@@ -11,4 +11,7 @@ args = parser.parse_args()
 
 #Enable logging
 logging.basicConfig(filename="picochess.log", level=getattr(logging, args.log_level.upper()))
-logging.debug("Starting picochess with DGT board on ["+args.dgt_port+"]")
+if args.dgt_port:
+    logging.debug("Starting picochess with DGT board on ["+args.dgt_port+"]")
+else:
+    logging.warning("No DGT board port provided")
