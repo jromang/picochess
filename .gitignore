@@ -54,3 +54,6 @@ docs/_build/
 
 #c9.io
 .c9/
+
+#pycharm
+.idea/
