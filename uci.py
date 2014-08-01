@@ -4,8 +4,7 @@ import logging
 import os.path
 
 
-class UCIEngine(Observable):
-    __metaclass__ = abc.ABCMeta
+class UCIEngine(Observable, metaclass=abc.ABCMeta):
 
     def __init__(self, path):
         Observable.__init__(self)
