@@ -2,7 +2,7 @@
 
 import argparse
 import logging
-import os.path
+import uci
 
 #Command line argument parsing
 parser = argparse.ArgumentParser()
@@ -16,9 +16,9 @@ logging.basicConfig(filename="picochess.log", level=getattr(logging, args.log_le
 
 #Startup tests
 if args.dgt_port:
-    logging.debug("Starting picochess with DGT board on ["+args.dgt_port+"]")
+    logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
 else:
     logging.warning("No DGT board port provided")
-    
-if not os.path.isfile(args.engine):
-    logging.error("Engine not found ["+args.engine+"]")
+
+#Load UCI engine
+engine=uci.Stockfish(args.engine)

@@ -1,6 +1,6 @@
 class Event(object):
     pass
- 
+
 class Observable(object):
     def __init__(self):
         self.callbacks = []
