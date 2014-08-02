@@ -34,8 +34,10 @@ def catch_move(e):
 
 #Load UCI engine
 engine = uci.Stockfish(args.engine, hostname=args.remote, username=args.user, key_file=args.key_file, password=args.password)
-engine.set_option("Hash", args.hash_size)
+logging.debug('Loaded engine [%s]', engine.name)
+logging.debug('Supported options [%s]', engine.options)
+if 'Hash' in engine.options:
+    engine.set_option("Hash", args.hash_size)
 engine.subscribe(catch_move)
 engine.send('go depth 10')
-print(engine.name)
 time.sleep(10)

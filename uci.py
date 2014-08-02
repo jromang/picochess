@@ -37,6 +37,7 @@ class UCIEngine(Observable, metaclass=abc.ABCMeta):
         self.uciok_lock = threading.Lock()
         self.uciok_lock.acquire()
         self.name = ""
+        self.options = []
         try:
             if hostname:
                 logging.info("Connecting to [%s]", hostname)
@@ -79,6 +80,8 @@ class UCIEngine(Observable, metaclass=abc.ABCMeta):
             self.uciok_lock.release()
         if tokens[0] == 'id' and tokens[1] == 'name':
             self.name = ' '.join(tokens[2:])
+        if tokens[0] == 'option' and tokens[1] == 'name':
+            self.options.append(' '.join(tokens[2:tokens.index('type')]))
         if tokens[0] == 'bestmove':
             self.fire(type='bestmove', move=tokens[1])
 
