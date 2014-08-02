@@ -9,10 +9,11 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--dgt-port", type=str, help="enable dgt board on the given serial port such as /dev/ttyUSB0")
 parser.add_argument("-e", "--engine", type=str, help="stockfish executable path", default="/usr/bin/stockfish")
 parser.add_argument("-l", "--log-level", choices=['notset', 'debug', 'info', 'warning', 'error', 'critical'], default='warning', help="logging level")
+parser.add_argument("-lf", "--log-file", type=str, help="log to the given file")
 args = parser.parse_args()
 
 #Enable logging
-logging.basicConfig(filename="picochess.log", level=getattr(logging, args.log_level.upper()))
+logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()))
 
 #Startup tests
 if args.dgt_port:
