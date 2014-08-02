@@ -13,7 +13,8 @@ parser.add_argument("-lf", "--log-file", type=str, help="log to the given file")
 args = parser.parse_args()
 
 #Enable logging
-logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()))
+logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
+                    format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
 
 #Startup tests
 if args.dgt_port:
