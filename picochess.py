@@ -10,6 +10,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--dgt-port", type=str, help="enable dgt board on the given serial port such as /dev/ttyUSB0")
 parser.add_argument("-e", "--engine", type=str, help="stockfish executable path", default="/usr/bin/stockfish")
 parser.add_argument("-hs", "--hash-size", type=int, help="hashtable size in MB (default:64)", default=64)
+parser.add_argument("-t", "--threads", type=int, help="number of engine threads (default:1)", default=1)
 parser.add_argument("-l", "--log-level", choices=['notset', 'debug', 'info', 'warning', 'error', 'critical'], default='warning', help="logging level")
 parser.add_argument("-lf", "--log-file", type=str, help="log to the given file")
 parser.add_argument("-r", "--remote", type=str, help="remote server running the engine")
@@ -38,6 +39,9 @@ logging.debug('Loaded engine [%s]', engine.name)
 logging.debug('Supported options [%s]', engine.options)
 if 'Hash' in engine.options:
     engine.set_option("Hash", args.hash_size)
+if 'Threads' in engine.options:
+    engine.set_option("Threads", args.threads)
+
 engine.subscribe(catch_move)
 engine.send('go depth 10')
 time.sleep(10)
