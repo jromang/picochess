@@ -36,7 +36,7 @@ class Engine(Observable):
         self.uciok_lock = threading.Lock()
         self.uciok_lock.acquire()
         self.name = ""
-        self.options = []
+        self.options = {}
         try:
             if hostname:
                 logging.info("Connecting to [%s]", hostname)
@@ -80,7 +80,12 @@ class Engine(Observable):
         if tokens[0] == 'id' and tokens[1] == 'name':
             self.name = ' '.join(tokens[2:])
         if tokens[0] == 'option' and tokens[1] == 'name':
-            self.options.append(' '.join(tokens[2:tokens.index('type')]))
+            option_name = ' '.join(tokens[2:tokens.index('type')])
+            option_type = tokens[tokens.index('type')+1]
+            option_default = None if not 'default' in tokens else tokens[tokens.index('default')+1]
+            option_min = None if not 'min' in tokens else tokens[tokens.index('min')+1]
+            option_max = None if not 'max' in tokens else tokens[tokens.index('max')+1]
+            self.options[option_name] = (option_type, option_default, option_min, option_max)
         if tokens[0] == 'bestmove':
             self.fire(type='bestmove', move=tokens[1])
 
