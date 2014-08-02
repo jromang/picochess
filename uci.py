@@ -93,16 +93,19 @@ class Engine(Observable):
         self.send("setoption name " + name + " value " + str(value))
 
     def set_level(self, level):
-        if 'Skill Level' in self.options: #Stockfish
+        """ Sets the engine playing strength, between 1 and 20. """
+        if level < 1 or level > 20:
+            logging.error('Level not in range (1,20) :[%i]', level)
+        if 'Skill Level' in self.options:  # Stockfish uses 'Skill Level' option
             self.set_option("Skill Level", level)
-        elif 'UCI_LimitStrength' in self.options:
+        elif 'UCI_LimitStrength' in self.options:  # Generic 'UCI_LimitStrength' option for other engines
             if level == 20:
                 self.set_option('UCI_LimitStrength', 'false')
             else:
                 self.set_option('UCI_LimitStrength', 'true')
                 min_elo = float(self.options['UCI_Elo'][2])
                 max_elo = float(self.options['UCI_Elo'][3])
-                set_elo = int(min_elo + (max_elo-min_elo) * float(level) / 19.0)
+                set_elo = int(min_elo + (max_elo-min_elo) * (float(level)-1.0) / 18.0)
                 self.set_option('UCI_Elo', str(set_elo))
             pass
         else:
