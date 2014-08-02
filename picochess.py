@@ -28,9 +28,14 @@ if args.dgt_port:
 else:
     logging.warning("No DGT board port provided")
 
+def catch_move(e):
+    if e.type == 'bestmove':
+        print('BM:'+e.move)
+
 #Load UCI engine
 engine = uci.Stockfish(args.engine, hostname=args.remote, username=args.user, key_file=args.key_file, password=args.password)
-#engine.send('go infinite')
 engine.set_option("Hash", args.hash_size)
+engine.subscribe(catch_move)
+engine.send('go depth 10')
 print(engine.name)
 time.sleep(10)

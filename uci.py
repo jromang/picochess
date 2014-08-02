@@ -79,6 +79,8 @@ class UCIEngine(Observable, metaclass=abc.ABCMeta):
             self.uciok_lock.release()
         if tokens[0] == 'id' and tokens[1] == 'name':
             self.name = ' '.join(tokens[2:])
+        if tokens[0] == 'bestmove':
+            self.fire(type='bestmove', move=tokens[1])
 
     def set_option(self, name, value):
         self.send("setoption name " + name + " value " + str(value))

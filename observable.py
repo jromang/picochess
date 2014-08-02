@@ -11,7 +11,7 @@ class Observable(object):
     def fire(self, **attrs):
         e = Event()
         e.source = self
-        for k, v in attrs.iteritems():
+        for k, v in attrs.items():
             setattr(e, k, v)
         for fn in self.callbacks:
             fn(e)
