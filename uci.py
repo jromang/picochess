@@ -4,7 +4,7 @@ import logging
 import os
 import spur
 import paramiko
-import subprocess
+import io
 
 
 def which(program):
@@ -30,26 +30,40 @@ def which(program):
 
 class UCIEngine(Observable, metaclass=abc.ABCMeta):
 
-    def __init__(self, path, hostname=None, username=None, key_file=None):
+    def __init__(self, path, hostname=None, username=None, key_file=None, password=None):
         Observable.__init__(self)
+        self.out = io.BytesIO()
         try:
             if hostname:
                 logging.info("Connecting to [%s]", hostname)
-                shell = spur.SshShell(
-                    hostname=hostname,
-                    username=username,
-                    private_key_file=key_file,
-                    missing_host_key=paramiko.AutoAddPolicy())
-                self.process = shell.spawn([path], stdout=subprocess.PIPE, store_pid=True, allow_error=True)
+                if key_file:
+                    shell = spur.SshShell(hostname=hostname, username=username, private_key_file=key_file, missing_host_key=paramiko.AutoAddPolicy())
+                else:
+                    shell = spur.SshShell(hostname=hostname, username=username, password=password, missing_host_key=paramiko.AutoAddPolicy())
+                self.process = shell.spawn([path], stdout=self, store_pid=True, allow_error=True)
             else:
                 path = which(path)
                 if not path:
                     logging.error("Engine not found")
+                    self.process = None
+                else:
                     shell = spur.LocalShell()
-                    self.process = shell.spawn(path, stdout=subprocess.PIPE, store_pid=True)
+                    self.process = shell.spawn(path, stdout=self, store_pid=True)
+            self.send("uci")
         except OSError:
             logging.exception("OS error in starting engine")
 
+    def send(self, command):
+        logging.debug("->[%s]", command)
+        self.process.stdin_write(bytes((command+'\n').encode('utf-8')))
+
+    def write(self, b):
+        if b == b'\n':
+            line = self.out.getvalue().decode("utf-8")
+            logging.debug("<-[%s]", line)
+            self.out = io.BytesIO()
+        else:
+            self.out.write(b)
 
     @abc.abstractmethod
     def set_level(self, level):
@@ -64,8 +78,8 @@ class UCIEngine(Observable, metaclass=abc.ABCMeta):
 
 
 class Stockfish(UCIEngine):
-    def __init__(self, path):
-        UCIEngine.__init__(self, path)
+    def __init__(self, path, hostname=None, username=None, key_file=None, password=None):
+        UCIEngine.__init__(self, path, hostname, username, key_file, password)
 
     def set_level(self, level):
         #TODO: set 'Skill Level' UCI option
