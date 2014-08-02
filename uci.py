@@ -96,7 +96,14 @@ class Engine(Observable):
         if 'Skill Level' in self.options: #Stockfish
             self.set_option("Skill Level", level)
         elif 'UCI_LimitStrength' in self.options:
-            #TODO: Implement generic elo strength limit
+            if level == 20:
+                self.set_option('UCI_LimitStrength', 'false')
+            else:
+                self.set_option('UCI_LimitStrength', 'true')
+                min_elo = float(self.options['UCI_Elo'][2])
+                max_elo = float(self.options['UCI_Elo'][3])
+                set_elo = int(min_elo + (max_elo-min_elo) * float(level) / 19.0)
+                self.set_option('UCI_Elo', str(set_elo))
             pass
         else:
             logging.warning("Engine does not support skill levels")
