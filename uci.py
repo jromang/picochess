@@ -82,5 +82,5 @@ class Stockfish(UCIEngine):
         UCIEngine.__init__(self, path, hostname, username, key_file, password)
 
     def set_level(self, level):
-        #TODO: set 'Skill Level' UCI option
+        self.send("setoption name Skill Level value "+level)
         return
