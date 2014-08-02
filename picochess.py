@@ -33,7 +33,7 @@ def catch_move(e):
         print('BM:'+e.move)
 
 #Load UCI engine
-engine = uci.Stockfish(args.engine, hostname=args.remote, username=args.user, key_file=args.key_file, password=args.password)
+engine = uci.Engine(args.engine, hostname=args.remote, username=args.user, key_file=args.key_file, password=args.password)
 logging.debug('Loaded engine [%s]', engine.name)
 logging.debug('Supported options [%s]', engine.options)
 if 'Hash' in engine.options:

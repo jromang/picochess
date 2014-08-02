@@ -1,4 +1,3 @@
-import abc
 from observable import *
 import logging
 import os
@@ -29,7 +28,7 @@ def which(program):
     return None
 
 
-class UCIEngine(Observable, metaclass=abc.ABCMeta):
+class Engine(Observable):
 
     def __init__(self, path, hostname=None, username=None, key_file=None, password=None):
         Observable.__init__(self)
@@ -88,22 +87,11 @@ class UCIEngine(Observable, metaclass=abc.ABCMeta):
     def set_option(self, name, value):
         self.send("setoption name " + name + " value " + str(value))
 
-    @abc.abstractmethod
     def set_level(self, level):
-        """
-        Set the engine level (from 1 to 20) ; this method is specific to each UCI engine.
-        You could for example use the 'UCI_LimitStrength' option for some engines, or
-        the 'Skill level' for Stockfish.
-        :param level:
-        :return:
-        """
-        return
-
-
-class Stockfish(UCIEngine):
-    def __init__(self, path, hostname=None, username=None, key_file=None, password=None):
-        UCIEngine.__init__(self, path, hostname, username, key_file, password)
-
-    def set_level(self, level):
-        self.set_option("Skill Level", level)
-        return
+        if 'Skill Level' in self.options: #Stockfish
+            self.set_option("Skill Level", level)
+        elif 'UCI_LimitStrength' in self.options:
+            #TODO: Implement generic elo strength limit
+            pass
+        else:
+            logging.warning("Engine does not support skill levels")
