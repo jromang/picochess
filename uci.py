@@ -5,6 +5,7 @@ import os
 import spur
 import paramiko
 import io
+import threading
 
 
 def which(program):
@@ -33,6 +34,9 @@ class UCIEngine(Observable, metaclass=abc.ABCMeta):
     def __init__(self, path, hostname=None, username=None, key_file=None, password=None):
         Observable.__init__(self)
         self.out = io.BytesIO()
+        self.uciok_lock = threading.Lock()
+        self.uciok_lock.acquire()
+        self.name = ""
         try:
             if hostname:
                 logging.info("Connecting to [%s]", hostname)
@@ -50,6 +54,7 @@ class UCIEngine(Observable, metaclass=abc.ABCMeta):
                     shell = spur.LocalShell()
                     self.process = shell.spawn(path, stdout=self, store_pid=True)
             self.send("uci")
+            self.uciok_lock.acquire() #Wait until uciok
         except OSError:
             logging.exception("OS error in starting engine")
 
@@ -61,9 +66,22 @@ class UCIEngine(Observable, metaclass=abc.ABCMeta):
         if b == b'\n':
             line = self.out.getvalue().decode("utf-8")
             logging.debug("<-[%s]", line)
+            if line:
+                self.parse(line)
             self.out = io.BytesIO()
         else:
             self.out.write(b)
+
+    def parse(self, line):
+        logging.debug("Parsing [%s]", line)
+        tokens = line.split()
+        if tokens[0] == 'uciok':
+            self.uciok_lock.release()
+        if tokens[0] == 'id' and tokens[1] == 'name':
+            self.name = ' '.join(tokens[2:])
+
+    def set_option(self, name, value):
+        self.send("setoption name " + name + " value " + str(value))
 
     @abc.abstractmethod
     def set_level(self, level):
@@ -82,5 +100,5 @@ class Stockfish(UCIEngine):
         UCIEngine.__init__(self, path, hostname, username, key_file, password)
 
     def set_level(self, level):
-        self.send("setoption name Skill Level value "+level)
+        self.set_option("Skill Level", level)
         return

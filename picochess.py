@@ -9,6 +9,7 @@ import time
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--dgt-port", type=str, help="enable dgt board on the given serial port such as /dev/ttyUSB0")
 parser.add_argument("-e", "--engine", type=str, help="stockfish executable path", default="/usr/bin/stockfish")
+parser.add_argument("-hs", "--hash-size", type=int, help="hashtable size in MB (default:64)", default=64)
 parser.add_argument("-l", "--log-level", choices=['notset', 'debug', 'info', 'warning', 'error', 'critical'], default='warning', help="logging level")
 parser.add_argument("-lf", "--log-file", type=str, help="log to the given file")
 parser.add_argument("-r", "--remote", type=str, help="remote server running the engine")
@@ -29,5 +30,7 @@ else:
 
 #Load UCI engine
 engine = uci.Stockfish(args.engine, hostname=args.remote, username=args.user, key_file=args.key_file, password=args.password)
-engine.send('go infinite')
+#engine.send('go infinite')
+engine.set_option("Hash", args.hash_size)
+print(engine.name)
 time.sleep(10)
