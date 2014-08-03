@@ -78,5 +78,4 @@ def dgt_observer(attrs):
             # self.send_message_to_clock(['b','o','a','r','d','c'], False, False)
 
 board.subscribe(dgt_observer)
-while True:
-    time.sleep(10)
+board.poll()

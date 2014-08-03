@@ -138,7 +138,7 @@ class DGTBoard(Observable):
         self.callbacks.append(callback)
 
     def convertInternalPieceToExternal(self, c):
-        if piece_map.has_key(c):
+        if c in piece_map:
             return piece_map[c]
 
     def sendMessageToBoard(self, i):
