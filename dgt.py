@@ -129,8 +129,6 @@ class DGTBoard(Observable):
             if send_board:
                 self.write(chr(_DGTNIX_SEND_BRD))
 
-        self.callbacks = []
-
     def get_board(self):
         self.write(chr(_DGTNIX_SEND_BRD))
 
