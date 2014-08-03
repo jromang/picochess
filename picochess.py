@@ -41,16 +41,6 @@ args = parser.parse_args()
 logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
                     format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
 
-#Startup tests
-if args.dgt_port:
-    logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
-else:
-    logging.warning("No DGT board port provided")
-
-def catch_move(e):
-    if e.type == 'bestmove':
-        print('BM:'+e.move)
-
 #Load UCI engine
 engine = uci.Engine(args.engine, hostname=args.remote, username=args.user, key_file=args.key_file, password=args.password)
 logging.debug('Loaded engine [%s]', engine.name)
@@ -60,6 +50,31 @@ if 'Hash' in engine.options:
 if 'Threads' in engine.options:
     engine.set_option("Threads", args.threads)
 
-engine.subscribe(catch_move)
-engine.send('go depth 10')
-time.sleep(10)
+#def catch_move(e):
+#    if e.type == 'bestmove':
+#        print('BM:'+e.move)
+
+#engine.subscribe(catch_move)
+#engine.send('go depth 10')
+#time.sleep(10)
+
+#Connect to DGT board
+if args.dgt_port:
+    logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
+else:
+    logging.warning("No DGT board port provided")
+
+board = dgt.DGTBoard(args.dgt_port, send_board=False)
+
+
+def dgt_observer(attrs):
+        if attrs.type == dgt.FEN:
+            logging.debug("FEN: {0}".format(attrs.message))
+        elif attrs.type == dgt.BOARD:
+            logging.debug("Board: ")
+            logging.debug(attrs.message)
+            # self.send_message_to_clock(['c','h','a','n','g','e'], False, False)
+            # time.sleep(1)
+            # self.send_message_to_clock(['b','o','a','r','d','c'], False, False)
+
+board.subscribe(dgt_observer)
