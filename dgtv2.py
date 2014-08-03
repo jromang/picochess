@@ -17,7 +17,7 @@
 import logging
 import serial as pyserial
 import time
-from observable import *
+from utilities import *
 from enum import Enum, IntEnum, unique
 from struct import unpack
 
@@ -169,27 +169,6 @@ piece_to_char = {
     0x01: 'W', 0x02: 'R', 0x03: 'N', 0x04: 'B', 0x05: 'K', 0x06: 'Q',
     0x07: 'p', 0x08: 'r', 0x09: 'n', 0x0a: 'b', 0x0b: 'k', 0x0c: 'Q', 0x00: '.'
 }
-
-
-class switch(object):
-    def __init__(self, value):
-        self.value = value
-        self.fall = False
-
-    def __iter__(self):
-        """Return the match method once, then stop"""
-        yield self.match
-        raise StopIteration
-
-    def match(self, *args):
-        """Indicate whether or not to enter a case suite"""
-        if self.fall or not args:
-            return True
-        elif self.value in args: # changed for v1.5, see below
-            self.fall = True
-            return True
-        else:
-            return False
 
 
 class DGTBoard(Observable):

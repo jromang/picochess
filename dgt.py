@@ -19,7 +19,7 @@ import logging
 import serial
 import sys
 import time
-from observable import *
+from utilities import *
 from threading import Thread
 from threading import RLock
 from struct import unpack
