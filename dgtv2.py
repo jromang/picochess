@@ -165,6 +165,11 @@ char_to_DGTXL = {
     'y': 0x20 | 0x08 | 0x04 | 0x40 | 0x02, 'z': 0x01 | 0x40 | 0x08 | 0x02 | 0x10, ' ': 0x00
 }
 
+piece_to_char = {
+    0x01: 'W', 0x02: 'R', 0x03: 'N', 0x04: 'B', 0x05: 'K', 0x06: 'Q',
+    0x07: 'p', 0x08: 'r', 0x09: 'n', 0x0a: 'b', 0x0b: 'k', 0x0c: 'Q', 0x00: '.'
+}
+
 
 class switch(object):
     def __init__(self, value):
@@ -249,6 +254,15 @@ class DGTBoard(Observable):
                 else:  # Clock Times message
                     logging.debug("Clock Times message not handled %s", message)
                     return None  # This is not an ACK and should be ignored
+                break
+            if case(Messages.DGT_MSG_BOARD_DUMP):
+                board = ''
+                for c in message:
+                    board += piece_to_char[c]
+                logging.debug('\n' + '\n'.join(board[0+i:8+i] for i in range(0, len(board), 8)))
+                break
+            if case(Messages.DGT_MSG_FIELD_UPDATE):
+                self.write([Commands.DGT_SEND_BRD])  # Ask for the board
                 break
             if case():  # Default
                 logging.warning("DGT message not handled : [%s]", Messages(message_id))
