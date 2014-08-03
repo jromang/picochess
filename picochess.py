@@ -73,7 +73,7 @@ def dgt_observer(attrs):
         elif attrs.type == dgt.BOARD:
             logging.debug("Board: ")
             logging.debug(attrs.message)
-            # self.send_message_to_clock(['c','h','a','n','g','e'], False, False)
+            board.send_message_to_clock(['c','h','a','n','g','e'], False, False)
             # time.sleep(1)
             # self.send_message_to_clock(['b','o','a','r','d','c'], False, False)
 

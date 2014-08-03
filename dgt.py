@@ -494,26 +494,26 @@ class DGTBoard(Observable):
         #         time.sleep(1) # wait a bit longer for ack
         #         if self.clock_ack_recv:
         #             break
-        self.ser.write(chr(_DGTNIX_CLOCK_MESSAGE))
-        self.ser.write(chr(0x0b))
-        self.ser.write(chr(0x03))
-        self.ser.write(chr(0x01))
-        self.ser.write(chr(c))
-        self.ser.write(chr(b))
-        self.ser.write(chr(a))
-        self.ser.write(chr(f))
-        self.ser.write(chr(e))
-        self.ser.write(chr(d))
+        self.ser.write(bytes(_DGTNIX_CLOCK_MESSAGE))
+        self.ser.write(bytes(0x0b))
+        self.ser.write(bytes(0x03))
+        self.ser.write(bytes(0x01))
+        self.ser.write(b'c')
+        self.ser.write(b'b')
+        self.ser.write(b'a')
+        self.ser.write(b'f')
+        self.ser.write(b'e')
+        self.ser.write(b'd')
 
         if dots:
-            self.ser.write(chr(dots))
+            self.ser.write(bytes(dots))
         else:
-            self.ser.write(chr(0))
+            self.ser.write(bytes(0))
         if beep:
-            self.ser.write(chr(0x03))
+            self.ser.write(bytes(0x03))
         else:
-            self.ser.write(chr(0x01))
-        self.ser.write(chr(0x00))
+            self.ser.write(bytes(0x01))
+        self.ser.write(bytes(0x00))
 
         # if test_clock:
         #     time.sleep(5)
