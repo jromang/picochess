@@ -75,13 +75,13 @@ class Engine(Observable):
             logging.exception("OS error in starting engine")
 
     def send(self, command):
-        logging.debug("->[%s]", command)
+        logging.debug("->Engine [%s]", command)
         self.process.stdin_write(bytes((command+'\n').encode('utf-8')))
 
     def write(self, b):
         if b == b'\n':
             line = self.out.getvalue().decode("utf-8")
-            logging.debug("<-[%s]", line)
+            logging.debug("<-Engine [%s]", line)
             if line:
                 self.parse(line)
             self.out = io.BytesIO()
