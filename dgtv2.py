@@ -167,7 +167,7 @@ char_to_DGTXL = {
 
 piece_to_char = {
     0x01: 'W', 0x02: 'R', 0x03: 'N', 0x04: 'B', 0x05: 'K', 0x06: 'Q',
-    0x07: 'p', 0x08: 'r', 0x09: 'n', 0x0a: 'b', 0x0b: 'k', 0x0c: 'Q', 0x00: '.'
+    0x07: 'p', 0x08: 'r', 0x09: 'n', 0x0a: 'b', 0x0b: 'k', 0x0c: 'q', 0x00: '.'
 }
 
 
@@ -176,17 +176,13 @@ class DGTBoard(Observable):
     def __init__(self, device):
         self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE)
         self.write([Commands.DGT_SEND_UPDATE_NICE])
-
         #Get board version
         self.version = 0.0
         self.write([Commands.DGT_SEND_VERSION])
-
         #Beep to say we are alive
         self.write([Commands.DGT_CLOCK_MESSAGE, 0x04, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_BEEP, 1, Clock.DGT_CMD_CLOCK_END_MESSAGE])
-
         #Update the board
         self.write([Commands.DGT_SEND_BRD])
-
 
     def write(self, message):
         logging.debug('->DGT [%s]', message[0])
