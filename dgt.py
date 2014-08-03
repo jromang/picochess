@@ -115,6 +115,7 @@ dgt_send_message_list = [_DGTNIX_CLOCK_MESSAGE, _DGTNIX_SEND_CLK, _DGTNIX_SEND_B
 
 class DGTBoard(Observable):
     def __init__(self, device, virtual = False, send_board = True):
+        Observable.__init__(self)
         self.board_reversed = False
         self.clock_ack_recv = False
         # self.clock_queue = Queue()
@@ -124,16 +125,13 @@ class DGTBoard(Observable):
         # self.dgt_clock_ack_queue = Queue()
 
         if not virtual:
-            self.ser = serial.Serial(device,stopbits=serial.STOPBITS_ONE)
+            self.ser = serial.Serial(device, stopbits=serial.STOPBITS_ONE)
             self.write(chr(_DGTNIX_SEND_UPDATE_NICE))
             if send_board:
                 self.write(chr(_DGTNIX_SEND_BRD))
 
     def get_board(self):
         self.write(chr(_DGTNIX_SEND_BRD))
-
-    def subscribe(self, callback):
-        self.callbacks.append(callback)
 
     def convertInternalPieceToExternal(self, c):
         if c in piece_map:
@@ -228,6 +226,7 @@ class DGTBoard(Observable):
         return self.ser.read(message_length)
 
     def write(self, message):
+        logging.debug('*************TYPEOF message [%s]', type(message))
         self.ser.write(bytes(message, 'UTF-8'))
 
     # Converts a lowercase ASCII character or digit to DGT Clock representation
