@@ -230,7 +230,7 @@ class DGTBoard(Observable):
         return self.ser.read(message_length)
 
     def write(self, message):
-        self.ser.write(message)
+        self.ser.write(bytes(message, 'UTF-8'))
 
     # Converts a lowercase ASCII character or digit to DGT Clock representation
     @staticmethod
@@ -718,7 +718,7 @@ if __name__ == "__main__":
     if len(sys.argv)> 1:
         device = sys.argv[1]
     else:
-        device = "/dev/cu.usbserial-00001004"
+        device = "/dev/ttyUSB0"
     board = DGTBoard(device, send_board=False)
     board.subscribe(board._dgt_observer)
     # poll_dgt(board)
