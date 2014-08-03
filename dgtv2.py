@@ -16,6 +16,7 @@
 
 import logging
 import serial as pyserial
+import time
 from observable import *
 from enum import Enum, IntEnum, unique
 from struct import unpack
@@ -200,6 +201,9 @@ class DGTBoard(Observable):
         self.write([Commands.DGT_CLOCK_MESSAGE, 0x04, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_BEEP, 1, Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
 
+        self.write([Commands.DGT_SEND_VERSION])
+
+
     def write(self, message):
         logging.debug('->DGT [%s]', message[0])
         array = []
@@ -211,6 +215,12 @@ class DGTBoard(Observable):
                     array.append(char_to_DGTXL[c])
             else: logging.error('Type not supported : [%s]', type(v))
         self.serial.write(bytearray(array))
+
+        if message[0] == Commands.DGT_CLOCK_MESSAGE:  # We have to wait for a clock ACK
+            while self.read_message() != Messages.DGT_MSG_BWTIME:
+                pass
+        else:  # Let the board a bit of time to handle the command
+            time.sleep(0.3)
 
     def read_message(self):
         header = unpack('>BBB', (self.serial.read(3)))
@@ -232,14 +242,19 @@ class DGTBoard(Observable):
                     ack1 = ((message[2]) & 0x7f) | ((message[3] << 2) & 0x80)
                     ack2 = ((message[4]) & 0x7f) | ((message[0] << 3) & 0x80)
                     ack3 = ((message[5]) & 0x7f) | ((message[0] << 2) & 0x80)
-                    if ack0 != 0x10: logging.warning("Clock ACK error %s", message)
-                    logging.debug("Clock ACK %s", (ack0, ack1, ack2, ack3))
+                    if ack0 != 0x10: logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
+                    else:
+                        logging.debug("Clock ACK %s", (ack0, ack1, ack2, ack3))
                 else:  # Clock Times message
                     logging.debug("Clock Times message not handled %s", message)
                 break
             if case():  # Default
                 logging.warning("DGT message not handled : [%s]", Messages(message_id))
 
+        return message_id
+
+    def wait_for_clock_ack(self):
+        self.clock_ack_lock.acquire()
 
     def poll(self):
         while True:
