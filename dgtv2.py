@@ -186,6 +186,19 @@ class DGTBoard(Observable):
         #Update the board
         self.write([Commands.DGT_SEND_BRD])
 
+        # Clock stress test
+        for i in range(0, 10):
+            self.display_on_DGT_XL(''+str(i)+'ooooo')
+            self.display_on_DGT_XL('o'+str(i)+'oooo')
+            self.display_on_DGT_XL('oo'+str(i)+'ooo')
+            self.display_on_DGT_XL('ooo'+str(i)+'oo')
+            self.display_on_DGT_XL('oooo'+str(i)+'o')
+            self.display_on_DGT_XL('ooooo'+str(i)+'')
+            self.display_on_DGT_XL('oooo'+str(i)+'o')
+            self.display_on_DGT_XL('ooo'+str(i)+'oo')
+            self.display_on_DGT_XL('oo'+str(i)+'ooo')
+            self.display_on_DGT_XL('o'+str(i)+'oooo')
+
         self.display_on_DGT_XL('pic'+version)
 
     def write(self, message):
@@ -229,9 +242,10 @@ class DGTBoard(Observable):
                     if ack0 != 0x10: logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
                     else:
                         logging.debug("Clock ACK %s", (ack0, ack1, ack2, ack3))
+                        return None
                 else:  # Clock Times message
                     logging.debug("Clock Times message not handled %s", message)
-                    return None  # This is not an ACK and should be ignored
+                    #return None  # This is not an ACK and should be ignored
                 break
             if case(Messages.DGT_MSG_BOARD_DUMP):
                 board = ''
