@@ -154,7 +154,7 @@ class DGTBoard(Observable):
         if self.board_reversed:
             buf = buf[::-1]
 
-        output = "__"*8+"\n"
+        output = "\n"+"__"*8+"\n"
         for square in range(0,len(board)):
             if square and square%8 == 0:
                 output+= "|\n"
