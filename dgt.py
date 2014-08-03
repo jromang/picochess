@@ -19,6 +19,7 @@ import logging
 import serial
 import sys
 import time
+from observable import *
 from threading import Thread
 from threading import RLock
 from struct import unpack
@@ -111,12 +112,8 @@ dgt_send_message_list = [_DGTNIX_CLOCK_MESSAGE, _DGTNIX_SEND_CLK, _DGTNIX_SEND_B
                          _DGTNIX_SEND_UPDATE_BRD, _DGTNIX_SEND_SERIALNR, _DGTNIX_SEND_BUSADDRESS, _DGTNIX_SEND_TRADEMARK,
                          _DGTNIX_SEND_VERSION, _DGTNIX_SEND_UPDATE_NICE, _DGTNIX_SEND_EE_MOVES, _DGTNIX_SEND_RESET]
 
-class Event(object):
-    pass
 
-
-
-class DGTBoard(object):
+class DGTBoard(Observable):
     def __init__(self, device, virtual = False, send_board = True):
         self.board_reversed = False
         self.clock_ack_recv = False
@@ -139,14 +136,6 @@ class DGTBoard(object):
 
     def subscribe(self, callback):
         self.callbacks.append(callback)
-
-    def fire(self, **attrs):
-        e = Event()
-        e.source = self
-        for k, v in attrs.iteritems():
-            setattr(e, k, v)
-        for fn in self.callbacks:
-            fn(e)
 
     def convertInternalPieceToExternal(self, c):
         if piece_map.has_key(c):
