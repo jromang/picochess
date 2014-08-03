@@ -17,9 +17,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import argparse
+import dgt
 import logging
-import uci
 import time
+import uci
+
 
 #Command line argument parsing
 parser = argparse.ArgumentParser()
