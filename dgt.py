@@ -15,6 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 
+import logging
 import serial
 import sys
 import time
@@ -155,7 +156,7 @@ class DGTBoard(object):
         if i in dgt_send_message_list:
             self.write(i)
         else:
-            raise "Critical, cannot send - Unknown command: {0}".format(unichr(i))
+            raise "Critical, cannot send - Unknown command: {0}".format(chr(i))
 
     def dump_board(self, board):
         pattern = '>'+'B'*len(board)
@@ -165,7 +166,7 @@ class DGTBoard(object):
             buf = buf[::-1]
 
         output = "__"*8+"\n"
-        for square in xrange(0,len(board)):
+        for square in range(0,len(board)):
             if square and square%8 == 0:
                 output+= "|\n"
                 output += "__"*8+"\n"
@@ -178,7 +179,7 @@ class DGTBoard(object):
 
     # Two reverse calls will bring back board to original orientation
     def reverse_board(self):
-        print "Reversing board!"
+        logging.debug("Reversing board")
         self.board_reversed = not self.board_reversed
 
     def extract_base_fen(self, board):
@@ -417,7 +418,7 @@ class DGTBoard(object):
 
     def send_message_to_clock(self, message, beep, dots, move=False, test_clock=False, max_num_tries = 5):
         # Todo locking?
-        print "Got message to clock: {0}".format(message)
+        logging.debug("Got message to clock: {0}".format(message))
         if move:
             message = self.format_move_for_dgt(message)
         else:
@@ -462,10 +463,10 @@ class DGTBoard(object):
 
     def dgt_clock_test_post_handler(self, signum, frame):
         if self.dgt_clock:
-            print "Clock found"
+            logging.debug("DGT clock found")
             # self.dgt_clock = True
         else:
-            print "No DGT Clock found"
+            logging.debug("No DGT clock found")
             # self.dgt_clock = False
 
     def format_str_for_dgt(self, s):
@@ -494,7 +495,7 @@ class DGTBoard(object):
         #         exit(-1);
         #       }
         #   }
-        print "Sending Message to Clock.."
+        logging.debug("Sending Message to Clock...")
         # num_tries = 0
         # self.clock_queue.empty()
         # self.dgt_clock_ack_lock.acquire()
@@ -546,7 +547,7 @@ class DGTBoard(object):
     def read_message_from_board(self, head=None):
         # print "acquire"
         # self.dgt_clock_ack_lock.acquire()
-        print "got DGT message"
+        logging.debug("got DGT message")
         header_len = 3
         if head:
             header = head + self.read(header_len-1)
@@ -562,7 +563,7 @@ class DGTBoard(object):
 #        if not buf[0] & 128:
 #            raise Exception("Invalid message -2- readMessageFromBoard")
         command_id = buf[0] & 127
-        print "command_id: {0}".format(command_id)
+        logging.debug("command_id: {0}".format(command_id))
 #
 #        if buf[1] & 128:
 #            raise Exception ("Invalid message -4- readMessageFromBoard")
@@ -578,7 +579,7 @@ class DGTBoard(object):
 #            message = self.ser.read(message_length)
 
         if command_id == _DGTNIX_BOARD_DUMP:
-            print "Received DGTNIX_DUMP message\n"
+            logging.debug("Received DGTNIX_DUMP message")
             message = self.read(message_length)
 #            self.dump_board(message)
 #            print self.get_fen(message)
@@ -586,7 +587,7 @@ class DGTBoard(object):
             self.fire(type=BOARD, message=self.dump_board(message))
 
         elif command_id == _DGTNIX_BWTIME:
-            print "Received DGTNIX_BWTIME message from the board\n"
+            logging.debug("Received DGTNIX_BWTIME message from the board")
             message = self.read(message_length)
 
             pattern = '>'+'B'*message_length
@@ -623,25 +624,25 @@ class DGTBoard(object):
 
 
         elif command_id == _DGTNIX_EE_MOVES:
-            print "Received _DGTNIX_EE_MOVES from the board\n"
+            logging.debug("Received _DGTNIX_EE_MOVES from the board")
 
         elif command_id == _DGTNIX_BUSADDRESS:
-            print "Received _DGTNIX_BUSADDRESS from the board\n"
+            logging.debug("Received _DGTNIX_BUSADDRESS from the board")
 
         elif command_id == _DGTNIX_SERIALNR:
-            print "Received _DGTNIX_SERIALNR from the board\n"
+            logging.debug("Received _DGTNIX_SERIALNR from the board")
             message = self.read(message_length)
 
         elif command_id == _DGTNIX_TRADEMARK:
-            print "Received _DGTNIX_TRADEMARK from the board\n"
+            logging.debug("Received _DGTNIX_TRADEMARK from the board")
             message = self.read(message_length)
 
         elif command_id == _DGTNIX_VERSION:
-            print "Received _DGTNIX_VERSION from the board\n"
+            logging.debug("Received _DGTNIX_VERSION from the board")
 
         elif command_id == _DGTNIX_FIELD_UPDATE:
-            print "Received _DGTNIX_FIELD_UPDATE from the board"
-            print "message_length : {0}".format(message_length)
+            logging.debug("Received _DGTNIX_FIELD_UPDATE from the board")
+            logging.debug("message_length : {0}".format(message_length))
 
             if message_length == 2:
                 message = self.read(message_length)
@@ -669,11 +670,11 @@ class DGTBoard(object):
 #            print "diff command : {0}".format(command_id)
 
             if command_id == DGTNIX_MSG_MV_ADD:
-                print "Add piece message"
+                logging.debug("Add piece message")
 #                board.ser.write(chr(_DGTNIX_SEND_BRD))
 
             elif command_id == DGTNIX_MSG_UPDATE:
-                print "Update piece message"
+                logging.debug("Update piece message")
 #                board.ser.write(chr(_DGTNIX_SEND_BRD))
 
     # Warning, this method must be in a thread
@@ -686,10 +687,10 @@ class DGTBoard(object):
 
     def _dgt_observer(self, attrs):
         if attrs.type == FEN:
-            print "FEN: {0}".format(attrs.message)
+            logging.debug("FEN: {0}".format(attrs.message))
         elif attrs.type == BOARD:
-            print "Board: "
-            print attrs.message
+            logging.debug("Board: ")
+            logging.debug(attrs.message)
             # self.send_message_to_clock(['c','h','a','n','g','e'], False, False)
             # time.sleep(1)
             # self.send_message_to_clock(['b','o','a','r','d','c'], False, False)
@@ -712,9 +713,9 @@ class VirtualDGTBoard(DGTBoard):
 
     def write(self, message):
         if message == chr(_DGTNIX_SEND_UPDATE_NICE):
-            print "Got Update Nice"
+            logging.debug("Got Update Nice")
         elif message == chr(_DGTNIX_SEND_BRD):
-            print "Got Send board"
+            logging.debug("Got Send board")
 
     def set_fen(self, fen):
         self.fen = fen
