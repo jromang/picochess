@@ -247,9 +247,6 @@ class DGTBoard(Observable):
 
         return message_id
 
-    def wait_for_clock_ack(self):
-        self.clock_ack_lock.acquire()
-
     def poll(self):
         while True:
             self.read_message()
