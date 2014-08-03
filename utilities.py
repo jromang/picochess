@@ -15,6 +15,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 
+# picochess version
+version = '024'
+
+# Observer design pattern
 class Event(object):
     pass
 
@@ -35,6 +39,7 @@ class Observable(object):
             fn(e)
 
 
+# switch/case instruction in python
 class switch(object):
     def __init__(self, value):
         self.value = value

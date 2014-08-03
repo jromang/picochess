@@ -186,7 +186,7 @@ class DGTBoard(Observable):
         #Update the board
         self.write([Commands.DGT_SEND_BRD])
 
-        self.display_on_DGT_XL('hello')
+        self.display_on_DGT_XL('pic'+version)
 
     def write(self, message):
         logging.debug('->DGT [%s]', message[0])
