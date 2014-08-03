@@ -186,6 +186,8 @@ class DGTBoard(Observable):
         #Update the board
         self.write([Commands.DGT_SEND_BRD])
 
+        self.display_on_DGT_XL('hello')
+
     def write(self, message):
         logging.debug('->DGT [%s]', message[0])
         array = []
@@ -270,6 +272,12 @@ class DGTBoard(Observable):
                 logging.warning("DGT message not handled : [%s]", Messages(message_id))
 
         return message_id
+
+    def display_on_DGT_XL(self, text):
+        while len(text) < 6: text += ' '
+        if len(text) > 6: logging.warning('DGT XL clock massage too long [%s]', text)
+        self.write([Commands.DGT_CLOCK_MESSAGE, 0x0b, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_DISPLAY,
+                    text[2], text[1], text[0], text[5], text[4], text[3], 0x00, 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
     def poll(self):
         while True:
