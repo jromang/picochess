@@ -174,6 +174,8 @@ piece_to_char = {
 class DGTBoard(Observable):
 
     def __init__(self, device):
+        self.flip_board = False
+
         self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE)
         self.write([Commands.DGT_SEND_UPDATE_NICE])
         #Get board version
@@ -234,6 +236,32 @@ class DGTBoard(Observable):
                 for c in message:
                     board += piece_to_char[c]
                 logging.debug('\n' + '\n'.join(board[0+i:8+i] for i in range(0, len(board), 8)))  # Show debug board
+                #Create fen from board
+                fen = ''
+                empty = 0
+                for sq in range(0, 64):
+                    if message[sq] != 0:
+                        if empty > 0:
+                            fen += str(empty)
+                            empty = 0
+                        fen += piece_to_char[message[sq]]
+                    else:
+                        empty += 1
+                    if (sq + 1) % 8 == 0:
+                        if empty > 0:
+                            fen += str(empty)
+                            empty = 0
+                        if sq < 63:
+                            fen += "/"
+                        empty = 0
+                if self.flip_board:  # Flip the board if needed
+                    fen = fen[::-1]
+                if fen == "RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr":  # Check if we have to flip the board
+                    logging.debug('Flipping the board')
+                    #Flip the board
+                    self.flip_board = not self.flip_board
+                    fen = fen[::-1]
+                logging.debug(fen)
                 break
             if case(Messages.DGT_MSG_FIELD_UPDATE):
                 self.write([Commands.DGT_SEND_BRD])  # Ask for the board when a piece moved
