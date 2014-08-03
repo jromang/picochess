@@ -18,6 +18,7 @@
 
 import argparse
 import dgt
+import dgtv2
 import logging
 import time
 import uci
@@ -64,18 +65,19 @@ if args.dgt_port:
 else:
     logging.warning("No DGT board port provided")
 
-board = dgt.DGTBoard(args.dgt_port, send_board=True)
+board = dgtv2.DGTBoard(args.dgt_port)
 
 
-def dgt_observer(attrs):
-        if attrs.type == dgt.FEN:
-            logging.debug("FEN: {0}".format(attrs.message))
-        elif attrs.type == dgt.BOARD:
-            logging.debug("Board: ")
-            logging.debug(attrs.message)
-            board.send_message_to_clock(['c','h','a','n','g','e'], False, False)
-            # time.sleep(1)
-            # self.send_message_to_clock(['b','o','a','r','d','c'], False, False)
-
-board.subscribe(dgt_observer)
+#def dgt_observer(attrs):
+#        if attrs.type == dgt.FEN:
+#            logging.debug("FEN: {0}".format(attrs.message))
+#        elif attrs.type == dgt.BOARD:
+#            logging.debug("Board: ")
+#            logging.debug(attrs.message)
+#            board.send_message_to_clock(['c','h','a','n','g','e'], False, False)
+#            # time.sleep(1)
+#            # self.send_message_to_clock(['b','o','a','r','d','c'], False, False)
+#
+#board.subscribe(dgt_observer)
+#board.test_for_dgt_clock()
 board.poll()
