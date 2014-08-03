@@ -200,8 +200,9 @@ class DGTBoard(Observable):
         #Beep to say we are alive
         self.write([Commands.DGT_CLOCK_MESSAGE, 0x04, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_BEEP, 1, Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
-
         self.write([Commands.DGT_SEND_VERSION])
+
+        self.write([Commands.DGT_SEND_BRD])
 
 
     def write(self, message):
@@ -247,6 +248,7 @@ class DGTBoard(Observable):
                         logging.debug("Clock ACK %s", (ack0, ack1, ack2, ack3))
                 else:  # Clock Times message
                     logging.debug("Clock Times message not handled %s", message)
+                    return None  # This is not an ACK and should be ignored
                 break
             if case():  # Default
                 logging.warning("DGT message not handled : [%s]", Messages(message_id))
