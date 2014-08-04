@@ -57,7 +57,7 @@ if 'Threads' in engine.options:
 #        print('BM:'+e.move)
 
 #engine.subscribe(catch_move)
-engine.send('go depth 20')
+#engine.send('go depth 20')
 #time.sleep(10)
 
 #Connect to DGT board

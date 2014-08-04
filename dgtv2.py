@@ -180,11 +180,17 @@ class DGTBoard(Observable, threading.Thread):
 
         self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE)
         self.write([Commands.DGT_SEND_UPDATE_NICE])
+
+        #Detect DGT XL clock
+        self.serial.write(bytearray([0x2b, 0x04, 0x03, 0x0b, 1, 0x00]))
+        time.sleep(2)
+        self.clock_found = self.serial.inWaiting()
+        logging.debug('DGT XL clock found' if self.clock_found else 'DGT XL clock NOT found')
         #Get board version
         self.version = 0.0
         self.write([Commands.DGT_SEND_VERSION])
         #Beep and display version
-        self.display_on_dgt_xl('pic'+version, True)
+        self.display_on_dgt_xl('pic'+version)
         #Update the board
         self.write([Commands.DGT_SEND_BRD])
 
@@ -289,10 +295,11 @@ class DGTBoard(Observable, threading.Thread):
         return message_id
 
     def display_on_dgt_xl(self, text, beep=False):
-        while len(text) < 6: text += ' '
-        if len(text) > 6: logging.warning('DGT XL clock massage too long [%s]', text)
-        self.write([Commands.DGT_CLOCK_MESSAGE, 0x0b, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_DISPLAY,
-                    text[2], text[1], text[0], text[5], text[4], text[3], 0x00, 0x03 if beep else 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+        if self.clock_found:
+            while len(text) < 6: text += ' '
+            if len(text) > 6: logging.warning('DGT XL clock massage too long [%s]', text)
+            self.write([Commands.DGT_CLOCK_MESSAGE, 0x0b, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_DISPLAY,
+                        text[2], text[1], text[0], text[5], text[4], text[3], 0x00, 0x03 if beep else 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
     def run(self):
         while True:
