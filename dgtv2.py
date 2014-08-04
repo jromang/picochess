@@ -183,8 +183,8 @@ class DGTBoard(Observable, threading.Thread):
         #Get board version
         self.version = 0.0
         self.write([Commands.DGT_SEND_VERSION])
-        #Beep to say we are alive
-        #self.write([Commands.DGT_CLOCK_MESSAGE, 0x04, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_BEEP, 1, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+        #Beep and display version
+        self.display_on_dgt_xl('pic'+version, True)
         #Update the board
         self.write([Commands.DGT_SEND_BRD])
 
@@ -200,8 +200,6 @@ class DGTBoard(Observable, threading.Thread):
         #    self.display_on_DGT_XL('ooo'+str(i)+'oo')
         #    self.display_on_DGT_XL('oo'+str(i)+'ooo')
         #    self.display_on_DGT_XL('o'+str(i)+'oooo')
-
-        self.display_on_DGT_XL('pic'+version, True)
 
     def write(self, message):
         logging.debug('->DGT [%s]', message[0])
@@ -290,7 +288,7 @@ class DGTBoard(Observable, threading.Thread):
 
         return message_id
 
-    def display_on_DGT_XL(self, text, beep = False):
+    def display_on_dgt_xl(self, text, beep=False):
         while len(text) < 6: text += ' '
         if len(text) > 6: logging.warning('DGT XL clock massage too long [%s]', text)
         self.write([Commands.DGT_CLOCK_MESSAGE, 0x0b, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_DISPLAY,
