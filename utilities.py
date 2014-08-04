@@ -14,29 +14,26 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import queue
 
 # picochess version
 version = '024'
 
-# Observer design pattern
+event_queue = queue.Queue()
+
+
 class Event(object):
     pass
 
 
 class Observable(object):
-    def __init__(self):
-        self.callbacks = []
-
-    def subscribe(self, callback):
-        self.callbacks.append(callback)
 
     def fire(self, **attrs):
         e = Event()
         e.source = self
         for k, v in attrs.items():
             setattr(e, k, v)
-        for fn in self.callbacks:
-            fn(e)
+        event_queue.put(e)
 
 
 # switch/case instruction in python

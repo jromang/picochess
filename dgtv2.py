@@ -17,6 +17,7 @@
 import logging
 import serial as pyserial
 import time
+import threading
 from utilities import *
 from enum import Enum, IntEnum, unique
 from struct import unpack
@@ -171,9 +172,10 @@ piece_to_char = {
 }
 
 
-class DGTBoard(Observable):
+class DGTBoard(Observable, threading.Thread):
 
     def __init__(self, device):
+        super(DGTBoard, self).__init__()
         self.flip_board = False
 
         self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE)
@@ -187,17 +189,17 @@ class DGTBoard(Observable):
         self.write([Commands.DGT_SEND_BRD])
 
         # Clock stress test
-        for i in range(0, 10):
-            self.display_on_DGT_XL(''+str(i)+'ooooo')
-            self.display_on_DGT_XL('o'+str(i)+'oooo')
-            self.display_on_DGT_XL('oo'+str(i)+'ooo')
-            self.display_on_DGT_XL('ooo'+str(i)+'oo')
-            self.display_on_DGT_XL('oooo'+str(i)+'o')
-            self.display_on_DGT_XL('ooooo'+str(i)+'')
-            self.display_on_DGT_XL('oooo'+str(i)+'o')
-            self.display_on_DGT_XL('ooo'+str(i)+'oo')
-            self.display_on_DGT_XL('oo'+str(i)+'ooo')
-            self.display_on_DGT_XL('o'+str(i)+'oooo')
+        #for i in range(0, 1):
+        #    self.display_on_DGT_XL(''+str(i)+'ooooo')
+        #    self.display_on_DGT_XL('o'+str(i)+'oooo')
+        #    self.display_on_DGT_XL('oo'+str(i)+'ooo')
+        #    self.display_on_DGT_XL('ooo'+str(i)+'oo')
+        #    self.display_on_DGT_XL('oooo'+str(i)+'o')
+        #    self.display_on_DGT_XL('ooooo'+str(i)+'')
+        #    self.display_on_DGT_XL('oooo'+str(i)+'o')
+        #    self.display_on_DGT_XL('ooo'+str(i)+'oo')
+        #    self.display_on_DGT_XL('oo'+str(i)+'ooo')
+        #    self.display_on_DGT_XL('o'+str(i)+'oooo')
 
         self.display_on_DGT_XL('pic'+version)
 
@@ -278,6 +280,7 @@ class DGTBoard(Observable):
                     self.flip_board = not self.flip_board
                     fen = fen[::-1]
                 logging.debug(fen)
+                self.fire(type='fen', value=fen)
                 break
             if case(Messages.DGT_MSG_FIELD_UPDATE):
                 self.write([Commands.DGT_SEND_BRD])  # Ask for the board when a piece moved
@@ -293,6 +296,6 @@ class DGTBoard(Observable):
         self.write([Commands.DGT_CLOCK_MESSAGE, 0x0b, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_DISPLAY,
                     text[2], text[1], text[0], text[5], text[4], text[3], 0x00, 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
-    def poll(self):
+    def run(self):
         while True:
             self.read_message()

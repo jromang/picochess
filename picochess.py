@@ -22,6 +22,7 @@ import dgtv2
 import logging
 import time
 import uci
+from utilities import *
 
 
 #Command line argument parsing
@@ -56,7 +57,7 @@ if 'Threads' in engine.options:
 #        print('BM:'+e.move)
 
 #engine.subscribe(catch_move)
-#engine.send('go depth 10')
+engine.send('go depth 20')
 #time.sleep(10)
 
 #Connect to DGT board
@@ -80,4 +81,9 @@ board = dgtv2.DGTBoard(args.dgt_port)
 #
 #board.subscribe(dgt_observer)
 #board.test_for_dgt_clock()
-board.poll()
+board.start()
+
+#Event loop
+while True:
+    event = event_queue.get()
+    logging.debug('Received event in event loop : %s', event.type)
