@@ -216,8 +216,8 @@ class DGTBoard(Observable):
         if message[0] == Commands.DGT_CLOCK_MESSAGE:  # We have to wait for a clock ACK
             while self.read_message() != Messages.DGT_MSG_BWTIME:
                 pass
-        else:  # Let the board a bit of time to handle the command
-            time.sleep(0.3)
+        #else:  # Let the board a bit of time to handle the command
+        #    time.sleep(0.3)
 
     def read_message(self):
         header = unpack('>BBB', (self.serial.read(3)))
