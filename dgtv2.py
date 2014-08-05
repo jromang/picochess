@@ -311,11 +311,16 @@ class DGTBoard(Observable, threading.Thread):
                     fen = fen[::-1]
                 logging.debug(fen)
                 #Fire the appropriate event
-                if fen in level_map:
+                if fen in level_map:  # User sets level
                     level = level_map.index(fen)
-                    self.display_on_dgt_xl('lvl ' + str(level), True)
                     self.fire(Event.LEVEL, level)
+                    self.display_on_dgt_xl('lvl ' + str(level), True)
+                elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":  # New game
+                    logging.debug("New game")
+                    self.fire(Event.NEW_GAME)
+                    self.display_on_dgt_xl('newgam', True)
                 else:
+                    logging.debug("Fen")
                     self.fire(Event.FEN, fen)
                 break
             if case(Messages.DGT_MSG_FIELD_UPDATE):

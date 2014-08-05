@@ -103,5 +103,10 @@ while True:
             engine.set_level(level)
             break
 
+        if case(Event.NEW_GAME):  # User starts a new game
+            game = chess.Bitboard()
+            legal_fens = compute_legal_fens(game)
+            break
+
         if case():  # Default
-            logging.warning("Event not handled : [%s]", Messages(message_id))
+            logging.warning("Event not handled : [%s]", event)
