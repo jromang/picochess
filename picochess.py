@@ -51,37 +51,16 @@ if 'Hash' in engine.options:
     engine.set_option("Hash", args.hash_size)
 if 'Threads' in engine.options:
     engine.set_option("Threads", args.threads)
-
-#def catch_move(e):
-#    if e.type == 'bestmove':
-#        print('BM:'+e.move)
-
-#engine.subscribe(catch_move)
 #engine.send('go depth 20')
-#time.sleep(10)
 
 #Connect to DGT board
+board = None
 if args.dgt_port:
     logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
+    board = dgtv2.DGTBoard(args.dgt_port)
+    board.start()
 else:
     logging.warning("No DGT board port provided")
-
-board = dgtv2.DGTBoard(args.dgt_port)
-
-
-#def dgt_observer(attrs):
-#        if attrs.type == dgt.FEN:
-#            logging.debug("FEN: {0}".format(attrs.message))
-#        elif attrs.type == dgt.BOARD:
-#            logging.debug("Board: ")
-#            logging.debug(attrs.message)
-#            board.send_message_to_clock(['c','h','a','n','g','e'], False, False)
-#            # time.sleep(1)
-#            # self.send_message_to_clock(['b','o','a','r','d','c'], False, False)
-#
-#board.subscribe(dgt_observer)
-#board.test_for_dgt_clock()
-board.start()
 
 #Event loop
 while True:
