@@ -103,15 +103,15 @@ class Engine(Observable):
             option_max = None if not 'max' in tokens else tokens[tokens.index('max')+1]
             self.options[option_name] = (option_type, option_default, option_min, option_max)
         if tokens[0] == 'bestmove':
-            self.fire(type='bestmove', move=tokens[1])
+            self.fire(Event.BESTMOVE, tokens[1])
 
     def set_option(self, name, value):
         self.send("setoption name " + name + " value " + str(value))
 
     def set_level(self, level):
-        """ Sets the engine playing strength, between 1 and 20. """
-        if level < 1 or level > 20:
-            logging.error('Level not in range (1,20) :[%i]', level)
+        """ Sets the engine playing strength, between 0 and 20. """
+        if level < 0 or level > 20:
+            logging.error('Level not in range (0,20) :[%i]', level)
         if 'Skill Level' in self.options:  # Stockfish uses 'Skill Level' option
             self.set_option("Skill Level", level)
         elif 'UCI_LimitStrength' in self.options:  # Generic 'UCI_LimitStrength' option for other engines
@@ -121,7 +121,7 @@ class Engine(Observable):
                 self.set_option('UCI_LimitStrength', 'true')
                 min_elo = float(self.options['UCI_Elo'][2])
                 max_elo = float(self.options['UCI_Elo'][3])
-                set_elo = int(min_elo + (max_elo-min_elo) * (float(level)-1.0) / 18.0)
+                set_elo = int(min_elo + (max_elo-min_elo) * (float(level)) / 19.0)
                 self.set_option('UCI_Elo', str(set_elo))
             pass
         else:

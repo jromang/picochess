@@ -17,10 +17,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import argparse
-import dgt
+import chess
+import chess.polyglot
 import dgtv2
 import logging
-import time
 import uci
 from utilities import *
 
@@ -62,7 +62,38 @@ if args.dgt_port:
 else:
     logging.warning("No DGT board port provided")
 
+#Game data
+def compute_legal_fens(g):
+    fens = []
+    for move in g.generate_legal_moves():
+        g.push(move)
+        fens.append(g.fen().split(' ')[0])
+        g.pop()
+    return fens
+
+game = chess.Bitboard()
+legal_fens = compute_legal_fens(game)
+
+#Opening book
+book = chess.polyglot.open_reader("books/gm1950.bin")
+
 #Event loop
 while True:
     event = event_queue.get()
-    logging.debug('Received event in event loop : %s', event.type)
+    logging.debug('Received event in event loop : %s', event)
+
+    for case in switch(event):
+
+        if case(Event.FEN):  # User sets a new position
+            if event.parameter in legal_fens:
+                print("WE HAVE A LEGAL MOVE")
+            break
+
+        if case(Event.LEVEL):  # User sets a new level
+            level = event.parameter
+            logging.debug("Setting engine to level %i", level)
+            engine.set_level(level)
+            break
+
+        if case():  # Default
+            logging.warning("Event not handled : [%s]", Messages(message_id))

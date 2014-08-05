@@ -15,6 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import queue
+from enum import Enum
 
 # picochess version
 version = '024'
@@ -22,18 +23,26 @@ version = '024'
 event_queue = queue.Queue()
 
 
-class Event(object):
-    pass
+class Event(Enum):
+    def __new__(cls): # Autonumber
+        value = len(cls.__members__) + 1
+        obj = object.__new__(cls)
+        obj._value_ = value
+        return obj
+
+    # User events
+    FEN = ()  # User has moved one or more pieces, and we have a new fen position.
+    LEVEL = ()  # User sets engine level (from 1 to 20).
+    NEW_GAME = ()  # User starts a new game
+
+    #Engine event
+    BESTMOVE = ()  # Engine has found a move
 
 
 class Observable(object):
-
-    def fire(self, **attrs):
-        e = Event()
-        e.source = self
-        for k, v in attrs.items():
-            setattr(e, k, v)
-        event_queue.put(e)
+    def fire(self, event, parameter=None):
+        event.parameter = parameter
+        event_queue.put(event)
 
 
 # switch/case instruction in python
