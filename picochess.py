@@ -104,6 +104,7 @@ while True:
             break
 
         if case(Event.NEW_GAME):  # User starts a new game
+            logging.debug("Starting a new game")
             game = chess.Bitboard()
             legal_fens = compute_legal_fens(game)
             break
