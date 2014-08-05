@@ -84,9 +84,17 @@ while True:
 
     for case in switch(event):
 
-        if case(Event.FEN):  # User sets a new position
+        if case(Event.FEN):  # User sets a new position, convert it to a move if it is legal
             if event.parameter in legal_fens:
-                print("WE HAVE A LEGAL MOVE")
+                legal_moves = list(game.generate_legal_moves())
+                Observable.fire(Event.USER_MOVE, legal_moves[legal_fens.index(event.parameter)])
+            break
+
+        if case(Event.USER_MOVE):  # User sends a new move
+            move = event.parameter
+            logging.debug('User move [%s]', move)
+            if not move in game.generate_legal_moves():
+                logging.warning('Illegal move [%s]', move)
             break
 
         if case(Event.LEVEL):  # User sets a new level

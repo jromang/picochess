@@ -34,13 +34,15 @@ class Event(Enum):
     FEN = ()  # User has moved one or more pieces, and we have a new fen position.
     LEVEL = ()  # User sets engine level (from 1 to 20).
     NEW_GAME = ()  # User starts a new game
+    USER_MOVE = ()  # User sends a moveS
 
     #Engine event
     BESTMOVE = ()  # Engine has found a move
 
 
 class Observable(object):
-    def fire(self, event, parameter=None):
+    @staticmethod
+    def fire(event, parameter=None):
         event.parameter = parameter
         event_queue.put(event)
 
