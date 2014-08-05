@@ -183,8 +183,12 @@ class DGTBoard(Observable, threading.Thread):
 
         #Detect DGT XL clock
         self.serial.write(bytearray([0x2b, 0x04, 0x03, 0x0b, 1, 0x00]))
-        time.sleep(2)
-        self.clock_found = self.serial.inWaiting()
+        tries = 0
+        self.clock_found = False
+        while not self.clock_found and tries < 20:
+            time.sleep(0.1)
+            self.clock_found = self.serial.inWaiting()
+            tries += 1
         logging.debug('DGT XL clock found' if self.clock_found else 'DGT XL clock NOT found')
         #Get board version
         self.version = 0.0
