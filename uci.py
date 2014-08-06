@@ -80,7 +80,7 @@ class Engine(Observable):
 
     def write(self, b):
         if b == b'\n':
-            line = self.out.getvalue().decode("utf-8")
+            line = self.out.getvalue().replace(b'\r', b'').decode("utf-8")
             logging.debug("<-Engine [%s]", line)
             if line:
                 self.parse(line)
