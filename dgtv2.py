@@ -206,7 +206,7 @@ book_map = ("rnbqkbnr/pppppppp/8/8/8/q7/PPPPPPPP/RNBQKBNR",
             "rnbqkbnr/pppppppp/8/8/5q2/8/PPPPPPPP/RNBQKBNR")
 
 
-class DGTBoard(Observable, threading.Thread):
+class DGTBoard(Observable, Display, threading.Thread):
 
     def __init__(self, device):
         super(DGTBoard, self).__init__()
@@ -357,4 +357,15 @@ class DGTBoard(Observable, threading.Thread):
 
     def run(self):
         while True:
-            self.read_message()
+            #Check if we have a message from the board
+            if self.serial.inWaiting():
+                self.read_message()
+            else:
+                time.sleep(0.1)
+            #Check if we have something to display
+            try:
+                display_message = self.message_queue.get_nowait()
+                self.display_on_dgt_xl(display_message[1], True)
+            except queue.Empty:
+                pass
+

@@ -22,15 +22,17 @@ from enum import Enum
 version = '024'
 
 event_queue = queue.Queue()
+display_devices = []
 
 
-class Event(Enum):
+class AutoNumber(Enum):
     def __new__(cls): # Autonumber
         value = len(cls.__members__) + 1
         obj = object.__new__(cls)
         obj._value_ = value
         return obj
 
+class Event(AutoNumber):
     # User events
     FEN = ()  # User has moved one or more pieces, and we have a new fen position.
     LEVEL = ()  # User sets engine level (from 1 to 20).
@@ -39,14 +41,34 @@ class Event(Enum):
     OPENING_BOOK = ()  # User chooses an opening book
 
     #Engine event
-    BESTMOVE = ()  # Engine has found a move
+    BEST_MOVE = ()  # Engine has found a move
 
 
-class Observable(object):
+class Message(AutoNumber):
+    #Display message types
+    COMPUTER_MOVE = ()  # Show computer move
+
+
+class Observable(object):  # Input devices are observable
+    def __init__(self):
+        super(Observable, self).__init__()
+
     @staticmethod
     def fire(event, parameter=None):
         event.parameter = parameter
         event_queue.put(event)
+
+
+class Display(object):  # Display devices (DGT XL clock, Piface LCD, ...)
+    def __init__(self):
+        super(Display, self).__init__()
+        self.message_queue = queue.Queue()
+        display_devices.append(self)
+
+    @staticmethod
+    def show(type, message):  # Sends a message on each display device
+        for display in display_devices:
+            display.message_queue.put((type, message))
 
 
 # switch/case instruction in python

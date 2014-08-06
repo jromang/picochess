@@ -103,7 +103,7 @@ class Engine(Observable):
             option_max = None if not 'max' in tokens else tokens[tokens.index('max')+1]
             self.options[option_name] = (option_type, option_default, option_min, option_max)
         if tokens[0] == 'bestmove':
-            self.fire(Event.BESTMOVE, tokens[1])
+            self.fire(Event.BEST_MOVE, tokens[1])
 
     def set_option(self, name, value):
         self.send("setoption name " + name + " value " + str(value))

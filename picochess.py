@@ -51,7 +51,7 @@ if 'Hash' in engine.options:
     engine.set_option("Hash", args.hash_size)
 if 'Threads' in engine.options:
     engine.set_option("Threads", args.threads)
-#engine.send('go depth 20')
+engine.send('go depth 20')
 
 #Connect to DGT board
 board = None
@@ -112,6 +112,10 @@ while True:
         if case(Event.OPENING_BOOK):
             logging.debug("Changing opening book [%s]", get_opening_books()[event.parameter][1])
             book = chess.polyglot.open_reader(get_opening_books()[event.parameter][1])
+            break
+
+        if case(Event.BEST_MOVE):
+            Display.show(Message.COMPUTER_MOVE, event.parameter)
             break
 
         if case():  # Default
