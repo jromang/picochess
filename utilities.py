@@ -15,6 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import queue
+import os
 from enum import Enum
 
 # picochess version
@@ -34,7 +35,8 @@ class Event(Enum):
     FEN = ()  # User has moved one or more pieces, and we have a new fen position.
     LEVEL = ()  # User sets engine level (from 1 to 20).
     NEW_GAME = ()  # User starts a new game
-    USER_MOVE = ()  # User sends a moveS
+    USER_MOVE = ()  # User sends a move
+    OPENING_BOOK = ()  # User chooses an opening book
 
     #Engine event
     BESTMOVE = ()  # Engine has found a move
@@ -67,3 +69,11 @@ class switch(object):
             return True
         else:
             return False
+
+
+def get_opening_books():
+    book_list = sorted(os.listdir('books'))
+    library = [('nobook', None)]
+    for book in book_list:
+        library.append((book[2:book.index('.')], 'books' + os.sep + book))
+    return library

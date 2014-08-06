@@ -75,7 +75,7 @@ game = chess.Bitboard()
 legal_fens = compute_legal_fens(game)
 
 #Opening book
-book = chess.polyglot.open_reader("books/gm1950.bin")
+book = chess.polyglot.open_reader(get_opening_books()[8][1])  # Default opening book
 
 #Event loop
 while True:
