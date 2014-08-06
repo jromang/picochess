@@ -49,6 +49,7 @@ class Message(AutoNumber):
     COMPUTER_MOVE = ()  # Show computer move
     BOOK_MOVE = ()  # Show book move
     INTERACTION_MODE = ()  # Interaction mode
+    START_NEW_GAME = ()
 
 
 @unique

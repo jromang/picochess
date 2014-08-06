@@ -336,12 +336,11 @@ class DGTBoard(Observable, Display, threading.Thread):
                 elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":  # New game
                     logging.debug("New game")
                     self.fire(Event.NEW_GAME)
-                    self.display_on_dgt_xl('newgam', True)
                 elif fen in book_map:  # Choose opening book
                     book_index = book_map.index(fen)
                     logging.debug("Opening book [%s]", get_opening_books()[book_index])
                     self.fire(Event.OPENING_BOOK, book_index)
-                    self.display_on_dgt_xl(get_opening_books()[book_index][0])
+                    self.display_on_dgt_xl(get_opening_books()[book_index][0], True)
                 elif fen in mode_map:  # Set interaction mode
                     mode_index = mode_map.index(fen)
                     logging.debug("Interaction mode [%s]", Mode(mode_index))
@@ -378,6 +377,8 @@ class DGTBoard(Observable, Display, threading.Thread):
                 display_message = self.message_queue.get_nowait()
                 if display_message[0] in (Message.BOOK_MOVE, Message.COMPUTER_MOVE):
                     self.display_on_dgt_xl(display_message[1], True)
+                elif display_message[0] == Message.START_NEW_GAME:
+                    self.display_on_dgt_xl('newgam', True)
             except queue.Empty:
                 pass
 

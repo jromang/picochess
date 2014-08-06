@@ -108,9 +108,11 @@ while True:
             break
 
         if case(Event.NEW_GAME):  # User starts a new game
-            logging.debug("Starting a new game")
-            game = chess.Bitboard()
-            legal_fens = compute_legal_fens(game)
+            if game.move_stack:
+                logging.debug("Starting a new game")
+                game = chess.Bitboard()
+                legal_fens = compute_legal_fens(game)
+                Display.show(Message.START_NEW_GAME)
             break
 
         if case(Event.OPENING_BOOK):
