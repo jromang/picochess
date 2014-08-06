@@ -57,3 +57,7 @@ docs/_build/
 
 #pycharm
 .idea/
+
+#Stockfish
+stockfish
+stockfish.exe
