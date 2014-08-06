@@ -37,6 +37,7 @@ parser.add_argument("-r", "--remote", type=str, help="remote server running the 
 parser.add_argument("-u", "--user", type=str, help="remote user on server running the engine")
 parser.add_argument("-p", "--password", type=str, help="password for the remote user")
 parser.add_argument("-k", "--key-file", type=str, help="key file used to connect to the remote server")
+parser.add_argument("-pgn", "--pgn-file", type=str, help="pgn file used to store the games")
 args = parser.parse_args()
 
 #Enable logging
@@ -77,6 +78,9 @@ legal_fens = compute_legal_fens(game)
 #Opening book
 book = chess.polyglot.open_reader(get_opening_books()[8][1])  # Default opening book
 
+#Interacation mode
+interaction_mode = Mode.PLAY
+
 #Event loop
 while True:
     event = event_queue.get()
@@ -116,6 +120,11 @@ while True:
 
         if case(Event.BEST_MOVE):
             Display.show(Message.COMPUTER_MOVE, event.parameter)
+            break
+
+        if case(Event.SET_MODE):
+            Display.show(Message.INTERACTION_MODE, event.parameter)  # Usefull for pgn display device
+            interaction_mode = event.parameter
             break
 
         if case():  # Default

@@ -16,7 +16,7 @@
 
 import queue
 import os
-from enum import Enum
+from enum import Enum, unique
 
 # picochess version
 version = '024'
@@ -39,14 +39,27 @@ class Event(AutoNumber):
     NEW_GAME = ()  # User starts a new game
     USER_MOVE = ()  # User sends a move
     OPENING_BOOK = ()  # User chooses an opening book
-
-    #Engine event
+    SET_MODE = ()  # Change interaction mode
+    #Engine events
     BEST_MOVE = ()  # Engine has found a move
 
 
 class Message(AutoNumber):
-    #Display message types
+    #Messages to display devices
     COMPUTER_MOVE = ()  # Show computer move
+    BOOK_MOVE = ()  # Show book move
+    INTERACTION_MODE = ()  # Interaction mode
+
+
+@unique
+class Mode(Enum):
+    #Interaction modes
+    BOOK = 0
+    ANALYSIS = 1
+    PLAY = 2
+    KIBITZ = 3
+    OBSERVE = 4
+
 
 
 class Observable(object):  # Input devices are observable
@@ -59,7 +72,7 @@ class Observable(object):  # Input devices are observable
         event_queue.put(event)
 
 
-class Display(object):  # Display devices (DGT XL clock, Piface LCD, ...)
+class Display(object):  # Display devices (DGT XL clock, Piface LCD, pgn file...)
     def __init__(self):
         super(Display, self).__init__()
         self.message_queue = queue.Queue()
