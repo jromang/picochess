@@ -110,8 +110,9 @@ while True:
             break
 
         if case(Event.OPENING_BOOK):
-            logging.debug("Changing opening book")
+            logging.debug("Changing opening book [%s]", get_opening_books()[event.parameter][1])
             book = chess.polyglot.open_reader(get_opening_books()[event.parameter][1])
+            break
 
         if case():  # Default
             logging.warning("Event not handled : [%s]", event)
