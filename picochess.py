@@ -109,5 +109,9 @@ while True:
             legal_fens = compute_legal_fens(game)
             break
 
+        if case(Event.OPENING_BOOK):
+            logging.debug("Changing opening book")
+            book = chess.polyglot.open_reader(get_opening_books()[event.parameter][1])
+
         if case():  # Default
             logging.warning("Event not handled : [%s]", event)

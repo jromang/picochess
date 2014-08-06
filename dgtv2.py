@@ -193,6 +193,18 @@ level_map = ("rnbqkbnr/pppppppp/q7/8/8/8/PPPPPPPP/RNBQKBNR",
              "rnbqkbnr/pppppppp/8/8/3q4/8/PPPPPPPP/RNBQKBNR",
              "rnbqkbnr/pppppppp/8/8/4q3/8/PPPPPPPP/RNBQKBNR")
 
+book_map = ("rnbqkbnr/pppppppp/8/8/8/q7/PPPPPPPP/RNBQKBNR",
+            "rnbqkbnr/pppppppp/8/8/8/1q6/PPPPPPPP/RNBQKBNR",
+            "rnbqkbnr/pppppppp/8/8/8/2q5/PPPPPPPP/RNBQKBNR",
+            "rnbqkbnr/pppppppp/8/8/8/3q4/PPPPPPPP/RNBQKBNR",
+            "rnbqkbnr/pppppppp/8/8/8/4q3/PPPPPPPP/RNBQKBNR",
+            "rnbqkbnr/pppppppp/8/8/8/5q2/PPPPPPPP/RNBQKBNR",
+            "rnbqkbnr/pppppppp/8/8/8/6q1/PPPPPPPP/RNBQKBNR",
+            "rnbqkbnr/pppppppp/8/8/8/7q/PPPPPPPP/RNBQKBNR",
+            "rnbqkbnr/pppppppp/8/8/7q/8/PPPPPPPP/RNBQKBNR",
+            "rnbqkbnr/pppppppp/8/8/6q1/8/PPPPPPPP/RNBQKBNR",
+            "rnbqkbnr/pppppppp/8/8/5q2/8/PPPPPPPP/RNBQKBNR")
+
 
 class DGTBoard(Observable, threading.Thread):
 
@@ -319,6 +331,11 @@ class DGTBoard(Observable, threading.Thread):
                     logging.debug("New game")
                     self.fire(Event.NEW_GAME)
                     self.display_on_dgt_xl('newgam', True)
+                elif fen in book_map:  # Choose opening book
+                    book_index = book_map.index(fen)
+                    logging.debug("Opening book [%s]", get_opening_books()[book_index])
+                    self.fire(Event.OPENING_BOOK, book_index)
+                    self.display_on_dgt_xl(get_opening_books()[book_index][0])
                 else:
                     logging.debug("Fen")
                     self.fire(Event.FEN, fen)
