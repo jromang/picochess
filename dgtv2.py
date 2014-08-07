@@ -239,17 +239,19 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.write([Commands.DGT_SEND_BRD])
 
         # Clock stress test
-        #for i in range(0, 1):
-        #    self.display_on_DGT_XL(''+str(i)+'ooooo')
-        #    self.display_on_DGT_XL('o'+str(i)+'oooo')
-        #    self.display_on_DGT_XL('oo'+str(i)+'ooo')
-        #    self.display_on_DGT_XL('ooo'+str(i)+'oo')
-        #    self.display_on_DGT_XL('oooo'+str(i)+'o')
-        #    self.display_on_DGT_XL('ooooo'+str(i)+'')
-        #    self.display_on_DGT_XL('oooo'+str(i)+'o')
-        #    self.display_on_DGT_XL('ooo'+str(i)+'oo')
-        #    self.display_on_DGT_XL('oo'+str(i)+'ooo')
-        #    self.display_on_DGT_XL('o'+str(i)+'oooo')
+        # for i in range(0, 9):
+        #    print("******************************************************")
+        #    self.display_on_dgt_xl(''+str(i)+'ooooo')
+        #    self.display_on_dgt_xl('o'+str(i)+'oooo')
+        #    self.display_on_dgt_xl('oo'+str(i)+'ooo')
+        #    self.display_on_dgt_xl('ooo'+str(i)+'oo')
+        #    self.display_on_dgt_xl('oooo'+str(i)+'o')
+        #    self.display_on_dgt_xl('ooooo'+str(i)+'')
+        #    self.display_on_dgt_xl('oooo'+str(i)+'o')
+        #    self.display_on_dgt_xl('ooo'+str(i)+'oo')
+        #    self.display_on_dgt_xl('oo'+str(i)+'ooo')
+        #    self.display_on_dgt_xl('o'+str(i)+'oooo')
+
 
     def write(self, message):
         logging.debug('->DGT [%s]', message[0])
@@ -261,13 +263,11 @@ class DGTBoard(Observable, Display, threading.Thread):
                 for c in v:
                     array.append(char_to_DGTXL[c])
             else: logging.error('Type not supported : [%s]', type(v))
-        self.serial.write(bytearray(array))
-
-        if message[0] == Commands.DGT_CLOCK_MESSAGE:  # We have to wait for a clock ACK
-            while self.read_message() != Messages.DGT_MSG_BWTIME:
-                pass
-        else:  # Let the board a bit of time to handle the command
+        if message[0] == Commands.DGT_CLOCK_MESSAGE:  # Let a bit time for the previous clock ACKs to come
             time.sleep(0.3)
+        while self.serial.inWaiting():  # Don't write anything when there is something to read
+            self.read_message()
+        self.serial.write(bytearray(array))
 
     def read_message(self):
         header = unpack('>BBB', (self.serial.read(3)))
