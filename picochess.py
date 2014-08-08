@@ -92,6 +92,9 @@ while True:
             if event.parameter in legal_fens:
                 legal_moves = list(game.generate_legal_moves())
                 Observable.fire(Event.USER_MOVE, legal_moves[legal_fens.index(event.parameter)])
+            elif event.parameter == game.fen().split(' ')[0]:  # Player had done the computer move on the board
+                Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD)
+            print(game.fen().split(' ')[0], event.parameter)
             break
 
         if case(Event.USER_MOVE):  # User sends a new move
@@ -99,6 +102,13 @@ while True:
             logging.debug('User move [%s]', move)
             if not move in game.generate_legal_moves():
                 logging.warning('Illegal move [%s]', move)
+            # Check if we are in play mode and it is player's turn
+            if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.WHITE) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.BLACK):
+                game.push(move)
+                Observable.fire(Event.USER_MOVE, move)
+                # Make the engine search
+                engine.set_position(game)
+                engine.send('go movetime 3000')
             break
 
         if case(Event.LEVEL):  # User sets a new level
@@ -121,7 +131,12 @@ while True:
             break
 
         if case(Event.BEST_MOVE):
-            Display.show(Message.COMPUTER_MOVE, event.parameter)
+            move = chess.Move.from_uci(event.parameter)
+            # Check if we are in play mode and it is computer's turn
+            if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
+                game.push(move)
+                legal_fens = compute_legal_fens(game)
+                Display.show(Message.COMPUTER_MOVE, move.uci())
             break
 
         if case(Event.SET_MODE):

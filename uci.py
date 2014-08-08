@@ -126,3 +126,9 @@ class Engine(Observable):
             pass
         else:
             logging.warning("Engine does not support skill levels")
+
+    def set_position(self, game):
+        cmd = 'position startpos moves'
+        for m in game.move_stack:
+            cmd += ' ' + m.uci()
+        self.send(cmd)

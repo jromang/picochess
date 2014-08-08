@@ -381,6 +381,8 @@ class DGTBoard(Observable, Display, threading.Thread):
                     self.display_on_dgt_xl(display_message[1], True)
                 elif display_message[0] == Message.START_NEW_GAME:
                     self.display_on_dgt_xl('newgam', True)
+                elif display_message[0] == Message.COMPUTER_MOVE_DONE_ON_BOARD:
+                    self.display_on_dgt_xl('ok', True)
             except queue.Empty:
                 pass
 

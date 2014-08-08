@@ -50,6 +50,7 @@ class Message(AutoNumber):
     BOOK_MOVE = ()  # Show book move
     INTERACTION_MODE = ()  # Interaction mode
     START_NEW_GAME = ()
+    COMPUTER_MOVE_DONE_ON_BOARD = ()  # User has done the compute move on board
 
 
 @unique
@@ -80,7 +81,7 @@ class Display(object):  # Display devices (DGT XL clock, Piface LCD, pgn file...
         display_devices.append(self)
 
     @staticmethod
-    def show(type, message):  # Sends a message on each display device
+    def show(type, message=None):  # Sends a message on each display device
         for display in display_devices:
             display.message_queue.put((type, message))
 
