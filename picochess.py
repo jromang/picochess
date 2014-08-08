@@ -81,6 +81,10 @@ book = chess.polyglot.open_reader(get_opening_books()[8][1])  # Default opening 
 #Interacation mode
 interaction_mode = Mode.PLAY_WHITE
 
+def think():
+    engine.set_position(game)
+    engine.send('go movetime 3000')
+
 #Event loop
 while True:
     event = event_queue.get()
@@ -106,9 +110,7 @@ while True:
             if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.WHITE) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.BLACK):
                 game.push(move)
                 Observable.fire(Event.USER_MOVE, move)
-                # Make the engine search
-                engine.set_position(game)
-                engine.send('go movetime 3000')
+                think()
             break
 
         if case(Event.LEVEL):  # User sets a new level
@@ -123,6 +125,8 @@ while True:
                 game = chess.Bitboard()
                 legal_fens = compute_legal_fens(game)
                 Display.show(Message.START_NEW_GAME)
+            if interaction_mode == Mode.PLAY_BLACK:
+                think()
             break
 
         if case(Event.OPENING_BOOK):

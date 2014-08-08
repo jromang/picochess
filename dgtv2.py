@@ -346,7 +346,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                     index = mode_map.index(fen)
                     mode_index = index if index != 6 else 2  # Whe have two equivalent fens to set PLAY_WHITE mode
                     logging.debug("Interaction mode [%s]", Mode(mode_index))
-                    self.fire(Event.SET_MODE, mode_index)
+                    self.fire(Event.SET_MODE, Mode(mode_index))
                     self.display_on_dgt_xl(('book', 'analys', 'game', 'kibitz', 'observ', 'black', 'white')[index], True)
                 else:
                     logging.debug("Fen")
