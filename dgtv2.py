@@ -378,7 +378,7 @@ class DGTBoard(Observable, Display, threading.Thread):
             try:
                 display_message = self.message_queue.get_nowait()
                 if display_message[0] in (Message.BOOK_MOVE, Message.COMPUTER_MOVE):
-                    self.display_on_dgt_xl(display_message[1], True)
+                    self.display_on_dgt_xl(' ' + display_message[1], True)
                 elif display_message[0] == Message.START_NEW_GAME:
                     self.display_on_dgt_xl('newgam', True)
                 elif display_message[0] == Message.COMPUTER_MOVE_DONE_ON_BOARD:
