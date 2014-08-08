@@ -50,8 +50,10 @@ logging.debug('Loaded engine [%s]', engine.name)
 logging.debug('Supported options [%s]', engine.options)
 if 'Hash' in engine.options:
     engine.set_option("Hash", args.hash_size)
-if 'Threads' in engine.options:
+if 'Threads' in engine.options:  # Stockfish
     engine.set_option("Threads", args.threads)
+if 'Core Threads' in engine.options:  # Hiarcs
+    engine.set_option("Core Threads", args.threads)
 #engine.send('go depth 20')
 
 #Connect to DGT board

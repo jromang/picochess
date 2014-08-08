@@ -98,9 +98,13 @@ class Engine(Observable):
         if tokens[0] == 'option' and tokens[1] == 'name':
             option_name = ' '.join(tokens[2:tokens.index('type')])
             option_type = tokens[tokens.index('type')+1]
-            option_default = None if not 'default' in tokens else tokens[tokens.index('default')+1]
-            option_min = None if not 'min' in tokens else tokens[tokens.index('min')+1]
-            option_max = None if not 'max' in tokens else tokens[tokens.index('max')+1]
+            try:
+                option_default = None if not 'default' in tokens else tokens[tokens.index('default')+1]
+                option_min = None if not 'min' in tokens else tokens[tokens.index('min')+1]
+                option_max = None if not 'max' in tokens else tokens[tokens.index('max')+1]
+            except IndexError:
+                option_default = option_min = option_max = None
+                logging.warning("Error when parsing UCI option [%s]", option_name)
             self.options[option_name] = (option_type, option_default, option_min, option_max)
         if tokens[0] == 'bestmove':
             self.fire(Event.BEST_MOVE, tokens[1])
@@ -121,7 +125,7 @@ class Engine(Observable):
                 self.set_option('UCI_LimitStrength', 'true')
                 min_elo = float(self.options['UCI_Elo'][2])
                 max_elo = float(self.options['UCI_Elo'][3])
-                set_elo = int(min_elo + (max_elo-min_elo) * (float(level)) / 19.0)
+                set_elo = min(int(min_elo + (max_elo-min_elo) * (float(level)) / 19.0), int(self.options['UCI_Elo'][3]))
                 self.set_option('UCI_Elo', str(set_elo))
             pass
         else:
