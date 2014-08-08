@@ -17,6 +17,7 @@
 import queue
 import os
 from enum import Enum, unique
+import random
 
 # picochess version
 version = '024'
@@ -114,3 +115,16 @@ def get_opening_books():
     for book in book_list:
         library.append((book[2:book.index('.')], 'books' + os.sep + book))
     return library
+
+
+def weighted_choice(book, game):
+    total = sum(e.weight for e in book.get_entries_for_position(game))
+    r = random.uniform(0, total)
+    upto = 0
+    #for e in book.get_entries_for_position(game):
+    #    print(e.move().uci() + 'w:' + str(e.weight))
+    for e in book.get_entries_for_position(game):
+        if upto + e.weight > r:
+            return e.move()
+        upto += e.weight
+    return None

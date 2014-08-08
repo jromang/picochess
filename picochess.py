@@ -82,8 +82,13 @@ book = chess.polyglot.open_reader(get_opening_books()[8][1])  # Default opening 
 interaction_mode = Mode.PLAY_WHITE
 
 def think():
-    engine.set_position(game)
-    engine.send('go movetime 3000')
+    book_move = weighted_choice(book, game)
+    if book_move:
+        Display.show(Message.BOOK_MOVE, book_move.uci())
+        Observable.fire(Event.BEST_MOVE, book_move.uci())
+    else:
+        engine.set_position(game)
+        engine.send('go movetime 3000')
 
 #Event loop
 while True:
@@ -98,7 +103,6 @@ while True:
                 Observable.fire(Event.USER_MOVE, legal_moves[legal_fens.index(event.parameter)])
             elif event.parameter == game.fen().split(' ')[0]:  # Player had done the computer move on the board
                 Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD)
-            print(game.fen().split(' ')[0], event.parameter)
             break
 
         if case(Event.USER_MOVE):  # User sends a new move
@@ -109,7 +113,6 @@ while True:
             # Check if we are in play mode and it is player's turn
             if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.WHITE) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.BLACK):
                 game.push(move)
-                Observable.fire(Event.USER_MOVE, move)
                 think()
             break
 
