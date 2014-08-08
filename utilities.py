@@ -57,10 +57,10 @@ class Mode(Enum):
     #Interaction modes
     BOOK = 0
     ANALYSIS = 1
-    PLAY = 2
+    PLAY_WHITE = 2
     KIBITZ = 3
     OBSERVE = 4
-
+    PLAY_BLACK = 5
 
 
 class Observable(object):  # Input devices are observable

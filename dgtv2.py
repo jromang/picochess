@@ -209,8 +209,9 @@ mode_map = ("rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR",
             "rnbqkbnr/pppppppp/8/1Q6/8/8/PPPPPPPP/RNBQKBNR",
             "rnbqkbnr/pppppppp/8/2Q5/8/8/PPPPPPPP/RNBQKBNR",
             "rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR",
-            "rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR")
-
+            "rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR",
+            "rnbq1bnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR",  # Player plays black
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQ1BNR")  # Player plays white
 
 class DGTBoard(Observable, Display, threading.Thread):
 
@@ -342,10 +343,11 @@ class DGTBoard(Observable, Display, threading.Thread):
                     self.fire(Event.OPENING_BOOK, book_index)
                     self.display_on_dgt_xl(get_opening_books()[book_index][0], True)
                 elif fen in mode_map:  # Set interaction mode
-                    mode_index = mode_map.index(fen)
+                    index = mode_map.index(fen)
+                    mode_index = index if index != 6 else 2  # Whe have two equivalent fens to set PLAY_WHITE mode
                     logging.debug("Interaction mode [%s]", Mode(mode_index))
                     self.fire(Event.SET_MODE, mode_index)
-                    self.display_on_dgt_xl(('book','analys','game','kibitz','observ')[mode_index], True)
+                    self.display_on_dgt_xl(('book', 'analys', 'game', 'kibitz', 'observ', 'black', 'white')[index], True)
                 else:
                     logging.debug("Fen")
                     self.fire(Event.FEN, fen)

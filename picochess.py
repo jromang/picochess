@@ -52,7 +52,7 @@ if 'Hash' in engine.options:
     engine.set_option("Hash", args.hash_size)
 if 'Threads' in engine.options:
     engine.set_option("Threads", args.threads)
-engine.send('go depth 20')
+#engine.send('go depth 20')
 
 #Connect to DGT board
 board = None
@@ -79,7 +79,7 @@ legal_fens = compute_legal_fens(game)
 book = chess.polyglot.open_reader(get_opening_books()[8][1])  # Default opening book
 
 #Interacation mode
-interaction_mode = Mode.PLAY
+interaction_mode = Mode.PLAY_WHITE
 
 #Event loop
 while True:
