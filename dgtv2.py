@@ -382,7 +382,6 @@ class DGTBoard(Observable, Display, threading.Thread):
                 display_message = self.message_queue.get_nowait()
                 if display_message[0] == Message.BOOK_MOVE:
                     self.display_on_dgt_xl(' book')
-                    time.sleep(0.5)
                 elif display_message[0] == Message.COMPUTER_MOVE:
                     self.display_on_dgt_xl(' ' + display_message[1], True)
                 elif display_message[0] == Message.START_NEW_GAME:

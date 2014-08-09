@@ -21,6 +21,7 @@ import spur
 import paramiko
 import io
 import threading
+from collections import deque
 
 
 def which(program):
@@ -53,6 +54,8 @@ class Engine(Observable):
         self.uciok_lock.acquire()
         self.name = ""
         self.options = {}
+        self.send_best_move = threading.Event()  # Send BEST_MOVE events only when this is set
+        self.send_best_move.set()
         try:
             if hostname:
                 logging.info("Connecting to [%s]", hostname)
@@ -107,7 +110,9 @@ class Engine(Observable):
                 logging.warning("Error when parsing UCI option [%s]", option_name)
             self.options[option_name] = (option_type, option_default, option_min, option_max)
         if tokens[0] == 'bestmove':
-            self.fire(Event.BEST_MOVE, tokens[1])
+            if self.send_best_move.is_set():
+                self.fire(Event.BEST_MOVE, tokens[1])
+            self.send_best_move.set()
 
     def set_option(self, name, value):
         self.send("setoption name " + name + " value " + str(value))
@@ -136,3 +141,15 @@ class Engine(Observable):
         for m in game.move_stack:
             cmd += ' ' + m.uci()
         self.send(cmd)
+
+    def stop(self, ignore_best_move=False):
+        if ignore_best_move:
+            self.send_best_move.clear()
+        else:
+            self.send_best_move.set()
+        self.send('stop')
+        self.send_best_move.wait(2.0)  # If stop() is called with ignore_best_move=True and the engine is not searching,
+                                       # the program could be locked here. So we have a timeout for safety.
+
+    def go(self):
+        self.send('go movetime 3000')

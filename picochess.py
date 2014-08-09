@@ -22,6 +22,7 @@ import chess.polyglot
 import dgtv2
 import logging
 import uci
+import threading
 from utilities import *
 
 
@@ -80,17 +81,25 @@ legal_fens = compute_legal_fens(game)
 #Opening book
 book = chess.polyglot.open_reader(get_opening_books()[8][1])  # Default opening book
 
-#Interacation mode
+#Interaction mode
 interaction_mode = Mode.PLAY_WHITE
 
+book_thread = None
+
 def think():
+    def send_book_move(move):
+        Observable.fire(Event.BEST_MOVE, move.uci())
+
+    global book_thread
     book_move = weighted_choice(book, game)
     if book_move:
         Display.show(Message.BOOK_MOVE, book_move.uci())
-        Observable.fire(Event.BEST_MOVE, book_move.uci())
+        book_thread = threading.Timer(2, send_book_move, [book_move])
+        book_thread.start()
     else:
+        book_thread = None
         engine.set_position(game)
-        engine.send('go movetime 3000')
+        engine.go()
 
 #Event loop
 while True:
@@ -101,6 +110,15 @@ while True:
 
         if case(Event.FEN):  # User sets a new position, convert it to a move if it is legal
             if event.parameter in legal_fens:
+                # Check if we have to undo a previous move (sliding)
+                if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
+                    # Stop current search or book thread
+                    if book_thread:
+                        book_thread.cancel()
+                    else:
+                        engine.stop(True)
+                    game.pop()
+
                 legal_moves = list(game.generate_legal_moves())
                 Observable.fire(Event.USER_MOVE, legal_moves[legal_fens.index(event.parameter)])
             elif event.parameter == game.fen().split(' ')[0]:  # Player had done the computer move on the board
