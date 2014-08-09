@@ -16,8 +16,12 @@
 
 import queue
 import os
-from enum import Enum, unique
 import random
+try:
+    import enum
+except ImportError:
+    import enum34 as enum
+
 
 # picochess version
 version = '024'
@@ -26,7 +30,7 @@ event_queue = queue.Queue()
 display_devices = []
 
 
-class AutoNumber(Enum):
+class AutoNumber(enum.Enum):
     def __new__(cls): # Autonumber
         value = len(cls.__members__) + 1
         obj = object.__new__(cls)
@@ -54,8 +58,8 @@ class Message(AutoNumber):
     COMPUTER_MOVE_DONE_ON_BOARD = ()  # User has done the compute move on board
 
 
-@unique
-class Mode(Enum):
+@enum.unique
+class Mode(enum.Enum):
     #Interaction modes
     BOOK = 0
     ANALYSIS = 1

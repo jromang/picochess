@@ -19,12 +19,15 @@ import serial as pyserial
 import time
 import threading
 from utilities import *
-from enum import Enum, IntEnum, unique
 from struct import unpack
+try:
+    import enum
+except ImportError:
+    import enum34 as enum
 
 
-@unique
-class Commands(Enum):
+@enum.unique
+class Commands(enum.Enum):
     """ COMMAND CODES FROM PC TO BOARD """
     # Commands not resulting in returning messages:
     DGT_SEND_RESET = 0x40  # Puts the board in IDLE mode, cancelling any UPDATE mode
@@ -55,7 +58,7 @@ class Commands(Enum):
     DGT_CLOCK_MESSAGE = 0x2b  # This message contains a command for the clock.
 
 
-class Clock(Enum):
+class Clock(enum.Enum):
     DGT_CMD_CLOCK_DISPLAY = 0x01  # This command can control the segments of six 7-segment characters,
                                   # two dots, two semicolons and the two '1' symbols.
     DGT_CMD_CLOCK_ICONS = 0x02  # Used to control the clock icons like flags etc.
@@ -73,8 +76,8 @@ class Clock(Enum):
     DGT_CMD_CLOCK_END_MESSAGE = 0x00
 
 
-@unique
-class Pieces(Enum):
+@enum.unique
+class Pieces(enum.Enum):
     #Piece codes for chess pieces:
     EMPTY = 0x00
     WPAWN = 0x01
@@ -94,7 +97,7 @@ class Pieces(Enum):
     PIECE3 = 0x0f #  Magic piece: Black win
 
 
-class Messages(IntEnum):
+class Messages(enum.IntEnum):
     """ DESCRIPTION OF THE MESSAGES FROM BOARD TO PC """
     MESSAGE_BIT = 0x80 #  The Message ID is the logical OR of MESSAGE_BIT and ID code
     #ID codes
@@ -259,7 +262,7 @@ class DGTBoard(Observable, Display, threading.Thread):
         array = []
         for v in message:
             if type(v) is int: array.append(v)
-            elif isinstance(v, Enum): array.append(v.value)
+            elif isinstance(v, enum.Enum): array.append(v.value)
             elif type(v) is str:
                 for c in v:
                     array.append(char_to_DGTXL[c])
