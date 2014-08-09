@@ -150,6 +150,9 @@ class Engine(Observable):
         self.send('stop')
         self.send_best_move.wait(2.0)  # If stop() is called with ignore_best_move=True and the engine is not searching,
                                        # the program could be locked here. So we have a timeout for safety.
+        if not self.send_best_move.is_set():  # There was no bestmove : send a waring, this should not happen.
+            logging.warning('No bestmove after stop()')
+            self.send_best_move.set()
 
     def go(self):
         self.send('go movetime 3000')
