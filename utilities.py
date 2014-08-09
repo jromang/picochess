@@ -56,6 +56,7 @@ class Message(AutoNumber):
     INTERACTION_MODE = ()  # Interaction mode
     START_NEW_GAME = ()
     COMPUTER_MOVE_DONE_ON_BOARD = ()  # User has done the compute move on board
+    SEARCH_STARTED = ()  # Engine has started to search
 
 
 @enum.unique

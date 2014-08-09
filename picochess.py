@@ -100,6 +100,7 @@ def think():
         book_thread = None
         engine.set_position(game)
         engine.go()
+        Display.show(Message.SEARCH_STARTED)
 
 #Event loop
 while True:

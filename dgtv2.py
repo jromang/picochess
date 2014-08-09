@@ -388,6 +388,8 @@ class DGTBoard(Observable, Display, threading.Thread):
                     self.display_on_dgt_xl('newgam', True)
                 elif display_message[0] == Message.COMPUTER_MOVE_DONE_ON_BOARD:
                     self.display_on_dgt_xl('ok', True)
+                elif display_message[0] == Message.SEARCH_STARTED:
+                    self.display_on_dgt_xl('search')
             except queue.Empty:
                 pass
 
