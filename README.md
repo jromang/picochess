@@ -4,15 +4,13 @@ picochess
 Requirements:
 
   1. python3
-  2. crypto
-  2. enum34 (if using python < 3.4)
-  
+  1. crypto
+
 Steps:
   
   1. Install python3 (on mac OS X, brew install python3)
-  2. Install pycrypto (on mac OS X, brew install pycrypto)
-  3. Install enum34 if not using python 3.4, ("sudo pip3 install enum34")
-  4. Execute "python3 picochess.py -h" for a list of options
+  1. Install pycrypto (on mac OS X, brew install pycrypto)
+  1. Execute "python3 picochess.py -h" for a list of options
   
   Options:
   
