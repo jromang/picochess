@@ -390,6 +390,8 @@ class DGTBoard(Observable, Display, threading.Thread):
                     self.display_on_dgt_xl('ok', True)
                 elif display_message[0] == Message.SEARCH_STARTED:
                     self.display_on_dgt_xl('search')
+                elif display_message[0] == Message.USER_TAKE_BACK:
+                    self.display_on_dgt_xl('takbak')
             except queue.Empty:
                 pass
 

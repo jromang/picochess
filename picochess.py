@@ -68,11 +68,17 @@ else:
 
 #Game data
 def compute_legal_fens(g):
-    fens = []
+    class FenList(list):
+        def __init__(self, *args):
+            list.__init__(self, *args)
+            self.root = ''
+
+    fens = FenList()
     for move in g.generate_legal_moves():
         g.push(move)
         fens.append(g.fen().split(' ')[0])
         g.pop()
+    fens.root = g.fen().split(' ')[0]
     return fens
 
 game = chess.Bitboard()
@@ -102,6 +108,14 @@ def think():
         engine.go()
         Display.show(Message.SEARCH_STARTED)
 
+
+def stop_thinking():
+    # Stop current search or book thread
+    if book_thread:
+        book_thread.cancel()
+    else:
+        engine.stop(True)
+
 #Event loop
 while True:
     event = event_queue.get()
@@ -113,17 +127,16 @@ while True:
             if event.parameter in legal_fens:
                 # Check if we have to undo a previous move (sliding)
                 if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
-                    # Stop current search or book thread
-                    if book_thread:
-                        book_thread.cancel()
-                    else:
-                        engine.stop(True)
+                    stop_thinking()
                     game.pop()
-
                 legal_moves = list(game.generate_legal_moves())
                 Observable.fire(Event.USER_MOVE, legal_moves[legal_fens.index(event.parameter)])
             elif event.parameter == game.fen().split(' ')[0]:  # Player had done the computer move on the board
                 Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD)
+            elif event.parameter == legal_fens.root:  # Allow user to take his move back while the engine is searching
+                stop_thinking()
+                game.pop()
+                Display.show(Message.USER_TAKE_BACK)
             break
 
         if case(Event.USER_MOVE):  # User sends a new move
