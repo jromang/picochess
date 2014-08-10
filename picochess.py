@@ -41,11 +41,11 @@ parser.add_argument("-k", "--key-file", type=str, help="key file used to connect
 parser.add_argument("-pgn", "--pgn-file", type=str, help="pgn file used to store the games")
 args = parser.parse_args()
 
-#Enable logging
+# Enable logging
 logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
                     format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
 
-#Load UCI engine
+# Load UCI engine
 engine = uci.Engine(args.engine, hostname=args.remote, username=args.user, key_file=args.key_file, password=args.password)
 logging.debug('Loaded engine [%s]', engine.name)
 logging.debug('Supported options [%s]', engine.options)
@@ -55,9 +55,8 @@ if 'Threads' in engine.options:  # Stockfish
     engine.set_option("Threads", args.threads)
 if 'Core Threads' in engine.options:  # Hiarcs
     engine.set_option("Core Threads", args.threads)
-#engine.send('go depth 20')
 
-#Connect to DGT board
+# Connect to DGT board
 board = None
 if args.dgt_port:
     logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
@@ -66,8 +65,14 @@ if args.dgt_port:
 else:
     logging.warning("No DGT board port provided")
 
-#Game data
+
 def compute_legal_fens(g):
+    """
+    Computes a list of legal FENs for the given game.
+    Also stores the initial position in the 'root' attribute.
+    :param g: The game
+    :return: A list of legal FENs, and the root FEN
+    """
     class FenList(list):
         def __init__(self, *args):
             list.__init__(self, *args)
@@ -81,18 +86,13 @@ def compute_legal_fens(g):
     fens.root = g.fen().split(' ')[0]
     return fens
 
-game = chess.Bitboard()
-legal_fens = compute_legal_fens(game)
-
-#Opening book
-book = chess.polyglot.open_reader(get_opening_books()[8][1])  # Default opening book
-
-#Interaction mode
-interaction_mode = Mode.PLAY_WHITE
-
-book_thread = None
 
 def think():
+    """
+    Starts a new search on the current game.
+    If a move is found in the opening book, fire an event in a few seconds.
+    :return:
+    """
     def send_book_move(move):
         Observable.fire(Event.BEST_MOVE, move.uci())
 
@@ -110,11 +110,20 @@ def think():
 
 
 def stop_thinking():
-    # Stop current search or book thread
+    """
+    Stop current search or book thread.
+    :return:
+    """
     if book_thread:
         book_thread.cancel()
     else:
         engine.stop(True)
+
+game = chess.Bitboard()  # Create the current game
+legal_fens = compute_legal_fens(game)  # Compute the legal FENs
+book = chess.polyglot.open_reader(get_opening_books()[8][1])  # Default opening book
+interaction_mode = Mode.PLAY_WHITE   # Interaction mode
+book_thread = None  # The thread that will fire book moves.
 
 #Event loop
 while True:
