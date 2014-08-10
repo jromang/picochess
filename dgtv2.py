@@ -370,6 +370,15 @@ class DGTBoard(Observable, Display, threading.Thread):
             self.write([Commands.DGT_CLOCK_MESSAGE, 0x0b, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_DISPLAY,
                         text[2], text[1], text[0], text[5], text[4], text[3], 0x00, 0x03 if beep else 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
+    def light_squares_revelation_board(self, squares):
+        for sq in squares:
+            dgt_square = (8 - int(sq[1])) * 8 + ord(sq[0]) - ord('a')
+            logging.debug("REV2 light on square %s(%i)", sq, dgt_square)
+            self.write([Commands.DGT_SET_LEDS, 0x04, 0x01, dgt_square, dgt_square])
+
+    def clear_light_revelation_board(self):
+        self.write([Commands.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
+
     def run(self):
         while True:
             #Check if we have a message from the board
@@ -384,10 +393,13 @@ class DGTBoard(Observable, Display, threading.Thread):
                     self.display_on_dgt_xl(' book')
                 elif display_message[0] == Message.COMPUTER_MOVE:
                     self.display_on_dgt_xl(' ' + display_message[1], True)
+                    self.light_squares_revelation_board((display_message[1][0:2], display_message[1][2:4]))
                 elif display_message[0] == Message.START_NEW_GAME:
                     self.display_on_dgt_xl('newgam', True)
+                    self.clear_light_revelation_board()
                 elif display_message[0] == Message.COMPUTER_MOVE_DONE_ON_BOARD:
                     self.display_on_dgt_xl('ok', True)
+                    self.clear_light_revelation_board()
                 elif display_message[0] == Message.SEARCH_STARTED:
                     self.display_on_dgt_xl('search')
                 elif display_message[0] == Message.USER_TAKE_BACK:
