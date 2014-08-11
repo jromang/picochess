@@ -3,9 +3,7 @@ repo_url: https://github.com/jromang/picochess
 use_directory_urls: false
 
 pages:
-
-# Introduction:
 - ['index.md', 'Home']
-
-# User Guide:
 - ['manual.md', 'Manual']
+
+theme: readthedocs
