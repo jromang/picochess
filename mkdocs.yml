@@ -1,7 +1,7 @@
 site_name: PicoChess
 site_url: http://docs.picochess.org/
 repo_url: https://github.com/jromang/picochess
-docs_dir: docs
+use_absolute_urls: true 
 
 pages:
 
