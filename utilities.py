@@ -47,6 +47,7 @@ class Event(AutoNumber):
     SET_MODE = ()  # Change interaction mode
     #Engine events
     BEST_MOVE = ()  # Engine has found a move
+    SET_TIME_CONTROL = ()  # User sets time control
 
 
 class Message(AutoNumber):
@@ -69,6 +70,12 @@ class Mode(enum.Enum):
     KIBITZ = 3
     OBSERVE = 4
     PLAY_BLACK = 5
+
+
+class ClockMode(AutoNumber):
+    FIXED_TIME = ()  # Fixed seconds per move
+    BLITZ = ()  # Fixed time per game
+    FISCHER = ()  # Fischer increment
 
 
 class Observable(object):  # Input devices are observable

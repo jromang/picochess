@@ -18,7 +18,7 @@ import logging
 import serial as pyserial
 import time
 import threading
-from utilities import *
+from timecontrol import *
 from struct import unpack
 try:
     import enum
@@ -216,6 +216,32 @@ mode_map = ("rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR",
             "rnbq1bnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR",  # Player plays black
             "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQ1BNR")  # Player plays white
 
+time_control_map = {
+"rnbqkbnr/pppppppp/Q7/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=1),
+"rnbqkbnr/pppppppp/1Q6/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=3),
+"rnbqkbnr/pppppppp/2Q5/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=5),
+"rnbqkbnr/pppppppp/3Q4/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=10),
+"rnbqkbnr/pppppppp/4Q3/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=15),
+"rnbqkbnr/pppppppp/5Q2/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=30),
+"rnbqkbnr/pppppppp/6Q1/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=60),
+"rnbqkbnr/pppppppp/7Q/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=120),
+"rnbqkbnr/pppppppp/8/8/Q7/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.BLITZ, minutes_per_game=1),
+"rnbqkbnr/pppppppp/8/8/1Q6/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.BLITZ, minutes_per_game=3),
+"rnbqkbnr/pppppppp/8/8/2Q5/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.BLITZ, minutes_per_game=5),
+"rnbqkbnr/pppppppp/8/8/3Q4/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.BLITZ, minutes_per_game=10),
+"rnbqkbnr/pppppppp/8/8/4Q3/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.BLITZ, minutes_per_game=15),
+"rnbqkbnr/pppppppp/8/8/5Q2/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.BLITZ, minutes_per_game=30),
+"rnbqkbnr/pppppppp/8/8/6Q1/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.BLITZ, minutes_per_game=60),
+"rnbqkbnr/pppppppp/8/8/7Q/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.BLITZ, minutes_per_game=90),
+"rnbqkbnr/pppppppp/8/8/8/Q7/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FISCHER, minutes_per_game=3, fischer_increment=2),
+"rnbqkbnr/pppppppp/8/8/8/1Q6/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FISCHER, minutes_per_game=4, fischer_increment=2),
+"rnbqkbnr/pppppppp/8/8/8/2Q5/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FISCHER, minutes_per_game=5, fischer_increment=3),
+"rnbqkbnr/pppppppp/8/8/8/3Q4/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FISCHER, minutes_per_game=5, fischer_increment=5),
+"rnbqkbnr/pppppppp/8/8/8/5Q2/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FISCHER, minutes_per_game=7, fischer_increment=1),
+"rnbqkbnr/pppppppp/8/8/8/4Q3/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FISCHER, minutes_per_game=15, fischer_increment=5),
+"rnbqkbnr/pppppppp/8/8/8/6Q1/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FISCHER, minutes_per_game=90, fischer_increment=30)
+}
+
 class DGTBoard(Observable, Display, threading.Thread):
 
     def __init__(self, device):
@@ -351,6 +377,9 @@ class DGTBoard(Observable, Display, threading.Thread):
                     logging.debug("Interaction mode [%s]", Mode(mode_index))
                     self.fire(Event.SET_MODE, Mode(mode_index))
                     self.display_on_dgt_xl(('book', 'analys', 'game', 'kibitz', 'observ', 'black', 'white')[index], True)
+                elif fen in time_control_map:
+                    logging.debug("Setting time control %s", time_control_map[fen].mode)
+                    self.fire(Event.SET_TIME_CONTROL, time_control_map[fen])
                 else:
                     logging.debug("Fen")
                     self.fire(Event.FEN, fen)
