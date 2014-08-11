@@ -1,1 +1,4 @@
 site_name: PicoChess
+pages:
+- [index.md, Home]
+- [manual.md, Manual]
