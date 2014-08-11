@@ -1,4 +1,5 @@
 site_name: PicoChess
+site_url: http://docs.picochess.org/
 repo_url: https://github.com/jromang/picochess
 
 pages:
