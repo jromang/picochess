@@ -208,13 +208,13 @@ book_map = ("rnbqkbnr/pppppppp/8/8/8/q7/PPPPPPPP/RNBQKBNR",
             "rnbqkbnr/pppppppp/8/8/6q1/8/PPPPPPPP/RNBQKBNR",
             "rnbqkbnr/pppppppp/8/8/5q2/8/PPPPPPPP/RNBQKBNR")
 
-mode_map = ("rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR",
-            "rnbqkbnr/pppppppp/8/1Q6/8/8/PPPPPPPP/RNBQKBNR",
-            "rnbqkbnr/pppppppp/8/2Q5/8/8/PPPPPPPP/RNBQKBNR",
-            "rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR",
-            "rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR",
-            "rnbq1bnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR",  # Player plays black
-            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQ1BNR")  # Player plays white
+mode_map = {"rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR": Mode.BOOK,
+            "rnbqkbnr/pppppppp/8/1Q6/8/8/PPPPPPPP/RNBQKBNR": Mode.ANALYSIS,
+            "rnbqkbnr/pppppppp/8/2Q5/8/8/PPPPPPPP/RNBQKBNR": Mode.PLAY_WHITE,
+            "rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR": Mode.KIBITZ,
+            "rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR": Mode.OBSERVE,
+            "rnbq1bnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR": Mode.PLAY_BLACK,  # Player plays black
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQ1BNR": Mode.PLAY_WHITE}  # Player plays white
 
 time_control_map = {
 "rnbqkbnr/pppppppp/Q7/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=1),
@@ -372,11 +372,9 @@ class DGTBoard(Observable, Display, threading.Thread):
                     self.fire(Event.OPENING_BOOK, book_index)
                     self.display_on_dgt_xl(get_opening_books()[book_index][0], True)
                 elif fen in mode_map:  # Set interaction mode
-                    index = mode_map.index(fen)
-                    mode_index = index if index != 6 else 2  # Whe have two equivalent fens to set PLAY_WHITE mode
-                    logging.debug("Interaction mode [%s]", Mode(mode_index))
-                    self.fire(Event.SET_MODE, Mode(mode_index))
-                    self.display_on_dgt_xl(('book', 'analys', 'game', 'kibitz', 'observ', 'black', 'white')[index], True)
+                    logging.debug("Interaction mode [%s]", mode_map[fen])
+                    self.fire(Event.SET_MODE, mode_map[fen])
+                    self.display_on_dgt_xl(('book', 'analys', 'game', 'kibitz', 'observ', 'black', 'white')[mode_map[fen].value], True)
                 elif fen in time_control_map:
                     logging.debug("Setting time control %s", time_control_map[fen].mode)
                     self.fire(Event.SET_TIME_CONTROL, time_control_map[fen])
