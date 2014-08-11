@@ -1,5 +1,3 @@
-![Logo](http://www.nsd.uk.com/miscellaneous/PicoChessV1.png)
-
 Welcome to the PicoChess wiki.
 
 ## Introduction
