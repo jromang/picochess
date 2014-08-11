@@ -1,4 +1,10 @@
 site_name: PicoChess
+repo_url: https://github.com/jromang/picochess
+
 pages:
-- [index.md, Home]
-- [manual.md, Manual]
+
+# Introduction:
+- [index.md, 'Home']
+
+# User Guide:
+- [manual.md, 'Manual']
