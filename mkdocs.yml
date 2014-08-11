@@ -1,13 +1,10 @@
 site_name: PicoChess
-site_url: http://docs.picochess.org/
 repo_url: https://github.com/jromang/picochess
-include_search: true
-use_absolute_urls: true 
 
 pages:
 
 # Introduction:
-- [index.md, 'Home']
+- ['index.md', 'Home']
 
 # User Guide:
-- [manual.md, 'Manual']
+- ['manual.md', 'Manual']
