@@ -1,6 +1,6 @@
 Welcome to the PicoChess wiki.
 
-## Introduction
+# Introduction
 
 The goal the this project is to create a dedicated chess computer based on tiny ARM computers, the Stockfish chess engine (http://www.stockfishchess.com/), the DGT eboard, and DGT XL Clock (http://www.dgtprojects.com/) via the dgtnix driver (http://dgtnix.sourceforge.net/).
 
@@ -10,7 +10,7 @@ One can also simply run the program on a desktop/laptop if you do not (yet) own 
 
 ![MK802 II](http://www.geeky-gadgets.com/wp-content/uploads/2012/08/Android-MK802-II.jpg)
 
-## Download and installation for MK 802 II/Raspberry Pi
+# Download and installation for MK 802 II/Raspberry Pi
 
 You will have to download and install the latest PicoChess image file from [the PicoChess website](http://www.picochess.org) and write it to a micro SD card.
 
