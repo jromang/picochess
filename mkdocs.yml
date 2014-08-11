@@ -2,4 +2,8 @@ site_name: PicoChess
 repo_url: https://github.com/jromang/picochess
 use_directory_urls: false
 url_format: index  
+
+pages:
+- ['index.md', 'Home']
+
 theme: readthedocs
