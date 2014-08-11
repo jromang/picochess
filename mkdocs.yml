@@ -1,5 +1,8 @@
 site_name: PicoChess
+site_url: /
 repo_url: https://github.com/jromang/picochess
+include_search: true
+use_absolute_urls: true 
 
 pages:
 
