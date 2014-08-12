@@ -19,7 +19,7 @@
 import argparse
 import chess
 import chess.polyglot
-import dgtv2
+import dgt
 import logging
 import uci
 import threading
@@ -61,7 +61,7 @@ def main():
     # Connect to DGT board
     if args.dgt_port:
         logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
-        dgtv2.DGTBoard(args.dgt_port).start()
+        dgt.DGTBoard(args.dgt_port).start()
     else:
         logging.warning("No DGT board port provided")
         # Enable keyboard input and terminal display

@@ -14,720 +14,424 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-
 import logging
-import serial
-import sys
+import serial as pyserial
 import time
-from utilities import *
-from threading import Thread
-from threading import RLock
+import threading
+from timecontrol import *
 from struct import unpack
+try:
+    import enum
+except ImportError:
+    import enum34 as enum
 
-from itertools import cycle
-clock_blink_iterator = cycle(range(2))
 
-BOARD = "Board"
+@enum.unique
+class Commands(enum.Enum):
+    """ COMMAND CODES FROM PC TO BOARD """
+    # Commands not resulting in returning messages:
+    DGT_SEND_RESET = 0x40  # Puts the board in IDLE mode, cancelling any UPDATE mode
+    DGT_STARTBOOTLOADER = 0x4e  # Makes a long jump to the FC00 boot loader code. Start FLIP now
+    # Commands resulting in returning message(s):
+    DGT_SEND_CLK = 0x41  # Results in a DGT_MSG_BWTIME message
+    DGT_SEND_BRD = 0x42  # Results in a DGT_MSG_BOARD_DUMP message
+    DGT_SEND_UPDATE = 0x43  # Results in DGT_MSG_FIELD_UPDATE messages and DGT_MSG_BWTIME messages
+                            # as long as the board is in UPDATE mode
+    DGT_SEND_UPDATE_BRD = 0x44  # Results in DGT_MSG_FIELD_UPDATE messages as long as the board is in UPDATE_BOARD mode
+    DGT_RETURN_SERIALNR = 0x45  # Results in a DGT_MSG_SERIALNR message
+    DGT_RETURN_BUSADRES = 0x46  # Results in a DGT_MSG_BUSADRES message
+    DGT_SEND_TRADEMARK = 0x47  # Results in a DGT_MSG_TRADEMARK message
+    DGT_SEND_EE_MOVES = 0x49  # Results in a DGT_MSG_EE_MOVES message
+    DGT_SEND_UPDATE_NICE = 0x4b  # Results in DGT_MSG_FIELD_UPDATE messages and DGT_MSG_BWTIME messages,
+                                 # the latter only at time changes, as long as the board is in UPDATE_NICE mode
+    DGT_SEND_BATTERY_STATUS = 0x4c  # New command for bluetooth board. Requests the battery status from the board.
+    DGT_SEND_VERSION = 0x4d  # Results in a DGT_MSG_VERSION message
+    DGT_SEND_BRD_50B = 0x50  # Results in a DGT_MSG_BOARD_DUMP_50 message: only the black squares
+    DGT_SCAN_50B = 0x51  # Sets the board in scanning only the black squares. This is written in EEPROM
+    DGT_SEND_BRD_50W = 0x52  # Results in a DGT_MSG_BOARD_DUMP_50 message: only the black squares
+    DGT_SCAN_50W = 0x53  # Sets the board in scanning only the black squares. This is written in EEPROM.
+    DGT_SCAN_100 = 0x54  # Sets the board in scanning all squares. This is written in EEPROM
+    DGT_RETURN_LONG_SERIALNR = 0x55  # Results in a DGT_LONG_SERIALNR message
+    DGT_SET_LEDS = 0x60  # Only for the Revelation II to switch a LED pattern on. This is a command that
+                         # has three extra bytes with data.
+    #Clock commands, returns ACK message if mode is in UPDATE or UPDATE_NICE
+    DGT_CLOCK_MESSAGE = 0x2b  # This message contains a command for the clock.
 
-FEN = "FEN"
-CLOCK_BUTTON_PRESSED = "CLOCK_BUTTON_PRESSED"
-CLOCK_ACK = "CLOCK_ACK"
-CLOCK_LEVER = "CLOCK_LEVER"
 
-DGTNIX_MSG_UPDATE = 0x05
-_DGTNIX_SEND_BRD = 0x42
-_DGTNIX_MESSAGE_BIT = 0x80
-_DGTNIX_BOARD_DUMP =  0x06
-_DGTNIX_BWTIME = 0x0d
+class Clock(enum.Enum):
+    DGT_CMD_CLOCK_DISPLAY = 0x01  # This command can control the segments of six 7-segment characters,
+                                  # two dots, two semicolons and the two '1' symbols.
+    DGT_CMD_CLOCK_ICONS = 0x02  # Used to control the clock icons like flags etc.
+    DGT_CMD_CLOCK_END = 0x03  # This command clears the message and brings the clock back to the
+                              # normal display (showing clock times).
+    DGT_CMD_CLOCK_BUTTON = 0x08  # Requests the current button pressed (if any).
+    DGT_CMD_CLOCK_VERSION = 0x09  # This commands requests the clock version.
+    DGT_CMD_CLOCK_SETNRUN = 0x0a  # This commands controls the clock times and counting direction, when
+                                  # the clock is in mode 23. A clock can be paused or counting down. But
+                                  # counting up isn't supported on current DGT XL's (1.14 and lower) yet.
+    DGT_CMD_CLOCK_BEEP = 0x0b  # This clock command turns the beep on, for a specified time (64ms * byte 5)
+    DGT_CMD_CLOCK_ASCII = 0x0c  # This clock commands sends a ASCII message to the clock that
+                                # can be displayed only by the DGT3000.
+    DGT_CMD_CLOCK_START_MESSAGE = 0x03
+    DGT_CMD_CLOCK_END_MESSAGE = 0x00
 
-_DGTNIX_MSG_BOARD_DUMP = _DGTNIX_MESSAGE_BIT|_DGTNIX_BOARD_DUMP
 
-_DGTNIX_SEND_UPDATE_NICE = 0x4b
+@enum.unique
+class Pieces(enum.Enum):
+    #Piece codes for chess pieces:
+    EMPTY = 0x00
+    WPAWN = 0x01
+    WROOK = 0x02
+    WKNIGHT = 0x03
+    WBISHOP = 0x04
+    WKING = 0x05
+    WQUEEN = 0x06
+    BPAWN = 0x07
+    BROOK = 0x08
+    BKNIGHT = 0x09
+    BBISHOP = 0x0a
+    BKING = 0x0b
+    BQUEEN = 0x0c
+    PIECE1 = 0x0d #  Magic piece: Draw
+    PIECE2 = 0x0e #  Magic piece: White win
+    PIECE3 = 0x0f #  Magic piece: Black win
 
-# message emitted when a piece is added onto the board
-DGTNIX_MSG_MV_ADD = 0x00
-#message emitted when a piece is removed from the board
-DGTNIX_MSG_MV_REMOVE = 0x01
 
-DGT_SIZE_FIELD_UPDATE = 5
-_DGTNIX_FIELD_UPDATE =   0x0e
-_DGTNIX_EMPTY = 0x00
-_DGTNIX_WPAWN = 0x01
-_DGTNIX_WROOK = 0x02
-_DGTNIX_WKNIGHT = 0x03
-_DGTNIX_WBISHOP = 0x04
-_DGTNIX_WKING = 0x05
-_DGTNIX_WQUEEN = 0x06
-_DGTNIX_BPAWN =      0x07
-_DGTNIX_BROOK  =     0x08
-_DGTNIX_BKNIGHT =    0x09
-_DGTNIX_BBISHOP =    0x0a
-_DGTNIX_BKING   =    0x0b
-_DGTNIX_BQUEEN  =    0x0c
+class Messages(enum.IntEnum):
+    """ DESCRIPTION OF THE MESSAGES FROM BOARD TO PC """
+    MESSAGE_BIT = 0x80 #  The Message ID is the logical OR of MESSAGE_BIT and ID code
+    #ID codes
+    DGT_NONE = 0x00
+    DGT_BOARD_DUMP = 0x06
+    DGT_BWTIME = 0x0d
+    DGT_FIELD_UPDATE = 0x0e
+    DGT_EE_MOVES = 0x0f
+    DGT_BUSADRES = 0x10
+    DGT_SERIALNR = 0x11
+    DGT_TRADEMARK = 0x12
+    DGT_VERSION = 0x13
+    DGT_BOARD_DUMP_50B = 0x14  # Added for Draughts board
+    DGT_BOARD_DUMP_50W = 0x15  # Added for Draughts board
+    DGT_BATTERY_STATUS = 0x20  # Added for Bluetooth board
+    DGT_LONG_SERIALNR = 0x22  # Added for Bluetooth board
+    DGT_MSG_BOARD_DUMP = (MESSAGE_BIT | DGT_BOARD_DUMP)  # DGT_MSG_BOARD_DUMP is the message that follows
+                                                         # on a DGT_SEND_BOARD command
+    DGT_SIZE_BOARD_DUMP = 67
+    DGT_SIZE_BOARD_DUMP_DRAUGHTS = 103
+    DGT_MSG_BOARD_DUMP_50B = (MESSAGE_BIT|DGT_BOARD_DUMP_50B)
+    DGT_SIZE_BOARD_DUMP_50B = 53
+    DGT_MSG_BOARD_DUMP_50W = (MESSAGE_BIT|DGT_BOARD_DUMP_50W)
+    DGT_SIZE_BOARD_DUMP_50W = 53
+    DGT_MSG_BWTIME = (MESSAGE_BIT | DGT_BWTIME)
+    DGT_SIZE_BWTIME = 10
+    DGT_MSG_FIELD_UPDATE = (MESSAGE_BIT | DGT_FIELD_UPDATE)
+    DGT_SIZE_FIELD_UPDATE = 5
+    DGT_MSG_TRADEMARK = (MESSAGE_BIT | DGT_TRADEMARK)
+    DGT_MSG_BUSADRES = (MESSAGE_BIT | DGT_BUSADRES)
+    DGT_SIZE_BUSADRES = 5
+    DGT_MSG_SERIALNR = (MESSAGE_BIT | DGT_SERIALNR)
+    DGT_SIZE_SERIALNR = 8
+    DGT_MSG_LONG_SERIALNR = (MESSAGE_BIT | DGT_LONG_SERIALNR)
+    DGT_SIZE_LONG_SERIALNR = 13
+    DGT_MSG_VERSION = (MESSAGE_BIT | DGT_VERSION)
+    DGT_SIZE_VERSION = 5
+    DGT_MSG_BATTERY_STATUS = (MESSAGE_BIT | DGT_BATTERY_STATUS)
+    DGT_SIZE_BATTERY_STATUS = 7
+    DGT_MSG_EE_MOVES = (MESSAGE_BIT | DGT_EE_MOVES)
+    # Definition of the one-byte EEPROM message codes
+    EE_POWERUP = 0x6a
+    EE_EOF = 0x6b
+    EE_FOURROWS = 0x6c
+    EE_EMPTYBOARD = 0x6d
+    EE_DOWNLOADED = 0x6e
+    EE_BEGINPOS = 0x6f
+    EE_BEGINPOS_ROT = 0x7a
+    EE_START_TAG = 0x7b
+    EE_WATCHDOG_ACTION = 0x7c
+    EE_FUTURE_1 = 0x7d
+    EE_FUTURE_2 = 0x7e
+    EE_NOP = 0x7f
+    EE_NOP2 = 0x00
 
-_DGTNIX_CLOCK_MESSAGE = 0x2b
-_DGTNIX_SEND_CLK = 0x41
-_DGTNIX_SEND_UPDATE = 0x43
-_DGTNIX_SEND_UPDATE_BRD = 0x44
-_DGTNIX_SEND_SERIALNR = 0x45
-_DGTNIX_SEND_BUSADDRESS = 0x46
-_DGTNIX_SEND_TRADEMARK = 0x47
-_DGTNIX_SEND_VERSION = 0x4d
-_DGTNIX_SEND_EE_MOVES = 0x49
-_DGTNIX_SEND_RESET = 0x40
-
-_DGTNIX_SIZE_BOARD_DUMP = 67
-_DGTNIX_NONE = 0x00
-_DGTNIX_BOARD_DUMP = 0x06
-_DGTNIX_EE_MOVES = 0x0f
-_DGTNIX_BUSADDRESS = 0x10
-_DGTNIX_SERIALNR = 0x11
-_DGTNIX_TRADEMARK = 0x12
-_DGTNIX_VERSION = 0x13
-
-DGTNIX_RIGHT_DOT = 0x01
-DGTNIX_RIGHT_SEMICOLON = 0x02
-DGTNIX_RIGHT_1 = 0x04
-DGTNIX_LEFT_DOT = 0x08
-DGTNIX_LEFT_SEMICOLON = 0x10
-DGTNIX_LEFT_1 = 0x20
-
-piece_map = {
-    _DGTNIX_EMPTY : ' ',
-    _DGTNIX_WPAWN : 'P',
-    _DGTNIX_WROOK : 'R',
-    _DGTNIX_WKNIGHT : 'N',
-    _DGTNIX_WBISHOP : 'B',
-    _DGTNIX_WKING : 'K',
-    _DGTNIX_WQUEEN : 'Q',
-    _DGTNIX_BPAWN : 'p',
-    _DGTNIX_BROOK : 'r',
-    _DGTNIX_BKNIGHT : 'n',
-    _DGTNIX_BBISHOP : 'b',
-    _DGTNIX_BKING : 'k',
-    _DGTNIX_BQUEEN : 'q'
+char_to_DGTXL = {
+    '0': 0x01 | 0x02 | 0x20 | 0x08 | 0x04 | 0x10,  '1':  0x02 | 0x04,  '2':  0x01 | 0x40 | 0x08 | 0x02 | 0x10,
+    '3': 0x01 | 0x40 | 0x08 | 0x02 | 0x04, '4': 0x20 | 0x04 | 0x40 | 0x02,  '5': 0x01 | 0x40 | 0x08 | 0x20 | 0x04,
+    '6': 0x01 | 0x40 | 0x08 | 0x20 | 0x04 | 0x10, '7': 0x02 | 0x04 | 0x01,
+    '8': 0x01 | 0x02 | 0x20 | 0x40 | 0x04 | 0x10 | 0x08, '9': 0x01 | 0x40 | 0x08 | 0x02 | 0x04 | 0x20,
+    'a': 0x01 | 0x02 | 0x20 | 0x40 | 0x04 | 0x10, 'b': 0x20 | 0x04 | 0x40 | 0x08 | 0x10,  'c': 0x01 | 0x20 | 0x10 | 0x08,
+    'd': 0x10 | 0x40 | 0x08 | 0x02 | 0x04, 'e': 0x01 | 0x40 | 0x08 | 0x20 | 0x10, 'f': 0x01 | 0x40 | 0x20 | 0x10,
+    'g': 0x01 | 0x20 | 0x10 | 0x08 | 0x04, 'h': 0x20 | 0x10 | 0x04 | 0x40, 'i': 0x02 | 0x04,
+    'j': 0x02 | 0x04 | 0x08 | 0x10, 'k': 0x01 | 0x20 | 0x40 | 0x04 | 0x10, 'l': 0x20 | 0x10 | 0x08,
+    'm': 0x01 | 0x40 | 0x04 | 0x10, 'n': 0x40 | 0x04 | 0x10, 'o': 0x40 | 0x04 | 0x10 | 0x08,
+    'p': 0x01 | 0x40 | 0x20 | 0x10 | 0x02,  'q': 0x01 | 0x40 | 0x20 | 0x04 | 0x02, 'r': 0x40 | 0x10,
+    's': 0x01 | 0x40 | 0x08 | 0x20 | 0x04, 't': 0x20 | 0x10 | 0x08 | 0x40, 'u': 0x08 | 0x02 | 0x20 | 0x04 | 0x10,
+    'v': 0x08 | 0x02 | 0x20,  'w': 0x40 | 0x08 | 0x20 | 0x02, 'x': 0x20 | 0x10 | 0x04 | 0x40 | 0x02,
+    'y': 0x20 | 0x08 | 0x04 | 0x40 | 0x02, 'z': 0x01 | 0x40 | 0x08 | 0x02 | 0x10, ' ': 0x00
 }
 
-dgt_send_message_list = [_DGTNIX_CLOCK_MESSAGE, _DGTNIX_SEND_CLK, _DGTNIX_SEND_BRD, _DGTNIX_SEND_UPDATE,
-                         _DGTNIX_SEND_UPDATE_BRD, _DGTNIX_SEND_SERIALNR, _DGTNIX_SEND_BUSADDRESS, _DGTNIX_SEND_TRADEMARK,
-                         _DGTNIX_SEND_VERSION, _DGTNIX_SEND_UPDATE_NICE, _DGTNIX_SEND_EE_MOVES, _DGTNIX_SEND_RESET]
+piece_to_char = {
+    0x01: 'P', 0x02: 'R', 0x03: 'N', 0x04: 'B', 0x05: 'K', 0x06: 'Q',
+    0x07: 'p', 0x08: 'r', 0x09: 'n', 0x0a: 'b', 0x0b: 'k', 0x0c: 'q', 0x00: '.'
+}
 
+level_map = ("rnbqkbnr/pppppppp/q7/8/8/8/PPPPPPPP/RNBQKBNR",
+             "rnbqkbnr/pppppppp/1q6/8/8/8/PPPPPPPP/RNBQKBNR",
+             "rnbqkbnr/pppppppp/2q5/8/8/8/PPPPPPPP/RNBQKBNR",
+             "rnbqkbnr/pppppppp/3q4/8/8/8/PPPPPPPP/RNBQKBNR",
+             "rnbqkbnr/pppppppp/4q3/8/8/8/PPPPPPPP/RNBQKBNR",
+             "rnbqkbnr/pppppppp/5q2/8/8/8/PPPPPPPP/RNBQKBNR",
+             "rnbqkbnr/pppppppp/6q1/8/8/8/PPPPPPPP/RNBQKBNR",
+             "rnbqkbnr/pppppppp/7q/8/8/8/PPPPPPPP/RNBQKBNR",
+             "rnbqkbnr/pppppppp/8/q7/8/8/PPPPPPPP/RNBQKBNR",
+             "rnbqkbnr/pppppppp/8/1q6/8/8/PPPPPPPP/RNBQKBNR",
+             "rnbqkbnr/pppppppp/8/2q5/8/8/PPPPPPPP/RNBQKBNR",
+             "rnbqkbnr/pppppppp/8/3q4/8/8/PPPPPPPP/RNBQKBNR",
+             "rnbqkbnr/pppppppp/8/4q3/8/8/PPPPPPPP/RNBQKBNR",
+             "rnbqkbnr/pppppppp/8/5q2/8/8/PPPPPPPP/RNBQKBNR",
+             "rnbqkbnr/pppppppp/8/6q1/8/8/PPPPPPPP/RNBQKBNR",
+             "rnbqkbnr/pppppppp/8/7q/8/8/PPPPPPPP/RNBQKBNR",
+             "rnbqkbnr/pppppppp/8/8/q7/8/PPPPPPPP/RNBQKBNR",
+             "rnbqkbnr/pppppppp/8/8/1q6/8/PPPPPPPP/RNBQKBNR",
+             "rnbqkbnr/pppppppp/8/8/2q5/8/PPPPPPPP/RNBQKBNR",
+             "rnbqkbnr/pppppppp/8/8/3q4/8/PPPPPPPP/RNBQKBNR",
+             "rnbqkbnr/pppppppp/8/8/4q3/8/PPPPPPPP/RNBQKBNR")
 
-class DGTBoard(Observable):
-    def __init__(self, device, virtual = False, send_board = True):
-        Observable.__init__(self)
-        self.board_reversed = False
-        self.clock_ack_recv = False
-        # self.clock_queue = Queue()
-        self.dgt_clock = False
-        self.dgt_clock_lock = RLock()
-        # self.dgt_clock_ack_lock = RLock()
-        # self.dgt_clock_ack_queue = Queue()
+book_map = ("rnbqkbnr/pppppppp/8/8/8/q7/PPPPPPPP/RNBQKBNR",
+            "rnbqkbnr/pppppppp/8/8/8/1q6/PPPPPPPP/RNBQKBNR",
+            "rnbqkbnr/pppppppp/8/8/8/2q5/PPPPPPPP/RNBQKBNR",
+            "rnbqkbnr/pppppppp/8/8/8/3q4/PPPPPPPP/RNBQKBNR",
+            "rnbqkbnr/pppppppp/8/8/8/4q3/PPPPPPPP/RNBQKBNR",
+            "rnbqkbnr/pppppppp/8/8/8/5q2/PPPPPPPP/RNBQKBNR",
+            "rnbqkbnr/pppppppp/8/8/8/6q1/PPPPPPPP/RNBQKBNR",
+            "rnbqkbnr/pppppppp/8/8/8/7q/PPPPPPPP/RNBQKBNR",
+            "rnbqkbnr/pppppppp/8/8/7q/8/PPPPPPPP/RNBQKBNR",
+            "rnbqkbnr/pppppppp/8/8/6q1/8/PPPPPPPP/RNBQKBNR",
+            "rnbqkbnr/pppppppp/8/8/5q2/8/PPPPPPPP/RNBQKBNR")
 
-        if not virtual:
-            self.ser = serial.Serial(device, stopbits=serial.STOPBITS_ONE)
-            self.write(chr(_DGTNIX_SEND_UPDATE_NICE))
-            if send_board:
-                self.write(chr(_DGTNIX_SEND_BRD))
+mode_map = {"rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR": Mode.BOOK,
+            "rnbqkbnr/pppppppp/8/1Q6/8/8/PPPPPPPP/RNBQKBNR": Mode.ANALYSIS,
+            "rnbqkbnr/pppppppp/8/2Q5/8/8/PPPPPPPP/RNBQKBNR": Mode.PLAY_WHITE,
+            "rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR": Mode.KIBITZ,
+            "rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR": Mode.OBSERVE,
+            "rnbq1bnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR": Mode.PLAY_BLACK,  # Player plays black
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQ1BNR": Mode.PLAY_WHITE}  # Player plays white
 
-    def get_board(self):
-        self.write(chr(_DGTNIX_SEND_BRD))
+time_control_map = {
+"rnbqkbnr/pppppppp/Q7/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=1),
+"rnbqkbnr/pppppppp/1Q6/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=3),
+"rnbqkbnr/pppppppp/2Q5/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=5),
+"rnbqkbnr/pppppppp/3Q4/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=10),
+"rnbqkbnr/pppppppp/4Q3/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=15),
+"rnbqkbnr/pppppppp/5Q2/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=30),
+"rnbqkbnr/pppppppp/6Q1/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=60),
+"rnbqkbnr/pppppppp/7Q/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=120),
+"rnbqkbnr/pppppppp/8/8/Q7/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.BLITZ, minutes_per_game=1),
+"rnbqkbnr/pppppppp/8/8/1Q6/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.BLITZ, minutes_per_game=3),
+"rnbqkbnr/pppppppp/8/8/2Q5/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.BLITZ, minutes_per_game=5),
+"rnbqkbnr/pppppppp/8/8/3Q4/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.BLITZ, minutes_per_game=10),
+"rnbqkbnr/pppppppp/8/8/4Q3/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.BLITZ, minutes_per_game=15),
+"rnbqkbnr/pppppppp/8/8/5Q2/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.BLITZ, minutes_per_game=30),
+"rnbqkbnr/pppppppp/8/8/6Q1/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.BLITZ, minutes_per_game=60),
+"rnbqkbnr/pppppppp/8/8/7Q/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.BLITZ, minutes_per_game=90),
+"rnbqkbnr/pppppppp/8/8/8/Q7/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FISCHER, minutes_per_game=3, fischer_increment=2),
+"rnbqkbnr/pppppppp/8/8/8/1Q6/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FISCHER, minutes_per_game=4, fischer_increment=2),
+"rnbqkbnr/pppppppp/8/8/8/2Q5/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FISCHER, minutes_per_game=5, fischer_increment=3),
+"rnbqkbnr/pppppppp/8/8/8/3Q4/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FISCHER, minutes_per_game=5, fischer_increment=5),
+"rnbqkbnr/pppppppp/8/8/8/5Q2/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FISCHER, minutes_per_game=7, fischer_increment=1),
+"rnbqkbnr/pppppppp/8/8/8/4Q3/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FISCHER, minutes_per_game=15, fischer_increment=5),
+"rnbqkbnr/pppppppp/8/8/8/6Q1/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FISCHER, minutes_per_game=90, fischer_increment=30)
+}
 
-    def convertInternalPieceToExternal(self, c):
-        if c in piece_map:
-            return piece_map[c]
+class DGTBoard(Observable, Display, threading.Thread):
 
-    def sendMessageToBoard(self, i):
-        if i in dgt_send_message_list:
-            self.write(i)
-        else:
-            raise "Critical, cannot send - Unknown command: {0}".format(chr(i))
+    def __init__(self, device):
+        super(DGTBoard, self).__init__()
+        self.flip_board = False
 
-    def dump_board(self, board):
-        pattern = '>'+'B'*len(board)
-        buf = unpack(pattern, board)
+        self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE)
+        self.write([Commands.DGT_SEND_UPDATE_NICE])
 
-        if self.board_reversed:
-            buf = buf[::-1]
+        #Detect DGT XL clock
+        self.serial.write(bytearray([0x2b, 0x04, 0x03, 0x0b, 1, 0x00]))
+        tries = 0
+        self.clock_found = False
+        while not self.clock_found and tries < 20:
+            time.sleep(0.1)
+            self.clock_found = self.serial.inWaiting()
+            tries += 1
+        logging.debug('DGT XL clock found' if self.clock_found else 'DGT XL clock NOT found')
+        #Get board version
+        self.version = 0.0
+        self.write([Commands.DGT_SEND_VERSION])
+        #Beep and display version
+        self.display_on_dgt_xl('pic'+version)
+        #Update the board
+        self.write([Commands.DGT_SEND_BRD])
 
-        output = "\n"+"__"*8+"\n"
-        for square in range(0,len(board)):
-            if square and square%8 == 0:
-                output+= "|\n"
-                output += "__"*8+"\n"
+        # Clock stress test
+        # for i in range(0, 9):
+        #    print("******************************************************")
+        #    self.display_on_dgt_xl(''+str(i)+'ooooo')
+        #    self.display_on_dgt_xl('o'+str(i)+'oooo')
+        #    self.display_on_dgt_xl('oo'+str(i)+'ooo')
+        #    self.display_on_dgt_xl('ooo'+str(i)+'oo')
+        #    self.display_on_dgt_xl('oooo'+str(i)+'o')
+        #    self.display_on_dgt_xl('ooooo'+str(i)+'')
+        #    self.display_on_dgt_xl('oooo'+str(i)+'o')
+        #    self.display_on_dgt_xl('ooo'+str(i)+'oo')
+        #    self.display_on_dgt_xl('oo'+str(i)+'ooo')
+        #    self.display_on_dgt_xl('o'+str(i)+'oooo')
 
-            output+= "|"
-            output+= self.convertInternalPieceToExternal(buf[square])
-        output+= "|\n"
-        output+= "__"*8
-        return output
-
-    # Two reverse calls will bring back board to original orientation
-    def reverse_board(self):
-        logging.debug("Reversing board")
-        self.board_reversed = not self.board_reversed
-
-    def extract_base_fen(self, board):
-        FEN = []
-        empty = 0
-        for sq in range(0, 64):
-            if board[sq] != 0:
-                if empty > 0:
-                    FEN.append(str(empty))
-                    empty = 0
-                FEN.append(self.convertInternalPieceToExternal(board[sq]))
-            else:
-                empty += 1
-            if (sq + 1) % 8 == 0:
-                if empty > 0:
-                    FEN.append(str(empty))
-                    empty = 0
-                if sq < 63:
-                    FEN.append("/")
-                empty = 0
-
-        return FEN
-
-    def get_fen(self, board, tomove='w'):
-        pattern = '>'+'B'*len(board)
-        board = unpack(pattern, board)
-
-        if self.board_reversed:
-            board = board[::-1]
-
-        FEN = self.extract_base_fen(board)# Check if board needs to be reversed
-        if ''.join(FEN) == "RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr":
-            self.reverse_board()
-            board = board[::-1]
-            # Redo FEN generation - should be a fast operation
-            FEN = self.extract_base_fen(board)# Check if board needs to be reversed
-
-        FEN.append(' ')
-
-        FEN.append(tomove)
-
-        FEN.append(' ')
-#         possible castlings
-        FEN.append('K')
-        FEN.append('Q')
-        FEN.append('k')
-        FEN.append('q')
-        FEN.append(' ')
-        FEN.append('-')
-        FEN.append(' ')
-        FEN.append('0')
-        FEN.append(' ')
-        FEN.append('1')
-        FEN.append('0')
-
-        return ''.join(FEN)
-
-    def read(self, message_length):
-        return self.ser.read(message_length)
 
     def write(self, message):
-        logging.debug('*************TYPEOF message [%s]', type(message))
-        self.ser.write(bytes(message, 'UTF-8'))
+        logging.debug('->DGT [%s]', message[0])
+        array = []
+        for v in message:
+            if type(v) is int: array.append(v)
+            elif isinstance(v, enum.Enum): array.append(v.value)
+            elif type(v) is str:
+                for c in v:
+                    array.append(char_to_DGTXL[c])
+            else: logging.error('Type not supported : [%s]', type(v))
+        if message[0] == Commands.DGT_CLOCK_MESSAGE:  # Let a bit time for the previous clock ACKs to come
+            time.sleep(0.3)
+        while self.serial.inWaiting():  # Don't write anything when there is something to read
+            self.read_message()
+        self.serial.write(bytearray(array))
 
-    # Converts a lowercase ASCII character or digit to DGT Clock representation
-    @staticmethod
-    def char_to_lcd_code(c):
-        if c == '0':
-            return 0x01 | 0x02 | 0x20 | 0x08 | 0x04 | 0x10
-        if c == '1':
-            return 0x02 | 0x04
-        if c == '2':
-            return 0x01 | 0x40 | 0x08 | 0x02 | 0x10
-        if c == '3':
-            return 0x01 | 0x40 | 0x08 | 0x02 | 0x04
-        if c == '4':
-            return 0x20 | 0x04 | 0x40 | 0x02
-        if c == '5':
-            return 0x01 | 0x40 | 0x08 | 0x20 | 0x04
-        if c == '6':
-            return 0x01 | 0x40 | 0x08 | 0x20 | 0x04 | 0x10
-        if c == '7':
-            return 0x02 | 0x04 | 0x01
-        if c == '8':
-            return 0x01 | 0x02 | 0x20 | 0x40 | 0x04 | 0x10 | 0x08
-        if c == '9':
-            return 0x01 | 0x40 | 0x08 | 0x02 | 0x04 | 0x20
-        if c == 'a':
-            return 0x01 | 0x02 | 0x20 | 0x40 | 0x04 | 0x10
-        if c == 'b':
-            return 0x20 | 0x04 | 0x40 | 0x08 | 0x10
-        if c == 'c':
-            return 0x01 | 0x20 | 0x10 | 0x08
-        if c == 'd':
-            return 0x10 | 0x40 | 0x08 | 0x02 | 0x04
-        if c == 'e':
-            return 0x01 | 0x40 | 0x08 | 0x20 | 0x10
-        if c == 'f':
-            return 0x01 | 0x40 | 0x20 | 0x10
-        if c == 'g':
-            return 0x01 | 0x20 | 0x10 | 0x08 | 0x04
-        if c == 'h':
-            return 0x20 | 0x10 | 0x04 | 0x40
-        if c == 'i':
-            return 0x02 | 0x04
-        if c == 'j':
-            return 0x02 | 0x04 | 0x08 | 0x10
-        if c == 'k':
-            return 0x01 | 0x20 | 0x40 | 0x04 | 0x10
-        if c == 'l':
-            return 0x20 | 0x10 | 0x08
-        if c == 'm':
-            return 0x01 | 0x40 | 0x04 | 0x10
-        if c == 'n':
-            return 0x40 | 0x04 | 0x10
-        if c == 'o':
-            return 0x40 | 0x04 | 0x10 | 0x08
-        if c == 'p':
-            return 0x01 | 0x40 | 0x20 | 0x10 | 0x02
-        if c == 'q':
-            return 0x01 | 0x40 | 0x20 | 0x04 | 0x02
-        if c == 'r':
-            return 0x40 | 0x10
-        if c == 's':
-            return 0x01 | 0x40 | 0x08 | 0x20 | 0x04
-        if c == 't':
-            return 0x20 | 0x10 | 0x08 | 0x40
-        if c == 'u':
-            return 0x08 | 0x02 | 0x20 | 0x04 | 0x10
-        if c == 'v':
-            return 0x08 | 0x02 | 0x20
-        if c == 'w':
-            return 0x40 | 0x08 | 0x20 | 0x02
-        if c == 'x':
-            return 0x20 | 0x10 | 0x04 | 0x40 | 0x02
-        if c == 'y':
-            return 0x20 | 0x08 | 0x04 | 0x40 | 0x02
-        if c == 'z':
-            return 0x01 | 0x40 | 0x08 | 0x02 | 0x10
-        return 0
+    def read_message(self):
+        header = unpack('>BBB', (self.serial.read(3)))
+        message_id = header[0]
+        message_length = (header[1] << 7) + header[2] - 3
+        logging.debug("<-DGT [%s], length:%i", Messages(message_id), message_length)
+        if message_length:
+            message = unpack('>'+str(message_length)+'B', (self.serial.read(message_length)))
 
-    @staticmethod
-    def compute_dgt_time_string(t):
-        if t < 0:
-            return "   "
-        t /= 1000
-
-        if t < 1200:
-        #minutes.seconds mode
-
-            minutes = t / 60
-            seconds = t - minutes * 60
-            if minutes >= 10:
-                minutes -= 10
-            # print "seconds : {0}".format(seconds)
-            return "{0}{1:02d}".format(minutes, seconds)
-            # oss << minutes << setfill ('0') << setw (2) << seconds;
-
-        else:
-        #hours:minutes mode
-            hours = t / 3600
-            minutes = (t - (hours * 3600)) / 60
-            return "{0}{1:02d}".format(hours, minutes)
-
-
-    def print_time_on_clock(self, w_time, b_time, w_blink=True, b_blink=True):
-        dots = 0
-        w_dots = True
-        b_dots = True
-        if w_blink and w_time >= 1200000:
-            w_dots = clock_blink_iterator.next()
-        if b_blink and b_time >= 1200000:
-            b_dots = clock_blink_iterator.next()
-
-        if not self.board_reversed:
-            s = self.compute_dgt_time_string(w_time) + self.compute_dgt_time_string(b_time)
-            if w_time < 1200000: #minutes.seconds mode
-                if w_dots:
-                    dots |= DGTNIX_LEFT_DOT
-                if w_time >= 600000:
-                    dots |= DGTNIX_LEFT_1
-            elif w_dots:
-                dots |= DGTNIX_LEFT_SEMICOLON #hours:minutes mode
-            #black
-            if b_time < 1200000:
-            #minutes.seconds mode
-
-                if b_dots:
-                    dots |= DGTNIX_RIGHT_DOT
-                if b_time >= 600000:
-                    dots |= DGTNIX_RIGHT_1
-
-            elif b_dots:
-                dots |= DGTNIX_RIGHT_SEMICOLON #hours:minutes mode
-
-        else:
-            s = self.compute_dgt_time_string(b_time) + self.compute_dgt_time_string(w_time)
-            if b_time < 1200000: #minutes.seconds mode
-                if b_dots:
-                    dots |= DGTNIX_LEFT_DOT
-                if b_time >= 600000:
-                    dots |= DGTNIX_LEFT_1
-            elif b_dots:
-                dots |= DGTNIX_LEFT_SEMICOLON #hours:minutes mode
-            #black
-            if w_time < 1200000:
-            #minutes.seconds mode
-
-                if w_dots:
-                    dots |= DGTNIX_RIGHT_DOT
-                if w_time >= 600000:
-                    dots |= DGTNIX_RIGHT_1
-
-            elif w_dots:
-                dots |= DGTNIX_RIGHT_SEMICOLON #hours:minutes mode
-    #       }
-    # else
-    #   {
-    #     s = getDgtTimeString (bClockTime) + getDgtTimeString (wClockTime);
-    #     //black
-    #     if (bClockTime < 1200000) //minutes.seconds mode
-    #       {
-    #         if (bDots) dots |= DGTNIX_LEFT_DOT;
-    #         if (bClockTime >= 600000) dots |= DGTNIX_LEFT_1;
-    #       }
-    #     else if (bDots) dots |= DGTNIX_LEFT_SEMICOLON; //hours:minutes mode
-    #     //white
-    #     if (wClockTime < 1200000) //minutes.seconds mode
-    #       {
-    #         if (wDots) dots |= DGTNIX_RIGHT_DOT;
-    #         if (wClockTime >= 600000) dots |= DGTNIX_RIGHT_1;
-    #       }
-    #     else if (wDots) dots |= DGTNIX_RIGHT_SEMICOLON; //hours:minutes mode
-    #   }
-    #     dgtnixPrintMessageOnClock (s.c_str (), false, dots);
-        self.send_message_to_clock(s, False, dots)
-
-    def send_message_to_clock(self, message, beep, dots, move=False, test_clock=False, max_num_tries = 5):
-        # Todo locking?
-        logging.debug("Got message to clock: {0}".format(message))
-        if move:
-            message = self.format_move_for_dgt(message)
-        else:
-            message = self.format_str_for_dgt(message)
-        with self.dgt_clock_lock:
-            # self.clock_ack_recv = False
-                  #     time.sleep(5)
-            self._sendMessageToClock(self.char_to_lcd_code(message[0]), self.char_to_lcd_code(message[1]),
-                                self.char_to_lcd_code(message[2]), self.char_to_lcd_code(message[3]),
-                                self.char_to_lcd_code(message[4]), self.char_to_lcd_code(message[5]),
-                                beep, dots, test_clock=test_clock, max_num_tries = max_num_tries)
-            # self.clock_ack_recv = False
-            if test_clock and not self.dgt_clock:
-                tries = 1
-                while True:
-                    time.sleep(1)
-                    if not self.dgt_clock:
-                        tries += 1
-                        if tries > max_num_tries:
-                            break
-                        self._sendMessageToClock(self.char_to_lcd_code(message[0]), self.char_to_lcd_code(message[1]),
-                                    self.char_to_lcd_code(message[2]), self.char_to_lcd_code(message[3]),
-                                    self.char_to_lcd_code(message[4]), self.char_to_lcd_code(message[5]),
-                                    beep, dots, test_clock=test_clock, max_num_tries = max_num_tries)
+        for case in switch(message_id):
+            if case(Messages.DGT_MSG_VERSION):  # Get the DGT board version
+                self.version = float(str(message[0])+'.'+str(message[1]))
+                logging.debug("DGT board version %0.2f", self.version)
+                break
+            if case(Messages.DGT_MSG_BWTIME):
+                if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
+                    #Construct the ack message
+                    ack0 = ((message[1]) & 0x7f) | ((message[3] << 3) & 0x80)
+                    ack1 = ((message[2]) & 0x7f) | ((message[3] << 2) & 0x80)
+                    ack2 = ((message[4]) & 0x7f) | ((message[0] << 3) & 0x80)
+                    ack3 = ((message[5]) & 0x7f) | ((message[0] << 2) & 0x80)
+                    if ack0 != 0x10: logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
                     else:
-                        break
+                        logging.debug("Clock ACK %s", (ack0, ack1, ack2, ack3))
+                        return None
+                else:  # Clock Times message
+                    logging.debug("Clock Times message not handled %s", message)
+                    #return None  # This is not an ACK and should be ignored
+                break
+            if case(Messages.DGT_MSG_BOARD_DUMP):
+                board = ''
+                for c in message:
+                    board += piece_to_char[c]
+                logging.debug('\n' + '\n'.join(board[0+i:8+i] for i in range(0, len(board), 8)))  # Show debug board
+                #Create fen from board
+                fen = ''
+                empty = 0
+                for sq in range(0, 64):
+                    if message[sq] != 0:
+                        if empty > 0:
+                            fen += str(empty)
+                            empty = 0
+                        fen += piece_to_char[message[sq]]
+                    else:
+                        empty += 1
+                    if (sq + 1) % 8 == 0:
+                        if empty > 0:
+                            fen += str(empty)
+                            empty = 0
+                        if sq < 63:
+                            fen += "/"
+                        empty = 0
+                if self.flip_board:  # Flip the board if needed
+                    fen = fen[::-1]
+                if fen == "RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr":  # Check if we have to flip the board
+                    logging.debug('Flipping the board')
+                    #Flip the board
+                    self.flip_board = not self.flip_board
+                    fen = fen[::-1]
+                logging.debug(fen)
+                #Fire the appropriate event
+                if fen in level_map:  # User sets level
+                    level = level_map.index(fen)
+                    self.fire(Event.LEVEL, level)
+                    self.display_on_dgt_xl('lvl ' + str(level), True)
+                elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":  # New game
+                    logging.debug("New game")
+                    self.fire(Event.NEW_GAME)
+                elif fen in book_map:  # Choose opening book
+                    book_index = book_map.index(fen)
+                    logging.debug("Opening book [%s]", get_opening_books()[book_index])
+                    self.fire(Event.OPENING_BOOK, book_index)
+                    self.display_on_dgt_xl(get_opening_books()[book_index][0], True)
+                elif fen in mode_map:  # Set interaction mode
+                    logging.debug("Interaction mode [%s]", mode_map[fen])
+                    self.fire(Event.SET_MODE, mode_map[fen])
+                    self.display_on_dgt_xl(('book', 'analys', 'game', 'kibitz', 'observ', 'black', 'white')[mode_map[fen].value], True)
+                elif fen in time_control_map:
+                    logging.debug("Setting time control %s", time_control_map[fen].mode)
+                    self.fire(Event.SET_TIME_CONTROL, time_control_map[fen])
+                else:
+                    logging.debug("Fen")
+                    self.fire(Event.FEN, fen)
+                break
+            if case(Messages.DGT_MSG_FIELD_UPDATE):
+                self.write([Commands.DGT_SEND_BRD])  # Ask for the board when a piece moved
+                break
+            if case():  # Default
+                logging.warning("DGT message not handled : [%s]", Messages(message_id))
 
+        return message_id
 
+    def display_on_dgt_xl(self, text, beep=False):
+        if self.clock_found:
+            while len(text) < 6: text += ' '
+            if len(text) > 6: logging.warning('DGT XL clock massage too long [%s]', text)
+            self.write([Commands.DGT_CLOCK_MESSAGE, 0x0b, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_DISPLAY,
+                        text[2], text[1], text[0], text[5], text[4], text[3], 0x00, 0x03 if beep else 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
+    def light_squares_revelation_board(self, squares):
+        for sq in squares:
+            dgt_square = (8 - int(sq[1])) * 8 + ord(sq[0]) - ord('a')
+            logging.debug("REV2 light on square %s(%i)", sq, dgt_square)
+            self.write([Commands.DGT_SET_LEDS, 0x04, 0x01, dgt_square, dgt_square])
 
-    def test_for_dgt_clock(self, message="pic023", wait_time = 5):
-    # try:
-    #     signal.signal(signal.SIGALRM, self.dgt_clock_test_post_handler)
+    def clear_light_revelation_board(self):
+        self.write([Commands.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
 
-        # signal.alarm(wait_time)
-        self.send_message_to_clock(message, True, False, test_clock=True, max_num_tries=wait_time)
-
-        # signal.alarm(0)
-        # except serial.serialutil.SerialException:
-        #     return False
-        # return True
-
-    def dgt_clock_test_post_handler(self, signum, frame):
-        if self.dgt_clock:
-            logging.debug("DGT clock found")
-            # self.dgt_clock = True
-        else:
-            logging.debug("No DGT clock found")
-            # self.dgt_clock = False
-
-    def format_str_for_dgt(self, s):
-        if len(s)>6:
-            s = s[:6]
-        if len(s) < 6:
-            remainder = 6 - len(s)
-            s = " "*remainder + s
-        return s
-
-    def format_move_for_dgt(self, s):
-        mod_s = s[:2]+' '+s[2:]
-        if len(mod_s)<6:
-            mod_s+=" "
-        return mod_s
-
-    def _sendMessageToClock(self, a, b, c, d, e, f, beep, dots, test_clock = False, max_num_tries = 5):
-        # pthread_mutex_lock (&clock_ack_mutex);
-
-        # if(!(g_debugMode == DGTNIX_DEBUG_OFF))
-        #   {
-        #     _debug("Sending message to clock\n");
-        #     if(g_descriptorDriverBoard < 0)
-        #       {
-        #         perror("dgtnix critical:sendMessageToBoard: invalid file descriptor\n");
-        #         exit(-1);
-        #       }
-        #   }
-        logging.debug("Sending Message to Clock...")
-        # num_tries = 0
-        # self.clock_queue.empty()
-        # self.dgt_clock_ack_lock.acquire()
-        # while not self.clock_ack_recv:
-        #     num_tries += 1
-        #     if num_tries > 1:
-        #         time.sleep(1) # wait a bit longer for ack
-        #         if self.clock_ack_recv:
-        #             break
-        self.ser.write(bytes(_DGTNIX_CLOCK_MESSAGE))
-        self.ser.write(bytes(0x0b))
-        self.ser.write(bytes(0x03))
-        self.ser.write(bytes(0x01))
-        self.ser.write(b'c')
-        self.ser.write(b'b')
-        self.ser.write(b'a')
-        self.ser.write(b'f')
-        self.ser.write(b'e')
-        self.ser.write(b'd')
-
-        if dots:
-            self.ser.write(bytes(dots))
-        else:
-            self.ser.write(bytes(0))
-        if beep:
-            self.ser.write(bytes(0x03))
-        else:
-            self.ser.write(bytes(0x01))
-        self.ser.write(bytes(0x00))
-
-        # if test_clock:
-        #     time.sleep(5)
-
-            # time.sleep(1)
-            # if num_tries>1:
-            #     print "try : {0}".format(num_tries)
-
-            # if self.dgt_clock and num_tries>=5:
-            #     break
-            # if num_tries>=max_num_tries:
-            #     break
-        # if not test_clock:
-
-        # Retry logic?
-        # time.sleep(1)
-        # Check clock ack?
-
-
-    def read_message_from_board(self, head=None):
-        # print "acquire"
-        # self.dgt_clock_ack_lock.acquire()
-        logging.debug("got DGT message")
-        header_len = 3
-        if head:
-            header = head + self.read(header_len-1)
-        else:
-            header = self.read(header_len)
-        if not header:
-            # raise
-            raise Exception("Invalid First char in message")
-        pattern = '>'+'B'*header_len
-        buf = unpack(pattern, header)
-#        print buf
-#        print buf[0] & 128
-#        if not buf[0] & 128:
-#            raise Exception("Invalid message -2- readMessageFromBoard")
-        command_id = buf[0] & 127
-        logging.debug("command_id: {0}".format(command_id))
-#
-#        if buf[1] & 128:
-#            raise Exception ("Invalid message -4- readMessageFromBoard")
-#
-#        if buf[2] & 128:
-#            raise Exception ("Invalid message -6- readMessageFromBoard")
-
-        message_length = (buf[1] << 7) + buf[2]
-        message_length-=3
-
-#        if command_id == _DGTNIX_NONE:
-#            print "Received _DGTNIX_NONE from the board\n"
-#            message = self.ser.read(message_length)
-
-        if command_id == _DGTNIX_BOARD_DUMP:
-            logging.debug("Received DGTNIX_DUMP message")
-            message = self.read(message_length)
-#            self.dump_board(message)
-#            print self.get_fen(message)
-            self.fire(type=FEN, message=self.get_fen(message))
-            self.fire(type=BOARD, message=self.dump_board(message))
-
-        elif command_id == _DGTNIX_BWTIME:
-            logging.debug("Received DGTNIX_BWTIME message from the board")
-            message = self.read(message_length)
-
-            pattern = '>'+'B'*message_length
-            buf = unpack(pattern, message)
-            # print buf
-
-            if buf:
-                if buf[0] == buf[1] == buf[2] == buf[3] == buf[4] == buf[5] == 0:
-                    self.fire(type=CLOCK_LEVER, message=buf[6])
-                if buf[0] == 10 and buf[1] == 16 and buf[2] == 1 and buf[3] == 10 and not buf[4] and not buf[5] and not buf[6]:
-                    # print "clock ACK received!"
-
-                    # self.clock_ack_recv = True
-                    # self.dgt_clock_ack_lock.acquire()
-                    # self.clock_queue.get()
-                    # self.clock_queue.task_done()
-                    if not self.dgt_clock:
-                        self.dgt_clock = True
-                    self.fire(type=CLOCK_ACK, message='')
-                if 5 <= buf[4] <= 6 and buf[5] == 49:
-                    self.fire(type=CLOCK_BUTTON_PRESSED, message=0)
-
-                if 33 <= buf[4] <= 34 and buf[5] == 52:
-                    self.fire(type=CLOCK_BUTTON_PRESSED, message=1)
-
-                if 17 <= buf[4] <= 18 and buf[5] == 51:
-                    self.fire(type=CLOCK_BUTTON_PRESSED, message=2)
-
-                if 9 <= buf[4] <= 10 and buf[5] == 50:
-                    self.fire(type=CLOCK_BUTTON_PRESSED, message=3)
-
-                if 65 <= buf[4] <= 66 and buf[5] == 53:
-                    self.fire(type=CLOCK_BUTTON_PRESSED, message=4)
-
-
-        elif command_id == _DGTNIX_EE_MOVES:
-            logging.debug("Received _DGTNIX_EE_MOVES from the board")
-
-        elif command_id == _DGTNIX_BUSADDRESS:
-            logging.debug("Received _DGTNIX_BUSADDRESS from the board")
-
-        elif command_id == _DGTNIX_SERIALNR:
-            logging.debug("Received _DGTNIX_SERIALNR from the board")
-            message = self.read(message_length)
-
-        elif command_id == _DGTNIX_TRADEMARK:
-            logging.debug("Received _DGTNIX_TRADEMARK from the board")
-            message = self.read(message_length)
-
-        elif command_id == _DGTNIX_VERSION:
-            logging.debug("Received _DGTNIX_VERSION from the board")
-
-        elif command_id == _DGTNIX_FIELD_UPDATE:
-            logging.debug("Received _DGTNIX_FIELD_UPDATE from the board")
-            logging.debug("message_length : {0}".format(message_length))
-
-            if message_length == 2:
-                message = self.read(message_length)
-                self.write(chr(_DGTNIX_SEND_BRD))
-            else:
-                message = self.read(4)
-
-#            pattern = '>'+'B'*message_length
-#            buf = unpack(pattern, message)
-#            print buf[0]
-#            print buf[1]
-
-        else:
-            # Not a regular command id
-            # Piece remove/add codes?
-
-#            header = header + self.ser.read(1)
-#            print "message_length : {0}".format(len(header))
-#            print [header]
-            #message[0] = code;
-            #message[1] = intern_column;
-            #message[2] = intern_line;
-            #message[3] = piece;
-
-#            print "diff command : {0}".format(command_id)
-
-            if command_id == DGTNIX_MSG_MV_ADD:
-                logging.debug("Add piece message")
-#                board.ser.write(chr(_DGTNIX_SEND_BRD))
-
-            elif command_id == DGTNIX_MSG_UPDATE:
-                logging.debug("Update piece message")
-#                board.ser.write(chr(_DGTNIX_SEND_BRD))
-
-    # Warning, this method must be in a thread
-    def poll(self):
+    def run(self):
         while True:
-            c = self.read(1)
-            # print "got msg"
-            if c:
-                self.read_message_from_board(head=c)
-
-    def _dgt_observer(self, attrs):
-        if attrs.type == FEN:
-            logging.debug("FEN: {0}".format(attrs.message))
-        elif attrs.type == BOARD:
-            logging.debug("Board: ")
-            logging.debug(attrs.message)
-            # self.send_message_to_clock(['c','h','a','n','g','e'], False, False)
-            # time.sleep(1)
-            # self.send_message_to_clock(['b','o','a','r','d','c'], False, False)
-
-
-class VirtualDGTBoard(DGTBoard):
-    def __init__(self, device, virtual = True):
-        super(VirtualDGTBoard, self).__init__(device, virtual = virtual)
-        self.fen = None
-        self.callbacks = []
-
-    def read(self, bits):
-        if self.fen:
-            return True
-
-    def read_message_from_board(self, head = None):
-        fen = self.fen
-        self.fen = None
-        return self.fire(type=FEN, message = fen)
-
-    def write(self, message):
-        if message == chr(_DGTNIX_SEND_UPDATE_NICE):
-            logging.debug("Got Update Nice")
-        elif message == chr(_DGTNIX_SEND_BRD):
-            logging.debug("Got Send board")
-
-    def set_fen(self, fen):
-        self.fen = fen
-
-
-def poll_dgt(dgt):
-    thread = Thread(target=dgt.poll)
-    thread.start()
-
-if __name__ == "__main__":
-    if len(sys.argv)> 1:
-        device = sys.argv[1]
-    else:
-        device = "/dev/ttyUSB0"
-    board = DGTBoard(device, send_board=False)
-    board.subscribe(board._dgt_observer)
-    # poll_dgt(board)
-    # if board.test_for_dgt_clock():
-    #     print "Clock found!"
-    # else:
-    #     print "Clock not present"
-
-    # board.send_message_to_clock(['a','y',' ','d','g', 't'], False, False)
-    board.poll()
-    # poll_dgt(board)
-
-
-
+            #Check if we have a message from the board
+            if self.serial.inWaiting():
+                self.read_message()
+            else:
+                time.sleep(0.1)
+            #Check if we have something to display
+            try:
+                display_message = self.message_queue.get_nowait()
+                if display_message[0] == Message.BOOK_MOVE:
+                    self.display_on_dgt_xl(' book')
+                elif display_message[0] == Message.COMPUTER_MOVE:
+                    uci_move = display_message[1][0]
+                    self.display_on_dgt_xl(' ' + uci_move, True)
+                    self.light_squares_revelation_board((uci_move[0:2], uci_move[2:4]))
+                elif display_message[0] == Message.START_NEW_GAME:
+                    self.display_on_dgt_xl('newgam', True)
+                    self.clear_light_revelation_board()
+                elif display_message[0] == Message.COMPUTER_MOVE_DONE_ON_BOARD:
+                    self.display_on_dgt_xl('ok', True)
+                    self.clear_light_revelation_board()
+                elif display_message[0] == Message.SEARCH_STARTED:
+                    self.display_on_dgt_xl('search')
+                elif display_message[0] == Message.USER_TAKE_BACK:
+                    self.display_on_dgt_xl('takbak')
+            except queue.Empty:
+                pass
 
