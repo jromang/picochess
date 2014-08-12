@@ -96,7 +96,7 @@ def main():
         :return:
         """
         def send_book_move(move):
-            Observable.fire(Event.BEST_MOVE, move.uci())
+            Observable.fire(Event.BEST_MOVE, move=move.uci())
 
         global book_thread
         book_move = weighted_choice(book, game)
@@ -135,23 +135,23 @@ def main():
         for case in switch(event):
 
             if case(Event.FEN):  # User sets a new position, convert it to a move if it is legal
-                if event.parameter in legal_fens:
+                if event.fen in legal_fens:
                     # Check if we have to undo a previous move (sliding)
                     if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
                         stop_thinking()
                         game.pop()
                     legal_moves = list(game.generate_legal_moves())
-                    Observable.fire(Event.USER_MOVE, legal_moves[legal_fens.index(event.parameter)])
-                elif event.parameter == game.fen().split(' ')[0]:  # Player had done the computer move on the board
+                    Observable.fire(Event.USER_MOVE, move=legal_moves[legal_fens.index(event.fen)])
+                elif event.fen == game.fen().split(' ')[0]:  # Player had done the computer move on the board
                     Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD)
-                elif event.parameter == legal_fens.root:  # Allow user to take his move back while the engine is searching
+                elif event.fen == legal_fens.root:  # Allow user to take his move back while the engine is searching
                     stop_thinking()
                     game.pop()
                     Display.show(Message.USER_TAKE_BACK)
                 break
 
             if case(Event.USER_MOVE):  # User sends a new move
-                move = event.parameter
+                move = event.move
                 logging.debug('User move [%s]', move)
                 if not move in game.generate_legal_moves():
                     logging.warning('Illegal move [%s]', move)
@@ -162,7 +162,7 @@ def main():
                 break
 
             if case(Event.LEVEL):  # User sets a new level
-                level = event.parameter
+                level = event.level
                 logging.debug("Setting engine to level %i", level)
                 engine.set_level(level)
                 break
@@ -178,12 +178,12 @@ def main():
                 break
 
             if case(Event.OPENING_BOOK):
-                logging.debug("Changing opening book [%s]", get_opening_books()[event.parameter][1])
-                book = chess.polyglot.open_reader(get_opening_books()[event.parameter][1])
+                logging.debug("Changing opening book [%s]", get_opening_books()[event.book_index][1])
+                book = chess.polyglot.open_reader(get_opening_books()[event.book_index][1])
                 break
 
             if case(Event.BEST_MOVE):
-                move = chess.Move.from_uci(event.parameter)
+                move = chess.Move.from_uci(event.move)
                 # Check if we are in play mode and it is computer's turn
                 if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
                     game.push(move)
@@ -192,8 +192,8 @@ def main():
                 break
 
             if case(Event.SET_MODE):
-                Display.show(Message.INTERACTION_MODE, event.parameter)  # Usefull for pgn display device
-                interaction_mode = event.parameter
+                Display.show(Message.INTERACTION_MODE, event.mode)  # Usefull for pgn display device
+                interaction_mode = event.mode
                 break
 
             if case():  # Default

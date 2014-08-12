@@ -14,7 +14,7 @@ class KeyboardInput(Observable, threading.Thread):
 
             try:
                 move=chess.Move.from_uci(cmd)
-                self.fire(Event.USER_MOVE, move)
+                self.fire(Event.USER_MOVE, move=move)
             except ValueError:
                 logging.warning('Invalid user input [%s]', cmd)
 

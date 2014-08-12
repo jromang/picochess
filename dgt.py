@@ -361,7 +361,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                 #Fire the appropriate event
                 if fen in level_map:  # User sets level
                     level = level_map.index(fen)
-                    self.fire(Event.LEVEL, level)
+                    self.fire(Event.LEVEL, level=level)
                     self.display_on_dgt_xl('lvl ' + str(level), True)
                 elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":  # New game
                     logging.debug("New game")
@@ -369,18 +369,18 @@ class DGTBoard(Observable, Display, threading.Thread):
                 elif fen in book_map:  # Choose opening book
                     book_index = book_map.index(fen)
                     logging.debug("Opening book [%s]", get_opening_books()[book_index])
-                    self.fire(Event.OPENING_BOOK, book_index)
+                    self.fire(Event.OPENING_BOOK, book_index=book_index)
                     self.display_on_dgt_xl(get_opening_books()[book_index][0], True)
                 elif fen in mode_map:  # Set interaction mode
                     logging.debug("Interaction mode [%s]", mode_map[fen])
-                    self.fire(Event.SET_MODE, mode_map[fen])
+                    self.fire(Event.SET_MODE, mode=mode_map[fen])
                     self.display_on_dgt_xl(('book', 'analys', 'game', 'kibitz', 'observ', 'black', 'white')[mode_map[fen].value], True)
                 elif fen in time_control_map:
                     logging.debug("Setting time control %s", time_control_map[fen].mode)
-                    self.fire(Event.SET_TIME_CONTROL, time_control_map[fen])
+                    self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[fen])
                 else:
                     logging.debug("Fen")
-                    self.fire(Event.FEN, fen)
+                    self.fire(Event.FEN, fen=fen)
                 break
             if case(Messages.DGT_MSG_FIELD_UPDATE):
                 self.write([Commands.DGT_SEND_BRD])  # Ask for the board when a piece moved

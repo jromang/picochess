@@ -83,8 +83,9 @@ class Observable(object):  # Input devices are observable
         super(Observable, self).__init__()
 
     @staticmethod
-    def fire(event, parameter=None):
-        event.parameter = parameter
+    def fire(event, **attrs):
+        for k, v in attrs.items():
+            setattr(event, k, v)
         event_queue.put(event)
 
 
