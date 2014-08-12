@@ -191,7 +191,7 @@ def main():
                 if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
                     game.push(move)
                     legal_fens = compute_legal_fens(game)
-                    Display.show(Message.COMPUTER_MOVE, move.uci())
+                    Display.show(Message.COMPUTER_MOVE, (move.uci(), game))
                 break
 
             if case(Event.SET_MODE):

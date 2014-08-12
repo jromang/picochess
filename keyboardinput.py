@@ -31,7 +31,8 @@ class TerminalDisplay(Display, threading.Thread):
                 if display_message[0] == Message.BOOK_MOVE:
                     print('Book move')
                 elif display_message[0] == Message.COMPUTER_MOVE:
-                    print('Computer move : ' + display_message[1])
+                    print('\n' + str(display_message[1][1]))
+                    print('Computer move : ' + display_message[1][0])
                 elif display_message[0] == Message.START_NEW_GAME:
                     print('New game')
                 elif display_message[0] == Message.SEARCH_STARTED:
