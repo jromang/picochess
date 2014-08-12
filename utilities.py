@@ -96,9 +96,11 @@ class Display(object):  # Display devices (DGT XL clock, Piface LCD, pgn file...
         display_devices.append(self)
 
     @staticmethod
-    def show(type, message=None):  # Sends a message on each display device
+    def show(message, **attrs):  # Sends a message on each display device
+        for k, v in attrs.items():
+            setattr(message, k, v)
         for display in display_devices:
-            display.message_queue.put((type, message))
+            display.message_queue.put(message)
 
 
 # switch/case instruction in python
