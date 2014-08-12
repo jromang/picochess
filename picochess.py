@@ -208,8 +208,8 @@ def main():
                 break
 
             if case(Event.OUT_OF_TIME):
-                print("OUT OF TIME********************")  # TODO send message
                 stop_thinking()
+                Display.show(Message.PLAYER_OUT_OF_TIME, color=event.color)
 
             if case():  # Default
                 logging.warning("Event not handled : [%s]", event)

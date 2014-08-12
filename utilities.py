@@ -61,6 +61,7 @@ class Message(AutoNumber):
     COMPUTER_MOVE_DONE_ON_BOARD = ()  # User has done the compute move on board
     SEARCH_STARTED = ()  # Engine has started to search
     USER_TAKE_BACK = ()  # User takes back his move while engine is searching
+    PLAYER_OUT_OF_TIME = ()
 
 
 @enum.unique

@@ -26,7 +26,7 @@ class TimeControl:
             self.timer = threading.Timer(min(1.0, self.clock_time[self.active_color]), self.tick)
             self.timer.start()
         else:
-            Observable.fire(Event.OUT_OF_TIME)
+            Observable.fire(Event.OUT_OF_TIME, color=self.active_color)
 
     def run(self, color):
         print("RUNNING"+str(min(1.0, self.clock_time[color])))
