@@ -1,0 +1,196 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>PicoChess by jromang</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>PicoChess</h1>
+        <p>Stand alone chess computer based on Stcokfish and DGT board</p>
+        <p class="view"><a href="https://github.com/jromang/picochess">View the Project on GitHub <small>jromang/picochess</small></a></p>
+        <ul>
+          <li><a href="https://github.com/jromang/picochess/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/jromang/picochess/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/jromang/picochess">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h2>
+<a name="introduction" class="anchor" href="#introduction"><span class="octicon octicon-link"></span></a>Introduction</h2>
+
+<p>The goal the this project is to create a dedicated chess computer based on tiny ARM computers, the <a href="http://www.stockfishchess.com">Stockfish chess engine</a>, the <a href="http://www.dgtprojects.com/">DGT eboard and DGT XL Clock</a>, and the <a href="http://dgtnix.sourceforge.net/">dgtnix driver</a>.</p>
+
+<p><img src="http://img24.imageshack.us/img24/6651/imgp0232r.png" alt="MK802 II"></p>
+
+<p>Currently the <a href="http://store.cloudsto.com/rikomagic/rikomagic-mk802-ii-detail.html">Rikomagic MK 802 II</a>, <a href="http://www.hardkernel.com/renewal_2011/products/prdt_info.php">ODROID-X</a> and  the <a href="http://www.raspberrypi.org/">Raspberry Pi</a> are supported.</p>
+
+<h2>
+<a name="status" class="anchor" href="#status"><span class="octicon octicon-link"></span></a>Status</h2>
+
+<p>You can see a <a href="http://www.dailymotion.com/video/xt2eul_pichess_tech">video of PicoChess running on a standard PC</a>, and <a href="http://www.dailymotion.com/video/xt4b85_pichess2_tech">running on a MK802 II ARM key</a> :-) 
+Also, here is a video of <a href="http://youtu.be/kWhmKEe6aBU">PicoChess running on MK802 II and a bluetooth DGT eboard</a></p>
+
+<p>Done so far :</p>
+
+<ul>
+<li>Added DGT XL clock message display to dgtnix driver</li>
+<li>Added DGT board/clock support to Stockfish</li>
+<li>Player can choose skill level</li>
+<li>Player can choose computer thinking time</li>
+<li>Allow to takeback moves</li>
+<li>Software shutdown</li>
+<li>Add opening books, and allow opening book selection</li>
+<li>Blitz, Fischer, and fixed time per move time controls</li>
+</ul><h2>
+<a name="download-and-installation" class="anchor" href="#download-and-installation"><span class="octicon octicon-link"></span></a>Download and installation</h2>
+
+<p>You will have to download install the latest PicoChess image file and write it to a micro SD card.</p>
+
+<ul>
+<li><a href="http://dl.picochess.org/picochess-MK802II-v0.13.img.xz">PicoChess MK802II v0.13 (4GB micro SD Card)</a></li>
+<li><a href="http://dl.picochess.org/picochess-MK802II-v0.12.img.xz">PicoChess MK802II v0.12 (4GB micro SD Card)</a></li>
+<li><a href="http://dl.picochess.org/picochess-ODROIDX-v0.12.img.xz">PicoChess ODROID-X v0.12 (8GB micro SD Card)</a></li>
+<li><a href="http://dl.picochess.org/picochess-RaspberryPi-v0.6.img.xz">PicoChess Raspberry Pi v0.6 (4GB SD Card)</a></li>
+</ul><p>You will need to unzip the image with <a href="http://www.7-zip.org/">7zip</a> and write it to a suitable SD card using the UNIX tool <a href="http://manpages.ubuntu.com/manpages/lucid/man1/dd.1.html">dd</a>. Windows users should use <a href="https://launchpad.net/win32-image-writer">Win32DiskImager</a>. Do not try to drag and drop or otherwise copy over the image without using dd or Win32DiskImager – it won’t work.</p>
+
+<h4>
+<a name="copying-the-image-to-an-sd-card-on-windows" class="anchor" href="#copying-the-image-to-an-sd-card-on-windows"><span class="octicon octicon-link"></span></a>Copying the image to an SD Card on Windows</h4>
+
+<ol>
+<li>Insert the SD card into your SD card reader and check what drive letter it was assigned. You can easily see the drive letter (for example G:) by looking in the left column of Windows Explorer. If the card is not new, you should format it; otherwise Win32DiskImager may hang.</li>
+<li>Download the <a href="https://launchpad.net/win32-image-writer">Win32DiskImager utility</a>. The download links are on the right hand side of the page, you want the binary zip.</li>
+<li>Extract the executable from the zip file and run the Win32DiskImager utility. You may need to run the utility as Administrator.</li>
+<li>Select the picochess-MK802II/RaspberryPi-vx.x.img image file you extracted earlier</li>
+<li>Select the drive letter of the SD card in the device box. Be careful to select the correct drive; if you get the wrong one you can destroy your computer's hard disk!</li>
+<li>Click Write and wait for the write to complete.</li>
+<li>Exit the imager and eject the SD card.</li>
+<li>Insert the card in the MK802II/RaspberryPi, connect it to a DGT eboard and XL clock, power it on, and it should boot up with a nice 'Hello' message on the clock after 1-2 minutes.</li>
+<li>Play !</li>
+</ol><h2>
+<a name="user-manual" class="anchor" href="#user-manual"><span class="octicon octicon-link"></span></a>User manual</h2>
+
+<p>Here is the <a href="https://github.com/jromang/Stockfish/wiki/Manual">user manual wiki</a></p>
+
+<h2>
+<a name="playing-strength" class="anchor" href="#playing-strength"><span class="octicon octicon-link"></span></a>Playing strength</h2>
+
+<p>This will be one of the strongest dedicated chess computer on the world :-)
+<a href="http://lefounumerique.xooit.com/t1202-Stockfish-sur-Raspberry-Pi.htm">My initial testing</a> on Rasperry Pi hardware versus a 4 core Intel i7 shows we have grandmaster strength :)</p>
+
+<table>
+<thead><tr>
+<th align="left">Engine</th>
+<th align="left">Score</th>
+<th align="left">St</th>
+</tr></thead>
+<tbody>
+<tr>
+<td align="left">1: Stockfish on Pi</td>
+<td align="left">40,0/100</td>
+<td align="left">····················</td>
+</tr>
+<tr>
+<td align="left">2: Komodo3-64-sse</td>
+<td align="left">20,0/20</td>
+<td align="left">11111111111111111111</td>
+</tr>
+<tr>
+<td align="left">3: Pharaon</td>
+<td align="left">14,0/20</td>
+<td align="left">=1=1=101=110==110111</td>
+</tr>
+<tr>
+<td align="left">4: AnMon 5.75</td>
+<td align="left">11,0/20</td>
+<td align="left">==1=1110=010==011001</td>
+</tr>
+<tr>
+<td align="left">5: SOS 5.1 for Arena</td>
+<td align="left">10,5/20</td>
+<td align="left">10001=10100111=001=1</td>
+</tr>
+<tr>
+<td align="left">6: Gaia64</td>
+<td align="left">4,5/20</td>
+<td align="left">00100100010=00000100</td>
+</tr>
+</tbody>
+</table><p>100 games played / Tournament is finished - Level: Blitz 2/1 - Hardware: Intel(R) Core(TM) i5-2405S CPU @ 2.50GHz with 8,0 GB Memory</p>
+
+<p>On a 802MK II device, stockfish is running 5 times faster ! And there is a lot of space (1GB) for the hastables.</p>
+
+<h2>
+<a name="to-do" class="anchor" href="#to-do"><span class="octicon octicon-link"></span></a>To do</h2>
+
+<ul>
+<li>Add more time controls</li>
+<li>Analysis mode</li>
+</ul><h2>
+<a name="help-needed--documentation" class="anchor" href="#help-needed--documentation"><span class="octicon octicon-link"></span></a>Help needed : documentation</h2>
+
+<p>If you have some english skills, I would like to provide a simple PDF sheet that explains how to use the board and the config modes.</p>
+
+<h2>
+<a name="contact" class="anchor" href="#contact"><span class="octicon octicon-link"></span></a>Contact</h2>
+
+<p>You are encouraged to join the <a href="http://groups.google.com/group/picochess">PicoChess mailing list</a>.</p>
+
+<p>For all questions :</p>
+
+<p><img src="https://dl.dropbox.com/u/3042900/44d0841ee0ac236247a78920ac5cbad7.gif" alt="eaddr"></p>
+
+<h2>
+<a name="pictures" class="anchor" href="#pictures"><span class="octicon octicon-link"></span></a>Pictures</h2>
+
+<p><img src="https://lh5.googleusercontent.com/-uw57fAjEjDs/UHTKNhEuIVI/AAAAAAAAABQ/WT_rY9-uNss/s1600/IMGP3046.jpg" alt="OnRpi"></p>
+
+<h2>
+<a name="credits" class="anchor" href="#credits"><span class="octicon octicon-link"></span></a>Credits</h2>
+
+<ul>
+<li>
+<a href="https://github.com/jromang/Stockfish/tree/dgt/books">Opening Books</a> by Gabriel Leperlier</li>
+<li>Logo by <a href="http://www.nsd.uk.com/pages/home.html">pygmy_giant</a>
+</li>
+</ul><p><img src="https://dl.dropbox.com/u/3042900/PicoChess_logo_black_250.png" alt="Logo"></p>
+
+<h2>
+<a name="similar-projects" class="anchor" href="#similar-projects"><span class="octicon octicon-link"></span></a>Similar projects</h2>
+
+<ul>
+<li>
+<a href="http://sishchess.blogspot.co.uk/">Sishfish</a> DIY USB chess computer</li>
+<li><a href="http://miclangschach.de/forum/index.php">Mysticum Schachcomputer</a></li>
+</ul>
+      </section>
+    </div>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/jromang">jromang</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-34439076-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
