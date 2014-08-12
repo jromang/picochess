@@ -101,7 +101,7 @@ def main():
         global book_thread
         book_move = weighted_choice(book, game)
         if book_move:
-            Display.show(Message.BOOK_MOVE, book_move.uci())
+            Display.show(Message.BOOK_MOVE, move=book_move.uci())
             book_thread = threading.Timer(2, send_book_move, [book_move])
             book_thread.start()
         else:
@@ -188,11 +188,11 @@ def main():
                 if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
                     game.push(move)
                     legal_fens = compute_legal_fens(game)
-                    Display.show(Message.COMPUTER_MOVE, (move.uci(), game))
+                    Display.show(Message.COMPUTER_MOVE, move=move.uci(), game=game)
                 break
 
             if case(Event.SET_MODE):
-                Display.show(Message.INTERACTION_MODE, event.mode)  # Usefull for pgn display device
+                Display.show(Message.INTERACTION_MODE, mode=event.mode)  # Usefull for pgn display device
                 interaction_mode = event.mode
                 break
 

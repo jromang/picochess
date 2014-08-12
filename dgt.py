@@ -415,22 +415,22 @@ class DGTBoard(Observable, Display, threading.Thread):
                 time.sleep(0.1)
             #Check if we have something to display
             try:
-                display_message = self.message_queue.get_nowait()
-                if display_message[0] == Message.BOOK_MOVE:
+                message = self.message_queue.get_nowait()
+                if message == Message.BOOK_MOVE:
                     self.display_on_dgt_xl(' book')
-                elif display_message[0] == Message.COMPUTER_MOVE:
-                    uci_move = display_message[1][0]
+                elif message == Message.COMPUTER_MOVE:
+                    uci_move = message.move
                     self.display_on_dgt_xl(' ' + uci_move, True)
                     self.light_squares_revelation_board((uci_move[0:2], uci_move[2:4]))
-                elif display_message[0] == Message.START_NEW_GAME:
+                elif message == Message.START_NEW_GAME:
                     self.display_on_dgt_xl('newgam', True)
                     self.clear_light_revelation_board()
-                elif display_message[0] == Message.COMPUTER_MOVE_DONE_ON_BOARD:
+                elif message == Message.COMPUTER_MOVE_DONE_ON_BOARD:
                     self.display_on_dgt_xl('ok', True)
                     self.clear_light_revelation_board()
-                elif display_message[0] == Message.SEARCH_STARTED:
+                elif message == Message.SEARCH_STARTED:
                     self.display_on_dgt_xl('search')
-                elif display_message[0] == Message.USER_TAKE_BACK:
+                elif message == Message.USER_TAKE_BACK:
                     self.display_on_dgt_xl('takbak')
             except queue.Empty:
                 pass
