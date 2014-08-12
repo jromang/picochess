@@ -154,5 +154,5 @@ class Engine(Observable):
             logging.warning('No bestmove after stop()')
             self.send_best_move.set()
 
-    def go(self):
-        self.send('go movetime 3000')
+    def go(self, time_string):
+        self.send('go ' + time_string)

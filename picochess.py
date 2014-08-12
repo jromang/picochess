@@ -23,6 +23,7 @@ import dgt
 import logging
 import uci
 import threading
+from timecontrol import TimeControl
 from utilities import *
 from keyboardinput import KeyboardInput, TerminalDisplay
 
@@ -89,7 +90,7 @@ def main():
         return fens
 
 
-    def think():
+    def think(time):
         """
         Starts a new search on the current game.
         If a move is found in the opening book, fire an event in a few seconds.
@@ -100,6 +101,7 @@ def main():
 
         global book_thread
         book_move = weighted_choice(book, game)
+        time.run(game.turn)
         if book_move:
             Display.show(Message.BOOK_MOVE, move=book_move.uci())
             book_thread = threading.Timer(2, send_book_move, [book_move])
@@ -107,7 +109,7 @@ def main():
         else:
             book_thread = None
             engine.set_position(game)
-            engine.go()
+            engine.go(time.uci())
             Display.show(Message.SEARCH_STARTED)
 
 
@@ -125,7 +127,8 @@ def main():
     legal_fens = compute_legal_fens(game)  # Compute the legal FENs
     book = chess.polyglot.open_reader(get_opening_books()[8][1])  # Default opening book
     interaction_mode = Mode.PLAY_WHITE   # Interaction mode
-    book_thread = None  # The thread that will fire book moves.
+    book_thread = None  # The thread that will fire book moves
+    time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=1)
 
     #Event loop
     while True:
@@ -144,6 +147,7 @@ def main():
                     Observable.fire(Event.USER_MOVE, move=legal_moves[legal_fens.index(event.fen)])
                 elif event.fen == game.fen().split(' ')[0]:  # Player had done the computer move on the board
                     Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD)
+                    time_control.run(game.turn)
                 elif event.fen == legal_fens.root:  # Allow user to take his move back while the engine is searching
                     stop_thinking()
                     game.pop()
@@ -157,8 +161,9 @@ def main():
                     logging.warning('Illegal move [%s]', move)
                 # Check if we are in play mode and it is player's turn
                 elif (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.WHITE) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.BLACK):
+                    time_control.stop()
                     game.push(move)
-                    think()
+                    think(time_control)
                 break
 
             if case(Event.LEVEL):  # User sets a new level
@@ -172,9 +177,10 @@ def main():
                     logging.debug("Starting a new game")
                     game = chess.Bitboard()
                     legal_fens = compute_legal_fens(game)
+                    time_control.reset()
                     Display.show(Message.START_NEW_GAME)
                 if interaction_mode == Mode.PLAY_BLACK:
-                    think()
+                    think(time_control)
                 break
 
             if case(Event.OPENING_BOOK):
@@ -186,6 +192,7 @@ def main():
                 move = chess.Move.from_uci(event.move)
                 # Check if we are in play mode and it is computer's turn
                 if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
+                    time_control.stop()
                     game.push(move)
                     legal_fens = compute_legal_fens(game)
                     Display.show(Message.COMPUTER_MOVE, move=move.uci(), game=game)
@@ -195,6 +202,14 @@ def main():
                 Display.show(Message.INTERACTION_MODE, mode=event.mode)  # Usefull for pgn display device
                 interaction_mode = event.mode
                 break
+
+            if case(Event.SET_TIME_CONTROL):
+                time_control = event.time_control
+                break
+
+            if case(Event.OUT_OF_TIME):
+                print("OUT OF TIME********************")  # TODO send message
+                stop_thinking()
 
             if case():  # Default
                 logging.warning("Event not handled : [%s]", event)

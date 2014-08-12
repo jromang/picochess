@@ -48,6 +48,8 @@ class Event(AutoNumber):
     #Engine events
     BEST_MOVE = ()  # Engine has found a move
     SET_TIME_CONTROL = ()  # User sets time control
+    CLOCK_TICK = ()  # Clock time event
+    OUT_OF_TIME = ()
 
 
 class Message(AutoNumber):
