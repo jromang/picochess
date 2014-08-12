@@ -59,17 +59,14 @@ def main():
         engine.set_option("Core Threads", args.threads)
 
     # Connect to DGT board
-    board = None
     if args.dgt_port:
         logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
-        board = dgtv2.DGTBoard(args.dgt_port)
-        board.start()
+        dgtv2.DGTBoard(args.dgt_port).start()
     else:
         logging.warning("No DGT board port provided")
-
-    # Enable keyboard input and terminal display
-    KeyboardInput().start()
-    TerminalDisplay().start()
+        # Enable keyboard input and terminal display
+        KeyboardInput().start()
+        TerminalDisplay().start()
 
     def compute_legal_fens(g):
         """
