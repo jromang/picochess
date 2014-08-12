@@ -24,6 +24,7 @@ import logging
 import uci
 import threading
 from utilities import *
+from keyboardinput import KeyboardInput, TerminalDisplay
 
 
 def main():
@@ -66,6 +67,9 @@ def main():
     else:
         logging.warning("No DGT board port provided")
 
+    # Enable keyboard input and terminal display
+    KeyboardInput().start()
+    TerminalDisplay().start()
 
     def compute_legal_fens(g):
         """
@@ -155,7 +159,7 @@ def main():
                 if not move in game.generate_legal_moves():
                     logging.warning('Illegal move [%s]', move)
                 # Check if we are in play mode and it is player's turn
-                if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.WHITE) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.BLACK):
+                elif (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.WHITE) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.BLACK):
                     game.push(move)
                     think()
                 break
