@@ -210,6 +210,10 @@ def main():
             if case(Event.OUT_OF_TIME):
                 stop_thinking()
                 Display.show(Message.PLAYER_OUT_OF_TIME, color=event.color)
+                break
+
+            if case(Event.CLOCK_TICK):
+                Display.show(Message.UPDATE_CLOCK, white_time=event.white_time, black_time=event.black_time)
 
             if case():  # Default
                 logging.warning("Event not handled : [%s]", event)

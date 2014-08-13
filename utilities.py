@@ -62,6 +62,7 @@ class Message(AutoNumber):
     SEARCH_STARTED = ()  # Engine has started to search
     USER_TAKE_BACK = ()  # User takes back his move while engine is searching
     PLAYER_OUT_OF_TIME = ()
+    UPDATE_CLOCK = ()
 
 
 @enum.unique

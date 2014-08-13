@@ -22,7 +22,7 @@ class TimeControl:
         remaining_time = self.clock_time[self.active_color] - int((time.clock() - self.start_time))
         print('TICK:%i',remaining_time)
         if remaining_time > 0.0:
-            Observable.fire(Event.CLOCK_TICK, white_time=int(self.clock_time[chess.WHITE] * 1000), black_time=int(self.clock_time[chess.BLACK] * 1000))
+            Observable.fire(Event.CLOCK_TICK, white_time=int(self.clock_time[chess.WHITE]), black_time=int(self.clock_time[chess.BLACK]))
             self.timer = threading.Timer(min(1.0, self.clock_time[self.active_color]), self.tick)
             self.timer.start()
         else:
