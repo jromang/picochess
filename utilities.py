@@ -62,7 +62,8 @@ class Message(AutoNumber):
     SEARCH_STARTED = ()  # Engine has started to search
     USER_TAKE_BACK = ()  # User takes back his move while engine is searching
     PLAYER_OUT_OF_TIME = ()
-    UPDATE_CLOCK = ()
+    UPDATE_CLOCK = ()  # Message send every second when to clock runs, containing white_time and black_time
+    RUN_CLOCK = ()  # Say to run autonomous clock, contains white_time, black_time, and turn
 
 
 @enum.unique
@@ -148,3 +149,9 @@ def weighted_choice(book, game):
             return e.move()
         upto += e.weight
     return None
+
+
+def hours_minutes_seconds(seconds):
+    m, s = divmod(seconds, 60)
+    h, m = divmod(m, 60)
+    return h, m, s

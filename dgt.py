@@ -417,9 +417,7 @@ class DGTBoard(Observable, Display, threading.Thread):
             #Check if we have something to display
             try:
                 message = self.message_queue.get_nowait()
-                if message == Message.BOOK_MOVE:
-                    self.display_on_dgt_xl(' book')
-                elif message == Message.COMPUTER_MOVE:
+                if message == Message.COMPUTER_MOVE:
                     uci_move = message.move
                     self.display_on_dgt_xl(' ' + uci_move, True)
                     self.light_squares_revelation_board((uci_move[0:2], uci_move[2:4]))
@@ -429,10 +427,20 @@ class DGTBoard(Observable, Display, threading.Thread):
                 elif message == Message.COMPUTER_MOVE_DONE_ON_BOARD:
                     self.display_on_dgt_xl('ok', True)
                     self.clear_light_revelation_board()
-                elif message == Message.SEARCH_STARTED:
-                    self.display_on_dgt_xl('search')
                 elif message == Message.USER_TAKE_BACK:
                     self.display_on_dgt_xl('takbak')
+                elif message == Message.RUN_CLOCK:
+                    tc = message.time_control
+                    w_hms = hours_minutes_seconds(int(tc.clock_time[chess.WHITE]))
+                    b_hms = hours_minutes_seconds(int(tc.clock_time[chess.BLACK]))
+                    side = 0x01 if message.turn == chess.WHITE else 0x02
+                    if tc.mode == ClockMode.FIXED_TIME:
+                        side = 0x02
+                        b_hms = hours_minutes_seconds(tc.seconds_per_move)
+                    self.write([Commands.DGT_CLOCK_MESSAGE, 0x0a, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_SETNRUN,
+                               w_hms[0], w_hms[1], w_hms[2], b_hms[0], b_hms[1], b_hms[2],
+                               side, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+                    self.write([Commands.DGT_CLOCK_MESSAGE, 0x03, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_END, Clock.DGT_CMD_CLOCK_END_MESSAGE])
             except queue.Empty:
                 pass
 
