@@ -7,12 +7,12 @@ Easy method : using image files
 Manual installation
 -------------------
 
-  Requirements
-  ------------
+* Requirements
+
+  Some computer
+
+* Steps
   
-  Steps
-  -----
-  
-  Running picochess from command line
-  -----------------------------------
+* Running picochess from command line
+
 
