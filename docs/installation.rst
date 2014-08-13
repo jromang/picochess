@@ -10,6 +10,9 @@ Manual installation
 * Requirements
 
   Some computer
+  Python
+  Python crypto
+  UCI engine
 
 * Steps
   
