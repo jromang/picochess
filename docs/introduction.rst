@@ -6,7 +6,7 @@ Introduction
 Presentation
 ------------
 
-The goal the this project is to create a dedicated chess computer based on tiny ARM computers with the `DGT eboard<http://www.dgtprojects.com/site/products/electronic-boards>`_ and `DGT XL Clock<http://www.dgtprojects.com/site/products/clocks/174-dgt-xl-red-beige>`_.
+The goal the this project is to create a dedicated chess computer based on tiny ARM computers with the `DGT eboard <http://www.dgtprojects.com/site/products/electronic-boards>`_ and `DGT XL Clock <http://www.dgtprojects.com/site/products/clocks/174-dgt-xl-red-beige>`_.
 
 
 Features
