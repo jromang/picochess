@@ -66,8 +66,8 @@ MOVETEXT_REGEX = re.compile(r"""
         ([a-hKQRBN][a-hxKQRBN1-8+#=\-]{1,6}
         |--
         |O-O(?:\-O)?)
-        ([\?!]{1,2})*
     )
+    |([\?!]{1,2})
     """, re.DOTALL | re.VERBOSE)
 
 
@@ -214,8 +214,8 @@ class GameNode(object):
             if comments and variation.starting_comment:
                 exporter.put_starting_comment(variation.starting_comment)
 
-            # Append ply.
-            exporter.put_ply(_board.turn, _board.ply, index != 0)
+            # Append fullmove number.
+            exporter.put_fullmove_number(_board.turn, _board.fullmove_number, index != 0)
 
             # Append SAN.
             exporter.put_move(_board, variation.move)
@@ -241,7 +241,7 @@ class GameNode(object):
             if not variations:
                 break
 
-    def __str__(self, comment=True, variations=True):
+    def __str__(self):
         exporter = StringExporter(columns=None)
         self.export(exporter)
         return exporter.__str__()
@@ -403,11 +403,11 @@ class StringExporter(object):
     def put_nag(self, nag):
         self.write_token("$" + str(nag) + " ")
 
-    def put_ply(self, turn, ply, variation_start):
+    def put_fullmove_number(self, turn, fullmove_number, variation_start):
         if turn == chess.WHITE:
-            self.write_token(str(ply) + ". ")
+            self.write_token(str(fullmove_number) + ". ")
         elif variation_start:
-            self.write_token(str(ply) + "... ")
+            self.write_token(str(fullmove_number) + "... ")
 
     def put_move(self, board, move):
         self.write_token(board.san(move) + " ")
@@ -541,7 +541,6 @@ def read_game(handle):
             found_game = True
 
             if token.startswith("{"):
-
                 # Consume until the end of the comment.
                 line = token[1:]
                 comment_lines = [ ]
@@ -570,6 +569,18 @@ def read_game(handle):
             elif token.startswith("$"):
                 # Found a NAG.
                 variation_stack[-1].nags.add(int(token[1:]))
+            elif token == "?":
+                variation_stack[-1].nags.add(NAG_MISTAKE)
+            elif token == "??":
+                variation_stack[-1].nags.add(NAG_BLUNDER)
+            elif token == "!":
+                variation_stack[-1].nags.add(NAG_GOOD_MOVE)
+            elif token == "!!":
+                variation_stack[-1].nags.add(NAG_BRILLIANT_MOVE)
+            elif token == "!?":
+                variation_stack[-1].nags.add(NAG_SPECULATIVE_MOVE)
+            elif token == "?!":
+                variation_stack[-1].nags.add(NAG_DUBIOUS_MOVE)
             elif token == "(":
                 # Found a start variation token.
                 variation_stack.append(variation_stack[-1].parent)
