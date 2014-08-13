@@ -9,7 +9,8 @@ Stand alone chess computer based on Stcokfish and DGT board
 
 .. image :: http://91.68.209.10/bmi/img24.imageshack.us/img24/6651/imgp0232r.png
 
-Contents:
+Contents
+--------
 
 .. toctree::
    :maxdepth: 2
@@ -19,11 +20,3 @@ Contents:
    installation
    usage
    community
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
