@@ -16,7 +16,6 @@ Contents
    :maxdepth: 2
    
    introduction
-   requirements
    installation
    usage
    community
