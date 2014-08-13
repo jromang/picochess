@@ -12,6 +12,9 @@ The goal the this project is to create a dedicated chess computer based on tiny 
 Features
 --------
 
+Performance
+-----------
+
 Status
 ------
 
