@@ -5,18 +5,18 @@
 
 Welcome to PicoChess's documentation!
 =====================================
+Stand alone chess computer based on Stcokfish and DGT board
 
-Contents:
+.. image :: http://91.68.209.10/bmi/img24.imageshack.us/img24/6651/imgp0232r.png
+
+Contents
+--------
 
 .. toctree::
    :maxdepth: 2
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+   
+   introduction
+   installation
+   usage
+   community
+   source
