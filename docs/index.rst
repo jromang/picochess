@@ -6,6 +6,8 @@
 Welcome to PicoChess's documentation!
 =====================================
 
+This is a test
+
 Contents:
 
 .. toctree::
