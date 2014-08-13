@@ -247,6 +247,7 @@ class DGTBoard(Observable, Display, threading.Thread):
     def __init__(self, device):
         super(DGTBoard, self).__init__()
         self.flip_board = False
+        self.flip_clock = False
 
         self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE)
         self.write([Commands.DGT_SEND_UPDATE_NICE])
@@ -324,8 +325,8 @@ class DGTBoard(Observable, Display, threading.Thread):
                         logging.debug("Clock ACK %s", (ack0, ack1, ack2, ack3))
                         return None
                 else:  # Clock Times message
-                    logging.debug("Clock Times message not handled %s", message)
-                    #return None  # This is not an ACK and should be ignored
+                    clock_status = message[6]
+                    self.flip_clock = bool(clock_status & 0x02)  # tumbler position high on right player
                 break
             if case(Messages.DGT_MSG_BOARD_DUMP):
                 board = ''
