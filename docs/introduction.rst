@@ -1,14 +1,18 @@
 Introduction
 ============
 
-test
+..image : http://91.68.209.10/bmi/img24.imageshack.us/img24/6651/imgp0232r.png
 
 onetitle
 --------
 
 aaa
 
-twotitles
----------
+Modes of usage
+--------------
 
-bbb
+#. On a mini computer, without screen
+
+#. On a desktop computer
+
+
