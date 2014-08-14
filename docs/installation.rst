@@ -21,7 +21,9 @@ Manual installation
   4. An UCI chess engine ; `Stockfish <http://stockfishchess.org/>`_ is probably the best choice !
 
 * Steps
+
   1. Clone PicoChess's git repository
+  
   2. Checkout the stable branch (needed to enable auto-updates)
   
 * Running picochess from command line
