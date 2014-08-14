@@ -27,9 +27,7 @@ runs on a desktop computer. You will need to install this first :
 
   git checkout stable  
   
-4. Run picochess from command line
-
-Picochess has a lot of options ; type::
+4. Run picochess from command line ; picochess has a lot of options type::
   
   python3 picochess.py -h
   
