@@ -20,6 +20,7 @@ import time
 import threading
 from timecontrol import *
 from struct import unpack
+from collections import OrderedDict
 try:
     import enum
 except ImportError:
@@ -216,31 +217,35 @@ mode_map = {"rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR": Mode.BOOK,
             "rnbq1bnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR": Mode.PLAY_BLACK,  # Player plays black
             "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQ1BNR": Mode.PLAY_WHITE}  # Player plays white
 
-time_control_map = {
-"rnbqkbnr/pppppppp/Q7/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=1),
-"rnbqkbnr/pppppppp/1Q6/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=3),
-"rnbqkbnr/pppppppp/2Q5/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=5),
-"rnbqkbnr/pppppppp/3Q4/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=10),
-"rnbqkbnr/pppppppp/4Q3/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=15),
-"rnbqkbnr/pppppppp/5Q2/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=30),
-"rnbqkbnr/pppppppp/6Q1/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=60),
-"rnbqkbnr/pppppppp/7Q/8/8/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FIXED_TIME, seconds_per_move=120),
-"rnbqkbnr/pppppppp/8/8/Q7/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.BLITZ, minutes_per_game=1),
-"rnbqkbnr/pppppppp/8/8/1Q6/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.BLITZ, minutes_per_game=3),
-"rnbqkbnr/pppppppp/8/8/2Q5/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.BLITZ, minutes_per_game=5),
-"rnbqkbnr/pppppppp/8/8/3Q4/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.BLITZ, minutes_per_game=10),
-"rnbqkbnr/pppppppp/8/8/4Q3/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.BLITZ, minutes_per_game=15),
-"rnbqkbnr/pppppppp/8/8/5Q2/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.BLITZ, minutes_per_game=30),
-"rnbqkbnr/pppppppp/8/8/6Q1/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.BLITZ, minutes_per_game=60),
-"rnbqkbnr/pppppppp/8/8/7Q/8/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.BLITZ, minutes_per_game=90),
-"rnbqkbnr/pppppppp/8/8/8/Q7/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FISCHER, minutes_per_game=3, fischer_increment=2),
-"rnbqkbnr/pppppppp/8/8/8/1Q6/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FISCHER, minutes_per_game=4, fischer_increment=2),
-"rnbqkbnr/pppppppp/8/8/8/2Q5/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FISCHER, minutes_per_game=5, fischer_increment=3),
-"rnbqkbnr/pppppppp/8/8/8/3Q4/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FISCHER, minutes_per_game=5, fischer_increment=5),
-"rnbqkbnr/pppppppp/8/8/8/5Q2/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FISCHER, minutes_per_game=7, fischer_increment=1),
-"rnbqkbnr/pppppppp/8/8/8/4Q3/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FISCHER, minutes_per_game=15, fischer_increment=5),
-"rnbqkbnr/pppppppp/8/8/8/6Q1/PPPPPPPP/RNBQKBNR": TimeControl(ClockMode.FISCHER, minutes_per_game=90, fischer_increment=30)
-}
+time_control_map = OrderedDict([
+("rnbqkbnr/pppppppp/Q7/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=1)),
+("rnbqkbnr/pppppppp/1Q6/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=3)),
+("rnbqkbnr/pppppppp/2Q5/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=5)),
+("rnbqkbnr/pppppppp/3Q4/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=10)),
+("rnbqkbnr/pppppppp/4Q3/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=15)),
+("rnbqkbnr/pppppppp/5Q2/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=30)),
+("rnbqkbnr/pppppppp/6Q1/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=60)),
+("rnbqkbnr/pppppppp/7Q/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=120)),
+("rnbqkbnr/pppppppp/8/8/Q7/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.BLITZ, minutes_per_game=1)),
+("rnbqkbnr/pppppppp/8/8/1Q6/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.BLITZ, minutes_per_game=3)),
+("rnbqkbnr/pppppppp/8/8/2Q5/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.BLITZ, minutes_per_game=5)),
+("rnbqkbnr/pppppppp/8/8/3Q4/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.BLITZ, minutes_per_game=10)),
+("rnbqkbnr/pppppppp/8/8/4Q3/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.BLITZ, minutes_per_game=15)),
+("rnbqkbnr/pppppppp/8/8/5Q2/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.BLITZ, minutes_per_game=30)),
+("rnbqkbnr/pppppppp/8/8/6Q1/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.BLITZ, minutes_per_game=60)),
+("rnbqkbnr/pppppppp/8/8/7Q/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.BLITZ, minutes_per_game=90)),
+("rnbqkbnr/pppppppp/8/8/8/Q7/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=3, fischer_increment=2)),
+("rnbqkbnr/pppppppp/8/8/8/1Q6/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=4, fischer_increment=2)),
+("rnbqkbnr/pppppppp/8/8/8/2Q5/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=5, fischer_increment=3)),
+("rnbqkbnr/pppppppp/8/8/8/3Q4/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=5, fischer_increment=5)),
+("rnbqkbnr/pppppppp/8/8/8/5Q2/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=7, fischer_increment=1)),
+("rnbqkbnr/pppppppp/8/8/8/4Q3/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=15, fischer_increment=5)),
+("rnbqkbnr/pppppppp/8/8/8/6Q1/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=90, fischer_increment=30))
+])
+
+dgt_xl_time_control_list = ["mov001", "mov003", "mov005", "mov010", "mov015", "mov030", "mov060", "mov120",
+                            "bli100", "bli300", "bli500", "bli000", "bli500", "bli030", "bli100", "bli130",
+                            "f 32  ", "f 42  ", "f 53  ", "f 55  ", "h 71  ", "f155  ", "f9030 "]
 
 class DGTBoard(Observable, Display, threading.Thread):
 
@@ -379,6 +384,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                 elif fen in time_control_map:
                     logging.debug("Setting time control %s", time_control_map[fen].mode)
                     self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[fen])
+                    self.display_on_dgt_xl(dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)], True)
                 else:
                     logging.debug("Fen")
                     self.fire(Event.FEN, fen=fen)
