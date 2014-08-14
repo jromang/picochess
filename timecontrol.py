@@ -19,23 +19,14 @@ class TimeControl:
         self.clock_time = {chess.WHITE: float(self.minutes_per_game * 60), chess.BLACK: float(self.minutes_per_game * 60)}  # Player remaining time, in seconds
         self.active_color = None
 
-    def tick(self):
-        try:
-            remaining_time = self.clock_time[self.active_color] - int((time.clock() - self.start_time))
-            if remaining_time > 0.0:
-                Observable.fire(Event.CLOCK_TICK, white_time=int(self.clock_time[chess.WHITE]), black_time=int(self.clock_time[chess.BLACK]))
-                self.timer = threading.Timer(1.0, self.tick)
-                self.timer.start()
-            else:
-                Observable.fire(Event.OUT_OF_TIME, color=self.active_color)
-        except KeyError:
-            logging.debug('KeyError')
+    def out_of_time(self):
+        Observable.fire(Event.OUT_OF_TIME, color=self.active_color)
 
     def run(self, color):
         if self.mode in (ClockMode.BLITZ, ClockMode.FISCHER):
             self.active_color = color
             self.start_time = time.clock()
-            self.timer = threading.Timer(min(1.0, self.clock_time[color]), self.tick)
+            self.timer = threading.Timer(self.clock_time[color], self.out_of_time)
             self.timer.start()
 
     def stop(self):
@@ -44,7 +35,6 @@ class TimeControl:
             self.timer.cancel()
             self.timer.join()
             self.active_color = None
-
 
     def uci(self):
         uci_string = ''
