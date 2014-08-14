@@ -22,7 +22,9 @@ Manual installation
 
 * Steps
 
-  1. Clone PicoChess's git repository
+  1. Clone PicoChess's git repository::
+    
+    git clone https://github.com/jromang/picochess.git
   
   2. Checkout the stable branch (needed to enable auto-updates)
   
