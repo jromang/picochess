@@ -62,7 +62,7 @@ class Message(AutoNumber):
     USER_TAKE_BACK = ()  # User takes back his move while engine is searching
     PLAYER_OUT_OF_TIME = ()
     UPDATE_CLOCK = ()  # Message send every second when to clock runs, containing white_time and black_time
-    RUN_CLOCK = ()  # Say to run autonomous clock, contains white_time, black_time, and turn
+    RUN_CLOCK = ()  # Say to run autonomous clock, contains time_control
 
 
 @enum.unique
