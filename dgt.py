@@ -420,9 +420,14 @@ class DGTBoard(Observable, Display, threading.Thread):
                 if message == Message.COMPUTER_MOVE:
                     uci_move = message.move
                     print("BEST MOVE:"+uci_move)
+                    # Stop the clock before displaying a move
+                    tc = message.time_control
+                    w_hms = hours_minutes_seconds(int(tc.clock_time[chess.WHITE]))
+                    b_hms = hours_minutes_seconds(int(tc.clock_time[chess.BLACK]))
                     self.write([Commands.DGT_CLOCK_MESSAGE, 0x0a, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_SETNRUN,
-                               0, 0, 0, 0, 0, 0,
-                               0x04, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+                               w_hms[0], w_hms[1], w_hms[2], b_hms[0], b_hms[1], b_hms[2],
+                               0x04 | 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+                    # Display the move
                     self.display_on_dgt_xl(' ' + uci_move, True)
                     self.light_squares_revelation_board((uci_move[0:2], uci_move[2:4]))
                 elif message == Message.START_NEW_GAME:

@@ -201,7 +201,7 @@ def main():
                     time_control.stop()
                     game.push(move)
                     legal_fens = compute_legal_fens(game)
-                    Display.show(Message.COMPUTER_MOVE, move=move.uci(), game=game)
+                    Display.show(Message.COMPUTER_MOVE, move=move.uci(), game=game, time_control=time_control)
                 break
 
             if case(Event.SET_MODE):
