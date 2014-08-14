@@ -186,6 +186,6 @@ def update_picochess():
         branch = subprocess.Popen([git, "rev-parse", "--abbrev-ref", "HEAD"], stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8').rstrip()
         if branch == 'stable':
             logging.debug('Updating')
-            output = subprocess.Popen([git, "pull"], stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
+            output = subprocess.Popen([git, "pull", "origin", "stable"], stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
             logging.debug(output)
 
