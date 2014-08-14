@@ -101,6 +101,7 @@ def main():
 
         global book_thread
         book_move = weighted_choice(book, game)
+        Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time)
         time.run(game.turn)
         if book_move:
             Display.show(Message.BOOK_MOVE, move=book_move.uci())
@@ -147,7 +148,9 @@ def main():
                     Observable.fire(Event.USER_MOVE, move=legal_moves[legal_fens.index(event.fen)])
                 elif event.fen == game.fen().split(' ')[0]:  # Player had done the computer move on the board
                     Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD)
-                    time_control.run(game.turn)
+                    if time_control.mode != ClockMode.FIXED_TIME:
+                        Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
+                        time_control.run(game.turn)
                 elif event.fen == legal_fens.root:  # Allow user to take his move back while the engine is searching
                     stop_thinking()
                     game.pop()
@@ -210,6 +213,7 @@ def main():
             if case(Event.OUT_OF_TIME):
                 stop_thinking()
                 Display.show(Message.PLAYER_OUT_OF_TIME, color=event.color)
+                break
 
             if case():  # Default
                 logging.warning("Event not handled : [%s]", event)
