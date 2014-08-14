@@ -3,11 +3,11 @@ Usage
 
 Choosing skill level
 --------------------
-Put the extra black queen on your DGT board to select skill level. Putting it on square A6 will select level 0 (easiest level), while B6 selects level 1, C6 selects level 2, etc. If no skill level is selected, PicoChess uses level 20 (the highest level) by default. Level 20 can also be selected by placing the extra black queen on square E4.
+Put the extra black queen on your DGT board to select skill level. Putting it on square A6 will select level 0 (easiest), while B6 selects level 1, C6 selects level 2, etc. If no skill level is selected, PicoChess uses level 20 (the highest level) by default. Level 20 can also be selected by placing the extra black queen on square E4.
 
-* Level 0 estimates about 1100 Elo ( Absolute beginner )
-* Level 10 estimates about 1750 Elo ( Mediate clubplayer )
-* Level 20 estimates about 2570 Elo ( Advanced tournament player )
+* Level  0 estimates about 1100 Elo (Absolute beginner)
+* Level 10 estimates about 1750 Elo (Mediate club player )
+* Level 20 estimates about 2570 Elo (Advanced tournament player)
 
 Choosing opening books
 ----------------------
@@ -71,9 +71,11 @@ PicoChess with White
 --------------------
 
 To force PicoChess to play with White just take the black king off the board and put it back. If you want to play with White again just take the white king off the board and put it back. Note: You have to be in the starting position!
-System shutdown
 
-From the start position, replace the white king with the extra white queen; this will shut down the MK802II (takes a few seconds until the blue light turns off). You can also do it with only the two white queens on the board (on e1,d1).
+System shutdown
+---------------
+
+From the start position, replace the white king with the extra white queen; this will shut down the machine (takes a few seconds until the blue light turns off). You can also do it with only the two white queens on the board (on e1,d1).
 Book/Training Modes
 
 When using these modes, please be patient and dont rush moves. Allow a few seconds for the book moves to appear. If you see any bug when rushing moves, let us know on the mailing list.
