@@ -42,6 +42,7 @@ class TimeControl:
         if self.mode in (ClockMode.BLITZ, ClockMode.FISCHER):
             self.active_color = color
             self.start_time = time.clock()
+            if self.mode == ClockMode.FISCHER: self.clock_time[color] += self.fischer_increment
             self.timer = threading.Timer(self.clock_time[color], self.out_of_time)
             self.timer.start()
 
