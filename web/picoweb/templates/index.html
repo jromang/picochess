@@ -1,10 +1,1620 @@
 {% extends 'base.html' %}
 
+{% block prebody %}
+
+<style>
+
+
+
+    .container-xs-height {
+        display:table;
+        padding-left:0px;
+        padding-right:0px;
+    }
+    .row-xs-height {
+        display:table-row;
+    }
+    .col-xs-height {
+        display:table-cell;
+        float:none;
+    }
+
+    .top-buffer { margin-top:10px; }
+    .bottom-buffer { margin-bottom:10px; }
+
+    .left-buffer {margin-left:10px;}
+    .right-buffer {margin-right:10px;}
+
+    input[type=text] { width: 100%; box-sizing: border-box; height: 28px; }
+
+    .grid {
+        margin-top: 1em;
+    }
+
+    .panel-heading {
+        overflow: hidden;
+    }
+
+    .flat-table tr:nth-of-type(even){
+        background: transparent;
+    }
+
+    .flat-table a {
+        /*color: #00008b;*/
+        color: #808080;
+        /*text-decoration: underline;*/
+    }
+
+    .flat-table {
+        /*table-layout:fixed;*/
+
+        margin-bottom: 20px;
+        border-collapse:collapse;
+        font-family: Calibri, Arial, sans-serif;
+        /*border: none;*/
+        border-radius: 3px;
+        -webkit-border-radius: 3px;
+        -moz-border-radius: 3px;
+    }
+
+    .flat-table th {
+        /*.a color:  -webkit-link;*/
+        font-weight: normal;
+        -webkit-font-smoothing: antialiased;
+        padding: 1em;
+        color: rgba(0,0,0,0.45);
+        text-shadow: 0 0 1px rgba(0,0,0,0.1);
+        font-size: 1.3em;
+        text-align: center !important;
+    }
+    .flat-table td {
+        /*color: #f7f7f7;*/
+        padding: 0.7em 1em 0.7em 1.15em;
+        /*text-shadow: 0 0 1px rgba(255,255,255,0.1);*/
+        font-size: 1.2em;
+        font-weight: normal;
+        text-align: center !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .flat-table tr {
+        -webkit-transition: background 0.3s, box-shadow 0.3s;
+        -moz-transition: background 0.3s, box-shadow 0.3s;
+        transition: background 0.3s, box-shadow 0.3s;
+    }
+
+    .flat-table-1 {
+        background: #fffaf0;
+
+    }
+    .flat-table-1 tr:hover {
+        background-color: rgba(0,0,0,0.19);
+    }
+
+</style>
+
+
+{% endblock %}
+
+
 {% block body %}
-<div class="container" style="margin-top:50px">
-    <div class="jumbotron">
-        <h1>Picochess</h1>
-        <h3>Work in development, check back frequently!</h3>
+<!--<div class="container" style="margin-top:50px">-->
+    <!--<div class="jumbotron">-->
+        <!--<h1>Picochess</h1>-->
+        <!--&lt;!&ndash;<h3>Work in development, check back frequently!</h3>&ndash;&gt;-->
+    <!--</div>-->
+<!--</div>-->
+
+
+<div class="container-fluid">
+    <div class="row-fluid clearfix">
+        <div class="col-md-5 col-xs-12 column grid">
+            <div class="panel panel-primary">
+
+                <div id="boardheader" class="panel-heading" style="display: none;">
+                    <span class="h3" id="time1">0:05:00</span>
+                </div>
+
+                <div class="panel-body">
+                    <div id="board" class="bottom-buffer"></div>
+                    <div class="text-center">
+                        <div id="gameControls" class="btn-group">
+
+                            <!--<div class="btn-group ">-->
+                            <button type="button" id="startBtn" class="btn btn-default"><i class='fa fa-fast-backward'></i></button>
+                            <!--</div>-->
+                            <!--<div class="btn-group ">-->
+                            <button type="button" id="backBtn" class="btn btn-default"><i class='fa fa-arrow-left'></i></button>
+                            <!--</div>-->
+                            <!--<div class="btn-group ">-->
+                            <button type="button" id="fwdBtn" class="btn btn-default"><i class='fa fa-arrow-right'></i></button>
+                            <!--</div>-->
+                            <!--<div class="btn-group ">-->
+                            <button type="button" id="endBtn" class="btn btn-default"><i class='fa fa-fast-forward'></i></button>
+                            <!--</div>-->
+                            <!--<button type="button" id="" class="btn btn-default"><i class='fa fa-fast-forward'></i></button>-->
+
+
+                        </div>
+                        <div id="setupBoardControls" class="btn-group" style="display:none" >
+                            <button type="button" id="clearSetupBtn" class="btn btn-default">Clear</button>
+                            <button type="button" id="resetSetupBtn" class="btn btn-default">Reset</button>
+                            <div id="setupBoardToMove" class="btn-group" data-toggle="buttons">
+                                <label class="btn btn-default active">
+                                    <input name="setupToMove" type="radio" value="white" id="whiteToMoveBtn" class=" btn btn-default"  checked>White To Move
+                                </label>
+                                <label class="btn btn-default">
+                                    <input name="setupToMove" type="radio" value="black" id="blackToMoveBtn" class="btn btn-default">Black To Move
+                                </label>
+                            </div>
+                            <button type="button" id="finishSetupBtn" class="btn btn-primary">Done</button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div id="boardfooter" class="panel-footer" style="display: none;">
+                    <span class="h3" id="time2">0:05:00</span>
+
+
+
+                </div>
+
+            </div>
+        </div>
+
+
+        <div id="rightColumn" class="col-md-7 col-xs-12 column grid">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title pull-left" style="padding-top: 7.5px;">Picochess </h3>
+
+
+
+
+                    <div class="btn-group pull-right">
+
+                        <div class="btn-group">
+                            <button type="button" id="flipOrientationBtn" class="btn btn-default"><i class='fa fa-refresh'></i>  Flip</button>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="button" id="DgtBtn" class="btn btn-primary"><i class='fa fa-delicious'></i> DGT Sync</button>
+                        </div>
+
+                        <!--<div class="btn-group">-->
+                            <!--<button type="button" id="arrangeBtn" class="btn btn-info"><i class='fa fa-arrows'></i> Layout</button>-->
+                        <!--</div>-->
+
+                        <div class="btn-group">
+                            <button type="button" id="newBtn" class="btn btn-success"><i class='fa fa-delicious'></i> Reset</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="panel-body">
+                    <div id="pgn"></div>
+
+                </div>
+
+            </div>
+            <div id="enginePanel" class="col-xs-12 panel panel-primary">
+                <div class="panel-heading clearfix">
+                    <h3 class="panel-title pull-left" style="padding-top: 7.5px;">Engine </h3>
+
+                    <!--<div>-->
+
+                    <!--</div>-->
+                    <div class="btn-group pull-right">
+
+
+                        <!--<a href="#" id="playBtn" class="btn btn-info" rel="popover"><i class='fa fa-gamepad'></i><span id="PlayText"> Play</span></a>-->
+                        <button id="analyzeBtn" class="btn btn-success"><i class='fa fa-cog'></i>
+                            <span id="AnalyzeText">Analyze</span>
+                        </button>
+                        <!--<button id="cloudAnalyzeBtn" class="btn btn-primary ladda-button" data-style="expand-left" data-size="l">-->
+                            <!--<span class="ladda-label" id="CloudAnalyzeText"><i class='fa fa-cloud'></i> Cloud Analysis</span>-->
+                        <!--</button>-->
+
+                        <!--'<div>'+' <label for="skillLevel" class="control-label pull-left">Skill Level (0-20)</label><div>'+-->
+                <!--'<input type="number" class="form-control" id="skillLevel" value="20"></div></div>'+-->
+
+                    </div>
+                </div>
+
+                <div class="panel-body">
+                    <div id="listener">
+                        <embed name="nacl_module" id='stockfish_module' width=0 height=0 src='/static/stockfish/stockfish.nmf' type='application/x-pnacl' />
+                    </div>
+                    <div id="engineStatus">
+
+                    </div>
+                    <div id="pv_output">
+                        <div id="pv_1"></div>
+
+                    </div>
+                    <div id="engineControls">
+                        <button id="analyzePlus" class="btn btn-default">
+                            <span id="analyzePlusText"><i class='fa fa-plus'></i></span>
+                        </button>
+                        <button id="analyzeMinus"  class="btn btn-default">
+                            <span id="analyzeMinusText"><i class='fa fa-minus'></i></span>
+                        </button>
+                        <span id="engineMultiPVStatus">
+
+                        </span>
+                    </div>
+
+
+                </div>
+
+                <!--<div id="conceptStatus" class="panel-footer">-->
+                    <!--<span class="h5">Important Ideas</span>-->
+                    <!--<div id="conceptText">-->
+                    <!--</div>-->
+                <!--</div>-->
+
+            </div>
+            <div class="panel col-xs-12 panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        Polyglot Book
+                    </h3>
+                </div>
+                <div class="panel-body">
+
+                    <table id="BookStatsTable" cellpadding="0" cellspacing="0" style="width: 100%; align: center; overflow: auto" class="table-responsive table-condensed table-bordered flat-table flat-table-1">
+                        <thead>
+                        <tr>
+                            <th data-dynatable-column="move">Move</th>
+                            <th data-dynatable-column="freq">Games</th>
+                            <th data-dynatable-column="pct">Winning %</th>
+
+                            <th data-dynatable-column="wins">Wins</th>
+                            <th data-dynatable-column="draws">Draws</th>
+                            <th data-dynatable-column="losses">Losses</th>
+
+                        </tr>
+                        </thead>
+                    </table>
+                    <!--<div id="bookStats"></div>-->
+
+                </div>
+
+            </div>
+
+
+        </div>
     </div>
+
+    <div class="row-fluid clearfix">
+        <div class="panel col-xs-12 panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    DGT Clock
+                </h3>
+            </div>
+            <div class="panel-body">
+                <div id="DGTClockStatus" cellpadding="0" cellspacing="0" style="width: 100%; align: center;overflow: auto" class="table-condensed table-bordered table-responsive flat-table flat-table-1">
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 </div>
+
+
+
+{% endblock %}
+
+{% block postbody %}
+
+<script type="text/javascript">
+var board,
+        game = new Chess(),
+        statusEl = $('#status'),
+        fenEl = $('#fen'),
+        pgnEl = $('#pgn'),
+        curr_move = {},
+        setup_fen = "";
+var gameHistory, fenHash, currentPly, currentPosition, currentGame;
+fenHash = {};
+
+currentPosition = {};
+gameHistory = currentPosition;
+gameHistory.gameHeader = '';
+gameHistory.result = '';
+gameHistory.variations = [];
+
+curr_move.num = 1;
+curr_move.fen = '';
+
+var pgnData = [[]];
+var setupBoardFen = '';
+const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+
+
+function load_nacl_stockfish() {
+    var listener = document.getElementById('listener');
+    listener.addEventListener('load', stockfishPNACLModuleDidLoad, true);
+    listener.addEventListener('message', handleMessage, true);
+    listener.addEventListener('crash', handleCrash, true);
+}
+$(function () {
+//    Ladda.bind('#cloudAnalyzeBtn' );
+    $(".grid").sortable({
+        tolerance: 'pointer',
+        revert: 'invalid',
+        disabled: 'true',
+//            placeholder: 'span2 well placeholder tile',
+        forceHelperSize: true
+    });
+    window.engine_lines = {};
+    window.multipv = 1;
+//    window.BookStatsTable = $('#BookStatsTable').dynatable( {
+//        dataset: {
+//            ajax: true,
+//            ajaxUrl: '/query',
+////                 ajaxMethod: 'POST',
+//            ajaxOnLoad: true,
+//            ajaxData:    {
+//                action: "get_book_moves",
+//                fen: game.fen()
+//            },
+//            records: []
+//        },
+//        inputs: {
+//            processingText: '<img width="col-xs-3" src="/static/img/ajax-loader.gif" />'
+//        },
+//        features: {
+//            paginate: false,
+//            search: false,
+//            recordCount: false
+//        },
+//        writers: {
+//            _rowWriter: clickRowBookWriter
+//        },
+//        readers: {
+//            _rowReader: clickRowBookReader
+//        }
+//    }).data('dynatable');
+
+//    $("#GameStatsTable").delegate('tr', 'click', function() {
+////            alert("You clicked my <tr>!");
+////            var game_num = ($(this).attr('data-game-id'));
+//        $.get("/query", { action: "get_game_content", game_num: $(this).attr('data-game-id') }, function (data) {
+//            pgnData = [data["pgn"]];
+//            loadGame(0);
+//        });
+//
+//        //get <td> element values here!!??
+//    });
+
+
+//    $("#BookStatsTable").delegate('tr', 'click', function() {
+////            alert("You clicked my <tr>!");
+////            alert($(this).attr('data-move'));
+//        stop_analysis();
+//        var tmp_game = create_game_pointer();
+//        var move = tmp_game.move($(this).attr('data-move'));
+//        updateCurrentPosition(move, tmp_game);
+//        board.position(currentPosition.fen);
+////        game.move($(this).attr('data-move'));
+////        board.position(game.fen());
+//        updateStatus();
+////         console.log($(this).attr('data-group'));
+//
+//    });
+
+//    window.GameStatsTable = $('#GameStatsTable').dynatable( {
+//        dataset: {
+//            ajax: true,
+//            ajaxUrl: '/query',
+////                 ajaxMethod: 'POST',
+//            ajaxOnLoad: true,
+//            ajaxData:    {
+//                action: "get_games",
+//                fen: game.fen()
+//            },
+//            records: []
+//        },
+//        inputs: {
+//            processingText: '<img width="col-xs-3" src="/static/img/ajax-loader.gif" />',
+//            paginationClass: 'pagination',
+//            paginationActiveClass: 'active',
+//            paginationDisabledClass: 'disabled'
+//        },
+//        features: {
+//            paginate: true,
+//            search: true,
+//            recordCount: true,
+//            perPageSelect: true
+//        },
+//        writers: {
+//            _rowWriter: clickRowGameWriter
+//        },
+//        readers: {
+//            _rowReader: clickRowGameReader
+//        }
+//    }).data('dynatable');
+
+    $('#playBtn').popover({
+
+        placement : 'bottom',
+        title : 'Play',
+        container: '#rightColumn',
+        html : true,
+//                animate: false,
+        trigger: 'click',
+        content:        '<form class="form-horizontal">'+'<label for="timeBase" class="control-label pull-left">Base time (min)</label>'+
+                '<div ><input type="number" class="form-control" id="timeBase" value="5"></div>' +
+                '</div>'+
+                '<div>'+'<label for="timeInc" class="control-label pull-left">Increment (sec)</label>'+'<div>'+
+                '<input type="number"  id="timeInc" value="5">'+'</div>'+'</div>'+
+                '<div>'+'<label for="timeInc" class="control-label pull-left">Human Bonus(min)</label>'+'<div>'+
+                '<input type="number"  id="humanBonus" value="25">'+'</div>'+
+
+                '<div>'+' <label for="skillLevel" class="control-label pull-left">Skill Level (0-20)</label><div>'+
+                '<input type="number" class="form-control" id="skillLevel" value="20"></div></div>'+
+                '</div>'+
+
+                '<div>'+'<label for="color" class="control-label pull-left">Human plays</label>'+'<div>'+
+                '<div class="btn-group" data-toggle="buttons">'+'<label class="btn btn-primary active" id="color-white"><input type="radio" name="color">White</label>'+
+                '<label class="btn btn-primary" id="color-black"><input type="radio" name="color">Black</label>'+'</div>'+'</div>'+'</div>'+
+                '<div>'+'<label for="showScore" class="control-label pull-left">Show Score?</label>'+'<div>'+
+                '<input type="checkbox" class="form-control pull-left" id="showScore">'+'</div></div>'+'<div>'+'<label for="color" class="pull-left control-label"></label>'+
+                '<div>'+'<button type="button" class="pull-left btn btn-primary" onclick="newGame()">New Game</button>'+'</div>'+'</div>'+'</form>'
+    });
+
+    $(document).keydown(function(e){
+        if (e.keyCode == 39) { //right arrow
+            if (e.ctrlKey) {
+                $('#endBtn').click();
+            } else {
+                $('#fwdBtn').click();
+            }
+            return true;
+        }
+    });
+
+    $(document).keydown(function(e){
+        if (e.keyCode == 37) { //left arrow
+            if (e.ctrlKey) {
+                $('#startBtn').click();
+            } else {
+                $('#backBtn').click();
+            }
+        }
+        return true;
+    });
+//        loadGame(1);
+    updateStatus();
+
+    if (navigator.mimeTypes['application/x-pnacl'] !== undefined) {
+        $('#analyzeBtn').prop('disabled', true);
+        load_nacl_stockfish();
+    }
+        //get <td> element values here!!??
+});
+
+// do not pick up pieces if the game is over
+// only pick up pieces for the side to move
+function create_game_pointer() {
+    var tmp_game;
+
+    if (currentPosition && currentPosition.fen) {
+        tmp_game = new Chess(currentPosition.fen);
+    }
+
+    else {
+        tmp_game = new Chess();
+    }
+    return tmp_game;
+}
+var onDragStart = function(source, piece, position, orientation) {
+    var tmp_game = create_game_pointer();
+    if ((tmp_game.turn() === 'w' && piece.search(/^b/) !== -1) ||
+            (tmp_game.turn() === 'b' && piece.search(/^w/) !== -1)) {
+        return false;
+    }
+};
+
+function strip_fen(fen) {
+    var stripped_fen = fen.replace(/\//g, "");
+    stripped_fen = stripped_fen.replace(/ /g, "");
+    return stripped_fen;
+}
+
+function walk_tree_iterative(variation) {
+    if (variation) {
+//        console.log(history.variations[0].move.san);
+        var q = [variation];
+        var score = '';
+        while (q.length > 0) {
+            var n = q.pop();
+//            console.log(n);
+            if (n) {
+
+                for (var i = 0; i < n.length; i++) {
+//                var san;
+                    var el = n[i];
+//                    console.log(el);
+                    if (!is_main_variation(el)) {
+                        score += "( ";
+                    }
+
+                    if (el.half_move_num % 2 == 1) {
+                        score += Math.floor((el.half_move_num + 1) / 2) + ". "
+                    }
+//                console.log();
+                    if (el.move) {
+//                        score += el.move.san+ " ";
+//                        var stripped_fen = el.fen.replace(" ","");
+                        var stripped_fen = strip_fen(el.fen);
+
+                        score += '<span class="gameMove' + (el.half_move_num) + '"><a href="#" class="fen" data-fen="'+el.fen+'" id="'+stripped_fen+'">' + el.move.san + ' </a></span>';
+
+                    }
+//
+//            }
+//            s = m.join(' ');
+//        }
+//        moveArray[i] = s;
+
+//                    console.log(el.variations.length);
+                    if (!is_main_line(el) && el.variations.length == 0)
+                    {
+                        score += ") ";
+                    }
+                    if (el.variations) {
+                        for (var j=0;j<el.variations.length;j++) {
+                            q.push([el.variations[j]]);
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+    return score;
+}
+
+var onDrop = function(source, target) {
+    var tmp_game = create_game_pointer();
+
+    var move = tmp_game.move({
+        from: source,
+        to: target,
+        promotion: 'q' // NOTE: always promote to a pawn for example simplicity
+    });
+
+        // illegal move
+    if (move === null) return 'snapback';
+}
+
+// update the board position after the piece snap
+// for castling, en passant, pawn promotion
+function updateCurrentPosition(move, tmp_game) {
+    var found_move = false;
+    if (currentPosition.variations) {
+        for (var i = 0; i < currentPosition.variations.length; i++) {
+            if (move.san == currentPosition.variations[i].move.san) {
+                currentPosition = currentPosition.variations[i];
+                found_move = true;
+            }
+        }
+
+    }
+    if (!found_move) {
+//        console.log(walk_tree_iterative(gameHistory.variations));
+        __ret = addNewMove(move, currentPosition, tmp_game);
+//    var node = __ret.node;
+        currentPosition = __ret.node;
+//        writeModifiedText(pgnEl, getPreviousMoves(currentPosition, "san"), '', '');
+//        if (game) {
+//            var h = game.header();
+//            var result = h.Result;
+//            var gameHeaderText = getGameHeader(h);
+//        }
+
+        writeVariationTree(pgnEl, walk_tree_iterative(gameHistory.variations), gameHistory);
+//        console.log(gameHistory);
+//        console.log(walk_tree_iterative(gameHistory.variations));
+    }
+}
+var onSnapEnd = function(source, target) {
+    stop_analysis();
+    var tmp_game = create_game_pointer();
+
+    var move = tmp_game.move({
+        from: source,
+        to: target,
+        promotion: 'q' // NOTE: always promote to a pawn for example simplicity
+    });
+
+        // illegal move
+//    if (move === null) return 'snapback';
+    updateCurrentPosition(move, tmp_game);
+    board.position(currentPosition.fen);
+    updateStatus();
+
+};
+
+var updateStatus = function() {
+//    console.log("calling updateStatus");
+    var status = '';
+    $('.fen').on('click', goToGameFen);
+
+    var moveColor = 'White';
+    var tmp_game;
+    var fen;
+    if (currentPosition && currentPosition.fen) {
+        fen = currentPosition.fen;
+        tmp_game = new Chess(fen);
+
+    }
+    else {
+        tmp_game = new Chess();
+        fen = tmp_game.fen();
+    }
+    //    fen =  $(this).attr('id');
+//    console.log("adding highlight..");
+    $("[class^='fen']").removeClass('highlight');
+//    var stripped_fen = fen.replace(/ /g,"");
+//    stripped_fen = stripped_fen.replace("-","");
+//    stripped_fen = stripped_fen.replace("/","");
+//    var stripped_fen = fen.split(" ")[0];
+    var stripped_fen = strip_fen(fen);
+//    console.log(stripped_fen);
+    $('#'+stripped_fen).addClass('highlight');
+//    console.log($('#'+stripped_fen))
+
+    if (tmp_game.turn() === 'b') {
+        moveColor = 'Black';
+        $('#sidetomove').html("<i class=\"fa fa-square fa-lg \"></i>");
+    }
+    else {
+//            $('#sidetomove').html("&#9633");
+        $('#sidetomove').html("<i class=\"fa fa-square-o fa-lg \"></i>");
+
+    }
+
+    // checkmate?
+    if (tmp_game.in_checkmate() === true) {
+        status = 'Game over, ' + moveColor + ' is in checkmate.';
+    }
+
+    // draw?
+    else if (tmp_game.in_draw() === true) {
+        status = 'Game over, drawn position';
+    }
+
+    // game still on
+    else {
+        status = moveColor + ' to move';
+
+        // check?
+        if (tmp_game.in_check() === true) {
+            status += ', ' + moveColor + ' is in check';
+        }
+    }
+
+    statusEl.html(status);
+//    fenEl.html(game.fen());
+    //highlight the current move
+    if (typeof(gameHistory) === 'undefined') {
+        writeGameText(game, pgnEl, true);
+
+    }
+    else {
+//        alert(move);
+        // Need to add variation to game if the move played is unique
+//        alert('adding variation');
+    }
+
+//        pgnEl.html(game.pgn());
+    if (window.analysis) {
+        analyze(true);
+    }
+//    window.BookStatsTable.processingIndicator.show();
+//    window.BookStatsTable.settings.dataset.ajaxData =    {
+//        action: "get_book_moves",
+//        fen: fen
+//    };
+//    window.BookStatsTable.process();
+//
+//    window.GameStatsTable.settings.dataset.ajaxData =    {
+//        action: "get_games",
+//        fen: fen
+//    };
+//    window.GameStatsTable.process();
+
+
+
+};
+
+
+var cfg = {
+    showNotation: false,
+//          sparePieces: true,
+
+
+    draggable: true,
+    position: 'start',
+    onDragStart: onDragStart,
+    onDrop: onDrop,
+    onSnapEnd: onSnapEnd
+//    onChange: onChange
+
+};
+board = new ChessBoard('board', cfg);
+
+$('#flipOrientationBtn').on('click', board.flip);
+$('#backBtn').on('click', goBack);
+$('#fwdBtn').on('click', fwd);
+$('#startBtn').on('click', goToStart);
+$('#endBtn').on('click', goToEnd);
+
+
+$('#newBtn').on('click', newBoard);
+$('#finishSetupBtn').on('click', finishSetupBoard);
+$('#clearSetupBtn').on('click', clearSetupBoard);
+$('#resetSetupBtn').on('click', resetSetupBoard);
+
+
+$('#setupBtn').on('click', setupBoard);
+//$('#cloudAnalyzeBtn').on('click', cloud_analyze_pressed);
+$('#analyzeBtn').on('click', analyze_pressed);
+$('#playBtn').on('click', play);
+
+$('#analyzePlus').on('click', multipv_increase);
+$('#analyzeMinus').on('click', multipv_decrease);
+
+
+
+function clickRowGameWriter(rowIndex, record, columns, cellWriter) {
+    var tr = '';
+
+    // grab the record's attribute for each column
+    for (var i = 0, len = columns.length; i < len; i++) {
+        tr += cellWriter(columns[i], record);
+    }
+
+    return '<tr data-game-id=' + record.id + '>' + tr + '</tr>';
+}
+
+function clickRowGameReader(rowIndex, rowElement, record) {
+    record.customData = $(rowElement).data('id');
+}
+
+function clickRowBookWriter(rowIndex, record, columns, cellWriter) {
+    var tr = '';
+
+    // grab the record's attribute for each column
+    for (var i = 0, len = columns.length; i < len; i++) {
+        tr += cellWriter(columns[i], record);
+    }
+
+    return '<tr data-move=' + record.move + '>' + tr + '</tr>';
+}
+
+function clickRowBookReader(rowIndex, rowElement, record) {
+    record.customData = $(rowElement).data('move');
+}
+
+function onChange() { //fires when the board position changes
+    //highlight the current move
+
+    $("[class^='gameMove']").removeClass('highlight');
+    $('.gameMove' + currentPly).addClass('highlight');
+
+}
+
+function setupBoard() {
+//        board = null;
+    board.destroy();
+    var setup_cfg = {};
+    setup_cfg.sparePieces = true;
+    setup_cfg.dropOffBoard = 'trash';
+    setup_cfg.draggable = true;
+    setup_cfg.showNotation = false;
+
+    board = new ChessBoard('board', setup_cfg);
+    $('#gameControls').hide();
+    $('#setupBoardControls').show();
+
+}
+
+function clearSetupBoard() {
+//    console.log("Clear setup board called");
+
+    board.clear(true);
+
+}
+function resetSetupBoard() {
+    var curr_fen;
+    if (currentPosition.fen) {
+        curr_fen = currentPosition.fen;
+    }
+    else {
+        curr_fen = START_FEN;
+    }
+//    console.log(START_FEN);
+    board.position(curr_fen, true);
+//    console.log(curr_fen);
+}
+
+function finishSetupBoard() {
+//    console.log(board.fen());
+    var tmp_game = new Chess();
+
+    var can_castle = false;
+    var castling_fen = '';
+    var fen = board.fen();
+    var position = board.position();
+
+    if (position.e1 == "wK" && position.h1 == "wR")
+    {
+        can_castle = true;
+        castling_fen += 'K';
+    }
+
+    if (position.e1 == "wK" && position.a1 == "wR")
+    {
+        can_castle = true;
+        castling_fen += 'Q';
+    }
+
+//    console.log("board");
+//    console.log(board.position());
+
+    if (position.e8 == "bK" && position.h8 == "bR")
+    {
+        can_castle = true;
+        castling_fen += 'k';
+    }
+
+    if (position.e8 == "bK" && position.a8 == "bR")
+    {
+        can_castle = true;
+        castling_fen += 'q';
+    }
+
+
+    if (!can_castle) {
+        castling_fen = '-';
+    }
+
+    if ($('#whiteToMoveBtn').prop("checked")) {
+//        console.log("white to move");
+        fen +=' w';
+    }
+    else {
+//        console.log("black to move");
+        fen +=' b';
+    }
+    fen += " "+castling_fen+" - 0 1";
+
+    var valid = tmp_game.load(fen);
+    console.log(fen);
+
+    if (!valid) {
+        console.log("Invalid FEN!");
+    }
+    else {
+        $('#gameControls').show();
+        $('#setupBoardControls').hide();
+        board.destroy();
+        board = new ChessBoard('board', cfg);
+
+        board.position(fen);
+        currentPosition = {};
+        currentPosition.fen=fen;
+        setupBoardFen = fen;
+//        currentPosition.previous = null;
+        gameHistory = currentPosition;
+        gameHistory.gameHeader = '';
+        gameHistory.result = '';
+        gameHistory.variations = [];
+//        console.log(currentPosition.fe)
+
+        updateStatus();
+
+
+    }
+//    console.log(board.position());
+//    game.se
+}
+
+function is_main_variation(variation) {
+    if (!variation.previous)  return true;
+
+    else {
+        return variation.previous.variations.indexOf(variation) == 0;
+    }
+}
+
+function is_main_line(variation) {
+    if (!variation.previous)  return true;
+
+    else {
+        return (variation.previous.variations.indexOf(variation) == 0 && is_main_line(variation.previous));
+    }
+}
+
+function addNewMove(move, current_position, tmp_game) {
+    var node = {};
+    node.variations = [];
+    node.move = move;
+    node.previous = current_position;
+    if (current_position && current_position.previous) {
+        node.half_move_num = +node.previous.half_move_num + 1;
+    }
+    else {
+        node.half_move_num = 1;
+//        gameHistory = current_position; // point to root node
+    }
+    node.fen = tmp_game.fen();
+//        console.log(node.fen);
+    if ($.isEmptyObject(fenHash)) {
+//        console.log("inserting first node");
+        fenHash['first'] = node.previous;
+        if (!setupBoardFen) {
+            node.previous.fen = START_FEN;
+        }
+//        node.previous.variations = [node];
+    }
+    fenHash[node.fen] = node;
+//    console.log(current_position);
+    if (current_position) {
+        if (!current_position.variations) {
+            current_position.variations = [];
+        }
+        current_position.variations.push(node);
+    }
+//    current_position = node;
+
+
+    return {node: node, position : current_position};
+}
+function loadGame(i) {
+//      game = new Chess();
+    var curr_fen;
+    if (currentPosition) {
+        curr_fen = currentPosition.fen;
+    }
+    else {
+        curr_fen = START_FEN;
+    }
+//    console.log(pgnData[i].join('\n'));
+    game.load_pgn(pgnData[i].join('\n'), {newline_char:'\n'});
+    var game_moves = game.history({verbose: true});
+    fenHash = {};
+    gameHistory.previous = null;
+//    var gameNode = {};
+//    writeGameText(game, pgnEl);
+    currentPosition = {};
+    var current_position = currentPosition;
+    gameHistory = current_position;
+
+    var tmp_game = new Chess();
+    gameHistory.fen = tmp_game.fen();
+    var start_fen = gameHistory.fen;
+//    fenHash['first'] = fenHash[tmp_game.fen()];
+//    console.log(game_moves);
+
+    for (var j=0;j<game_moves.length;j++) {
+
+        var move = tmp_game.move(game_moves[j]);
+
+        var __ret = addNewMove(move, current_position, tmp_game);
+//        console.log(__ret);
+        current_position = __ret.node;
+    }
+
+    fenHash['last'] = fenHash[tmp_game.fen()];
+
+//    console.log(curr_fen);
+    if (curr_fen === undefined) {
+        currentPosition = fenHash['first'];
+//        console.log(currentPosition);
+
+    }
+    else {
+        currentPosition = fenHash[curr_fen];
+    }
+//    console.log(currentPosition);
+//        console.log(fenHash[curr_fen]);
+//    goToFen(curr_fen);
+    currentGame = i;
+//      updateStatus();
+    var h = game.header();
+    var result = h.Result;
+    var gameHeaderText = getGameHeader(h);
+    gameHistory.gameHeader = gameHeaderText;
+    gameHistory.result = result;
+    writeVariationTree(pgnEl, walk_tree_iterative(gameHistory.variations), gameHistory);
+    $('.fen').on('click', goToGameFen);
+
+
+}
+
+function writeVariationTree(dom, gameMoves, gameHistoryEl) {
+    $(dom).html(gameHistoryEl.gameHeader + '<div class="gameMoves">' + gameMoves + ' <span class="gameResult">' + gameHistoryEl.result + '</span></div>');
+
+}
+
+
+function getGameHeader(h) {
+
+    var gameHeaderText = '<h4>' + h.White + ' (' + h.WhiteElo + ') - ' + h.Black + ' (' + h.BlackElo + ')</h4>';
+    gameHeaderText += '<h5>' + h.Event + ', ' + h.Site + ' ' + h.EventDate + '</h5>';
+
+    return gameHeaderText;
+}
+
+//Write the game to the DOM
+function writeGameText(g, dom, skip_header) {
+
+    //remove the header to get the moves
+    var h = g.header();
+    if (typeof(h.Result) == 'undefined') {
+        h.Result = '';
+    }
+    var gameHeaderText = '<h4>' + h.White + ' (' + h.WhiteElo + ') - ' + h.Black + ' (' + h.BlackElo + ')</h4>';
+    gameHeaderText += '<h5>' + h.Event + ', ' + h.Site + ' ' + h.EventDate + '</h5>';
+    if (skip_header) {
+        gameHeaderText = '';
+    }
+    var pgn = g.pgn();
+    var gameMoves = pgn.replace(/\[(.*?)\]/gm, '').replace(h.Result, '').trim();
+//    console.log(pgn);
+//    console.log(g);
+    var game = new Chess();
+    //format the moves so each one is individually identified, so it can be highlighted
+//    console.log(gameMoves);
+    var moveArray = gameMoves.split(/([0-9]+\.\s)/).filter(function(n) {return n;});
+    for (var i = 0, l = moveArray.length; i < l; ++i) {
+        var s = $.trim(moveArray[i]);
+        if (!/^[0-9]+\.$/.test(s)) { //move numbers
+            var m = s.split(/\s+/);
+            for (var j = 0, ll = m.length; j < ll; ++j) {
+                game.move(m[j]);
+//                m[j] = '<span class="gameMove' + (i + j - 1) + '"><a id="myLink" href="#" onclick="goToMove(' + (i + j - 1) + ');return false;">' + m[j] + '</a></span>';
+//                var stripped_fen = game.fen().replace(" ","");
+                var fen = game.fen();
+                var stripped_fen = strip_fen(fen);
+
+                m[j] = '<span class="gameMove' + (i + j - 1) + '"><a href="#" class="fen" data-fen="'+fen+'" id="'+stripped_fen+'">' + m[j] + '</a></span>';
+
+            }
+            s = m.join(' ');
+        }
+        moveArray[i] = s;
+    }
+
+    $(dom).html(gameHeaderText + '<div class="gameMoves">' + moveArray.join(' ') + ' <span class="gameResult">' + h.Result + '</span></div>');
+
+}
+
+function newGame() {
+    var baseTime = parseFloat($('#timeBase').val()) * 60;
+    var inc = parseFloat($('#timeInc').val());
+    var skill = parseInt($('#skillLevel').val());
+//        console.log($('#skillLevel').val());
+    var human_bonus = parseInt($('#humanBonus').val()) * 60;
+    var engine_game = engineGame({book: '/static/resources/gm1950.bin', board: board});
+
+    $('#playBtn').popover("hide");
+    $('#boardheader').show();
+    $('#boardfooter').show();
+
+    var player_color = $('#color-white').hasClass('active') ? 'white' : 'black';
+    var bonus = {};
+//    console.log(human_bonus);
+    if (human_bonus>0) {
+        if (player_color == 'white') {
+            bonus.white = human_bonus;
+        }
+        else if (player_color == 'black') {
+            bonus.black = human_bonus;
+        }
+    }
+    engine_game.reset();
+    engine_game.setTime(baseTime, inc, bonus);
+    engine_game.setSkillLevel(skill);
+    engine_game.setPlayerColor(player_color);
+//        console.log($('#showScore').is(':checked'));
+    engine_game.setDisplayScore($('#showScore').is(':checked'));
+    engine_game.start();
+}
+
+function getNextGameMove() {
+    if (currentPly < gameHistory.length - 1) {
+        return gameHistory[currentPly+1].san;
+    }
+    return false;
+}
+
+function fwd() {
+    stop_analysis();
+//    console.log(currentPosition);
+    if (currentPosition && currentPosition.variations[0]) {
+        currentPosition = currentPosition.variations[0];
+//        console.log(currentPosition.variations[0]);
+        if (currentPosition) {
+            board.position(currentPosition.fen);
+        }
+    }
+    updateStatus();
+}
+
+function newBoard() {
+    stop_analysis();
+//    currentPosition
+
+    currentPosition = {};
+    gameHistory = currentPosition;
+    gameHistory.gameHeader = '';
+    gameHistory.result = '';
+    gameHistory.variations = [];
+
+    curr_move.num = 1;
+    curr_move.fen = '';
+    currentPosition.fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+    board.position(currentPosition.fen);
+    setupBoardFen = '';
+
+    writeVariationTree(pgnEl, walk_tree_iterative(gameHistory.variations), gameHistory);
+
+    updateStatus();
+}
+
+
+function goToStart() {
+    stop_analysis();
+    currentPosition = gameHistory;
+    board.position(currentPosition.fen);
+
+//    if (currentPosition.variations) {
+//        currentPosition = currentPosition.variations[0];
+//    }
+    updateStatus();
+
+}
+
+
+function goToGameFen() {
+    var fen =  $(this).attr('data-fen');
+    stop_analysis();
+
+    currentPosition = fenHash[fen];
+    board.position(currentPosition.fen);
+    updateStatus();
+
+}
+
+//used for clickable moves in gametext
+//not used for buttons for efficiency
+
+function goToMove(ply, variation_index, variation_subindex) {
+    stop_analysis();
+
+    if (ply > gameHistory.length - 1) ply = gameHistory.length - 1;
+    game.reset();
+    for (var i = 0; i <= ply; i++) {
+        game.move(gameHistory[i].san);
+    }
+//    console.log(variation_index);
+    if (!(variation_index === undefined)) {
+//        console.log(variation_subindex);
+        for (i=0; i<=variation_subindex; i++) {
+            game.move(gameHistory[ply].variations[variation_index][i]);
+        }
+    }
+    currentPly = i - 1;
+    board.position(game.fen());
+    updateStatus();
+}
+
+function goToFen(fen) {
+    stop_analysis();
+
+    var end = gameHistory.length - 1;
+//        console.log("curr_fen:");
+//        console.log(fen);
+    game.reset();
+    for (var i = 0; i <= end; i++) {
+        if (game.fen() == fen) {
+            break;
+        }
+        game.move(gameHistory[i].san);
+//            console.log(game.fen());
+
+    }
+    // No point in going to end of game
+    if (i==end) {
+        goToStart();
+        return;
+    }
+    currentPly = i - 1;
+    board.position(game.fen());
+    updateStatus();
+}
+
+
+
+function goToEnd() {
+    stop_analysis();
+
+    currentPosition = fenHash.last;
+//    console.log(currentPosition);
+    board.position(currentPosition.fen);
+
+
+//    board.position(game.fen());
+    updateStatus();
+}
+
+function undoMove() {
+    stop_analysis();
+
+//        console.log("undo");
+    game.undo();
+//        console.log(game.fen());
+    board.position(game.fen());
+    updateStatus();
+}
+
+function goBack() {
+    stop_analysis();
+
+    if (currentPosition && currentPosition.previous) {
+        currentPosition = currentPosition.previous;
+        board.position(currentPosition.fen);
+    }
+
+    updateStatus();
+
+}
+
+function startGame() {
+    stop_analysis();
+
+    game = new Chess();
+    board.position(game.fen());
+    updateStatus();
+}
+
+ function dynamicSort(property) {
+    var sortOrder = 1;
+    var abs_value = false;
+    if(property[0] === "-") {
+        abs_value = true;
+        sortOrder = -1;
+        property = property.substr(1);
+    }
+
+    if(property[0] === "+") {
+        abs_value = true;
+        property = property.substr(1);
+    }
+
+    return function (a,b) {
+        var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+        if (abs_value) {
+            result = (Math.abs(a[property]) < Math.abs(b[property])) ? -1 : (Math.abs(a[property]) > Math.abs(b[property])) ? 1 : 0;
+        }
+
+        return result * sortOrder;
+    }
+}
+
+function get_current_fen() {
+     var current_fen = 'startpos';
+     if (currentPosition && currentPosition.fen) {
+//        analysis_game.load(currentPosition.fen);
+//        start_move_num = getCountPrevMoves(currentPosition) + 1;
+        current_fen =  currentPosition.fen;
+    }
+    return current_fen;
+}
+
+function formatEngineOutput(line) {
+//    console.log(line);
+    if (line.search("depth") > 0 && line.search("currmove") < 0) {
+        var analysis_game = new Chess();
+        var start_move_num = 1;
+        var current_fen = 'startpos';
+        if (currentPosition && currentPosition.fen) {
+            analysis_game.load(currentPosition.fen);
+            start_move_num = getCountPrevMoves(currentPosition) + 1;
+            current_fen =  currentPosition.fen;
+        }
+
+        var output = '';
+        var tokens = line.split(" ");
+        var depth_index = tokens.indexOf("depth")+1;
+        var depth = tokens[depth_index];
+        var score_index = tokens.indexOf("score")+1;
+
+        var multipv_index = tokens.indexOf("multipv");
+        var multipv = 0;
+        if (multipv_index > -1) {
+            multipv = Number(tokens[multipv_index+1]);
+        }
+
+        var score = tokens[score_index];
+        if (score == 'cp') {
+            score = (tokens[score_index+1]/100.0).toFixed(2);
+            if (analysis_game.turn() == 'b') {
+                score *=-1;
+            }
+
+        }
+        else if (score == 'mate') {
+            score = '#' + score;
+        }
+        var pv_index = tokens.indexOf("pv")+1;
+
+        var pv_out = tokens.slice(pv_index);
+        var first_move = pv_out[0];
+        for (var i = 0; i < pv_out.length; i++) {
+            var from = pv_out[i].slice(0,2);
+            var to = pv_out[i].slice(2,4);
+            var promotion = '';
+//            console.log("move length: ");
+//            console.log(pv_out[i].length);
+//            console.log(pv_out[i]);
+            if (pv_out[i].length==5) {
+                promotion = pv_out[i][4];
+            }
+//            console.log("promotion: ");
+//            console.log(promotion);
+            if (promotion) {
+                var mv = analysis_game.move(({from: from, to: to, promotion: promotion}));
+//                console.log("promotion output");
+//                console.log(mv);
+            } else {
+                analysis_game.move(({from: from, to: to}));
+            }
+        }
+
+        var history = analysis_game.history();
+//        console.log("game_history");
+//        console.log(history);
+        var turn_sep = '';
+        if (start_move_num % 2 == 0) {
+            turn_sep = '..';
+        }
+        if (score !== null) {
+            output = score + "/" + depth + " " + turn_sep;
+        }
+        for (i=0; i < history.length; ++i) {
+            if ((start_move_num + i) % 2 == 1) {
+                output += Math.floor((start_move_num + i+1)/2)+". ";
+            }
+            if (history[i]) {
+                output += history[i] + " ";
+            }
+
+        }
+        analysis_game = null;
+
+//        // Store line
+//        if (!window.engine_lines[current_fen]) {
+//            window.engine_lines[current_fen]=[];
+//        }
+//        var depth_int = Number(depth);
+//        if (depth_int>10) {
+//            window.engine_lines[current_fen].push({depth: depth_int, first_move: first_move, score: score, line: output});
+//        }
+        return {line: output, pv_index: multipv};
+
+    }
+    else if (line.search("currmove") < 0 && line.search("time") < 0) {
+        return line;
+    }
+
+//        return output;
+
+}
+
+function play() {
+    console.log("Play!");
+
+}
+
+function multipv_increase() {
+//    window.stockfish.postMessage('go infinite');
+    if (window.stockfish) {
+        window.multipv += 1;
+
+        window.stockfish.postMessage('setoption name multipv value ' + window.multipv);
+        if (window.analysis) {
+
+            window.stockfish.postMessage('stop');
+            window.stockfish.postMessage('go infinite');
+
+        }
+        else {
+            $('#engineMultiPVStatus').html(window.multipv + " line(s)");
+
+        }
+//
+//        if (window.cloud_analysis_engine) {
+//        $.post("/cloud", { action: "send_command", command: 'setoption name multipv value ' + window.multipv}, function (data) {});
+//
+//        }
+
+        var new_div_str = "<div id=\"pv_" + window.multipv+"\"></div>";
+        $("#pv_output").append(new_div_str);
+
+//        console.log(new_div_str);
+
+    }
+
+}
+
+function multipv_decrease() {
+    if (window.multipv > 1) {
+        $("#pv_"+window.multipv).remove();
+
+        window.multipv -= 1;
+//    window.stockfish.postMessage('go infinite');
+        window.stockfish.postMessage('setoption name multipv value ' + window.multipv);
+
+        if (window.analysis) {
+            window.stockfish.postMessage('stop');
+            window.stockfish.postMessage('go infinite');
+        }
+        else {
+            $('#engineMultiPVStatus').html(window.multipv + " line(s)");
+
+        }
+
+//
+//        if (window.cloud_analysis_engine) {
+//            $.post("/cloud", { action: "send_command", command: 'setoption name multipv value ' + window.multipv}, function (data) {});
+//
+//        }
+
+
+    }
+
+}
+
+
+function analyze_pressed() {
+    analyze(false);
+}
+
+function stockfishPNACLModuleDidLoad() {
+    window.StockfishModule = document.getElementById('stockfish_module');
+    window.StockfishModule.postMessage('uci');
+//    window.StockfishModule.postMessage('setoption name multipv value 4');
+
+    $('#analyzeBtn').prop('disabled', false);
+    window.stockfish = StockfishModule;
+
+
+}
+
+function handleCrash(event) {
+    console.log("Nacl Module crash handler method..");
+    load_nacl_stockfish();
+}
+
+function handleMessage(event) {
+    var output = formatEngineOutput(event.data);
+//    console.log(output);
+    if (output && output.pv_index && output.pv_index>0) {
+        $('#pv_'+output.pv_index).html(output.line+" <hr>");
+    }
+    $('#engineMultiPVStatus').html(window.multipv + " line(s)");
+
+}
+
+function stop_analysis() {
+    if (!window.StockfishModule) {
+//        console.log(window.stockfish);
+        if (window.stockfish) {
+            window.stockfish.terminate();
+        }
+    }
+    else {
+        window.StockfishModule.postMessage("stop");
+    }
+
+}
+
+function getCountPrevMoves(node) {
+     if (node.previous) {
+        return getCountPrevMoves(node.previous) + 1;
+    } else {
+        return 0;
+    }
+}
+
+function getPreviousMoves(node, format) {
+    format = format || "raw";
+
+    if (node.previous) {
+        if (format=="san") {
+            var san = "";
+//            console.log(node.half_move_num);
+            if (node.half_move_num % 2 == 1) {
+                san += Math.floor((node.half_move_num + 1) / 2) + ". "
+            }
+            san += node.move.san;
+            return getPreviousMoves(node.previous, format) + ' ' + san;
+        }
+        else {
+            return getPreviousMoves(node.previous, format) + ' ' + node.move.from + node.move.to + (node.move.promotion ? node.move.promotion : '');
+        }
+    } else {
+        return '';
+    }
+}
+
+function analyze(position_update) {
+//    StockfishModule = null;
+//    console.log('analyze called');
+    if (!position_update) {
+        if ($('#AnalyzeText').text()=="Analyze") {
+            window.analysis = true;
+            $('#AnalyzeText').text("Stop");
+        }
+        else {
+            $('#AnalyzeText').text("Analyze");
+            console.log("stopping engine..");
+            stop_analysis();
+            window.analysis = false;
+            $('#engineStatus').html('');
+//            $('#engineMultiPVStatus').html(window.multipv + " line(s)");
+
+            return;
+        }
+    }
+    var moves;
+    if (currentPosition === undefined) {
+        moves = '';
+    }
+    else {
+        moves = getPreviousMoves(currentPosition);
+    }
+
+    if (!window.stockfish) {
+        window.stockfish = new Worker('/static/js/stockfish.js');
+        window.stockfish.onmessage = function(event) {
+            $('#engineStatus').html(formatEngineOutput(event.data));
+
+        };
+    }
+//    else {
+//        if (!window.stockfish) {
+//            window.stockfish = StockfishModule;
+//        }
+//    }
+//    console.log(moves);
+
+    var startpos = 'startpos';
+    if (setupBoardFen) {
+        startpos = 'fen '+setupBoardFen;
+    }
+//    console.log(startpos);
+    window.stockfish.postMessage('position '+startpos+' moves ' + moves);
+    window.stockfish.postMessage('go infinite');
+}
+
+
+
+
+
+</script>
+
 {% endblock %}
