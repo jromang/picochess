@@ -13,7 +13,7 @@ runs on a desktop computer (Linux, OSX, Windows). You will need to install this 
   
 * `Python 3 <https://www.python.org/downloads/>`_ (on mac OS X, brew install python3)
   
-* `pycrypto <https://pypi.python.org/pypi/pycrypto>`_
+* `pycrypto <https://pypi.python.org/pypi/pycrypto>`_ (on mac OS X, brew install pycrypto)
   
 * `git <http://git-scm.com/>`_ (the git executable has to be in the system PATH)
   
