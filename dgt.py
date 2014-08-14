@@ -419,6 +419,10 @@ class DGTBoard(Observable, Display, threading.Thread):
                 message = self.message_queue.get_nowait()
                 if message == Message.COMPUTER_MOVE:
                     uci_move = message.move
+                    print("BEST MOVE:"+uci_move)
+                    self.write([Commands.DGT_CLOCK_MESSAGE, 0x0a, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_SETNRUN,
+                               0, 0, 0, 0, 0, 0,
+                               0x04, Clock.DGT_CMD_CLOCK_END_MESSAGE])
                     self.display_on_dgt_xl(' ' + uci_move, True)
                     self.light_squares_revelation_board((uci_move[0:2], uci_move[2:4]))
                 elif message == Message.START_NEW_GAME:
