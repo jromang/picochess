@@ -9,7 +9,7 @@ Manual installation
 
 1. Requirements
 PicoChess is mainly targetted for small devices like the `Raspberry Pi <http://www.raspberrypi.org>`_, however is also
-runs on a desktop computer. You will need to install this first :
+runs on a desktop computer (Linux, OSX, Windows). You will need to install this first :
   
 * `Python 3 <https://www.python.org/downloads/>`_ (on mac OS X, brew install python3)
   
