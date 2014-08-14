@@ -24,27 +24,6 @@ import threading
 from collections import deque
 
 
-def which(program):
-    """ Find an executable file on the system path.
-    :param program: Name or full path of the executable file
-    :return: Full path of the executable file, or None if it was not found
-    """
-    def is_exe(fpath):
-        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
-    fpath, fname = os.path.split(program)
-    if fpath:
-        if is_exe(program):
-            return program
-    else:
-        for path in os.environ["PATH"].split(os.pathsep) + [os.path.dirname(os.path.realpath(__file__))]:
-            path = path.strip('"')
-            exe_file = os.path.join(path, program)
-            if is_exe(exe_file):
-                return exe_file
-    logging.warning("Engine executable [%s] not found", program)
-    return None
-
-
 class Engine(Observable):
 
     def __init__(self, path, hostname=None, username=None, key_file=None, password=None):

@@ -14,9 +14,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import logging
 import queue
 import os
+import platform
 import random
+import subprocess
 try:
     import enum
 except ImportError:
@@ -154,3 +157,35 @@ def hours_minutes_seconds(seconds):
     m, s = divmod(seconds, 60)
     h, m = divmod(m, 60)
     return h, m, s
+
+
+def which(program):
+    """ Find an executable file on the system path.
+    :param program: Name or full path of the executable file
+    :return: Full path of the executable file, or None if it was not found
+    """
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep) + [os.path.dirname(os.path.realpath(__file__))]:
+            path = path.strip('"')
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+    logging.warning("Engine executable [%s] not found", program)
+    return None
+
+
+def update_picochess():
+    git = which('git.exe' if platform.system() == 'Windows' else 'git')
+    if git:
+        branch = subprocess.Popen([git, "rev-parse", "--abbrev-ref", "HEAD"], stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8').rstrip()
+        if branch == 'stable':
+            logging.debug('Updating')
+            output = subprocess.Popen([git, "pull"], stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
+            logging.debug(output)
+

@@ -48,6 +48,9 @@ def main():
     logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
                         format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
 
+    # Update
+    update_picochess()
+
     # Load UCI engine
     engine = uci.Engine(args.engine, hostname=args.remote, username=args.user, key_file=args.key_file, password=args.password)
     logging.debug('Loaded engine [%s]', engine.name)
