@@ -8,16 +8,16 @@ Manual installation
 -------------------
 
 1. Requirements
-  PicoChess is mainly targetted for small devices like the `Raspberry Pi <http://www.raspberrypi.org>`_, however is also
-  runs on a desktop computer. You will need to install this first :
+PicoChess is mainly targetted for small devices like the `Raspberry Pi <http://www.raspberrypi.org>`_, however is also
+runs on a desktop computer. You will need to install this first :
   
-  * `Python 3 <https://www.python.org/downloads/>`_ (on mac OS X, brew install python3)
+* `Python 3 <https://www.python.org/downloads/>`_ (on mac OS X, brew install python3)
   
-  * `python-crypto <https://pypi.python.org/pypi/pycrypto>`_
+* `python-crypto <https://pypi.python.org/pypi/pycrypto>`_
   
-  * `git <http://git-scm.com/>`_ (the git executable has to be in the system PATH)
+* `git <http://git-scm.com/>`_ (the git executable has to be in the system PATH)
   
-  * An UCI chess engine ; `Stockfish <http://stockfishchess.org/>`_ is probably the best choice !
+* An UCI chess engine ; `Stockfish <http://stockfishchess.org/>`_ is probably the best choice !
 
 2. Clone PicoChess's git repository::
   
@@ -29,8 +29,8 @@ Manual installation
   
 4. Run picochess from command line
 
-  Picochess has a lot of options ; type::
+Picochess has a lot of options ; type::
   
-    python3 picochess.py -h
+  python3 picochess.py -h
   
-  for a list. 
+for a list. 
