@@ -1,65 +1,76 @@
 Usage
 =====
 
-## Choosing skill level
-Put the extra **black** queen on your DGT board to select skill level.  Putting it on square **A6** will select level 0 (easiest level), while **B6** selects level 1, **C6** selects level 2, etc.  If no skill level is selected, PicoChess uses level 20 (the highest level) by default.  Level 20 can also be selected by placing the extra black queen on square **E4**.
+Choosing skill level
+--------------------
+Put the extra black queen on your DGT board to select skill level. Putting it on square A6 will select level 0 (easiest), while B6 selects level 1, C6 selects level 2, etc. If no skill level is selected, PicoChess uses level 20 (the highest level) by default. Level 20 can also be selected by placing the extra black queen on square E4.
 
-* Level  0  estimates about 1100 Elo ( Absolute beginner )
-* Level 10 estimates about 1750 Elo ( Mediate clubplayer )
-* Level 20 estimates about 2570 Elo  ( Advanced tournament player )
+* Level  0 estimates about 1100 Elo (Absolute beginner)
+* Level 10 estimates about 1750 Elo (Mediate club player )
+* Level 20 estimates about 2570 Elo (Advanced tournament player)
 
-## Choosing opening books
-Opening books are also selected with the extra **black** queen:
+Choosing opening books
+----------------------
 
-1. **A3** - No book
-1. **B3** - Fun
-1. **C3** - Anand
-1. **D3** - Korchnoi
-1. **E3** - Larsen
-1. **F3** - Pro
-1. **G3** - GM_2001 : GM games from 2001 to mid-September, 2012
-1. **H3** - Varied. (**Default**)
-1. **H4** - GM_1950 (> 2500 ELO GM games from 1950 till mid-Sept, 2012)
-1. **G4** - Performance
-1. **F4** - Stockfish optimized book v 2.11 by Salvo Spitaleri
+Opening books are also selected with the extra black queen:
 
-## Setting up time controls
-Time controls are set with the extra **white** queen. Remove the extra black queen if it is still on the board.
+* A3 - No book
+* B3 - Fun
+* C3 - Anand
+* D3 - Korchnoi
+* E3 - Larsen
+* F3 - Pro
+* G3 - GM_2001 : GM games from 2001 to mid-September, 2012
+* H3 - Varied. (Default)
+* H4 - GM_1950 (> 2500 ELO GM games from 1950 till mid-Sept, 2012)
+* G4 - Performance
+* F4 - Stockfish optimized book v 2.11 by Salvo Spitaleri
 
-1. **A6** - 1 second per move
-1. **B6** - 3 seconds per move
-1. **C6** - 5 seconds per move
-1. **D6** - 10 seconds per move
-1. **E6** - 15 seconds per move
-1. **F6** - 30 seconds per move
-1. **G6** - 60 seconds per move
-1. **H6** - 120 seconds per move
+Setting up time controls
+------------------------
 
-## Blitz Levels
-Blitz time controls are set with the extra **white** queen. Remove the extra black queen if it is still on the board.
+Time controls are set with the extra white queen. Remove the extra black queen if it is still on the board.
 
-1.	**A4** - 1 minute game
-1.	**B4** - 3 minute game
-1.	**C4** - 5 minute game
-1.	**D4** - 10 minute game
-1.	**E4** - 15 minute game
-1.	**F4** - 30 minute game
-1.	**G4** - 60 minute game (1 hour)
-1.	**H4** - 90 minute game (1 hour and 30 minutes)
+* A6 - 1 second per move
+* B6 - 3 seconds per move
+* C6 - 5 seconds per move
+* D6 - 10 seconds per move
+* E6 - 15 seconds per move
+* F6 - 30 seconds per move
+* G6 - 60 seconds per move
+* H6 - 120 seconds per move
 
-## Fischer Increment Blitz Levels
-These are set with the extra **white** queen. Remove the extra black queen if it is still on the board.
+Blitz Levels
+------------
 
-1. **A3** - 3 minute game with 2 second Fischer increment
-2. **B3** - 4 minute game with 2 second Fischer increment
-3. **C3** - 5 minute game with 3 second Fischer increment
-4. **D3** - 5 minute game with 5 second Fischer increment
-1. **E3** - 15 minute game with 5 second Fischer increment
-1. **F3** - 25 minute game with 5 second Fischer increment
-1. **G3** - 90 minute game with 30 second Fischer increment
+Blitz time controls are set with the extra white queen. Remove the extra black queen if it is still on the board.
 
-##PicoChess with White
-To force PicoChess to play with White just take the black king off the board and put it back. If you want to play with White again just take the white king off the board and put it back. Note: **You have to be in the starting position!**
+* A4 - 1 minute game
+* B4 - 3 minute game
+* C4 - 5 minute game
+* D4 - 10 minute game
+* E4 - 15 minute game
+* F4 - 30 minute game
+* G4 - 60 minute game (1 hour)
+* H4 - 90 minute game (1 hour and 30 minutes)
+
+Fischer Increment Blitz Levels
+------------------------------
+
+These are set with the extra white queen. Remove the extra black queen if it is still on the board.
+
+* A3 - 3 minute game with 2 second Fischer increment
+* B3 - 4 minute game with 2 second Fischer increment
+* C3 - 5 minute game with 3 second Fischer increment
+* D3 - 5 minute game with 5 second Fischer increment
+* E3 - 15 minute game with 5 second Fischer increment
+* F3 - 25 minute game with 5 second Fischer increment
+* G3 - 90 minute game with 30 second Fischer increment
+
+PicoChess with White
+--------------------
+
+To force PicoChess to play with White just take the black king off the board and put it back. If you want to play with White again just take the white king off the board and put it back. Note: You have to be in the starting position!
 
 System shutdown
 ---------------
