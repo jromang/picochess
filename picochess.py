@@ -72,7 +72,7 @@ def main():
         # Enable keyboard input and terminal display
         KeyboardInput().start()
         # TerminalDisplay().start()
-        WebServer().start()
+    WebServer().start()
 
     def compute_legal_fens(g):
         """
