@@ -169,6 +169,7 @@ def main():
                 elif (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.WHITE) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.BLACK):
                     time_control.stop()
                     game.push(move)
+                    Display.show(Message.USER_MOVE, move=move, game=game)
                     think(time_control)
                 break
 

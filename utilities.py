@@ -66,6 +66,7 @@ class Message(AutoNumber):
     PLAYER_OUT_OF_TIME = ()
     UPDATE_CLOCK = ()  # Message send every second when to clock runs, containing white_time and black_time
     RUN_CLOCK = ()  # Say to run autonomous clock, contains time_control
+    USER_MOVE = ()  # Player has done a move on board
 
 
 @enum.unique
