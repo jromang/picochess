@@ -12,60 +12,60 @@ Put the extra black queen on your DGT board to select skill level. Putting it on
 Choosing opening books
 ----------------------
 
-Opening books are also selected with the extra black queen:
+Opening books are also selected with the extra **black** queen:
 
-* A3 - No book
-* B3 - Fun
-* C3 - Anand
-* D3 - Korchnoi
-* E3 - Larsen
-* F3 - Pro
-* G3 - GM_2001 : GM games from 2001 to mid-September, 2012
-* H3 - Varied. (Default)
-* H4 - GM_1950 (> 2500 ELO GM games from 1950 till mid-Sept, 2012)
-* G4 - Performance
-* F4 - Stockfish optimized book v 2.11 by Salvo Spitaleri
+* **A3** - No book
+* **B3** - Fun
+* **C3** - Anand
+* **D3** - Korchnoi
+* **E3** - Larsen
+* **F3** - Pro
+* **G3** - GM_2001 : GM games from 2001 to mid-September, 2012
+* **H3** - Varied. (Default)
+* **H4** - GM_1950 (> 2500 ELO GM games from 1950 till mid-Sept, 2012)
+* **G4** - Performance
+* **F4** - Stockfish optimized book v 2.11 by Salvo Spitaleri
 
 Setting up time controls
 ------------------------
 
-Time controls are set with the extra white queen. Remove the extra black queen if it is still on the board.
+Time controls are set with the extra **white** queen. Remove the extra black queen if it is still on the board.
 
-* A6 - 1 second per move
-* B6 - 3 seconds per move
-* C6 - 5 seconds per move
-* D6 - 10 seconds per move
-* E6 - 15 seconds per move
-* F6 - 30 seconds per move
-* G6 - 60 seconds per move
-* H6 - 120 seconds per move
+* **A6** - 1 second per move
+* **B6** - 3 seconds per move
+* **C6** - 5 seconds per move
+* **D6** - 10 seconds per move
+* **E6** - 15 seconds per move
+* **F6** - 30 seconds per move
+* **G6** - 60 seconds per move
+* **H6** - 120 seconds per move
 
 Blitz Levels
 ------------
 
-Blitz time controls are set with the extra white queen. Remove the extra black queen if it is still on the board.
+Blitz time controls are set with the extra **white** queen. Remove the extra black queen if it is still on the board.
 
-* A4 - 1 minute game
-* B4 - 3 minute game
-* C4 - 5 minute game
-* D4 - 10 minute game
-* E4 - 15 minute game
-* F4 - 30 minute game
-* G4 - 60 minute game (1 hour)
-* H4 - 90 minute game (1 hour and 30 minutes)
+* **A4** - 1 minute game
+* **B4** - 3 minute game
+* **C4** - 5 minute game
+* **D4** - 10 minute game
+* **E4** - 15 minute game
+* **F4** - 30 minute game
+* **G4** - 60 minute game (1 hour)
+* **H4** - 90 minute game (1 hour and 30 minutes)
 
 Fischer Increment Blitz Levels
 ------------------------------
 
-These are set with the extra white queen. Remove the extra black queen if it is still on the board.
+These are set with the extra **white** queen. Remove the extra black queen if it is still on the board.
 
-* A3 - 3 minute game with 2 second Fischer increment
-* B3 - 4 minute game with 2 second Fischer increment
-* C3 - 5 minute game with 3 second Fischer increment
-* D3 - 5 minute game with 5 second Fischer increment
-* E3 - 15 minute game with 5 second Fischer increment
-* F3 - 25 minute game with 5 second Fischer increment
-* G3 - 90 minute game with 30 second Fischer increment
+* **A3** - 3 minute game with 2 second Fischer increment
+* **B3** - 4 minute game with 2 second Fischer increment
+* **C3** - 5 minute game with 3 second Fischer increment
+* **D3** - 5 minute game with 5 second Fischer increment
+* **E3** - 15 minute game with 5 second Fischer increment
+* **F3** - 25 minute game with 5 second Fischer increment
+* **G3** - 90 minute game with 30 second Fischer increment
 
 PicoChess with White
 --------------------
@@ -82,10 +82,10 @@ Book/Training Modes
 
 When using these modes, please be patient and dont rush moves. Allow a few seconds for the book moves to appear. If you see any bug when rushing moves, let us know on the mailing list.
 
-* Book mode is enabled by putting the white queen on the A5 square. Book mode will return the top 3 book moves in descending order (by score) to you when it is your turn. Descending order means that the last move on the clock is the best book move. This is useful when you want to play against the computer but are not confident in your opening preparation.
-* Analysis mode (enabled by white queen on B5) is Book mode + the computer does not play. After you move pieces, you can see the book moves or position score if out of book followed by the best move suggestion. You can play over games and see the computer evaluation. The display keeps refreshing every 2 seconds with the depth (e.g. d17), the score in centipawns (e.g. 17) OR a mate in x (e.g. m 2), followed by the recommended move. Note that the score is from the perspective of the side to move. A n100 score means the side to move is worse by about a pawn, whereas a 100 score means that the side to move is ahead by a pawn.
-* Training mode (enabled by white queen on C5) is Analysis mode but without displaying the best move. It only continuously displays the depth and score. This is useful when you want to train yourself on the values of different moves.
-* Game mode is the regular mode, but if you used one of the above modes, you can return back to game mode by putting a white queen on D5.
+* Book mode is enabled by putting the **white** queen on the **A5** square. Book mode will return the top 3 book moves in descending order (by score) to you when it is your turn. Descending order means that the last move on the clock is the best book move. This is useful when you want to play against the computer but are not confident in your opening preparation.
+* Analysis mode (enabled by **white** queen on **B5**) is Book mode + the computer does not play. After you move pieces, you can see the book moves or position score if out of book followed by the best move suggestion. You can play over games and see the computer evaluation. The display keeps refreshing every 2 seconds with the depth (e.g. d17), the score in centipawns (e.g. 17) OR a mate in x (e.g. m 2), followed by the recommended move. Note that the score is from the perspective of the side to move. A n100 score means the side to move is worse by about a pawn, whereas a 100 score means that the side to move is ahead by a pawn.
+* Training mode (enabled by **white** queen on **C5**) is Analysis mode but without displaying the best move. It only continuously displays the depth and score. This is useful when you want to train yourself on the values of different moves.
+* Game mode is the regular mode, but if you used one of the above modes, you can return back to game mode by putting a **white** queen on **D5**.
 
 (Todo: In a later version, the score will always be from white's perspective to be more consistent.)
 
