@@ -20,11 +20,9 @@ __author__ = "Niklas Fiekas"
 
 __email__ = "niklas.fiekas@tu-clausthal.de"
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 import collections
-import random
-import time
 import re
 
 
@@ -49,7 +47,7 @@ STATUS_PAWNS_ON_BACKRANK = 32
 STATUS_TOO_MANY_WHITE_PIECES = 64
 STATUS_TOO_MANY_BLACK_PIECES = 128
 STATUS_BAD_CASTLING_RIGHTS = 256
-STATUS_INVALID_EP_RANK = 512
+STATUS_INVALID_EP_SQUARE = 512
 STATUS_OPPOSITE_CHECK = 1024
 
 SAN_REGEX = re.compile("^([NBKRQ])?([a-h])?([1-8])?x?([a-h][1-8])(=[nbrqNBRQ])?(\\+|#)?$")
@@ -1393,7 +1391,7 @@ class Bitboard(object):
         return self.is_attacked_by(self.turn, self.king_squares[self.turn ^ 1])
 
     def generate_legal_moves(self, castling=True, pawns=True, knights=True, bishops=True, rooks=True, queens=True, king=True):
-        return ( move for move in self.generate_pseudo_legal_moves(castling, pawns, knights, bishops, rooks, queens, king) if not self.is_into_check(move) )
+        return (move for move in self.generate_pseudo_legal_moves(castling, pawns, knights, bishops, rooks, queens, king) if not self.is_into_check(move))
 
     def is_pseudo_legal(self, move):
         # Null moves are not pseudo legal.
@@ -1706,7 +1704,7 @@ class Bitboard(object):
         if len(parts) < 4:
             raise ValueError("epd should consist of at least 4 parts: {0}".format(repr(epd)))
 
-        operations = { }
+        operations = {}
 
         # Parse the operations.
         if len(parts) > 4:
@@ -1860,11 +1858,11 @@ class Bitboard(object):
                 # Append integer or float.
                 epd.append(" ")
                 epd.append(str(operand))
-            elif not operand is None:
+            elif operand is not None:
                 # Append as escaped string.
                 epd.append(" \"")
                 epd.append(str(operand).replace("\r", "").replace("\n", " ").replace("\\", "\\\\").replace(";", "\\s"))
-                epd.append("\"");
+                epd.append("\"")
 
             epd.append(";")
 
@@ -2248,14 +2246,17 @@ class Bitboard(object):
         if self.ep_square:
             if self.turn == WHITE:
                 ep_rank = 5
-                pawn_mask = shift_up(BB_SQUARES[self.ep_square])
+                pawn_mask = shift_down(BB_SQUARES[self.ep_square])
             else:
                 ep_rank = 2
-                pawn_mask = shift_down(BB_SQUARES[self.ep_square])
+                pawn_mask = shift_up(BB_SQUARES[self.ep_square])
 
+            # The en-passant square must be on the third or sixth rank.
             if rank_index(self.ep_square) != ep_rank:
                 errors |= STATUS_INVALID_EP_SQUARE
 
+            # The last move must have been a double pawn push, so there must
+            # be a pawn of the correct color on the fourth or fifth rank.
             if not self.pawns & self.occupied_co[self.turn ^ 1] & pawn_mask:
                 errors |= STATUS_INVALID_EP_SQUARE
 
@@ -2336,7 +2337,7 @@ class Bitboard(object):
 
         # Default random array is polyglot compatible.
         if array is None:
-            array=POLYGLOT_RANDOM_ARRAY
+            array = POLYGLOT_RANDOM_ARRAY
 
         # Hash in the board setup.
         squares = self.occupied_co[BLACK]
