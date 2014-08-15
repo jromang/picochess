@@ -7,7 +7,7 @@ Welcome to PicoChess's documentation!
 =====================================
 Stand alone chess computer based on Stcokfish and DGT board
 
-.. image :: http://91.68.209.10/bmi/img24.imageshack.us/img24/6651/imgp0232r.png
+.. image :: https://dl.dropboxusercontent.com/u/3042900/IMGP0232_r.png
 
 Contents
 --------
