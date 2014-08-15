@@ -297,7 +297,7 @@
                 </h3>
             </div>
             <div class="panel-body">
-                <div id="DGTClockStatus" cellpadding="0" cellspacing="0" style="width: 100%; align: center;overflow: auto" class="table-condensed table-bordered table-responsive flat-table flat-table-1">
+                <div id="DGTClockStatus">
 
                 </div>
 
@@ -442,33 +442,33 @@ $(function () {
 //        }
 //    }).data('dynatable');
 
-    $('#playBtn').popover({
-
-        placement : 'bottom',
-        title : 'Play',
-        container: '#rightColumn',
-        html : true,
-//                animate: false,
-        trigger: 'click',
-        content:        '<form class="form-horizontal">'+'<label for="timeBase" class="control-label pull-left">Base time (min)</label>'+
-                '<div ><input type="number" class="form-control" id="timeBase" value="5"></div>' +
-                '</div>'+
-                '<div>'+'<label for="timeInc" class="control-label pull-left">Increment (sec)</label>'+'<div>'+
-                '<input type="number"  id="timeInc" value="5">'+'</div>'+'</div>'+
-                '<div>'+'<label for="timeInc" class="control-label pull-left">Human Bonus(min)</label>'+'<div>'+
-                '<input type="number"  id="humanBonus" value="25">'+'</div>'+
-
-                '<div>'+' <label for="skillLevel" class="control-label pull-left">Skill Level (0-20)</label><div>'+
-                '<input type="number" class="form-control" id="skillLevel" value="20"></div></div>'+
-                '</div>'+
-
-                '<div>'+'<label for="color" class="control-label pull-left">Human plays</label>'+'<div>'+
-                '<div class="btn-group" data-toggle="buttons">'+'<label class="btn btn-primary active" id="color-white"><input type="radio" name="color">White</label>'+
-                '<label class="btn btn-primary" id="color-black"><input type="radio" name="color">Black</label>'+'</div>'+'</div>'+'</div>'+
-                '<div>'+'<label for="showScore" class="control-label pull-left">Show Score?</label>'+'<div>'+
-                '<input type="checkbox" class="form-control pull-left" id="showScore">'+'</div></div>'+'<div>'+'<label for="color" class="pull-left control-label"></label>'+
-                '<div>'+'<button type="button" class="pull-left btn btn-primary" onclick="newGame()">New Game</button>'+'</div>'+'</div>'+'</form>'
-    });
+//    $('#playBtn').popover({
+//
+//        placement : 'bottom',
+//        title : 'Play',
+//        container: '#rightColumn',
+//        html : true,
+////                animate: false,
+//        trigger: 'click',
+//        content:        '<form class="form-horizontal">'+'<label for="timeBase" class="control-label pull-left">Base time (min)</label>'+
+//                '<div ><input type="number" class="form-control" id="timeBase" value="5"></div>' +
+//                '</div>'+
+//                '<div>'+'<label for="timeInc" class="control-label pull-left">Increment (sec)</label>'+'<div>'+
+//                '<input type="number"  id="timeInc" value="5">'+'</div>'+'</div>'+
+//                '<div>'+'<label for="timeInc" class="control-label pull-left">Human Bonus(min)</label>'+'<div>'+
+//                '<input type="number"  id="humanBonus" value="25">'+'</div>'+
+//
+//                '<div>'+' <label for="skillLevel" class="control-label pull-left">Skill Level (0-20)</label><div>'+
+//                '<input type="number" class="form-control" id="skillLevel" value="20"></div></div>'+
+//                '</div>'+
+//
+//                '<div>'+'<label for="color" class="control-label pull-left">Human plays</label>'+'<div>'+
+//                '<div class="btn-group" data-toggle="buttons">'+'<label class="btn btn-primary active" id="color-white"><input type="radio" name="color">White</label>'+
+//                '<label class="btn btn-primary" id="color-black"><input type="radio" name="color">Black</label>'+'</div>'+'</div>'+'</div>'+
+//                '<div>'+'<label for="showScore" class="control-label pull-left">Show Score?</label>'+'<div>'+
+//                '<input type="checkbox" class="form-control pull-left" id="showScore">'+'</div></div>'+'<div>'+'<label for="color" class="pull-left control-label"></label>'+
+//                '<div>'+'<button type="button" class="pull-left btn btn-primary" onclick="newGame()">New Game</button>'+'</div>'+'</div>'+'</form>'
+//    });
 
     $(document).keydown(function(e){
         if (e.keyCode == 39) { //right arrow
@@ -499,6 +499,25 @@ $(function () {
         load_nacl_stockfish();
     }
         //get <td> element values here!!??
+    window.WebSocket=window.WebSocket || window.MozWebSocket || false;
+    if(!window.WebSocket){
+        alert("No WebSocket Support");}
+    else {
+        var ws = new WebSocket("ws://"+location.host+"/event");
+        var el=document.getElementById("DGTClockStatus");
+//        var el = $('#DGTClockStatus');
+
+        ws.onmessage=function(e){
+            var j = JSON.parse(e.data);
+            if (j.fen) {
+                board.position(j.fen, true);
+            }
+            el.innerHTML=j.msg;
+        };
+        ws.onclose=function(){
+            el.innerHTML='closed';
+        };
+    }
 });
 
 // do not pick up pieces if the game is over

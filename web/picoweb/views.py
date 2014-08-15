@@ -1,5 +1,5 @@
 from flask import render_template
-from picoweb import picoweb
+from web.picoweb import picoweb
 
 @picoweb.route('/')
 def index():

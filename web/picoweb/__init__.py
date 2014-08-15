@@ -9,7 +9,7 @@ picoweb.config['FREEZER_DESTINATION'] = os.path.dirname(os.path.abspath(__file__
 # Function to easily find your assets
 # In your template use <link rel=stylesheet href="{{ static('filename') }}">
 picoweb.jinja_env.globals['static'] = (
-    lambda filename: url_for('static', filename = filename)
+    lambda filename: url_for('static', filename=filename)
 )
 
-from picoweb import views
+from web.picoweb import views

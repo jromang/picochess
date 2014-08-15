@@ -26,6 +26,7 @@ import threading
 from timecontrol import TimeControl
 from utilities import *
 from keyboardinput import KeyboardInput, TerminalDisplay
+from server import WebServer
 
 
 def main():
@@ -70,7 +71,8 @@ def main():
         logging.warning("No DGT board port provided")
         # Enable keyboard input and terminal display
         KeyboardInput().start()
-        TerminalDisplay().start()
+        # TerminalDisplay().start()
+        WebServer().start()
 
     def compute_legal_fens(g):
         """
@@ -91,7 +93,6 @@ def main():
             g.pop()
         fens.root = g.fen().split(' ')[0]
         return fens
-
 
     def think(time):
         """
@@ -115,7 +116,6 @@ def main():
             engine.set_position(game)
             engine.go(time.uci())
             Display.show(Message.SEARCH_STARTED)
-
 
     def stop_thinking():
         """
