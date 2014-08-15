@@ -43,7 +43,7 @@ class TerminalDisplay(Display, threading.Thread):
         while True:
             #Check if we have something to display
             try:
-                message = self.message_queue.get_nowait()
+                message = self.message_queue.get()
                 if message == Message.BOOK_MOVE:
                     print('Book move')
                 elif message == Message.COMPUTER_MOVE:
