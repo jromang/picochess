@@ -44,6 +44,7 @@ def main():
     parser.add_argument("-k", "--key-file", type=str, help="key file used to connect to the remote server")
     parser.add_argument("-pgn", "--pgn-file", type=str, help="pgn file used to store the games")
     parser.add_argument("-ar", "--auto-reboot", action='store_true', help="reboot system after update")
+    parser.add_argument("-web", "--web-server", action='store_true', help="launch web server")
     args = parser.parse_args()
 
     # Enable logging
@@ -73,8 +74,11 @@ def main():
         logging.warning("No DGT board port provided")
         # Enable keyboard input and terminal display
         KeyboardInput().start()
-        # TerminalDisplay().start()
-    WebServer().start()
+        TerminalDisplay().start()
+
+    # Launch web server
+    if(args.web_server):
+        WebServer().start()
 
     def compute_legal_fens(g):
         """
