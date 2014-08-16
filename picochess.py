@@ -43,6 +43,7 @@ def main():
     parser.add_argument("-p", "--password", type=str, help="password for the remote user")
     parser.add_argument("-k", "--key-file", type=str, help="key file used to connect to the remote server")
     parser.add_argument("-pgn", "--pgn-file", type=str, help="pgn file used to store the games")
+    parser.add_argument("-ar", "--auto-reboot", action='store_true', help="reboot system after update")
     args = parser.parse_args()
 
     # Enable logging
@@ -50,7 +51,7 @@ def main():
                         format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
 
     # Update
-    update_picochess()
+    update_picochess(args.auto_reboot)
 
     # Load UCI engine
     engine = uci.Engine(args.engine, hostname=args.remote, username=args.user, key_file=args.key_file, password=args.password)

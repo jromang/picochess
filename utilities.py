@@ -181,12 +181,21 @@ def which(program):
     return None
 
 
-def update_picochess():
+def update_picochess(auto_reboot=False):
     git = which('git.exe' if platform.system() == 'Windows' else 'git')
     if git:
         branch = subprocess.Popen([git, "rev-parse", "--abbrev-ref", "HEAD"], stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8').rstrip()
         if branch == 'stable':
-            logging.debug('Updating')
-            output = subprocess.Popen([git, "pull", "origin", "stable"], stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
+            # Fetch remote repo
+            output = subprocess.Popen([git, "remote", "update"], stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
             logging.debug(output)
-
+            # Check if update is needed
+            output = subprocess.Popen([git, "status", "-uno"], stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
+            logging.debug(output)
+            if not 'up-to-date' in output:
+                # Update
+                logging.debug('Updating')
+                output = subprocess.Popen([git, "pull", "origin", "stable"], stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
+                logging.debug(output)
+                if auto_reboot:
+                    os.system('reboot now')
