@@ -52,6 +52,7 @@ def main():
 
     # Update
     update_picochess(args.auto_reboot)
+    # Update test 1
 
     # Load UCI engine
     engine = uci.Engine(args.engine, hostname=args.remote, username=args.user, key_file=args.key_file, password=args.password)
