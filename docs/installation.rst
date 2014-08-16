@@ -66,6 +66,9 @@ Copying the image to an SD Card on Mac OS X
 6. Eject the card
 
 
+.. todo:: Alternative and easier method : http://www.tweaking4all.com/hardware/raspberry-pi/macosx-apple-pi-baker/
+
+
 .. _manual-install-label:
 
 Manual installation
