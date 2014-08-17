@@ -28,6 +28,7 @@ from multiprocessing.pool import ThreadPool
 from utilities import *
 import queue
 from web.picoweb import picoweb as pw
+import chess.pgn as pgn
 
 _workers = ThreadPool(5)
 
@@ -88,10 +89,14 @@ class WebDisplay(Display, threading.Thread):
             EventHandler.write_to_clients({'msg': 'New game'})
 
         elif message == Message.SEARCH_STARTED:
-            EventHandler.write_to_clients({'msg': 'New game'})
+            EventHandler.write_to_clients({'msg': 'Thinking..'})
 
-        elif message == Message.SEARCH_STARTED:
-            EventHandler.write_to_clients({'msg': 'New game'})
+        elif message == Message.USER_MOVE:
+            # print (message.game.move_stack)
+            # exporter = pgn.StringExporter()
+            # message.game.export(exporter, headers=False, comments=False, variations=False)
+            EventHandler.write_to_clients({'msg': 'User move: '+str(message.move), 'move': str(message.move), 'fen': message.game.fen()})
+
 
     def create_task(self, msg):
         IOLoop.instance().add_callback(callback=lambda: self.task(msg))
