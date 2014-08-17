@@ -300,7 +300,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                     array.append(char_to_DGTXL[c])
             else: logging.error('Type not supported : [%s]', type(v))
         if message[0] == Commands.DGT_CLOCK_MESSAGE:  # Let a bit time for the previous clock ACKs to come
-            time.sleep(1.1)
+            time.sleep(0.3)
         while self.serial.inWaiting():  # Don't write anything when there is something to read
             self.read_message()
         self.serial.write(bytearray(array))
