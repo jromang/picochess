@@ -69,6 +69,7 @@ class Message(AutoNumber):
     RUN_CLOCK = ()  # Say to run autonomous clock, contains time_control
     USER_MOVE = ()  # Player has done a move on board
     UCI_OPTION_LIST = ()  # Contains 'options', a dict of the current engine's UCI options
+    GAME_ENDS = ()  # The current game has ended, contains a 'result' (GameResult) and list of 'moves'
 
 
 @enum.unique
@@ -86,6 +87,13 @@ class ClockMode(AutoNumber):
     FIXED_TIME = ()  # Fixed seconds per move
     BLITZ = ()  # Fixed time per game
     FISCHER = ()  # Fischer increment
+
+
+class GameResult(AutoNumber):
+    MATE = ()
+    DRAW = ()
+    STALEMATE = ()
+    TIME_CONTROL = ()
 
 
 class Observable(object):  # Input devices are observable

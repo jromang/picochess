@@ -26,6 +26,7 @@ import threading
 from timecontrol import TimeControl
 from utilities import *
 from keyboardinput import KeyboardInput, TerminalDisplay
+from pgn import PgnDisplay
 from server import WebServer
 
 
@@ -75,6 +76,9 @@ def main():
         # Enable keyboard input and terminal display
         KeyboardInput().start()
         TerminalDisplay().start()
+
+    # Save to PGN
+    PgnDisplay("test.pgn").start()
 
     # Launch web server
     if(args.web_server):
@@ -225,6 +229,7 @@ def main():
 
             if case(Event.OUT_OF_TIME):
                 stop_thinking()
+                Display.show(Message.GAME_ENDS, result=GameResult.TIME_CONTROL, moves=list(game.move_stack))
                 Display.show(Message.PLAYER_OUT_OF_TIME, color=event.color)
                 break
 
