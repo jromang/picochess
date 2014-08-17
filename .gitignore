@@ -62,3 +62,6 @@ docs/_build/
 stockfish
 stockfish.exe
 Hiarcs13.2MP.exe
+
+# PGN files
+*.pgn
