@@ -140,6 +140,9 @@ def main():
     book_thread = None  # The thread that will fire book moves
     time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=1)
 
+    #Send the engine's UCI options to all Displays
+    Display.show(Message.UCI_OPTION_LIST, options=engine.options)
+
     #Event loop
     while True:
         event = event_queue.get()
@@ -223,6 +226,10 @@ def main():
             if case(Event.OUT_OF_TIME):
                 stop_thinking()
                 Display.show(Message.PLAYER_OUT_OF_TIME, color=event.color)
+                break
+
+            if case(Event.UCI_OPTION_SET):
+                engine.set_option(event.name, event.value)
                 break
 
             if case():  # Default

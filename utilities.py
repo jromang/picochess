@@ -52,6 +52,7 @@ class Event(AutoNumber):
     BEST_MOVE = ()  # Engine has found a move
     SET_TIME_CONTROL = ()  # User sets time control
     OUT_OF_TIME = ()
+    UCI_OPTION_SET = ()  # Users sets an UCI option, contains 'name' and 'value' (strings)
 
 
 class Message(AutoNumber):
@@ -67,6 +68,7 @@ class Message(AutoNumber):
     UPDATE_CLOCK = ()  # Message send every second when to clock runs, containing white_time and black_time
     RUN_CLOCK = ()  # Say to run autonomous clock, contains time_control
     USER_MOVE = ()  # Player has done a move on board
+    UCI_OPTION_LIST = ()  # Contains 'options', a dict of the current engine's UCI options
 
 
 @enum.unique
