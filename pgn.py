@@ -16,6 +16,7 @@
 
 import threading
 import chess
+import chess.pgn
 import logging
 from utilities import *
 
@@ -32,8 +33,15 @@ class PgnDisplay(Display, threading.Thread):
                 message = self.message_queue.get()
                 if message == Message.GAME_ENDS:
                     logging.debug('Saving game to [' + self.file_name+']')
+                    game = node = chess.pgn.Game()
+                    game.headers["Result"] = "*"
                     for move in message.moves:
                         print(move.uci())
+                        node = node.add_main_variation(move)
+                    file = open(self.file_name, "a")
+                    exporter = chess.pgn.FileExporter(file)
+                    game.export(exporter)
+                    file.close()
 
             except queue.Empty:
                 pass

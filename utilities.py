@@ -64,7 +64,6 @@ class Message(AutoNumber):
     COMPUTER_MOVE_DONE_ON_BOARD = ()  # User has done the compute move on board
     SEARCH_STARTED = ()  # Engine has started to search
     USER_TAKE_BACK = ()  # User takes back his move while engine is searching
-    PLAYER_OUT_OF_TIME = ()
     UPDATE_CLOCK = ()  # Message send every second when to clock runs, containing white_time and black_time
     RUN_CLOCK = ()  # Say to run autonomous clock, contains time_control
     USER_MOVE = ()  # Player has done a move on board

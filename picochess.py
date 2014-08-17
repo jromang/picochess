@@ -229,8 +229,7 @@ def main():
 
             if case(Event.OUT_OF_TIME):
                 stop_thinking()
-                Display.show(Message.GAME_ENDS, result=GameResult.TIME_CONTROL, moves=list(game.move_stack))
-                Display.show(Message.PLAYER_OUT_OF_TIME, color=event.color)
+                Display.show(Message.GAME_ENDS, result=GameResult.TIME_CONTROL, moves=list(game.move_stack), color=event.color)
                 break
 
             if case(Event.UCI_OPTION_SET):
