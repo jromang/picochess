@@ -86,8 +86,6 @@ runs on a desktop computer (Linux, OSX, Windows). You will need to install this 
 * `tornado <http://www.tornadoweb.org>`_
 
 * `flask <https://github.com/mitsuhiko/flask>`_
-
-* `enum34 <https://pypi.python.org/pypi/enum34>`_
   
 * `git <http://git-scm.com/>`_ (the git executable has to be in the system PATH)
   
