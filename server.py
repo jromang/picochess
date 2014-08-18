@@ -29,11 +29,52 @@ from utilities import *
 import queue
 from web.picoweb import picoweb as pw
 import chess.pgn as pgn
+import json
 
 _workers = ThreadPool(5)
 
+class ChannelHandler(tornado.web.RequestHandler):
+    def initialize(self, shared=None):
+        self.shared = shared
+
+    def post(self):
+        action = self.get_argument("action")
+        # print("action: {0}".format(action))
+        # $.post("/channel", { action: "broadcast", fen: currentPosition.fen, pgn: pgnEl[0].innerText}, function (data) {
+        if action == 'broadcast':
+            fen = self.get_argument("fen")
+            # print("fen: {0}".format(fen))
+
+            move_stack = self.get_argument("moveStack")
+            move_stack = json.loads(move_stack)
+            game = pgn.Game()
+
+            WebDisplay.create_game_header(game)
+
+            tmp = game
+            # move_stack = message.game.move_stack
+            for move in move_stack:
+                tmp = tmp.add_variation(tmp.board().parse_san(move))
+
+            # print (message.game.move_stack)
+            exporter = pgn.StringExporter()
+            game.export(exporter, headers=True, comments=False, variations=False)
+            # print ("PGN: ")
+            # print (str(exporter))
+            # r = {'move': str(message.move), , 'fen': message.game.fen()}
+
+            # print("pgn: {0}".format(pgn))
+
+            r = {'type': 'broadcast', 'msg': 'Received position from Spectators!', 'pgn': str(exporter), 'fen':fen}
+            EventHandler.write_to_clients(r)
+
+        # if action == 'pause_cloud_engine':
+
 class EventHandler(WebSocketHandler):
     clients = set()
+
+    def initialize(self, shared=None):
+        self.shared = shared
 
     def open(self):
         EventHandler.clients.add(self)
@@ -47,14 +88,28 @@ class EventHandler(WebSocketHandler):
         for client in cls.clients:
             client.write_message(msg)
 
+class DGTHandler(tornado.web.RequestHandler):
+    def initialize(self, shared=None):
+        self.shared = shared
+
+    def get(self, *args, **kwargs):
+        action = self.get_argument("action")
+        if action == "get_last_move":
+            self.write(self.shared['last_dgt_move_msg'])
 
 class WebServer(Observable, threading.Thread):
     def __init__(self):
-        WebDisplay().start()
+        shared = {}
+
+        WebDisplay(shared).start()
         super(WebServer, self).__init__()
         wsgi_app = tornado.wsgi.WSGIContainer(pw)
+
         application = tornado.web.Application([
-            (r'/event', EventHandler),
+            (r'/event', EventHandler, dict(shared=shared)),
+            (r'/dgt', DGTHandler, dict(shared=shared)),
+
+            (r'/channel', ChannelHandler, dict(shared=shared)),
             (r'.*', tornado.web.FallbackHandler, {'fallback': wsgi_app})
         ])
 
@@ -65,8 +120,9 @@ class WebServer(Observable, threading.Thread):
 
 
 class WebDisplay(Display, threading.Thread):
-    def __init__(self):
+    def __init__(self, shared):
         super(WebDisplay, self).__init__()
+        self.shared = shared
 
     @staticmethod
     def run_background(func, callback, args=(), kwds = None):
@@ -79,11 +135,20 @@ class WebDisplay(Display, threading.Thread):
         _workers.apply_async(func, args, kwds, _callback)
 
     @staticmethod
-    def task(message):
+    def create_game_header(game):
+        game.headers["Result"] = "*"
+        game.headers["White"] = "User"
+        game.headers["WhiteElo"] = "*"
+        game.headers["BlackElo"] = "2900"
+        game.headers["Black"] = "Picochess"
+        game.headers["Event"] = "Game"
+        game.headers["Site"] = "Pi"
+        game.headers["EventDate"] = "*"
+
+    # @staticmethod
+    def task(self, message):
         if message == Message.BOOK_MOVE:
             EventHandler.write_to_clients({'msg': 'Book move'})
-        elif message == Message.COMPUTER_MOVE:
-            EventHandler.write_to_clients({'msg': 'Computer move: '+message.move, 'move': message.move, 'fen': message.game.fen()})
 
         elif message == Message.START_NEW_GAME:
             EventHandler.write_to_clients({'msg': 'New game'})
@@ -91,12 +156,28 @@ class WebDisplay(Display, threading.Thread):
         elif message == Message.SEARCH_STARTED:
             EventHandler.write_to_clients({'msg': 'Thinking..'})
 
-        elif message == Message.USER_MOVE:
-            # print (message.game.move_stack)
-            # exporter = pgn.StringExporter()
-            # message.game.export(exporter, headers=False, comments=False, variations=False)
-            EventHandler.write_to_clients({'msg': 'User move: '+str(message.move), 'move': str(message.move), 'fen': message.game.fen()})
+        elif message == Message.COMPUTER_MOVE or message == Message.USER_MOVE:
+            game = pgn.Game()
+            WebDisplay.create_game_header(game)
 
+            tmp = game
+            move_stack = message.game.move_stack
+            for move in move_stack:
+                tmp = tmp.add_variation(move)
+            exporter = pgn.StringExporter()
+            game.export(exporter, headers=True, comments=False, variations=False)
+            fen = message.game.fen()
+            pgn_str = str(exporter)
+            r = {'move': str(message.move), 'pgn': pgn_str, 'fen': fen}
+
+
+            if message == Message.COMPUTER_MOVE:
+                r['msg']= 'Computer move: '+str(message.move)
+            elif message == Message.USER_MOVE:
+                r['msg']= 'User move: '+str(message.move)
+
+            self.shared['last_dgt_move_msg'] = r
+            EventHandler.write_to_clients(r)
 
     def create_task(self, msg):
         IOLoop.instance().add_callback(callback=lambda: self.task(msg))

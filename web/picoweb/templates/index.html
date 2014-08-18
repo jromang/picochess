@@ -180,16 +180,20 @@
                         </div>
 
                         <div class="btn-group">
-                            <button type="button" id="DgtBtn" class="btn btn-primary"><i class='fa fa-delicious'></i> DGT Sync</button>
+                            <button type="button" id="DgtSyncBtn" class="btn btn-primary"><i class='fa fa-delicious'></i> DGT Sync</button>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="button" id="broadcastBtn" class="btn btn-success"><i class='fa'></i>  Broadcast</button>
                         </div>
 
                         <!--<div class="btn-group">-->
                             <!--<button type="button" id="arrangeBtn" class="btn btn-info"><i class='fa fa-arrows'></i> Layout</button>-->
                         <!--</div>-->
 
-                        <div class="btn-group">
-                            <button type="button" id="newBtn" class="btn btn-success"><i class='fa fa-delicious'></i> Reset</button>
-                        </div>
+                        <!--<div class="btn-group">-->
+                            <!--<button type="button" id="newBtn" class="btn btn-success"><i class='fa fa-delicious'></i> Reset</button>-->
+                        <!--</div>-->
                     </div>
 
                 </div>
@@ -321,7 +325,7 @@ var board,
         pgnEl = $('#pgn'),
         curr_move = {},
         setup_fen = "";
-var gameHistory, fenHash, currentPly, currentPosition, currentGame;
+var gameHistory, fenHash, currentPly, currentPosition, currentGame, dgtFEN;
 fenHash = {};
 
 currentPosition = {};
@@ -343,6 +347,22 @@ function load_nacl_stockfish() {
     listener.addEventListener('load', stockfishPNACLModuleDidLoad, true);
     listener.addEventListener('message', handleMessage, true);
     listener.addEventListener('crash', handleCrash, true);
+}
+function updateDGTPosition(j) {
+    if (j.pgn) {
+        pgnData = [
+            [j.pgn]
+        ];
+//                console.log(pgnData[0]);
+        loadGame(0);
+    }
+    if (j.fen) {
+        if (j.type != "broadcast") {
+            dgtFEN = j.fen;
+        }
+        goToPosition(j.fen);
+//                board.position(j.fen, true);
+    }
 }
 $(function () {
 //    Ladda.bind('#cloudAnalyzeBtn' );
@@ -509,10 +529,9 @@ $(function () {
 
         ws.onmessage=function(e){
             var j = JSON.parse(e.data);
-            if (j.fen) {
-                board.position(j.fen, true);
-            }
             el.innerHTML=j.msg;
+
+            updateDGTPosition(j);
         };
         ws.onclose=function(){
             el.innerHTML='closed';
@@ -548,11 +567,14 @@ function strip_fen(fen) {
     return stripped_fen;
 }
 
-function walk_tree_iterative(variation) {
+function walk_tree_iterative(variation, format) {
     if (variation) {
 //        console.log(history.variations[0].move.san);
         var q = [variation];
         var score = '';
+        if (format=="raw") {
+            score = [];
+        }
         while (q.length > 0) {
             var n = q.pop();
 //            console.log(n);
@@ -563,19 +585,28 @@ function walk_tree_iterative(variation) {
                     var el = n[i];
 //                    console.log(el);
                     if (!is_main_variation(el)) {
-                        score += "( ";
+                        if (format!="raw") {
+                            score += "( ";
+                        }
                     }
 
                     if (el.half_move_num % 2 == 1) {
-                        score += Math.floor((el.half_move_num + 1) / 2) + ". "
+                        if (format!="raw") {
+                            score += Math.floor((el.half_move_num + 1) / 2) + ". ";
+                        }
                     }
 //                console.log();
                     if (el.move) {
 //                        score += el.move.san+ " ";
 //                        var stripped_fen = el.fen.replace(" ","");
                         var stripped_fen = strip_fen(el.fen);
-
-                        score += '<span class="gameMove' + (el.half_move_num) + '"><a href="#" class="fen" data-fen="'+el.fen+'" id="'+stripped_fen+'">' + el.move.san + ' </a></span>';
+                        if (format=="raw") {
+                            score.push(el.move.san);
+                        }
+                        else
+                        {
+                            score += '<span class="gameMove' + (el.half_move_num) + '"><a href="#" class="fen" data-fen="' + el.fen + '" id="' + stripped_fen + '">' + el.move.san + ' </a></span>';
+                        }
 
                     }
 //
@@ -587,7 +618,9 @@ function walk_tree_iterative(variation) {
 //                    console.log(el.variations.length);
                     if (!is_main_line(el) && el.variations.length == 0)
                     {
-                        score += ") ";
+                        if (format!="raw") {
+                            score += ") ";
+                        }
                     }
                     if (el.variations) {
                         for (var j=0;j<el.variations.length;j++) {
@@ -773,6 +806,9 @@ var cfg = {
 board = new ChessBoard('board', cfg);
 
 $('#flipOrientationBtn').on('click', board.flip);
+$('#DgtSyncBtn').on('click', goToDGTFen);
+$('#broadcastBtn').on('click', broadcastPosition);
+
 $('#backBtn').on('click', goBack);
 $('#fwdBtn').on('click', fwd);
 $('#startBtn').on('click', goToStart);
@@ -1001,7 +1037,7 @@ function addNewMove(move, current_position, tmp_game) {
     return {node: node, position : current_position};
 }
 function loadGame(i) {
-//      game = new Chess();
+//    game = new Chess();
     var curr_fen;
     if (currentPosition) {
         curr_fen = currentPosition.fen;
@@ -1198,22 +1234,55 @@ function goToStart() {
     stop_analysis();
     currentPosition = gameHistory;
     board.position(currentPosition.fen);
-
-//    if (currentPosition.variations) {
-//        currentPosition = currentPosition.variations[0];
-//    }
     updateStatus();
 
+}
+
+function goToDGTFen() {
+    $.get("/dgt", { action: "get_last_move"}, function (data) {
+        var fen = data["fen"];
+        if (!goToPosition(fen)) {
+            updateDGTPosition(data);
+            if (data['msg']) {
+                var el = document.getElementById("DGTClockStatus");
+                el.innerHTML = data['msg'];
+            }
+        }
+
+    });
+
+}
+
+function broadcastPosition() {
+    var moveStack = walk_tree_iterative(gameHistory.variations, "raw");
+    $.post("/channel", { action: "broadcast", fen: currentPosition.fen, moveStack: JSON.stringify(moveStack)}, function (data) {
+
+    });
+
+    // Only use FEN and Movestack (no variations) for broadcast at this point
 }
 
 
 function goToGameFen() {
     var fen =  $(this).attr('data-fen');
-    stop_analysis();
+    goToPosition(fen);
+//    stop_analysis();
+//
+//    currentPosition = fenHash[fen];
+//    board.position(currentPosition.fen);
+//    updateStatus();
+}
 
+function goToPosition(fen) {
+    stop_analysis();
     currentPosition = fenHash[fen];
+    if (!currentPosition) {
+        return false;
+    }
+//    console.log(currentPosition);
     board.position(currentPosition.fen);
     updateStatus();
+    return true;
 
 }
 
