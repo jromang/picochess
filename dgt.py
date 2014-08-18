@@ -274,12 +274,11 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.display_on_dgt_xl('pic'+version)
         # Update the board
         self.write([Commands.DGT_SEND_BRD])
-        self._dgt_xl_stress_test()
+        #self._dgt_xl_stress_test()
 
     def _dgt_xl_stress_test(self):
         # Clock stress test
         for i in range(0, 9):
-            print("******************************************************")
             self.display_on_dgt_xl(''+str(i)+'ooooo')
             self.display_on_dgt_xl('o'+str(i)+'oooo')
             self.display_on_dgt_xl('oo'+str(i)+'ooo')
