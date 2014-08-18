@@ -258,7 +258,7 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE)
         self.write([Commands.DGT_SEND_UPDATE_NICE])
 
-        #Detect DGT XL clock
+        # Detect DGT XL clock
         self.serial.write(bytearray([0x2b, 0x04, 0x03, 0x0b, 1, 0x00]))
         tries = 0
         self.clock_found = False
@@ -267,33 +267,34 @@ class DGTBoard(Observable, Display, threading.Thread):
             self.clock_found = self.serial.inWaiting()
             tries += 1
         logging.debug('DGT XL clock found' if self.clock_found else 'DGT XL clock NOT found')
-        #Get board version
+        # Get board version
         self.version = 0.0
         self.write([Commands.DGT_SEND_VERSION])
-        #Beep and display version
+        # Beep and display version
         self.display_on_dgt_xl('pic'+version)
-        #Update the board
+        # Update the board
         self.write([Commands.DGT_SEND_BRD])
+        self._dgt_xl_stress_test()
 
+    def _dgt_xl_stress_test(self):
         # Clock stress test
-        # for i in range(0, 9):
-        #    print("******************************************************")
-        #    self.display_on_dgt_xl(''+str(i)+'ooooo')
-        #    self.display_on_dgt_xl('o'+str(i)+'oooo')
-        #    self.display_on_dgt_xl('oo'+str(i)+'ooo')
-        #    self.display_on_dgt_xl('ooo'+str(i)+'oo')
-        #    self.display_on_dgt_xl('oooo'+str(i)+'o')
-        #    self.display_on_dgt_xl('ooooo'+str(i)+'')
-        #    self.display_on_dgt_xl('oooo'+str(i)+'o')
-        #    self.display_on_dgt_xl('ooo'+str(i)+'oo')
-        #    self.display_on_dgt_xl('oo'+str(i)+'ooo')
-        #    self.display_on_dgt_xl('o'+str(i)+'oooo')
+        for i in range(0, 9):
+            print("******************************************************")
+            self.display_on_dgt_xl(''+str(i)+'ooooo')
+            self.display_on_dgt_xl('o'+str(i)+'oooo')
+            self.display_on_dgt_xl('oo'+str(i)+'ooo')
+            self.display_on_dgt_xl('ooo'+str(i)+'oo')
+            self.display_on_dgt_xl('oooo'+str(i)+'o')
+            self.display_on_dgt_xl('ooooo'+str(i)+'')
+            self.display_on_dgt_xl('oooo'+str(i)+'o')
+            self.display_on_dgt_xl('ooo'+str(i)+'oo')
+            self.display_on_dgt_xl('oo'+str(i)+'ooo')
+            self.display_on_dgt_xl('o'+str(i)+'oooo')
 
     def write(self, message):
         self.write_queue.put(message)
 
     def send_command(self, message):
-        print("sending")
         logging.debug('->DGT [%s]', message[0])
         array = []
         for v in message:
