@@ -21,6 +21,7 @@ import threading
 from timecontrol import *
 from struct import unpack
 from collections import OrderedDict
+import queue
 try:
     import enum
 except ImportError:
@@ -253,7 +254,7 @@ class DGTBoard(Observable, Display, threading.Thread):
         super(DGTBoard, self).__init__()
         self.flip_board = False
         self.flip_clock = False
-
+        self.write_queue = queue.Queue()
         self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE)
         self.write([Commands.DGT_SEND_UPDATE_NICE])
 
@@ -288,8 +289,11 @@ class DGTBoard(Observable, Display, threading.Thread):
         #    self.display_on_dgt_xl('oo'+str(i)+'ooo')
         #    self.display_on_dgt_xl('o'+str(i)+'oooo')
 
-
     def write(self, message):
+        self.write_queue.put(message)
+
+    def send_command(self, message):
+        print("sending")
         logging.debug('->DGT [%s]', message[0])
         array = []
         for v in message:
@@ -419,6 +423,12 @@ class DGTBoard(Observable, Display, threading.Thread):
             if self.serial.inWaiting():
                 self.read_message()
             else:
+                # Check if we have something to send
+                try:
+                    command = self.write_queue.get_nowait()
+                    self.send_command(command)
+                except queue.Empty:
+                    pass
                 time.sleep(0.1)
             #Check if we have something to display
             try:
@@ -463,4 +473,3 @@ class DGTBoard(Observable, Display, threading.Thread):
                         pass
             except queue.Empty:
                 pass
-
