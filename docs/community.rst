@@ -9,6 +9,8 @@ You are encouraged to join the `PicoChess group <https://groups.google.com/forum
 Emails
 ------
 
+.. image :: https://dl.dropboxusercontent.com/u/3042900/devs_pico_email.png
+
 Issues and bugs
 ---------------
 
