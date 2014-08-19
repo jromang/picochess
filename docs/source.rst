@@ -14,8 +14,9 @@ We hope PicoChess will be more than just a piece of software, but also a human a
 Thanks to other projects
 ------------------------
 
-* stockfish
-* python-chess
+* PicoChess uses `python-chess <https://github.com/niklasf/python-chess>`_ to handle chess rules, opening books, and PGN files.
+
+* Without a chess engine, PicoChess would be useless : thanks to the `Stockfish <http://stockfishchess.org/>`_ team !
 
 Get the sources
 ---------------
