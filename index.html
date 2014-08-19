@@ -18,91 +18,51 @@
     <div class="wrapper">
       <header>
         <h1>PicoChess</h1>
-        <p>Stand alone chess computer based on Stockfish and DGT board</p>
-        <p class="view"><a href="https://github.com/jromang/Stockfish">View the Project on GitHub <small>jromang/Stockfish</small></a></p>
+        <p>Stand alone chess computer based on DGT board</p>
+        <p class="view"><a href="https://github.com/jromang/picochess">View the Project on GitHub <small>jromang/picochess</small></a></p>
         <ul>
-          <li><a href="https://github.com/jromang/Stockfish/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/jromang/Stockfish/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/jromang/Stockfish">View On <strong>GitHub</strong></a></li>
+          <li><a href="https://github.com/jromang/picochess/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/jromang/picochess/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/jromang/picochess">View On <strong>GitHub</strong></a></li>
         </ul>
       </header>
       <section>
-        <h2>Introduction</h2>
+        <h1>
+<a name="introduction" class="anchor" href="#introduction"><span class="octicon octicon-link"></span></a>Introduction</h1>
 
-<p>The goal the this project is to create a dedicated chess computer based on the Raspberry Pi, the <a href="http://www.stockfishchess.com">Stockfish chess engine</a>, the <a href="http://www.dgtprojects.com/">DGT eboard and the DGT XL Clock</a> or the <a href="http://www.piface.org.uk/products/piface_control_and_display/"> Piface display. </a></p>
+<p>The goal the this project is to create a dedicated chess computer based on the <a href="http://www.raspberrypi.org/">Raspberry Pi</a>, the <a href="http://www.stockfishchess.com">Stockfish chess engine</a>, the <a href="http://www.dgtprojects.com/">DGT eboard and DGT XL Clock</a> or the Piface display.</p>
 
-<!--<p><img src="http://img24.imageshack.us/img24/6651/imgp0232r.png" alt="MK802 II"></p>-->
-<p><img src="https://lh5.googleusercontent.com/-uw57fAjEjDs/UHTKNhEuIVI/AAAAAAAAABQ/WT_rY9-uNss/s1600/IMGP3046.jpg" alt="OnRpi"></p>
+<p><img src="https://lh5.googleusercontent.com/-uw57fAjEjDs/UHTKNhEuIVI/AAAAAAAAABQ/WT_rY9-uNss/s1600/IMGP3046.jpg" alt=""></p>
 
+<p>This project mainly supports the Raspberry Pi (now with Piface and tablebase support). The <a href="http://www.hardkernel.com/renewal_2011/products/prdt_info.php">ODROID-X</a> is also supported for expert users. The Rikomagic MK 802 II is no longer supported. Old Rikomagic images are maintained for historical sake. Also, it's possible to run PicoChess on a desktop computer (Linux, OSX, Windows).</p>
 
-<p>This project mainly supports the <a href="http://www.raspberrypi.org/">Raspberry Pi</a> (now with Piface and tablebase support!).</p>
-<p>The <a href="http://www.hardkernel.com/renewal_2011/products/prdt_info.php">ODROID-X</a> is also supported for expert users.</p>
-<p>The <a href="http://store.cloudsto.com/rikomagic/rikomagic-mk802-ii-detail.html">Rikomagic MK 802 II</a> is no longer supported. Old Rikomagic images are maintained for historical sake.</p>
+<p><img src="http://91.68.209.8/bmi/www.picochess.org/images/picochess_slovenia_gms.jpg" alt=""></p>
 
-<p><img src="images/picochess_slovenia_gms.jpg" alt="Picochess vs Slovenian GMs">
-Top Slovenian GMs - (from left to right) GM Jure Škoberne, GM Luka Lenič, GM Duško Pavasović, and GM Matej Šebenik after a casual tag team session vs Picochess at Jonas's chess shop.
-Photo credit and thanks to <a href="http://bestchessmenever.com">Jonas Žnidaršič</a>
-</p>
+<p>Picochess vs Slovenian GMs Top Slovenian GMs - (from left to right) GM Jure Škoberne, GM Luka Lenič, GM Duško Pavasović, and GM Matej Šebenik after a casual tag team session vs Picochess at Jonas's chess shop. Photo credit and thanks to Jonas Žnidaršič</p>
 
-<h2>Status</h2>
+<h1>
+<a name="status" class="anchor" href="#status"><span class="octicon octicon-link"></span></a>Status</h1>
 
 <p>You can see a <a href="http://www.dailymotion.com/video/xt2eul_pichess_tech">video of PicoChess running on a standard PC</a>, and <a href="http://www.dailymotion.com/video/xt4b85_pichess2_tech">running on a MK802 II ARM key</a> :-) 
 Also, here is a video of <a href="http://youtu.be/kWhmKEe6aBU">PicoChess running on MK802 II and a bluetooth DGT eboard</a></p>
 
-<p>Done so far :</p>
+<h1>
+<a name="download-and-installation" class="anchor" href="#download-and-installation"><span class="octicon octicon-link"></span></a>Download and installation</h1>
 
-<ul>
-<li>Added DGT XL clock message display to dgtnix driver</li>
-<li>Added DGT board/clock support to Stockfish</li>
-<li>Player can choose skill level</li>
-<li>Player can choose computer thinking time</li>
-<li>Allow to takeback moves</li>
-<li>Software shutdown</li>
-<li>Add opening books, and allow opening book selection</li>
-<li>Blitz, Fischer, and fixed time per move time controls</li>
-<li>Analysis/Training and learn book moves mode</li>
-<li>Custom position setup</li>
-<li>Support for a menu using the DGT clock buttons</li>
-</ul><h2>Download and installation</h2>
+<p>Please refer to the <a href="http://docs.picochess.org/en/latest/installation.html">installation section</a> of our <a href="http://docs.picochess.org">documentation</a>.</p>
 
-<p>You will have to download install the latest PicoChess image file and write it to a micro SD card.</p>
+<h1>
+<a name="playing-strength" class="anchor" href="#playing-strength"><span class="octicon octicon-link"></span></a>Playing strength</h1>
 
-<ul>
-<li><a href="http://dl.picochess.org/picochess-RaspberryPiface-v0.21.img.xz">PicoChess Raspberry Piface v0.21 (Caution: ONLY works with the Raspberry PiFace display. 8GB SD Card)</a></li>
-<li><a href="http://dl.picochess.org/picochess-RaspberryPi-v0.18s.img.xz">PicoChess Raspberry Pi v0.18 (4GB SD Card)</a></li>
-<li><a href="http://dl.picochess.org/picochess-ODROIDX-v0.18.img.xz">PicoChess ODROID-X v0.18 (8GB micro SD Card)</a></li>
-<li><a href="http://dl.picochess.org/picochess-Odroid-U3-v0.18.img.xz">PicoChess ODroid-U3 v0.18 (8GB micro SD Card)</a></li>
-<li><a href="http://dl.picochess.org/picochess-MK802II-v0.18.img.gz">PicoChess MK802II v0.18 (4GB micro SD Card)</a></li>
-
-</ul><p>You will need to unzip the image with <a href="http://www.7-zip.org/">7zip</a> and write it to a suitable SD card using the UNIX tool <a href="http://manpages.ubuntu.com/manpages/lucid/man1/dd.1.html">dd</a>. Windows users should use <a href="https://launchpad.net/win32-image-writer">Win32DiskImager</a>. Do not try to drag and drop or otherwise copy over the image without using dd or Win32DiskImager – it won’t work.</p>
-
-<h4>Copying the image to an SD Card on Windows</h4>
-
-<ol>
-<li>Insert the SD card into your SD card reader and check what drive letter it was assigned. You can easily see the drive letter (for example G:) by looking in the left column of Windows Explorer. If the card is not new, you should format it; otherwise Win32DiskImager may hang.</li>
-<li>Download the <a href="https://launchpad.net/win32-image-writer">Win32DiskImager utility</a>. The download links are on the right hand side of the page, you want the binary zip.</li>
-<li>Extract the executable from the zip file and run the Win32DiskImager utility. You may need to run the utility as Administrator.</li>
-<li>Select the picochess-MK802II/RaspberryPi-vx.x.img image file you extracted earlier</li>
-<li>Select the drive letter of the SD card in the device box. Be careful to select the correct drive; if you get the wrong one you can destroy your computer's hard disk!</li>
-<li>Click Write and wait for the write to complete.</li>
-<li>Exit the imager and eject the SD card.</li>
-<li>Insert the card in the MK802II/RaspberryPi, connect it to a DGT eboard and XL clock, power it on, and it should boot up with a nice 'Hello' message on the clock after 1-2 minutes.</li>
-<li>Play !</li>
-</ol><h2>User manual</h2>
-
-<p>Here is the <a href="https://github.com/jromang/Stockfish/wiki/Manual">user manual wiki</a></p>
-
-<h2>Playing strength</h2>
-
-<p>This will be one of the strongest dedicated chess computer on the world :-)
-<a href="http://lefounumerique.xooit.com/t1202-Stockfish-sur-Raspberry-Pi.htm">My initial testing</a> on Rasperry Pi hardware versus a 4 core Intel i7 shows we have grandmaster strength :)</p>
+<p>This will be one of the strongest dedicated chess computer on the world :-) My initial testing on Rasperry Pi hardware versus a 4 core Intel i7 shows we have grandmaster strength.</p>
 
 <table>
-<tr>
+<thead><tr>
 <th align="left">Engine</th>
 <th align="left">Score</th>
 <th align="left">St</th>
-</tr>
+</tr></thead>
+<tbody>
 <tr>
 <td align="left">1: Stockfish on Pi</td>
 <td align="left">40,0/100</td>
@@ -133,62 +93,24 @@ Also, here is a video of <a href="http://youtu.be/kWhmKEe6aBU">PicoChess running
 <td align="left">4,5/20</td>
 <td align="left">00100100010=00000100</td>
 </tr>
+</tbody>
 </table><p>100 games played / Tournament is finished - Level: Blitz 2/1 - Hardware: Intel(R) Core(TM) i5-2405S CPU @ 2.50GHz with 8,0 GB Memory</p>
 
-<p>On a 802MK II device, stockfish is running 5 times faster ! And there is a lot of space (1GB) for the hastables.</p>
-<p>Picochess is the strongest on the O-Droidx (4 core ARM processor)!</p>
+<p>On a 802MK II device, stockfish is running 5 times faster ! And there is a lot of space (1GB) for the hastables. Picochess is the strongest on the O-Droidx (4 core ARM processor). You can also play with a remote chess engine (on a desktop PC or a 32-core amazon instance).</p>
 
-<h2>To do</h2>
-
-<ul>
-<li>More opening book formats</li>
-
-</ul>
-<h2>Frequently Asked Questions</h2>
+<h1>
+<a name="frequently-asked-questions" class="anchor" href="#frequently-asked-questions"><span class="octicon octicon-link"></span></a>Frequently Asked Questions</h1>
 
 <ul>
-<li><b>Is the bluetooth DGT board supported?</b>
-    <p>
-    Yes, but only in bluetooth mode. You need a USB to bluetooth adapter.
-    If you are not using the piface version refer to <a href="https://github.com/jromang/Stockfish/wiki/DGT-Bluetooth-eboard-configuration">Regular Bluetooth instructions.</a>
-    If you are using the piface version refer to <a href="https://github.com/jromang/Stockfish/wiki/Manual#bluetooth-via-pycochess-courtesy-of-uwe-lauer">Piface Bluetooth instructions.</a>
-    </p>
+<li>Is the bluetooth DGT board supported ?
+Yes, but only in bluetooth mode. You need a USB to bluetooth adapter. If you are not using the piface version refer to Regular Bluetooth instructions. If you are using the piface version refer to Piface Bluetooth instructions.</li>
+</ul><h1>
+<a name="contact" class="anchor" href="#contact"><span class="octicon octicon-link"></span></a>Contact</h1>
 
-</li>
+<p>You are encouraged to join the <a href="http://groups.google.com/group/picochess">PicoChess mailing list</a>, especially if you want to help for help testing or <a href="http://docs.picochess.org">documenting</a>. If you have new feature requests, send these to the mailing list too.</p>
 
-</ul>
-
-<h2>Help needed : Testing and more documentation</h2>
-
-<p>Would like more help testing and with documentation. If you have new feature requests, send these to the mailing list too!</p>
-
-<h2>Contact</h2>
-
-<p>You are encouraged to join the <a href="http://groups.google.com/group/picochess">PicoChess mailing list</a>.</p>
-
-<p>For questions/comments :</p>
-<p><img src="https://dl.dropbox.com/u/3042900/44d0841ee0ac236247a78920ac5cbad7.gif" alt="eaddr"></p>
-<p><img src="http://www.mylivesignature.com/signatures/54491/54/2B630CEB02BEE836DAE198BC97A273A5.png" alt="eaddr"></p>
-<!--<h2>Pictures</h2>-->
-
-<!--<p><img src="https://lh5.googleusercontent.com/-uw57fAjEjDs/UHTKNhEuIVI/AAAAAAAAABQ/WT_rY9-uNss/s1600/IMGP3046.jpg" alt="OnRpi"></p>-->
-
-<h2>Credits</h2>
-
-<ul>
-<li>
-<a href="https://github.com/jromang/Stockfish/tree/dgt/books">Opening Books</a> by Gabriel Leperlier</li>
-<li>Logo by <a href="http://www.nsd.uk.com/pages/home.html">pygmy_giant</a>
-</li>
-</ul><p><img src="https://dl.dropbox.com/u/3042900/PicoChess_logo_black_250.png" alt="Logo"></p>
-
-<h2>Similar projects</h2>
-
-<ul>
-<li>
-<a href="http://sishchess.blogspot.co.uk/">Sishfish</a> DIY USB chess computer</li>
-<li><a href="http://miclangschach.de/forum/index.php">Mysticum Schachcomputer</a></li>
-</ul>
+<p>You have better chances to have quick answers on the PicoChess group, but you can also write us for all questions :
+<img src="https://dl.dropboxusercontent.com/u/3042900/devs_pico_email.png" alt=""></p>
       </section>
     </div>
     <footer>
