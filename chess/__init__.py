@@ -20,7 +20,7 @@ __author__ = "Niklas Fiekas"
 
 __email__ = "niklas.fiekas@tu-clausthal.de"
 
-__version__ = "0.3.1"
+__version__ = "0.4.0"
 
 import collections
 import re
@@ -242,16 +242,16 @@ def l90(b):
 
     while b:
         square, b = next_bit(b)
-        mask |= SQUARES_L90[square]
+        mask |= BB_SQUARES_L90[square]
 
-    mask
+    return mask
 
 def r45(b):
     mask = BB_VOID
 
     while b:
         square, b = next_bit(b)
-        mask |= SQUARES_R45[square]
+        mask |= BB_SQUARES_R45[square]
 
     return mask
 
@@ -260,7 +260,9 @@ def l45(b):
 
     while b:
         square, b = next_bit(b)
-        mask |= SQUARES_L45[square]
+        mask |= BB_SQUARES_L45[square]
+
+    return mask
 
 BB_KNIGHT_ATTACKS = []
 
@@ -700,8 +702,8 @@ class Piece(object):
         except AttributeError:
             return False
 
-    def __neq__(self, other):
-        return self.__eq__(other)
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     @classmethod
     def from_symbol(cls, symbol):
@@ -755,7 +757,7 @@ class Move(object):
         except AttributeError:
             return False
 
-    def __neq__(self, other):
+    def __ne__(self, other):
         return not self.__eq__(other)
 
     def __repr__(self):
@@ -871,6 +873,8 @@ class Bitboard(object):
         self.castling_right_stack = collections.deque()
         self.ep_square_stack = collections.deque()
         self.move_stack = collections.deque()
+        self.incremental_zobrist_hash = self.board_zobrist_hash(POLYGLOT_RANDOM_ARRAY)
+        self.transpositions = collections.Counter((self.zobrist_hash(), ))
 
     def clear(self):
         """
@@ -911,6 +915,8 @@ class Bitboard(object):
         self.turn = WHITE
         self.fullmove_number = 1
         self.halfmove_clock = 0
+        self.incremental_zobrist_hash = self.board_zobrist_hash(POLYGLOT_RANDOM_ARRAY)
+        self.transpositions = collections.Counter((self.zobrist_hash(), ))
 
     def piece_at(self, square):
         """Gets the piece at the given square."""
@@ -956,6 +962,14 @@ class Bitboard(object):
         self.occupied_r45 ^= BB_SQUARES[SQUARES_R45[square]]
         self.occupied_l45 ^= BB_SQUARES[SQUARES_L45[square]]
 
+        # Update incremental zobrist hash.
+        if color == BLACK:
+            piece_index = (piece_type - 1) * 2
+        else:
+            piece_index = (piece_type - 1) * 2 + 1
+        self.incremental_zobrist_hash ^= POLYGLOT_RANDOM_ARRAY[64 * piece_index + 8 * rank_index(square) + file_index(square)]
+
+
     def set_piece_at(self, square, piece):
         """Sets a piece at the given square. An existing piece is replaced."""
         self.remove_piece_at(square)
@@ -983,6 +997,14 @@ class Bitboard(object):
         self.occupied_l90 ^= BB_SQUARES[SQUARES_L90[square]]
         self.occupied_r45 ^= BB_SQUARES[SQUARES_R45[square]]
         self.occupied_l45 ^= BB_SQUARES[SQUARES_L45[square]]
+
+        # Update incremental zorbist hash.
+        if piece.color == BLACK:
+            piece_index = (piece.piece_type - 1) * 2
+        else:
+            piece_index = (piece.piece_type - 1) * 2 + 1
+        self.incremental_zobrist_hash ^= POLYGLOT_RANDOM_ARRAY[64 * piece_index + 8 * rank_index(square) + file_index(square)]
+
 
     def generate_pseudo_legal_moves(self, castling=True, pawns=True, knights=True, bishops=True, rooks=True, queens=True, king=True):
         if self.turn == WHITE:
@@ -1467,17 +1489,28 @@ class Bitboard(object):
 
     def is_game_over(self):
         """
-        Checks if the game is over due to checkmate, stalemate or insufficient
-        mating material.
+        Checks if the game is over due to checkmate, stalemate, insufficient
+        mating material, the seventyfive-move rule or fivefold repitition.
         """
+        # Seventyfive-move rule.
+        if self.halfmove_clock >= 150:
+            return True
+
+        # Insufficient material.
         if self.is_insufficient_material():
             return True
 
+        # Stalemate or checkmate.
         try:
             next(self.generate_legal_moves().__iter__())
-            return False
         except StopIteration:
             return True
+
+        # Fivefold repitition.
+        if self.transpositions[self.zobrist_hash()] >= 5:
+            return True
+
+        return False
 
     def is_checkmate(self):
         """Checks if the current position is a checkmate."""
@@ -1522,6 +1555,74 @@ class Bitboard(object):
             return True
         else:
             return False
+
+    def is_seventyfive_moves(self):
+        """
+        Since the first of July 2014 a game is automatically drawn (without
+        a claim by one of the players) if the half move clock since a capture
+        or pawn move is equal to or grather than 150. Other means to end a game
+        take precedence.
+        """
+        if self.halfmove_clock >= 150:
+            try:
+                next(self.generate_legal_moves().__iter__())
+                return True
+            except StopIteration:
+                pass
+
+        return False
+
+    def is_fivefold_repitition(self):
+        """
+        Since the first of July 2014 a game is automatically drawn (without
+        a claim by one of the players) if a position occurs for the fifth time.
+        """
+        return self.transpositions[self.zobrist_hash()] >= 5
+
+    def can_claim_draw(self):
+        """
+        Checks if the side to move can claim a draw by the fifty-move rule or
+        by threefold repitition.
+        """
+        return self.can_claim_fifty_moves() or self.can_claim_threefold_repitition()
+
+    def can_claim_fifty_moves(self):
+        """
+        Draw by the fifty-move rule can be claimed once the clock of halfmoves
+        since the last capture or pawn move becomes equal or greater to 100
+        and the side to move still has a legal move they can make.
+        """
+        # Fifty-move rule.
+        if self.halfmove_clock >= 100:
+            try:
+                next(self.generate_legal_moves().__iter__())
+                return True
+            except StopIteration:
+                pass
+
+        return False
+
+    def can_claim_threefold_repitition(self):
+        """
+        Draw by threefold repitition can be claimed if the position on the
+        board occured for the third time or if such a repitition is reached
+        with one of the possible legal moves.
+        """
+        # Threefold repitition occured.
+        if self.transpositions[self.zobrist_hash()] >= 3:
+            return True
+
+        # The next legal move is a threefold repitition.
+        for move in self.generate_pseudo_legal_moves():
+            self.push(move)
+
+            if not self.was_into_check() and self.transpositions[self.zobrist_hash()] >= 3:
+                self.pop()
+                return True
+
+            self.pop()
+
+        return False
 
     def push(self, move):
         """
@@ -1624,11 +1725,17 @@ class Bitboard(object):
         # Swap turn.
         self.turn ^= 1
 
+        # Update transposition table.
+        self.transpositions.update((self.zobrist_hash(), ))
+
     def pop(self):
         """
         Restores the previous position and returns the last move from the stack.
         """
         move = self.move_stack.pop()
+
+        # Update transposition table.
+        self.transpositions.subtract((self.zobrist_hash(), ))
 
         # Decrement fullmove number.
         if self.turn == WHITE:
@@ -1969,6 +2076,9 @@ class Bitboard(object):
         self.halfmove_clock = int(parts[4])
         self.fullmove_number = int(parts[5]) or 1
 
+        # Reset the transposition table.
+        self.transpositions = collections.Counter((self.zobrist_hash(), ))
+
     def fen(self):
         """Gets the FEN representation of the position."""
         fen = []
@@ -2289,34 +2399,37 @@ class Bitboard(object):
         return "".join(builder)
 
     def __eq__(self, bitboard):
-        return not self.__neq__(bitboard)
+        return not self.__ne__(bitboard)
 
-    def __neq__(self, bitboard):
-        if self.occupied != bitboard.occupied:
-            return True
-        if self.occupied_co[WHITE] != bitboard.occupied_co[WHITE]:
-            return True
-        if self.pawns != bitboard.pawns:
-            return True
-        if self.knights != bitboard.knights:
-            return True
-        if self.bishops != bitboard.bishops:
-            return True
-        if self.rooks != bitboard.rooks:
-            return True
-        if self.queens != bitboard.queens:
-            return True
-        if self.kings != bitboard.kings:
-            return True
-        if self.ep_square != bitboard.ep_square:
-            return True
-        if self.castling_rights != bitboard.castling_rights:
-            return True
-        if self.turn != bitboard.turn:
-            return True
-        if self.fullmove_number != bitboard.fullmove_number:
-            return True
-        if self.halfmove_clock != bitboard.halfmove_clock:
+    def __ne__(self, bitboard):
+        try:
+            if self.occupied != bitboard.occupied:
+                return True
+            if self.occupied_co[WHITE] != bitboard.occupied_co[WHITE]:
+                return True
+            if self.pawns != bitboard.pawns:
+                return True
+            if self.knights != bitboard.knights:
+                return True
+            if self.bishops != bitboard.bishops:
+                return True
+            if self.rooks != bitboard.rooks:
+                return True
+            if self.queens != bitboard.queens:
+                return True
+            if self.kings != bitboard.kings:
+                return True
+            if self.ep_square != bitboard.ep_square:
+                return True
+            if self.castling_rights != bitboard.castling_rights:
+                return True
+            if self.turn != bitboard.turn:
+                return True
+            if self.fullmove_number != bitboard.fullmove_number:
+                return True
+            if self.halfmove_clock != bitboard.halfmove_clock:
+                return True
+        except AttributeError:
             return True
 
         return False
@@ -2333,24 +2446,12 @@ class Bitboard(object):
         The default behaviour is to use values from `POLYGLOT_RANDOM_ARRAY`,
         which makes for hashes compatible with polyglot opening books.
         """
-        zobrist_hash = 0
+        # Hash in the board setup.
+        zobrist_hash = self.board_zobrist_hash(array)
 
         # Default random array is polyglot compatible.
         if array is None:
             array = POLYGLOT_RANDOM_ARRAY
-
-        # Hash in the board setup.
-        squares = self.occupied_co[BLACK]
-        while squares:
-            square, squares = next_bit(squares)
-            piece_index = (self.piece_type_at(square) - 1) * 2
-            zobrist_hash ^= array[64 * piece_index + 8 * rank_index(square) + file_index(square)]
-
-        squares = self.occupied_co[WHITE]
-        while squares:
-            square, squares = next_bit(squares)
-            piece_index = (self.piece_type_at(square) - 1) * 2 + 1
-            zobrist_hash ^= array[64 * piece_index + 8 * rank_index(square) + file_index(square)]
 
         # Hash in the castling flags.
         if self.castling_rights & CASTLING_WHITE_KINGSIDE:
@@ -2378,6 +2479,26 @@ class Bitboard(object):
         # Hash in the turn.
         if self.turn == WHITE:
             zobrist_hash ^= array[780]
+
+        return zobrist_hash
+
+    def board_zobrist_hash(self, array=None):
+        if array is None:
+            return self.incremental_zobrist_hash
+
+        zobrist_hash = 0
+
+        squares = self.occupied_co[BLACK]
+        while squares:
+            square, squares = next_bit(squares)
+            piece_index = (self.piece_type_at(square) - 1) * 2
+            zobrist_hash ^= array[64 * piece_index + 8 * rank_index(square) + file_index(square)]
+
+        squares = self.occupied_co[WHITE]
+        while squares:
+            square, squares = next_bit(squares)
+            piece_index = (self.piece_type_at(square) - 1) * 2 + 1
+            zobrist_hash ^= array[64 * piece_index + 8 * rank_index(square) + file_index(square)]
 
         return zobrist_hash
 
@@ -2445,6 +2566,18 @@ class SquareSet(object):
 
     __nonzero__ = __bool__
 
+    def __eq__(self, other):
+        try:
+            return int(self) == int(other)
+        except ValueError:
+            return False
+
+    def __ne__(self, other):
+        try:
+            return int(self) != int(other)
+        except ValueError:
+            return False
+
     def __len__(self):
         return pop_count(self.mask)
 
@@ -2483,27 +2616,32 @@ class SquareSet(object):
 
     def __ilshift__(self, shift):
         self.mask = (self.mask << shift & BB_ALL)
+        return self
 
     def __irshift__(self, shift):
         self.mask >>= shift
+        return self
 
     def __iand__(self, other):
         try:
             self.mask &= other.mask
         except AttributeError:
             self.mask &= other
+        return self
 
     def __ixor__(self, other):
         try:
             self.mask = (self.mask ^ other.mask) & BB_ALL
         except AttributeError:
             self.mask = (self.mask ^ other) & BB_ALL
+        return self
 
     def __ior__(self, other):
         try:
             self.mask = (self.mask | other.mask) & BB_ALL
         except AttributeError:
             self.mask = (self.mask | other) & BB_ALL
+        return self
 
     def __invert__(self):
         return self.__class__(~self.mask & BB_ALL)
