@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to PicoChess's documentation!
-=====================================
+Welcome to PicoChess's documentation !
+======================================
 Stand alone chess computer based on Stockfish and DGT board
 
 .. image :: https://dl.dropboxusercontent.com/u/3042900/IMGP0232_r.png
