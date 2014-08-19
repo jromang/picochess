@@ -17,7 +17,7 @@
 import logging
 import serial as pyserial
 import time
-import threading
+import asyncio
 from timecontrol import *
 from struct import unpack
 from collections import OrderedDict
@@ -256,6 +256,8 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.flip_clock = False
         self.write_queue = queue.Queue()
         self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE)
+        self.clock_lock = asyncio.Lock()
+
         self.write([Commands.DGT_SEND_UPDATE_NICE])
 
         # Detect DGT XL clock
@@ -274,7 +276,7 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.display_on_dgt_xl('pic'+version)
         # Update the board
         self.write([Commands.DGT_SEND_BRD])
-        #self._dgt_xl_stress_test()
+        self._dgt_xl_stress_test()
 
     def _dgt_xl_stress_test(self):
         # Clock stress test
@@ -303,11 +305,10 @@ class DGTBoard(Observable, Display, threading.Thread):
                 for c in v:
                     array.append(char_to_DGTXL[c])
             else: logging.error('Type not supported : [%s]', type(v))
-        if message[0] == Commands.DGT_CLOCK_MESSAGE:  # Let a bit time for the previous clock ACKs to come
-            time.sleep(0.3)
-        while self.serial.inWaiting():  # Don't write anything when there is something to read
-            self.read_message()
         self.serial.write(bytearray(array))
+        if message[0] == Commands.DGT_CLOCK_MESSAGE:
+            time.sleep(0.5)  # Let a bit time for the message to be displayed on the clock
+            self.clock_lock.acquire()
 
     def read_message(self):
         header = unpack('>BBB', (self.serial.read(3)))
@@ -332,6 +333,8 @@ class DGTBoard(Observable, Display, threading.Thread):
                     if ack0 != 0x10: logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
                     else:
                         logging.debug("Clock ACK %s", (ack0, ack1, ack2, ack3))
+                        if self.clock_lock.locked():
+                            self.clock_lock.release()
                         return None
                 else:  # Clock Times message
                     clock_status = message[6]
@@ -422,7 +425,7 @@ class DGTBoard(Observable, Display, threading.Thread):
             #Check if we have a message from the board
             if self.serial.inWaiting():
                 self.read_message()
-            else:
+            elif not self.clock_lock.locked():
                 # Check if we have something to send
                 try:
                     command = self.write_queue.get_nowait()
