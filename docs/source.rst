@@ -1,5 +1,5 @@
-Opensource
-==========
+Free Software 
+=============
 
 Project licence and philosophy
 ------------------------------
