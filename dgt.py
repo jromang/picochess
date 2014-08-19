@@ -276,7 +276,7 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.display_on_dgt_xl('pic'+version)
         # Update the board
         self.write([Commands.DGT_SEND_BRD])
-        self._dgt_xl_stress_test()
+        #self._dgt_xl_stress_test()
 
     def _dgt_xl_stress_test(self):
         # Clock stress test
@@ -422,24 +422,25 @@ class DGTBoard(Observable, Display, threading.Thread):
 
     def run(self):
         while True:
-            #Check if we have a message from the board
+            # Check if we have a message from the board
             if self.serial.inWaiting():
                 self.read_message()
-            elif not self.clock_lock.locked():
+            else:
+                time.sleep(0.1)  # Sleep a little bit to avoid CPU usage
+            if not self.clock_lock.locked():
                 # Check if we have something to send
                 try:
                     command = self.write_queue.get_nowait()
                     self.send_command(command)
                 except queue.Empty:
                     pass
-                time.sleep(0.1)
-            #Check if we have something to display
+            # Check if we have something to display
             try:
                 message = self.message_queue.get_nowait()
                 for case in switch(message):
                     if case(Message.COMPUTER_MOVE):
                         uci_move = message.move
-                        print("BEST MOVE:"+uci_move)
+                        logging.info("DGT SEND BEST MOVE:"+uci_move)
                         # Stop the clock before displaying a move
                         self.write([Commands.DGT_CLOCK_MESSAGE, 0x0a, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_SETNRUN,
                                    0, 0, 0, 0, 0, 0,
