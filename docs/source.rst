@@ -20,4 +20,5 @@ Thanks to other projects
 
 Get the sources
 ---------------
-(Link to github hosting)
+
+You can get the `sources on Github <https://github.com/jromang/picochess>`_.
