@@ -5,7 +5,7 @@
 
 Welcome to PicoChess's documentation!
 =====================================
-Stand alone chess computer based on Stcokfish and DGT board
+Stand alone chess computer based on Stockfish and DGT board
 
 .. image :: https://dl.dropboxusercontent.com/u/3042900/IMGP0232_r.png
 
