@@ -27,7 +27,7 @@ except ImportError:
 
 
 # picochess version
-version = '026'
+version = '027'
 
 event_queue = queue.Queue()
 display_devices = []
@@ -207,4 +207,4 @@ def update_picochess(auto_reboot=False):
                 output = subprocess.Popen([git, "pull", "origin", "stable"], stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
                 logging.debug(output)
                 if auto_reboot:
-                    os.system('reboot now')
+                    os.system('reboot')
