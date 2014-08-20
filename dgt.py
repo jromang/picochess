@@ -258,7 +258,8 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE)
         self.clock_lock = asyncio.Lock()
 
-        self.write([Commands.DGT_SEND_UPDATE_NICE])
+        # Set the board update mode
+        self.serial.write(bytearray([Commands.DGT_SEND_UPDATE_NICE.value]))
 
         # Detect DGT XL clock
         self.serial.write(bytearray([0x2b, 0x04, 0x03, 0x0b, 1, 0x00]))
