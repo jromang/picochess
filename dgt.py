@@ -315,7 +315,12 @@ class DGTBoard(Observable, Display, threading.Thread):
         header = unpack('>BBB', (self.serial.read(3)))
         message_id = header[0]
         message_length = (header[1] << 7) + header[2] - 3
-        logging.debug("<-DGT [%s], length:%i", Messages(message_id), message_length)
+
+        try:
+            logging.debug("<-DGT [%s], length:%i", Messages(message_id), message_length)
+        except ValueError:
+            logging.warning("Unknown message value %i", message_id)
+
         if message_length:
             message = unpack('>'+str(message_length)+'B', (self.serial.read(message_length)))
 
@@ -447,16 +452,16 @@ class DGTBoard(Observable, Display, threading.Thread):
                                    0, 0, 0, 0, 0, 0,
                                    0x04 | 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
                         # Display the move
-                        self.light_squares_revelation_board((uci_move[0:2], uci_move[2:4]))
                         self.display_on_dgt_xl(' ' + uci_move, True)
+                        #self.light_squares_revelation_board((uci_move[0:2], uci_move[2:4]))
                         break
                     if case(Message.START_NEW_GAME):
                         self.display_on_dgt_xl('newgam', True)
-                        self.clear_light_revelation_board()
+                        #self.clear_light_revelation_board()
                         break
                     if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
                         self.display_on_dgt_xl('ok', True)
-                        self.clear_light_revelation_board()
+                        #self.clear_light_revelation_board()
                         break
                     if case(Message.USER_TAKE_BACK):
                         self.display_on_dgt_xl('takbak')
@@ -473,6 +478,10 @@ class DGTBoard(Observable, Display, threading.Thread):
                                    w_hms[0], w_hms[1], w_hms[2], b_hms[0], b_hms[1], b_hms[2],
                                    side, Clock.DGT_CMD_CLOCK_END_MESSAGE])
                         self.write([Commands.DGT_CLOCK_MESSAGE, 0x03, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_END, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+                        break
+                    if case(Message.GAME_ENDS):
+                        time.sleep(3)  # Let the move displayed on lock
+                        self.display_on_dgt_xl(message.result.value, beep=True)
                         break
                     if case():  # Default
                         pass

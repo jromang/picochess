@@ -88,11 +88,11 @@ class ClockMode(AutoNumber):
     FISCHER = ()  # Fischer increment
 
 
-class GameResult(AutoNumber):
-    MATE = ()
-    DRAW = ()
-    STALEMATE = ()
-    TIME_CONTROL = ()
+class GameResult(enum.Enum):
+    MATE = 'mate'
+    STALEMATE = 'stalemate'
+    TIME_CONTROL = 'time'
+    INSUFFICIENT_MATERIAL = 'material'
 
 
 class Observable(object):  # Input devices are observable

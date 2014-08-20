@@ -137,6 +137,18 @@ def main():
         else:
             engine.stop(True)
 
+    def check_game_state(game):
+        if game.is_stalemate():
+            Display.show(Message.GAME_ENDS, result=GameResult.STALEMATE, moves=list(game.move_stack), color=game.turn)
+            return False
+        if game.is_insufficient_material():
+            Display.show(Message.GAME_ENDS, result=GameResult.INSUFFICIENT_MATERIAL, moves=list(game.move_stack), color=game.turn)
+            return False
+        if game.is_game_over():
+            Display.show(Message.GAME_ENDS, result=GameResult.MATE, moves=list(game.move_stack), color=game.turn)
+            return False
+        return True
+
     game = chess.Bitboard()  # Create the current game
     legal_fens = compute_legal_fens(game)  # Compute the legal FENs
     book = chess.polyglot.open_reader(get_opening_books()[8][1])  # Default opening book
@@ -182,8 +194,9 @@ def main():
                 elif (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.WHITE) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.BLACK):
                     time_control.stop()
                     game.push(move)
-                    Display.show(Message.USER_MOVE, move=move, game=game)
-                    think(time_control)
+                    if check_game_state(game):
+                        Display.show(Message.USER_MOVE, move=move, game=game)
+                        think(time_control)
                 break
 
             if case(Event.LEVEL):  # User sets a new level
@@ -214,8 +227,9 @@ def main():
                 if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
                     time_control.stop()
                     game.push(move)
-                    legal_fens = compute_legal_fens(game)
                     Display.show(Message.COMPUTER_MOVE, move=move.uci(), game=game, time_control=time_control)
+                    if check_game_state(game):
+                        legal_fens = compute_legal_fens(game)
                 break
 
             if case(Event.SET_MODE):
