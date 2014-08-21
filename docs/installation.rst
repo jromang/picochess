@@ -8,7 +8,7 @@ This is the easiest installation method, supported on the `Raspberry Pi <http://
 Many other ARM boards can run picochess (like the powefull `Odroix-U3 <http://hardkernel.com/main/products/prdt_info.php?g_code=G138745696275>`_)
 but you will need to do a :ref:`manual-install-label`.
 
-You will have to download and install the latest PicoChess image file from the `PicoChess downloads <dl.picochess.org>`_ and write it
+You will have to download and install the latest PicoChess image file from the `PicoChess downloads <http://dl.picochess.org>`_ and write it
 to a SD or micro SD card.
 
 You will need to unzip the image with `7zip <http://www.7-zip.org/>`_ and write it to a suitable SD card
