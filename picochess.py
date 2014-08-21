@@ -54,7 +54,6 @@ def main():
 
     # Update
     update_picochess(args.auto_reboot)
-    # Update test 3
 
     # Load UCI engine
     engine = uci.Engine(args.engine, hostname=args.remote, username=args.user, key_file=args.key_file, password=args.password)
@@ -138,6 +137,11 @@ def main():
             engine.stop(True)
 
     def check_game_state(game):
+        """
+        Check if the game has ended or not ; it also sends Message to Displays if the game has ended.
+        :param game:
+        :return: True is the game continues, False if it has ended
+        """
         if game.is_stalemate():
             Display.show(Message.GAME_ENDS, result=GameResult.STALEMATE, moves=list(game.move_stack), color=game.turn)
             return False
