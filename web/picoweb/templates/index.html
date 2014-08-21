@@ -183,6 +183,12 @@
                             <button type="button" id="DgtSyncBtn" class="btn btn-primary"><i class='fa fa-delicious'></i> DGT Sync</button>
                         </div>
 
+                          <div class="btn-group">
+                            <a class="btn btn-info" href="/pgn?action=get_pgn_file" target="_blank"><i class='fa fa-cloud-download'></i> DGT PGN</a>
+                            <!--<button type="button" id="DgtPGNBtn" class="btn btn-info"><i class='fa fa-cloud-download'></i> DGT PGN</button>-->
+                        </div>
+
+
                         <div class="btn-group">
                             <button type="button" id="broadcastBtn" class="btn btn-success"><i class='fa'></i>  Broadcast</button>
                         </div>
@@ -807,6 +813,8 @@ board = new ChessBoard('board', cfg);
 
 $('#flipOrientationBtn').on('click', board.flip);
 $('#DgtSyncBtn').on('click', goToDGTFen);
+$('#DgtPGNBtn').on('click', getDGTPGN);
+
 $('#broadcastBtn').on('click', broadcastPosition);
 
 $('#backBtn').on('click', goBack);
@@ -1236,6 +1244,22 @@ function goToStart() {
     board.position(currentPosition.fen);
     updateStatus();
 
+}
+
+function getDGTPGN() {
+     $.get("/pgn", { action: "get_pgn_file"}, function (data) {
+         console.log(data);
+//         console.log("PGN");
+//        var fen = data["fen"];
+//        if (!goToPosition(fen)) {
+//            updateDGTPosition(data);
+//            if (data['msg']) {
+//                var el = document.getElementById("DGTClockStatus");
+//                el.innerHTML = data['msg'];
+//            }
+//        }
+
+    });
 }
 
 function goToDGTFen() {

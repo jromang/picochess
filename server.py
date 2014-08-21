@@ -97,6 +97,19 @@ class DGTHandler(tornado.web.RequestHandler):
         if action == "get_last_move":
             self.write(self.shared['last_dgt_move_msg'])
 
+
+class PGNHandler(tornado.web.RequestHandler):
+    def initialize(self, shared=None):
+        self.shared = shared
+    def get(self, *args, **kwargs):
+        action = self.get_argument("action")
+        # print (action)
+        if action == "get_pgn_file":
+            self.set_header('Content-Type', 'text/pgn')
+            self.set_header('Content-Disposition', 'attachment; filename=game.pgn')
+            self.write(self.shared['last_dgt_move_msg']['pgn'])
+
+
 class WebServer(Observable, threading.Thread):
     def __init__(self):
         shared = {}
@@ -108,6 +121,7 @@ class WebServer(Observable, threading.Thread):
         application = tornado.web.Application([
             (r'/event', EventHandler, dict(shared=shared)),
             (r'/dgt', DGTHandler, dict(shared=shared)),
+            (r'/pgn', PGNHandler, dict(shared=shared)),
 
             (r'/channel', ChannelHandler, dict(shared=shared)),
             (r'.*', tornado.web.FallbackHandler, {'fallback': wsgi_app})
