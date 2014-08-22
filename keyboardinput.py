@@ -42,16 +42,13 @@ class TerminalDisplay(Display, threading.Thread):
     def run(self):
         while True:
             #Check if we have something to display
-            try:
-                message = self.message_queue.get()
-                if message == Message.BOOK_MOVE:
-                    print('Book move')
-                elif message == Message.COMPUTER_MOVE:
-                    print('\n' + str(message.game))
-                    print('Computer move : ' + message.move)
-                elif message == Message.START_NEW_GAME:
-                    print('New game')
-                elif message == Message.SEARCH_STARTED:
-                    print('Computer is thinking...')
-            except queue.Empty:
-                pass
+            message = self.message_queue.get()
+            if message == Message.BOOK_MOVE:
+                print('Book move')
+            elif message == Message.COMPUTER_MOVE:
+                print('\n' + str(message.game))
+                print('Computer move : ' + message.move)
+            elif message == Message.START_NEW_GAME:
+                print('New game')
+            elif message == Message.SEARCH_STARTED:
+                print('Computer is thinking...')
