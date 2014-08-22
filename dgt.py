@@ -17,15 +17,18 @@
 import logging
 import serial as pyserial
 import time
-import asyncio
 from timecontrol import *
 from struct import unpack
 from collections import OrderedDict
 import queue
 try:
     import enum
-except ImportError:
+except ImportError:  # Python 3.3 support
     import enum34 as enum
+try:
+    import asyncio
+except ImportError:  # Python 3.3 support
+    import asyncio34 as asyncio
 
 
 @enum.unique
