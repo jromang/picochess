@@ -15,7 +15,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__))+os.sep+'libs')
 import argparse
 import chess
 import chess.polyglot
