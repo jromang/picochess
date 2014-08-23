@@ -53,6 +53,7 @@ class Event(AutoNumber):
     SET_TIME_CONTROL = ()  # User sets time control
     OUT_OF_TIME = ()
     UCI_OPTION_SET = ()  # Users sets an UCI option, contains 'name' and 'value' (strings)
+    SHUTDOWN = ()
 
 
 class Message(AutoNumber):
@@ -210,3 +211,10 @@ def update_picochess(auto_reboot=False):
                 logging.debug(output)
                 if auto_reboot:
                     os.system('reboot')
+
+def shutdown():
+    logging.debug('Shutting down system')
+    if platform.system() == 'Windows':
+        os.system('shutdown /s')
+    else:
+        os.system('shutdown -h now')

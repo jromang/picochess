@@ -260,6 +260,10 @@ def main():
                 engine.set_option(event.name, event.value)
                 break
 
+            if case(Event.SHUTDOWN):
+                shutdown()
+                break
+
             if case():  # Default
                 logging.warning("Event not handled : [%s]", event)
 

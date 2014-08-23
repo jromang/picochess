@@ -213,6 +213,8 @@ book_map = ("rnbqkbnr/pppppppp/8/8/8/q7/PPPPPPPP/RNBQKBNR",
             "rnbqkbnr/pppppppp/8/8/6q1/8/PPPPPPPP/RNBQKBNR",
             "rnbqkbnr/pppppppp/8/8/5q2/8/PPPPPPPP/RNBQKBNR")
 
+shutdown_map = ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQQBNR", "8/8/8/8/8/8/8/3QQ3", "3QQ3/8/8/8/8/8/8/8")
+
 mode_map = {"rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR": Mode.BOOK,
             "rnbqkbnr/pppppppp/8/1Q6/8/8/PPPPPPPP/RNBQKBNR": Mode.ANALYSIS,
             "rnbqkbnr/pppppppp/8/2Q5/8/8/PPPPPPPP/RNBQKBNR": Mode.PLAY_WHITE,
@@ -402,6 +404,9 @@ class DGTBoard(Observable, Display, threading.Thread):
                     logging.debug("Setting time control %s", time_control_map[fen].mode)
                     self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[fen])
                     self.display_on_dgt_xl(dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)], True)
+                elif fen in shutdown_map:
+                    self.fire(Event.SHUTDOWN)
+                    self.display_on_dgt_xl('powoff', True)
                 else:
                     logging.debug("Fen")
                     self.fire(Event.FEN, fen=fen)
