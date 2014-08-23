@@ -253,10 +253,11 @@ dgt_xl_time_control_list = ["mov001", "mov003", "mov005", "mov010", "mov015", "m
 
 class DGTBoard(Observable, Display, threading.Thread):
 
-    def __init__(self, device):
+    def __init__(self, device, enable_board_leds=False):
         super(DGTBoard, self).__init__()
         self.flip_board = False
         self.flip_clock = False
+        self.enable_board_leds = enable_board_leds
         self.write_queue = queue.Queue()
         self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE)
         self.clock_lock = asyncio.Lock()
@@ -421,13 +422,15 @@ class DGTBoard(Observable, Display, threading.Thread):
                         text[2], text[1], text[0], text[5], text[4], text[3], 0x00, 0x03 if beep else 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
     def light_squares_revelation_board(self, squares):
-        for sq in squares:
-            dgt_square = (8 - int(sq[1])) * 8 + ord(sq[0]) - ord('a')
-            logging.debug("REV2 light on square %s(%i)", sq, dgt_square)
-            self.write([Commands.DGT_SET_LEDS, 0x04, 0x01, dgt_square, dgt_square])
+        if self.enable_board_leds:
+            for sq in squares:
+                dgt_square = (8 - int(sq[1])) * 8 + ord(sq[0]) - ord('a')
+                logging.debug("REV2 light on square %s(%i)", sq, dgt_square)
+                self.write([Commands.DGT_SET_LEDS, 0x04, 0x01, dgt_square, dgt_square])
 
     def clear_light_revelation_board(self):
-        self.write([Commands.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
+        if self.enable_board_leds:
+            self.write([Commands.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
 
     def run(self):
         while True:
@@ -456,15 +459,15 @@ class DGTBoard(Observable, Display, threading.Thread):
                                    0x04 | 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
                         # Display the move
                         self.display_on_dgt_xl(' ' + uci_move, True)
-                        #self.light_squares_revelation_board((uci_move[0:2], uci_move[2:4]))
+                        self.light_squares_revelation_board((uci_move[0:2], uci_move[2:4]))
                         break
                     if case(Message.START_NEW_GAME):
                         self.display_on_dgt_xl('newgam', True)
-                        #self.clear_light_revelation_board()
+                        self.clear_light_revelation_board()
                         break
                     if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
                         self.display_on_dgt_xl('ok', True)
-                        #self.clear_light_revelation_board()
+                        self.clear_light_revelation_board()
                         break
                     if case(Message.USER_TAKE_BACK):
                         self.display_on_dgt_xl('takbak')

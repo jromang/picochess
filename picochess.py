@@ -37,6 +37,7 @@ def main():
     parser = configargparse.ArgParser(default_config_files=[os.path.dirname(os.path.realpath(__file__)) + os.sep + 'picochess.ini'])
     parser.add_argument("-e", "--engine", type=str, help="UCI engine executable path", required=True)
     parser.add_argument("-d", "--dgt-port", type=str, help="enable dgt board on the given serial port such as /dev/ttyUSB0")
+    parser.add_argument("-leds", "--enable-dgt-board-leds", action='store_true', help="reboot system after update")
     parser.add_argument("-hs", "--hash-size", type=int, help="hashtable size in MB (default:64)", default=64)
     parser.add_argument("-t", "--threads", type=int, help="number of engine threads (default:1)", default=1)
     parser.add_argument("-l", "--log-level", choices=['notset', 'debug', 'info', 'warning', 'error', 'critical'], default='warning', help="logging level")
@@ -51,7 +52,6 @@ def main():
     parser.add_argument("-mail", "--email", type=str, help="email used to send pgn files", default=None)
     parser.add_argument("-mk", "--email-key", type=str, help="key used to send emails", default=None)
     args = parser.parse_args()
-
 
     # Enable logging
     logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
@@ -74,7 +74,7 @@ def main():
     # Connect to DGT board
     if args.dgt_port:
         logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
-        dgt.DGTBoard(args.dgt_port).start()
+        dgt.DGTBoard(args.dgt_port, args.enable_dgt_board_leds).start()
     else:
         logging.warning("No DGT board port provided")
         # Enable keyboard input and terminal display

@@ -40,7 +40,6 @@ class PgnDisplay(Display, threading.Thread):
                     game = node = chess.pgn.Game()
                     game.headers["Result"] = "*"
                     for move in message.moves:
-                        print(move.uci())
                         node = node.add_main_variation(move)
                     # Save to file
                     file = open(self.file_name, "a")
