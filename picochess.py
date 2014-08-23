@@ -44,12 +44,12 @@ def main():
     parser.add_argument("-r", "--remote", type=str, help="remote server running the engine")
     parser.add_argument("-u", "--user", type=str, help="remote user on server running the engine")
     parser.add_argument("-p", "--password", type=str, help="password for the remote user")
-    parser.add_argument("-k", "--key-file", type=str, help="key file used to connect to the remote server")
+    parser.add_argument("-sk", "--server-key", type=str, help="key file used to connect to the remote server")
     parser.add_argument("-pgn", "--pgn-file", type=str, help="pgn file used to store the games")
     parser.add_argument("-ar", "--auto-reboot", action='store_true', help="reboot system after update")
     parser.add_argument("-web", "--web-server", action='store_true', help="launch web server")
     parser.add_argument("-mail", "--email", type=str, help="email used to send pgn files")
-    parser.add_argument("-key", "--email-key", type=str, help="key used to send emails")
+    parser.add_argument("-mk", "--email-key", type=str, help="key used to send emails")
     args = parser.parse_args()
 
 
