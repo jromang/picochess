@@ -58,10 +58,5 @@ docs/_build/
 # PyCharm
 .idea/
 
-# Chess engines
-stockfish
-stockfish.exe
-Hiarcs13.2MP.exe
-
 # PGN files
 *.pgn
