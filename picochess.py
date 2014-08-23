@@ -49,7 +49,9 @@ def main():
     parser.add_argument("-ar", "--auto-reboot", action='store_true', help="reboot system after update")
     parser.add_argument("-web", "--web-server", action='store_true', help="launch web server")
     parser.add_argument("-mail", "--email", type=str, help="email used to send pgn files")
+    parser.add_argument("-key", "--email-key", type=str, help="key used to send emails")
     args = parser.parse_args()
+
 
     # Enable logging
     logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
