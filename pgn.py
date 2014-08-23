@@ -28,7 +28,8 @@ class PgnDisplay(Display, threading.Thread):
         super(PgnDisplay, self).__init__()
         self.file_name = pgn_file_name
         self.email = email
-        self.key = base64.b64decode(str.encode(key)).decode("utf-8")
+        if email and key:
+            self.key = base64.b64decode(str.encode(key)).decode("utf-8")
 
     def run(self):
         while True:
