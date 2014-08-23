@@ -93,6 +93,7 @@ class GameResult(enum.Enum):
     STALEMATE = 'stalemate'
     TIME_CONTROL = 'time'
     INSUFFICIENT_MATERIAL = 'material'
+    ABORT = 'abort'
 
 
 class Observable(object):  # Input devices are observable

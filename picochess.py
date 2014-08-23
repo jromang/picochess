@@ -48,8 +48,8 @@ def main():
     parser.add_argument("-pgn", "--pgn-file", type=str, help="pgn file used to store the games")
     parser.add_argument("-ar", "--auto-reboot", action='store_true', help="reboot system after update")
     parser.add_argument("-web", "--web-server", action='store_true', help="launch web server")
-    parser.add_argument("-mail", "--email", type=str, help="email used to send pgn files")
-    parser.add_argument("-mk", "--email-key", type=str, help="key used to send emails")
+    parser.add_argument("-mail", "--email", type=str, help="email used to send pgn files", default=None)
+    parser.add_argument("-mk", "--email-key", type=str, help="key used to send emails", default=None)
     args = parser.parse_args()
 
 
@@ -61,7 +61,7 @@ def main():
     update_picochess(args.auto_reboot)
 
     # Load UCI engine
-    engine = uci.Engine(args.engine, hostname=args.remote, username=args.user, key_file=args.key_file, password=args.password)
+    engine = uci.Engine(args.engine, hostname=args.remote, username=args.user, key_file=args.server_key, password=args.password)
     logging.debug('Loaded engine [%s]', engine.name)
     logging.debug('Supported options [%s]', engine.options)
     if 'Hash' in engine.options:
@@ -82,7 +82,7 @@ def main():
         TerminalDisplay().start()
 
     # Save to PGN
-    PgnDisplay("test.pgn").start()
+    PgnDisplay("test.pgn", email=args.email, key=args.email_key).start()
 
     # Launch web server
     if(args.web_server):
@@ -217,6 +217,7 @@ def main():
             if case(Event.NEW_GAME):  # User starts a new game
                 if game.move_stack:
                     logging.debug("Starting a new game")
+                    Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack), color=game.turn)
                     game = chess.Bitboard()
                     legal_fens = compute_legal_fens(game)
                     time_control.reset()

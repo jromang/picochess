@@ -15,16 +15,20 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import threading
+import base64
 import chess
 import chess.pgn
 import logging
+import requests
 from utilities import *
 
 
 class PgnDisplay(Display, threading.Thread):
-    def __init__(self, pgn_file_name):
+    def __init__(self, pgn_file_name, email=None, key=None):
         super(PgnDisplay, self).__init__()
         self.file_name = pgn_file_name
+        self.email = email
+        self.key = base64.b64decode(str.encode(key)).decode("utf-8")
 
     def run(self):
         while True:
@@ -38,10 +42,19 @@ class PgnDisplay(Display, threading.Thread):
                     for move in message.moves:
                         print(move.uci())
                         node = node.add_main_variation(move)
+                    # Save to file
                     file = open(self.file_name, "a")
                     exporter = chess.pgn.FileExporter(file)
                     game.export(exporter)
                     file.close()
-
+                    # Send email
+                    if self.email:
+                        out = requests.post("https://api.mailgun.net/v2/picochess.org/messages",
+                                            auth=("api", self.key),
+                                            data={"from": "Your PicoChess computer <no-reply@picochess.org>",
+                                            "to": self.email,
+                                            "subject": "Game PGN",
+                                            "text": str(game)})
+                        logging.debug(out)
             except queue.Empty:
                 pass
