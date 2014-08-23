@@ -18,7 +18,7 @@
 import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__))+os.sep+'libs')
-import argparse
+import configargparse
 import chess
 import chess.polyglot
 import dgt
@@ -34,7 +34,7 @@ from server import WebServer
 
 def main():
     #Command line argument parsing
-    parser = argparse.ArgumentParser()
+    parser = configargparse.ArgParser(default_config_files=[os.path.dirname(os.path.realpath(__file__)) + os.sep + 'picochess.ini'])
     parser.add_argument("-d", "--dgt-port", type=str, help="enable dgt board on the given serial port such as /dev/ttyUSB0")
     parser.add_argument("-e", "--engine", type=str, help="stockfish executable path", default="/usr/bin/stockfish")
     parser.add_argument("-hs", "--hash-size", type=int, help="hashtable size in MB (default:64)", default=64)
@@ -48,6 +48,7 @@ def main():
     parser.add_argument("-pgn", "--pgn-file", type=str, help="pgn file used to store the games")
     parser.add_argument("-ar", "--auto-reboot", action='store_true', help="reboot system after update")
     parser.add_argument("-web", "--web-server", action='store_true', help="launch web server")
+    parser.add_argument("--email", type=str, help="email used to send pgn files")
     args = parser.parse_args()
 
     # Enable logging

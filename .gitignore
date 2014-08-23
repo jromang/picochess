@@ -60,3 +60,6 @@ docs/_build/
 
 # PGN files
 *.pgn
+
+# Config file
+picochess.ini
