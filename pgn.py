@@ -35,7 +35,7 @@ class PgnDisplay(Display, threading.Thread):
             #Check if we have something to display
             try:
                 message = self.message_queue.get()
-                if message == Message.GAME_ENDS:
+                if message == Message.GAME_ENDS and message.moves:
                     logging.debug('Saving game to [' + self.file_name+']')
                     game = node = chess.pgn.Game()
                     game.headers["Result"] = "*"
