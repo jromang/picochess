@@ -279,8 +279,8 @@ class DGTBoard(Observable, Display, threading.Thread):
         # Get board version and trademark
         self.version = 0.0
         self.trademark = ''
-        self.serial.write(bytearray([Commands.DGT_SEND_VERSION.value]))
-        self.serial.write(bytearray([Commands.DGT_SEND_TRADEMARK.value]))
+        self.write([Commands.DGT_SEND_VERSION])
+        self.write([Commands.DGT_SEND_TRADEMARK])
         # Beep and display version
         self.display_on_dgt_xl('pic'+version)
         # Update the board
