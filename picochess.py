@@ -168,7 +168,7 @@ def main():
     book = chess.polyglot.open_reader(get_opening_books()[8][1])  # Default opening book
     interaction_mode = Mode.PLAY_WHITE   # Interaction mode
     book_thread = None  # The thread that will fire book moves
-    time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=1)
+    time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=5)
 
     #Send the engine's UCI options to all Displays
     Display.show(Message.UCI_OPTION_LIST, options=engine.options)
