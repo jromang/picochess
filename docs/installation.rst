@@ -104,3 +104,30 @@ runs on a desktop computer (Linux, OSX, Windows). You will need to install this 
   python3 picochess.py -h
   
 for a list. 
+
+Bluetooth Connection
+--------------------
+
+1. Connect the bluetooth dongle and restart the pi
+
+2. start the gui
+
+   startx
+
+3. go to preferences/blustooth manager
+
+4. Click search to find your device, right click and connect
+
+5. For the Rev II use the prepared pin 1234
+
+6. Then click to connect as a serial device
+
+7. Back on the bluetooth manager right click on the device again and click trusted. Job done!
+
+8. I opened a TX Terminal window at this point and shut down using the command :
+
+   sudo shutdown -h now
+
+9. Restart the pi without the keyboard and monitor and tada! the connection should work.
+
+If you need more information chek this `forum post <https://groups.google.com/forum/#!topic/picochess/7LSBZ6Qha64>`_.
