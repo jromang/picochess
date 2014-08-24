@@ -52,6 +52,7 @@ def main():
     parser.add_argument("-web", "--web-server", action='store_true', help="launch web server")
     parser.add_argument("-mail", "--email", type=str, help="email used to send pgn files", default=None)
     parser.add_argument("-mk", "--email-key", type=str, help="key used to send emails", default=None)
+    parser.add_argument("-uci", "--uci-option", type=str, help="pass an UCI option to the engine (name;value)", default=None)
     args = parser.parse_args()
 
     # Enable logging
@@ -71,6 +72,9 @@ def main():
         engine.set_option("Threads", args.threads)
     if 'Core Threads' in engine.options:  # Hiarcs
         engine.set_option("Core Threads", args.threads)
+    if args.uci_option:
+        uci_parameter = args.uci_option.split('=')
+        engine.set_option(uci_parameter[0], uci_parameter[1])
 
     # Connect to DGT board
     if args.dgt_port:
