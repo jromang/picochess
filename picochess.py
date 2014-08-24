@@ -25,6 +25,7 @@ import dgt
 import logging
 import uci
 import threading
+import copy
 from timecontrol import TimeControl
 from utilities import *
 from keyboardinput import KeyboardInput, TerminalDisplay
@@ -204,7 +205,7 @@ def main():
                     time_control.stop()
                     game.push(move)
                     if check_game_state(game):
-                        Display.show(Message.USER_MOVE, move=move, game=game)
+                        Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
                         think(time_control)
                 break
 
@@ -237,7 +238,7 @@ def main():
                 if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
                     time_control.stop()
                     game.push(move)
-                    Display.show(Message.COMPUTER_MOVE, move=move.uci(), game=game, time_control=time_control)
+                    Display.show(Message.COMPUTER_MOVE, move=move.uci(), game=copy.deepcopy(game), time_control=time_control)
                     if check_game_state(game):
                         legal_fens = compute_legal_fens(game)
                 break
