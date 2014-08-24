@@ -339,7 +339,6 @@ class DGTBoard(Observable, Display, threading.Thread):
                 break
             if case(Messages.DGT_MSG_TRADEMARK):  # Get the DGT trademark
                 self.trademark = ''.join(chr(i) for i in message)
-                logging.debug('Trademark:'+self.trademark)
                 if 'Revelation' in self.trademark:
                     logging.debug('Revelation board detected, enabling LED display')
                     self.enable_board_leds = True
