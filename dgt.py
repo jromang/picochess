@@ -255,11 +255,11 @@ dgt_xl_time_control_list = ["mov001", "mov003", "mov005", "mov010", "mov015", "m
 
 class DGTBoard(Observable, Display, threading.Thread):
 
-    def __init__(self, device):
+    def __init__(self, device, enable_board_leds=False):
         super(DGTBoard, self).__init__()
         self.flip_board = False
         self.flip_clock = False
-        self.enable_board_leds = False
+        self.enable_board_leds = enable_board_leds
         self.write_queue = queue.Queue()
         self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE)
         self.clock_lock = asyncio.Lock()
@@ -276,11 +276,9 @@ class DGTBoard(Observable, Display, threading.Thread):
             self.clock_found = self.serial.inWaiting()
             tries += 1
         logging.debug('DGT XL clock found' if self.clock_found else 'DGT XL clock NOT found')
-        # Get board version and trademark
+        # Get board version
         self.version = 0.0
-        self.trademark = ''
         self.write([Commands.DGT_SEND_VERSION])
-        self.write([Commands.DGT_SEND_TRADEMARK])
         # Beep and display version
         self.display_on_dgt_xl('pic'+version)
         # Update the board
@@ -336,12 +334,6 @@ class DGTBoard(Observable, Display, threading.Thread):
             if case(Messages.DGT_MSG_VERSION):  # Get the DGT board version
                 self.version = float(str(message[0])+'.'+str(message[1]))
                 logging.debug("DGT board version %0.2f", self.version)
-                break
-            if case(Messages.DGT_MSG_TRADEMARK):  # Get the DGT trademark
-                self.trademark = ''.join(chr(i) for i in message)
-                if 'Revelation' in self.trademark:
-                    logging.debug('Revelation board detected, enabling LED display')
-                    self.enable_board_leds = True
                 break
             if case(Messages.DGT_MSG_BWTIME):
                 if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
