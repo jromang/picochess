@@ -101,12 +101,10 @@ def main():
                 self.root = ''
 
         fens = FenList()
-        for m in g.generate_legal_moves():
-            # g.push(m)
-            # try:
+        for move in g.generate_legal_moves():
+            g.push(move)
             fens.append(g.fen().split(' ')[0])
-            # finally:
-                # g.pop()
+            g.pop()
         fens.root = g.fen().split(' ')[0]
         return fens
 
@@ -235,7 +233,6 @@ def main():
 
             if case(Event.BEST_MOVE):
                 move = chess.Move.from_uci(event.move)
-                logging.debug("Best move [%s]", move)
                 # Check if we are in play mode and it is computer's turn
                 if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
                     time_control.stop()
