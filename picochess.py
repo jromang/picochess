@@ -102,11 +102,11 @@ def main():
 
         fens = FenList()
         for m in g.generate_legal_moves():
-            g.push(m)
-            try:
-                fens.append(g.fen().split(' ')[0])
-            finally:
-                g.pop()
+            # g.push(m)
+            # try:
+            fens.append(g.fen().split(' ')[0])
+            # finally:
+                # g.pop()
         fens.root = g.fen().split(' ')[0]
         return fens
 
@@ -241,8 +241,8 @@ def main():
                     time_control.stop()
                     game.push(move)
                     Display.show(Message.COMPUTER_MOVE, move=move.uci(), game=game, time_control=time_control)
-                    check_game_state(game)
-                        # legal_fens = compute_legal_fens(game)
+                    if check_game_state(game):
+                        legal_fens = compute_legal_fens(game)
                 break
 
             if case(Event.SET_MODE):
