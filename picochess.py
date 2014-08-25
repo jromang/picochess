@@ -38,7 +38,7 @@ def main():
     parser = configargparse.ArgParser(default_config_files=[os.path.dirname(os.path.realpath(__file__)) + os.sep + 'picochess.ini'])
     parser.add_argument("-e", "--engine", type=str, help="UCI engine executable path", required=True)
     parser.add_argument("-d", "--dgt-port", type=str, help="enable dgt board on the given serial port such as /dev/ttyUSB0")
-    parser.add_argument("-leds", "--enable-dgt-board-leds", action='store_true', help="reboot system after update")
+    parser.add_argument("-leds", "--enable-dgt-board-leds", action='store_true', help="enable dgt board leds")
     parser.add_argument("-hs", "--hash-size", type=int, help="hashtable size in MB (default:64)", default=64)
     parser.add_argument("-t", "--threads", type=int, help="number of engine threads (default:1)", default=1)
     parser.add_argument("-l", "--log-level", choices=['notset', 'debug', 'info', 'warning', 'error', 'critical'], default='warning', help="logging level")
@@ -52,6 +52,7 @@ def main():
     parser.add_argument("-web", "--web-server", action='store_true', help="launch web server")
     parser.add_argument("-mail", "--email", type=str, help="email used to send pgn files", default=None)
     parser.add_argument("-mk", "--email-key", type=str, help="key used to send emails", default=None)
+    parser.add_argument("-uci", "--uci-option", type=str, help="pass an UCI option to the engine (name;value)", default=None)
     args = parser.parse_args()
 
     # Enable logging
@@ -71,6 +72,10 @@ def main():
         engine.set_option("Threads", args.threads)
     if 'Core Threads' in engine.options:  # Hiarcs
         engine.set_option("Core Threads", args.threads)
+    if args.uci_option:
+        uci_parameter = args.uci_option.split('=')
+        engine.set_option(uci_parameter[0], uci_parameter[1])
+
     # Connect to DGT board
     if args.dgt_port:
         logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
@@ -163,7 +168,7 @@ def main():
     book = chess.polyglot.open_reader(get_opening_books()[8][1])  # Default opening book
     interaction_mode = Mode.PLAY_WHITE   # Interaction mode
     book_thread = None  # The thread that will fire book moves
-    time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=1)
+    time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=5)
 
     #Send the engine's UCI options to all Displays
     Display.show(Message.UCI_OPTION_LIST, options=engine.options)
