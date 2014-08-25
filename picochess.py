@@ -211,9 +211,6 @@ def main():
                     time_control.stop()
                     game.push(move)
                     if check_game_state(game):
-                        logging.debug('Showing Observe mode move')
-                        # Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
-
                         if interaction_mode == Mode.PLAY_BLACK or interaction_mode == Mode.PLAY_WHITE:
                             think(time_control)
                             Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
