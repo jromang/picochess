@@ -233,6 +233,7 @@ def main():
                     Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
                     game = chess.Bitboard()
                     legal_fens = compute_legal_fens(game)
+                    time_control.stop()
                     time_control.reset()
                     Display.show(Message.START_NEW_GAME)
                 if interaction_mode == Mode.PLAY_BLACK:
