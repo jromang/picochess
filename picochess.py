@@ -71,7 +71,6 @@ def main():
         engine.set_option("Threads", args.threads)
     if 'Core Threads' in engine.options:  # Hiarcs
         engine.set_option("Core Threads", args.threads)
-
     # Connect to DGT board
     if args.dgt_port:
         logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
@@ -201,12 +200,23 @@ def main():
                 if not move in game.generate_legal_moves():
                     logging.warning('Illegal move [%s]', move)
                 # Check if we are in play mode and it is player's turn
-                elif (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.WHITE) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.BLACK):
+                elif (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.WHITE) or \
+                        (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.BLACK) or \
+                        (interaction_mode != Mode.PLAY_BLACK and interaction_mode != Mode.PLAY_WHITE):
                     time_control.stop()
                     game.push(move)
                     if check_game_state(game):
-                        Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
-                        think(time_control)
+                        logging.debug('Showing Observe mode move')
+                        # Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
+
+                        if interaction_mode == Mode.PLAY_BLACK or interaction_mode == Mode.PLAY_WHITE:
+                            think(time_control)
+                            Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
+                        else:
+                            # Observe mode
+                            Display.show(Message.COMPUTER_MOVE, move=move.uci(), game=copy.deepcopy(game), time_control=time_control)
+                            if check_game_state(game):
+                                legal_fens = compute_legal_fens(game)
                 break
 
             if case(Event.LEVEL):  # User sets a new level
