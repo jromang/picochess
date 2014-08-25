@@ -18,6 +18,7 @@ import threading
 import base64
 import chess
 import chess.pgn
+import datetime
 import logging
 import requests
 from utilities import *
@@ -39,9 +40,18 @@ class PgnDisplay(Display, threading.Thread):
                 if message == Message.GAME_ENDS and message.moves:
                     logging.debug('Saving game to [' + self.file_name+']')
                     game = node = chess.pgn.Game()
-                    game.headers["Result"] = "*"
                     for move in message.moves:
                         node = node.add_main_variation(move)
+                    # Headers
+                    game.headers["Event"] = 'PicoChess game'
+                    game.headers["Site"] = get_location()
+                    game.headers["Date"] = datetime.date.today().strftime('%Y.%m.%d')
+                    if message.result == GameResult.ABORT:
+                        game.headers["Result"] = "*"
+                    elif message.result == GameResult.STALEMATE:
+                        game.headers["Result"] = "1/2-1/2"
+                    elif message.result in (GameResult.MATE, GameResult.TIME_CONTROL):
+                        game.headers["Result"] = "0-1" if message.turn == chess.WHITE else "1-0"
                     # Save to file
                     file = open(self.file_name, "a")
                     exporter = chess.pgn.FileExporter(file)

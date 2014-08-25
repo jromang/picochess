@@ -20,6 +20,8 @@ import os
 import platform
 import random
 import subprocess
+import urllib.request
+from xml.dom.minidom import parseString
 try:
     import enum
 except ImportError:
@@ -218,3 +220,14 @@ def shutdown():
         os.system('shutdown /s')
     else:
         os.system('shutdown -h now')
+
+def get_location():
+    try:
+        response = urllib.request.urlopen('http://freegeoip.net/xml/')
+        dom = parseString(response.read())
+        country = dom.getElementsByTagName('CountryName')[0].childNodes[0].data
+        city = dom.getElementsByTagName('City')[0].childNodes[0].data
+        country_code = dom.getElementsByTagName('CountryCode')[0].childNodes[0].data
+        return city + ', ' + country + ' ' + country_code
+    except:
+        return '?'
