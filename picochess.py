@@ -146,20 +146,20 @@ def main():
         else:
             engine.stop(True)
 
-    def check_game_state(game):
+    def check_game_state(game, interaction_mode):
         """
         Check if the game has ended or not ; it also sends Message to Displays if the game has ended.
         :param game:
         :return: True is the game continues, False if it has ended
         """
         if game.is_stalemate():
-            Display.show(Message.GAME_ENDS, result=GameResult.STALEMATE, moves=list(game.move_stack), color=game.turn)
+            Display.show(Message.GAME_ENDS, result=GameResult.STALEMATE, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
             return False
         if game.is_insufficient_material():
-            Display.show(Message.GAME_ENDS, result=GameResult.INSUFFICIENT_MATERIAL, moves=list(game.move_stack), color=game.turn)
+            Display.show(Message.GAME_ENDS, result=GameResult.INSUFFICIENT_MATERIAL, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
             return False
         if game.is_game_over():
-            Display.show(Message.GAME_ENDS, result=GameResult.MATE, moves=list(game.move_stack), color=game.turn)
+            Display.show(Message.GAME_ENDS, result=GameResult.MATE, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
             return False
         return True
 
@@ -210,14 +210,14 @@ def main():
                         (interaction_mode != Mode.PLAY_BLACK and interaction_mode != Mode.PLAY_WHITE):
                     time_control.stop()
                     game.push(move)
-                    if check_game_state(game):
+                    if check_game_state(game, interaction_mode):
                         if interaction_mode == Mode.PLAY_BLACK or interaction_mode == Mode.PLAY_WHITE:
                             think(time_control)
                             Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
                         else:
                             # Observe mode
                             Display.show(Message.COMPUTER_MOVE, move=move.uci(), game=copy.deepcopy(game), time_control=time_control)
-                            if check_game_state(game):
+                            if check_game_state(game, interaction_mode):
                                 legal_fens = compute_legal_fens(game)
                 break
 
@@ -230,7 +230,7 @@ def main():
             if case(Event.NEW_GAME):  # User starts a new game
                 if game.move_stack:
                     logging.debug("Starting a new game")
-                    Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack), color=game.turn)
+                    Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
                     game = chess.Bitboard()
                     legal_fens = compute_legal_fens(game)
                     time_control.reset()
@@ -251,7 +251,7 @@ def main():
                     time_control.stop()
                     game.push(move)
                     Display.show(Message.COMPUTER_MOVE, move=move.uci(), game=copy.deepcopy(game), time_control=time_control)
-                    if check_game_state(game):
+                    if check_game_state(game, interaction_mode):
                         legal_fens = compute_legal_fens(game)
                 break
 
@@ -266,7 +266,7 @@ def main():
 
             if case(Event.OUT_OF_TIME):
                 stop_thinking()
-                Display.show(Message.GAME_ENDS, result=GameResult.TIME_CONTROL, moves=list(game.move_stack), color=event.color)
+                Display.show(Message.GAME_ENDS, result=GameResult.TIME_CONTROL, moves=list(game.move_stack), color=event.color, mode=interaction_mode)
                 break
 
             if case(Event.UCI_OPTION_SET):
