@@ -20,7 +20,7 @@ __author__ = "Niklas Fiekas"
 
 __email__ = "niklas.fiekas@tu-clausthal.de"
 
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 
 import collections
 import re
@@ -1507,7 +1507,7 @@ class Bitboard(object):
             return True
 
         # Fivefold repitition.
-        if self.transpositions[self.zobrist_hash()] >= 5:
+        if self.is_fivefold_repitition():
             return True
 
         return False
@@ -1575,9 +1575,34 @@ class Bitboard(object):
     def is_fivefold_repitition(self):
         """
         Since the first of July 2014 a game is automatically drawn (without
-        a claim by one of the players) if a position occurs for the fifth time.
+        a claim by one of the players) if a position occurs for the fifth time
+        on consecutive alternating moves.
         """
-        return self.transpositions[self.zobrist_hash()] >= 5
+        zobrist_hash = self.zobrist_hash()
+
+        # A minimum amount of moves must have been played and the position
+        # in question must have appeared at least five times.
+        if len(self.move_stack) < 16 or self.transpositions[zobrist_hash] < 5:
+            return False
+
+        switchyard = collections.deque()
+
+        for i in range(4):
+            # Go back two full moves, each.
+            for j in range(4):
+                switchyard.append(self.pop())
+
+            # Check the position was the same before.
+            if self.zobrist_hash() != zobrist_hash:
+                while switchyard:
+                    self.push(switchyard.pop())
+
+                return False
+
+        while switchyard:
+            self.push(switchyard.pop())
+
+        return True
 
     def can_claim_draw(self):
         """
