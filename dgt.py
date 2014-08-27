@@ -221,7 +221,9 @@ mode_map = {"rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR": Mode.BOOK,
             "rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR": Mode.KIBITZ,
             "rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR": Mode.OBSERVE,
             "rnbq1bnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR": Mode.PLAY_BLACK,  # Player plays black
-            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQ1BNR": Mode.PLAY_WHITE}  # Player plays white
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQ1BNR": Mode.PLAY_WHITE,  # Player plays white
+            "RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbq1bnr": Mode.PLAY_BLACK,  # Player plays black (reversed board)
+            "RNBQ1BNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr": Mode.PLAY_WHITE}  # Player plays white (reversed board)
 
 time_control_map = OrderedDict([
 ("rnbqkbnr/pppppppp/Q7/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=1)),
@@ -399,7 +401,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                 elif fen in mode_map:  # Set interaction mode
                     logging.debug("Interaction mode [%s]", mode_map[fen])
                     self.fire(Event.SET_MODE, mode=mode_map[fen])
-                    self.display_on_dgt_xl(('book', 'analys', 'game', 'kibitz', 'observ', 'black', 'white')[mode_map[fen].value], True)
+                    self.display_on_dgt_xl(('book', 'analys', 'game', 'kibitz', 'observ', 'black', 'white', 'black', 'white')[mode_map[fen].value], True)
                 elif fen in time_control_map:
                     logging.debug("Setting time control %s", time_control_map[fen].mode)
                     self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[fen])
