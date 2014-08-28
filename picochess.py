@@ -73,8 +73,18 @@ def main():
     if 'Core Threads' in engine.options:  # Hiarcs
         engine.set_option("Core Threads", args.threads)
     if args.uci_option:
-        uci_parameter = args.uci_option.split('=')
-        engine.set_option(uci_parameter[0], uci_parameter[1])
+        uci_options = args.uci_option
+        if '"' in uci_options:
+            uci_options = uci_options.strip('"')
+        if ";" in uci_options:
+            uci_option_list = uci_options.split(";")
+        else:
+            uci_option_list = [uci_options]
+
+        for uci_option in uci_option_list:
+            uci_option = uci_option.strip()
+            uci_parameter = uci_option.split('=')
+            engine.set_option(uci_parameter[0], uci_parameter[1])
 
     # Connect to DGT board
     if args.dgt_port:
@@ -216,7 +226,7 @@ def main():
                             Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
                         else:
                             # Observe mode
-                            Display.show(Message.COMPUTER_MOVE, move=move.uci(), game=copy.deepcopy(game), time_control=time_control)
+                            Display.show(Message.COMPUTER_MOVE, move=move.uci(), game=copy.deepcopy(game), time_control=time_control, beep=False)
                             if check_game_state(game, interaction_mode):
                                 legal_fens = compute_legal_fens(game)
                 break
