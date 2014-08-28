@@ -263,8 +263,17 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.flip_clock = False
         self.enable_board_leds = enable_board_leds
         self.write_queue = queue.Queue()
-        self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE)
         self.clock_lock = asyncio.Lock()
+
+        # Open the serial port
+        attempts = 0
+        while attempts < 10:
+            try:
+                self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE)
+                break
+            except pyserial.SerialException as e:
+                logging.warning(e)
+                time.sleep(2)
 
         # Set the board update mode
         self.serial.write(bytearray([Commands.DGT_SEND_UPDATE_NICE.value]))
