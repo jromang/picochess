@@ -73,17 +73,8 @@ def main():
     if 'Core Threads' in engine.options:  # Hiarcs
         engine.set_option("Core Threads", args.threads)
     if args.uci_option:
-        uci_options = args.uci_option
-        if '"' in uci_options:
-            uci_options = uci_options.strip('"')
-        if ";" in uci_options:
-            uci_option_list = uci_options.split(";")
-        else:
-            uci_option_list = [uci_options]
-
-        for uci_option in uci_option_list:
-            uci_option = uci_option.strip()
-            uci_parameter = uci_option.split('=')
+        for uci_option in args.uci_option.strip('"').split(";"):
+            uci_parameter = uci_option.strip().split('=')
             engine.set_option(uci_parameter[0], uci_parameter[1])
 
     # Connect to DGT board
