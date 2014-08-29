@@ -23,7 +23,7 @@ from utilities import *
 
 class TimeControl(object):
     def __init__(self, mode=ClockMode.FIXED_TIME, seconds_per_move=0, minutes_per_game=0, fischer_increment=0):
-        super().__init__()
+        super(TimeControl, self).__init__()
         self.mode = mode
         self.seconds_per_move = seconds_per_move
         self.minutes_per_game = minutes_per_game
