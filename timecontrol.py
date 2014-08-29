@@ -21,7 +21,7 @@ import logging
 from utilities import *
 
 
-class TimeControl:
+class TimeControl(object):
     def __init__(self, mode=ClockMode.FIXED_TIME, seconds_per_move=0, minutes_per_game=0, fischer_increment=0):
         super().__init__()
         self.mode = mode
@@ -32,10 +32,12 @@ class TimeControl:
         self.reset()
 
     def reset(self):
+        """Resets the clock's times for both players"""
         self.clock_time = {chess.WHITE: float(self.minutes_per_game * 60), chess.BLACK: float(self.minutes_per_game * 60)}  # Player remaining time, in seconds
         self.active_color = None
 
     def out_of_time(self):
+        """Fires an OUT_OF_TIME event"""
         Observable.fire(Event.OUT_OF_TIME, color=self.active_color)
 
     def run(self, color):
@@ -47,6 +49,7 @@ class TimeControl:
             self.timer.start()
 
     def stop(self):
+        """Stop the clocks"""
         if self.active_color is not None and self.mode in (ClockMode.BLITZ, ClockMode.FISCHER):
             self.clock_time[self.active_color] -= time.clock() - self.start_time
             self.timer.cancel()
@@ -54,6 +57,7 @@ class TimeControl:
             self.active_color = None
 
     def uci(self):
+        """Returns remaining time for both players in an UCI formatted string"""
         uci_string = ''
         if self.mode in (ClockMode.BLITZ, ClockMode.FISCHER):
             uci_string = 'wtime ' + str(int(self.clock_time[chess.WHITE] * 1000)) + ' btime ' + str(int(self.clock_time[chess.BLACK] * 1000))
