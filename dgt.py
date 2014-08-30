@@ -260,7 +260,6 @@ class DGTBoard(Observable, Display, threading.Thread):
     def __init__(self, device, enable_board_leds=False):
         super(DGTBoard, self).__init__()
         self.flip_board = False
-        self.flip_clock = False
         self.enable_board_leds = enable_board_leds
         self.write_queue = queue.Queue()
         self.clock_lock = asyncio.Lock()
@@ -492,10 +491,12 @@ class DGTBoard(Observable, Display, threading.Thread):
                         tc = message.time_control
                         w_hms = hours_minutes_seconds(int(tc.clock_time[chess.WHITE]))
                         b_hms = hours_minutes_seconds(int(tc.clock_time[chess.BLACK]))
-                        side = 0x01 if message.turn == chess.WHITE else 0x02
+                        side = 0x01 if (message.turn == chess.WHITE) != self.flip_board else 0x02
                         if tc.mode == ClockMode.FIXED_TIME:
                             side = 0x02
                             b_hms = hours_minutes_seconds(tc.seconds_per_move)
+                        if self.flip_board:
+                            w_hms, b_hms = b_hms, w_hms
                         self.write([Commands.DGT_CLOCK_MESSAGE, 0x0a, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_SETNRUN,
                                    w_hms[0], w_hms[1], w_hms[2], b_hms[0], b_hms[1], b_hms[2],
                                    side, Clock.DGT_CMD_CLOCK_END_MESSAGE])
