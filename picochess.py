@@ -198,6 +198,19 @@ def main():
                     stop_thinking()
                     game.pop()
                     Display.show(Message.USER_TAKE_BACK)
+                else:  # Check if this a a previous legal position and allow user to restart from this position
+                    game_history = copy.deepcopy(game)
+                    while game_history.move_stack:
+                        game_history.pop()
+                        if (interaction_mode == Mode.PLAY_WHITE and game_history.turn == chess.WHITE) or (interaction_mode == Mode.PLAY_BLACK and game_history.turn == chess.BLACK):
+                            if game_history.fen().split(' ')[0] == event.fen:
+                                logging.debug("Undoing game until FEN :" + event.fen)
+                                stop_thinking()
+                                while len(game_history.move_stack) < len(game.move_stack):
+                                    game.pop()
+                                Display.show(Message.USER_TAKE_BACK)
+                                legal_fens = compute_legal_fens(game)
+                                break
                 break
 
             if case(Event.USER_MOVE):  # User sends a new move
