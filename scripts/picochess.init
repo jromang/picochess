@@ -1,0 +1,46 @@
+#! /bin/bash
+# /etc/init.d/picochess
+#
+
+# Some things that run always
+touch /var/lock/picochess
+
+# Carry out specific functions when asked to by the system
+case "$1" in
+  start)
+    echo "Starting picochess"
+      if [ -e "/dev/ttyACM0" ]
+      then
+         dgt_port="/dev/ttyACM0"
+      elif [ -e "/dev/ttyUSB0" ]
+      then
+         dgt_port="/dev/ttyUSB0"
+      elif [ -e "/dev/rfcomm0" ]
+      then
+         #/opt/picochess/pico_dgt_bt.sh
+         dgt_port="/dev/rfcomm0"
+      else
+        # Start bluetooth detection. Call Eric Singer's script that covers both regular DGT and the REV II board.
+        # Should we support even more device checks?
+        echo "Starting bluetooth detection" 
+        /opt/picochess/scripts/pico_dgt_bt.sh
+        dgt_port="/dev/rfcomm0"
+      fi
+
+      echo $dgt_port
+      cd /opt/picochess
+      screen -dmUS pc /opt/picochess/picochess.py -e stockfish -d $dgt_port -web -lf picochess.log -l debug -hs 128
+    ;;
+  stop)
+    echo "Stopping picochess"
+    pkill -9 -f picochess.py
+    screen -wipe
+    ;;
+  *)
+    echo "Usage: /etc/init.d/picochess {start|stop}"
+    exit 1
+    ;;
+esac
+
+exit 0
+
