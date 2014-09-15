@@ -170,7 +170,7 @@ class WebDisplay(Display, threading.Thread):
         elif message == Message.SEARCH_STARTED:
             EventHandler.write_to_clients({'msg': 'Thinking..'})
 
-        elif message == Message.COMPUTER_MOVE or message == Message.USER_MOVE:
+        elif message == Message.COMPUTER_MOVE or message == Message.USER_MOVE or message == Message.REVIEW_MODE_MOVE:
             game = pgn.Game()
             WebDisplay.create_game_header(game)
 

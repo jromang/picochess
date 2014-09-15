@@ -186,7 +186,8 @@ def main():
                     # Check if we have to undo a previous move (sliding)
                     if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
                         stop_thinking()
-                        game.pop()
+                        if game.move_stack:
+                            game.pop()
                     legal_moves = list(game.generate_legal_moves())
                     Observable.fire(Event.USER_MOVE, move=legal_moves[legal_fens.index(event.fen)])
                 elif event.fen == game.fen().split(' ')[0]:  # Player had done the computer move on the board
@@ -202,7 +203,9 @@ def main():
                     game_history = copy.deepcopy(game)
                     while game_history.move_stack:
                         game_history.pop()
-                        if (interaction_mode == Mode.PLAY_WHITE and game_history.turn == chess.WHITE) or (interaction_mode == Mode.PLAY_BLACK and game_history.turn == chess.BLACK):
+                        if (interaction_mode == Mode.PLAY_WHITE and game_history.turn == chess.WHITE) \
+                            or (interaction_mode == Mode.PLAY_BLACK and game_history.turn == chess.BLACK) \
+                            or (interaction_mode == Mode.OBSERVE):
                             if game_history.fen().split(' ')[0] == event.fen:
                                 logging.debug("Undoing game until FEN :" + event.fen)
                                 stop_thinking()
@@ -230,7 +233,7 @@ def main():
                             Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
                         else:
                             # Observe mode
-                            Display.show(Message.COMPUTER_MOVE, move=move.uci(), game=copy.deepcopy(game), time_control=time_control, beep=False)
+                            Display.show(Message.REVIEW_MODE_MOVE, move=move.uci(), game=copy.deepcopy(game))
                             if check_game_state(game, interaction_mode):
                                 legal_fens = compute_legal_fens(game)
                 break

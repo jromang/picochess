@@ -484,8 +484,13 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.display_on_dgt_xl('ok', True)
                         self.clear_light_revelation_board()
                         break
+                    if case(Message.REVIEW_MODE_MOVE):
+                        uci_move = message.move
+                        # Dont beep when reviewing a game
+                        self.display_on_dgt_xl(' ' + uci_move, False)
+                        break
                     if case(Message.USER_TAKE_BACK):
-                        self.display_on_dgt_xl('takbak')
+                        self.display_on_dgt_xl('takbak', True)
                         break
                     if case(Message.RUN_CLOCK):
                         tc = message.time_control

@@ -397,18 +397,20 @@ function load_nacl_stockfish() {
     listener.addEventListener('crash', handleCrash, true);
 }
 function updateDGTPosition(j) {
-    if (j.pgn) {
-        pgnData = [
-            [j.pgn]
-        ];
-//                console.log(pgnData[0]);
-        loadGame(0);
-    }
+
     if (j.fen) {
         if (j.type != "broadcast") {
             dgtFEN = j.fen;
         }
-        goToPosition(j.fen);
+        if (!goToPosition(j.fen)) {
+            if (j.pgn) {
+                pgnData = [
+                    [j.pgn]
+                ];
+                loadGame(0);
+            }
+
+        }
 //                board.position(j.fen, true);
     }
 }
