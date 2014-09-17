@@ -43,15 +43,27 @@ class TimeControl(object):
     def run(self, color):
         if self.mode in (ClockMode.BLITZ, ClockMode.FISCHER):
             self.active_color = color
-            self.start_time = time.clock()
-            if self.mode == ClockMode.FISCHER: self.clock_time[color] += self.fischer_increment
+            self.start_time = time.time()
+            # logging.debug("start time is {0}".format(self.start_time))
+
+            if self.mode == ClockMode.FISCHER:
+                self.clock_time[color] += self.fischer_increment
             self.timer = threading.Timer(self.clock_time[color], self.out_of_time)
             self.timer.start()
 
     def stop(self):
         """Stop the clocks"""
         if self.active_color is not None and self.mode in (ClockMode.BLITZ, ClockMode.FISCHER):
-            self.clock_time[self.active_color] -= time.clock() - self.start_time
+
+            # logging.debug("active color current time is {0}".format(self.clock_time[self.active_color]))
+            # logging.debug("start time is {0}".format(self.start_time))
+            # logging.debug("active color is {0}".format(self.active_color))
+            # logging.debug("current time.clock is {0}".format(time.time()))
+
+
+            self.clock_time[self.active_color] -= time.time() - self.start_time
+            # logging.debug("updated time.clock is {0}".format(self.clock_time[self.active_color]))
+
             self.timer.cancel()
             self.timer.join()
             self.active_color = None

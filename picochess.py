@@ -129,8 +129,11 @@ def main():
         time.run(game.turn)
         if book_move:
             Display.show(Message.BOOK_MOVE, move=book_move.uci())
-            book_thread = threading.Timer(2, send_book_move, [book_move])
-            book_thread.start()
+            send_book_move(book_move)
+
+            # No need for one more thread at this point given slightly slower picochess, can bring back if needed
+            # book_thread = threading.Timer(2, send_book_move, [book_move])
+            # book_thread.start()
         else:
             book_thread = None
             engine.set_position(game)
@@ -194,6 +197,7 @@ def main():
                     Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD)
                     if time_control.mode != ClockMode.FIXED_TIME:
                         Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
+                        # logging.debug("Starting player clock")
                         time_control.run(game.turn)
                 elif event.fen == legal_fens.root:  # Allow user to take his move back while the engine is searching
                     stop_thinking()
@@ -226,6 +230,8 @@ def main():
                         (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.BLACK) or \
                         (interaction_mode != Mode.PLAY_BLACK and interaction_mode != Mode.PLAY_WHITE):
                     time_control.stop()
+                    # logging.debug("Stopping player clock")
+
                     game.push(move)
                     if check_game_state(game, interaction_mode):
                         if interaction_mode == Mode.PLAY_BLACK or interaction_mode == Mode.PLAY_WHITE:
