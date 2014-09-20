@@ -53,6 +53,7 @@ def main():
     parser.add_argument("-mail", "--email", type=str, help="email used to send pgn files", default=None)
     parser.add_argument("-mk", "--email-key", type=str, help="key used to send emails", default=None)
     parser.add_argument("-uci", "--uci-option", type=str, help="pass an UCI option to the engine (name;value)", default=None)
+    parser.add_argument("-dgt3000", "--dgt-3000-clock", action='store_true', help="use dgt 3000 clock")
     args = parser.parse_args()
 
     # Enable logging
@@ -80,7 +81,7 @@ def main():
     # Connect to DGT board
     if args.dgt_port:
         logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
-        dgt.DGTBoard(args.dgt_port, args.enable_dgt_board_leds).start()
+        dgt.DGTBoard(args.dgt_port, args.enable_dgt_board_leds, args.dgt_3000_clock).start()
     else:
         logging.warning("No DGT board port provided")
         # Enable keyboard input and terminal display

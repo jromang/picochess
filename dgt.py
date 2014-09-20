@@ -257,12 +257,13 @@ dgt_xl_time_control_list = ["mov001", "mov003", "mov005", "mov010", "mov015", "m
 
 class DGTBoard(Observable, Display, threading.Thread):
 
-    def __init__(self, device, enable_board_leds=False):
+    def __init__(self, device, enable_board_leds=False, enable_dgt_3000=False):
         super(DGTBoard, self).__init__()
         self.flip_board = False
         self.enable_board_leds = enable_board_leds
         self.write_queue = queue.Queue()
         self.clock_lock = asyncio.Lock()
+        self.enable_dgt_3000 = enable_dgt_3000
 
         # Open the serial port
         attempts = 0
@@ -324,7 +325,7 @@ class DGTBoard(Observable, Display, threading.Thread):
             else: logging.error('Type not supported : [%s]', type(v))
         self.serial.write(bytearray(array))
         if message[0] == Commands.DGT_CLOCK_MESSAGE:
-            time.sleep(0.5)  # Let a bit time for the message to be displayed on the clock
+            time.sleep(0.05 if self.enable_dgt_3000 else 0.5)  # Let a bit time for the message to be displayed on the clock
             self.clock_lock.acquire()
 
     def read_message(self):
