@@ -768,7 +768,9 @@ var onSnapEnd = function(source, target) {
 var updateStatus = function() {
 //    console.log("calling updateStatus");
     var status = '';
-    $('.fen').on('click', goToGameFen);
+//    $('.fen').on('click', goToGameFen);
+    $('.fen').unbind('click', goToGameFen).one('click', goToGameFen);
+
 
     var moveColor = 'White';
     var tmp_game;
@@ -1165,7 +1167,9 @@ function loadGame(i) {
     gameHistory.gameHeader = gameHeaderText;
     gameHistory.result = result;
     writeVariationTree(pgnEl, walk_tree_iterative(gameHistory.variations), gameHistory);
-    $('.fen').on('click', goToGameFen);
+//    $('.fen').on('click', goToGameFen);
+    $('.fen').unbind('click', goToGameFen).one('click', goToGameFen);
+
 
 
 }
