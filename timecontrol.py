@@ -19,6 +19,7 @@ import time
 import threading
 import logging
 from utilities import *
+import copy
 
 
 class TimeControl(object):
@@ -48,7 +49,8 @@ class TimeControl(object):
 
             if self.mode == ClockMode.FISCHER:
                 self.clock_time[color] += self.fischer_increment
-            self.timer = threading.Timer(self.clock_time[color], self.out_of_time)
+            # logging.debug("Time left is {0}".format(self.clock_time[color]))
+            self.timer = threading.Timer(copy.deepcopy(self.clock_time[color]), self.out_of_time)
             self.timer.start()
 
     def stop(self):
