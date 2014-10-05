@@ -30,6 +30,7 @@ class TimeControl(object):
         self.minutes_per_game = minutes_per_game
         self.fischer_increment = fischer_increment
         self.timer = None
+        self.run_color = None
         self.reset()
 
     def reset(self):
@@ -37,9 +38,11 @@ class TimeControl(object):
         self.clock_time = {chess.WHITE: float(self.minutes_per_game * 60), chess.BLACK: float(self.minutes_per_game * 60)}  # Player remaining time, in seconds
         self.active_color = None
 
-    def out_of_time(self):
+    def out_of_time(self, time_start):
         """Fires an OUT_OF_TIME event"""
-        Observable.fire(Event.OUT_OF_TIME, color=self.active_color)
+        if self.active_color is not None:
+            logging.debug('Firing an OUT_OF_TIME event, current clock time (before subtracting) is {0} and color is {1}, out of time event started from {2}'.format(self.clock_time[self.active_color], self.active_color, time_start))
+            Observable.fire(Event.OUT_OF_TIME, color=self.active_color)
 
     def run(self, color):
         if self.mode in (ClockMode.BLITZ, ClockMode.FISCHER):
@@ -50,24 +53,27 @@ class TimeControl(object):
             if self.mode == ClockMode.FISCHER:
                 self.clock_time[color] += self.fischer_increment
             # logging.debug("Time left is {0}".format(self.clock_time[color]))
-            self.timer = threading.Timer(copy.deepcopy(self.clock_time[color]), self.out_of_time)
-            self.timer.start()
+
+            # Only start thread if thread is not already started for same color
+            if self.active_color is not None and self.run_color != self.active_color:
+                self.timer = threading.Timer(copy.copy(self.clock_time[color]), self.out_of_time, [copy.copy(self.clock_time[color])])
+                self.timer.start()
+                self.run_color = self.active_color
+                # logging.info("Started out of time event at {0} for {1}".format(copy.copy(self.clock_time[color]), color))
+
 
     def stop(self):
         """Stop the clocks"""
         if self.active_color is not None and self.mode in (ClockMode.BLITZ, ClockMode.FISCHER):
+            self.timer.cancel()
+            # if self.timer.finished:
+            #     logging.info("Timer thread finished!")
+            #     # logging.info("After cancelling Thread state is {0}".format(self.timer.finished))
+            self.timer.join()
 
-            # logging.debug("active color current time is {0}".format(self.clock_time[self.active_color]))
-            # logging.debug("start time is {0}".format(self.start_time))
-            # logging.debug("active color is {0}".format(self.active_color))
-            # logging.debug("current time.clock is {0}".format(time.time()))
-
-
+            # logging.info("Cancelled out of time event")
             self.clock_time[self.active_color] -= time.time() - self.start_time
             # logging.debug("updated time.clock is {0}".format(self.clock_time[self.active_color]))
-
-            self.timer.cancel()
-            self.timer.join()
             self.active_color = None
 
     def uci(self):
