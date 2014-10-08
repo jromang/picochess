@@ -270,7 +270,7 @@
             <div class="panel col-xs-12 panel-primary">
                 <div class="panel-heading">
                     <h3 class="panel-title">
-                        Polyglot Book
+                        Book
                     </h3>
                 </div>
                 <div class="panel-body">
@@ -294,6 +294,20 @@
                 </div>
 
             </div>
+            <div class="panel col-xs-12 panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        DGT Clock
+
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    <div id="DGTClockStatus">
+
+                    </div>
+
+                </div>
+            </div>
 
 
         </div>
@@ -301,19 +315,47 @@
 
     <div class="row-fluid clearfix">
         <div class="panel col-xs-12 panel-primary">
-            <div class="panel-heading">
-                <h3 class="panel-title">
-                    DGT Clock
-                </h3>
-            </div>
             <div class="panel-body">
-                <div id="DGTClockStatus">
+                <table id="GameStatsTable" cellpadding="0" cellspacing="0" style="width: 100%; align: center; overflow: auto" class="table-condensed table-bordered table-responsive flat-table flat-table-1">
+                    <thead>
+                    <tr>
 
-                </div>
+                        <th data-dynatable-column="white">White</th>
+                        <th data-dynatable-column="white_elo">White Elo</th>
+
+                        <th data-dynatable-column="black">Black</th>
+                        <th data-dynatable-column="black_elo">Black Elo</th>
+
+                        <th data-dynatable-column="result">Result</th>
+                        <th data-dynatable-column="date">Date</th>
+
+                        <th data-dynatable-column="event">Event</th>
+                        <th data-dynatable-column="site">Site</th>
+                        <th data-dynatable-column="eco">ECO</th>
+
+                    </tr>
+                    </thead>
+                </table>
 
             </div>
         </div>
     </div>
+
+    <!--<div class="row-fluid clearfix">-->
+        <!--<div class="panel col-xs-12 panel-primary">-->
+            <!--<div class="panel-heading">-->
+                <!--<h3 class="panel-title">-->
+                    <!--DGT Clock-->
+                <!--</h3>-->
+            <!--</div>-->
+            <!--<div class="panel-body">-->
+                <!--<div id="DGTClockStatus">-->
+
+                <!--</div>-->
+
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
 
 </div>
 
@@ -355,18 +397,21 @@ function load_nacl_stockfish() {
     listener.addEventListener('crash', handleCrash, true);
 }
 function updateDGTPosition(j) {
-    if (j.pgn) {
-        pgnData = [
-            [j.pgn]
-        ];
-//                console.log(pgnData[0]);
-        loadGame(0);
-    }
+
     if (j.fen) {
         if (j.type != "broadcast") {
             dgtFEN = j.fen;
         }
-        goToPosition(j.fen);
+        if (!goToPosition(j.fen)) {
+            if (j.pgn) {
+                pgnData = [
+                    [j.pgn]
+                ];
+                loadGame(0);
+                goToPosition(j.fen);
+            }
+
+        }
 //                board.position(j.fen, true);
     }
 }
@@ -381,92 +426,110 @@ $(function () {
     });
     window.engine_lines = {};
     window.multipv = 1;
-//    window.BookStatsTable = $('#BookStatsTable').dynatable( {
-//        dataset: {
-//            ajax: true,
-//            ajaxUrl: '/query',
-////                 ajaxMethod: 'POST',
-//            ajaxOnLoad: true,
-//            ajaxData:    {
-//                action: "get_book_moves",
-//                fen: game.fen()
-//            },
-//            records: []
-//        },
-//        inputs: {
-//            processingText: '<img width="col-xs-3" src="/static/img/ajax-loader.gif" />'
-//        },
-//        features: {
-//            paginate: false,
-//            search: false,
-//            recordCount: false
-//        },
-//        writers: {
-//            _rowWriter: clickRowBookWriter
-//        },
-//        readers: {
-//            _rowReader: clickRowBookReader
-//        }
-//    }).data('dynatable');
+    window.BookStatsTable = $('#BookStatsTable').dynatable( {
+        dataset: {
+            ajax: true,
+            ajaxDataType: 'jsonp',
+            ajaxUrl: 'http://drshivaji.com:3334/query?callback=js_callback',
+//                 ajaxMethod: 'POST',
+            ajaxOnLoad: true,
+            ajaxData:    {
+                action: "get_book_moves",
+                fen: game.fen()
+//                cache_buster : (new Date()).getTime()
+            },
+            records: []
+        },
+        inputs: {
+            processingText: '<img width="col-xs-3" src="/static/img/ajax-loader.gif" />'
+        },
+        features: {
+            paginate: false,
+            search: false,
+            recordCount: false
+        },
+        writers: {
+            _rowWriter: clickRowBookWriter
+        },
+        readers: {
+            _rowReader: clickRowBookReader
+        }
+    }).data('dynatable');
 
-//    $("#GameStatsTable").delegate('tr', 'click', function() {
-////            alert("You clicked my <tr>!");
-////            var game_num = ($(this).attr('data-game-id'));
-//        $.get("/query", { action: "get_game_content", game_num: $(this).attr('data-game-id') }, function (data) {
+    $("#GameStatsTable").delegate('tr', 'click', function() {
+//            alert("You clicked my <tr>!");
+//            var game_num = ($(this).attr('data-game-id'));
+//            ajaxUrl: 'http://localhost:9999/query?callback=js_callback',
+        $.ajax({
+            dataType: 'jsonp',
+            url: "http://drshivaji.com:3334/query?callback=game_callback",
+            data: {action: "get_game_content",
+                   game_num: $(this).attr('data-game-id')}
+//                   cache_buster : (new Date()).getTime()}
+
+        }).done(function (data) {
+            pgnData = [data["pgn"]];
+            loadGame(0);
+        });
+
+//                "http://localhost:9999/query?callback=js_callback", { action: "get_game_content", game_num: $(this).attr('data-game-id') }, function (data) {
 //            pgnData = [data["pgn"]];
 //            loadGame(0);
 //        });
-//
-//        //get <td> element values here!!??
-//    });
+
+        //get <td> element values here!!??
+    });
 
 
-//    $("#BookStatsTable").delegate('tr', 'click', function() {
-////            alert("You clicked my <tr>!");
-////            alert($(this).attr('data-move'));
-//        stop_analysis();
-//        var tmp_game = create_game_pointer();
-//        var move = tmp_game.move($(this).attr('data-move'));
-//        updateCurrentPosition(move, tmp_game);
-//        board.position(currentPosition.fen);
-////        game.move($(this).attr('data-move'));
-////        board.position(game.fen());
-//        updateStatus();
-////         console.log($(this).attr('data-group'));
-//
-//    });
+    $("#BookStatsTable").delegate('tr', 'click', function() {
+//            alert("You clicked my <tr>!");
+//            alert($(this).attr('data-move'));
+        stop_analysis();
+        var tmp_game = create_game_pointer();
+        var move = tmp_game.move($(this).attr('data-move'));
+        updateCurrentPosition(move, tmp_game);
+        board.position(currentPosition.fen);
+//        game.move($(this).attr('data-move'));
+//        board.position(game.fen());
+        updateStatus();
+//         console.log($(this).attr('data-group'));
 
-//    window.GameStatsTable = $('#GameStatsTable').dynatable( {
-//        dataset: {
-//            ajax: true,
+    });
+
+    window.GameStatsTable = $('#GameStatsTable').dynatable( {
+        dataset: {
+            ajax: true,
+            ajaxDataType: 'jsonp',
+            ajaxUrl: 'http://drshivaji.com:3334/query?callback=game_callback',
 //            ajaxUrl: '/query',
-////                 ajaxMethod: 'POST',
-//            ajaxOnLoad: true,
-//            ajaxData:    {
-//                action: "get_games",
-//                fen: game.fen()
-//            },
-//            records: []
-//        },
-//        inputs: {
-//            processingText: '<img width="col-xs-3" src="/static/img/ajax-loader.gif" />',
-//            paginationClass: 'pagination',
-//            paginationActiveClass: 'active',
-//            paginationDisabledClass: 'disabled'
-//        },
-//        features: {
-//            paginate: true,
-//            search: true,
-//            recordCount: true,
-//            perPageSelect: true
-//        },
-//        writers: {
-//            _rowWriter: clickRowGameWriter
-//        },
-//        readers: {
-//            _rowReader: clickRowGameReader
-//        }
-//    }).data('dynatable');
+//                 ajaxMethod: 'POST',
+            ajaxOnLoad: true,
+            ajaxData:    {
+                action: "get_games",
+                fen: game.fen()
+//                cache_buster : (new Date()).getTime()
+            },
+            records: []
+        },
+        inputs: {
+            processingText: '<img width="col-xs-3" src="/static/img/ajax-loader.gif" />',
+            paginationClass: 'pagination',
+            paginationActiveClass: 'active',
+            paginationDisabledClass: 'disabled'
+        },
+        features: {
+            paginate: true,
+            search: true,
+            recordCount: true,
+            perPageSelect: true
+        },
+        writers: {
+            _rowWriter: clickRowGameWriter
+        },
+        readers: {
+            _rowReader: clickRowGameReader
+        }
+    }).data('dynatable');
 
 //    $('#playBtn').popover({
 //
@@ -705,7 +768,9 @@ var onSnapEnd = function(source, target) {
 var updateStatus = function() {
 //    console.log("calling updateStatus");
     var status = '';
-    $('.fen').on('click', goToGameFen);
+//    $('.fen').on('click', goToGameFen);
+    $('.fen').unbind('click', goToGameFen).one('click', goToGameFen);
+
 
     var moveColor = 'White';
     var tmp_game;
@@ -778,18 +843,19 @@ var updateStatus = function() {
     if (window.analysis) {
         analyze(true);
     }
-//    window.BookStatsTable.processingIndicator.show();
-//    window.BookStatsTable.settings.dataset.ajaxData =    {
-//        action: "get_book_moves",
-//        fen: fen
-//    };
-//    window.BookStatsTable.process();
-//
-//    window.GameStatsTable.settings.dataset.ajaxData =    {
-//        action: "get_games",
-//        fen: fen
-//    };
-//    window.GameStatsTable.process();
+    window.BookStatsTable.processingIndicator.show();
+    window.BookStatsTable.settings.dataset.ajaxData =    {
+        action: "get_book_moves",
+        fen: fen
+    };
+    window.BookStatsTable.process();
+
+//    window.GameStatsTable.processingIndicator.show();
+    window.GameStatsTable.settings.dataset.ajaxData =    {
+        action: "get_games",
+        fen: fen
+    };
+    window.GameStatsTable.process();
 
 
 
@@ -1101,7 +1167,9 @@ function loadGame(i) {
     gameHistory.gameHeader = gameHeaderText;
     gameHistory.result = result;
     writeVariationTree(pgnEl, walk_tree_iterative(gameHistory.variations), gameHistory);
-    $('.fen').on('click', goToGameFen);
+//    $('.fen').on('click', goToGameFen);
+    $('.fen').unbind('click', goToGameFen).one('click', goToGameFen);
+
 
 
 }
@@ -1539,6 +1607,10 @@ function formatEngineOutput(line) {
 function play() {
     console.log("Play!");
 
+}
+
+function js_callback(e) {
+//    console.log(e);
 }
 
 function multipv_increase() {

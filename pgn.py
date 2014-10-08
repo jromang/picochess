@@ -51,8 +51,10 @@ class PgnDisplay(Display, threading.Thread):
                     elif message.result == GameResult.STALEMATE:
                         game.headers["Result"] = "1/2-1/2"
                     elif message.result in (GameResult.MATE, GameResult.TIME_CONTROL):
-                        game.headers["Result"] = "0-1" if message.turn == chess.WHITE else "1-0"
-
+                        try:
+                            game.headers["Result"] = "0-1" if message.turn == chess.WHITE else "1-0"
+                        except AttributeError:
+                            game.headers["Result"] = "1-0"
                     if message.mode == Mode.PLAY_WHITE:
                         game.headers["White"] = self.email.split('@')[0] if self.email else 'Player'
                         game.headers["Black"] = "PicoChess"

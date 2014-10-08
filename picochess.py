@@ -53,6 +53,7 @@ def main():
     parser.add_argument("-mail", "--email", type=str, help="email used to send pgn files", default=None)
     parser.add_argument("-mk", "--email-key", type=str, help="key used to send emails", default=None)
     parser.add_argument("-uci", "--uci-option", type=str, help="pass an UCI option to the engine (name;value)", default=None)
+    parser.add_argument("-dgt3000", "--dgt-3000-clock", action='store_true', help="use dgt 3000 clock")
     args = parser.parse_args()
 
     # Enable logging
@@ -80,7 +81,7 @@ def main():
     # Connect to DGT board
     if args.dgt_port:
         logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
-        dgt.DGTBoard(args.dgt_port, args.enable_dgt_board_leds).start()
+        dgt.DGTBoard(args.dgt_port, args.enable_dgt_board_leds, args.dgt_3000_clock).start()
     else:
         logging.warning("No DGT board port provided")
         # Enable keyboard input and terminal display
@@ -129,8 +130,11 @@ def main():
         time.run(game.turn)
         if book_move:
             Display.show(Message.BOOK_MOVE, move=book_move.uci())
-            book_thread = threading.Timer(2, send_book_move, [book_move])
-            book_thread.start()
+            send_book_move(book_move)
+
+            # No need for one more thread at this point given slightly slower picochess, can bring back if needed
+            # book_thread = threading.Timer(2, send_book_move, [book_move])
+            # book_thread.start()
         else:
             book_thread = None
             engine.set_position(game)
@@ -186,13 +190,15 @@ def main():
                     # Check if we have to undo a previous move (sliding)
                     if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
                         stop_thinking()
-                        game.pop()
+                        if game.move_stack:
+                            game.pop()
                     legal_moves = list(game.generate_legal_moves())
                     Observable.fire(Event.USER_MOVE, move=legal_moves[legal_fens.index(event.fen)])
                 elif event.fen == game.fen().split(' ')[0]:  # Player had done the computer move on the board
                     Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD)
                     if time_control.mode != ClockMode.FIXED_TIME:
                         Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
+                        # logging.debug("Starting player clock")
                         time_control.run(game.turn)
                 elif event.fen == legal_fens.root:  # Allow user to take his move back while the engine is searching
                     stop_thinking()
@@ -202,7 +208,9 @@ def main():
                     game_history = copy.deepcopy(game)
                     while game_history.move_stack:
                         game_history.pop()
-                        if (interaction_mode == Mode.PLAY_WHITE and game_history.turn == chess.WHITE) or (interaction_mode == Mode.PLAY_BLACK and game_history.turn == chess.BLACK):
+                        if (interaction_mode == Mode.PLAY_WHITE and game_history.turn == chess.WHITE) \
+                            or (interaction_mode == Mode.PLAY_BLACK and game_history.turn == chess.BLACK) \
+                            or (interaction_mode == Mode.OBSERVE):
                             if game_history.fen().split(' ')[0] == event.fen:
                                 logging.debug("Undoing game until FEN :" + event.fen)
                                 stop_thinking()
@@ -223,6 +231,8 @@ def main():
                         (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.BLACK) or \
                         (interaction_mode != Mode.PLAY_BLACK and interaction_mode != Mode.PLAY_WHITE):
                     time_control.stop()
+                    # logging.debug("Stopping player clock")
+
                     game.push(move)
                     if check_game_state(game, interaction_mode):
                         if interaction_mode == Mode.PLAY_BLACK or interaction_mode == Mode.PLAY_WHITE:
@@ -230,7 +240,7 @@ def main():
                             Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
                         else:
                             # Observe mode
-                            Display.show(Message.COMPUTER_MOVE, move=move.uci(), game=copy.deepcopy(game), time_control=time_control, beep=False)
+                            Display.show(Message.REVIEW_MODE_MOVE, move=move.uci(), game=copy.deepcopy(game))
                             if check_game_state(game, interaction_mode):
                                 legal_fens = compute_legal_fens(game)
                 break

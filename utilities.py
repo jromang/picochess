@@ -62,6 +62,7 @@ class Message(AutoNumber):
     #Messages to display devices
     COMPUTER_MOVE = ()  # Show computer move
     BOOK_MOVE = ()  # Show book move
+    REVIEW_MODE_MOVE = () # Player is reviewing game
     INTERACTION_MODE = ()  # Interaction mode
     START_NEW_GAME = ()
     COMPUTER_MOVE_DONE_ON_BOARD = ()  # User has done the compute move on board
