@@ -16,7 +16,7 @@ using the UNIX tool `dd <http://manpages.ubuntu.com/manpages/lucid/man1/dd.1.htm
 Windows users should use `Win32DiskImager <https://launchpad.net/win32-image-writer>`_. Do not try to drag and drop or otherwise copy over the image
 without using dd or Win32DiskImager – it won’t work.
 
-After booting from the new image, you might want to tinker with the machine (i.e. set defaults in picochess.ini file). This is done by connecting via ssh:
+After booting from the new image, you might want to tinker with the machine (i.e. set defaults in picochess.ini file or install alternative engines). This is done by connecting via ssh:
 
 1. On Raspberry Pi, the hostname on local network is 'raspberrypi.local', username:pi, pass:picochess.
 
