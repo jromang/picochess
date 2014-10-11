@@ -20,7 +20,7 @@ After booting from the new image, you might want to tinker with the machine (i.e
 
 1. On Raspberry Pi, the hostname on local network is 'raspberrypi.local', username:pi, pass:picochess.
 
-2. On Odroid, the hostname on local network is 'odroid.local' (username:odroid, pass:odroid).
+2. On Odroid, the hostname on local network is 'odroid.local', username:odroid, pass:odroid.
 
 
 Copying the image to an SD Card on Windows
