@@ -137,4 +137,4 @@ Bluetooth Connection
 
 9. Restart the pi without the keyboard and monitor and tada! the connection should work.
 
-For more information check `forum post <https://groups.google.com/forum/#!topic/picochess/7LSBZ6Qha64>`_.
+For more information check this `forum post <https://groups.google.com/forum/#!topic/picochess/7LSBZ6Qha64>`_.
