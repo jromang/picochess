@@ -115,19 +115,19 @@ for a list.
 Bluetooth Connection
 --------------------
 
-1. Connect bluetooth dongle and restart the Pi
+1. Connect bluetooth dongle and restart the Pi.
 
 2. Start the GUI:
 
    startx
 
-3. Go to Preferences/Bluetooth Manager
+3. Go to Preferences/Bluetooth Manager.
 
-4. Click search to find your device, right click and connect
+4. Click search to find your device, right click and connect.
 
-5. For Revelation II use the prepared pin 1234, for DGT bluetooth eboard 0000
+5. For Revelation II use the prepared pin 1234, for DGT bluetooth eboard 0000.
 
-6. Then click to connect as a serial device
+6. Then click to connect as a serial device.
 
 7. Back on the bluetooth manager right click on the device again and click trusted. Job done!
 
