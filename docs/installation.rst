@@ -115,26 +115,26 @@ for a list.
 Bluetooth Connection
 --------------------
 
-1. Connect the bluetooth dongle and restart the pi
+1. Connect bluetooth dongle and restart the Pi
 
-2. start the gui
+2. Start the GUI:
 
    startx
 
-3. go to preferences/blustooth manager
+3. Go to Preferences/Bluetooth Manager
 
 4. Click search to find your device, right click and connect
 
-5. For the Rev II use the prepared pin 1234
+5. For Revelation II use the prepared pin 1234, for DGT bluetooth eboard 0000
 
 6. Then click to connect as a serial device
 
 7. Back on the bluetooth manager right click on the device again and click trusted. Job done!
 
-8. I opened a TX Terminal window at this point and shut down using the command :
+8. Open Terminal app and shut down the machine:
 
    sudo shutdown -h now
 
 9. Restart the pi without the keyboard and monitor and tada! the connection should work.
 
-If you need more information chek this `forum post <https://groups.google.com/forum/#!topic/picochess/7LSBZ6Qha64>`_.
+For more information check `forum post <https://groups.google.com/forum/#!topic/picochess/7LSBZ6Qha64>`_.
