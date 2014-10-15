@@ -127,7 +127,7 @@ class WebServer(Observable, threading.Thread):
             (r'.*', tornado.web.FallbackHandler, {'fallback': wsgi_app})
         ])
 
-        application.listen(5000)
+        application.listen(80)
 
     def run(self):
         IOLoop.instance().start()
