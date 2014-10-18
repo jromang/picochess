@@ -16,6 +16,13 @@ using the UNIX tool `dd <http://manpages.ubuntu.com/manpages/lucid/man1/dd.1.htm
 Windows users should use `Win32DiskImager <https://launchpad.net/win32-image-writer>`_. Do not try to drag and drop or otherwise copy over the image
 without using dd or Win32DiskImager – it won’t work.
 
+After booting from the new image, you might want to tinker with the machine (i.e. set defaults in picochess.ini file or install alternative engines). This is done by connecting via ssh:
+
+1. On Raspberry Pi, the hostname on local network is 'raspberrypi.local', username:pi, pass:picochess.
+
+2. On Odroid, the hostname on local network is 'odroid.local', username:odroid, pass:odroid.
+
+
 Copying the image to an SD Card on Windows
 ------------------------------------------
 
@@ -108,26 +115,26 @@ for a list.
 Bluetooth Connection
 --------------------
 
-1. Connect the bluetooth dongle and restart the pi
+1. Connect bluetooth dongle and restart the Pi.
 
-2. start the gui
+2. Start the GUI:
 
    startx
 
-3. go to preferences/blustooth manager
+3. Go to Preferences/Bluetooth Manager.
 
-4. Click search to find your device, right click and connect
+4. Click search to find your device, right click and connect.
 
-5. For the Rev II use the prepared pin 1234
+5. For Revelation II use the prepared pin 1234, for DGT bluetooth eboard 0000.
 
-6. Then click to connect as a serial device
+6. Then click to connect as a serial device.
 
 7. Back on the bluetooth manager right click on the device again and click trusted. Job done!
 
-8. I opened a TX Terminal window at this point and shut down using the command :
+8. Open Terminal app and shut down the machine:
 
    sudo shutdown -h now
 
 9. Restart the pi without the keyboard and monitor and tada! the connection should work.
 
-If you need more information chek this `forum post <https://groups.google.com/forum/#!topic/picochess/7LSBZ6Qha64>`_.
+For more information check this `forum post <https://groups.google.com/forum/#!topic/picochess/7LSBZ6Qha64>`_.
