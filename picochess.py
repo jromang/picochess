@@ -177,6 +177,7 @@ def main():
 
     #Send the engine's UCI options to all Displays
     Display.show(Message.UCI_OPTION_LIST, options=engine.options)
+    Display.show(Message.SYSTEM_INFO, info={"version": version, "location": get_location(), "books": get_opening_books()})
 
     #Event loop
     while True:

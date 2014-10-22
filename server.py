@@ -98,6 +98,17 @@ class DGTHandler(tornado.web.RequestHandler):
             self.write(self.shared['last_dgt_move_msg'])
 
 
+class InfoHandler(tornado.web.RequestHandler):
+    def initialize(self, shared=None):
+        self.shared = shared
+
+    def get(self, *args, **kwargs):
+        action = self.get_argument("action")
+        if action == "get_system_info":
+            # print(self.shared['system_info'])
+            self.write(self.shared['system_info'])
+
+
 class PGNHandler(tornado.web.RequestHandler):
     def initialize(self, shared=None):
         self.shared = shared
@@ -122,6 +133,8 @@ class WebServer(Observable, threading.Thread):
             (r'/event', EventHandler, dict(shared=shared)),
             (r'/dgt', DGTHandler, dict(shared=shared)),
             (r'/pgn', PGNHandler, dict(shared=shared)),
+            (r'/info', InfoHandler, dict(shared=shared)),
+
 
             (r'/channel', ChannelHandler, dict(shared=shared)),
             (r'.*', tornado.web.FallbackHandler, {'fallback': wsgi_app})
@@ -164,6 +177,36 @@ class WebDisplay(Display, threading.Thread):
         if message == Message.BOOK_MOVE:
             EventHandler.write_to_clients({'msg': 'Book move'})
 
+        elif message == Message.UCI_OPTION_LIST:
+            self.shared['uci_options'] = message.options
+
+        elif message == Message.SYSTEM_INFO:
+            self.shared['system_info'] = message.info
+            # print(message.info["version"])
+            # print(message.info["location"])
+
+        # elif message == Event.OPENING_BOOK:  # Choose opening book
+        #     if 'game_info' not in self.shared:
+        #         self.shared['game_info'] = {}
+        #
+        #     self.shared['game_info']['book_index'] = message.book_index
+        #     print (message.book_index)
+        #     # book_index = book_map.index(fen)
+        #     # logging.debug("Opening book [%s]", get_opening_books()[book_index])
+        #     # self.fire(Event.OPENING_BOOK, book_index=book_index)
+        #     # self.display_on_dgt_xl(get_opening_books()[book_index][0], True)
+        #     # self.display_on_dgt_3000(get_opening_books()[book_index][0], True)
+        # # elif fen in mode_map:  # Set interaction mode
+        # #             logging.debug("Interaction mode [%s]", mode_map[fen])
+        # #             self.fire(Event.SET_MODE, mode=mode_map[fen])
+        # #             self.display_on_dgt_xl(('book', 'analys', 'game', 'kibitz', 'observ', 'black', 'white', 'black', 'white')[mode_map[fen].value], True)
+        # #             self.display_on_dgt_3000(('book', 'analyse', 'game', 'kibitz', 'observe', 'black', 'white', 'black', 'white')[mode_map[fen].value], True)
+        # # elif fen in time_control_map:
+        # #             logging.debug("Setting time control %s", time_control_map[fen].mode)
+        # #             self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[fen])
+        # #             self.display_on_dgt_xl(dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)], True)
+        # #             self.display_on_dgt_3000(dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)], True)
+
         elif message == Message.START_NEW_GAME:
             EventHandler.write_to_clients({'msg': 'New game'})
 
@@ -184,7 +227,6 @@ class WebDisplay(Display, threading.Thread):
             pgn_str = str(exporter)
             r = {'move': str(message.move), 'pgn': pgn_str, 'fen': fen}
 
-
             if message == Message.COMPUTER_MOVE:
                 r['msg']= 'Computer move: '+str(message.move)
             elif message == Message.USER_MOVE:
@@ -200,4 +242,5 @@ class WebDisplay(Display, threading.Thread):
         while True:
             #Check if we have something to display
             message = self.message_queue.get()
+            # print(message.options)
             self.create_task(message)

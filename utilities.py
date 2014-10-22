@@ -74,6 +74,8 @@ class Message(AutoNumber):
     UCI_OPTION_LIST = ()  # Contains 'options', a dict of the current engine's UCI options
     GAME_ENDS = ()  # The current game has ended, contains a 'result' (GameResult) and list of 'moves'
 
+    SYSTEM_INFO = () # Information about picochess such as version etc
+
 
 @enum.unique
 class Mode(enum.Enum):
