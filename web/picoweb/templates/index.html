@@ -1337,7 +1337,7 @@ function getSystemInfo() {
      $.get("/info", { action: "get_system_info"}, function (data) {
         window.system_info = data;
 
-        $("#SystemInfo").text("Picochess "+window.system_info.version);
+        $("#SystemInfo").text('Picochess '+window.system_info.version + ' ' + window.system_info.ip + ' ');
     });
 
 }

@@ -177,7 +177,8 @@ def main():
 
     #Send the engine's UCI options to all Displays
     Display.show(Message.UCI_OPTION_LIST, options=engine.options)
-    Display.show(Message.SYSTEM_INFO, info={"version": version, "location": get_location(), "books": get_opening_books()})
+    Display.show(Message.SYSTEM_INFO, info={"version": version, "location": get_location(),
+                                            "books": get_opening_books(), "ip": get_ip()})
 
     #Event loop
     while True:
@@ -282,7 +283,7 @@ def main():
                 break
 
             if case(Event.SET_MODE):
-                Display.show(Message.INTERACTION_MODE, mode=event.mode)  # Usefull for pgn display device
+                # Display.show(Message.INTERACTION_MODE, mode=event.mode)  # Usefull for pgn display device
                 interaction_mode = event.mode
                 break
 

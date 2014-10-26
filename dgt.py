@@ -215,7 +215,7 @@ book_map = ("rnbqkbnr/pppppppp/8/8/8/q7/PPPPPPPP/RNBQKBNR",
 
 shutdown_map = ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQQBNR", "8/8/8/8/8/8/8/3QQ3", "3QQ3/8/8/8/8/8/8/8")
 
-mode_map = {"rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR": Mode.BOOK,
+mode_map = {"rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR": Mode.GAME,
             "rnbqkbnr/pppppppp/8/1Q6/8/8/PPPPPPPP/RNBQKBNR": Mode.ANALYSIS,
             "rnbqkbnr/pppppppp/8/2Q5/8/8/PPPPPPPP/RNBQKBNR": Mode.PLAY_WHITE,
             "rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR": Mode.KIBITZ,
@@ -324,7 +324,10 @@ class DGTBoard(Observable, Display, threading.Thread):
                 for c in v:
                     array.append(char_to_DGTXL[c])
             else: logging.error('Type not supported : [%s]', type(v))
-        self.serial.write(bytearray(array))
+        try:
+            self.serial.write(bytearray(array))
+        except ValueError:
+            logging.error('Invalid bytes sent {0}'.format(array))
         if message[0] == Commands.DGT_CLOCK_MESSAGE:
             time.sleep(0.05 if self.enable_dgt_3000 else 0.5)  # Let a bit time for the message to be displayed on the clock
             self.clock_lock.acquire()
@@ -363,6 +366,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                 else:  # Clock Times message
                     clock_status = message[6]
                     self.flip_clock = bool(clock_status & 0x02)  # tumbler position high on right player
+                    # logging.debug("Tumbler pressed")
                 break
             if case(Messages.DGT_MSG_BOARD_DUMP):
                 board = ''
@@ -399,6 +403,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                 if fen in level_map:  # User sets level
                     level = level_map.index(fen)
                     self.fire(Event.LEVEL, level=level)
+                    Display.show(Event.LEVEL, level=level)
                     self.display_on_dgt_xl('lvl ' + str(level), True)
                     self.display_on_dgt_3000('level '+ str(level), True)
                 elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":  # New game
@@ -408,16 +413,22 @@ class DGTBoard(Observable, Display, threading.Thread):
                     book_index = book_map.index(fen)
                     logging.debug("Opening book [%s]", get_opening_books()[book_index])
                     self.fire(Event.OPENING_BOOK, book_index=book_index)
+                    Display.show(Event.OPENING_BOOK, book=get_opening_books()[book_index])
+
                     self.display_on_dgt_xl(get_opening_books()[book_index][0], True)
                     self.display_on_dgt_3000(get_opening_books()[book_index][0], True)
                 elif fen in mode_map:  # Set interaction mode
                     logging.debug("Interaction mode [%s]", mode_map[fen])
                     self.fire(Event.SET_MODE, mode=mode_map[fen])
+                    Display.show(Event.SET_MODE, mode_string=('book', 'analyse', 'game', 'kibitz', 'observe', 'black', 'white', 'black', 'white')[mode_map[fen].value])
+
                     self.display_on_dgt_xl(('book', 'analys', 'game', 'kibitz', 'observ', 'black', 'white', 'black', 'white')[mode_map[fen].value], True)
                     self.display_on_dgt_3000(('book', 'analyse', 'game', 'kibitz', 'observe', 'black', 'white', 'black', 'white')[mode_map[fen].value], True)
                 elif fen in time_control_map:
                     logging.debug("Setting time control %s", time_control_map[fen].mode)
                     self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[fen])
+                    Display.show(Event.SET_TIME_CONTROL, time_control_string=dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)])
+
                     self.display_on_dgt_xl(dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)], True)
                     self.display_on_dgt_3000(dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)], True)
                 elif fen in shutdown_map:

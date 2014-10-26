@@ -21,6 +21,7 @@ import platform
 import random
 import subprocess
 import urllib.request
+import socket
 from xml.dom.minidom import parseString
 try:
     import enum
@@ -80,7 +81,7 @@ class Message(AutoNumber):
 @enum.unique
 class Mode(enum.Enum):
     #Interaction modes
-    BOOK = 0
+    GAME = 0
     ANALYSIS = 1
     PLAY_WHITE = 2
     KIBITZ = 3
@@ -217,12 +218,27 @@ def update_picochess(auto_reboot=False):
                 if auto_reboot:
                     os.system('reboot')
 
+
 def shutdown():
     logging.debug('Shutting down system')
     if platform.system() == 'Windows':
         os.system('shutdown /s')
     else:
         os.system('shutdown -h now')
+
+
+def get_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("google.com", 80))
+        return s.getsockname()[0]
+
+    # TODO: Better handling of exceptions of socket connect
+    except socket.error as v:
+        logging.error("No Internet Connection!")
+    finally:
+        s.close()
+
 
 def get_location():
     try:

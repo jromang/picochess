@@ -30,6 +30,7 @@ import queue
 from web.picoweb import picoweb as pw
 import chess.pgn as pgn
 import json
+import datetime
 
 _workers = ThreadPool(5)
 
@@ -49,7 +50,7 @@ class ChannelHandler(tornado.web.RequestHandler):
             move_stack = json.loads(move_stack)
             game = pgn.Game()
 
-            WebDisplay.create_game_header(game)
+            self.create_game_header(game)
 
             tmp = game
             # move_stack = message.game.move_stack
@@ -161,18 +162,39 @@ class WebDisplay(Display, threading.Thread):
 
         _workers.apply_async(func, args, kwds, _callback)
 
-    @staticmethod
-    def create_game_header(game):
+    def create_game_header(self, game):
         game.headers["Result"] = "*"
         game.headers["White"] = "User"
         game.headers["WhiteElo"] = "*"
         game.headers["BlackElo"] = "2900"
         game.headers["Black"] = "Picochess"
         game.headers["Event"] = "Game"
+        game.headers["EventDate"] = datetime.datetime.now().date().strftime('%Y-%m-%d')
         game.headers["Site"] = "Pi"
-        game.headers["EventDate"] = "*"
+
+        if 'system_info' in self.shared:
+            game.headers["Site"] = self.shared['system_info']['location']
+
+        if 'game_info' in self.shared:
+            # game.headers["Result"] = "*"
+            game.headers["Black"] = "Picochess" if "mode_string" in self.shared["game_info"] and self.shared["game_info"]["mode_string"] == Mode.PLAY_BLACK else "User"
+
+            game.headers["White"] = "Picochess" if game.headers["Black"] == "User" else "User"
+            comp_color = "Black" if game.headers["Black"] == "Picochess" else "White"
+
+            if "level" in self.shared["game_info"]:
+                game.headers[comp_color+"Elo"] = "Level {0}".format(self.shared["game_info"]["level"])
+            else:
+                game.headers[comp_color+"Elo"] = "2900"
+            if "time_control_string" in self.shared["game_info"]:
+                game.headers["Event"] = "Time " + self.shared["game_info"]["time_control_string"]
+
 
     # @staticmethod
+    def create_game_info(self):
+        if 'game_info' not in self.shared:
+            self.shared['game_info'] = {}
+
     def task(self, message):
         if message == Message.BOOK_MOVE:
             EventHandler.write_to_clients({'msg': 'Book move'})
@@ -182,30 +204,22 @@ class WebDisplay(Display, threading.Thread):
 
         elif message == Message.SYSTEM_INFO:
             self.shared['system_info'] = message.info
-            # print(message.info["version"])
-            # print(message.info["location"])
 
-        # elif message == Event.OPENING_BOOK:  # Choose opening book
-        #     if 'game_info' not in self.shared:
-        #         self.shared['game_info'] = {}
-        #
-        #     self.shared['game_info']['book_index'] = message.book_index
-        #     print (message.book_index)
-        #     # book_index = book_map.index(fen)
-        #     # logging.debug("Opening book [%s]", get_opening_books()[book_index])
-        #     # self.fire(Event.OPENING_BOOK, book_index=book_index)
-        #     # self.display_on_dgt_xl(get_opening_books()[book_index][0], True)
-        #     # self.display_on_dgt_3000(get_opening_books()[book_index][0], True)
-        # # elif fen in mode_map:  # Set interaction mode
-        # #             logging.debug("Interaction mode [%s]", mode_map[fen])
-        # #             self.fire(Event.SET_MODE, mode=mode_map[fen])
-        # #             self.display_on_dgt_xl(('book', 'analys', 'game', 'kibitz', 'observ', 'black', 'white', 'black', 'white')[mode_map[fen].value], True)
-        # #             self.display_on_dgt_3000(('book', 'analyse', 'game', 'kibitz', 'observe', 'black', 'white', 'black', 'white')[mode_map[fen].value], True)
-        # # elif fen in time_control_map:
-        # #             logging.debug("Setting time control %s", time_control_map[fen].mode)
-        # #             self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[fen])
-        # #             self.display_on_dgt_xl(dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)], True)
-        # #             self.display_on_dgt_3000(dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)], True)
+        elif message == Event.OPENING_BOOK:  # Process opening book
+            self.create_game_info()
+            self.shared['game_info']['book'] = message.book
+
+        elif message == Event.SET_MODE:  # Process interaction mode
+            self.create_game_info()
+            self.shared['game_info']['mode_string'] = message.mode_string
+
+        elif message == Event.SET_TIME_CONTROL:
+            self.create_game_info()
+            self.shared['game_info']['time_control_string'] = message.time_control_string
+
+        elif message == Event.LEVEL:
+            self.create_game_info()
+            self.shared['game_info']['level'] = message.level
 
         elif message == Message.START_NEW_GAME:
             EventHandler.write_to_clients({'msg': 'New game'})
@@ -215,7 +229,7 @@ class WebDisplay(Display, threading.Thread):
 
         elif message == Message.COMPUTER_MOVE or message == Message.USER_MOVE or message == Message.REVIEW_MODE_MOVE:
             game = pgn.Game()
-            WebDisplay.create_game_header(game)
+            self.create_game_header(game)
 
             tmp = game
             move_stack = message.game.move_stack
