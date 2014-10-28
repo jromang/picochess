@@ -286,13 +286,17 @@ class DGTBoard(Observable, Display, threading.Thread):
             time.sleep(0.1)
             self.clock_found = self.serial.inWaiting()
             tries += 1
-        logging.debug('DGT XL clock found' if self.clock_found else 'DGT XL clock NOT found')
+        logging.debug('DGT clock found' if self.clock_found else 'DGT clock NOT found')
+
+        # Get clock version
+
+        self.write([Commands.DGT_CLOCK_MESSAGE, 0x03, Clock.DGT_CMD_CLOCK_START_MESSAGE,
+                        Clock.DGT_CMD_CLOCK_VERSION, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+
         # Get board version
         self.version = 0.0
         self.write([Commands.DGT_SEND_VERSION])
-        # Beep and display version
-        self.display_on_dgt_xl('pic'+version)
-        self.display_on_dgt_3000('pico '+version)
+        
         # Update the board
         self.write([Commands.DGT_SEND_BRD])
         #self._dgt_xl_stress_test()
@@ -329,6 +333,7 @@ class DGTBoard(Observable, Display, threading.Thread):
         except ValueError:
             logging.error('Invalid bytes sent {0}'.format(array))
         if message[0] == Commands.DGT_CLOCK_MESSAGE:
+            # print(message)
             time.sleep(0.05 if self.enable_dgt_3000 else 0.5)  # Let a bit time for the message to be displayed on the clock
             self.clock_lock.acquire()
 
@@ -341,21 +346,36 @@ class DGTBoard(Observable, Display, threading.Thread):
             logging.debug("<-DGT [%s], length:%i", Messages(message_id), message_length)
         except ValueError:
             logging.warning("Unknown message value %i", message_id)
-
         if message_length:
             message = unpack('>'+str(message_length)+'B', (self.serial.read(message_length)))
+            # print(message)
+            # print(message_id)
 
         for case in switch(message_id):
             if case(Messages.DGT_MSG_VERSION):  # Get the DGT board version
                 self.version = float(str(message[0])+'.'+str(message[1]))
                 logging.debug("DGT board version %0.2f", self.version)
                 break
+
+            # if case():
+            #     logging.info("Got clock version number")
+            #     break
             if case(Messages.DGT_MSG_BWTIME):
+                # print ("GOT BW_TIME")
                 if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
                     #Construct the ack message
                     ack0 = ((message[1]) & 0x7f) | ((message[3] << 3) & 0x80)
                     ack1 = ((message[2]) & 0x7f) | ((message[3] << 2) & 0x80)
+                    # print ("Ack1: {0}".format(ack1))
                     ack2 = ((message[4]) & 0x7f) | ((message[0] << 3) & 0x80)
+                    if ack1 == 0x09:
+                        main_version = ack2 >> 4
+                        if main_version == 2:
+                            self.enable_dgt_3000 = True
+                            self.display_on_dgt_3000('pico '+version)
+                        else:
+                            # Beep and display version
+                            self.display_on_dgt_xl('pic'+version)
                     ack3 = ((message[5]) & 0x7f) | ((message[0] << 2) & 0x80)
                     if ack0 != 0x10: logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
                     else:
