@@ -15,12 +15,15 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+import queue
 import serial as pyserial
+import chess
 import time
+
 from timecontrol import *
 from struct import unpack
 from collections import OrderedDict
-import queue
+
 try:
     import enum
 except ImportError:  # Python 3.3 support
@@ -264,6 +267,7 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.write_queue = queue.Queue()
         self.clock_lock = asyncio.Lock()
         self.enable_dgt_3000 = enable_dgt_3000
+        self.bit_board = chess.Bitboard()
 
         # Open the serial port
         attempts = 0
@@ -296,7 +300,7 @@ class DGTBoard(Observable, Display, threading.Thread):
         # Get board version
         self.version = 0.0
         self.write([Commands.DGT_SEND_VERSION])
-        
+
         # Update the board
         self.write([Commands.DGT_SEND_BRD])
         #self._dgt_xl_stress_test()
@@ -512,7 +516,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                 message = self.message_queue.get_nowait()
                 for case in switch(message):
                     if case(Message.COMPUTER_MOVE):
-                        uci_move = message.move
+                        uci_move = message.move.uci()
                         logging.info("DGT SEND BEST MOVE:"+uci_move)
                         # Stop the clock before displaying a move
                         self.write([Commands.DGT_CLOCK_MESSAGE, 0x0a, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_SETNRUN,
@@ -520,7 +524,10 @@ class DGTBoard(Observable, Display, threading.Thread):
                                    0x04 | 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
                         # Display the move
                         self.display_on_dgt_xl(' ' + uci_move, True)
-                        self.display_on_dgt_3000('mov ' + uci_move, True)
+                        # self.display_on_dgt_3000('mov ' + mo, True)
+                        self.bit_board.set_fen(message.fen)
+                        # logging.info("Move is {0}".format(self.bit_board.san(message.move)))
+                        self.display_on_dgt_3000(self.bit_board.san(message.move), True)
                         self.light_squares_revelation_board((uci_move[0:2], uci_move[2:4]))
                         break
                     if case(Message.START_NEW_GAME):

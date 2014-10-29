@@ -276,8 +276,9 @@ def main():
                 # Check if we are in play mode and it is computer's turn
                 if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
                     time_control.stop()
+                    fen = game.fen()
                     game.push(move)
-                    Display.show(Message.COMPUTER_MOVE, move=move.uci(), game=copy.deepcopy(game), time_control=time_control)
+                    Display.show(Message.COMPUTER_MOVE, move=move, fen=fen, game=copy.deepcopy(game), time_control=time_control)
                     if check_game_state(game, interaction_mode):
                         legal_fens = compute_legal_fens(game)
                 break
