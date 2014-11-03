@@ -263,6 +263,8 @@ class DGTBoard(Observable, Display, threading.Thread):
     def __init__(self, device, enable_board_leds=False, enable_dgt_3000=False):
         super(DGTBoard, self).__init__()
         self.flip_board = False
+        self.flip_clock = None
+
         self.enable_board_leds = enable_board_leds
         self.write_queue = queue.Queue()
         self.clock_lock = asyncio.Lock()
@@ -353,123 +355,156 @@ class DGTBoard(Observable, Display, threading.Thread):
         if message_length:
             message = unpack('>'+str(message_length)+'B', (self.serial.read(message_length)))
             # print(message)
-            # print(message_id)
+            # print(message[0] & 127)
 
-        for case in switch(message_id):
-            if case(Messages.DGT_MSG_VERSION):  # Get the DGT board version
-                self.version = float(str(message[0])+'.'+str(message[1]))
-                logging.debug("DGT board version %0.2f", self.version)
-                break
+            for case in switch(message_id):
+                if case(Messages.DGT_MSG_VERSION):  # Get the DGT board version
+                    self.version = float(str(message[0])+'.'+str(message[1]))
+                    logging.debug("DGT board version %0.2f", self.version)
+                    break
 
-            # if case():
-            #     logging.info("Got clock version number")
-            #     break
-            if case(Messages.DGT_MSG_BWTIME):
-                # print ("GOT BW_TIME")
-                if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
-                    #Construct the ack message
-                    ack0 = ((message[1]) & 0x7f) | ((message[3] << 3) & 0x80)
-                    ack1 = ((message[2]) & 0x7f) | ((message[3] << 2) & 0x80)
-                    # print ("Ack1: {0}".format(ack1))
-                    ack2 = ((message[4]) & 0x7f) | ((message[0] << 3) & 0x80)
-                    if ack1 == 0x09:
-                        main_version = ack2 >> 4
-                        if main_version == 2:
-                            self.enable_dgt_3000 = True
-                            self.display_on_dgt_3000('pico '+version)
+                # if case():
+                #     logging.info("Got clock version number")
+                #     break
+                if case(Messages.DGT_MSG_BWTIME):
+                    # print ("GOT BW_TIME")
+                    # print ("Clock m
+                    # sg")
+                    # print (message)
+                    if message[0] == message[1] == message[2] == message[3] == message[4] == message[5] == 0:  # Clock Times message
+                        # print ("tumbler message: {0}".format(message))
+                        clock_status = message[6]
+                        old_flip_clock = self.flip_clock
+                        self.flip_clock = bool(clock_status & 0x02)  # tumbler position high on right player
+                        # if old_flip_clock is not None and self.flip_clock != old_flip_clock:
+                        #     logging.debug("Tumbler pressed")
+                        #     # self.write([Commands.DGT_CLOCK_MESSAGE, 0x0a, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_SETNRUN,
+                        #     #            0, 0, 0, 0, 0, 0,
+                        #     #            0x04 | 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+                        #     self.display_on_dgt_3000('menu')
+                    # if message[0] == 10 and message[1] == 16 and message[3] == 10 and not message[5] and not message[6]:
+
+                    if 5 <= message[4] <= 6 and message[5] == 49:
+                        print("Button 0 pressed")
+
+                    if 33 <= message[4] <= 34 and message[5] == 52:
+                        print("Button 1 pressed")
+
+                    if 17 <= message[4] <= 18 and message[5] == 51:
+                        print("Button 2 pressed")
+
+                    if 9 <= message[4] <= 10 and message[5] == 50:
+                        print("Button 3 pressed")
+
+                    if 65 <= message[4] <= 66 and message[5] == 53:
+                        print("Button 4 pressed")
+
+                    if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
+
+                        #Construct the ack message
+                        ack0 = ((message[1]) & 0x7f) | ((message[3] << 3) & 0x80)
+                        ack1 = ((message[2]) & 0x7f) | ((message[3] << 2) & 0x80)
+                        # print ("Ack1: {0}".format(ack1))
+                        ack2 = ((message[4]) & 0x7f) | ((message[0] << 3) & 0x80)
+                        if ack1 == 0x09:
+                            main_version = ack2 >> 4
+                            if main_version == 2:
+                                self.enable_dgt_3000 = True
+                                self.display_on_dgt_3000('pico '+version)
+                            else:
+                                # Beep and display version
+                                self.display_on_dgt_xl('pic'+version)
+                        ack3 = ((message[5]) & 0x7f) | ((message[0] << 2) & 0x80)
+                        if ack0 != 0x10: logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
                         else:
-                            # Beep and display version
-                            self.display_on_dgt_xl('pic'+version)
-                    ack3 = ((message[5]) & 0x7f) | ((message[0] << 2) & 0x80)
-                    if ack0 != 0x10: logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
-                    else:
-                        logging.debug("Clock ACK %s", (ack0, ack1, ack2, ack3))
-                        if self.clock_lock.locked():
-                            self.clock_lock.release()
-                        return None
-                else:  # Clock Times message
-                    clock_status = message[6]
-                    self.flip_clock = bool(clock_status & 0x02)  # tumbler position high on right player
-                    # logging.debug("Tumbler pressed")
-                break
-            if case(Messages.DGT_MSG_BOARD_DUMP):
-                board = ''
-                for c in message:
-                    board += piece_to_char[c]
-                logging.debug('\n' + '\n'.join(board[0+i:8+i] for i in range(0, len(board), 8)))  # Show debug board
-                #Create fen from board
-                fen = ''
-                empty = 0
-                for sq in range(0, 64):
-                    if message[sq] != 0:
-                        if empty > 0:
-                            fen += str(empty)
+                            logging.debug("Clock ACK %s", (ack0, ack1, ack2, ack3))
+                            if self.clock_lock.locked():
+                                self.clock_lock.release()
+                            return None
+
+
+                    # print ("Clock button pressed")
+                    # print (message)
+
+                    break
+                if case(Messages.DGT_MSG_BOARD_DUMP):
+                    board = ''
+                    for c in message:
+                        board += piece_to_char[c]
+                    logging.debug('\n' + '\n'.join(board[0+i:8+i] for i in range(0, len(board), 8)))  # Show debug board
+                    #Create fen from board
+                    fen = ''
+                    empty = 0
+                    for sq in range(0, 64):
+                        if message[sq] != 0:
+                            if empty > 0:
+                                fen += str(empty)
+                                empty = 0
+                            fen += piece_to_char[message[sq]]
+                        else:
+                            empty += 1
+                        if (sq + 1) % 8 == 0:
+                            if empty > 0:
+                                fen += str(empty)
+                                empty = 0
+                            if sq < 63:
+                                fen += "/"
                             empty = 0
-                        fen += piece_to_char[message[sq]]
+                    if self.flip_board:  # Flip the board if needed
+                        fen = fen[::-1]
+                    if fen == "RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr":  # Check if we have to flip the board
+                        logging.debug('Flipping the board')
+                        #Flip the board
+                        self.flip_board = not self.flip_board
+                        fen = fen[::-1]
+                    logging.debug(fen)
+                    #Fire the appropriate event
+                    if fen in level_map:  # User sets level
+                        level = level_map.index(fen)
+                        self.fire(Event.LEVEL, level=level)
+                        Display.show(Event.LEVEL, level=level)
+                        self.display_on_dgt_xl('lvl ' + str(level), True)
+                        self.display_on_dgt_3000('level '+ str(level), True)
+                    elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":  # New game
+                        logging.debug("New game")
+                        self.fire(Event.NEW_GAME)
+                    elif fen in book_map:  # Choose opening book
+                        book_index = book_map.index(fen)
+                        logging.debug("Opening book [%s]", get_opening_books()[book_index])
+                        self.fire(Event.OPENING_BOOK, book_index=book_index)
+                        Display.show(Event.OPENING_BOOK, book=get_opening_books()[book_index])
+
+                        self.display_on_dgt_xl(get_opening_books()[book_index][0], True)
+                        self.display_on_dgt_3000(get_opening_books()[book_index][0], True)
+                    elif fen in mode_map:  # Set interaction mode
+                        logging.debug("Interaction mode [%s]", mode_map[fen])
+                        self.fire(Event.SET_MODE, mode=mode_map[fen])
+                        Display.show(Event.SET_MODE, mode_string=('book', 'analyse', 'game', 'kibitz', 'observe', 'black', 'white', 'black', 'white')[mode_map[fen].value])
+
+                        self.display_on_dgt_xl(('book', 'analys', 'game', 'kibitz', 'observ', 'black', 'white', 'black', 'white')[mode_map[fen].value], True)
+                        self.display_on_dgt_3000(('book', 'analyse', 'game', 'kibitz', 'observe', 'black', 'white', 'black', 'white')[mode_map[fen].value], True)
+                    elif fen in time_control_map:
+                        logging.debug("Setting time control %s", time_control_map[fen].mode)
+                        self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[fen])
+                        Display.show(Event.SET_TIME_CONTROL, time_control_string=dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)])
+
+                        self.display_on_dgt_xl(dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)], True)
+                        self.display_on_dgt_3000(dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)], True)
+                    elif fen in shutdown_map:
+                        self.fire(Event.SHUTDOWN)
+                        self.display_on_dgt_xl('powoff', True)
+                        self.display_on_dgt_3000('poweroff', True)
                     else:
-                        empty += 1
-                    if (sq + 1) % 8 == 0:
-                        if empty > 0:
-                            fen += str(empty)
-                            empty = 0
-                        if sq < 63:
-                            fen += "/"
-                        empty = 0
-                if self.flip_board:  # Flip the board if needed
-                    fen = fen[::-1]
-                if fen == "RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr":  # Check if we have to flip the board
-                    logging.debug('Flipping the board')
-                    #Flip the board
-                    self.flip_board = not self.flip_board
-                    fen = fen[::-1]
-                logging.debug(fen)
-                #Fire the appropriate event
-                if fen in level_map:  # User sets level
-                    level = level_map.index(fen)
-                    self.fire(Event.LEVEL, level=level)
-                    Display.show(Event.LEVEL, level=level)
-                    self.display_on_dgt_xl('lvl ' + str(level), True)
-                    self.display_on_dgt_3000('level '+ str(level), True)
-                elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":  # New game
-                    logging.debug("New game")
-                    self.fire(Event.NEW_GAME)
-                elif fen in book_map:  # Choose opening book
-                    book_index = book_map.index(fen)
-                    logging.debug("Opening book [%s]", get_opening_books()[book_index])
-                    self.fire(Event.OPENING_BOOK, book_index=book_index)
-                    Display.show(Event.OPENING_BOOK, book=get_opening_books()[book_index])
+                        logging.debug("Fen")
+                        self.fire(Event.FEN, fen=fen)
+                    break
+                if case(Messages.DGT_MSG_FIELD_UPDATE):
+                    self.write([Commands.DGT_SEND_BRD])  # Ask for the board when a piece moved
+                    break
+                if case():  # Default
+                    logging.warning("DGT message not handled : [%s]", Messages(message_id))
 
-                    self.display_on_dgt_xl(get_opening_books()[book_index][0], True)
-                    self.display_on_dgt_3000(get_opening_books()[book_index][0], True)
-                elif fen in mode_map:  # Set interaction mode
-                    logging.debug("Interaction mode [%s]", mode_map[fen])
-                    self.fire(Event.SET_MODE, mode=mode_map[fen])
-                    Display.show(Event.SET_MODE, mode_string=('book', 'analyse', 'game', 'kibitz', 'observe', 'black', 'white', 'black', 'white')[mode_map[fen].value])
-
-                    self.display_on_dgt_xl(('book', 'analys', 'game', 'kibitz', 'observ', 'black', 'white', 'black', 'white')[mode_map[fen].value], True)
-                    self.display_on_dgt_3000(('book', 'analyse', 'game', 'kibitz', 'observe', 'black', 'white', 'black', 'white')[mode_map[fen].value], True)
-                elif fen in time_control_map:
-                    logging.debug("Setting time control %s", time_control_map[fen].mode)
-                    self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[fen])
-                    Display.show(Event.SET_TIME_CONTROL, time_control_string=dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)])
-
-                    self.display_on_dgt_xl(dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)], True)
-                    self.display_on_dgt_3000(dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)], True)
-                elif fen in shutdown_map:
-                    self.fire(Event.SHUTDOWN)
-                    self.display_on_dgt_xl('powoff', True)
-                    self.display_on_dgt_3000('poweroff', True)
-                else:
-                    logging.debug("Fen")
-                    self.fire(Event.FEN, fen=fen)
-                break
-            if case(Messages.DGT_MSG_FIELD_UPDATE):
-                self.write([Commands.DGT_SEND_BRD])  # Ask for the board when a piece moved
-                break
-            if case():  # Default
-                logging.warning("DGT message not handled : [%s]", Messages(message_id))
-
-        return message_id
+            return message_id
 
     def display_on_dgt_xl(self, text, beep=False):
         if self.clock_found and not self.enable_dgt_3000:

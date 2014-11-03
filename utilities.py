@@ -30,7 +30,7 @@ except ImportError:
 
 
 # picochess version
-version = '029'
+version = '030'
 
 event_queue = queue.Queue()
 display_devices = []
@@ -77,6 +77,36 @@ class Message(AutoNumber):
 
     SYSTEM_INFO = () # Information about picochess such as version etc
 
+
+class Menu(AutoNumber):
+    GAME_MENU = ()  # Default Menu
+    SETUP_POSITION_MENU = ()  # Setup position menu
+    ENGINE_MENU = ()  # Engine menu
+    SETTINGS_MENU = ()  # Settings menu
+
+
+class SetupPositionMenu(AutoNumber):
+    TO_MOVE_TOGGLE = ()
+    REVERSE_ORIENTATION = ()
+    SCAN_POSITION = ()
+    SPACER = ()
+    SWITCH_MENU = ()  # Switch Menu
+
+
+class EngineMenu(AutoNumber):
+    LEVEL = ()
+    BOOK = ()
+    TIME = ()
+    ENG_INFO = ()
+    SWITCH_MENU = ()  # Switch Menu
+
+
+class GameMenu(AutoNumber):
+    LAST_MOVE = () # Show last move
+    HINT = ()  # Show hint
+    EVAL = ()  # Show evaluation of position
+    ADD_TIME = ()  # Add 1 minute to clock
+    SWITCH_MENU = ()  # Switch Menu
 
 @enum.unique
 class Mode(enum.Enum):
