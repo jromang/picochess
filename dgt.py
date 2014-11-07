@@ -270,6 +270,7 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.clock_lock = asyncio.Lock()
         self.enable_dgt_3000 = enable_dgt_3000
         self.bit_board = chess.Bitboard()
+        self.dgt_clock_menu = Menu.GAME_MENU
 
         # Open the serial port
         attempts = 0
@@ -306,6 +307,8 @@ class DGTBoard(Observable, Display, threading.Thread):
         # Update the board
         self.write([Commands.DGT_SEND_BRD])
         #self._dgt_xl_stress_test()
+        self.display_on_dgt_3000('pico '+version, force=True)
+
 
     def _dgt_xl_stress_test(self):
         # Clock stress test
@@ -386,6 +389,7 @@ class DGTBoard(Observable, Display, threading.Thread):
 
                     if 5 <= message[4] <= 6 and message[5] == 49:
                         print("Button 0 pressed")
+                        print(self.dgt_clock_menu)
 
                     if 33 <= message[4] <= 34 and message[5] == 52:
                         print("Button 1 pressed")
@@ -399,6 +403,26 @@ class DGTBoard(Observable, Display, threading.Thread):
                     if 65 <= message[4] <= 66 and message[5] == 53:
                         print("Button 4 pressed")
 
+                        # self.dgt_clock_menu = Menu.self.dgt_clock_menu.value+1
+                        # print(self.dgt_clock_menu)
+                        # print(self.dgt_clock_menu.value)
+                        try:
+                            self.dgt_clock_menu = Menu(self.dgt_clock_menu.value+1)
+                        except ValueError:
+                            self.dgt_clock_menu = Menu(1)
+
+                        if self.dgt_clock_menu == Menu.GAME_MENU:
+                            msg = 'Game'
+                        elif self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
+                            msg = 'Position'
+                        elif self.dgt_clock_menu == Menu.ENGINE_MENU:
+                            msg = 'Engine'
+                        elif self.dgt_clock_menu == Menu.SETTINGS_MENU:
+                            msg = 'System'
+
+                        self.display_on_dgt_3000(msg, beep=True)
+                        self.display_on_dgt_xl(msg, beep=True)
+
                     if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
 
                         #Construct the ack message
@@ -410,7 +434,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                             main_version = ack2 >> 4
                             if main_version == 2:
                                 self.enable_dgt_3000 = True
-                                self.display_on_dgt_3000('pico '+version)
+                                # self.display_on_dgt_3000('pico '+version)
                             else:
                                 # Beep and display version
                                 self.display_on_dgt_xl('pic'+version)
@@ -513,8 +537,8 @@ class DGTBoard(Observable, Display, threading.Thread):
             self.write([Commands.DGT_CLOCK_MESSAGE, 0x0b, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_DISPLAY,
                         text[2], text[1], text[0], text[5], text[4], text[3], 0x00, 0x03 if beep else 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
-    def display_on_dgt_3000(self, text, beep=False):
-        if self.enable_dgt_3000:
+    def display_on_dgt_3000(self, text, beep=False, force=False):
+        if force or self.enable_dgt_3000:
             while len(text) < 8: text += ' '
             if len(text) > 8: logging.warning('DGT 3000 clock message too long [%s]', text)
             text = bytes(text, 'utf-8')
