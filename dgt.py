@@ -271,7 +271,8 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.enable_dgt_3000 = enable_dgt_3000
         self.bit_board = chess.Bitboard()
         self.dgt_clock_menu = Menu.GAME_MENU
-
+        self.last_move = None
+        self.last_fen = None
         # Open the serial port
         attempts = 0
         while attempts < 10:
@@ -307,8 +308,6 @@ class DGTBoard(Observable, Display, threading.Thread):
         # Update the board
         self.write([Commands.DGT_SEND_BRD])
         #self._dgt_xl_stress_test()
-        self.display_on_dgt_3000('pico '+version, force=True)
-
 
     def _dgt_xl_stress_test(self):
         # Clock stress test
@@ -389,7 +388,23 @@ class DGTBoard(Observable, Display, threading.Thread):
 
                     if 5 <= message[4] <= 6 and message[5] == 49:
                         print("Button 0 pressed")
-                        print(self.dgt_clock_menu)
+                        # print(self.dgt_clock_menu)
+
+                        if self.dgt_clock_menu == Menu.GAME_MENU and self.last_move:
+                            self.display_on_dgt_xl(' ' + self.last_move.uci(), True)
+                            # self.display_on_dgt_3000('mov ' + mo, True)
+                            self.bit_board.set_fen(self.last_fen)
+                            # logging.info("Move is {0}".format(self.bit_board.san(message.move)))
+                            self.display_on_dgt_3000(self.bit_board.san(self.last_move), False)
+
+                        if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
+                            pass
+    #                             TO_MOVE_TOGGLE = ()
+    # REVERSE_ORIENTATION = ()
+    # SCAN_POSITION = ()
+    # SPACER = ()
+    # SWITCH_MENU = ()  # Switch Menu
+
 
                     if 33 <= message[4] <= 34 and message[5] == 52:
                         print("Button 1 pressed")
@@ -434,7 +449,11 @@ class DGTBoard(Observable, Display, threading.Thread):
                             main_version = ack2 >> 4
                             if main_version == 2:
                                 self.enable_dgt_3000 = True
-                                # self.display_on_dgt_3000('pico '+version)
+                                self.display_on_dgt_3000('pico '+version)
+                                time.sleep(0.5)
+                                # Some bug with certain DGT 3000 clocks?!
+                                self.display_on_dgt_3000('pico '+version)
+
                             else:
                                 # Beep and display version
                                 self.display_on_dgt_xl('pic'+version)
@@ -445,10 +464,6 @@ class DGTBoard(Observable, Display, threading.Thread):
                             if self.clock_lock.locked():
                                 self.clock_lock.release()
                             return None
-
-
-                    # print ("Clock button pressed")
-                    # print (message)
 
                     break
                 if case(Messages.DGT_MSG_BOARD_DUMP):
@@ -576,6 +591,8 @@ class DGTBoard(Observable, Display, threading.Thread):
                 for case in switch(message):
                     if case(Message.COMPUTER_MOVE):
                         uci_move = message.move.uci()
+                        self.last_move = message.move
+                        self.last_fen = message.fen
                         logging.info("DGT SEND BEST MOVE:"+uci_move)
                         # Stop the clock before displaying a move
                         self.write([Commands.DGT_CLOCK_MESSAGE, 0x0a, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_SETNRUN,
@@ -601,9 +618,13 @@ class DGTBoard(Observable, Display, threading.Thread):
                         break
                     if case(Message.REVIEW_MODE_MOVE):
                         uci_move = message.move
+                        self.last_move = uci_move
+                        self.last_fen = message.fen
+
                         # Dont beep when reviewing a game
                         self.display_on_dgt_xl(' ' + uci_move, False)
-                        self.display_on_dgt_3000(' ' + uci_move, False)
+                        self.display_on_dgt_3000(self.bit_board.san(message.move), False)
+
                         break
                     if case(Message.USER_TAKE_BACK):
                         self.display_on_dgt_xl('takbak', True)
