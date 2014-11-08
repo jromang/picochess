@@ -168,7 +168,7 @@
         <div id="rightColumn" class="col-md-7 col-xs-12 column grid">
             <div class="panel panel-primary">
                 <div class="panel-heading">
-                    <h3 class="panel-title pull-left" style="padding-top: 7.5px;">Picochess </h3>
+                    <h3 class="panel-title pull-left" style="padding-top: 7.5px;"><span id="SystemInfo">Picochess</span> </h3>
 
 
 
@@ -417,6 +417,8 @@ function updateDGTPosition(j) {
 }
 $(function () {
 //    Ladda.bind('#cloudAnalyzeBtn' );
+    getSystemInfo();
+//    console.log(window.system_info);
     $(".grid").sortable({
         tolerance: 'pointer',
         revert: 'invalid',
@@ -606,6 +608,7 @@ $(function () {
             el.innerHTML='closed';
         };
     }
+//    console.log(window.system_info);
 });
 
 // do not pick up pieces if the game is over
@@ -1328,6 +1331,15 @@ function getDGTPGN() {
 //        }
 
     });
+}
+
+function getSystemInfo() {
+     $.get("/info", { action: "get_system_info"}, function (data) {
+        window.system_info = data;
+
+        $("#SystemInfo").text('Picochess '+window.system_info.version + ' ' + window.system_info.ip + ' ');
+    });
+
 }
 
 function goToDGTFen() {

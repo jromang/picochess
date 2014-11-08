@@ -21,6 +21,7 @@ import platform
 import random
 import subprocess
 import urllib.request
+import socket
 from xml.dom.minidom import parseString
 try:
     import enum
@@ -29,7 +30,7 @@ except ImportError:
 
 
 # picochess version
-version = '029'
+version = '030'
 
 event_queue = queue.Queue()
 display_devices = []
@@ -74,11 +75,43 @@ class Message(AutoNumber):
     UCI_OPTION_LIST = ()  # Contains 'options', a dict of the current engine's UCI options
     GAME_ENDS = ()  # The current game has ended, contains a 'result' (GameResult) and list of 'moves'
 
+    SYSTEM_INFO = () # Information about picochess such as version etc
+
+
+class Menu(AutoNumber):
+    GAME_MENU = ()  # Default Menu
+    SETUP_POSITION_MENU = ()  # Setup position menu
+    ENGINE_MENU = ()  # Engine menu
+    SETTINGS_MENU = ()  # Settings menu
+
+
+class SetupPositionMenu(AutoNumber):
+    TO_MOVE_TOGGLE = ()
+    REVERSE_ORIENTATION = ()
+    SCAN_POSITION = ()
+    SPACER = ()
+    SWITCH_MENU = ()  # Switch Menu
+
+
+class EngineMenu(AutoNumber):
+    LEVEL = ()
+    BOOK = ()
+    TIME = ()
+    ENG_INFO = ()
+    SWITCH_MENU = ()  # Switch Menu
+
+
+class GameMenu(AutoNumber):
+    LAST_MOVE = () # Show last move
+    HINT = ()  # Show hint
+    EVAL = ()  # Show evaluation of position
+    ADD_TIME = ()  # Add 1 minute to clock
+    SWITCH_MENU = ()  # Switch Menu
 
 @enum.unique
 class Mode(enum.Enum):
     #Interaction modes
-    BOOK = 0
+    GAME = 0
     ANALYSIS = 1
     PLAY_WHITE = 2
     KIBITZ = 3
@@ -215,12 +248,27 @@ def update_picochess(auto_reboot=False):
                 if auto_reboot:
                     os.system('reboot')
 
+
 def shutdown():
     logging.debug('Shutting down system')
     if platform.system() == 'Windows':
         os.system('shutdown /s')
     else:
         os.system('shutdown -h now')
+
+
+def get_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("google.com", 80))
+        return s.getsockname()[0]
+
+    # TODO: Better handling of exceptions of socket connect
+    except socket.error as v:
+        logging.error("No Internet Connection!")
+    finally:
+        s.close()
+
 
 def get_location():
     try:
