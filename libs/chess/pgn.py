@@ -63,9 +63,10 @@ MOVETEXT_REGEX = re.compile(r"""
     |(\))
     |(\*|1-0|0-1|1/2-1/2)
     |(
-        ([a-hKQRBN][a-hxKQRBN1-8+#=\-]{1,6}
+        [NBKRQ]?[a-h]?[1-8]?[\-x]?[a-h][1-8](?:=[nbrqNBRQ])?
         |--
-        |O-O(?:\-O)?)
+        |O-O(?:-O)?
+        |0-0(?:-0)?
     )
     |([\?!]{1,2})
     """, re.DOTALL | re.VERBOSE)
@@ -91,6 +92,14 @@ class GameNode(object):
         board.push(self.move)
         return board
 
+    def san(self):
+        """
+        Gets the standard algebraic notation of the move leading to this node.
+
+        Do not call this on the root node.
+        """
+        return self.parent.board().san(self.move)
+
     def root(self):
         """Gets the root node, i.e. the game."""
         node = self
@@ -112,10 +121,11 @@ class GameNode(object):
     def starts_variation(self):
         """
         Checks if this node starts a variation (and can thus have a starting
-        comment). The beginning of the game is also the start of a variation.
+        comment). The root node does not start a variation and can have no
+        starting comment.
         """
         if not self.parent or not self.parent.variations:
-            return True
+            return False
 
         return self.parent.variations[0] != self
 
@@ -201,45 +211,68 @@ class GameNode(object):
         self.promote_to_main(move)
         return node
 
-    def export(self, exporter, comments=True, variations=True, _board=None):
+    def export(self, exporter, comments=True, variations=True, _board=None, _after_variation=False):
         if _board is None:
             _board = self.board()
 
-        for index, variation in enumerate(self.variations):
-            # Open varation.
-            if index != 0:
-                exporter.start_variation()
-
-            # Append starting comment.
-            if comments and variation.starting_comment:
-                exporter.put_starting_comment(variation.starting_comment)
+        # The mainline move goes first.
+        if self.variations:
+            main_variation = self.variations[0]
 
             # Append fullmove number.
-            exporter.put_fullmove_number(_board.turn, _board.fullmove_number, index != 0)
+            exporter.put_fullmove_number(_board.turn, _board.fullmove_number, _after_variation)
 
             # Append SAN.
-            exporter.put_move(_board, variation.move)
+            exporter.put_move(_board, main_variation.move)
 
-            # Append NAGs.
             if comments:
-                exporter.put_nags(variation.nags)
+                # Append NAGs.
+                exporter.put_nags(main_variation.nags)
 
-            # Append the comment.
-            if comments and variation.comment:
-                exporter.put_comment(variation.comment)
+                # Append the comment.
+                if main_variation.comment:
+                    exporter.put_comment(main_variation.comment)
 
-            # Recursively append the next moves.
-            _board.push(variation.move)
-            variation.export(exporter, comments, variations, _board)
-            _board.pop()
+        # Then export sidelines.
+        if variations:
+            for variation in itertools.islice(self.variations, 1, None):
+                # Start variation.
+                exporter.start_variation()
 
-            # End variation.
-            if index != 0:
+                # Append starting comment.
+                if comments and variation.starting_comment:
+                    exporter.put_starting_comment(variation.starting_comment)
+
+                # Append fullmove number.
+                exporter.put_fullmove_number(_board.turn, _board.fullmove_number, True)
+
+                # Append SAN.
+                exporter.put_move(_board, variation.move)
+
+                if comments:
+                    # Append NAGs.
+                    exporter.put_nags(variation.nags)
+
+                    # Append the comment.
+                    if variation.comment:
+                        exporter.put_comment(variation.comment)
+
+                # Recursively append the next moves.
+                _board.push(variation.move)
+                variation.export(exporter, comments, variations, _board, False)
+                _board.pop()
+
+                # End variation.
                 exporter.end_variation()
 
-            # All variations or just the main line.
-            if not variations:
-                break
+        # The mainline is continued last.
+        if self.variations:
+            main_variation = self.variations[0]
+
+            # Recursively append the next moves.
+            _board.push(main_variation.move)
+            main_variation.export(exporter, comments, variations, _board, variations and len(self.variations) > 1)
+            _board.pop()
 
     def __str__(self):
         exporter = StringExporter(columns=None)
@@ -323,8 +356,8 @@ class Game(GameNode):
                 exporter.put_header(tagname, tagvalue)
             exporter.end_headers()
 
-        if comments and self.starting_comment:
-            exporter.put_starting_comment(self.starting_comment)
+        if comments and self.comment:
+            exporter.put_starting_comment(self.comment)
 
         super(Game, self).export(exporter, comments=comments, variations=variations)
 
@@ -450,7 +483,11 @@ class FileExporter(StringExporter):
         self.handle.write("\n")
 
 
-def read_game(handle):
+def _raise(error):
+    raise error
+
+
+def read_game(handle, error_handler=_raise):
     """
     Reads a game from a file opened in text mode.
 
@@ -485,12 +522,18 @@ def read_game(handle):
     for a valid game. This parser also handles games without any headers just
     fine.
 
-    Raises `ValueError` if invalid moves are encountered in the movetext.
+    The parser is relatively forgiving when it comes to errors. It skips over
+    tokens it can not parse. However it is difficult to handle illegal or
+    ambiguous moves. If such a move is encountered the default behaviour is to
+    stop right in the middle of the game and raise `ValueError`. If you pass
+    `None` for `error_handler` all errors are silently ignored, instead. If you
+    pass a function this function will be called with the error as an argument.
 
     Returns the parsed game or `None` if the EOF is reached.
     """
     game = Game()
     found_game = False
+    found_content = False
 
     line = handle.readline()
 
@@ -517,7 +560,7 @@ def read_game(handle):
         line = handle.readline()
 
     # Movetext parser state.
-    start_comment = ""
+    starting_comment = ""
     variation_stack = collections.deque([ game ])
     board_stack = collections.deque([ game.board() ])
     in_variation = False
@@ -527,7 +570,7 @@ def read_game(handle):
         read_next_line = True
 
         # An empty line is the end of a game.
-        if not line.strip() and found_game:
+        if not line.strip() and found_game and found_content:
             return game
 
         for match in MOVETEXT_REGEX.finditer(line):
@@ -554,13 +597,17 @@ def read_game(handle):
                 else:
                     line = ""
 
-                # Add the comment.
-                if in_variation:
+                if in_variation or not variation_stack[-1].parent:
+                    # Add the comment if in the middle of a variation or
+                    # directly to the game.
+                    if variation_stack[-1].comment:
+                        comment_lines.insert(0, variation_stack[-1].comment)
                     variation_stack[-1].comment = "\n".join(comment_lines).strip()
-                elif len(variation_stack) == 1:
-                    variation_stack[0].start_comment = "\n".join(comment_lines).strip()
                 else:
-                    start_comment += "\n".join(comment_lines)
+                    # Otherwise it is a starting comment.
+                    if starting_comment:
+                        comment_lines.insert(0, starting_comment)
+                    starting_comment = "\n".join(comment_lines).strip()
 
                 # Continue with the current or the next line.
                 if line:
@@ -583,29 +630,48 @@ def read_game(handle):
                 variation_stack[-1].nags.add(NAG_DUBIOUS_MOVE)
             elif token == "(":
                 # Found a start variation token.
-                variation_stack.append(variation_stack[-1].parent)
+                if variation_stack[-1].parent:
+                    variation_stack.append(variation_stack[-1].parent)
 
-                board = copy.deepcopy(board_stack[-1])
-                board.pop()
-                board_stack.append(board)
+                    board = copy.deepcopy(board_stack[-1])
+                    board.pop()
+                    board_stack.append(board)
 
-                in_variation = False
+                    in_variation = False
             elif token == ")":
-                # Found a close variation token.
-                variation_stack.pop()
-                board_stack.pop()
+                # Found a close variation token. Always leave at least the
+                # root node on the stack.
+                if len(variation_stack) > 1:
+                    variation_stack.pop()
+                    board_stack.pop()
             elif token in ["1-0", "0-1", "1/2-1/2", "*"] and len(variation_stack) == 1:
                 # Found a result token.
+                found_content = True
+
+                # Set result header if not present, yet.
                 if "Result" not in game.headers:
                     game.headers["Result"] = token
             else:
                 # Found a SAN token.
-                in_variation = True
-                board = board_stack[-1]
-                variation_stack[-1] = variation_stack[-1].add_variation(board.parse_san(token))
-                variation_stack[-1].start_comment = start_comment.strip()
-                board_stack[-1].push(variation_stack[-1].move)
-                start_comment = ""
+                found_content = True
+
+                # Replace zeros castling notation.
+                if token == "0-0":
+                    token = "O-O"
+                elif token == "0-0-0":
+                    token = "O-O-O"
+
+                # Parse the SAN.
+                try:
+                    move = board_stack[-1].parse_san(token)
+                    in_variation = True
+                    variation_stack[-1] = variation_stack[-1].add_variation(move)
+                    variation_stack[-1].starting_comment = starting_comment
+                    board_stack[-1].push(move)
+                    starting_comment = ""
+                except ValueError as error:
+                    if error_handler:
+                        error_handler(error)
 
         if read_next_line:
             line = handle.readline()
@@ -614,23 +680,108 @@ def read_game(handle):
         return game
 
 
-def scan_offsets(handle):
+def scan_headers(handle):
     """
-    Scan a PGN file opened in text mode.
+    Scan a PGN file opened in text mode for game offsets and headers.
 
-    Yields the starting offsets of all the games, so that they can be seeked
-    later. Since actually parsing many games from a big file is relatively
-    expensive, this is a better way to read only a specific game.
+    Yields a tuple for each game. The first element is the offset. The second
+    element is an ordered dictionary of game headers.
+
+    Since actually parsing many games from a big file is relatively expensive,
+    this is a better way to look only for specific games and seek and parse
+    them later.
+
+    This example scans for the first game with Kasparov as the white player.
 
     >>> pgn = open("mega.pgn")
-    >>> offsets = chess.pgn.scan_offsets(pgn)
-    >>> first_game_offset = next(offsets)
-    >>> second_game_offset = next(offsets)
-    >>> pgn.seek(second_game_offset)
-    >>> second_game = chess.pgn.read_game(pgn)
+    >>> for offset, headers in chess.pgn.scan_headers(pgn):
+    ...     if "Kasparov" in headers["White"]:
+    ...         kasparov_offset = offset
+    ...         break
 
-    The PGN standard requires each game to start with an Event-tag. So does this
-    scanner.
+    Then it can later be seeked an parsed.
+
+    >>> pgn.seek(kasparov_offset)
+    >>> game = chess.pgn.read_game(pgn)
+
+    This also works nicely with generators, scanning lazily only when the next
+    offset is required.
+
+    >>> white_win_offsets = (offset for offset, headers in chess.pgn.scan_headers(pgn)
+    ...                             if headers["Result"] == "1-0")
+    >>> first_white_win = next(white_win_offsets)
+    >>> second_white_win = next(white_win_offsets)
+
+    Be careful when seeking a game in the file while more offsets are being
+    generated.
+    """
+    in_comment = False
+
+    game_headers = None
+    game_pos = None
+
+    last_pos = handle.tell()
+    line = handle.readline()
+
+
+    while line:
+        # Skip single line comments.
+        if line.startswith("%"):
+            last_pos = handle.tell()
+            line = handle.readline()
+            continue
+
+        # Reading a header tag. Parse it and add it to the current headers.
+        if not in_comment and line.startswith("["):
+            tag_match = TAG_REGEX.match(line)
+            if tag_match:
+                if game_pos is None:
+                    game_headers = collections.OrderedDict()
+                    game_headers["Event"] = "?"
+                    game_headers["Site"] = "?"
+                    game_headers["Date"] = "????.??.??"
+                    game_headers["Round"] = "?"
+                    game_headers["White"] = "?"
+                    game_headers["Black"] = "?"
+                    game_headers["Result"] = "*"
+
+                    game_pos = last_pos
+
+                game_headers[tag_match.group(1)] = tag_match.group(2)
+
+                last_pos = handle.tell()
+                line = handle.readline()
+                continue
+
+        # Reading movetext. Update parser state in_comment in order to skip
+        # comments that look like header tags.
+        if (not in_comment and "{" in line) or (in_comment and "}" in line):
+            in_comment = line.rfind("{") > line.rfind("}")
+
+        # Reading movetext. If there were headers, previously, those are now
+        # complete and can be yielded.
+        if game_pos is not None:
+            yield game_pos, game_headers
+            game_pos = None
+
+        last_pos = handle.tell()
+        line = handle.readline()
+
+    # Yield the headers of the last game.
+    if game_pos is not None:
+        yield game_pos, game_headers
+
+
+def scan_offsets(handle):
+    """
+    Scan a PGN file opened in text mode for game offsets.
+
+    Yields the starting offsets of all the games, so that they can be seeked
+    later. This is just like `scan_headers()` but more efficient if you do
+    not actually need the header information.
+
+    The PGN standard requires each game to start with an Event-tag. So does
+    this scanner.
     """
     in_comment = False
 
@@ -641,10 +792,7 @@ def scan_offsets(handle):
         if not in_comment and line.startswith("[Event \""):
             yield last_pos
         elif (not in_comment and "{" in line) or (in_comment and "}" in line):
-            if line.rfind("{") < line.rfind("}"):
-                in_comment = False
-            else:
-                in_comment = True
+            in_comment = line.rfind("{") > line.rfind("}")
 
         last_pos = handle.tell()
         line = handle.readline()
