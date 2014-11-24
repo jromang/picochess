@@ -296,8 +296,8 @@ class DGTBoard(Observable, Display, threading.Thread):
             tries += 1
         logging.debug('DGT clock found' if self.clock_found else 'DGT clock NOT found')
 
+        self.display_on_dgt_xl('pic'+version)
         # Get clock version
-
         self.write([Commands.DGT_CLOCK_MESSAGE, 0x03, Clock.DGT_CMD_CLOCK_START_MESSAGE,
                         Clock.DGT_CMD_CLOCK_VERSION, Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
@@ -449,14 +449,11 @@ class DGTBoard(Observable, Display, threading.Thread):
                             main_version = ack2 >> 4
                             if main_version == 2:
                                 self.enable_dgt_3000 = True
-                                self.display_on_dgt_3000('pico '+version)
-                                time.sleep(0.5)
-                                # Some bug with certain DGT 3000 clocks?!
-                                self.display_on_dgt_3000('pico '+version)
+                                # self.display_on_dgt_3000('pico '+version)
+                                # time.sleep(0.5)
+                                # # Some bug with certain DGT 3000 clocks?!
+                                # self.display_on_dgt_3000('pico '+version)
 
-                            else:
-                                # Beep and display version
-                                self.display_on_dgt_xl('pic'+version)
                         ack3 = ((message[5]) & 0x7f) | ((message[0] << 2) & 0x80)
                         if ack0 != 0x10: logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
                         else:
