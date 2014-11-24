@@ -265,6 +265,11 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.flip_board = False
         self.flip_clock = None
 
+        self.setup_to_move = chess.WHITE
+        self.setup_reverse_orientation = False
+        self.dgt_fen = None
+        # self.dgt_fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+
         self.enable_board_leds = enable_board_leds
         self.write_queue = queue.Queue()
         self.clock_lock = asyncio.Lock()
@@ -398,19 +403,26 @@ class DGTBoard(Observable, Display, threading.Thread):
                             self.display_on_dgt_3000(self.bit_board.san(self.last_move), False)
 
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
-                            pass
-    #                             TO_MOVE_TOGGLE = ()
-    # REVERSE_ORIENTATION = ()
-    # SCAN_POSITION = ()
-    # SPACER = ()
-    # SWITCH_MENU = ()  # Switch Menu
+                            self.setup_to_move = chess.WHITE if self.setup_to_move == chess.BLACK else chess.BLACK
+                            to_move_string = "white" if self.setup_to_move == chess.WHITE else "black"
+                            self.display_on_dgt_clock(to_move_string, beep=True)
 
+                    # SCAN_POSITION = ()
+                    # SPACER = ()
+                    # SWITCH_MENU = ()  # Switch Menu
 
                     if 33 <= message[4] <= 34 and message[5] == 52:
                         print("Button 1 pressed")
+                        if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
+                            self.setup_reverse_orientation = False if self.setup_reverse_orientation else True
+                            orientation = "reversed" if self.setup_reverse_orientation else "normal"
+                            self.display_on_dgt_clock(orientation, beep=True)
 
                     if 17 <= message[4] <= 18 and message[5] == 51:
                         print("Button 2 pressed")
+                        if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
+                            self.display_on_dgt_clock("Scan", beep=True)
+                        print(self.dgt_fen)
 
                     if 9 <= message[4] <= 10 and message[5] == 50:
                         print("Button 3 pressed")
@@ -435,8 +447,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                         elif self.dgt_clock_menu == Menu.SETTINGS_MENU:
                             msg = 'System'
 
-                        self.display_on_dgt_3000(msg, beep=True)
-                        self.display_on_dgt_xl(msg, beep=True)
+                        self.display_on_dgt_clock(msg, beep=True)
 
                     if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
 
@@ -494,6 +505,8 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.flip_board = not self.flip_board
                         fen = fen[::-1]
                     logging.debug(fen)
+                    self.dgt_fen = fen
+
                     #Fire the appropriate event
                     if fen in level_map:  # User sets level
                         level = level_map.index(fen)
@@ -556,6 +569,14 @@ class DGTBoard(Observable, Display, threading.Thread):
             text = bytes(text, 'utf-8')
             self.write([Commands.DGT_CLOCK_MESSAGE, 0x0c, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_ASCII,
                         text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], 0x03 if beep else 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+
+    def display_on_dgt_clock(self, text, beep=False, dgt_3000_text=None):
+        if self.enable_dgt_3000:
+            if dgt_3000_text:
+                text = dgt_3000_text
+            self.display_on_dgt_3000(text, beep=beep)
+        else:
+            self.display_on_dgt_xl(text, beep=beep)
 
     def light_squares_revelation_board(self, squares):
         if self.enable_board_leds:
