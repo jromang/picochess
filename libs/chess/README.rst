@@ -4,8 +4,14 @@ python-chess: a pure Python chess library
 .. image:: https://travis-ci.org/niklasf/python-chess.svg?branch=master
     :target: https://travis-ci.org/niklasf/python-chess
 
-.. image:: https://readthedocs.org/projects/python-chess/badge/?version=latest
-    :target: https://python-chess.readthedocs.org/en/latest/
+.. image:: https://coveralls.io/repos/niklasf/python-chess/badge.png
+    :target: https://coveralls.io/r/niklasf/python-chess
+
+.. image:: https://landscape.io/github/niklasf/python-chess/master/landscape.png
+    :target: https://landscape.io/github/niklasf/python-chess/master
+
+.. image:: https://pypip.in/version/python-chess/badge.svg
+    :target: https://pypi.python.org/pypi/python-chess
 
 Introduction
 ------------
@@ -39,6 +45,9 @@ This is the scholars mate in python-chess:
 Documentation
 -------------
 
+.. image:: https://readthedocs.org/projects/python-chess/badge/?version=latest
+    :target: https://python-chess.readthedocs.org/en/latest/
+
 https://python-chess.readthedocs.org/en/latest/
 
 Features
@@ -65,7 +74,6 @@ Features
       >>> board.push(Qf7) # Restore
 
 * Detects checkmates, stalemates and draws by insufficient material.
-  Has a half-move clock.
 
   .. code:: python
 
@@ -77,6 +85,30 @@ Features
       True
       >>> board.halfmove_clock
       0
+
+* Detects repititions. Has a half move clock.
+
+  .. code:: python
+
+      >>> board.can_claim_threefold_repitition()
+      False
+      >>> board.halfmove_clock
+      0
+      >>> board.can_claim_fifty_moves()
+      False
+      >>> board.can_claim_draw()
+      False
+
+  With the new rules from July 2014 a game ends drawn (even without a claim)
+  once a fivefold repitition occurs or if there are 75 moves without a pawn
+  push or capture. Other ways of ending a game take precedence.
+
+  .. code:: python
+
+      >>> board.is_fivefold_repitition()
+      False
+      >>> board.is_seventyfive_moves()
+      False
 
 * Detects checks and attacks.
 
@@ -187,9 +219,13 @@ python-chess is not intended to be used by serious chess engines where
 performance is critical. The goal is rather to create a simple and relatively
 highlevel library.
 
-However, even though bit fiddling in Python is not as fast as in C or C++,
-the current version is still much faster than previous attempts including
-the naive x88 move generation from libchess.
+You can install the `gmpy2` or `gmpy` (https://code.google.com/p/gmpy/) modules
+in order to get a slight performance boost on basic operations like bit scans
+and population counts.
+
+python-chess will only ever import very basic general (non-chess-related)
+operations from native libraries. All logic is pure Python. There will always
+be pure Python fallbacks.
 
 Installing
 ----------
