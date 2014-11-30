@@ -51,6 +51,7 @@ class Event(AutoNumber):
     USER_MOVE = ()  # User sends a move
     OPENING_BOOK = ()  # User chooses an opening book
     SET_MODE = ()  # Change interaction mode
+    SETUP_POSITION = () # Setup custom position
     #Engine events
     BEST_MOVE = ()  # Engine has found a move
     SET_TIME_CONTROL = ()  # User sets time control

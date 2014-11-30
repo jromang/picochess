@@ -161,6 +161,8 @@ class Messages(enum.IntEnum):
     EE_NOP = 0x7f
     EE_NOP2 = 0x00
 
+INITIAL_BOARD_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+
 char_to_DGTXL = {
     '0': 0x01 | 0x02 | 0x20 | 0x08 | 0x04 | 0x10,  '1':  0x02 | 0x04,  '2':  0x01 | 0x40 | 0x08 | 0x02 | 0x10,
     '3': 0x01 | 0x40 | 0x08 | 0x02 | 0x04, '4': 0x20 | 0x04 | 0x40 | 0x02,  '5': 0x01 | 0x40 | 0x08 | 0x20 | 0x04,
@@ -350,6 +352,34 @@ class DGTBoard(Observable, Display, threading.Thread):
             time.sleep(0.05 if self.enable_dgt_3000 else 0.5)  # Let a bit time for the message to be displayed on the clock
             self.clock_lock.acquire()
 
+    def complete_dgt_fen(self, fen):
+        # fen = str(self.setup_chessboard.fen())
+        can_castle = False
+        castling_fen = ''
+        bit_board = chess.Bitboard(fen)
+
+        if bit_board.piece_at(chess.E1) == chess.Piece.from_symbol("K") and bit_board.piece_at(chess.H1) == chess.Piece.from_symbol("R"):
+            can_castle = True
+            castling_fen += 'K'
+
+        if bit_board.piece_at(chess.E1) == chess.Piece.from_symbol("K") and bit_board.piece_at(chess.A1) == chess.Piece.from_symbol("R"):
+            can_castle = True
+            castling_fen += 'Q'
+
+        if bit_board.piece_at(chess.E8) == chess.Piece.from_symbol("k") and bit_board.piece_at(chess.H8) == chess.Piece.from_symbol("r"):
+            can_castle = True
+            castling_fen += 'k'
+
+        if bit_board.piece_at(chess.E8) == chess.Piece.from_symbol("k") and bit_board.piece_at(chess.A8) == chess.Piece.from_symbol("r"):
+            can_castle = True
+            castling_fen += 'q'
+
+        if not can_castle:
+            castling_fen = '-'
+
+        # TODO: Support fen positions where castling is not possible even if king and rook are on right squares
+        return fen.replace("KQkq", castling_fen)
+
     def read_message(self):
         header = unpack('>BBB', (self.serial.read(3)))
         message_id = header[0]
@@ -407,10 +437,6 @@ class DGTBoard(Observable, Display, threading.Thread):
                             to_move_string = "white" if self.setup_to_move == chess.WHITE else "black"
                             self.display_on_dgt_clock(to_move_string, beep=True)
 
-                    # SCAN_POSITION = ()
-                    # SPACER = ()
-                    # SWITCH_MENU = ()  # Switch Menu
-
                     if 33 <= message[4] <= 34 and message[5] == 52:
                         print("Button 1 pressed")
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
@@ -422,7 +448,11 @@ class DGTBoard(Observable, Display, threading.Thread):
                         print("Button 2 pressed")
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
                             self.display_on_dgt_clock("Scan", beep=True)
-                        print(self.dgt_fen)
+                            to_move = 'w' if self.setup_to_move == chess.WHITE else 'b'
+                            fen = self.dgt_fen
+                            fen += " {0} KQkq - 0 1".format(to_move)
+                            fen = self.complete_dgt_fen(fen)
+                            self.fire(Event.SETUP_POSITION, fen=fen)
 
                     if 9 <= message[4] <= 10 and message[5] == 50:
                         print("Button 3 pressed")
