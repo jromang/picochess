@@ -251,14 +251,14 @@ time_control_map = OrderedDict([
 ("rnbqkbnr/pppppppp/8/8/8/1Q6/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=4, fischer_increment=2)),
 ("rnbqkbnr/pppppppp/8/8/8/2Q5/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=5, fischer_increment=3)),
 ("rnbqkbnr/pppppppp/8/8/8/3Q4/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=5, fischer_increment=5)),
-("rnbqkbnr/pppppppp/8/8/8/5Q2/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=7, fischer_increment=1)),
+("rnbqkbnr/pppppppp/8/8/8/5Q2/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=25, fischer_increment=5)),
 ("rnbqkbnr/pppppppp/8/8/8/4Q3/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=15, fischer_increment=5)),
 ("rnbqkbnr/pppppppp/8/8/8/6Q1/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=90, fischer_increment=30))
 ])
 
 dgt_xl_time_control_list = ["mov  1", "mov  3", "mov  5", "mov 10", "mov 15", "mov 30", "mov 60", "mov120",
                             "bl   1", "bl   3", "bl   5", "bl  10", "bl  15", "bl  30", "bl  60", "bl  90",
-                            "f 3  2", "f 4  2", "f 5  3", "f 5  5", "f 7  1", "f15  5", "f90 30"]
+                            "f 3  2", "f 4  2", "f 5  3", "f 5  5", "f25  5", "f15  5", "f90 30"]
 
 class DGTBoard(Observable, Display, threading.Thread):
 
@@ -422,7 +422,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                     # if message[0] == 10 and message[1] == 16 and message[3] == 10 and not message[5] and not message[6]:
 
                     if 5 <= message[4] <= 6 and message[5] == 49:
-                        print("Button 0 pressed")
+                        logging.info("Button 0 pressed")
                         # print(self.dgt_clock_menu)
 
                         if self.dgt_clock_menu == Menu.GAME_MENU and self.last_move:
@@ -438,14 +438,14 @@ class DGTBoard(Observable, Display, threading.Thread):
                             self.display_on_dgt_clock(to_move_string, beep=True)
 
                     if 33 <= message[4] <= 34 and message[5] == 52:
-                        print("Button 1 pressed")
+                        logging.info("Button 1 pressed")
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
                             self.setup_reverse_orientation = False if self.setup_reverse_orientation else True
                             orientation = "reversed" if self.setup_reverse_orientation else "normal"
                             self.display_on_dgt_clock(orientation, beep=True)
 
                     if 17 <= message[4] <= 18 and message[5] == 51:
-                        print("Button 2 pressed")
+                        logging.info("Button 2 pressed")
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
                             self.display_on_dgt_clock("Scan", beep=True)
                             to_move = 'w' if self.setup_to_move == chess.WHITE else 'b'
@@ -455,10 +455,10 @@ class DGTBoard(Observable, Display, threading.Thread):
                             self.fire(Event.SETUP_POSITION, fen=fen)
 
                     if 9 <= message[4] <= 10 and message[5] == 50:
-                        print("Button 3 pressed")
+                        logging.info("Button 3 pressed")
 
                     if 65 <= message[4] <= 66 and message[5] == 53:
-                        print("Button 4 pressed")
+                        logging.info("Button 4 pressed")
 
                         # self.dgt_clock_menu = Menu.self.dgt_clock_menu.value+1
                         # print(self.dgt_clock_menu)
