@@ -229,6 +229,9 @@ class WebDisplay(Display, threading.Thread):
 
         elif message == Message.COMPUTER_MOVE or message == Message.USER_MOVE or message == Message.REVIEW_MODE_MOVE:
             game = pgn.Game()
+            custom_fen = getattr(message.game, 'custom_fen', None)
+            if custom_fen:
+                game.setup(custom_fen)
             self.create_game_header(game)
 
             tmp = game
@@ -236,6 +239,7 @@ class WebDisplay(Display, threading.Thread):
             for move in move_stack:
                 tmp = tmp.add_variation(move)
             exporter = pgn.StringExporter()
+
             game.export(exporter, headers=True, comments=False, variations=False)
             fen = message.game.fen()
             pgn_str = str(exporter)

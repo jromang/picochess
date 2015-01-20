@@ -161,6 +161,8 @@ class Messages(enum.IntEnum):
     EE_NOP = 0x7f
     EE_NOP2 = 0x00
 
+INITIAL_BOARD_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+
 char_to_DGTXL = {
     '0': 0x01 | 0x02 | 0x20 | 0x08 | 0x04 | 0x10,  '1':  0x02 | 0x04,  '2':  0x01 | 0x40 | 0x08 | 0x02 | 0x10,
     '3': 0x01 | 0x40 | 0x08 | 0x02 | 0x04, '4': 0x20 | 0x04 | 0x40 | 0x02,  '5': 0x01 | 0x40 | 0x08 | 0x20 | 0x04,
@@ -249,14 +251,14 @@ time_control_map = OrderedDict([
 ("rnbqkbnr/pppppppp/8/8/8/1Q6/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=4, fischer_increment=2)),
 ("rnbqkbnr/pppppppp/8/8/8/2Q5/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=5, fischer_increment=3)),
 ("rnbqkbnr/pppppppp/8/8/8/3Q4/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=5, fischer_increment=5)),
-("rnbqkbnr/pppppppp/8/8/8/5Q2/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=7, fischer_increment=1)),
+("rnbqkbnr/pppppppp/8/8/8/5Q2/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=25, fischer_increment=5)),
 ("rnbqkbnr/pppppppp/8/8/8/4Q3/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=15, fischer_increment=5)),
 ("rnbqkbnr/pppppppp/8/8/8/6Q1/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=90, fischer_increment=30))
 ])
 
 dgt_xl_time_control_list = ["mov  1", "mov  3", "mov  5", "mov 10", "mov 15", "mov 30", "mov 60", "mov120",
                             "bl   1", "bl   3", "bl   5", "bl  10", "bl  15", "bl  30", "bl  60", "bl  90",
-                            "f 3  2", "f 4  2", "f 5  3", "f 5  5", "f 7  1", "f15  5", "f90 30"]
+                            "f 3  2", "f 4  2", "f 5  3", "f 5  5", "f25  5", "f15  5", "f90 30"]
 
 class DGTBoard(Observable, Display, threading.Thread):
 
@@ -264,6 +266,11 @@ class DGTBoard(Observable, Display, threading.Thread):
         super(DGTBoard, self).__init__()
         self.flip_board = False
         self.flip_clock = None
+
+        self.setup_to_move = chess.WHITE
+        self.setup_reverse_orientation = False
+        self.dgt_fen = None
+        # self.dgt_fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
         self.enable_board_leds = enable_board_leds
         self.write_queue = queue.Queue()
@@ -296,8 +303,8 @@ class DGTBoard(Observable, Display, threading.Thread):
             tries += 1
         logging.debug('DGT clock found' if self.clock_found else 'DGT clock NOT found')
 
+        self.display_on_dgt_xl('pic'+version)
         # Get clock version
-
         self.write([Commands.DGT_CLOCK_MESSAGE, 0x03, Clock.DGT_CMD_CLOCK_START_MESSAGE,
                         Clock.DGT_CMD_CLOCK_VERSION, Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
@@ -345,6 +352,34 @@ class DGTBoard(Observable, Display, threading.Thread):
             time.sleep(0.05 if self.enable_dgt_3000 else 0.5)  # Let a bit time for the message to be displayed on the clock
             self.clock_lock.acquire()
 
+    def complete_dgt_fen(self, fen):
+        # fen = str(self.setup_chessboard.fen())
+        can_castle = False
+        castling_fen = ''
+        bit_board = chess.Bitboard(fen)
+
+        if bit_board.piece_at(chess.E1) == chess.Piece.from_symbol("K") and bit_board.piece_at(chess.H1) == chess.Piece.from_symbol("R"):
+            can_castle = True
+            castling_fen += 'K'
+
+        if bit_board.piece_at(chess.E1) == chess.Piece.from_symbol("K") and bit_board.piece_at(chess.A1) == chess.Piece.from_symbol("R"):
+            can_castle = True
+            castling_fen += 'Q'
+
+        if bit_board.piece_at(chess.E8) == chess.Piece.from_symbol("k") and bit_board.piece_at(chess.H8) == chess.Piece.from_symbol("r"):
+            can_castle = True
+            castling_fen += 'k'
+
+        if bit_board.piece_at(chess.E8) == chess.Piece.from_symbol("k") and bit_board.piece_at(chess.A8) == chess.Piece.from_symbol("r"):
+            can_castle = True
+            castling_fen += 'q'
+
+        if not can_castle:
+            castling_fen = '-'
+
+        # TODO: Support fen positions where castling is not possible even if king and rook are on right squares
+        return fen.replace("KQkq", castling_fen)
+
     def read_message(self):
         header = unpack('>BBB', (self.serial.read(3)))
         message_id = header[0]
@@ -387,7 +422,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                     # if message[0] == 10 and message[1] == 16 and message[3] == 10 and not message[5] and not message[6]:
 
                     if 5 <= message[4] <= 6 and message[5] == 49:
-                        print("Button 0 pressed")
+                        logging.info("Button 0 pressed")
                         # print(self.dgt_clock_menu)
 
                         if self.dgt_clock_menu == Menu.GAME_MENU and self.last_move:
@@ -398,25 +433,32 @@ class DGTBoard(Observable, Display, threading.Thread):
                             self.display_on_dgt_3000(self.bit_board.san(self.last_move), False)
 
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
-                            pass
-    #                             TO_MOVE_TOGGLE = ()
-    # REVERSE_ORIENTATION = ()
-    # SCAN_POSITION = ()
-    # SPACER = ()
-    # SWITCH_MENU = ()  # Switch Menu
-
+                            self.setup_to_move = chess.WHITE if self.setup_to_move == chess.BLACK else chess.BLACK
+                            to_move_string = "white" if self.setup_to_move == chess.WHITE else "black"
+                            self.display_on_dgt_clock(to_move_string, beep=True)
 
                     if 33 <= message[4] <= 34 and message[5] == 52:
-                        print("Button 1 pressed")
+                        logging.info("Button 1 pressed")
+                        if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
+                            self.setup_reverse_orientation = False if self.setup_reverse_orientation else True
+                            orientation = "reversed" if self.setup_reverse_orientation else "normal"
+                            self.display_on_dgt_clock(orientation, beep=True)
 
                     if 17 <= message[4] <= 18 and message[5] == 51:
-                        print("Button 2 pressed")
+                        logging.info("Button 2 pressed")
+                        if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
+                            self.display_on_dgt_clock("Scan", beep=True)
+                            to_move = 'w' if self.setup_to_move == chess.WHITE else 'b'
+                            fen = self.dgt_fen
+                            fen += " {0} KQkq - 0 1".format(to_move)
+                            fen = self.complete_dgt_fen(fen)
+                            self.fire(Event.SETUP_POSITION, fen=fen)
 
                     if 9 <= message[4] <= 10 and message[5] == 50:
-                        print("Button 3 pressed")
+                        logging.info("Button 3 pressed")
 
                     if 65 <= message[4] <= 66 and message[5] == 53:
-                        print("Button 4 pressed")
+                        logging.info("Button 4 pressed")
 
                         # self.dgt_clock_menu = Menu.self.dgt_clock_menu.value+1
                         # print(self.dgt_clock_menu)
@@ -435,8 +477,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                         elif self.dgt_clock_menu == Menu.SETTINGS_MENU:
                             msg = 'System'
 
-                        self.display_on_dgt_3000(msg, beep=True)
-                        self.display_on_dgt_xl(msg, beep=True)
+                        self.display_on_dgt_clock(msg, beep=True)
 
                     if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
 
@@ -449,14 +490,11 @@ class DGTBoard(Observable, Display, threading.Thread):
                             main_version = ack2 >> 4
                             if main_version == 2:
                                 self.enable_dgt_3000 = True
-                                self.display_on_dgt_3000('pico '+version)
-                                time.sleep(0.5)
-                                # Some bug with certain DGT 3000 clocks?!
-                                self.display_on_dgt_3000('pico '+version)
+                                # self.display_on_dgt_3000('pico '+version)
+                                # time.sleep(0.5)
+                                # # Some bug with certain DGT 3000 clocks?!
+                                # self.display_on_dgt_3000('pico '+version)
 
-                            else:
-                                # Beep and display version
-                                self.display_on_dgt_xl('pic'+version)
                         ack3 = ((message[5]) & 0x7f) | ((message[0] << 2) & 0x80)
                         if ack0 != 0x10: logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
                         else:
@@ -497,6 +535,8 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.flip_board = not self.flip_board
                         fen = fen[::-1]
                     logging.debug(fen)
+                    self.dgt_fen = fen
+
                     #Fire the appropriate event
                     if fen in level_map:  # User sets level
                         level = level_map.index(fen)
@@ -559,6 +599,14 @@ class DGTBoard(Observable, Display, threading.Thread):
             text = bytes(text, 'utf-8')
             self.write([Commands.DGT_CLOCK_MESSAGE, 0x0c, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_ASCII,
                         text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], 0x03 if beep else 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+
+    def display_on_dgt_clock(self, text, beep=False, dgt_3000_text=None):
+        if self.enable_dgt_3000:
+            if dgt_3000_text:
+                text = dgt_3000_text
+            self.display_on_dgt_3000(text, beep=beep)
+        else:
+            self.display_on_dgt_xl(text, beep=beep)
 
     def light_squares_revelation_board(self, squares):
         if self.enable_board_leds:

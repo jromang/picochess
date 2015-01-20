@@ -253,6 +253,20 @@ def main():
                 engine.set_level(level)
                 break
 
+            if case(Event.SETUP_POSITION): # User sets up a position
+                # print(event.fen)
+                logging.debug("Setting up custom fen: {0}".format(event.fen))
+
+                game = chess.Bitboard(event.fen)
+                game.custom_fen = event.fen
+                legal_fens = compute_legal_fens(game)
+                time_control.stop()
+                time_control.reset()
+                Display.show(Message.START_NEW_GAME)
+                if interaction_mode == Mode.PLAY_BLACK:
+                    think(time_control)
+                break
+
             if case(Event.NEW_GAME):  # User starts a new game
                 if game.move_stack:
                     logging.debug("Starting a new game")
