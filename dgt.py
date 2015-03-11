@@ -262,7 +262,7 @@ dgt_xl_time_control_list = ["mov  1", "mov  3", "mov  5", "mov 10", "mov 15", "m
 
 class DGTBoard(Observable, Display, threading.Thread):
 
-    def __init__(self, device, enable_board_leds=False, enable_dgt_3000=False):
+    def __init__(self, device, enable_board_leds=False, enable_dgt_3000=False, enable_dgt_clock_beep=True):
         super(DGTBoard, self).__init__()
         self.flip_board = False
         self.flip_clock = None
@@ -276,6 +276,7 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.write_queue = queue.Queue()
         self.clock_lock = asyncio.Lock()
         self.enable_dgt_3000 = enable_dgt_3000
+        self.enable_dgt_clock_beep = enable_dgt_clock_beep
         self.bit_board = chess.Bitboard()
         self.dgt_clock_menu = Menu.GAME_MENU
         self.last_move = None
@@ -304,6 +305,7 @@ class DGTBoard(Observable, Display, threading.Thread):
         logging.debug('DGT clock found' if self.clock_found else 'DGT clock NOT found')
 
         self.display_on_dgt_xl('pic'+version)
+        self.display_on_dgt_3000('pic'+version)
         # Get clock version
         self.write([Commands.DGT_CLOCK_MESSAGE, 0x03, Clock.DGT_CMD_CLOCK_START_MESSAGE,
                         Clock.DGT_CMD_CLOCK_VERSION, Clock.DGT_CMD_CLOCK_END_MESSAGE])
@@ -542,8 +544,8 @@ class DGTBoard(Observable, Display, threading.Thread):
                         level = level_map.index(fen)
                         self.fire(Event.LEVEL, level=level)
                         Display.show(Event.LEVEL, level=level)
-                        self.display_on_dgt_xl('lvl ' + str(level), True)
-                        self.display_on_dgt_3000('level '+ str(level), True)
+                        self.display_on_dgt_xl('lvl ' + str(level), self.enable_dgt_clock_beep)
+                        self.display_on_dgt_3000('level '+ str(level), self.enable_dgt_clock_beep)
                     elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":  # New game
                         logging.debug("New game")
                         self.fire(Event.NEW_GAME)
@@ -553,26 +555,26 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.fire(Event.OPENING_BOOK, book_index=book_index)
                         Display.show(Event.OPENING_BOOK, book=get_opening_books()[book_index])
 
-                        self.display_on_dgt_xl(get_opening_books()[book_index][0], True)
-                        self.display_on_dgt_3000(get_opening_books()[book_index][0], True)
+                        self.display_on_dgt_xl(get_opening_books()[book_index][0], self.enable_dgt_clock_beep)
+                        self.display_on_dgt_3000(get_opening_books()[book_index][0], self.enable_dgt_clock_beep)
                     elif fen in mode_map:  # Set interaction mode
                         logging.debug("Interaction mode [%s]", mode_map[fen])
                         self.fire(Event.SET_MODE, mode=mode_map[fen])
-                        Display.show(Event.SET_MODE, mode_string=('book', 'analyse', 'game', 'kibitz', 'observe', 'black', 'white', 'black', 'white')[mode_map[fen].value])
+                        Display.show(Event.SET_MODE, mode_string=('game', 'analyse', 'white', 'kibitz', 'observe', 'black')[mode_map[fen].value])
 
-                        self.display_on_dgt_xl(('book', 'analys', 'game', 'kibitz', 'observ', 'black', 'white', 'black', 'white')[mode_map[fen].value], True)
-                        self.display_on_dgt_3000(('book', 'analyse', 'game', 'kibitz', 'observe', 'black', 'white', 'black', 'white')[mode_map[fen].value], True)
+                        self.display_on_dgt_xl(('game', 'analys', 'white', 'kibitz', 'observ', 'black')[mode_map[fen].value], self.enable_dgt_clock_beep)
+                        self.display_on_dgt_3000(('game', 'analyse', 'white', 'kibitz', 'observe', 'black')[mode_map[fen].value], self.enable_dgt_clock_beep)
                     elif fen in time_control_map:
                         logging.debug("Setting time control %s", time_control_map[fen].mode)
                         self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[fen])
                         Display.show(Event.SET_TIME_CONTROL, time_control_string=dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)])
 
-                        self.display_on_dgt_xl(dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)], True)
-                        self.display_on_dgt_3000(dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)], True)
+                        self.display_on_dgt_xl(dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)], self.enable_dgt_clock_beep)
+                        self.display_on_dgt_3000(dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)], self.enable_dgt_clock_beep)
                     elif fen in shutdown_map:
                         self.fire(Event.SHUTDOWN)
-                        self.display_on_dgt_xl('powoff', True)
-                        self.display_on_dgt_3000('poweroff', True)
+                        self.display_on_dgt_xl('powoff', self.enable_dgt_clock_beep)
+                        self.display_on_dgt_3000('poweroff', self.enable_dgt_clock_beep)
                     else:
                         logging.debug("Fen")
                         self.fire(Event.FEN, fen=fen)
@@ -647,21 +649,21 @@ class DGTBoard(Observable, Display, threading.Thread):
                                    0, 0, 0, 0, 0, 0,
                                    0x04 | 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
                         # Display the move
-                        self.display_on_dgt_xl(' ' + uci_move, True)
-                        # self.display_on_dgt_3000('mov ' + mo, True)
+                        self.display_on_dgt_xl(' ' + uci_move, self.enable_dgt_clock_beep)
+                        # self.display_on_dgt_3000('mov ' + mo, self.enable_dgt_clock_beep)
                         self.bit_board.set_fen(message.fen)
                         # logging.info("Move is {0}".format(self.bit_board.san(message.move)))
-                        self.display_on_dgt_3000(self.bit_board.san(message.move), True)
+                        self.display_on_dgt_3000(self.bit_board.san(message.move), self.enable_dgt_clock_beep)
                         self.light_squares_revelation_board((uci_move[0:2], uci_move[2:4]))
                         break
                     if case(Message.START_NEW_GAME):
-                        self.display_on_dgt_xl('newgam', True)
-                        self.display_on_dgt_3000('new game', True)
+                        self.display_on_dgt_xl('newgam', self.enable_dgt_clock_beep)
+                        self.display_on_dgt_3000('new game', self.enable_dgt_clock_beep)
                         self.clear_light_revelation_board()
                         break
                     if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
-                        self.display_on_dgt_xl('ok', True)
-                        self.display_on_dgt_3000('ok', True)
+                        self.display_on_dgt_xl('ok', self.enable_dgt_clock_beep)
+                        self.display_on_dgt_3000('ok', self.enable_dgt_clock_beep)
                         self.clear_light_revelation_board()
                         break
                     if case(Message.REVIEW_MODE_MOVE):
@@ -675,8 +677,8 @@ class DGTBoard(Observable, Display, threading.Thread):
 
                         break
                     if case(Message.USER_TAKE_BACK):
-                        self.display_on_dgt_xl('takbak', True)
-                        self.display_on_dgt_3000('takeback', True)
+                        self.display_on_dgt_xl('takbak', self.enable_dgt_clock_beep)
+                        self.display_on_dgt_3000('takeback', self.enable_dgt_clock_beep)
                         break
                     if case(Message.RUN_CLOCK):
                         tc = message.time_control
@@ -695,8 +697,8 @@ class DGTBoard(Observable, Display, threading.Thread):
                         break
                     if case(Message.GAME_ENDS):
                         time.sleep(3)  # Let the move displayed on lock
-                        self.display_on_dgt_xl(message.result.value, beep=True)
-                        self.display_on_dgt_3000(message.result.value, beep=True)
+                        self.display_on_dgt_xl(message.result.value, beep=self.enable_dgt_clock_beep)
+                        self.display_on_dgt_3000(message.result.value, beep=self.enable_dgt_clock_beep)
                         break
                     if case():  # Default
                         pass
