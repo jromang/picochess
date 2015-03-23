@@ -54,8 +54,8 @@ class TimeControl(object):
                 self.clock_time[color] += self.fischer_increment
             # logging.debug("Time left is {0}".format(self.clock_time[color]))
 
-            # Only start thread if thread is not already started for same color
-            if self.active_color is not None and self.run_color != self.active_color:
+            # Only start thread if thread is not already started for same color, and the player has not already lost on time
+            if self.clock_time[color] > 0 and self.active_color is not None and self.run_color != self.active_color:
                 self.timer = threading.Timer(copy.copy(self.clock_time[color]), self.out_of_time, [copy.copy(self.clock_time[color])])
                 self.timer.start()
                 self.run_color = self.active_color
