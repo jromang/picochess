@@ -125,26 +125,26 @@ Bluetooth Connection
 
 1. Install bluetooth utilities. (apt-get install bluez-utils)
 
-1. Connect bluetooth dongle and restart the Pi.
+2. Connect bluetooth dongle and restart the Pi.
 
-2. Start the GUI:
+3. Start the GUI:
 
    startx
 
-3. Go to Preferences/Bluetooth Manager.
+4. Go to Preferences/Bluetooth Manager.
 
-4. Click search to find your device, right click and connect.
+5. Click search to find your device, right click and connect.
 
-5. For Revelation II use the prepared pin 1234, for DGT bluetooth eboard 0000.
+6. For Revelation II use the prepared pin 1234, for DGT bluetooth eboard 0000.
 
-6. Then click to connect as a serial device.
+7. Then click to connect as a serial device.
 
-7. Back on the bluetooth manager right click on the device again and click trusted. Job done!
+8. Back on the bluetooth manager right click on the device again and click trusted. Job done!
 
-8. Open Terminal app and shut down the machine:
+9. Open Terminal app and shut down the machine:
 
    sudo shutdown -h now
 
-9. Restart the pi without the keyboard and monitor and tada! the connection should work.
+10. Restart the pi without the keyboard and monitor and tada! the connection should work.
 
 For more information check this `forum post <https://groups.google.com/forum/#!topic/picochess/7LSBZ6Qha64>`_.
