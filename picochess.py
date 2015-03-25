@@ -31,6 +31,7 @@ from utilities import *
 from keyboardinput import KeyboardInput, TerminalDisplay
 from pgn import PgnDisplay
 from server import WebServer
+import chesstalker.chesstalker
 
 
 def main():
@@ -54,6 +55,9 @@ def main():
     parser.add_argument("-mk", "--email-key", type=str, help="key used to send emails", default=None)
     parser.add_argument("-uci", "--uci-option", type=str, help="pass an UCI option to the engine (name;value)", default=None)
     parser.add_argument("-dgt3000", "--dgt-3000-clock", action='store_true', help="use dgt 3000 clock")
+    parser.add_argument("-nobeep", "--disable-dgt-clock-beep", action='store_true', help="disable beeps on the dgt clock")
+    parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
+    parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
     args = parser.parse_args()
 
     # Enable logging
@@ -81,7 +85,7 @@ def main():
     # Connect to DGT board
     if args.dgt_port:
         logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
-        dgt.DGTBoard(args.dgt_port, args.enable_dgt_board_leds, args.dgt_3000_clock).start()
+        dgt.DGTBoard(args.dgt_port, args.enable_dgt_board_leds, args.dgt_3000_clock, not args.disable_dgt_clock_beep).start()
     else:
         logging.warning("No DGT board port provided")
         # Enable keyboard input and terminal display
@@ -90,6 +94,15 @@ def main():
 
     # Save to PGN
     PgnDisplay("test.pgn", email=args.email, key=args.email_key).start()
+
+    # Create ChessTalker for speech output
+    talker = None
+    if(args.user_voice or args.computer_voice):
+        logging.debug("Initializing ChessTalker [%s, %s]", str(args.user_voice), str(args.computer_voice))
+        talker = chesstalker.chesstalker.ChessTalker(args.user_voice, args.computer_voice)
+        talker.start()
+    else:
+        logging.debug("ChessTalker disabled")
 
     # Launch web server
     if(args.web_server):
@@ -316,6 +329,8 @@ def main():
                 break
 
             if case(Event.SHUTDOWN):
+                if talker:
+                    talker.say_event(event)
                 shutdown()
                 break
 
