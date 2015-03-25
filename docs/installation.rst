@@ -95,6 +95,12 @@ runs on a desktop computer (Linux, OSX, Windows). You will need to install this 
 * `flask <https://github.com/mitsuhiko/flask>`_
   
 * `git <http://git-scm.com/>`_ (the git executable has to be in the system PATH)
+
+* `asyncio` (pip3 install asyncio)
+
+* `enum34` (pip3 install enum34)
+
+* `zeroconf` (apt-get install avahi-daemon avahi-discover libnss-mdns, included on mac OS X)
   
 * An UCI chess engine ; `Stockfish <http://stockfishchess.org/>`_ is probably the best choice !
 
@@ -110,31 +116,35 @@ runs on a desktop computer (Linux, OSX, Windows). You will need to install this 
   
   python3 picochess.py -h
   
-for a list. 
+for a list.
+
+5. If diskspace is low (check via df -h), remove Wolfram Mathematica from your distro. (apt-get purge wolfram-engine)
 
 Bluetooth Connection
 --------------------
 
-1. Connect bluetooth dongle and restart the Pi.
+1. Install bluetooth utilities. (apt-get install bluez-utils)
 
-2. Start the GUI:
+2. Connect bluetooth dongle and restart the Pi.
+
+3. Start the GUI:
 
    startx
 
-3. Go to Preferences/Bluetooth Manager.
+4. Go to Preferences/Bluetooth Manager.
 
-4. Click search to find your device, right click and connect.
+5. Click search to find your device, right click and connect.
 
-5. For Revelation II use the prepared pin 1234, for DGT bluetooth eboard 0000.
+6. For Revelation II use the prepared pin 1234, for DGT bluetooth eboard 0000.
 
-6. Then click to connect as a serial device.
+7. Then click to connect as a serial device.
 
-7. Back on the bluetooth manager right click on the device again and click trusted. Job done!
+8. Back on the bluetooth manager right click on the device again and click trusted. Job done!
 
-8. Open Terminal app and shut down the machine:
+9. Open Terminal app and shut down the machine:
 
    sudo shutdown -h now
 
-9. Restart the pi without the keyboard and monitor and tada! the connection should work.
+10. Restart the pi without the keyboard and monitor and tada! the connection should work.
 
 For more information check this `forum post <https://groups.google.com/forum/#!topic/picochess/7LSBZ6Qha64>`_.
