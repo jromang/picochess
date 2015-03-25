@@ -95,6 +95,12 @@ runs on a desktop computer (Linux, OSX, Windows). You will need to install this 
 * `flask <https://github.com/mitsuhiko/flask>`_
   
 * `git <http://git-scm.com/>`_ (the git executable has to be in the system PATH)
+
+* `asyncio` (pip3 install asyncio)
+
+* `enum34` (pip3 install enum34)
+
+* `zeroconf` (apt-get install avahi-daemon avahi-discover libnss-mdns, included on mac OS X)
   
 * An UCI chess engine ; `Stockfish <http://stockfishchess.org/>`_ is probably the best choice !
 
@@ -110,10 +116,14 @@ runs on a desktop computer (Linux, OSX, Windows). You will need to install this 
   
   python3 picochess.py -h
   
-for a list. 
+for a list.
+
+5. If diskspace is low (check via df -h), remove Wolfram Mathematica from your distro. (apt-get purge wolfram-engine)
 
 Bluetooth Connection
 --------------------
+
+1. Install bluetooth utilities. (apt-get install bluez-utils)
 
 1. Connect bluetooth dongle and restart the Pi.
 
