@@ -248,6 +248,7 @@ def main():
                     time_control.stop()
                     # logging.debug("Stopping player clock")
 
+                    fen = game.fen()
                     game.push(move)
                     if check_game_state(game, interaction_mode):
                         if interaction_mode == Mode.PLAY_BLACK or interaction_mode == Mode.PLAY_WHITE:
@@ -255,7 +256,7 @@ def main():
                             Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
                         else:
                             # Observe mode
-                            Display.show(Message.REVIEW_MODE_MOVE, move=move.uci(), game=copy.deepcopy(game))
+                            Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game))
                             if check_game_state(game, interaction_mode):
                                 legal_fens = compute_legal_fens(game)
                 break

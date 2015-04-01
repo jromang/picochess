@@ -344,7 +344,8 @@ class DGTBoard(Observable, Display, threading.Thread):
             elif type(v) is str:
                 for c in v:
                     array.append(char_to_DGTXL[c])
-            else: logging.error('Type not supported : [%s]', type(v))
+            else:
+                logging.error('Type not supported : [%s]', type(v))
         try:
             self.serial.write(bytearray(array))
         except ValueError:
@@ -449,7 +450,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                     if 17 <= message[4] <= 18 and message[5] == 51:
                         logging.info("Button 2 pressed")
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
-                            self.display_on_dgt_clock("Scan", beep=True)
+                            self.display_on_dgt_clock("scan", beep=True)
                             to_move = 'w' if self.setup_to_move == chess.WHITE else 'b'
                             fen = self.dgt_fen
                             fen += " {0} KQkq - 0 1".format(to_move)
@@ -471,13 +472,13 @@ class DGTBoard(Observable, Display, threading.Thread):
                             self.dgt_clock_menu = Menu(1)
 
                         if self.dgt_clock_menu == Menu.GAME_MENU:
-                            msg = 'Game'
+                            msg = 'game'
                         elif self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
-                            msg = 'Position'
+                            msg = 'position'
                         elif self.dgt_clock_menu == Menu.ENGINE_MENU:
-                            msg = 'Engine'
+                            msg = 'engine'
                         elif self.dgt_clock_menu == Menu.SETTINGS_MENU:
-                            msg = 'System'
+                            msg = 'system'
 
                         self.display_on_dgt_clock(msg, beep=True)
 
@@ -667,7 +668,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.clear_light_revelation_board()
                         break
                     if case(Message.REVIEW_MODE_MOVE):
-                        uci_move = message.move
+                        uci_move = message.move.uci()
                         self.last_move = uci_move
                         self.last_fen = message.fen
 
