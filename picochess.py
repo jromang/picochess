@@ -18,7 +18,7 @@
 
 import sys
 import os
-sys.path.insert(0, os.path.dirname(os.path.realpath(__file__))+os.sep+'libs')
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "libs"))
 import configargparse
 import chess
 import chess.polyglot
@@ -37,7 +37,7 @@ import chesstalker.chesstalker
 
 def main():
     #Command line argument parsing
-    parser = configargparse.ArgParser(default_config_files=[os.path.dirname(os.path.realpath(__file__)) + os.sep + 'picochess.ini'])
+    parser = configargparse.ArgParser(default_config_files=[os.path.join(os.path.dirname(__file__), "picochess.ini")])
     parser.add_argument("-e", "--engine", type=str, help="UCI engine executable path", required=True)
     parser.add_argument("-d", "--dgt-port", type=str, help="enable dgt board on the given serial port such as /dev/ttyUSB0")
     parser.add_argument("-leds", "--enable-dgt-board-leds", action='store_true', help="enable dgt board leds")
