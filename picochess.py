@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python3
 
 # Copyright (C) 2013-2014 Jean-Francois Romang (jromang@posteo.de)
 #                         Shivkumar Shivaji ()
@@ -15,6 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
+
 import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__))+os.sep+'libs')
