@@ -51,7 +51,7 @@ def main():
     parser.add_argument("-sk", "--server-key", type=str, help="key file used to connect to the remote server")
     parser.add_argument("-pgn", "--pgn-file", type=str, help="pgn file used to store the games")
     parser.add_argument("-ar", "--auto-reboot", action='store_true', help="reboot system after update")
-    parser.add_argument("-web", "--web-server", action='store_true', help="launch web server")
+    parser.add_argument("-web", "--web-server", dest="web_server_port", nargs="?", const=80, type=int, metavar="PORT", help="launch web server")
     parser.add_argument("-mail", "--email", type=str, help="email used to send pgn files", default=None)
     parser.add_argument("-mk", "--email-key", type=str, help="key used to send emails", default=None)
     parser.add_argument("-uci", "--uci-option", type=str, help="pass an UCI option to the engine (name;value)", default=None)
@@ -106,8 +106,8 @@ def main():
         logging.debug("ChessTalker disabled")
 
     # Launch web server
-    if(args.web_server):
-        WebServer().start()
+    if(args.web_server_port):
+        WebServer(args.web_server_port).start()
 
     def compute_legal_fens(g):
         """
