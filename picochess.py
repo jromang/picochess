@@ -34,6 +34,8 @@ from server import WebServer
 import chesstalker.chesstalker
 
 
+import chess.uci
+
 def main():
     #Command line argument parsing
     parser = configargparse.ArgParser(default_config_files=[os.path.dirname(os.path.realpath(__file__)) + os.sep + 'picochess.ini'])
