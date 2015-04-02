@@ -121,7 +121,7 @@ def main():
                 self.root = ''
 
         fens = FenList()
-        for move in g.generate_legal_moves():
+        for move in g.legal_moves:
             g.push(move)
             fens.append(g.fen().split(' ')[0])
             g.pop()
@@ -207,7 +207,7 @@ def main():
                         stop_thinking()
                         if game.move_stack:
                             game.pop()
-                    legal_moves = list(game.generate_legal_moves())
+                    legal_moves = list(game.legal_moves)
                     Observable.fire(Event.USER_MOVE, move=legal_moves[legal_fens.index(event.fen)])
                 elif event.fen == game.fen().split(' ')[0]:  # Player had done the computer move on the board
                     Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD)
@@ -239,7 +239,7 @@ def main():
             if case(Event.USER_MOVE):  # User sends a new move
                 move = event.move
                 logging.debug('User move [%s]', move)
-                if not move in game.generate_legal_moves():
+                if move not in game.legal_moves:
                     logging.warning('Illegal move [%s]', move)
                 # Check if we are in play mode and it is player's turn
                 elif (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.WHITE) or \
