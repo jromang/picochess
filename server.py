@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-
-
 # Copyright (C) 2013-2014 Jean-Francois Romang (jromang@posteo.de)
 #                         Shivkumar Shivaji ()
 #
