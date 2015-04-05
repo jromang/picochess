@@ -30,7 +30,7 @@ except ImportError:
 
 
 # picochess version
-version = '033'
+version = '034'
 
 event_queue = queue.Queue()
 display_devices = []
