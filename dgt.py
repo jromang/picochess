@@ -674,6 +674,7 @@ class DGTBoard(Observable, Display, threading.Thread):
 
                         # Dont beep when reviewing a game
                         self.display_on_dgt_xl(' ' + uci_move, False)
+                        self.bit_board.set_fen(message.fen)
                         self.display_on_dgt_3000(self.bit_board.san(message.move), False)
 
                         break
