@@ -175,7 +175,7 @@ disable-dgt-clock-beep
 To remove a setting, delete the appropriate line or comment it out using the Hash character (#) or set the option to false.
 For example to turn OFF the LED's on the Revelation II chessbot, this line will do:
 
-enable-dgt-board-leds = true
+enable-dgt-board-leds = false
 
 UCI engine options can be set using uci-option. For example, when using jromang's modified
 Stockfish Human Player engine, the line
