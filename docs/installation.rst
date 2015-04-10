@@ -182,7 +182,7 @@ Stockfish Human Player engine, the line
 
 uci-option = Beginner Mode=true
 
-will dumb Stockfish engine down enough for playing against children and total beginners to give
+will dumb Stockfish engine down enough for play against children and total beginners to give
 them a chance of beating the machine.
 
 
