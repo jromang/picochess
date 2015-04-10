@@ -148,3 +148,30 @@ Bluetooth Connection
 10. Restart the pi without the keyboard and monitor and tada! the connection should work.
 
 For more information check this `forum post <https://groups.google.com/forum/#!topic/picochess/7LSBZ6Qha64>`_.
+
+Initial Settings
+----------------
+
+At start Picochess looks at the file
+
+/opt/picochess/picochess.ini
+
+... and sets itself up accordingly. Here is a list of available options:
+
+* enable-dgt-board-leds = true
+* uci-option = Beginner Mode=true
+* log-level = debug
+* log-file = /opt/picochess/picochess.log
+* uci-option = Threads = 4
+* user-voice = en:Elsie
+* computer-voice = en:Marvin
+* disable-dgt-clock-beep
+
+To set a particular setting, simply include appropriate line in the picochess.ini file.
+For example, to disable default beep on a move, include this line in picochess.ini:
+
+disable-dgt-clock-beep
+
+To remove a setting, delete the appropriate line or comment it out using the Hash character (#).
+
+
