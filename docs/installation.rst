@@ -172,6 +172,17 @@ For example, to disable default beep on a move, include this line in picochess.i
 
 disable-dgt-clock-beep
 
-To remove a setting, delete the appropriate line or comment it out using the Hash character (#).
+To remove a setting, delete the appropriate line or comment it out using the Hash character (#) or set the option to false.
+For example to turn OFF the LED's on the Revelation II chessbot, this line will do:
+
+enable-dgt-board-leds = true
+
+UCI engine options can be set using uci-option. For example, when using jromang's modified
+Stockfish Human Player engine, the line
+
+uci-option = Beginner Mode=true
+
+will dumb Stockfish engine down enough for playing against children and total beginners to give
+them a chance of beating the machine.
 
 
