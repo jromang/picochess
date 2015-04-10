@@ -178,7 +178,7 @@ For example to turn OFF the LED's on the Revelation II chessbot, this line will 
 enable-dgt-board-leds = false
 
 UCI engine options can be set using uci-option. For example, when using jromang's modified
-Stockfish Human Player engine, the line
+`Stockfish Human Player engine <https://github.com/jromang/Stockfish/tree/human_player>`_, the line
 
 uci-option = Beginner Mode=true
 
