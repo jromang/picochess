@@ -183,6 +183,7 @@ UCI engine options can be set using uci-option. For example, when using jromang'
 uci-option = Beginner Mode=true
 
 will dumb Stockfish engine down enough for play against children and total beginners to give
-them a chance of beating the machine.
+them a chance of beating the machine. If you are using our image files, you will probably find
+stockfish_human engine already waiting for your kids in the /opt/picochess/engines folder.
 
 
