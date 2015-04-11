@@ -528,7 +528,7 @@ class ChessTalkerVoice():
             self.say_castles_queenside(color_moved)
         elif moveTextSAN.startswith("O-O"):
             self.say_castles_kingside(color_moved)
-        elif move.from_square and move.to_square and game:
+        else:
             if from_square_piece and to_square_piece:
                 # Announce capture.
                 self.say_captures(str(from_square_piece), str(to_square_piece))
@@ -541,9 +541,6 @@ class ChessTalkerVoice():
             # Announce promotion if necessary.
             if move.promotion:
                 self.say_promotion(moveText[4])
-        else:
-            logging.debug("Announcing raw move: " + moveText)
-            self.say_text(moveText)
 
         if is_game_over:
             if is_checkmate:
