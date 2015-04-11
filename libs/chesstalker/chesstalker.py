@@ -577,8 +577,9 @@ if __name__ == "__main__":
         if sys.argv[1] == "--test":
             # Test all voices in all 'voices/*.json' config files.
             localisations = ChessTalker.localisations()
-            for localisation_id in localisations:
-                print("Testing localisation: " + localisation_id)
+            for localisation in localisations:
+                localisation_id = localisation.split(":")[0]
+                print("Testing localisation: " + localisation)
                 voices = ChessTalker.voices(localisation_id)
                 for voice in voices:
                     print("    Testing voice: " + voice)
