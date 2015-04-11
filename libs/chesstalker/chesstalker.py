@@ -161,8 +161,7 @@ class ChessTalker(Display, threading.Thread):
             ru:Russian
         """
         localisations = []
-        pathname = os.path.abspath(os.path.dirname(sys.argv[0]))
-        voice_files = glob.glob(os.path.join(pathname, "voices", "*.json"))
+        voice_files = glob.glob(os.path.join(os.path.dirname(__file__), "voices", "*.json"))
         for voice_filepath in voice_files:
             with open(voice_filepath, "r") as fp:
                 if fp:
@@ -183,8 +182,7 @@ class ChessTalker(Display, threading.Thread):
         voices = []
         try:
             localisation_id = localisation.split(":")[0]
-            pathname = os.path.abspath(os.path.dirname(sys.argv[0]))
-            voice_filepath = os.path.join(pathname, "voices", localisation_id + ".json")
+            voice_filepath = os.path.join(os.path.dirname(__file__), "voices", localisation_id + ".json")
             with open(voice_filepath, "r") as fp:
                 if fp:
                     localisation_json = json.load(fp)
@@ -272,8 +270,7 @@ class ChessTalkerVoice():
         # Load voice config from JSON file.
         try:
             (localisation_id, voice) = localisation_id_voice.split(":")
-            pathname = os.path.abspath(os.path.dirname(sys.argv[0]))
-            voice_filepath = os.path.join(pathname, "libs", "chesstalker", "voices", localisation_id + ".json")
+            voice_filepath = os.path.join(os.path.dirname(__file__), "voices", localisation_id + ".json")
             logging.debug("Loading voice file [%s]", voice_filepath)
             with open(voice_filepath, "r") as fp:
                 if fp:
