@@ -164,13 +164,12 @@ class ChessTalker(Display, threading.Thread):
         voice_files = glob.glob(os.path.join(os.path.dirname(__file__), "voices", "*.json"))
         for voice_filepath in voice_files:
             with open(voice_filepath, "r") as fp:
-                if fp:
-                    localisation_json = json.load(fp)
-                    if localisation_json:
-                        localisation_id = localisation_json["identifier"]
-                        localisation_language = localisation_json["language"]
-                        if localisation_id and localisation_language:
-                            localisations.append(localisation_id + ":" + localisation_language)
+                localisation_json = json.load(fp)
+                if localisation_json:
+                    localisation_id = localisation_json["identifier"]
+                    localisation_language = localisation_json["language"]
+                    if localisation_id and localisation_language:
+                        localisations.append(localisation_id + ":" + localisation_language)
         return localisations
 
     @staticmethod
@@ -184,15 +183,14 @@ class ChessTalker(Display, threading.Thread):
             localisation_id = localisation.split(":")[0]
             voice_filepath = os.path.join(os.path.dirname(__file__), "voices", localisation_id + ".json")
             with open(voice_filepath, "r") as fp:
-                if fp:
-                    localisation_json = json.load(fp)
-                    if localisation_json:
-                        voices_json = localisation_json["voices"]
-                        for voice_json in voices_json:
-                            voice_name = voice_json["name"]
-                            voice_platforms = voice_json["platforms"]
-                            if voice_name and voice_platforms.count(platform.system()) > 0:
-                                voices.append(voice_name)
+                localisation_json = json.load(fp)
+                if localisation_json:
+                    voices_json = localisation_json["voices"]
+                    for voice_json in voices_json:
+                        voice_name = voice_json["name"]
+                        voice_platforms = voice_json["platforms"]
+                        if voice_name and voice_platforms.count(platform.system()) > 0:
+                            voices.append(voice_name)
         except:
             logging.error("Unexpected error: %s", str(sys.exc_info()[0]))
         return voices
@@ -273,20 +271,19 @@ class ChessTalkerVoice():
             voice_filepath = os.path.join(os.path.dirname(__file__), "voices", localisation_id + ".json")
             logging.debug("Loading voice file [%s]", voice_filepath)
             with open(voice_filepath, "r") as fp:
-                if fp:
-                    localisation_json = json.load(fp)
-                    if localisation_json:
-                        voices_json = localisation_json["voices"]
-                        for voice_json in voices_json:
-                            voice_name = voice_json["name"]
-                            voice_platforms = voice_json["platforms"]
-                            if voice_name and voice_name==voice and voice_platforms.count(platform.system()) > 0:
-                                self.localisation_id = localisation_id
-                                self.voice_name = voice
-                                self.voice_description = voice_json["description"]
-                                self.voice_platforms = voice_json["platforms"]
-                                self.voice_command = voice_json["command"]
-                                self.voice_vocabulary = voice_json["vocabulary"]
+                localisation_json = json.load(fp)
+                if localisation_json:
+                    voices_json = localisation_json["voices"]
+                    for voice_json in voices_json:
+                        voice_name = voice_json["name"]
+                        voice_platforms = voice_json["platforms"]
+                        if voice_name and voice_name==voice and voice_platforms.count(platform.system()) > 0:
+                            self.localisation_id = localisation_id
+                            self.voice_name = voice
+                            self.voice_description = voice_json["description"]
+                            self.voice_platforms = voice_json["platforms"]
+                            self.voice_command = voice_json["command"]
+                            self.voice_vocabulary = voice_json["vocabulary"]
         except:
             logging.error("Unexpected error: %s", str(sys.exc_info()[0]))
 
