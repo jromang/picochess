@@ -58,8 +58,8 @@ class ChessTalker(Display, threading.Thread):
                 if len(self.computer_chesstalker_voice.voice_vocabulary) == 0:
                     logging.error('ChessTalker: Failed to create computer voice: [%s]', str(computer_voice))
                     self.computer_chesstalker_voice = None
-        except Exception as e:
-            logging.error("EXCEPTION: %s", str(e))
+        except:
+            logging.exception("Unexpected error")
 
     def run(self):
         """
@@ -134,10 +134,10 @@ class ChessTalker(Display, threading.Thread):
                     elif message == Event.SHUTDOWN:
                         logging.debug('Announcing SHUTDOWN')
                         system_voice.say_shutdown()
-            except Exception as e:
-                logging.error("EXCEPTION: %s", str(e))
             except queue.Empty:
                 pass
+            except:
+                logging.exception("Unexpected error")
 
     def system_voice(self):
         """
@@ -192,7 +192,7 @@ class ChessTalker(Display, threading.Thread):
                         if voice_name and voice_platforms.count(platform.system()) > 0:
                             voices.append(voice_name)
         except:
-            logging.error("Unexpected error: %s", str(sys.exc_info()[0]))
+            logging.exception("Unexpected error")
         return voices
 
 
@@ -285,7 +285,7 @@ class ChessTalkerVoice():
                             self.voice_command = voice_json["command"]
                             self.voice_vocabulary = voice_json["vocabulary"]
         except:
-            logging.error("Unexpected error: %s", str(sys.exc_info()[0]))
+            logging.exception("Unexpected error")
 
     def vocabulary_color(self, color):
         if color.lower() == ChessTalkerVoice.COLOR_WHITE:
