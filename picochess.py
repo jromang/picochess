@@ -48,7 +48,7 @@ def main():
     parser.add_argument("-u", "--user", type=str, help="remote user on server running the engine")
     parser.add_argument("-p", "--password", type=str, help="password for the remote user")
     parser.add_argument("-sk", "--server-key", type=str, help="key file used to connect to the remote server")
-    parser.add_argument("-pgn", "--pgn-file", type=str, help="pgn file used to store the games")
+    parser.add_argument("-pgn", "--pgn-file", type=str, help="pgn file used to store the games", default='games.pgn')
     parser.add_argument("-ar", "--auto-reboot", action='store_true', help="reboot system after update")
     parser.add_argument("-web", "--web-server", action='store_true', help="launch web server")
     parser.add_argument("-mail", "--email", type=str, help="email used to send pgn files", default=None)
@@ -93,7 +93,7 @@ def main():
         TerminalDisplay().start()
 
     # Save to PGN
-    PgnDisplay("test.pgn", email=args.email, key=args.email_key).start()
+    PgnDisplay(args.pgn_file, email=args.email, key=args.email_key).start()
 
     # Create ChessTalker for speech output
     talker = None
