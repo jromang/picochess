@@ -177,6 +177,12 @@ def main():
         if game.is_insufficient_material():
             Display.show(Message.GAME_ENDS, result=GameResult.INSUFFICIENT_MATERIAL, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
             return False
+        if game.is_seventyfive_moves():
+            Display.show(Message.GAME_ENDS, result=GameResult.SEVENTYFIVE_MOVES, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
+            return False
+        if game.is_fivefold_repetition():
+            Display.show(Message.GAME_ENDS, result=GameResult.FIVEFOLD_REPETITION, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
+            return False
         if game.is_game_over():
             Display.show(Message.GAME_ENDS, result=GameResult.MATE, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
             return False
