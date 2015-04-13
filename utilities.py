@@ -131,6 +131,8 @@ class GameResult(enum.Enum):
     STALEMATE = 'stalemate'
     TIME_CONTROL = 'time'
     INSUFFICIENT_MATERIAL = 'material'
+    SEVENTYFIVE_MOVES = '75 moves'
+    FIVEFOLD_REPETITION = 'repetition'
     ABORT = 'abort'
 
 
