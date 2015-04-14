@@ -180,7 +180,7 @@ def main():
         if game.is_seventyfive_moves():
             Display.show(Message.GAME_ENDS, result=GameResult.SEVENTYFIVE_MOVES, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
             return False
-        if game.is_fivefold_repetition():
+        if game.is_fivefold_repitition():
             Display.show(Message.GAME_ENDS, result=GameResult.FIVEFOLD_REPETITION, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
             return False
         if game.is_game_over():
