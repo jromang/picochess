@@ -27,6 +27,7 @@ import logging
 import uci
 import threading
 import copy
+import time
 from timecontrol import TimeControl
 from utilities import *
 from keyboardinput import KeyboardInput, TerminalDisplay
@@ -204,9 +205,7 @@ def main():
     while True:
         event = event_queue.get()
         logging.debug('Received event in event loop : %s', event)
-
         for case in switch(event):
-
             if case(Event.FEN):  # User sets a new position, convert it to a move if it is legal
                 if event.fen in legal_fens:
                     # Check if we have to undo a previous move (sliding)
@@ -217,11 +216,12 @@ def main():
                     legal_moves = list(game.legal_moves)
                     Observable.fire(Event.USER_MOVE, move=legal_moves[legal_fens.index(event.fen)])
                 elif event.fen == game.fen().split(' ')[0]:  # Player had done the computer move on the board
-                    Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD)
-                    if time_control.mode != ClockMode.FIXED_TIME:
-                        Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
-                        # logging.debug("Starting player clock")
-                        time_control.run(game.turn)
+                    if check_game_state(game, interaction_mode):
+                        Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD)
+                        if time_control.mode != ClockMode.FIXED_TIME:
+                            Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
+                            # logging.debug("Starting player clock")
+                            time_control.run(game.turn)
                 elif event.fen == legal_fens.root:  # Allow user to take his move back while the engine is searching
                     stop_thinking()
                     game.pop()
@@ -242,6 +242,7 @@ def main():
                                 legal_fens = compute_legal_fens(game)
                                 break
                 break
+
 
             if case(Event.USER_MOVE):  # User sends a new move
                 move = event.move
@@ -314,8 +315,8 @@ def main():
                     fen = game.fen()
                     game.push(move)
                     Display.show(Message.COMPUTER_MOVE, move=move, fen=fen, game=copy.deepcopy(game), time_control=time_control)
-                    if check_game_state(game, interaction_mode):
-                        legal_fens = compute_legal_fens(game)
+                    # if check_game_state(game, interaction_mode):
+                    legal_fens = compute_legal_fens(game)
                 break
 
             if case(Event.SET_MODE):
