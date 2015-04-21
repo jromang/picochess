@@ -276,7 +276,6 @@ def main():
                 break
 
             if case(Event.SETUP_POSITION): # User sets up a position
-                # print(event.fen)
                 logging.debug("Setting up custom fen: {0}".format(event.fen))
 
                 game = chess.Bitboard(event.fen)

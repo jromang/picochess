@@ -698,7 +698,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.write([Commands.DGT_CLOCK_MESSAGE, 0x03, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_END, Clock.DGT_CMD_CLOCK_END_MESSAGE])
                         break
                     if case(Message.GAME_ENDS):
-                        time.sleep(3)  # Let the move displayed on lock
+                        # time.sleep(3)  # Let the move displayed on lock
                         self.display_on_dgt_xl(message.result.value, beep=self.enable_dgt_clock_beep)
                         self.display_on_dgt_3000(message.result.value, beep=self.enable_dgt_clock_beep)
                         break
