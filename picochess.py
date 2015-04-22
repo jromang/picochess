@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python3
 
 # Copyright (C) 2013-2014 Jean-Francois Romang (jromang@posteo.de)
 #                         Shivkumar Shivaji ()
@@ -15,9 +15,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
+
 import sys
 import os
-sys.path.insert(0, os.path.dirname(os.path.realpath(__file__))+os.sep+'libs')
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "libs"))
 import configargparse
 import chess
 import chess.polyglot
@@ -26,6 +27,7 @@ import logging
 import uci
 import threading
 import copy
+import time
 from timecontrol import TimeControl
 from utilities import *
 from keyboardinput import KeyboardInput, TerminalDisplay
@@ -38,7 +40,7 @@ import chess.uci
 
 def main():
     #Command line argument parsing
-    parser = configargparse.ArgParser(default_config_files=[os.path.dirname(os.path.realpath(__file__)) + os.sep + 'picochess.ini'])
+    parser = configargparse.ArgParser(default_config_files=[os.path.join(os.path.dirname(__file__), "picochess.ini")])
     parser.add_argument("-e", "--engine", type=str, help="UCI engine executable path", required=True)
     parser.add_argument("-d", "--dgt-port", type=str, help="enable dgt board on the given serial port such as /dev/ttyUSB0")
     parser.add_argument("-leds", "--enable-dgt-board-leds", action='store_true', help="enable dgt board leds")
@@ -50,9 +52,9 @@ def main():
     parser.add_argument("-u", "--user", type=str, help="remote user on server running the engine")
     parser.add_argument("-p", "--password", type=str, help="password for the remote user")
     parser.add_argument("-sk", "--server-key", type=str, help="key file used to connect to the remote server")
-    parser.add_argument("-pgn", "--pgn-file", type=str, help="pgn file used to store the games")
+    parser.add_argument("-pgn", "--pgn-file", type=str, help="pgn file used to store the games", default='games.pgn')
     parser.add_argument("-ar", "--auto-reboot", action='store_true', help="reboot system after update")
-    parser.add_argument("-web", "--web-server", action='store_true', help="launch web server")
+    parser.add_argument("-web", "--web-server", dest="web_server_port", nargs="?", const=80, type=int, metavar="PORT", help="launch web server")
     parser.add_argument("-mail", "--email", type=str, help="email used to send pgn files", default=None)
     parser.add_argument("-mk", "--email-key", type=str, help="key used to send emails", default=None)
     parser.add_argument("-uci", "--uci-option", type=str, help="pass an UCI option to the engine (name;value)", default=None)
@@ -95,7 +97,7 @@ def main():
         TerminalDisplay().start()
 
     # Save to PGN
-    PgnDisplay("test.pgn", email=args.email, key=args.email_key).start()
+    PgnDisplay(args.pgn_file, email=args.email, key=args.email_key).start()
 
     # Create ChessTalker for speech output
     talker = None
@@ -107,8 +109,8 @@ def main():
         logging.debug("ChessTalker disabled")
 
     # Launch web server
-    if(args.web_server):
-        WebServer().start()
+    if(args.web_server_port):
+        WebServer(args.web_server_port).start()
 
     def compute_legal_fens(g):
         """
@@ -123,7 +125,7 @@ def main():
                 self.root = ''
 
         fens = FenList()
-        for move in g.generate_legal_moves():
+        for move in g.legal_moves:
             g.push(move)
             fens.append(g.fen().split(' ')[0])
             g.pop()
@@ -178,6 +180,12 @@ def main():
         if game.is_insufficient_material():
             Display.show(Message.GAME_ENDS, result=GameResult.INSUFFICIENT_MATERIAL, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
             return False
+        if game.is_seventyfive_moves():
+            Display.show(Message.GAME_ENDS, result=GameResult.SEVENTYFIVE_MOVES, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
+            return False
+        if game.is_fivefold_repitition():
+            Display.show(Message.GAME_ENDS, result=GameResult.FIVEFOLD_REPETITION, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
+            return False
         if game.is_game_over():
             Display.show(Message.GAME_ENDS, result=GameResult.MATE, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
             return False
@@ -199,9 +207,7 @@ def main():
     while True:
         event = event_queue.get()
         logging.debug('Received event in event loop : %s', event)
-
         for case in switch(event):
-
             if case(Event.FEN):  # User sets a new position, convert it to a move if it is legal
                 if event.fen in legal_fens:
                     # Check if we have to undo a previous move (sliding)
@@ -209,14 +215,15 @@ def main():
                         stop_thinking()
                         if game.move_stack:
                             game.pop()
-                    legal_moves = list(game.generate_legal_moves())
+                    legal_moves = list(game.legal_moves)
                     Observable.fire(Event.USER_MOVE, move=legal_moves[legal_fens.index(event.fen)])
                 elif event.fen == game.fen().split(' ')[0]:  # Player had done the computer move on the board
-                    Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD)
-                    if time_control.mode != ClockMode.FIXED_TIME:
-                        Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
-                        # logging.debug("Starting player clock")
-                        time_control.run(game.turn)
+                    if check_game_state(game, interaction_mode):
+                        Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD)
+                        if time_control.mode != ClockMode.FIXED_TIME:
+                            Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
+                            # logging.debug("Starting player clock")
+                            time_control.run(game.turn)
                 elif event.fen == legal_fens.root:  # Allow user to take his move back while the engine is searching
                     stop_thinking()
                     game.pop()
@@ -238,10 +245,11 @@ def main():
                                 break
                 break
 
+
             if case(Event.USER_MOVE):  # User sends a new move
                 move = event.move
                 logging.debug('User move [%s]', move)
-                if not move in game.generate_legal_moves():
+                if move not in game.legal_moves:
                     logging.warning('Illegal move [%s]', move)
                 # Check if we are in play mode and it is player's turn
                 elif (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.WHITE) or \
@@ -270,7 +278,6 @@ def main():
                 break
 
             if case(Event.SETUP_POSITION): # User sets up a position
-                # print(event.fen)
                 logging.debug("Setting up custom fen: {0}".format(event.fen))
 
                 game = chess.Bitboard(event.fen)
@@ -309,8 +316,8 @@ def main():
                     fen = game.fen()
                     game.push(move)
                     Display.show(Message.COMPUTER_MOVE, move=move, fen=fen, game=copy.deepcopy(game), time_control=time_control)
-                    if check_game_state(game, interaction_mode):
-                        legal_fens = compute_legal_fens(game)
+                    # if check_game_state(game, interaction_mode):
+                    legal_fens = compute_legal_fens(game)
                 break
 
             if case(Event.SET_MODE):

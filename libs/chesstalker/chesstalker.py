@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Copyright (C) 2013-2015 Jean-Francois Romang (jromang@posteo.de)
 #                         Shivkumar Shivaji ()
 #                         Charles Gamble ()
@@ -56,8 +58,8 @@ class ChessTalker(Display, threading.Thread):
                 if len(self.computer_chesstalker_voice.voice_vocabulary) == 0:
                     logging.error('ChessTalker: Failed to create computer voice: [%s]', str(computer_voice))
                     self.computer_chesstalker_voice = None
-        except Exception as e:
-            logging.error("EXCEPTION: %s", str(e))
+        except:
+            logging.exception("Unexpected error")
 
     def run(self):
         """
@@ -132,10 +134,10 @@ class ChessTalker(Display, threading.Thread):
                     elif message == Event.SHUTDOWN:
                         logging.debug('Announcing SHUTDOWN')
                         system_voice.say_shutdown()
-            except Exception as e:
-                logging.error("EXCEPTION: %s", str(e))
             except queue.Empty:
                 pass
+            except:
+                logging.exception("Unexpected error")
 
     def system_voice(self):
         """
@@ -159,17 +161,15 @@ class ChessTalker(Display, threading.Thread):
             ru:Russian
         """
         localisations = []
-        pathname = os.path.abspath(os.path.dirname(sys.argv[0]))
-        voice_files = glob.glob(os.path.join(pathname, "voices", "*.json"))
+        voice_files = glob.glob(os.path.join(os.path.dirname(__file__), "voices", "*.json"))
         for voice_filepath in voice_files:
             with open(voice_filepath, "r") as fp:
-                if fp:
-                    localisation_json = json.load(fp)
-                    if localisation_json:
-                        localisation_id = localisation_json["identifier"]
-                        localisation_language = localisation_json["language"]
-                        if localisation_id and localisation_language:
-                            localisations.append(localisation_id + ":" + localisation_language)
+                localisation_json = json.load(fp)
+                if localisation_json:
+                    localisation_id = localisation_json["identifier"]
+                    localisation_language = localisation_json["language"]
+                    if localisation_id and localisation_language:
+                        localisations.append(localisation_id + ":" + localisation_language)
         return localisations
 
     @staticmethod
@@ -181,20 +181,18 @@ class ChessTalker(Display, threading.Thread):
         voices = []
         try:
             localisation_id = localisation.split(":")[0]
-            pathname = os.path.abspath(os.path.dirname(sys.argv[0]))
-            voice_filepath = os.path.join(pathname, "voices", localisation_id + ".json")
+            voice_filepath = os.path.join(os.path.dirname(__file__), "voices", localisation_id + ".json")
             with open(voice_filepath, "r") as fp:
-                if fp:
-                    localisation_json = json.load(fp)
-                    if localisation_json:
-                        voices_json = localisation_json["voices"]
-                        for voice_json in voices_json:
-                            voice_name = voice_json["name"]
-                            voice_platforms = voice_json["platforms"]
-                            if voice_name and voice_platforms.count(platform.system()) > 0:
-                                voices.append(voice_name)
+                localisation_json = json.load(fp)
+                if localisation_json:
+                    voices_json = localisation_json["voices"]
+                    for voice_json in voices_json:
+                        voice_name = voice_json["name"]
+                        voice_platforms = voice_json["platforms"]
+                        if voice_name and voice_platforms.count(platform.system()) > 0:
+                            voices.append(voice_name)
         except:
-            logging.error("Unexpected error: %s", str(sys.exc_info()[0]))
+            logging.exception("Unexpected error")
         return voices
 
 
@@ -270,26 +268,24 @@ class ChessTalkerVoice():
         # Load voice config from JSON file.
         try:
             (localisation_id, voice) = localisation_id_voice.split(":")
-            pathname = os.path.abspath(os.path.dirname(sys.argv[0]))
-            voice_filepath = os.path.join(pathname, "libs", "chesstalker", "voices", localisation_id + ".json")
+            voice_filepath = os.path.join(os.path.dirname(__file__), "voices", localisation_id + ".json")
             logging.debug("Loading voice file [%s]", voice_filepath)
             with open(voice_filepath, "r") as fp:
-                if fp:
-                    localisation_json = json.load(fp)
-                    if localisation_json:
-                        voices_json = localisation_json["voices"]
-                        for voice_json in voices_json:
-                            voice_name = voice_json["name"]
-                            voice_platforms = voice_json["platforms"]
-                            if voice_name and voice_name==voice and voice_platforms.count(platform.system()) > 0:
-                                self.localisation_id = localisation_id
-                                self.voice_name = voice
-                                self.voice_description = voice_json["description"]
-                                self.voice_platforms = voice_json["platforms"]
-                                self.voice_command = voice_json["command"]
-                                self.voice_vocabulary = voice_json["vocabulary"]
+                localisation_json = json.load(fp)
+                if localisation_json:
+                    voices_json = localisation_json["voices"]
+                    for voice_json in voices_json:
+                        voice_name = voice_json["name"]
+                        voice_platforms = voice_json["platforms"]
+                        if voice_name and voice_name==voice and voice_platforms.count(platform.system()) > 0:
+                            self.localisation_id = localisation_id
+                            self.voice_name = voice
+                            self.voice_description = voice_json["description"]
+                            self.voice_platforms = voice_json["platforms"]
+                            self.voice_command = voice_json["command"]
+                            self.voice_vocabulary = voice_json["vocabulary"]
         except:
-            logging.error("Unexpected error: %s", str(sys.exc_info()[0]))
+            logging.exception("Unexpected error")
 
     def vocabulary_color(self, color):
         if color.lower() == ChessTalkerVoice.COLOR_WHITE:
@@ -532,7 +528,7 @@ class ChessTalkerVoice():
             self.say_castles_queenside(color_moved)
         elif moveTextSAN.startswith("O-O"):
             self.say_castles_kingside(color_moved)
-        elif move.from_square and move.to_square and game:
+        else:
             if from_square_piece and to_square_piece:
                 # Announce capture.
                 self.say_captures(str(from_square_piece), str(to_square_piece))
@@ -545,9 +541,6 @@ class ChessTalkerVoice():
             # Announce promotion if necessary.
             if move.promotion:
                 self.say_promotion(moveText[4])
-        else:
-            logging.debug("Announcing raw move: " + moveText)
-            self.say_text(moveText)
 
         if is_game_over:
             if is_checkmate:
@@ -581,8 +574,9 @@ if __name__ == "__main__":
         if sys.argv[1] == "--test":
             # Test all voices in all 'voices/*.json' config files.
             localisations = ChessTalker.localisations()
-            for localisation_id in localisations:
-                print("Testing localisation: " + localisation_id)
+            for localisation in localisations:
+                localisation_id = localisation.split(":")[0]
+                print("Testing localisation: " + localisation)
                 voices = ChessTalker.voices(localisation_id)
                 for voice in voices:
                     print("    Testing voice: " + voice)

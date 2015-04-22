@@ -30,7 +30,7 @@ except ImportError:
 
 
 # picochess version
-version = '033'
+version = '036'
 
 event_queue = queue.Queue()
 display_devices = []
@@ -131,6 +131,8 @@ class GameResult(enum.Enum):
     STALEMATE = 'stalemate'
     TIME_CONTROL = 'time'
     INSUFFICIENT_MATERIAL = 'material'
+    SEVENTYFIVE_MOVES = '75 moves'
+    FIVEFOLD_REPETITION = 'repetition'
     ABORT = 'abort'
 
 
@@ -182,8 +184,9 @@ class switch(object):
 
 
 def get_opening_books():
-    book_list = sorted(os.listdir(os.path.dirname(os.path.realpath(__file__))+os.sep+'books'))
-    library = [('nobook', None)]
+    program_path = os.path.dirname(os.path.realpath(__file__)) + os.sep
+    book_list = sorted(os.listdir(program_path +'books'))
+    library = [('nobook', program_path +'books/nobook.bin')]
     for book in book_list:
         library.append((book[2:book.index('.')], 'books' + os.sep + book))
     return library

@@ -48,13 +48,10 @@ class PgnDisplay(Display, threading.Thread):
                     game.headers["Date"] = datetime.date.today().strftime('%Y.%m.%d')
                     if message.result == GameResult.ABORT:
                         game.headers["Result"] = "*"
-                    elif message.result == GameResult.STALEMATE:
+                    elif message.result in (GameResult.STALEMATE, GameResult.SEVENTYFIVE_MOVES, GameResult.FIVEFOLD_REPETITION):
                         game.headers["Result"] = "1/2-1/2"
                     elif message.result in (GameResult.MATE, GameResult.TIME_CONTROL):
-                        try:
-                            game.headers["Result"] = "0-1" if message.turn == chess.WHITE else "1-0"
-                        except AttributeError:
-                            game.headers["Result"] = "1-0"
+                        game.headers["Result"] = "0-1" if message.color == chess.WHITE else "1-0"
                     if message.mode == Mode.PLAY_WHITE:
                         game.headers["White"] = self.email.split('@')[0] if self.email else 'Player'
                         game.headers["Black"] = "PicoChess"
@@ -62,10 +59,11 @@ class PgnDisplay(Display, threading.Thread):
                         game.headers["White"] = "PicoChess"
                         game.headers["Black"] = self.email.split('@')[0] if self.email else 'Player'
                     # Save to file
-                    file = open(self.file_name, "a")
-                    exporter = chess.pgn.FileExporter(file)
-                    game.export(exporter)
-                    file.close()
+                    if message.result != GameResult.ABORT:
+                        file = open(self.file_name, "a")
+                        exporter = chess.pgn.FileExporter(file)
+                        game.export(exporter)
+                        file.close()
                     # Send email
                     if self.email:
                         out = requests.post("https://api.mailgun.net/v2/picochess.org/messages",

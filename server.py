@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-
-
 # Copyright (C) 2013-2014 Jean-Francois Romang (jromang@posteo.de)
 #                         Shivkumar Shivaji ()
 #
@@ -123,7 +120,7 @@ class PGNHandler(tornado.web.RequestHandler):
 
 
 class WebServer(Observable, threading.Thread):
-    def __init__(self):
+    def __init__(self, port=80):
         shared = {}
 
         WebDisplay(shared).start()
@@ -141,7 +138,7 @@ class WebServer(Observable, threading.Thread):
             (r'.*', tornado.web.FallbackHandler, {'fallback': wsgi_app})
         ])
 
-        application.listen(80)
+        application.listen(port)
 
     def run(self):
         IOLoop.instance().start()
