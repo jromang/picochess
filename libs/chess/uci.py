@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of the python-chess library.
-# Copyright (C) 2012-2014 Niklas Fiekas <niklas.fiekas@tu-clausthal.de>
+# Copyright (C) 2012-2015 Niklas Fiekas <niklas.fiekas@tu-clausthal.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -217,19 +217,15 @@ class InfoHandler(object):
         """
         self.lock.release()
 
-    def pre_bestmove(self, line):
-        """A new bestmove command is about to be processed."""
-        pass
-
     def on_bestmove(self, bestmove, ponder):
         """A new bestmove and pondermove have been received."""
         pass
 
-    def post_bestmove(self):
+    def on_go(self):
         """
-        A new bestmove command was processed.
+        A go command is being sent.
 
-        Since this indicates that the current search has been finished the
+        Since information about the previous search is invalidated the
         dictionary with the current information will be cleared.
         """
         with self.lock:
@@ -491,6 +487,9 @@ class GoCommand(Command):
         self.buf = " ".join(builder)
 
     def execute(self, engine):
+        for info_handler in engine.info_handlers:
+            info_handler.on_go()
+
         engine.bestmove = None
         engine.ponder = None
         engine.bestmove_received.clear()
@@ -819,9 +818,6 @@ class Engine(object):
         self.readyok.set()
 
     def _bestmove(self, arg):
-        for info_handler in self.info_handlers:
-            info_handler.pre_bestmove(arg)
-
         tokens = arg.split(None, 2)
         self.bestmove = chess.Move.from_uci(tokens[0])
         if len(tokens) >= 3 and tokens[1] == "ponder" and tokens[2] != "(none)":
@@ -832,10 +828,6 @@ class Engine(object):
 
         for info_handler in self.info_handlers:
             info_handler.on_bestmove(self.bestmove, self.ponder)
-
-        for info_handler in self.info_handlers:
-            info_handler.post_bestmove()
-
 
     def _copyprotection(self, arg):
         # TODO: Implement copyprotection
@@ -1145,7 +1137,7 @@ class Engine(object):
 
         Instead of just the final FEN, the initial FEN and all moves leading
         up to the position will be sent, so that the engine can detect
-        repititions.
+        repetitions.
 
         If the position is from a new game it is recommended to use the
         *ucinewgame* command before the *position* command.

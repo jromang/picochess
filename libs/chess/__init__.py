@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of the python-chess library.
-# Copyright (C) 2012-2014 Niklas Fiekas <niklas.fiekas@tu-clausthal.de>
+# Copyright (C) 2012-2015 Niklas Fiekas <niklas.fiekas@tu-clausthal.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -872,6 +872,30 @@ class Board(object):
         self.incremental_zobrist_hash = self.board_zobrist_hash(POLYGLOT_RANDOM_ARRAY)
         self.transpositions = collections.Counter((self.zobrist_hash(), ))
 
+    def pieces_mask(self, piece_type, color):
+        if piece_type == PAWN:
+            bb = self.pawns
+        elif piece_type == KNIGHT:
+            bb = self.knights
+        elif piece_type == BISHOP:
+            bb = self.bishops
+        elif piece_type == ROOK:
+            bb = self.rooks
+        elif piece_type == QUEEN:
+            bb = self.queens
+        elif piece_type == KING:
+            bb = self.kings
+
+        return bb & self.occupied_co[color]
+
+    def pieces(self, piece_type, color):
+        """
+        Gets pieces of the given type and color.
+
+        Returns a set of squares.
+        """
+        return SquareSet(self.pieces_mask(piece_type, color))
+
     def piece_at(self, square):
         """Gets the piece at the given square."""
         mask = BB_SQUARES[square]
@@ -1325,30 +1349,6 @@ class Board(object):
         """
         return SquareSet(self.attacker_mask(color, square))
 
-    def pieces_mask(self, piece_type, color):
-        if piece_type == PAWN:
-            bb = self.pawns
-        elif piece_type == KNIGHT:
-            bb = self.knights
-        elif piece_type == BISHOP:
-            bb = self.bishops
-        elif piece_type == ROOK:
-            bb = self.rooks
-        elif piece_type == QUEEN:
-            bb = self.queens
-        elif piece_type == KING:
-            bb = self.kings
-
-        return bb & self.occupied_co[color]
-
-    def pieces(self, piece_type, color):
-        """
-        Gets pieces of the given type and color.
-
-        Returns a set of squares.
-        """
-        return SquareSet(self.piece_mask(piece_type, color))
-
     def is_check(self):
         """Checks if the current side to move is in check."""
         return self.is_attacked_by(self.turn ^ 1, self.king_squares[self.turn])
@@ -1478,7 +1478,7 @@ class Board(object):
     def is_game_over(self):
         """
         Checks if the game is over due to checkmate, stalemate, insufficient
-        mating material, the seventyfive-move rule or fivefold repitition.
+        mating material, the seventyfive-move rule or fivefold repetition.
         """
         # Seventyfive-move rule.
         if self.halfmove_clock >= 150:
@@ -1494,8 +1494,8 @@ class Board(object):
         except StopIteration:
             return True
 
-        # Fivefold repitition.
-        if self.is_fivefold_repitition():
+        # Fivefold repetition.
+        if self.is_fivefold_repetition():
             return True
 
         return False
@@ -1560,7 +1560,7 @@ class Board(object):
 
         return False
 
-    def is_fivefold_repitition(self):
+    def is_fivefold_repetition(self):
         """
         Since the first of July 2014 a game is automatically drawn (without
         a claim by one of the players) if a position occurs for the fifth time
@@ -1592,12 +1592,15 @@ class Board(object):
 
         return True
 
+    # TODO: Remove alias.
+    is_fivefold_repitition = is_fivefold_repetition
+
     def can_claim_draw(self):
         """
         Checks if the side to move can claim a draw by the fifty-move rule or
-        by threefold repitition.
+        by threefold repetition.
         """
-        return self.can_claim_fifty_moves() or self.can_claim_threefold_repitition()
+        return self.can_claim_fifty_moves() or self.can_claim_threefold_repetition()
 
     def can_claim_fifty_moves(self):
         """
@@ -1615,17 +1618,17 @@ class Board(object):
 
         return False
 
-    def can_claim_threefold_repitition(self):
+    def can_claim_threefold_repetition(self):
         """
-        Draw by threefold repitition can be claimed if the position on the
-        board occured for the third time or if such a repitition is reached
+        Draw by threefold repetition can be claimed if the position on the
+        board occured for the third time or if such a repetition is reached
         with one of the possible legal moves.
         """
-        # Threefold repitition occured.
+        # Threefold repetition occured.
         if self.transpositions[self.zobrist_hash()] >= 3:
             return True
 
-        # The next legal move is a threefold repitition.
+        # The next legal move is a threefold repetition.
         for move in self.generate_pseudo_legal_moves():
             self.push(move)
 
@@ -1636,6 +1639,9 @@ class Board(object):
             self.pop()
 
         return False
+
+    # TODO: Remove alias.
+    can_claim_threefold_repitition = can_claim_threefold_repetition
 
     def push(self, move):
         """
@@ -2605,6 +2611,14 @@ class SquareSet(object):
         while square != -1 and square is not None:
             yield square
             square = bit_scan(self.mask, square + 1)
+
+    def __reversed__(self):
+        string = bin(self.mask)
+        l = len(string)
+        r = string.find("1", 0)
+        while r != -1:
+            yield l - r - 1
+            r = string.find("1", r + 1)
 
     def __contains__(self, square):
         return bool(BB_SQUARES[square] & self.mask)

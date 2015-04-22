@@ -24,7 +24,9 @@ import chess
 import chess.polyglot
 import dgt
 import logging
-import uci
+
+# JP! sollte ja ersetzt werden! import uci
+
 import threading
 import copy
 import time
