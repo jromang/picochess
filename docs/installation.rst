@@ -51,7 +51,7 @@ Copying the image to an SD Card on Linux
 
 3. Unmount the disk (using /dev/sba as example, verify with step 2): umount /dev/sba*
 
-4. Use the 'dd' command to copy the image file to the entire disk: dd if=picochess-MK802II-vx.x.img of=/dev/sba bs=16m
+4. Use the 'dd' command to copy the image file to the entire disk: dd if=picochess-MK802II-vx.x.img of=/dev/sba bs=16M
 
 5. After the previous step is complete, execute "sudo sync" to ensure that the data is fully written before you eject.
 
