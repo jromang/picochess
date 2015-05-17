@@ -54,14 +54,16 @@ def main():
     parser.add_argument("-ar", "--auto-reboot", action='store_true', help="reboot system after update")
     parser.add_argument("-web", "--web-server", dest="web_server_port", nargs="?", const=80, type=int, metavar="PORT", help="launch web server")
     parser.add_argument("-mail", "--email", type=str, help="email used to send pgn files", default=None)
-    parser.add_argument("-mk", "--email-key", type=str, help="key used to send emails", default=None)
+    parser.add_argument("-mail_s", "--smtp_server", type=str, help="Adress of email server", default=None)
+    parser.add_argument("-mail_u", "--smtp_user", type=str, help="Username for email server", default=None)
+    parser.add_argument("-mail_p", "--smtp_pass", type=str, help="Password for email server", default=None)
+    parser.add_argument("-mail_enc", "--smtp_encryption", action='store_true', help="use ssl encryption connection to smtp-Server")
     parser.add_argument("-uci", "--uci-option", type=str, help="pass an UCI option to the engine (name;value)", default=None)
     parser.add_argument("-dgt3000", "--dgt-3000-clock", action='store_true', help="use dgt 3000 clock")
     parser.add_argument("-nobeep", "--disable-dgt-clock-beep", action='store_true', help="disable beeps on the dgt clock")
     parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
     parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
     args = parser.parse_args()
-
     # Enable logging
     logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
                         format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
@@ -95,7 +97,9 @@ def main():
         TerminalDisplay().start()
 
     # Save to PGN
-    PgnDisplay(args.pgn_file, email=args.email, key=args.email_key).start()
+    PgnDisplay(args.pgn_file, email=args.email, 
+                        fromIniSmtp_Server=args.smtp_server, fromINISmtp_User=args.smtp_user,
+                        fromINISmtp_Pass=args.smtp_pass, fromINISmtp_Enc=args.smtp_encryption).start() 
 
     # Create ChessTalker for speech output
     talker = None
