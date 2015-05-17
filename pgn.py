@@ -102,14 +102,14 @@ class PgnDisplay(Display, threading.Thread):
                                     logging.debug("SMTP Mail delivery: trying to send email")
                                     conn.sendmail('no-reply@picochess.org', self.email, msg.as_string())
                                     logging.debug("SMTP Mail delivery: successfuly delivered message to SMTP server")
-                                except Exception as exc:
+                                except Exception as exec:
                                     logging.error("SMTP Mail delivery: Failed")
                                     logging.error("SMTP Mail delivery: " + str(exec))
                                 finally:
                                     conn.close()
                                     logging.debug("SMTP Mail delivery: Ended")
-                            except Exception as exc:
-                                logging.error("SMTP Mail delivery2: Failed")
+                            except Exception as exec:
+                                logging.error("SMTP Mail delivery: Failed")
                                 logging.error("SMTP Mail delivery: " + str(exec))
                         # smtp based system end
             except queue.Empty:
