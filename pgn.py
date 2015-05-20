@@ -41,7 +41,7 @@ class PgnDisplay(Display, threading.Thread):
         self.smtp_user = fromINISmtp_User
         self.smtp_pass = fromINISmtp_Pass
         if email and fromINIMailGun_Key:
-            self.mailgun_key = base64.b64decode(str.encode(key)).decode("utf-8")
+            self.mailgun_key = base64.b64decode(str.encode(fromINIMailGun_Key)).decode("utf-8")
 
     def run(self):
         while True:
