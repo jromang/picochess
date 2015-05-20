@@ -58,6 +58,7 @@ def main():
     parser.add_argument("-mail_u", "--smtp_user", type=str, help="Username for email server", default=None)
     parser.add_argument("-mail_p", "--smtp_pass", type=str, help="Password for email server", default=None)
     parser.add_argument("-mail_enc", "--smtp_encryption", action='store_true', help="use ssl encryption connection to smtp-Server")
+    parser.add_argument("-mk", "--mailgun-key", type=str, help="key used to send emails via Mailgun Webservice", default=None)
     parser.add_argument("-uci", "--uci-option", type=str, help="pass an UCI option to the engine (name;value)", default=None)
     parser.add_argument("-dgt3000", "--dgt-3000-clock", action='store_true', help="use dgt 3000 clock")
     parser.add_argument("-nobeep", "--disable-dgt-clock-beep", action='store_true', help="disable beeps on the dgt clock")
@@ -97,7 +98,7 @@ def main():
         TerminalDisplay().start()
 
     # Save to PGN
-    PgnDisplay(args.pgn_file, email=args.email, 
+    PgnDisplay(args.pgn_file, email=args.email, fromINIMailGun_Key=args.mailgun_key,
                         fromIniSmtp_Server=args.smtp_server, fromINISmtp_User=args.smtp_user,
                         fromINISmtp_Pass=args.smtp_pass, fromINISmtp_Enc=args.smtp_encryption).start() 
 

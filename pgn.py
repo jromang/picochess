@@ -29,7 +29,7 @@ from email.mime.text import MIMEText
 
 
 class PgnDisplay(Display, threading.Thread):
-    def __init__(self, pgn_file_name, email=None, 
+    def __init__(self, pgn_file_name, email=None, fromINIMailGun_Key=None,
                     fromIniSmtp_Server=None, fromINISmtp_User=None,
                     fromINISmtp_Pass=None, fromINISmtp_Enc=False):
         super(PgnDisplay, self).__init__()
@@ -40,6 +40,8 @@ class PgnDisplay(Display, threading.Thread):
         self.smtp_encryption = fromINISmtp_Enc
         self.smtp_user = fromINISmtp_User
         self.smtp_pass = fromINISmtp_Pass
+        if email and fromINIMailGun_Key:
+            self.mailgun_key = base64.b64decode(str.encode(fromINIMailGun_Key)).decode("utf-8")
 
     def run(self):
         while True:
@@ -75,7 +77,6 @@ class PgnDisplay(Display, threading.Thread):
                         file.close()
                     # Send email
                     if self.email:
-
                         if self.smtp_server: # check if smtp server adress provided
                             logging.debug("SMTP Mail delivery: Started")
                             # change to smtp based mail delivery
@@ -112,5 +113,13 @@ class PgnDisplay(Display, threading.Thread):
                                 logging.error("SMTP Mail delivery: Failed")
                                 logging.error("SMTP Mail delivery: " + str(exec))
                         # smtp based system end
+                        if self.mailgun_key:
+                            out = requests.post("https://api.mailgun.net/v2/picochess.org/messages",
+                                            auth=("api", self.mailgun_key),
+                                            data={"from": "Your PicoChess computer <no-reply@picochess.org>",
+                                            "to": self.email,
+                                            "subject": "Game PGN",
+                                            "text": str(game)})
+                            logging.debug(out)
             except queue.Empty:
                 pass
