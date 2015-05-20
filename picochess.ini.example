@@ -39,13 +39,13 @@
 # email = your.mailbox@your-domain.com 
 ### for email delivery via SMTP 
 ### if smtp_server is not set, PicoChess won't attempt to send the game via SMTP
-## smtp_server must contain the address of the smtp server (e.g. smtp.gmail.com)
+## smtp_server must contain the address of your smtp server (e.g. smtp.gmail.com)
 # smtp_server = smtp.your-mailserver.com
 ## smtp_user is necessary if your smtp server requires authentication
 # smtp_user= your_username
 ## smtp_pass is necessary if your smtp server requires authentication
 # smtp_pass= your_password
-## Should PicoChess SSL-encrypt the communication with your smtp server (Port 465)? If so, uncomment the next line smtp_encryption. Otherwise PicoChess will use the default SMTP Port 21.
+## Should PicoChess SSL-encrypt the communication with your smtp server (Port 465)? If so, uncomment the next line smtp_encryption. Otherwise PicoChess will use the default SMTP Port 21. Some SMTP Server require an SSL encryption (e.g. GMAIL).
 # smtp_encryption
 ### for email delivery via Mailgun 
 ### if mailgun-key is not set, PicoChess won't attempt to send the game via Mailgun
@@ -65,4 +65,3 @@
 # user-voice = en:Elsie
 ## computer-voice for computer moves announcement
 # computer-voice = en:Marvin
-
