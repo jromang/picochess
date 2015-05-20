@@ -1,0 +1,71 @@
+### ===============================
+### = picochess.ini.example v0.36 =
+### ===============================
+### Example and description how to configure PicoChess
+### To use this file, simply copy this file to picochess.ini and edit the appropriate settings
+
+### Lines that start with 3x# are general comments
+### Lines that start with 2x# explain the option of the next line that starts with one # 
+### Lines that start with 1x# are option lines, delete the # to use the option 
+
+### =======================
+### = DGT related options =
+### =======================
+## enable-dgt-board-leds turn ON or OFF the LED's on the Revelation II chessbot, values are true or false
+# enable-dgt-board-leds = true
+## disable-dgt-clock-beep disables the beep of the DGT-clock. To disable the beep remove #, to enable comment the next line with #
+# disable-dgt-clock-beep
+
+### ========================
+### = Chess engine options =
+### ========================
+### Options for the UCI-Chess engine
+## What engine should play. Path to a UCI engine or Stockfish
+# engine = /opt/Stockfish/src/stockfish
+## uci-option stores options that will be passed to the engine
+# uci-option = Hash = 128
+# uci-option = Threads = 4
+# uci-option = Beginner Mode=true
+
+### ================
+### = Mail Service =
+### ================
+### Options for sending the finished game via email service
+### PicoChess currently implements two different ways to send a finished game via email.
+### standard SMTP email or Mailgun Webservice
+### Mail general
+### if email is not set, PicoChess won't attempt to send the game at all
+## email tells PicoChess to which email address the game should be send to, it should be your email address :-)
+# email = your.mailbox@your-domain.com 
+### =======================================
+### = Section for email delivery via SMTP =
+### =======================================
+### if smtp_server is not set, PicoChess won't attempt to send the game via SMTP
+## smtp_server must contain the address of your smtp server (e.g. smtp.gmail.com)
+# smtp_server = smtp.your-mailserver.com
+## smtp_user is necessary if your smtp server requires authentication, sets your username
+# smtp_user = your_username
+## smtp_pass is necessary if your smtp server requires authentication, sets your password
+# smtp_pass = your_secret_password
+## Should PicoChess SSL-encrypt the communication with your smtp server (Port 465)? If so, uncomment the next line smtp_encryption. Otherwise PicoChess will use the default and unencrypted SMTP Port 21. Some SMTP Server require an SSL encryption (e.g. GMAIL).
+# smtp_encryption
+### ==========================================
+### = Section for email delivery via Mailgun =
+### ==========================================
+### if mailgun-key is not set, PicoChess won't attempt to send the game via Mailgun
+## mailgun-key stores your Mailgun access key for Mailgun Webservice
+# mailgun-key = your Mailgun API access key
+
+### =============================
+### = PicoChess related options =
+### =============================
+## log-file points to a file that is used to write the log information. If file exists the text will be appended to the file otherwise a file will be created.
+# log-file = /opt/picochess/picochess.log
+## What log level should be used 
+## Loglevel options are [debug, info, warning, error, critical]
+# log-level = debug
+### PicoChess can use a speech engine for announcement
+## user-voice used for user moves announcement
+# user-voice = en:Elsie
+## computer-voice for computer moves announcement
+# computer-voice = en:Marvin
