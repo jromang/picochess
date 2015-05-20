@@ -41,7 +41,7 @@ class PgnDisplay(Display, threading.Thread):
         self.smtp_user = fromINISmtp_User
         self.smtp_pass = fromINISmtp_Pass
         if email and fromINIMailGun_Key:
-            self.gunmail_key = base64.b64decode(str.encode(key)).decode("utf-8")
+            self.mailgun_key = base64.b64decode(str.encode(key)).decode("utf-8")
 
     def run(self):
         while True:
@@ -113,9 +113,9 @@ class PgnDisplay(Display, threading.Thread):
                                 logging.error("SMTP Mail delivery: Failed")
                                 logging.error("SMTP Mail delivery: " + str(exec))
                         # smtp based system end
-                        if self.gunmail_key:
+                        if self.mailgun_key:
                             out = requests.post("https://api.mailgun.net/v2/picochess.org/messages",
-                                            auth=("api", self.key),
+                                            auth=("api", self.mailgun_key),
                                             data={"from": "Your PicoChess computer <no-reply@picochess.org>",
                                             "to": self.email,
                                             "subject": "Game PGN",
