@@ -34,14 +34,21 @@ class PgnDisplay(Display, threading.Thread):
                     fromINISmtp_Pass=None, fromINISmtp_Enc=False):
         super(PgnDisplay, self).__init__()
         self.file_name = pgn_file_name
-        # store information for SMTP based Mail delivery
-        self.email = email
+        
+        if email: # check if email adress is provided by picochess.ini
+            self.email = email
+        else: # if no email adress is set then set self.email to false so skip later sending the game as via mail
+            self.email = False
+        # store information for SMTP based mail delivery
         self.smtp_server = fromIniSmtp_Server
         self.smtp_encryption = fromINISmtp_Enc
         self.smtp_user = fromINISmtp_User
         self.smtp_pass = fromINISmtp_Pass
+        # store information for mailgun mail delivery
         if email and fromINIMailGun_Key:
             self.mailgun_key = base64.b64decode(str.encode(fromINIMailGun_Key)).decode("utf-8")
+        else:
+            self.mailgun_key = False
 
     def run(self):
         while True:
@@ -75,9 +82,10 @@ class PgnDisplay(Display, threading.Thread):
                         exporter = chess.pgn.FileExporter(file)
                         game.export(exporter)
                         file.close()
-                    # Send email
-                    if self.email:
+                    # section send email
+                    if self.email: # check if email adress to send the game to is provided
                         if self.smtp_server: # check if smtp server adress provided
+                            # if self.smtp_server is not provided than don't try to send email via smtp service
                             logging.debug("SMTP Mail delivery: Started")
                             # change to smtp based mail delivery
                             # depending on encrypted mail delivery, we need to import the right lib
@@ -113,7 +121,7 @@ class PgnDisplay(Display, threading.Thread):
                                 logging.error("SMTP Mail delivery: Failed")
                                 logging.error("SMTP Mail delivery: " + str(exec))
                         # smtp based system end
-                        if self.mailgun_key:
+                        if self.mailgun_key: # check if we have the mailgun-key available to send the game successful
                             out = requests.post("https://api.mailgun.net/v2/picochess.org/messages",
                                             auth=("api", self.mailgun_key),
                                             data={"from": "Your PicoChess computer <no-reply@picochess.org>",
