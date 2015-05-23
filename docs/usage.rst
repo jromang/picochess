@@ -3,7 +3,7 @@ Usage
 
 Choosing skill level
 --------------------
-Put the extra black queen on your DGT board to select skill level. Putting it on square A6 will select level 0 (easiest), while B6 selects level 1, C6 selects level 2, etc. If no skill level is selected, PicoChess uses level 20 (the highest level) by default. Level 20 can also be selected by placing the extra black queen on square E4.
+Put the extra **black** queen on your DGT board to select skill level. Putting it on square A6 will select level 0 (easiest), while B6 selects level 1, C6 selects level 2, etc. If no skill level is selected, PicoChess uses level 20 (the highest level) by default. Level 20 can also be selected by placing the extra black queen on square E4.
 
 * Level  0 estimates about 1100 Elo (Absolute beginner)
 * Level 10 estimates about 1750 Elo (Mediate club player )
@@ -15,21 +15,22 @@ Choosing opening books
 Opening books are also selected with the extra **black** queen:
 
 * **A3** - No book
-* **B3** - Fun
-* **C3** - Anand
-* **D3** - Korchnoi
-* **E3** - Larsen
-* **F3** - Pro
-* **G3** - GM_2001 : GM games from 2001 to mid-September, 2012
+* **B3** - ECO A - Flank
+* **C3** - ECO B - Semiopen
+* **D3** - ECO C - Open
+* **E3** - ECO D - Closed
+* **F3** - ECO E - Indian
+* **G3** - Fun
 * **H3** - Varied. (Default)
-* **H4** - GM_1950 (> 2500 ELO GM games from 1950 till mid-Sept, 2012)
+* **H4** - GM_1950 (> 2500 ELO GM games from 1950 till 2013)
 * **G4** - Performance
 * **F4** - Stockfish optimized book v 2.11 by Salvo Spitaleri
 
 Setting up time controls
 ------------------------
 
-Time controls are set with the extra **white** queen. Remove the extra black queen if it is still on the board.
+Time controls are set with the extra **white** queen.
+(Remove the extra black queen if it is still on the board.)
 
 * **A6** - 1 second per move
 * **B6** - 3 seconds per move
