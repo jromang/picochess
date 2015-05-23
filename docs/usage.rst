@@ -95,9 +95,10 @@ Position setup
 
 Before setting custom position, choose your level and time controls with pieces in starting position as usual.
 
-Press the rightmost button until "Position" is displayed on the clock. Setup your position and press the center button.
-Clock will respond with "Scan". Press the leftmost button to choose side to move, Black or White. Press center button, clock will again respond with "Scan". Move.
-
+Setup your position. Press the rightmost button until "Position" is displayed on the clock.
+Press the center button. Clock will respond with "Scan".
+Press the leftmost button to choose side to move, Black or White.
+Press center button, clock will again respond with "Scan". Move.
 
 Clock button support
 --------------------
