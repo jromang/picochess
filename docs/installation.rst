@@ -118,8 +118,6 @@ runs on a desktop computer (Linux, OSX, Windows). You will need to install this 
   
 for a list.
 
-5. If diskspace is low (check via df -h), remove Wolfram Mathematica from your distro. (apt-get purge wolfram-engine)
-
 Bluetooth Connection
 --------------------
 
@@ -156,7 +154,7 @@ At start Picochess looks at the file
 
 /opt/picochess/picochess.ini
 
-... and sets itself up accordingly. Here is a list of available options:
+... and sets itself up accordingly. Here is a list of some available options:
 
 * enable-dgt-board-leds = true
 * uci-option = Beginner Mode=true
@@ -186,4 +184,6 @@ will dumb Stockfish down enough for play against children and total beginners to
 them a chance of beating the machine. If you are using our image files, you will probably find
 stockfish_human engine already waiting for your kids in the /opt/picochess/engines folder.
 
+An example .ini file can be found at /opt/picochess/picochess.ini.example.
+Uncomment appropriate options and rename the file to picochess.ini.
 

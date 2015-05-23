@@ -114,4 +114,4 @@ PGN file support
 
 All moves of the played game along with engine are stored.
 Every game played with picochess is stored in the /opt/picochess folder as "games.pgn".
-If a position is undone, another game will be created within game.pgn.
+If a position is undone, another game will be created within games.pgn.
