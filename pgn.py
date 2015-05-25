@@ -77,11 +77,10 @@ class PgnDisplay(Display, threading.Thread):
                         game.headers["White"] = "PicoChess"
                         game.headers["Black"] = self.email.split('@')[0] if self.email else 'Player'
                     # Save to file
-                    if message.result != GameResult.ABORT:
-                        file = open(self.file_name, "a")
-                        exporter = chess.pgn.FileExporter(file)
-                        game.export(exporter)
-                        file.close()
+                    file = open(self.file_name, "a")
+                    exporter = chess.pgn.FileExporter(file)
+                    game.export(exporter)
+                    file.close()
                     # section send email
                     if self.email: # check if email adress to send the game to is provided
                         if self.smtp_server: # check if smtp server adress provided
