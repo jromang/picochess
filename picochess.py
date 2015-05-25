@@ -297,7 +297,7 @@ def main():
                 if game.move_stack:
                     logging.debug("Starting a new game")
                     if not game.is_game_over():
-                    	Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
+                        Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
                     game = chess.Bitboard()
                     legal_fens = compute_legal_fens(game)
                     time_control.stop()
