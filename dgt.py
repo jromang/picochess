@@ -23,6 +23,7 @@ import time
 from timecontrol import *
 from struct import unpack
 from collections import OrderedDict
+from utilities import *
 
 try:
     import enum
@@ -459,6 +460,8 @@ class DGTBoard(Observable, Display, threading.Thread):
 
                     if 9 <= message[4] <= 10 and message[5] == 50:
                         logging.info("Button 3 pressed")
+                        self.display_on_dgt_xl('pic'+version)
+                        self.display_on_dgt_3000('pic'+version)
 
                     if 65 <= message[4] <= 66 and message[5] == 53:
                         logging.info("Button 4 pressed")
