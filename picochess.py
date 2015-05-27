@@ -39,6 +39,7 @@ import chesstalker.chesstalker
 
 
 import chess.uci
+import spur
 
 def main():
     #Command line argument parsing
@@ -74,7 +75,10 @@ def main():
     update_picochess(args.auto_reboot)
 
     # Load UCI engine
-    engine = uci.Engine(args.engine, hostname=args.remote, username=args.user, key_file=args.server_key, password=args.password)
+    #engine = uci.Engine(args.engine, hostname=args.remote, username=args.user, key_file=args.server_key, password=args.password)
+    shell = spur.SshShell(args.engine, hostname=args.remote, username=args.user, password=args.password)
+    engine = chess.uci.spur_spwan_engine(shell, [args.engine])
+
     logging.debug('Loaded engine [%s]', engine.name)
     logging.debug('Supported options [%s]', engine.options)
     if 'Hash' in engine.options:
