@@ -672,7 +672,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                         break
                     if case(Message.REVIEW_MODE_MOVE):
                         uci_move = message.move.uci()
-                        self.last_move = uci_move
+                        self.last_move = message.move
                         self.last_fen = message.fen
 
                         # Dont beep when reviewing a game
