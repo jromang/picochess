@@ -289,7 +289,7 @@ def main():
                 time_control.stop()
                 time_control.reset()
                 Display.show(Message.START_NEW_GAME)
-                if interaction_mode == Mode.PLAY_BLACK:
+                if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
                     think(time_control)
                 break
 
@@ -303,7 +303,7 @@ def main():
                     time_control.stop()
                     time_control.reset()
                     Display.show(Message.START_NEW_GAME)
-                if interaction_mode == Mode.PLAY_BLACK:
+                if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
                     think(time_control)
                 break
 
@@ -325,8 +325,18 @@ def main():
                 break
 
             if case(Event.SET_MODE):
-                # Display.show(Message.INTERACTION_MODE, mode=event.mode)  # Usefull for pgn display device
+                Display.show(Message.INTERACTION_MODE, mode=event.mode)  # Useful for pgn display device
                 interaction_mode = event.mode
+                break
+
+            if case(Event.CHANGE_MODE):
+                if interaction_mode == Mode.PLAY_WHITE:
+                    interaction_mode = Mode.PLAY_BLACK
+                else:
+                    interaction_mode = Mode.PLAY_WHITE
+                Display.show(Message.INTERACTION_MODE, mode=interaction_mode)
+                if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
+                    think(time_control)
                 break
 
             if case(Event.SET_TIME_CONTROL):
