@@ -96,17 +96,17 @@ Position setup
 Before setting custom position, choose your level and time controls with pieces in starting position as usual.
 
 Setup your position. Press the rightmost button until "Position" is displayed on the clock.
-Press the center button. Clock will respond with "Scan".
 Press the leftmost button to choose side to move, Black or White.
-Press center button, clock will again respond with "Scan". Move.
+Press the second button to choose the board orientation, Normal or Reversed.
+Press center button, clock will respond with "Scan". Move.
 
 Clock button support
 --------------------
 
 * First button chooses White or Black.
 * Second button does nothing.
-* Third button scans the board when setting up custom position.
-* The fourth button will switch sides and the computer will make your move. Not implemented yet.
+* Third button will switch sides and the computer will make your move.
+* The fourth button does nothing.
 * The fifth toggles between "Position", "Engine", "System", "Game" options. Some of the options provide no functionality yet.
 
 PGN file support
