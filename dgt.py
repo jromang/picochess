@@ -278,7 +278,7 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.clock_lock = asyncio.Lock()
         self.enable_dgt_3000 = enable_dgt_3000
         self.enable_dgt_clock_beep = enable_dgt_clock_beep
-        self.bit_board = chess.Bitboard()
+        self.bit_board = chess.Board()
         self.dgt_clock_menu = Menu.GAME_MENU
         self.last_move = None
         self.last_fen = None
@@ -360,7 +360,7 @@ class DGTBoard(Observable, Display, threading.Thread):
         # fen = str(self.setup_chessboard.fen())
         can_castle = False
         castling_fen = ''
-        bit_board = chess.Bitboard(fen)
+        bit_board = chess.Board(fen)
 
         if bit_board.piece_at(chess.E1) == chess.Piece.from_symbol("K") and bit_board.piece_at(chess.H1) == chess.Piece.from_symbol("R"):
             can_castle = True

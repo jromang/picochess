@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of the python-chess library.
-# Copyright (C) 2012-2014 Niklas Fiekas <niklas.fiekas@tu-clausthal.de>
+# Copyright (C) 2012-2015 Niklas Fiekas <niklas.fiekas@tu-clausthal.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -82,15 +82,19 @@ class GameNode(object):
         self.comment = ""
         self.variations = []
 
+        self.board_cached = None
+
     def board(self):
         """
         Gets a bitboard with the position of the node.
 
-        Its a copy, so modifying the board will not alter the game.
+        It's a copy, so modifying the board will not alter the game.
         """
-        board = self.parent.board()
-        board.push(self.move)
-        return board
+        if not self.board_cached:
+            self.board_cached = self.parent.board()
+            self.board_cached.push(self.move)
+
+        return copy.deepcopy(self.board_cached)
 
     def san(self):
         """
@@ -191,7 +195,7 @@ class GameNode(object):
         """Removes a variation by move."""
         self.variations.remove(self.variation(move))
 
-    def add_variation(self, move, comment="", starting_comment="", nags=set()):
+    def add_variation(self, move, comment="", starting_comment="", nags=()):
         """Creates a child node with the given attributes."""
         node = GameNode()
         node.move = move
@@ -326,9 +330,9 @@ class Game(GameNode):
         starting position.
         """
         if "FEN" in self.headers and "SetUp" in self.headers and self.headers["SetUp"] == "1":
-            return chess.Bitboard(self.headers["FEN"])
+            return chess.Board(self.headers["FEN"])
         else:
-            return chess.Bitboard()
+            return chess.Board()
 
     def setup(self, board):
         """
@@ -338,7 +342,7 @@ class Game(GameNode):
         try:
             fen = board.fen()
         except AttributeError:
-            fen = chess.Bitboard(board).fen()
+            fen = chess.Board(board).fen()
 
         if fen == chess.STARTING_FEN:
             del self.headers["SetUp"]

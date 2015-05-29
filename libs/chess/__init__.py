@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of the python-chess library.
-# Copyright (C) 2012-2014 Niklas Fiekas <niklas.fiekas@tu-clausthal.de>
+# Copyright (C) 2012-2015 Niklas Fiekas <niklas.fiekas@tu-clausthal.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ __author__ = "Niklas Fiekas"
 
 __email__ = "niklas.fiekas@tu-clausthal.de"
 
-__version__ = "0.6.0"
+__version__ = "0.8.1"
 
 import collections
 import re
@@ -295,9 +295,9 @@ for bb_square in BB_SQUARES:
     mask |= shift_down_right(bb_square)
     BB_KING_ATTACKS.append(mask & BB_ALL)
 
-BB_RANK_ATTACKS = [ [ BB_VOID for i in range(64) ] for k in range(64) ]
+BB_RANK_ATTACKS = [ [ BB_VOID for _ in range(64) ] for _ in range(64) ]
 
-BB_FILE_ATTACKS = [ [ BB_VOID for i in range(64) ] for k in range(64) ]
+BB_FILE_ATTACKS = [ [ BB_VOID for _ in range(64) ] for _ in range(64) ]
 
 for square in SQUARES:
     for bitrow in range(0, 64):
@@ -357,9 +357,9 @@ BB_SHIFT_L45 = [
     57, 1, 10, 19, 28, 37, 46, 55,
     1, 10, 19, 28, 37, 46, 55, 64 ]
 
-BB_L45_ATTACKS = [ [ BB_VOID for i in range(64) ] for k in range(64) ]
+BB_L45_ATTACKS = [ [ BB_VOID for _ in range(64) ] for _ in range(64) ]
 
-BB_R45_ATTACKS = [ [ BB_VOID for i in range(64) ] for k in range(64) ]
+BB_R45_ATTACKS = [ [ BB_VOID for _ in range(64) ] for _ in range(64) ]
 
 for s in SQUARES:
     for b in range(0, 64):
@@ -772,7 +772,7 @@ class Move(object):
         return cls(0, 0, NONE)
 
 
-class Bitboard(object):
+class Board(object):
     """
     A bitboard and additional information representing a position.
 
@@ -873,7 +873,7 @@ class Bitboard(object):
         self.occupied_l45 = BB_VOID
 
         self.king_squares = [ E1, E8 ]
-        self.pieces = [ NONE for i in range(64) ]
+        self.pieces = [ NONE for _ in range(64) ]
 
         self.halfmove_clock_stack = collections.deque()
         self.captured_piece_stack = collections.deque()
@@ -1461,7 +1461,7 @@ class Bitboard(object):
     def is_game_over(self):
         """
         Checks if the game is over due to checkmate, stalemate, insufficient
-        mating material, the seventyfive-move rule or fivefold repitition.
+        mating material, the seventyfive-move rule or fivefold repetition.
         """
         # Seventyfive-move rule.
         if self.halfmove_clock >= 150:
@@ -1477,8 +1477,8 @@ class Bitboard(object):
         except StopIteration:
             return True
 
-        # Fivefold repitition.
-        if self.is_fivefold_repitition():
+        # Fivefold repetition.
+        if self.is_fivefold_repetition():
             return True
 
         return False
@@ -1543,7 +1543,7 @@ class Bitboard(object):
 
         return False
 
-    def is_fivefold_repitition(self):
+    def is_fivefold_repetition(self):
         """
         Since the first of July 2014 a game is automatically drawn (without
         a claim by one of the players) if a position occurs for the fifth time
@@ -1558,9 +1558,9 @@ class Bitboard(object):
 
         switchyard = collections.deque()
 
-        for i in range(4):
+        for _ in range(4):
             # Go back two full moves, each.
-            for j in range(4):
+            for _ in range(4):
                 switchyard.append(self.pop())
 
             # Check the position was the same before.
@@ -1575,12 +1575,15 @@ class Bitboard(object):
 
         return True
 
+    # TODO: Remove alias.
+    is_fivefold_repitition = is_fivefold_repetition
+
     def can_claim_draw(self):
         """
         Checks if the side to move can claim a draw by the fifty-move rule or
-        by threefold repitition.
+        by threefold repetition.
         """
-        return self.can_claim_fifty_moves() or self.can_claim_threefold_repitition()
+        return self.can_claim_fifty_moves() or self.can_claim_threefold_repetition()
 
     def can_claim_fifty_moves(self):
         """
@@ -1598,17 +1601,17 @@ class Bitboard(object):
 
         return False
 
-    def can_claim_threefold_repitition(self):
+    def can_claim_threefold_repetition(self):
         """
-        Draw by threefold repitition can be claimed if the position on the
-        board occured for the third time or if such a repitition is reached
+        Draw by threefold repetition can be claimed if the position on the
+        board occured for the third time or if such a repetition is reached
         with one of the possible legal moves.
         """
-        # Threefold repitition occured.
+        # Threefold repetition occured.
         if self.transpositions[self.zobrist_hash()] >= 3:
             return True
 
-        # The next legal move is a threefold repitition.
+        # The next legal move is a threefold repetition.
         for move in self.generate_pseudo_legal_moves():
             self.push(move)
 
@@ -1619,6 +1622,9 @@ class Bitboard(object):
             self.pop()
 
         return False
+
+    # TODO: Remove alias.
+    can_claim_threefold_repitition = can_claim_threefold_repetition
 
     def push(self, move):
         """
@@ -2210,18 +2216,37 @@ class Bitboard(object):
         piece = self.piece_type_at(move.from_square)
         en_passant = False
 
+        # Look ahead for check or checkmate.
+        self.push(move)
+        is_check = self.is_check()
+        is_checkmate = is_check and self.is_checkmate()
+        self.pop()
+
         # Castling.
         if piece == KING:
+            castling = False
             if move.from_square == E1:
                 if move.to_square == G1:
-                    return "O-O"
+                    castling = True
+                    san = "O-O"
                 elif move.to_square == C1:
-                    return "O-O-O"
+                    castling = True
+                    san = "O-O-O"
             elif move.from_square == E8:
                 if move.to_square == G8:
-                    return "O-O"
+                    castling = True
+                    san = "O-O"
                 elif move.to_square == C8:
-                    return "O-O-O"
+                    castling = True
+                    san = "O-O-O"
+
+            if castling:
+                if is_checkmate:
+                    return san + "#"
+                elif is_check:
+                    return san + "+"
+                else:
+                    return san
 
         if piece == PAWN:
             san = ""
@@ -2289,14 +2314,11 @@ class Bitboard(object):
         if move.promotion:
             san += "=" + PIECE_SYMBOLS[move.promotion].upper()
 
-        # Look ahead for check or checkmate.
-        self.push(move)
-        if self.is_check():
-            if self.is_checkmate():
-                san += "#"
-            else:
-                san += "+"
-        self.pop()
+        # Add check or checkmate suffix
+        if is_checkmate:
+            san += "#"
+        elif is_check:
+            san += "+"
 
         return san
 
@@ -2374,7 +2396,7 @@ class Bitboard(object):
         return errors
 
     def __repr__(self):
-        return "Bitboard('{0}')".format(self.fen())
+        return "Board('{0}')".format(self.fen())
 
     def __str__(self):
         builder = []
@@ -2502,6 +2524,9 @@ class Bitboard(object):
         return zobrist_hash
 
 
+Bitboard = Board
+
+
 class PseudoLegalMoveGenerator(object):
 
     def __init__(self, bitboard):
@@ -2543,7 +2568,7 @@ class LegalMoveGenerator(object):
     def __len__(self):
         count = 0
 
-        for move in self.bitboard.generate_legal_moves():
+        for _ in self.bitboard.generate_legal_moves():
             count += 1
 
         return count
@@ -2585,6 +2610,14 @@ class SquareSet(object):
         while square != -1 and square is not None:
             yield square
             square = bit_scan(self.mask, square + 1)
+
+    def __reversed__(self):
+        string = bin(self.mask)
+        l = len(string)
+        r = string.find("1", 0)
+        while r != -1:
+            yield l - r - 1
+            r = string.find("1", r + 1)
 
     def __contains__(self, square):
         return bool(BB_SQUARES[square] & self.mask)
