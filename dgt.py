@@ -282,6 +282,7 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.dgt_clock_menu = Menu.GAME_MENU
         self.last_move = None
         self.last_fen = None
+        self.ponder_move = None
         # Open the serial port
         attempts = 0
         while attempts < 10:
@@ -443,6 +444,9 @@ class DGTBoard(Observable, Display, threading.Thread):
 
                     if 33 <= message[4] <= 34 and message[5] == 52:
                         logging.info("Button 1 pressed")
+                        if self.dgt_clock_menu == Menu.GAME_MENU and self.ponder_move:
+                            self.display_on_dgt_clock(self.ponder_move.uci(), beep=True)
+
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
                             self.setup_reverse_orientation = False if self.setup_reverse_orientation else True
                             orientation = "reversed" if self.setup_reverse_orientation else "normal"
@@ -645,6 +649,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                     if case(Message.COMPUTER_MOVE):
                         uci_move = message.move.uci()
                         self.last_move = message.move
+                        self.ponder_move = chess.Move.null() if message.ponder is None else message.ponder
                         self.last_fen = message.fen
                         logging.info("DGT SEND BEST MOVE:"+uci_move)
                         # Stop the clock before displaying a move
@@ -663,6 +668,8 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.display_on_dgt_xl('newgam', self.enable_dgt_clock_beep)
                         self.display_on_dgt_3000('new game', self.enable_dgt_clock_beep)
                         self.clear_light_revelation_board()
+                        self.last_move = None
+                        self.ponder_move = None
                         break
                     if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
                         self.display_on_dgt_xl('ok', self.enable_dgt_clock_beep)

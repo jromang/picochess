@@ -148,7 +148,7 @@ def main():
         :return:
         """
         def send_book_move(move):
-            Observable.fire(Event.BEST_MOVE, move=move.uci())
+            Observable.fire(Event.BEST_MOVE, move=move,ponder=None)
 
         global book_thread
         book_move = weighted_choice(book, game)
@@ -319,13 +319,14 @@ def main():
                 break
 
             if case(Event.BEST_MOVE):
-                move = chess.Move.from_uci(event.move)
+                move = event.move
+                ponder = event.ponder
                 # Check if we are in play mode and it is computer's turn
                 if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
                     time_control.stop()
                     fen = game.fen()
                     game.push(move)
-                    Display.show(Message.COMPUTER_MOVE, move=move, fen=fen, game=copy.deepcopy(game), time_control=time_control)
+                    Display.show(Message.COMPUTER_MOVE, move=move, ponder=ponder, fen=fen, game=copy.deepcopy(game), time_control=time_control)
                     # if check_game_state(game, interaction_mode):
                     legal_fens = compute_legal_fens(game)
                 break

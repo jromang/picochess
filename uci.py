@@ -24,7 +24,7 @@ import chess.uci
 class Informer(chess.uci.InfoHandler,Observable):
 
     def on_bestmove(self,bestmove,ponder):
-        self.fire(Event.BEST_MOVE, move=bestmove.uci())
+        self.fire(Event.BEST_MOVE, move=bestmove, ponder=ponder)
         super().on_bestmove(bestmove,ponder)
 
 
