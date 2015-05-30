@@ -25,7 +25,7 @@ import chess.polyglot
 import dgt
 import logging
 
-# JP! sollte ja ersetzt werden! import uci
+import uci
 
 import threading
 import copy
@@ -38,7 +38,7 @@ from server import WebServer
 import chesstalker.chesstalker
 
 
-import chess.uci
+#import chess.uci
 import spur
 
 def main():
@@ -75,17 +75,15 @@ def main():
     update_picochess(args.auto_reboot)
 
     # Load UCI engine
-    #engine = uci.Engine(args.engine, hostname=args.remote, username=args.user, key_file=args.server_key, password=args.password)
-    shell = spur.SshShell(args.engine, hostname=args.remote, username=args.user, password=args.password)
-    engine = chess.uci.spur_spwan_engine(shell, [args.engine])
+    engine = uci.Engine(args.engine, hostname=args.remote, username=args.user, key_file=args.server_key, password=args.password)
 
-    logging.debug('Loaded engine [%s]', engine.name)
-    logging.debug('Supported options [%s]', engine.options)
-    if 'Hash' in engine.options:
+    logging.debug('Loaded engine [%s]', engine.get().name)
+    logging.debug('Supported options [%s]', engine.get().options)
+    if 'Hash' in engine.get().options:
         engine.set_option("Hash", args.hash_size)
-    if 'Threads' in engine.options:  # Stockfish
+    if 'Threads' in engine.get().options:  # Stockfish
         engine.set_option("Threads", args.threads)
-    if 'Core Threads' in engine.options:  # Hiarcs
+    if 'Core Threads' in engine.get().options:  # Hiarcs
         engine.set_option("Core Threads", args.threads)
     if args.uci_option:
         for uci_option in args.uci_option.strip('"').split(";"):
@@ -172,7 +170,7 @@ def main():
         if book_thread:
             book_thread.cancel()
         else:
-            engine.stop(True)
+            engine.stop()
 
     def check_game_state(game, interaction_mode):
         """
@@ -205,7 +203,7 @@ def main():
     time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=5)
 
     #Send the engine's UCI options to all Displays
-    Display.show(Message.UCI_OPTION_LIST, options=engine.options)
+    Display.show(Message.UCI_OPTION_LIST, options=engine.get().options)
     Display.show(Message.SYSTEM_INFO, info={"version": version, "location": get_location(),
                                             "books": get_opening_books(), "ip": get_ip()})
 
