@@ -18,74 +18,14 @@ from utilities import *
 import logging
 import spur
 import paramiko
-
 import chess.uci
 
 
-
 class Informer(chess.uci.InfoHandler,Observable):
-    def on_go(self):
-        super().on_go()
-        pass
 
     def on_bestmove(self,bestmove,ponder):
         self.fire(Event.BEST_MOVE, move=bestmove.uci())
         super().on_bestmove(bestmove,ponder)
-
-    def post_info(self):
-        super().post_info()
-
-    def pre_info(self,line):
-        super().pre_info(line)
-
-    def currline(self,cpunr,moves):
-        super().currline(cpunr,moves)
-
-    def refutation(self,move,refuted_by):
-        super().refutation(move,refuted_by)
-
-    def string(self,string):
-        super().string(string)
-
-    def cpuload(self,x):
-        super().cpuload(x)
-
-    def tbhits(self,x):
-        super().tbhits(x)
-
-    def nps(self,x):
-        super().nps(x)
-
-    def hashfull(self,x):
-        super().hashfull(x)
-
-    def currmovenumber(self,x):
-        super().currmovenumber(x)
-
-    def currmove(self,move):
-        super().currmove(move)
-
-    def score(self,cp,mate,lowerbound,upperbound):
-        super().score(cp,mate,lowerbound,upperbound)
-
-    def multipv(self,num):
-        super().multipv(num)
-
-    def pv(self,moves):
-        super().pv(moves)
-
-    def nodes(self,x):
-        super().nodes(x)
-
-    def time(self,x):
-        super().time(x)
-
-    def seldepth(self,x):
-        super().seldepth(x)
-
-    def depth(self,x):
-        super().depth(x)
-
 
 
 class Engine():
