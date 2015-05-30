@@ -192,7 +192,7 @@ def main():
         if game.is_seventyfive_moves():
             Display.show(Message.GAME_ENDS, result=GameResult.SEVENTYFIVE_MOVES, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
             return False
-        if game.is_fivefold_repitition():
+        if game.is_fivefold_repetition():
             Display.show(Message.GAME_ENDS, result=GameResult.FIVEFOLD_REPETITION, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
             return False
         if game.is_game_over():
@@ -200,7 +200,7 @@ def main():
             return False
         return True
 
-    game = chess.Bitboard()  # Create the current game
+    game = chess.Board()  # Create the current game
     legal_fens = compute_legal_fens(game)  # Compute the legal FENs
     book = chess.polyglot.open_reader(get_opening_books()[8][1])  # Default opening book
     interaction_mode = Mode.PLAY_WHITE   # Interaction mode
@@ -289,7 +289,7 @@ def main():
             if case(Event.SETUP_POSITION): # User sets up a position
                 logging.debug("Setting up custom fen: {0}".format(event.fen))
 
-                game = chess.Bitboard(event.fen)
+                game = chess.Board(event.fen)
                 game.custom_fen = event.fen
                 legal_fens = compute_legal_fens(game)
                 time_control.stop()
@@ -304,7 +304,7 @@ def main():
                     logging.debug("Starting a new game")
                     if not game.is_game_over():
                         Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
-                    game = chess.Bitboard()
+                    game = chess.Board()
                     legal_fens = compute_legal_fens(game)
                     time_control.stop()
                     time_control.reset()

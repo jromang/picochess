@@ -20,7 +20,7 @@ __author__ = "Niklas Fiekas"
 
 __email__ = "niklas.fiekas@tu-clausthal.de"
 
-__version__ = "0.8.0"
+__version__ = "0.8.1"
 
 import collections
 import re
@@ -810,6 +810,22 @@ class Board(object):
         self.occupied_r45 = BB_VOID
 
         self.king_squares = [ E1, E8 ]
+        self.pieces = [ NONE for i in range(64) ]
+
+        for i in range(64):
+            mask = BB_SQUARES[i]
+            if mask & self.pawns:
+                self.pieces[i] = PAWN
+            elif mask & self.knights:
+                self.pieces[i] = KNIGHT
+            elif mask & self.bishops:
+                self.pieces[i] = BISHOP
+            elif mask & self.rooks:
+                self.pieces[i] = ROOK
+            elif mask & self.queens:
+                self.pieces[i] = QUEEN
+            elif mask & self.kings:
+                self.pieces[i] = KING
 
         self.ep_square = 0
         self.castling_rights = CASTLING
@@ -857,6 +873,7 @@ class Board(object):
         self.occupied_l45 = BB_VOID
 
         self.king_squares = [ E1, E8 ]
+        self.pieces = [ NONE for _ in range(64) ]
 
         self.halfmove_clock_stack = collections.deque()
         self.captured_piece_stack = collections.deque()
@@ -872,30 +889,6 @@ class Board(object):
         self.incremental_zobrist_hash = self.board_zobrist_hash(POLYGLOT_RANDOM_ARRAY)
         self.transpositions = collections.Counter((self.zobrist_hash(), ))
 
-    def pieces_mask(self, piece_type, color):
-        if piece_type == PAWN:
-            bb = self.pawns
-        elif piece_type == KNIGHT:
-            bb = self.knights
-        elif piece_type == BISHOP:
-            bb = self.bishops
-        elif piece_type == ROOK:
-            bb = self.rooks
-        elif piece_type == QUEEN:
-            bb = self.queens
-        elif piece_type == KING:
-            bb = self.kings
-
-        return bb & self.occupied_co[color]
-
-    def pieces(self, piece_type, color):
-        """
-        Gets pieces of the given type and color.
-
-        Returns a set of squares.
-        """
-        return SquareSet(self.pieces_mask(piece_type, color))
-
     def piece_at(self, square):
         """Gets the piece at the given square."""
         mask = BB_SQUARES[square]
@@ -907,30 +900,16 @@ class Board(object):
 
     def piece_type_at(self, square):
         """Gets the piece type at the given square."""
-        mask = BB_SQUARES[square]
-
-        if self.pawns & mask:
-            return PAWN
-        elif self.knights & mask:
-            return KNIGHT
-        elif self.bishops & mask:
-            return BISHOP
-        elif self.rooks & mask:
-            return ROOK
-        elif self.queens & mask:
-            return QUEEN
-        elif self.kings & mask:
-            return KING
-        else:
-            return NONE
+        return self.pieces[square]
 
     def remove_piece_at(self, square):
         """Removes a piece from the given square if present."""
-        mask = BB_SQUARES[square]
-        if not self.occupied & mask:
+        piece_type = self.pieces[square]
+
+        if piece_type == NONE:
             return
 
-        piece_type = self.piece_type_at(square)
+        mask = BB_SQUARES[square]
 
         if piece_type == PAWN:
             self.pawns ^= mask
@@ -947,6 +926,7 @@ class Board(object):
 
         color = int(bool(self.occupied_co[BLACK] & mask))
 
+        self.pieces[square] = NONE
         self.occupied ^= mask
         self.occupied_co[color] ^= mask
         self.occupied_l90 ^= BB_SQUARES[SQUARES_L90[square]]
@@ -963,6 +943,8 @@ class Board(object):
     def set_piece_at(self, square, piece):
         """Sets a piece at the given square. An existing piece is replaced."""
         self.remove_piece_at(square)
+
+        self.pieces[square] = piece.piece_type
 
         mask = BB_SQUARES[square]
 
@@ -992,6 +974,7 @@ class Board(object):
         else:
             piece_index = (piece.piece_type - 1) * 2 + 1
         self.incremental_zobrist_hash ^= POLYGLOT_RANDOM_ARRAY[64 * piece_index + 8 * rank_index(square) + file_index(square)]
+
 
     def generate_pseudo_legal_moves(self, castling=True, pawns=True, knights=True, bishops=True, rooks=True, queens=True, king=True):
         if self.turn == WHITE:
@@ -2233,18 +2216,37 @@ class Board(object):
         piece = self.piece_type_at(move.from_square)
         en_passant = False
 
+        # Look ahead for check or checkmate.
+        self.push(move)
+        is_check = self.is_check()
+        is_checkmate = is_check and self.is_checkmate()
+        self.pop()
+
         # Castling.
         if piece == KING:
+            castling = False
             if move.from_square == E1:
                 if move.to_square == G1:
-                    return "O-O"
+                    castling = True
+                    san = "O-O"
                 elif move.to_square == C1:
-                    return "O-O-O"
+                    castling = True
+                    san = "O-O-O"
             elif move.from_square == E8:
                 if move.to_square == G8:
-                    return "O-O"
+                    castling = True
+                    san = "O-O"
                 elif move.to_square == C8:
-                    return "O-O-O"
+                    castling = True
+                    san = "O-O-O"
+
+            if castling:
+                if is_checkmate:
+                    return san + "#"
+                elif is_check:
+                    return san + "+"
+                else:
+                    return san
 
         if piece == PAWN:
             san = ""
@@ -2312,14 +2314,11 @@ class Board(object):
         if move.promotion:
             san += "=" + PIECE_SYMBOLS[move.promotion].upper()
 
-        # Look ahead for check or checkmate.
-        self.push(move)
-        if self.is_check():
-            if self.is_checkmate():
-                san += "#"
-            else:
-                san += "+"
-        self.pop()
+        # Add check or checkmate suffix
+        if is_checkmate:
+            san += "#"
+        elif is_check:
+            san += "+"
 
         return san
 

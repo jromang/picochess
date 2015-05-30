@@ -510,7 +510,7 @@ class ChessTalkerVoice():
         is_game_over = game.is_game_over()
         is_insufficient_material = game.is_insufficient_material()
         is_seventyfive_moves = game.is_seventyfive_moves()
-        is_fivefold_repitition = game.is_fivefold_repitition()
+        is_fivefold_repetition = game.is_fivefold_repetition()
         # logging.debug("say_move: POST-move game state: %s", str(game))
         # Pop to the previous game state, so we can determine the pieces on the from/to squares.
         game.pop()
@@ -553,7 +553,7 @@ class ChessTalkerVoice():
                     self.say_draw_seventyfive_moves()
                 elif is_insufficient_material:
                     self.say_draw_insufficient_material()
-                elif is_fivefold_repitition:
+                elif is_fivefold_repetition:
                     self.say_draw_fivefold_repetition()
                 else:
                     self.say_draw()
