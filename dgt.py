@@ -23,6 +23,7 @@ import time
 from timecontrol import *
 from struct import unpack
 from collections import OrderedDict
+from utilities import *
 
 try:
     import enum
@@ -449,6 +450,9 @@ class DGTBoard(Observable, Display, threading.Thread):
 
                     if 17 <= message[4] <= 18 and message[5] == 51:
                         logging.info("Button 2 pressed")
+                        if self.dgt_clock_menu == Menu.GAME_MENU:
+                            self.fire(Event.CHANGE_MODE)
+
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
                             self.display_on_dgt_clock("scan", beep=True)
                             to_move = 'w' if self.setup_to_move == chess.WHITE else 'b'
@@ -459,6 +463,8 @@ class DGTBoard(Observable, Display, threading.Thread):
 
                     if 9 <= message[4] <= 10 and message[5] == 50:
                         logging.info("Button 3 pressed")
+                        self.display_on_dgt_xl('pic'+version)
+                        self.display_on_dgt_3000('pic'+version)
 
                     if 65 <= message[4] <= 66 and message[5] == 53:
                         logging.info("Button 4 pressed")
@@ -561,10 +567,6 @@ class DGTBoard(Observable, Display, threading.Thread):
                     elif fen in mode_map:  # Set interaction mode
                         logging.debug("Interaction mode [%s]", mode_map[fen])
                         self.fire(Event.SET_MODE, mode=mode_map[fen])
-                        Display.show(Event.SET_MODE, mode_string=('game', 'analyse', 'white', 'kibitz', 'observe', 'black')[mode_map[fen].value])
-
-                        self.display_on_dgt_xl(('game', 'analys', 'white', 'kibitz', 'observ', 'black')[mode_map[fen].value], self.enable_dgt_clock_beep)
-                        self.display_on_dgt_3000(('game', 'analyse', 'white', 'kibitz', 'observe', 'black')[mode_map[fen].value], self.enable_dgt_clock_beep)
                     elif fen in time_control_map:
                         logging.debug("Setting time control %s", time_control_map[fen].mode)
                         self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[fen])
@@ -669,7 +671,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                         break
                     if case(Message.REVIEW_MODE_MOVE):
                         uci_move = message.move.uci()
-                        self.last_move = uci_move
+                        self.last_move = message.move
                         self.last_fen = message.fen
 
                         # Dont beep when reviewing a game
@@ -701,6 +703,10 @@ class DGTBoard(Observable, Display, threading.Thread):
                         # time.sleep(3)  # Let the move displayed on lock
                         self.display_on_dgt_xl(message.result.value, beep=self.enable_dgt_clock_beep)
                         self.display_on_dgt_3000(message.result.value, beep=self.enable_dgt_clock_beep)
+                        break
+                    if case(Message.INTERACTION_MODE):
+                        self.display_on_dgt_xl(message.mode.value, beep=self.enable_dgt_clock_beep)
+                        self.display_on_dgt_3000(message.mode.value, beep=self.enable_dgt_clock_beep)
                         break
                     if case():  # Default
                         pass

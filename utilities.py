@@ -30,7 +30,7 @@ except ImportError:
 
 
 # picochess version
-version = '036'
+version = '039'
 
 event_queue = queue.Queue()
 display_devices = []
@@ -51,6 +51,7 @@ class Event(AutoNumber):
     USER_MOVE = ()  # User sends a move
     OPENING_BOOK = ()  # User chooses an opening book
     SET_MODE = ()  # Change interaction mode
+    CHANGE_MODE = ()
     SETUP_POSITION = () # Setup custom position
     #Engine events
     BEST_MOVE = ()  # Engine has found a move
@@ -112,12 +113,12 @@ class GameMenu(AutoNumber):
 @enum.unique
 class Mode(enum.Enum):
     #Interaction modes
-    GAME = 0
-    ANALYSIS = 1
-    PLAY_WHITE = 2
-    KIBITZ = 3
-    OBSERVE = 4
-    PLAY_BLACK = 5
+    GAME = 'game'
+    ANALYSIS = 'analyse'
+    PLAY_WHITE = 'white'
+    KIBITZ = 'kibitz'
+    OBSERVE = 'observe'
+    PLAY_BLACK = 'black'
 
 
 class ClockMode(AutoNumber):

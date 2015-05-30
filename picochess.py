@@ -59,14 +59,17 @@ def main():
     parser.add_argument("-ar", "--auto-reboot", action='store_true', help="reboot system after update")
     parser.add_argument("-web", "--web-server", dest="web_server_port", nargs="?", const=80, type=int, metavar="PORT", help="launch web server")
     parser.add_argument("-mail", "--email", type=str, help="email used to send pgn files", default=None)
-    parser.add_argument("-mk", "--email-key", type=str, help="key used to send emails", default=None)
+    parser.add_argument("-mail_s", "--smtp_server", type=str, help="Adress of email server", default=None)
+    parser.add_argument("-mail_u", "--smtp_user", type=str, help="Username for email server", default=None)
+    parser.add_argument("-mail_p", "--smtp_pass", type=str, help="Password for email server", default=None)
+    parser.add_argument("-mail_enc", "--smtp_encryption", action='store_true', help="use ssl encryption connection to smtp-Server")
+    parser.add_argument("-mk", "--mailgun-key", type=str, help="key used to send emails via Mailgun Webservice", default=None)
     parser.add_argument("-uci", "--uci-option", type=str, help="pass an UCI option to the engine (name;value)", default=None)
     parser.add_argument("-dgt3000", "--dgt-3000-clock", action='store_true', help="use dgt 3000 clock")
     parser.add_argument("-nobeep", "--disable-dgt-clock-beep", action='store_true', help="disable beeps on the dgt clock")
     parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
     parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
     args = parser.parse_args()
-
     # Enable logging
     logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
                         format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
@@ -101,7 +104,9 @@ def main():
         TerminalDisplay().start()
 
     # Save to PGN
-    PgnDisplay(args.pgn_file, email=args.email, key=args.email_key).start()
+    PgnDisplay(args.pgn_file, email=args.email, fromINIMailGun_Key=args.mailgun_key,
+                        fromIniSmtp_Server=args.smtp_server, fromINISmtp_User=args.smtp_user,
+                        fromINISmtp_Pass=args.smtp_pass, fromINISmtp_Enc=args.smtp_encryption).start() 
 
     # Create ChessTalker for speech output
     talker = None
@@ -290,20 +295,21 @@ def main():
                 time_control.stop()
                 time_control.reset()
                 Display.show(Message.START_NEW_GAME)
-                if interaction_mode == Mode.PLAY_BLACK:
+                if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
                     think(time_control)
                 break
 
             if case(Event.NEW_GAME):  # User starts a new game
                 if game.move_stack:
                     logging.debug("Starting a new game")
-                    Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
+                    if not game.is_game_over():
+                        Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
                     game = chess.Bitboard()
                     legal_fens = compute_legal_fens(game)
                     time_control.stop()
                     time_control.reset()
                     Display.show(Message.START_NEW_GAME)
-                if interaction_mode == Mode.PLAY_BLACK:
+                if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
                     think(time_control)
                 break
 
@@ -325,8 +331,18 @@ def main():
                 break
 
             if case(Event.SET_MODE):
-                # Display.show(Message.INTERACTION_MODE, mode=event.mode)  # Usefull for pgn display device
+                Display.show(Message.INTERACTION_MODE, mode=event.mode)  # Useful for pgn display device
                 interaction_mode = event.mode
+                break
+
+            if case(Event.CHANGE_MODE):
+                if interaction_mode == Mode.PLAY_WHITE:
+                    interaction_mode = Mode.PLAY_BLACK
+                else:
+                    interaction_mode = Mode.PLAY_WHITE
+                Display.show(Message.INTERACTION_MODE, mode=interaction_mode)
+                if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
+                    think(time_control)
                 break
 
             if case(Event.SET_TIME_CONTROL):

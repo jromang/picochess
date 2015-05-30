@@ -3,7 +3,7 @@ Usage
 
 Choosing skill level
 --------------------
-Put the extra black queen on your DGT board to select skill level. Putting it on square A6 will select level 0 (easiest), while B6 selects level 1, C6 selects level 2, etc. If no skill level is selected, PicoChess uses level 20 (the highest level) by default. Level 20 can also be selected by placing the extra black queen on square E4.
+Put the extra **black** queen on your DGT board to select skill level. Putting it on square A6 will select level 0 (easiest), while B6 selects level 1, C6 selects level 2, etc. If no skill level is selected, PicoChess uses level 20 (the highest level) by default. Level 20 can also be selected by placing the extra black queen on square E4.
 
 * Level  0 estimates about 1100 Elo (Absolute beginner)
 * Level 10 estimates about 1750 Elo (Mediate club player )
@@ -15,21 +15,22 @@ Choosing opening books
 Opening books are also selected with the extra **black** queen:
 
 * **A3** - No book
-* **B3** - Fun
-* **C3** - Anand
-* **D3** - Korchnoi
-* **E3** - Larsen
-* **F3** - Pro
-* **G3** - GM_2001 : GM games from 2001 to mid-September, 2012
+* **B3** - ECO A - Flank
+* **C3** - ECO B - Semiopen
+* **D3** - ECO C - Open
+* **E3** - ECO D - Closed
+* **F3** - ECO E - Indian
+* **G3** - Fun
 * **H3** - Varied. (Default)
-* **H4** - GM_1950 (> 2500 ELO GM games from 1950 till mid-Sept, 2012)
+* **H4** - GM_1950 (> 2500 ELO GM games from 1950 till 2013)
 * **G4** - Performance
 * **F4** - Stockfish optimized book v 2.11 by Salvo Spitaleri
 
 Setting up time controls
 ------------------------
 
-Time controls are set with the extra **white** queen. Remove the extra black queen if it is still on the board.
+Time controls are set with the extra **white** queen.
+(Remove the extra black queen if it is still on the board.)
 
 * **A6** - 1 second per move
 * **B6** - 3 seconds per move
@@ -92,35 +93,25 @@ When using these modes, please be patient and dont rush moves. Allow a few secon
 Position setup
 --------------
 
-Setting up a custom position is now possible.
+Before setting custom position, choose your level and time controls with pieces in starting position as usual.
 
-To set up a position with white to move, place both white queens on A1 and H1 and remove ALL other pieces from the board.
-The "Setup" message should flash on the DGT clock.
-Now setup a custom position.
-After you are done setting up the position, remove the white king and place it back (can also be the black king) if you want to play the position against the computer with you having while to move.
-If instead you want to analyze the position, remove any other piece excepting a king and place it back on the same square.
-You should get a "New Game" message.
-Now make a move for white, and the computer will either play against you or analyze depending on what you chose.
-To have a position with black to move, repeat the above procedure with black queens on A8 and H8.
-If you want white to play but have the board reversed, place the queens on the squares and remove and replace a queen once after to get the "Setup" message.
+Setup your position. Press the rightmost button until "Position" is displayed on the clock.
+Press the leftmost button to choose side to move, Black or White.
+Press the second button to choose the board orientation, Normal or Reversed.
+Press center button, clock will respond with "Scan". Move.
 
 Clock button support
 --------------------
 
-* The first clock button shows the last move.
-* The second clock button shows an evaluation followed by a move hint.
-* The third clock button toggles between top level menus, currently "Setup", "Level", "Book", "Time", "None", "Engine", and "System". The last two menus dont provide any functionality yet.
-* The fourth clock button will switch sides and the computer will make your move.
-* The fifth clock button switches game modes.
-
-To move between top level menus, use the home button. If you want to change a level for example, use the home button until you see "Level". Then hit the 2nd and/or 4th clock buttons to toggle levels. Then, use the last clock button to select an option. With level, you can use the 4th button to increase to level 10 and then hit the last button to select level 10.
-On the setup menu, the options are white, black, reverse board, and scan position. This means white to move, black to move, reverse board orientation, and scan the board position.
-The chatty game mode will return the evaluation every two seconds, while playing a game.
-Use the home button to switch to the "None" to use the clock buttons during a game.
+* First button chooses White or Black.
+* Second button does nothing.
+* Third button will switch sides and the computer will make your move.
+* The fourth button does nothing.
+* The fifth toggles between "Position", "Engine", "System", "Game" options. Some of the options provide no functionality yet.
 
 PGN file support
 ----------------
 
-All moves of the played game along with engine evaluations and the principal variation are stored.
-Every game played with picochess is stored in the source tree folder as "game.pgn". This is overwritten when you restart pico chess.
-If a position is undone, another game will be created within game.pgn.
+All moves of the played game along with engine are stored.
+Every game played with picochess is stored in the /opt/picochess folder as "games.pgn".
+If a position is undone, another game will be created within games.pgn.
