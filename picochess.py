@@ -37,8 +37,6 @@ from pgn import PgnDisplay
 from server import WebServer
 import chesstalker.chesstalker
 
-
-#import chess.uci
 import spur
 
 def main():
@@ -329,6 +327,10 @@ def main():
                     Display.show(Message.COMPUTER_MOVE, move=move, ponder=ponder, fen=fen, game=copy.deepcopy(game), time_control=time_control)
                     # if check_game_state(game, interaction_mode):
                     legal_fens = compute_legal_fens(game)
+                break
+
+            if case(Event.SCORE):
+                Display.show(Message.SCORE, score=event.score, mate=event.mate)
                 break
 
             if case(Event.SET_MODE):

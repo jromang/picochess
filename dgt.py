@@ -283,6 +283,8 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.last_move = None
         self.last_fen = None
         self.ponder_move = None
+        self.score = None
+        self.mate = None
         # Open the serial port
         attempts = 0
         while attempts < 10:
@@ -468,8 +470,15 @@ class DGTBoard(Observable, Display, threading.Thread):
 
                     if 9 <= message[4] <= 10 and message[5] == 50:
                         logging.info("Button 3 pressed")
-                        self.display_on_dgt_xl('pic'+version)
-                        self.display_on_dgt_3000('pic'+version)
+                        if self.dgt_clock_menu == Menu.GAME_MENU:
+                            if self.mate is None:
+                                sc = 's none' if self.score is None else 's' + str(self.score).rjust(4)
+                            else:
+                                sc = 'm ' + str(self.mate)
+                            self.display_on_dgt_clock(sc, True)
+
+                        if self.dgt_clock_menu == Menu.SETTINGS_MENU:
+                            self.display_on_dgt_clock('pic'+version)
 
                     if 65 <= message[4] <= 66 and message[5] == 53:
                         logging.info("Button 4 pressed")
@@ -671,6 +680,8 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.clear_light_revelation_board()
                         self.last_move = None
                         self.ponder_move = None
+                        self.score = None
+                        self.mate = None
                         break
                     if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
                         self.display_on_dgt_xl('ok', self.enable_dgt_clock_beep)
@@ -715,6 +726,10 @@ class DGTBoard(Observable, Display, threading.Thread):
                     if case(Message.INTERACTION_MODE):
                         self.display_on_dgt_xl(message.mode.value, beep=self.enable_dgt_clock_beep)
                         self.display_on_dgt_3000(message.mode.value, beep=self.enable_dgt_clock_beep)
+                        break
+                    if case(Message.SCORE):
+                        self.score = message.score
+                        self.mate = message.mate
                         break
                     if case():  # Default
                         pass

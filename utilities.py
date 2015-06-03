@@ -55,6 +55,7 @@ class Event(AutoNumber):
     SETUP_POSITION = () # Setup custom position
     #Engine events
     BEST_MOVE = ()  # Engine has found a move
+    SCORE = ()  # Engine sends a new Score
     SET_TIME_CONTROL = ()  # User sets time control
     OUT_OF_TIME = ()
     UCI_OPTION_SET = ()  # Users sets an UCI option, contains 'name' and 'value' (strings)
@@ -78,6 +79,7 @@ class Message(AutoNumber):
     GAME_ENDS = ()  # The current game has ended, contains a 'result' (GameResult) and list of 'moves'
 
     SYSTEM_INFO = () # Information about picochess such as version etc
+    SCORE = ()  # Score
 
 
 class Menu(AutoNumber):
