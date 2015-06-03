@@ -303,7 +303,7 @@ class DGTBoard(Observable, Display, threading.Thread):
         tries = 0
         self.clock_found = False
         while not self.clock_found and tries < 20:
-            time.sleep(0.1)
+            time.sleep(0.3)
             self.clock_found = self.serial.inWaiting()
             tries += 1
         logging.debug('DGT clock found' if self.clock_found else 'DGT clock NOT found')
