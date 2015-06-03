@@ -338,7 +338,8 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.write_queue.put(message)
 
     def send_command(self, message):
-        logging.debug('->DGT [%s]', message[0])
+        mes = message[3] if message[0] == Commands.DGT_CLOCK_MESSAGE else message[0]
+        logging.debug('->DGT [%s]', mes)
         array = []
         for v in message:
             if type(v) is int: array.append(v)
