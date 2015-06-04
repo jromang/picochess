@@ -731,6 +731,9 @@ class DGTBoard(Observable, Display, threading.Thread):
                     if case(Message.BOOK_MOVE):
                         self.display_on_dgt_clock('book', beep=False)
                         break
+                    if case(Message.SEARCH_STARTED):
+                        print('Search Started!')
+                        break
                     if case():  # Default
                         pass
             except queue.Empty:

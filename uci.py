@@ -90,3 +90,6 @@ class Engine():
 
     def go(self, time_dict):
         return self.engine.go(**time_dict)
+
+    def ponder(self):
+        return self.engine.go(ponder=True)

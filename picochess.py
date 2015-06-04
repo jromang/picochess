@@ -168,15 +168,25 @@ def main():
             engine.go(time.uci())
             Display.show(Message.SEARCH_STARTED)
 
+    def xponder():
+        """
+        Starts a new search on the current game.
+        If a move is found in the opening book, fire an event in a few seconds.
+        :return:
+        """
+        engine.set_position(game)
+        engine.ponder()
+        Display.show(Message.SEARCH_STARTED)
+
     def stop_thinking():
         """
         Stop current search or book thread.
         :return:
         """
-        if book_thread:
-            book_thread.cancel()
-        else:
-            engine.stop()
+        #if book_thread:
+        #    book_thread.cancel()
+        #else:
+        engine.stop()
 
     def check_game_state(game, interaction_mode):
         """
@@ -263,22 +273,30 @@ def main():
                     logging.warning('Illegal move [%s]', move)
                 # Check if we are in play mode and it is player's turn
                 elif (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.WHITE) or \
-                        (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.BLACK) or \
-                        (interaction_mode != Mode.PLAY_BLACK and interaction_mode != Mode.PLAY_WHITE):
+                        (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.BLACK):
                     time_control.stop()
                     # logging.debug("Stopping player clock")
-
+                    game.push(move)
+                    if check_game_state(game, interaction_mode):
+                        think(time_control)
+                        Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
+                elif interaction_mode == Mode.OBSERVE:
+                    time_control.stop()
+                    # logging.debug("Stopping player clock")
                     fen = game.fen()
                     game.push(move)
                     if check_game_state(game, interaction_mode):
-                        if interaction_mode == Mode.PLAY_BLACK or interaction_mode == Mode.PLAY_WHITE:
-                            think(time_control)
-                            Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
-                        else:
-                            # Observe mode
-                            Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game))
-                            if check_game_state(game, interaction_mode):
-                                legal_fens = compute_legal_fens(game)
+                        Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game))
+                        if check_game_state(game, interaction_mode):
+                            legal_fens = compute_legal_fens(game)
+                elif interaction_mode == Mode.ANALYSIS:
+                    print(engine.stop())
+                    time_control.stop()
+                    # logging.debug("Stopping player clock")
+                    game.push(move)
+                    if check_game_state(game, interaction_mode):
+                        xponder()
+                        Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
                 break
 
             if case(Event.LEVEL):  # User sets a new level
