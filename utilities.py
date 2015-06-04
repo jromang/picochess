@@ -116,10 +116,10 @@ class GameMenu(AutoNumber):
 class Mode(enum.Enum):
     #Interaction modes
     GAME = 'game'
-    ANALYSIS = 'analyse'
+    ANALYSIS = 'analys'
     PLAY_WHITE = 'white'
     KIBITZ = 'kibitz'
-    OBSERVE = 'observe'
+    OBSERVE = 'observ'
     PLAY_BLACK = 'black'
 
 

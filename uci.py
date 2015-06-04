@@ -92,4 +92,5 @@ class Engine():
         return self.engine.go(**time_dict)
 
     def ponder(self):
-        return self.engine.go(ponder=True)
+        #return self.engine.go(ponder=True,async_callback=True)
+        return self.engine.go(infinite=True,async_callback=True)

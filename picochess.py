@@ -297,6 +297,7 @@ def main():
                     if check_game_state(game, interaction_mode):
                         xponder()
                         Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
+                        legal_fens = compute_legal_fens(game)
                 break
 
             if case(Event.LEVEL):  # User sets a new level
