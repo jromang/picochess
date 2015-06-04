@@ -697,7 +697,6 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.display_on_dgt_xl(' ' + uci_move, False)
                         self.bit_board.set_fen(message.fen)
                         self.display_on_dgt_3000(self.bit_board.san(message.move), False)
-
                         break
                     if case(Message.USER_TAKE_BACK):
                         self.display_on_dgt_xl('takbak', self.enable_dgt_clock_beep)
@@ -719,17 +718,18 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.write([Commands.DGT_CLOCK_MESSAGE, 0x03, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_END, Clock.DGT_CMD_CLOCK_END_MESSAGE])
                         break
                     if case(Message.GAME_ENDS):
-                        # time.sleep(3)  # Let the move displayed on lock
-                        self.display_on_dgt_xl(message.result.value, beep=self.enable_dgt_clock_beep)
-                        self.display_on_dgt_3000(message.result.value, beep=self.enable_dgt_clock_beep)
+                        # time.sleep(3)  # Let the move displayed on clock
+                        self.display_on_dgt_clock(message.result.value, beep=self.enable_dgt_clock_beep)
                         break
                     if case(Message.INTERACTION_MODE):
-                        self.display_on_dgt_xl(message.mode.value, beep=self.enable_dgt_clock_beep)
-                        self.display_on_dgt_3000(message.mode.value, beep=self.enable_dgt_clock_beep)
+                        self.display_on_dgt_clock(message.mode.value, beep=self.enable_dgt_clock_beep)
                         break
                     if case(Message.SCORE):
                         self.score = message.score
                         self.mate = message.mate
+                        break
+                    if case(Message.BOOK_MOVE):
+                        self.display_on_dgt_clock('book', beep=False)
                         break
                     if case():  # Default
                         pass

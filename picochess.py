@@ -146,9 +146,12 @@ def main():
         :return:
         """
         def send_book_move(move):
-            Observable.fire(Event.BEST_MOVE, move=move,ponder=None)
+            g=copy.deepcopy(game)
+            g.push(move)
+            book_ponder = weighted_choice(book, g)
+            Observable.fire(Event.BEST_MOVE, move=move,ponder=book_ponder)
 
-        global book_thread
+        #global book_thread
         book_move = weighted_choice(book, game)
         Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time)
         time.run(game.turn)
@@ -160,7 +163,7 @@ def main():
             # book_thread = threading.Timer(2, send_book_move, [book_move])
             # book_thread.start()
         else:
-            book_thread = None
+            #book_thread = None
             engine.set_position(game)
             engine.go(time.uci())
             Display.show(Message.SEARCH_STARTED)
