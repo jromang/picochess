@@ -55,6 +55,7 @@ class Event(AutoNumber):
     SETUP_POSITION = () # Setup custom position
     #Engine events
     BEST_MOVE = ()  # Engine has found a move
+    NEW_PV = ()    # Engine sends a new Principal Variation
     SCORE = ()  # Engine sends a new Score
     SET_TIME_CONTROL = ()  # User sets time control
     OUT_OF_TIME = ()
@@ -66,6 +67,7 @@ class Message(AutoNumber):
     #Messages to display devices
     COMPUTER_MOVE = ()  # Show computer move
     BOOK_MOVE = ()  # Show book move
+    NEW_PV  = ()    # Show the new Principal Variation
     REVIEW_MODE_MOVE = () # Player is reviewing game
     INTERACTION_MODE = ()  # Interaction mode
     START_NEW_GAME = ()

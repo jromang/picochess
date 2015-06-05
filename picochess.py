@@ -168,7 +168,7 @@ def main():
             engine.go(time.uci())
             Display.show(Message.SEARCH_STARTED)
 
-    def xponder():
+    def analyse():
         """
         Starts a new search on the current game.
         If a move is found in the opening book, fire an event in a few seconds.
@@ -265,7 +265,6 @@ def main():
                                 break
                 break
 
-
             if case(Event.USER_MOVE):  # User sends a new move
                 move = event.move
                 logging.debug('User move [%s]', move)
@@ -282,7 +281,6 @@ def main():
                         Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
                 elif interaction_mode == Mode.OBSERVE:
                     time_control.stop()
-                    # logging.debug("Stopping player clock")
                     fen = game.fen()
                     game.push(move)
                     if check_game_state(game, interaction_mode):
@@ -290,13 +288,13 @@ def main():
                         if check_game_state(game, interaction_mode):
                             legal_fens = compute_legal_fens(game)
                 elif interaction_mode == Mode.ANALYSIS:
-                    print(engine.stop())
+                    engine.stop()
                     time_control.stop()
-                    # logging.debug("Stopping player clock")
+                    fen = game.fen()
                     game.push(move)
                     if check_game_state(game, interaction_mode):
-                        xponder()
-                        Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
+                        analyse()
+                        Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game))
                         legal_fens = compute_legal_fens(game)
                 break
 
@@ -329,6 +327,8 @@ def main():
                     time_control.stop()
                     time_control.reset()
                     Display.show(Message.START_NEW_GAME)
+                    if interaction_mode == Mode.ANALYSIS:
+                        interaction_mode = Mode.PLAY_WHITE
                 if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
                     think(time_control)
                 break
@@ -349,6 +349,11 @@ def main():
                     Display.show(Message.COMPUTER_MOVE, move=move, ponder=ponder, fen=fen, game=copy.deepcopy(game), time_control=time_control)
                     # if check_game_state(game, interaction_mode):
                     legal_fens = compute_legal_fens(game)
+                break
+
+            if case(Event.NEW_PV):
+                if interaction_mode == Mode.ANALYSIS:
+                    Display.show(Message.NEW_PV, pv=event.pv)
                 break
 
             if case(Event.SCORE):

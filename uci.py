@@ -31,6 +31,10 @@ class Informer(chess.uci.InfoHandler,Observable):
         self.fire(Event.SCORE, score=cp, mate=mate)
         super().score(cp,mate,lowerbound,upperbound)
 
+    def pv(self,moves):
+        self.fire(Event.NEW_PV, pv=moves)
+        super().pv(moves)
+
 
 class Engine():
 
@@ -92,5 +96,4 @@ class Engine():
         return self.engine.go(**time_dict)
 
     def ponder(self):
-        #return self.engine.go(ponder=True,async_callback=True)
-        return self.engine.go(infinite=True,async_callback=True)
+        return self.engine.go(ponder=True, infinite=True, async_callback=True)

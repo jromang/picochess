@@ -282,7 +282,7 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.dgt_clock_menu = Menu.GAME_MENU
         self.last_move = None
         self.last_fen = None
-        self.ponder_move = None
+        self.hint_move = None
         self.score = None
         self.mate = None
         # Open the serial port
@@ -447,8 +447,8 @@ class DGTBoard(Observable, Display, threading.Thread):
 
                     if 33 <= message[4] <= 34 and message[5] == 52:
                         logging.info("Button 1 pressed")
-                        if self.dgt_clock_menu == Menu.GAME_MENU and self.ponder_move:
-                            self.display_on_dgt_clock(self.ponder_move.uci(), beep=True)
+                        if self.dgt_clock_menu == Menu.GAME_MENU and self.hint_move:
+                            self.display_on_dgt_clock(self.hint_move.uci(), beep=True)
 
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
                             self.setup_reverse_orientation = False if self.setup_reverse_orientation else True
@@ -472,7 +472,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                         logging.info("Button 3 pressed")
                         if self.dgt_clock_menu == Menu.GAME_MENU:
                             if self.mate is None:
-                                sc = 's none' if self.score is None else 's' + str(self.score).rjust(4)
+                                sc = 'c none' if self.score is None else 'c' + str(self.score).rjust(4)
                             else:
                                 sc = 'm ' + str(self.mate)
                             self.display_on_dgt_clock(sc, True)
@@ -659,7 +659,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                     if case(Message.COMPUTER_MOVE):
                         uci_move = message.move.uci()
                         self.last_move = message.move
-                        self.ponder_move = chess.Move.null() if message.ponder is None else message.ponder
+                        self.hint_move = chess.Move.null() if message.ponder is None else message.ponder
                         self.last_fen = message.fen
                         logging.info("DGT SEND BEST MOVE:"+uci_move)
                         # Stop the clock before displaying a move
@@ -679,13 +679,13 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.display_on_dgt_3000('new game', self.enable_dgt_clock_beep)
                         self.clear_light_revelation_board()
                         self.last_move = None
-                        self.ponder_move = None
+                        self.hint_move = None
                         self.score = None
                         self.mate = None
+                        self.dgt_clock_menu = Menu.GAME_MENU
                         break
                     if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
-                        self.display_on_dgt_xl('ok', self.enable_dgt_clock_beep)
-                        self.display_on_dgt_3000('ok', self.enable_dgt_clock_beep)
+                        self.display_on_dgt_clock('ok', self.enable_dgt_clock_beep)
                         self.clear_light_revelation_board()
                         break
                     if case(Message.REVIEW_MODE_MOVE):
@@ -729,13 +729,12 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.mate = message.mate
                         break
                     if case(Message.BOOK_MOVE):
+                        self.score = None
+                        self.mate = None
                         self.display_on_dgt_clock('book', beep=False)
                         break
-                    if case(Message.SEARCH_STARTED):
-                        #print('Search Started!')
-                        break
-                    if case(Message.USER_MOVE):
-                        #print('UserMove')
+                    if case(Message.NEW_PV):
+                        self.hint_move = message.pv[0]
                         break
                     if case():  # Default
                         pass
