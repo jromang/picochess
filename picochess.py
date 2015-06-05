@@ -248,6 +248,8 @@ def main():
                 elif event.fen == legal_fens.root:  # Allow user to take his move back while the engine is searching
                     stop_thinking()
                     game.pop()
+                    if interaction_mode == Mode.ANALYSIS:
+                        analyse()
                     Display.show(Message.USER_TAKE_BACK)
                 else:  # Check if this a a previous legal position and allow user to restart from this position
                     game_history = copy.deepcopy(game)
@@ -255,12 +257,14 @@ def main():
                         game_history.pop()
                         if (interaction_mode == Mode.PLAY_WHITE and game_history.turn == chess.WHITE) \
                             or (interaction_mode == Mode.PLAY_BLACK and game_history.turn == chess.BLACK) \
-                            or (interaction_mode == Mode.OBSERVE):
+                            or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.ANALYSIS):
                             if game_history.fen().split(' ')[0] == event.fen:
                                 logging.debug("Undoing game until FEN :" + event.fen)
                                 stop_thinking()
                                 while len(game_history.move_stack) < len(game.move_stack):
                                     game.pop()
+                                if interaction_mode == Mode.ANALYSIS:
+                                    analyse()
                                 Display.show(Message.USER_TAKE_BACK)
                                 legal_fens = compute_legal_fens(game)
                                 break
