@@ -472,7 +472,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                         logging.info("Button 3 pressed")
                         if self.dgt_clock_menu == Menu.GAME_MENU:
                             if self.mate is None:
-                                sc = 'c none' if self.score is None else 'c' + str(self.score).rjust(4)
+                                sc = 'none' if self.score is None else str(self.score).rjust(6)
                             else:
                                 sc = 'm ' + str(self.mate)
                             self.display_on_dgt_clock(sc, True)
