@@ -57,7 +57,12 @@ class PgnDisplay(Display, threading.Thread):
                 message = self.message_queue.get()
                 if message == Message.GAME_ENDS and message.moves:
                     logging.debug('Saving game to [' + self.file_name+']')
-                    game = node = chess.pgn.Game()
+                    game = chess.pgn.Game()
+                    if message.custom_fen:
+                        b = chess.Board()
+                        b.set_fen(message.custom_fen)
+                        game.setup(b)
+                    node = game
                     for move in message.moves:
                         node = node.add_main_variation(move)
                     # Headers

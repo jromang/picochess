@@ -194,20 +194,21 @@ def main():
         :param game:
         :return: True is the game continues, False if it has ended
         """
+        custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
         if game.is_stalemate():
-            Display.show(Message.GAME_ENDS, result=GameResult.STALEMATE, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
+            Display.show(Message.GAME_ENDS, result=GameResult.STALEMATE, moves=list(game.move_stack), color=game.turn, mode=interaction_mode, custom_fen=custom_fen)
             return False
         if game.is_insufficient_material():
-            Display.show(Message.GAME_ENDS, result=GameResult.INSUFFICIENT_MATERIAL, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
+            Display.show(Message.GAME_ENDS, result=GameResult.INSUFFICIENT_MATERIAL, moves=list(game.move_stack), color=game.turn, mode=interaction_mode, custom_fen=custom_fen)
             return False
         if game.is_seventyfive_moves():
-            Display.show(Message.GAME_ENDS, result=GameResult.SEVENTYFIVE_MOVES, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
+            Display.show(Message.GAME_ENDS, result=GameResult.SEVENTYFIVE_MOVES, moves=list(game.move_stack), color=game.turn, mode=interaction_mode, custom_fen=custom_fen)
             return False
         if game.is_fivefold_repetition():
-            Display.show(Message.GAME_ENDS, result=GameResult.FIVEFOLD_REPETITION, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
+            Display.show(Message.GAME_ENDS, result=GameResult.FIVEFOLD_REPETITION, moves=list(game.move_stack), color=game.turn, mode=interaction_mode, custom_fen=custom_fen)
             return False
         if game.is_game_over():
-            Display.show(Message.GAME_ENDS, result=GameResult.MATE, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
+            Display.show(Message.GAME_ENDS, result=GameResult.MATE, moves=list(game.move_stack), color=game.turn, mode=interaction_mode, custom_fen=custom_fen)
             return False
         return True
 
@@ -372,7 +373,8 @@ def main():
                     interaction_mode = Mode.PLAY_WHITE
                 Display.show(Message.INTERACTION_MODE, mode=interaction_mode)
                 if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
-                    think(time_control)
+                    if check_game_state(game, interaction_mode):
+                        think(time_control)
                 break
 
             if case(Event.SET_TIME_CONTROL):
