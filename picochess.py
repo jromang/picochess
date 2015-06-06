@@ -151,7 +151,7 @@ def main():
             book_ponder = weighted_choice(book, g)
             Observable.fire(Event.BEST_MOVE, move=move,ponder=book_ponder)
 
-        #global book_thread
+        # global book_thread
         book_move = weighted_choice(book, game)
         Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time)
         time.run(game.turn)
@@ -163,7 +163,7 @@ def main():
             # book_thread = threading.Timer(2, send_book_move, [book_move])
             # book_thread.start()
         else:
-            #book_thread = None
+            # book_thread = None
             engine.set_position(game)
             engine.go(time.uci())
             Display.show(Message.SEARCH_STARTED)
@@ -174,6 +174,20 @@ def main():
         If a move is found in the opening book, fire an event in a few seconds.
         :return:
         """
+        engine.set_position(game)
+        engine.ponder()
+        Display.show(Message.SEARCH_STARTED)
+
+    def observe(time):
+        """
+        Starts a new search on the current game.
+        If a move is found in the opening book, fire an event in a few seconds.
+        :return:
+        """
+        Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time)
+        # logging.debug("Starting clock")
+        time.run(game.turn)
+
         engine.set_position(game)
         engine.ponder()
         Display.show(Message.SEARCH_STARTED)
@@ -216,7 +230,7 @@ def main():
     legal_fens = compute_legal_fens(game)  # Compute the legal FENs
     book = chess.polyglot.open_reader(get_opening_books()[8][1])  # Default opening book
     interaction_mode = Mode.PLAY_WHITE   # Interaction mode
-    book_thread = None  # The thread that will fire book moves
+    # book_thread = None  # The thread that will fire book moves
     time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=5)
 
     #Send the engine's UCI options to all Displays
@@ -265,6 +279,8 @@ def main():
                                     game.pop()
                                 if interaction_mode == Mode.ANALYSIS:
                                     analyse()
+                                if interaction_mode == Mode.OBSERVE:
+                                    observe(time_control)
                                 Display.show(Message.USER_TAKE_BACK)
                                 legal_fens = compute_legal_fens(game)
                                 break
@@ -285,16 +301,17 @@ def main():
                         think(time_control)
                         Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
                 elif interaction_mode == Mode.OBSERVE:
+                    engine.stop()
                     time_control.stop()
                     fen = game.fen()
                     game.push(move)
                     if check_game_state(game, interaction_mode):
+                        observe(time_control)
                         Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game))
-                        if check_game_state(game, interaction_mode):
-                            legal_fens = compute_legal_fens(game)
+                        legal_fens = compute_legal_fens(game)
                 elif interaction_mode == Mode.ANALYSIS:
                     engine.stop()
-                    time_control.stop()
+                    # time_control.stop()
                     fen = game.fen()
                     game.push(move)
                     if check_game_state(game, interaction_mode):
@@ -326,7 +343,8 @@ def main():
                 if game.move_stack:
                     logging.debug("Starting a new game")
                     if not game.is_game_over():
-                        Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
+                        custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
+                        Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack), color=game.turn, mode=interaction_mode, custom_fen=custom_fen)
                     game = chess.Board()
                     legal_fens = compute_legal_fens(game)
                     time_control.stop()
@@ -357,8 +375,8 @@ def main():
                 break
 
             if case(Event.NEW_PV):
-                if interaction_mode == Mode.ANALYSIS:
-                    Display.show(Message.NEW_PV, pv=event.pv)
+                if (interaction_mode == Mode.ANALYSIS) or (interaction_mode == Mode.OBSERVE):
+                    Display.show(Message.NEW_PV, pv=event.pv, interaction_mode=interaction_mode)
                 break
 
             if case(Event.SCORE):
@@ -387,7 +405,8 @@ def main():
 
             if case(Event.OUT_OF_TIME):
                 stop_thinking()
-                Display.show(Message.GAME_ENDS, result=GameResult.TIME_CONTROL, moves=list(game.move_stack), color=event.color, mode=interaction_mode)
+                custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
+                Display.show(Message.GAME_ENDS, result=GameResult.TIME_CONTROL, moves=list(game.move_stack), color=event.color, mode=interaction_mode, custom_fen=custom_fen)
                 break
 
             if case(Event.UCI_OPTION_SET):

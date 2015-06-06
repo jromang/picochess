@@ -223,9 +223,10 @@ shutdown_map = ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQQBNR", "8/8/8/8/8/8/8/3Q
 
 mode_map = {"rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR": Mode.GAME,
             "rnbqkbnr/pppppppp/8/1Q6/8/8/PPPPPPPP/RNBQKBNR": Mode.ANALYSIS,
-            "rnbqkbnr/pppppppp/8/2Q5/8/8/PPPPPPPP/RNBQKBNR": Mode.PLAY_WHITE,
-            "rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR": Mode.KIBITZ,
-            "rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR": Mode.OBSERVE,
+            "rnbqkbnr/pppppppp/8/2Q5/8/8/PPPPPPPP/RNBQKBNR": Mode.OBSERVE,
+            # "rnbqkbnr/pppppppp/8/2Q5/8/8/PPPPPPPP/RNBQKBNR": Mode.PLAY_WHITE,
+            # "rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR": Mode.KIBITZ,
+            # "rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR": Mode.OBSERVE,
             "rnbq1bnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR": Mode.PLAY_BLACK,  # Player plays black
             "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQ1BNR": Mode.PLAY_WHITE,  # Player plays white
             "RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbq1bnr": Mode.PLAY_BLACK,  # Player plays black (reversed board)
@@ -689,14 +690,9 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.clear_light_revelation_board()
                         break
                     if case(Message.REVIEW_MODE_MOVE):
-                        uci_move = message.move.uci()
                         self.last_move = message.move
                         self.last_fen = message.fen
-
-                        # Dont beep when reviewing a game
-                        self.display_on_dgt_xl(' ' + uci_move, False)
-                        self.bit_board.set_fen(message.fen)
-                        self.display_on_dgt_3000(self.bit_board.san(message.move), False)
+                        # self.display_on_dgt_clock('ok', false)
                         break
                     if case(Message.USER_TAKE_BACK):
                         self.display_on_dgt_xl('takbak', self.enable_dgt_clock_beep)
@@ -735,6 +731,8 @@ class DGTBoard(Observable, Display, threading.Thread):
                         break
                     if case(Message.NEW_PV):
                         self.hint_move = message.pv[0]
+                        if message.interaction_mode == Mode.ANALYSIS:
+                            self.display_on_dgt_clock(self.hint_move.uci(),False)
                         break
                     if case():  # Default
                         pass
