@@ -233,7 +233,7 @@ def main():
     play_mode = GameMode.PLAY_WHITE
 
     # book_thread = None  # The thread that will fire book moves
-    time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=2)
+    time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=5)
 
     #Send the engine's UCI options to all Displays
     Display.show(Message.UCI_OPTION_LIST, options=engine.get().options)

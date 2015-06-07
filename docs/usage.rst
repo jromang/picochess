@@ -104,7 +104,7 @@ Clock button support
 --------------------
 
 * First button chooses White or Black.
-* Second button does nothing.
+* Second button shows the best move (ponder move) and the value (rotation by clicks)
 * Third button will switch sides and the computer will make your move.
 * The fourth button does nothing.
 * The fifth toggles between "Position", "Engine", "System", "Game" options. Some of the options provide no functionality yet.
