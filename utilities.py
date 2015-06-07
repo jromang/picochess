@@ -52,7 +52,7 @@ class Event(AutoNumber):
     OPENING_BOOK = ()  # User chooses an opening book
     SET_MODE = ()  # Change interaction mode
     SET_PLAYMODE = () # Change play mode
-    CHANGE_MODE = ()
+    CHANGE_PLAYMODE = () # Toogle between the play modes
     SETUP_POSITION = () # Setup custom position
     #Engine events
     BEST_MOVE = ()  # Engine has found a move
@@ -121,17 +121,14 @@ class Mode(enum.Enum):
     #Interaction modes
     GAME = 'game'
     ANALYSIS = 'analys'
-    # PLAY_WHITE = 'white'
-    # KIBITZ = 'kibitz'
+    KIBITZ = 'kibitz'
     OBSERVE = 'observ'
-    # PLAY_BLACK = 'black'
 
 @enum.unique
 class GameMode(enum.Enum):
     #Play modes
     PLAY_WHITE = 'white'
     PLAY_BLACK = 'black'
-
 
 class ClockMode(AutoNumber):
     FIXED_TIME = ()  # Fixed seconds per move

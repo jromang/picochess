@@ -256,10 +256,6 @@ def main():
                     legal_moves = list(game.legal_moves)
                     Observable.fire(Event.USER_MOVE, move=legal_moves[legal_fens.index(event.fen)])
                 elif event.fen == game.fen().split(' ')[0]:  # Player had done the computer move on the board
-                    if interaction_mode == Mode.ANALYSIS:
-                        print(game)
-                        print(event.fen)
-                        print(legal_fens)
                     if check_game_state(game, play_mode):
                         Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD)
                         if time_control.mode != ClockMode.FIXED_TIME:
@@ -311,22 +307,22 @@ def main():
                             think(time_control)
                             Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
                 elif interaction_mode == Mode.OBSERVE:
-                    engine.stop()
+                    stop_thinking()
                     time_control.stop()
                     fen = game.fen()
                     game.push(move)
                     if check_game_state(game, play_mode):
                         observe(time_control)
-                        Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game))
+                        Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game), mode=interaction_mode)
                         legal_fens = compute_legal_fens(game)
-                elif interaction_mode == Mode.ANALYSIS:
-                    engine.stop()
+                elif (interaction_mode == Mode.ANALYSIS) or (interaction_mode == Mode.KIBITZ):
+                    stop_thinking()
                     # time_control.stop()
                     fen = game.fen()
                     game.push(move)
                     if check_game_state(game, play_mode):
                         analyse()
-                        Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game))
+                        Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game), mode=interaction_mode)
                         legal_fens = compute_legal_fens(game)
                 break
 
@@ -386,12 +382,12 @@ def main():
                 break
 
             if case(Event.NEW_PV):
-                if (interaction_mode == Mode.ANALYSIS) or (interaction_mode == Mode.OBSERVE):
+                if (interaction_mode == Mode.ANALYSIS) or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.KIBITZ):
                     Display.show(Message.NEW_PV, pv=event.pv, interaction_mode=interaction_mode)
                 break
 
             if case(Event.SCORE):
-                Display.show(Message.SCORE, score=event.score, mate=event.mate)
+                Display.show(Message.SCORE, score=event.score, mate=event.mate, interaction_mode=interaction_mode)
                 break
 
             if case(Event.SET_MODE):
@@ -404,7 +400,7 @@ def main():
                 play_mode = event.mode
                 break
 
-            if case(Event.CHANGE_MODE):
+            if case(Event.CHANGE_PLAYMODE):
                 if play_mode == GameMode.PLAY_WHITE:
                     play_mode = GameMode.PLAY_BLACK
                 else:
