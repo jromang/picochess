@@ -75,10 +75,10 @@ class PgnDisplay(Display, threading.Thread):
                         game.headers["Result"] = "1/2-1/2"
                     elif message.result in (GameResult.MATE, GameResult.TIME_CONTROL):
                         game.headers["Result"] = "0-1" if message.color == chess.WHITE else "1-0"
-                    if message.mode == Mode.PLAY_WHITE:
+                    if message.mode == GameMode.PLAY_WHITE:
                         game.headers["White"] = self.email.split('@')[0] if self.email else 'Player'
                         game.headers["Black"] = "PicoChess"
-                    if message.mode == Mode.PLAY_BLACK:
+                    if message.mode == GameMode.PLAY_BLACK:
                         game.headers["White"] = "PicoChess"
                         game.headers["Black"] = self.email.split('@')[0] if self.email else 'Player'
                     # Save to file

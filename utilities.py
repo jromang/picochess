@@ -51,6 +51,7 @@ class Event(AutoNumber):
     USER_MOVE = ()  # User sends a move
     OPENING_BOOK = ()  # User chooses an opening book
     SET_MODE = ()  # Change interaction mode
+    SET_PLAYMODE = () # Change play mode
     CHANGE_MODE = ()
     SETUP_POSITION = () # Setup custom position
     #Engine events
@@ -67,9 +68,10 @@ class Message(AutoNumber):
     #Messages to display devices
     COMPUTER_MOVE = ()  # Show computer move
     BOOK_MOVE = ()  # Show book move
-    NEW_PV  = ()    # Show the new Principal Variation
+    NEW_PV = ()    # Show the new Principal Variation
     REVIEW_MODE_MOVE = () # Player is reviewing game
     INTERACTION_MODE = ()  # Interaction mode
+    PLAY_MODE = () # Play mode
     START_NEW_GAME = ()
     COMPUTER_MOVE_DONE_ON_BOARD = ()  # User has done the compute move on board
     SEARCH_STARTED = ()  # Engine has started to search
@@ -119,9 +121,15 @@ class Mode(enum.Enum):
     #Interaction modes
     GAME = 'game'
     ANALYSIS = 'analys'
-    PLAY_WHITE = 'white'
-    KIBITZ = 'kibitz'
+    # PLAY_WHITE = 'white'
+    # KIBITZ = 'kibitz'
     OBSERVE = 'observ'
+    # PLAY_BLACK = 'black'
+
+@enum.unique
+class GameMode(enum.Enum):
+    #Play modes
+    PLAY_WHITE = 'white'
     PLAY_BLACK = 'black'
 
 
