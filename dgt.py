@@ -177,7 +177,7 @@ char_to_DGTXL = {
     'p': 0x01 | 0x40 | 0x20 | 0x10 | 0x02,  'q': 0x01 | 0x40 | 0x20 | 0x04 | 0x02, 'r': 0x40 | 0x10,
     's': 0x01 | 0x40 | 0x08 | 0x20 | 0x04, 't': 0x20 | 0x10 | 0x08 | 0x40, 'u': 0x08 | 0x02 | 0x20 | 0x04 | 0x10,
     'v': 0x08 | 0x02 | 0x20,  'w': 0x40 | 0x08 | 0x20 | 0x02, 'x': 0x20 | 0x10 | 0x04 | 0x40 | 0x02,
-    'y': 0x20 | 0x08 | 0x04 | 0x40 | 0x02, 'z': 0x01 | 0x40 | 0x08 | 0x02 | 0x10, ' ': 0x00
+    'y': 0x20 | 0x08 | 0x04 | 0x40 | 0x02, 'z': 0x01 | 0x40 | 0x08 | 0x02 | 0x10, ' ': 0x00, '-': 0x40
 }
 
 piece_to_char = {
@@ -223,13 +223,13 @@ shutdown_map = ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQQBNR", "8/8/8/8/8/8/8/3Q
 
 mode_map = {"rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR": Mode.GAME,
             "rnbqkbnr/pppppppp/8/1Q6/8/8/PPPPPPPP/RNBQKBNR": Mode.ANALYSIS,
-            "rnbqkbnr/pppppppp/8/2Q5/8/8/PPPPPPPP/RNBQKBNR": Mode.PLAY_WHITE,
-            "rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR": Mode.KIBITZ,
-            "rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR": Mode.OBSERVE,
-            "rnbq1bnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR": Mode.PLAY_BLACK,  # Player plays black
-            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQ1BNR": Mode.PLAY_WHITE,  # Player plays white
-            "RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbq1bnr": Mode.PLAY_BLACK,  # Player plays black (reversed board)
-            "RNBQ1BNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr": Mode.PLAY_WHITE}  # Player plays white (reversed board)
+            "rnbqkbnr/pppppppp/8/2Q5/8/8/PPPPPPPP/RNBQKBNR": Mode.KIBITZ,
+            "rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR": Mode.OBSERVE}
+game_map = {
+            "rnbq1bnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR": GameMode.PLAY_BLACK,  # Player plays black
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQ1BNR": GameMode.PLAY_WHITE,  # Player plays white
+            "RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbq1bnr": GameMode.PLAY_BLACK,  # Player plays black (reversed board)
+            "RNBQ1BNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr": GameMode.PLAY_WHITE}  # Player plays white (reversed board)
 
 time_control_map = OrderedDict([
 ("rnbqkbnr/pppppppp/Q7/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=1)),
@@ -282,6 +282,10 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.dgt_clock_menu = Menu.GAME_MENU
         self.last_move = None
         self.last_fen = None
+        self.hint_move = chess.Move.null()
+        self.score = None
+        self.mate = None
+        self.menu2 = False
         # Open the serial port
         attempts = 0
         while attempts < 10:
@@ -337,7 +341,8 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.write_queue.put(message)
 
     def send_command(self, message):
-        logging.debug('->DGT [%s]', message[0])
+        mes = message[3] if message[0] == Commands.DGT_CLOCK_MESSAGE else message[0]
+        logging.debug('->DGT [%s]', mes)
         array = []
         for v in message:
             if type(v) is int: array.append(v)
@@ -439,22 +444,33 @@ class DGTBoard(Observable, Display, threading.Thread):
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
                             self.setup_to_move = chess.WHITE if self.setup_to_move == chess.BLACK else chess.BLACK
                             to_move_string = "white" if self.setup_to_move == chess.WHITE else "black"
-                            self.display_on_dgt_clock(to_move_string, beep=True)
+                            self.display_on_dgt_clock(to_move_string, True)
 
                     if 33 <= message[4] <= 34 and message[5] == 52:
                         logging.info("Button 1 pressed")
+                        if self.dgt_clock_menu == Menu.GAME_MENU:
+                            if self.menu2:
+                                self.display_on_dgt_clock(self.hint_move.uci(), True)
+                            else:
+                                if self.mate is None:
+                                    sc = 'none' if self.score is None else str(self.score).rjust(6)
+                                else:
+                                    sc = 'm ' + str(self.mate)
+                                self.display_on_dgt_clock(sc, True)
+                            self.menu2 = not self.menu2
+
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
                             self.setup_reverse_orientation = False if self.setup_reverse_orientation else True
                             orientation = "reversed" if self.setup_reverse_orientation else "normal"
-                            self.display_on_dgt_clock(orientation, beep=True)
+                            self.display_on_dgt_clock(orientation, True)
 
                     if 17 <= message[4] <= 18 and message[5] == 51:
                         logging.info("Button 2 pressed")
                         if self.dgt_clock_menu == Menu.GAME_MENU:
-                            self.fire(Event.CHANGE_MODE)
+                            self.fire(Event.CHANGE_PLAYMODE)
 
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
-                            self.display_on_dgt_clock("scan", beep=True)
+                            self.display_on_dgt_clock("scan", True)
                             to_move = 'w' if self.setup_to_move == chess.WHITE else 'b'
                             fen = self.dgt_fen
                             fen += " {0} KQkq - 0 1".format(to_move)
@@ -463,8 +479,11 @@ class DGTBoard(Observable, Display, threading.Thread):
 
                     if 9 <= message[4] <= 10 and message[5] == 50:
                         logging.info("Button 3 pressed")
-                        self.display_on_dgt_xl('pic'+version)
-                        self.display_on_dgt_3000('pic'+version)
+                        # if self.dgt_clock_menu == Menu.GAME_MENU:
+                            # self.display_on_dgt_clock('')
+
+                        if self.dgt_clock_menu == Menu.SETTINGS_MENU:
+                            self.display_on_dgt_clock('pic'+version)
 
                     if 65 <= message[4] <= 66 and message[5] == 53:
                         logging.info("Button 4 pressed")
@@ -567,6 +586,9 @@ class DGTBoard(Observable, Display, threading.Thread):
                     elif fen in mode_map:  # Set interaction mode
                         logging.debug("Interaction mode [%s]", mode_map[fen])
                         self.fire(Event.SET_MODE, mode=mode_map[fen])
+                    elif fen in game_map:  # Set play mode
+                        logging.debug("Play mode [%s]", game_map[fen])
+                        self.fire(Event.SET_PLAYMODE, mode=game_map[fen])
                     elif fen in time_control_map:
                         logging.debug("Setting time control %s", time_control_map[fen].mode)
                         self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[fen])
@@ -645,6 +667,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                     if case(Message.COMPUTER_MOVE):
                         uci_move = message.move.uci()
                         self.last_move = message.move
+                        self.hint_move = chess.Move.null() if message.ponder is None else message.ponder
                         self.last_fen = message.fen
                         logging.info("DGT SEND BEST MOVE:"+uci_move)
                         # Stop the clock before displaying a move
@@ -663,22 +686,20 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.display_on_dgt_xl('newgam', self.enable_dgt_clock_beep)
                         self.display_on_dgt_3000('new game', self.enable_dgt_clock_beep)
                         self.clear_light_revelation_board()
+                        self.last_move = None
+                        self.hint_move = chess.Move.null()
+                        self.score = None
+                        self.mate = None
+                        self.dgt_clock_menu = Menu.GAME_MENU
                         break
                     if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
-                        self.display_on_dgt_xl('ok', self.enable_dgt_clock_beep)
-                        self.display_on_dgt_3000('ok', self.enable_dgt_clock_beep)
+                        self.display_on_dgt_clock('ok', self.enable_dgt_clock_beep)
                         self.clear_light_revelation_board()
                         break
                     if case(Message.REVIEW_MODE_MOVE):
-                        uci_move = message.move.uci()
                         self.last_move = message.move
                         self.last_fen = message.fen
-
-                        # Dont beep when reviewing a game
-                        self.display_on_dgt_xl(' ' + uci_move, False)
-                        self.bit_board.set_fen(message.fen)
-                        self.display_on_dgt_3000(self.bit_board.san(message.move), False)
-
+                        # self.display_on_dgt_clock('ok', false)
                         break
                     if case(Message.USER_TAKE_BACK):
                         self.display_on_dgt_xl('takbak', self.enable_dgt_clock_beep)
@@ -700,13 +721,30 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.write([Commands.DGT_CLOCK_MESSAGE, 0x03, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_END, Clock.DGT_CMD_CLOCK_END_MESSAGE])
                         break
                     if case(Message.GAME_ENDS):
-                        # time.sleep(3)  # Let the move displayed on lock
-                        self.display_on_dgt_xl(message.result.value, beep=self.enable_dgt_clock_beep)
-                        self.display_on_dgt_3000(message.result.value, beep=self.enable_dgt_clock_beep)
+                        # time.sleep(3)  # Let the move displayed on clock
+                        self.display_on_dgt_clock(message.result.value, beep=self.enable_dgt_clock_beep)
                         break
                     if case(Message.INTERACTION_MODE):
-                        self.display_on_dgt_xl(message.mode.value, beep=self.enable_dgt_clock_beep)
-                        self.display_on_dgt_3000(message.mode.value, beep=self.enable_dgt_clock_beep)
+                        self.display_on_dgt_clock(message.mode.value, beep=self.enable_dgt_clock_beep)
+                        break
+                    if case(Message.PLAY_MODE):
+                        self.display_on_dgt_clock(message.mode.value, beep=self.enable_dgt_clock_beep)
+                        break
+                    if case(Message.SCORE):
+                        self.score = message.score
+                        self.mate = message.mate
+                        if message.interaction_mode == Mode.KIBITZ:
+                            self.display_on_dgt_clock(str(self.score).rjust(6), False)
+                        break
+                    if case(Message.BOOK_MOVE):
+                        self.score = None
+                        self.mate = None
+                        self.display_on_dgt_clock('book', beep=False)
+                        break
+                    if case(Message.NEW_PV):
+                        self.hint_move = message.pv[0]
+                        if message.interaction_mode == Mode.ANALYSIS:
+                            self.display_on_dgt_clock(self.hint_move.uci(), False)
                         break
                     if case():  # Default
                         pass

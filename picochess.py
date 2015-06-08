@@ -24,7 +24,9 @@ import chess
 import chess.polyglot
 import dgt
 import logging
+
 import uci
+
 import threading
 import copy
 import time
@@ -35,6 +37,7 @@ from pgn import PgnDisplay
 from server import WebServer
 import chesstalker.chesstalker
 
+import spur
 
 def main():
     #Command line argument parsing
@@ -74,13 +77,14 @@ def main():
 
     # Load UCI engine
     engine = uci.Engine(args.engine, hostname=args.remote, username=args.user, key_file=args.server_key, password=args.password)
-    logging.debug('Loaded engine [%s]', engine.name)
-    logging.debug('Supported options [%s]', engine.options)
-    if 'Hash' in engine.options:
+
+    logging.debug('Loaded engine [%s]', engine.get().name)
+    logging.debug('Supported options [%s]', engine.get().options)
+    if 'Hash' in engine.get().options:
         engine.set_option("Hash", args.hash_size)
-    if 'Threads' in engine.options:  # Stockfish
+    if 'Threads' in engine.get().options:  # Stockfish
         engine.set_option("Threads", args.threads)
-    if 'Core Threads' in engine.options:  # Hiarcs
+    if 'Core Threads' in engine.get().options:  # Hiarcs
         engine.set_option("Core Threads", args.threads)
     if args.uci_option:
         for uci_option in args.uci_option.strip('"').split(";"):
@@ -142,9 +146,12 @@ def main():
         :return:
         """
         def send_book_move(move):
-            Observable.fire(Event.BEST_MOVE, move=move.uci())
+            g=copy.deepcopy(game)
+            g.push(move)
+            book_ponder = weighted_choice(book, g)
+            Observable.fire(Event.BEST_MOVE, move=move,ponder=book_ponder)
 
-        global book_thread
+        # global book_thread
         book_move = weighted_choice(book, game)
         Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time)
         time.run(game.turn)
@@ -156,53 +163,80 @@ def main():
             # book_thread = threading.Timer(2, send_book_move, [book_move])
             # book_thread.start()
         else:
-            book_thread = None
+            # book_thread = None
             engine.set_position(game)
             engine.go(time.uci())
             Display.show(Message.SEARCH_STARTED)
+
+    def analyse():
+        """
+        Starts a new search on the current game.
+        If a move is found in the opening book, fire an event in a few seconds.
+        :return:
+        """
+        engine.set_position(game)
+        engine.ponder()
+        Display.show(Message.SEARCH_STARTED)
+
+    def observe(time):
+        """
+        Starts a new search on the current game.
+        If a move is found in the opening book, fire an event in a few seconds.
+        :return:
+        """
+        Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time)
+        # logging.debug("Starting clock")
+        time.run(game.turn)
+
+        engine.set_position(game)
+        engine.ponder()
+        Display.show(Message.SEARCH_STARTED)
 
     def stop_thinking():
         """
         Stop current search or book thread.
         :return:
         """
-        if book_thread:
-            book_thread.cancel()
-        else:
-            engine.stop(True)
+        #if book_thread:
+        #    book_thread.cancel()
+        #else:
+        engine.stop()
 
-    def check_game_state(game, interaction_mode):
+    def check_game_state(game, play_mode):
         """
         Check if the game has ended or not ; it also sends Message to Displays if the game has ended.
         :param game:
         :return: True is the game continues, False if it has ended
         """
+        custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
         if game.is_stalemate():
-            Display.show(Message.GAME_ENDS, result=GameResult.STALEMATE, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
+            Display.show(Message.GAME_ENDS, result=GameResult.STALEMATE, moves=list(game.move_stack), color=game.turn, mode=play_mode, custom_fen=custom_fen)
             return False
         if game.is_insufficient_material():
-            Display.show(Message.GAME_ENDS, result=GameResult.INSUFFICIENT_MATERIAL, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
+            Display.show(Message.GAME_ENDS, result=GameResult.INSUFFICIENT_MATERIAL, moves=list(game.move_stack), color=game.turn, mode=play_mode, custom_fen=custom_fen)
             return False
         if game.is_seventyfive_moves():
-            Display.show(Message.GAME_ENDS, result=GameResult.SEVENTYFIVE_MOVES, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
+            Display.show(Message.GAME_ENDS, result=GameResult.SEVENTYFIVE_MOVES, moves=list(game.move_stack), color=game.turn, mode=play_mode, custom_fen=custom_fen)
             return False
         if game.is_fivefold_repetition():
-            Display.show(Message.GAME_ENDS, result=GameResult.FIVEFOLD_REPETITION, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
+            Display.show(Message.GAME_ENDS, result=GameResult.FIVEFOLD_REPETITION, moves=list(game.move_stack), color=game.turn, mode=play_mode, custom_fen=custom_fen)
             return False
         if game.is_game_over():
-            Display.show(Message.GAME_ENDS, result=GameResult.MATE, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
+            Display.show(Message.GAME_ENDS, result=GameResult.MATE, moves=list(game.move_stack), color=game.turn, mode=play_mode, custom_fen=custom_fen)
             return False
         return True
 
     game = chess.Board()  # Create the current game
     legal_fens = compute_legal_fens(game)  # Compute the legal FENs
     book = chess.polyglot.open_reader(get_opening_books()[8][1])  # Default opening book
-    interaction_mode = Mode.PLAY_WHITE   # Interaction mode
-    book_thread = None  # The thread that will fire book moves
+    interaction_mode = Mode.GAME   # Interaction mode
+    play_mode = GameMode.PLAY_WHITE
+
+    # book_thread = None  # The thread that will fire book moves
     time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=5)
 
     #Send the engine's UCI options to all Displays
-    Display.show(Message.UCI_OPTION_LIST, options=engine.options)
+    Display.show(Message.UCI_OPTION_LIST, options=engine.get().options)
     Display.show(Message.SYSTEM_INFO, info={"version": version, "location": get_location(),
                                             "books": get_opening_books(), "ip": get_ip()})
 
@@ -214,14 +248,15 @@ def main():
             if case(Event.FEN):  # User sets a new position, convert it to a move if it is legal
                 if event.fen in legal_fens:
                     # Check if we have to undo a previous move (sliding)
-                    if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
-                        stop_thinking()
-                        if game.move_stack:
-                            game.pop()
+                    if interaction_mode == Mode.GAME:
+                        if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
+                            stop_thinking()
+                            if game.move_stack:
+                                game.pop()
                     legal_moves = list(game.legal_moves)
                     Observable.fire(Event.USER_MOVE, move=legal_moves[legal_fens.index(event.fen)])
                 elif event.fen == game.fen().split(' ')[0]:  # Player had done the computer move on the board
-                    if check_game_state(game, interaction_mode):
+                    if check_game_state(game, play_mode):
                         Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD)
                         if time_control.mode != ClockMode.FIXED_TIME:
                             Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
@@ -230,24 +265,31 @@ def main():
                 elif event.fen == legal_fens.root:  # Allow user to take his move back while the engine is searching
                     stop_thinking()
                     game.pop()
+                    if interaction_mode == Mode.ANALYSIS:
+                        analyse()
+                    if interaction_mode == Mode.OBSERVE:
+                        observe(time_control)
                     Display.show(Message.USER_TAKE_BACK)
                 else:  # Check if this a a previous legal position and allow user to restart from this position
                     game_history = copy.deepcopy(game)
                     while game_history.move_stack:
                         game_history.pop()
-                        if (interaction_mode == Mode.PLAY_WHITE and game_history.turn == chess.WHITE) \
-                            or (interaction_mode == Mode.PLAY_BLACK and game_history.turn == chess.BLACK) \
-                            or (interaction_mode == Mode.OBSERVE):
+                        if (play_mode == GameMode.PLAY_WHITE and game_history.turn == chess.WHITE) \
+                            or (play_mode == GameMode.PLAY_BLACK and game_history.turn == chess.BLACK) \
+                            or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.ANALYSIS):
                             if game_history.fen().split(' ')[0] == event.fen:
                                 logging.debug("Undoing game until FEN :" + event.fen)
                                 stop_thinking()
                                 while len(game_history.move_stack) < len(game.move_stack):
                                     game.pop()
+                                if interaction_mode == Mode.ANALYSIS:
+                                    analyse()
+                                if interaction_mode == Mode.OBSERVE:
+                                    observe(time_control)
                                 Display.show(Message.USER_TAKE_BACK)
                                 legal_fens = compute_legal_fens(game)
                                 break
                 break
-
 
             if case(Event.USER_MOVE):  # User sends a new move
                 move = event.move
@@ -255,23 +297,33 @@ def main():
                 if move not in game.legal_moves:
                     logging.warning('Illegal move [%s]', move)
                 # Check if we are in play mode and it is player's turn
-                elif (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.WHITE) or \
-                        (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.BLACK) or \
-                        (interaction_mode != Mode.PLAY_BLACK and interaction_mode != Mode.PLAY_WHITE):
-                    time_control.stop()
-                    # logging.debug("Stopping player clock")
-
-                    fen = game.fen()
-                    game.push(move)
-                    if check_game_state(game, interaction_mode):
-                        if interaction_mode == Mode.PLAY_BLACK or interaction_mode == Mode.PLAY_WHITE:
+                elif interaction_mode == Mode.GAME:
+                    if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.WHITE) or \
+                            (play_mode == GameMode.PLAY_BLACK and game.turn == chess.BLACK):
+                        time_control.stop()
+                        # logging.debug("Stopping player clock")
+                        game.push(move)
+                        if check_game_state(game, play_mode):
                             think(time_control)
                             Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
-                        else:
-                            # Observe mode
-                            Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game))
-                            if check_game_state(game, interaction_mode):
-                                legal_fens = compute_legal_fens(game)
+                elif interaction_mode == Mode.OBSERVE:
+                    stop_thinking()
+                    time_control.stop()
+                    fen = game.fen()
+                    game.push(move)
+                    if check_game_state(game, play_mode):
+                        observe(time_control)
+                        Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game), mode=interaction_mode)
+                        legal_fens = compute_legal_fens(game)
+                elif (interaction_mode == Mode.ANALYSIS) or (interaction_mode == Mode.KIBITZ):
+                    stop_thinking()
+                    # time_control.stop()
+                    fen = game.fen()
+                    game.push(move)
+                    if check_game_state(game, play_mode):
+                        analyse()
+                        Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game), mode=interaction_mode)
+                        legal_fens = compute_legal_fens(game)
                 break
 
             if case(Event.LEVEL):  # User sets a new level
@@ -289,7 +341,7 @@ def main():
                 time_control.stop()
                 time_control.reset()
                 Display.show(Message.START_NEW_GAME)
-                if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
+                if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
                     think(time_control)
                 break
 
@@ -297,13 +349,16 @@ def main():
                 if game.move_stack:
                     logging.debug("Starting a new game")
                     if not game.is_game_over():
-                        Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack), color=game.turn, mode=interaction_mode)
+                        custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
+                        Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack), color=game.turn, mode=play_mode, custom_fen=custom_fen)
                     game = chess.Board()
                     legal_fens = compute_legal_fens(game)
                     time_control.stop()
                     time_control.reset()
                     Display.show(Message.START_NEW_GAME)
-                if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
+                    if interaction_mode == Mode.ANALYSIS:
+                        play_mode = GameMode.PLAY_WHITE
+                if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
                     think(time_control)
                 break
 
@@ -313,15 +368,26 @@ def main():
                 break
 
             if case(Event.BEST_MOVE):
-                move = chess.Move.from_uci(event.move)
+                move = event.move
+                ponder = event.ponder
                 # Check if we are in play mode and it is computer's turn
-                if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
-                    time_control.stop()
-                    fen = game.fen()
-                    game.push(move)
-                    Display.show(Message.COMPUTER_MOVE, move=move, fen=fen, game=copy.deepcopy(game), time_control=time_control)
-                    # if check_game_state(game, interaction_mode):
-                    legal_fens = compute_legal_fens(game)
+                if interaction_mode == Mode.GAME:
+                    if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
+                        time_control.stop()
+                        fen = game.fen()
+                        game.push(move)
+                        Display.show(Message.COMPUTER_MOVE, move=move, ponder=ponder, fen=fen, game=copy.deepcopy(game), time_control=time_control)
+                        # if check_game_state(game, interaction_mode):
+                        legal_fens = compute_legal_fens(game)
+                break
+
+            if case(Event.NEW_PV):
+                if (interaction_mode == Mode.ANALYSIS) or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.KIBITZ):
+                    Display.show(Message.NEW_PV, pv=event.pv, interaction_mode=interaction_mode)
+                break
+
+            if case(Event.SCORE):
+                Display.show(Message.SCORE, score=event.score, mate=event.mate, interaction_mode=interaction_mode)
                 break
 
             if case(Event.SET_MODE):
@@ -329,14 +395,20 @@ def main():
                 interaction_mode = event.mode
                 break
 
-            if case(Event.CHANGE_MODE):
-                if interaction_mode == Mode.PLAY_WHITE:
-                    interaction_mode = Mode.PLAY_BLACK
+            if case(Event.SET_PLAYMODE):
+                Display.show(Message.PLAY_MODE, mode=event.mode)  # Useful for pgn display device
+                play_mode = event.mode
+                break
+
+            if case(Event.CHANGE_PLAYMODE):
+                if play_mode == GameMode.PLAY_WHITE:
+                    play_mode = GameMode.PLAY_BLACK
                 else:
-                    interaction_mode = Mode.PLAY_WHITE
-                Display.show(Message.INTERACTION_MODE, mode=interaction_mode)
-                if (interaction_mode == Mode.PLAY_WHITE and game.turn == chess.BLACK) or (interaction_mode == Mode.PLAY_BLACK and game.turn == chess.WHITE):
-                    think(time_control)
+                    play_mode = GameMode.PLAY_WHITE
+                Display.show(Message.INTERACTION_MODE, mode=play_mode)
+                if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
+                    if check_game_state(game, play_mode):
+                        think(time_control)
                 break
 
             if case(Event.SET_TIME_CONTROL):
@@ -345,7 +417,8 @@ def main():
 
             if case(Event.OUT_OF_TIME):
                 stop_thinking()
-                Display.show(Message.GAME_ENDS, result=GameResult.TIME_CONTROL, moves=list(game.move_stack), color=event.color, mode=interaction_mode)
+                custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
+                Display.show(Message.GAME_ENDS, result=GameResult.TIME_CONTROL, moves=list(game.move_stack), color=event.color, mode=play_mode, custom_fen=custom_fen)
                 break
 
             if case(Event.UCI_OPTION_SET):

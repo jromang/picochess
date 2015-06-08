@@ -51,10 +51,13 @@ class Event(AutoNumber):
     USER_MOVE = ()  # User sends a move
     OPENING_BOOK = ()  # User chooses an opening book
     SET_MODE = ()  # Change interaction mode
-    CHANGE_MODE = ()
+    SET_PLAYMODE = () # Change play mode
+    CHANGE_PLAYMODE = () # Toogle between the play modes
     SETUP_POSITION = () # Setup custom position
     #Engine events
     BEST_MOVE = ()  # Engine has found a move
+    NEW_PV = ()    # Engine sends a new Principal Variation
+    SCORE = ()  # Engine sends a new Score
     SET_TIME_CONTROL = ()  # User sets time control
     OUT_OF_TIME = ()
     UCI_OPTION_SET = ()  # Users sets an UCI option, contains 'name' and 'value' (strings)
@@ -65,8 +68,10 @@ class Message(AutoNumber):
     #Messages to display devices
     COMPUTER_MOVE = ()  # Show computer move
     BOOK_MOVE = ()  # Show book move
+    NEW_PV = ()    # Show the new Principal Variation
     REVIEW_MODE_MOVE = () # Player is reviewing game
     INTERACTION_MODE = ()  # Interaction mode
+    PLAY_MODE = () # Play mode
     START_NEW_GAME = ()
     COMPUTER_MOVE_DONE_ON_BOARD = ()  # User has done the compute move on board
     SEARCH_STARTED = ()  # Engine has started to search
@@ -78,6 +83,7 @@ class Message(AutoNumber):
     GAME_ENDS = ()  # The current game has ended, contains a 'result' (GameResult) and list of 'moves'
 
     SYSTEM_INFO = () # Information about picochess such as version etc
+    SCORE = ()  # Score
 
 
 class Menu(AutoNumber):
@@ -114,12 +120,15 @@ class GameMenu(AutoNumber):
 class Mode(enum.Enum):
     #Interaction modes
     GAME = 'game'
-    ANALYSIS = 'analyse'
-    PLAY_WHITE = 'white'
+    ANALYSIS = 'analys'
     KIBITZ = 'kibitz'
-    OBSERVE = 'observe'
-    PLAY_BLACK = 'black'
+    OBSERVE = 'observ'
 
+@enum.unique
+class GameMode(enum.Enum):
+    #Play modes
+    PLAY_WHITE = 'white'
+    PLAY_BLACK = 'black'
 
 class ClockMode(AutoNumber):
     FIXED_TIME = ()  # Fixed seconds per move

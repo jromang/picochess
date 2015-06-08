@@ -77,12 +77,16 @@ class TimeControl(object):
             self.active_color = None
 
     def uci(self):
-        """Returns remaining time for both players in an UCI formatted string"""
-        uci_string = ''
+        """Returns remaining time for both players in an UCI dict"""
+        uci_dict = {}
         if self.mode in (ClockMode.BLITZ, ClockMode.FISCHER):
-            uci_string = 'wtime ' + str(int(self.clock_time[chess.WHITE] * 1000)) + ' btime ' + str(int(self.clock_time[chess.BLACK] * 1000))
+            uci_dict['wtime'] = str(int(self.clock_time[chess.WHITE] * 1000))
+            uci_dict['btime'] = str(int(self.clock_time[chess.BLACK] * 1000))
+
             if self.mode == ClockMode.FISCHER:
-                uci_string += ' winc ' + str(self.fischer_increment * 1000) + ' binc ' + str(self.fischer_increment * 1000)
+                uci_dict['winc'] = str(self.fischer_increment * 1000)
+                uci_dict['binc'] = str(self.fischer_increment * 1000)
         elif self.mode == ClockMode.FIXED_TIME:
-            uci_string = 'movetime ' + str(self.seconds_per_move * 1000)
-        return uci_string
+            uci_dict['movetime'] = str(self.seconds_per_move * 1000)
+
+        return uci_dict

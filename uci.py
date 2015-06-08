@@ -16,25 +16,29 @@
 
 from utilities import *
 import logging
-import os
 import spur
 import paramiko
-import io
-import threading
-from collections import deque
+import chess.uci
 
 
-class Engine(Observable):
+class Informer(chess.uci.InfoHandler,Observable):
+
+    def on_bestmove(self,bestmove,ponder):
+        self.fire(Event.BEST_MOVE, move=bestmove, ponder=ponder)
+        super().on_bestmove(bestmove,ponder)
+
+    def score(self,cp,mate,lowerbound,upperbound):
+        self.fire(Event.SCORE, score=cp, mate=mate)
+        super().score(cp,mate,lowerbound,upperbound)
+
+    def pv(self,moves):
+        self.fire(Event.NEW_PV, pv=moves)
+        super().pv(moves)
+
+
+class Engine():
 
     def __init__(self, path, hostname=None, username=None, key_file=None, password=None):
-        Observable.__init__(self)
-        self.out = io.BytesIO()
-        self.uciok_lock = threading.Lock()
-        self.uciok_lock.acquire()
-        self.name = ""
-        self.options = {}
-        self.send_best_move = threading.Event()  # Send BEST_MOVE events only when this is set
-        self.send_best_move.set()
         try:
             if hostname:
                 logging.info("Connecting to [%s]", hostname)
@@ -42,100 +46,54 @@ class Engine(Observable):
                     shell = spur.SshShell(hostname=hostname, username=username, private_key_file=key_file, missing_host_key=paramiko.AutoAddPolicy())
                 else:
                     shell = spur.SshShell(hostname=hostname, username=username, password=password, missing_host_key=paramiko.AutoAddPolicy())
-                self.process = shell.spawn([path], stdout=self, store_pid=True, allow_error=True)
+                self.engine = chess.uci.spur_spwan_engine(shell, [path])
             else:
                 path = which(path)
                 if not path:
                     logging.error("Engine not found")
-                    self.process = None
+                    self.engine = None
                 else:
-                    shell = spur.LocalShell()
-                    self.process = shell.spawn(path, stdout=self, store_pid=True)
-            self.send("uci")
-            self.uciok_lock.acquire() #Wait until uciok
+                    self.engine = chess.uci.popen_engine(path)
+            self.engine.uci()
+
+            handler = Informer()
+            self.engine.info_handlers.append(handler)
         except OSError:
             logging.exception("OS error in starting engine")
 
-    def send(self, command):
-        logging.debug("->Engine [%s]", command)
-        self.process.stdin_write(bytes((command+'\n').encode('utf-8')))
-
-    def write(self, b):
-        if b == b'\n':
-            line = self.out.getvalue().replace(b'\r', b'').decode("utf-8")
-            logging.debug("<-Engine [%s]", line)
-            if line:
-                self.parse(line)
-            self.out = io.BytesIO()
-        else:
-            self.out.write(b)
-
-    def parse(self, line):
-        logging.debug("Parsing [%s]", line)
-        tokens = line.split()
-        if tokens[0] == 'uciok':
-            self.uciok_lock.release()
-        if tokens[0] == 'id' and tokens[1] == 'name':
-            self.name = ' '.join(tokens[2:])
-        if tokens[0] == 'option' and tokens[1] == 'name':
-            option_name = ' '.join(tokens[2:tokens.index('type')])
-            option_type = tokens[tokens.index('type')+1]
-            try:
-                option_default = None if not 'default' in tokens else tokens[tokens.index('default')+1]
-                option_min = None if not 'min' in tokens else tokens[tokens.index('min')+1]
-                option_max = None if not 'max' in tokens else tokens[tokens.index('max')+1]
-            except IndexError:
-                option_default = option_min = option_max = None
-                logging.warning("Error when parsing UCI option [%s]", option_name)
-            self.options[option_name] = (option_type, option_default, option_min, option_max)
-        if tokens[0] == 'bestmove':
-            if self.send_best_move.is_set():
-                self.fire(Event.BEST_MOVE, move=tokens[1].lower())
-            self.send_best_move.set()
+    def get(self):
+        return self.engine
 
     def set_option(self, name, value):
-        self.send("setoption name " + name + " value " + str(value))
+        self.engine.options[name] = value
 
     def set_level(self, level):
         """ Sets the engine playing strength, between 0 and 20. """
         if level < 0 or level > 20:
             logging.error('Level not in range (0,20) :[%i]', level)
-        if 'Skill Level' in self.options:  # Stockfish uses 'Skill Level' option
+        if 'Skill Level' in self.engine.options:  # Stockfish uses 'Skill Level' option
             self.set_option("Skill Level", level)
-        elif 'UCI_LimitStrength' in self.options:  # Generic 'UCI_LimitStrength' option for other engines
+        elif 'UCI_LimitStrength' in self.engine.options:  # Generic 'UCI_LimitStrength' option for other engines
             if level == 20:
                 self.set_option('UCI_LimitStrength', 'false')
             else:
                 self.set_option('UCI_LimitStrength', 'true')
-                min_elo = float(self.options['UCI_Elo'][2])
-                max_elo = float(self.options['UCI_Elo'][3])
-                set_elo = min(int(min_elo + (max_elo-min_elo) * (float(level)) / 19.0), int(self.options['UCI_Elo'][3]))
+                min_elo = float(self.engine.options['UCI_Elo'][2])
+                max_elo = float(self.engine.options['UCI_Elo'][3])
+                set_elo = min(int(min_elo + (max_elo-min_elo) * (float(level)) / 19.0), int(self.engine.options['UCI_Elo'][3]))
                 self.set_option('UCI_Elo', str(set_elo))
             pass
         else:
             logging.warning("Engine does not support skill levels")
 
     def set_position(self, game):
-        custom_fen = getattr(game, 'custom_fen', None)
-        if custom_fen:
-            cmd = 'position fen '+custom_fen+' moves'
-        else:
-            cmd = 'position startpos moves'
-        for m in game.move_stack:
-            cmd += ' ' + m.uci()
-        self.send(cmd)
+        self.engine.position(game)
 
-    def stop(self, ignore_best_move=False):
-        if ignore_best_move:
-            self.send_best_move.clear()
-        else:
-            self.send_best_move.set()
-        self.send('stop')
-        self.send_best_move.wait(2.0)  # If stop() is called with ignore_best_move=True and the engine is not searching,
-                                       # the program could be locked here. So we have a timeout for safety.
-        if not self.send_best_move.is_set():  # There was no bestmove : send a waring, this should not happen.
-            logging.warning('No bestmove after stop()')
-            self.send_best_move.set()
+    def stop(self):
+        return self.engine.stop()
 
-    def go(self, time_string):
-        self.send('go ' + time_string)
+    def go(self, time_dict):
+        return self.engine.go(**time_dict)
+
+    def ponder(self):
+        return self.engine.go(ponder=True, infinite=True, async_callback=True)
