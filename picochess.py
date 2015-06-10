@@ -383,7 +383,7 @@ def main():
 
             if case(Event.NEW_PV):
                 if (interaction_mode == Mode.ANALYSIS) or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.KIBITZ):
-                    Display.show(Message.NEW_PV, pv=event.pv, interaction_mode=interaction_mode)
+                    Display.show(Message.NEW_PV, pv=event.pv, interaction_mode=interaction_mode, fen=game.fen())
                 break
 
             if case(Event.SCORE):
