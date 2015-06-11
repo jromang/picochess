@@ -103,8 +103,8 @@ Press center button, clock will respond with "Scan". Move.
 Clock button support
 --------------------
 
-* First button chooses White or Black.
-* Second button shows the best move (ponder move) and the value (rotation by clicks)
+* First button shows the last move.
+* Second button toggles between showing the value and the best/ponder move.
 * Third button will switch sides and the computer will make your move.
 * The fourth button does nothing.
 * The fifth toggles between "Position", "Engine", "System", "Game" options. Some of the options provide no functionality yet.
