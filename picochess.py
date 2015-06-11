@@ -150,6 +150,7 @@ def main():
             g.push(move)
             book_ponder = weighted_choice(book, g)
             Observable.fire(Event.BEST_MOVE, move=move, ponder=book_ponder)
+            Observable.fire(Event.SCORE, score='book', mate=None)
 
         # global book_thread
         book_move = weighted_choice(book, game)

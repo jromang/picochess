@@ -708,6 +708,9 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.clear_light_revelation_board()
                         self.display_move = False
                         break
+                    if case(Message.USER_MOVE):
+                        self.display_move = False
+                        break
                     if case(Message.REVIEW_MODE_MOVE):
                         self.last_move = message.move
                         self.last_fen = message.fen
