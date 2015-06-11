@@ -149,7 +149,7 @@ def main():
             g=copy.deepcopy(game)
             g.push(move)
             book_ponder = weighted_choice(book, g)
-            Observable.fire(Event.BEST_MOVE, move=move,ponder=book_ponder)
+            Observable.fire(Event.BEST_MOVE, move=move, ponder=book_ponder)
 
         # global book_thread
         book_move = weighted_choice(book, game)
