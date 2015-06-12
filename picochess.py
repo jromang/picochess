@@ -149,7 +149,8 @@ def main():
             g=copy.deepcopy(game)
             g.push(move)
             book_ponder = weighted_choice(book, g)
-            Observable.fire(Event.BEST_MOVE, move=move,ponder=book_ponder)
+            Observable.fire(Event.BEST_MOVE, move=move, ponder=book_ponder)
+            Observable.fire(Event.SCORE, score='book', mate=None)
 
         # global book_thread
         book_move = weighted_choice(book, game)
@@ -383,7 +384,7 @@ def main():
 
             if case(Event.NEW_PV):
                 if (interaction_mode == Mode.ANALYSIS) or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.KIBITZ):
-                    Display.show(Message.NEW_PV, pv=event.pv, interaction_mode=interaction_mode)
+                    Display.show(Message.NEW_PV, pv=event.pv, interaction_mode=interaction_mode, fen=game.fen())
                 break
 
             if case(Event.SCORE):

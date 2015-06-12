@@ -283,9 +283,11 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.last_move = None
         self.last_fen = None
         self.hint_move = chess.Move.null()
+        self.hint_fen = None
         self.score = None
         self.mate = None
-        self.menu2 = False
+        self.display_move = False
+        self.mode_index = 0
         # Open the serial port
         attempts = 0
         while attempts < 10:
@@ -449,15 +451,21 @@ class DGTBoard(Observable, Display, threading.Thread):
                     if 33 <= message[4] <= 34 and message[5] == 52:
                         logging.info("Button 1 pressed")
                         if self.dgt_clock_menu == Menu.GAME_MENU:
-                            if self.menu2:
-                                self.display_on_dgt_clock(self.hint_move.uci(), True)
+                            if self.display_move:
+                                if self.hint_fen is None:
+                                    self.display_on_dgt_clock('none')
+                                else:
+                                    # self.display_on_dgt_clock(self.hint_move.uci(), True)
+                                    self.display_on_dgt_xl(' ' + self.hint_move.uci(), True)
+                                    self.bit_board.set_fen(self.hint_fen)
+                                    self.display_on_dgt_3000(self.bit_board.san(self.hint_move), True)
                             else:
                                 if self.mate is None:
                                     sc = 'none' if self.score is None else str(self.score).rjust(6)
                                 else:
                                     sc = 'm ' + str(self.mate)
                                 self.display_on_dgt_clock(sc, True)
-                            self.menu2 = not self.menu2
+                            self.display_move = not self.display_move
 
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
                             self.setup_reverse_orientation = False if self.setup_reverse_orientation else True
@@ -479,8 +487,13 @@ class DGTBoard(Observable, Display, threading.Thread):
 
                     if 9 <= message[4] <= 10 and message[5] == 50:
                         logging.info("Button 3 pressed")
-                        # if self.dgt_clock_menu == Menu.GAME_MENU:
-                            # self.display_on_dgt_clock('')
+                        if self.dgt_clock_menu == Menu.GAME_MENU:
+                            mode_list = list(iter(Mode))
+                            self.mode_index += 1
+                            if self.mode_index >= len(mode_list):
+                                self.mode_index = 0
+                            mode_new = mode_list[self.mode_index]
+                            self.fire(Event.SET_MODE, mode=mode_new)
 
                         if self.dgt_clock_menu == Menu.SETTINGS_MENU:
                             self.display_on_dgt_clock('pic'+version)
@@ -668,7 +681,9 @@ class DGTBoard(Observable, Display, threading.Thread):
                         uci_move = message.move.uci()
                         self.last_move = message.move
                         self.hint_move = chess.Move.null() if message.ponder is None else message.ponder
+                        self.hint_fen = message.game.fen()
                         self.last_fen = message.fen
+                        self.display_move = False
                         logging.info("DGT SEND BEST MOVE:"+uci_move)
                         # Stop the clock before displaying a move
                         self.write([Commands.DGT_CLOCK_MESSAGE, 0x0a, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_SETNRUN,
@@ -688,22 +703,30 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.clear_light_revelation_board()
                         self.last_move = None
                         self.hint_move = chess.Move.null()
+                        self.hint_fen = None
                         self.score = None
                         self.mate = None
+                        self.display_move = False
                         self.dgt_clock_menu = Menu.GAME_MENU
                         break
                     if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
                         self.display_on_dgt_clock('ok', self.enable_dgt_clock_beep)
                         self.clear_light_revelation_board()
+                        self.display_move = False
+                        break
+                    if case(Message.USER_MOVE):
+                        self.display_move = False
                         break
                     if case(Message.REVIEW_MODE_MOVE):
                         self.last_move = message.move
                         self.last_fen = message.fen
+                        self.display_move = False
                         # self.display_on_dgt_clock('ok', false)
                         break
                     if case(Message.USER_TAKE_BACK):
                         self.display_on_dgt_xl('takbak', self.enable_dgt_clock_beep)
                         self.display_on_dgt_3000('takeback', self.enable_dgt_clock_beep)
+                        self.display_move = False
                         break
                     if case(Message.RUN_CLOCK):
                         tc = message.time_control
@@ -739,12 +762,16 @@ class DGTBoard(Observable, Display, threading.Thread):
                     if case(Message.BOOK_MOVE):
                         self.score = None
                         self.mate = None
+                        self.display_move = False
                         self.display_on_dgt_clock('book', beep=False)
                         break
                     if case(Message.NEW_PV):
                         self.hint_move = message.pv[0]
+                        self.hint_fen = message.fen
                         if message.interaction_mode == Mode.ANALYSIS:
-                            self.display_on_dgt_clock(self.hint_move.uci(), False)
+                            self.display_on_dgt_xl(' ' + self.hint_move.uci(), False)
+                            self.bit_board.set_fen(message.fen)
+                            self.display_on_dgt_3000(self.bit_board.san(self.hint_move), False)
                         break
                     if case():  # Default
                         pass
