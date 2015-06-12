@@ -287,6 +287,7 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.score = None
         self.mate = None
         self.display_move = False
+        self.mode_index = 0
         # Open the serial port
         attempts = 0
         while attempts < 10:
@@ -486,8 +487,13 @@ class DGTBoard(Observable, Display, threading.Thread):
 
                     if 9 <= message[4] <= 10 and message[5] == 50:
                         logging.info("Button 3 pressed")
-                        # if self.dgt_clock_menu == Menu.GAME_MENU:
-                            # self.display_on_dgt_clock('')
+                        if self.dgt_clock_menu == Menu.GAME_MENU:
+                            mode_list = list(iter(Mode))
+                            self.mode_index += 1
+                            if self.mode_index >= len(mode_list):
+                                self.mode_index = 0
+                            mode_new = mode_list[self.mode_index]
+                            self.fire(Event.SET_MODE, mode=mode_new)
 
                         if self.dgt_clock_menu == Menu.SETTINGS_MENU:
                             self.display_on_dgt_clock('pic'+version)
