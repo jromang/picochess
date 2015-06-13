@@ -78,17 +78,19 @@ System shutdown
 
 From the start position, replace the white king with the extra white queen; this will shut down the machine (takes a few seconds until the blue light turns off). You can also do it with only the two white queens on the board (on e1,d1).
 
-Book/Training Modes
--------------------
+Playing/Training Modes
+----------------------
 
-When using these modes, please be patient and dont rush moves. Allow a few seconds for the book moves to appear. If you see any bug when rushing moves, let us know on the mailing list.
+When using these modes, please be patient and don't rush moves. Allow a few seconds for the scores and moves to appear. If you see any bug when rushing moves, let us know on the mailing list.
 
-* Book mode is enabled by putting the **white** queen on the **A5** square. Book mode will return the top 3 book moves in descending order (by score) to you when it is your turn. Descending order means that the last move on the clock is the best book move. This is useful when you want to play against the computer but are not confident in your opening preparation.
-* Analysis mode (enabled by **white** queen on **B5**) is Book mode + the computer does not play. After you move pieces, you can see the book moves or position score if out of book followed by the best move suggestion. You can play over games and see the computer evaluation. The display keeps refreshing every 2 seconds with the depth (e.g. d17), the score in centipawns (e.g. 17) OR a mate in x (e.g. m 2), followed by the recommended move. Note that the score is from the perspective of the side to move. A n100 score means the side to move is worse by about a pawn, whereas a 100 score means that the side to move is ahead by a pawn.
-* Training mode (enabled by **white** queen on **C5**) is Analysis mode but without displaying the best move. It only continuously displays the depth and score. This is useful when you want to train yourself on the values of different moves.
-* Game mode is the regular mode, but if you used one of the above modes, you can return back to game mode by putting a **white** queen on **D5**.
+* Game mode is enabled by putting the **white** queen on the **A5** square. This is the default mode. You can play against the computer. The clock displays the remaining thinking time for both sides. Press the second button to show the position evaluation, expressed in centipawns. Press again to show a hint ("ponder move").
+* Analysis mode (enabled by **white** queen on **B5**): the computer is watching the game, it does not play itself. The clock continually displays the best move for the side to play.
+* Kibitz mode (enabled by **white** queen on **C5**): the computer is watching the game, it does not play itself. The clock continually displays the position score in centipawns for the side to play. For example: if it's White's turn and the clock displays 33, then White is ahead 33 centipawns (or 0.33 pawns). A negative score means that the other side is ahead.
+* Observe mode (enabled by **white** queen on **D5**): the computer is watching the game, it does not play itself. The clock displays the remaining thinking time for both sides. Press the second button once to show the position evaluation, twice to show a hint.
 
-(Todo: In a later version, the score will always be from white's perspective to be more consistent.)
+Game mode is the regular mode. If you used one of the other modes, you can return back to game mode by putting the extra **white** queen on **A5**.
+
+(Todo: In a later version, the score will always be from White's perspective to be more consistent.)
 
 Position setup
 --------------
