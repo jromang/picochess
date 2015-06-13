@@ -224,12 +224,15 @@ shutdown_map = ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQQBNR", "8/8/8/8/8/8/8/3Q
 mode_map = {"rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR": Mode.GAME,
             "rnbqkbnr/pppppppp/8/1Q6/8/8/PPPPPPPP/RNBQKBNR": Mode.ANALYSIS,
             "rnbqkbnr/pppppppp/8/2Q5/8/8/PPPPPPPP/RNBQKBNR": Mode.KIBITZ,
-            "rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR": Mode.OBSERVE}
+            "rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR": Mode.OBSERVE,
+            "rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR": Mode.REMOTE}
+
 game_map = {
             "rnbq1bnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR": GameMode.PLAY_BLACK,  # Player plays black
             "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQ1BNR": GameMode.PLAY_WHITE,  # Player plays white
             "RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbq1bnr": GameMode.PLAY_BLACK,  # Player plays black (reversed board)
             "RNBQ1BNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr": GameMode.PLAY_WHITE}  # Player plays white (reversed board)
+
 
 time_control_map = OrderedDict([
 ("rnbqkbnr/pppppppp/Q7/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=1)),

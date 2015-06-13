@@ -123,6 +123,7 @@ class Mode(enum.Enum):
     ANALYSIS = 'analys'
     KIBITZ = 'kibitz'
     OBSERVE = 'observ'
+    REMOTE = 'remote'
 
 @enum.unique
 class GameMode(enum.Enum):
