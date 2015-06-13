@@ -251,6 +251,7 @@ class ChessTalkerVoice():
     VOCAB_MODE_ANALYSIS = "MODE_ANALYSIS"
     VOCAB_MODE_KIBITZ = "MODE_KIBITZ"
     VOCAB_MODE_OBSERVE = "MODE_OBSERVE"
+    VOCAB_MODE_REMOTE = "MODE_REMOTE"
     VOCAB_MODE_PLAY_BLACK = "MODE_PLAY_BLACK"
     VOCAB_MODE_PLAY_WHITE = "MODE_PLAY_WHITE"
     VOCAB_TIME_CONTROL_FIXED_TIME = "TIME_CONTROL_FIXED_TIME"
@@ -429,6 +430,8 @@ class ChessTalkerVoice():
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_KIBITZ]
         elif mode == Mode.OBSERVE:
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_OBSERVE]
+        elif mode == Mode.REMOTE:
+            modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_REMOTE]
         elif mode == Mode.PLAY_BLACK:
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_PLAY_BLACK]
         elif mode == Mode.PLAY_WHITE:
@@ -635,6 +638,7 @@ if __name__ == "__main__":
                     chesstalker.say_mode(Mode.GAME)
                     chesstalker.say_mode(Mode.ANALYSIS)
                     chesstalker.say_mode(Mode.OBSERVE)
+                    chesstalker.say_mode(Mode.REMOTE)
                     chesstalker.say_mode(Mode.KIBITZ)
                     chesstalker.say_mode(Mode.PLAY_WHITE)
                     chesstalker.say_mode(Mode.PLAY_BLACK)

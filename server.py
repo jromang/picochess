@@ -104,7 +104,8 @@ class InfoHandler(tornado.web.RequestHandler):
         action = self.get_argument("action")
         if action == "get_system_info":
             # print(self.shared['system_info'])
-            self.write(self.shared['system_info'])
+            if 'system_info' in self.shared:
+                self.write(self.shared['system_info'])
 
 
 class PGNHandler(tornado.web.RequestHandler):

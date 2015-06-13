@@ -225,6 +225,8 @@ mode_map = {"rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR": Mode.GAME,
             "rnbqkbnr/pppppppp/8/2Q5/8/8/PPPPPPPP/RNBQKBNR": Mode.PLAY_WHITE,
             "rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR": Mode.KIBITZ,
             "rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR": Mode.OBSERVE,
+            "rnbqkbnr/pppppppp/8/5Q2/8/8/PPPPPPPP/RNBQKBNR": Mode.REMOTE,
+
             "rnbq1bnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR": Mode.PLAY_BLACK,  # Player plays black
             "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQ1BNR": Mode.PLAY_WHITE,  # Player plays white
             "RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbq1bnr": Mode.PLAY_BLACK,  # Player plays black (reversed board)

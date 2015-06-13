@@ -118,7 +118,7 @@ class Mode(enum.Enum):
     KIBITZ = 3
     OBSERVE = 4
     PLAY_BLACK = 5
-
+    REMOTE = 6
 
 class ClockMode(AutoNumber):
     FIXED_TIME = ()  # Fixed seconds per move
