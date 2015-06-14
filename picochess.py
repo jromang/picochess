@@ -433,8 +433,6 @@ def main():
                         score = event.score
                         logging.debug('Could not convert score')
 
-
-
                     Display.show(Message.SCORE, score=score, mate=event.mate, interaction_mode=interaction_mode)
                     break
 
