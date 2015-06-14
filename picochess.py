@@ -316,8 +316,8 @@ def main():
                         # logging.debug("Stopping player clock")
                         game.push(move)
                         if check_game_state(game, play_mode):
-                            think(time_control)
                             Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
+                            think(time_control)
                 elif interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
                     stop_thinking()
                     time_control.stop()
