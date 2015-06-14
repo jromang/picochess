@@ -601,6 +601,7 @@ $(function () {
         ws.onmessage=function(e){
             var j = JSON.parse(e.data);
             el.innerHTML=j.msg;
+//            console.log(j);
 
             updateDGTPosition(j);
         };

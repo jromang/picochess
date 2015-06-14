@@ -104,7 +104,8 @@ class InfoHandler(tornado.web.RequestHandler):
         action = self.get_argument("action")
         if action == "get_system_info":
             # print(self.shared['system_info'])
-            self.write(self.shared['system_info'])
+            if 'system_info' in self.shared:
+                self.write(self.shared['system_info'])
 
 
 class PGNHandler(tornado.web.RequestHandler):
@@ -246,6 +247,10 @@ class WebDisplay(Display, threading.Thread):
                 r['msg']= 'Computer move: '+str(message.move)
             elif message == Message.USER_MOVE:
                 r['msg']= 'User move: '+str(message.move)
+
+            if message == Message.REMOTE_MODE_MOVE:
+                r['remote_play'] = True
+
 
             self.shared['last_dgt_move_msg'] = r
             EventHandler.write_to_clients(r)
