@@ -22,6 +22,7 @@ import random
 import subprocess
 import urllib.request
 import socket
+import json
 from xml.dom.minidom import parseString
 try:
     import enum
@@ -292,11 +293,12 @@ def get_ip():
 
 def get_location():
     try:
-        response = urllib.request.urlopen('http://freegeoip.net/xml/')
-        dom = parseString(response.read())
-        country = dom.getElementsByTagName('CountryName')[0].childNodes[0].data
-        city = dom.getElementsByTagName('City')[0].childNodes[0].data
-        country_code = dom.getElementsByTagName('CountryCode')[0].childNodes[0].data
+        response = urllib.request.urlopen('http://www.telize.com/geoip/')
+        j = json.loads(response.read().decode())
+        country = j['country']
+        city = j['city']
+        country_code = j['country_code']
+
         return city + ', ' + country + ' ' + country_code
     except:
         return '?'
