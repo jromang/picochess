@@ -292,38 +292,46 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.display_move = False
         self.mode_index = 0
         # Open the serial port
-        attempts = 0
-        while attempts < 5:
-            try:
-                self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE,
-                                              parity=pyserial.PARITY_NONE,
-                                              bytesize=pyserial.EIGHTBITS,
-                                              timeout=1
-                                              )
-                attempts += 1
-                break
-            except pyserial.SerialException as e:
-                logging.warning(e)
-                time.sleep(2)
+
+        try:
+            self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE,
+                                          parity=pyserial.PARITY_NONE,
+                                          bytesize=pyserial.EIGHTBITS,
+                                          timeout=2
+                                          )
+        except pyserial.SerialException as e:
+            logging.warning(e)
 
         # Set the board update mode
         self.serial.write(bytearray([Commands.DGT_SEND_UPDATE_NICE.value]))
 
-        # Detect DGT XL clock
-        self.serial.write(bytearray([0x2b, 0x04, 0x03, 0x0b, 1, 0x00]))
-        tries = 0
-        self.clock_found = False
-        while not self.clock_found and tries < 20:
-            time.sleep(0.3)
-            self.clock_found = self.serial.inWaiting()
-            tries += 1
-        logging.debug('DGT clock found' if self.clock_found else 'DGT clock NOT found')
+        # self.clock_found = True
 
-        self.display_on_dgt_xl('pic'+version)
-        self.display_on_dgt_3000('pic'+version)
+        # Detect DGT XL clock
+        self.clock_found = False
+        self.serial.write(bytearray([0x2b, 0x04, 0x03, 0x0b, 1, 0x00]))
+        # time.sleep(0.3)
+        # self.clock_found = self.read_message()
+        # if self.serial.inWaiting():
+        #     self.read_message()
+        #     self.clock_found = True
+        # else:
+        #     self.clock_found = False
+
+        # self.clock_found = self.serial.read()
+        # print (self.clock_found)
+        # if self.clock_found is not None:
+        #     self.serial.read(self.serial.inWaiting())
+        time.sleep(1)
+        # logging.debug('DGT clock found' if self.clock_found else 'DGT clock NOT found')
+
+        # self.display_on_dgt_xl('pic'+version)
+        # self.display_on_dgt_3000('pic'+version)
         # Get clock version
         self.write([Commands.DGT_CLOCK_MESSAGE, 0x03, Clock.DGT_CMD_CLOCK_START_MESSAGE,
                         Clock.DGT_CMD_CLOCK_VERSION, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+        self.display_on_dgt_xl('pic'+version)
+
 
         # Get board version
         self.version = 0.0
@@ -536,18 +544,23 @@ class DGTBoard(Observable, Display, threading.Thread):
                         # print ("Ack1: {0}".format(ack1))
                         ack2 = ((message[4]) & 0x7f) | ((message[0] << 3) & 0x80)
                         if ack1 == 0x09:
+                            if not self.clock_found:
+                                self.clock_found = True
                             main_version = ack2 >> 4
                             if main_version == 2:
                                 self.enable_dgt_3000 = True
                                 # self.display_on_dgt_3000('pico '+version)
                                 # time.sleep(0.5)
                                 # # Some bug with certain DGT 3000 clocks?!
-                                # self.display_on_dgt_3000('pico '+version)
+                                self.display_on_dgt_3000('pico '+version)
+                            else:
+                                self.display_on_dgt_xl('pic'+version)
 
                         ack3 = ((message[5]) & 0x7f) | ((message[0] << 2) & 0x80)
                         if ack0 != 0x10: logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
                         else:
                             logging.debug("Clock ACK %s", (ack0, ack1, ack2, ack3))
+
                             if self.clock_lock.locked():
                                 self.clock_lock.release()
                             return None
