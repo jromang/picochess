@@ -87,8 +87,10 @@ When using these modes, please be patient and don't rush moves. Allow a few seco
 * Analysis mode (enabled by **white** queen on **B5**): the computer is watching the game, it does not play itself. The clock continually displays the best move for the side to play.
 * Kibitz mode (enabled by **white** queen on **C5**): the computer is watching the game, it does not play itself. The clock continually displays the position score in centipawns for the side to play. For example: if it's White's turn and the clock displays 33, then White is ahead 33 centipawns (or 0.33 pawns). A negative score means that the other side is ahead.
 * Observe mode (enabled by **white** queen on **D5**): the computer is watching the game, it does not play itself. The clock displays the remaining thinking time for both sides. Press the second button once to show the position evaluation, twice to show a hint.
+* Remote play mode (enabled by **white** queen on **E5**): no documentation right now
 
 Game mode is the regular mode. If you used one of the other modes, you can return back to game mode by putting the extra **white** queen on **A5**.
+You can also use Button 4 for toggling over the modes (Qa5-Qe5 only working in the starting position).
 
 (Todo: In a later version, the score will always be from White's perspective to be more consistent.)
 

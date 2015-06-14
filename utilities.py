@@ -148,6 +148,10 @@ class GameResult(enum.Enum):
     FIVEFOLD_REPETITION = 'repetition'
     ABORT = 'abort'
 
+class EngineStatus(AutoNumber):
+    THINK = ()
+    PONDER = ()
+    WAIT = ()
 
 class Observable(object):  # Input devices are observable
     def __init__(self):

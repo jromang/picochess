@@ -21,7 +21,7 @@ import paramiko
 import chess.uci
 
 
-class Informer(chess.uci.InfoHandler,Observable):
+class Informer(chess.uci.InfoHandler, Observable):
 
     def on_bestmove(self,bestmove,ponder):
         self.fire(Event.BEST_MOVE, move=bestmove, ponder=ponder)
@@ -36,7 +36,7 @@ class Informer(chess.uci.InfoHandler,Observable):
         super().pv(moves)
 
 
-class Engine():
+class Engine:
 
     def __init__(self, path, hostname=None, username=None, key_file=None, password=None):
         try:
