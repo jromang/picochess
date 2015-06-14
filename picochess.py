@@ -424,7 +424,18 @@ def main():
                     break
 
                 if case(Event.SCORE):
-                    Display.show(Message.SCORE, score=event.score, mate=event.mate, interaction_mode=interaction_mode)
+                    try:
+                        score = int(event.score)
+                        if game.turn == chess.BLACK:
+                            score *=-1
+
+                    except ValueError:
+                        score = event.score
+                        logging.debug('Could not convert score')
+
+
+
+                    Display.show(Message.SCORE, score=score, mate=event.mate, interaction_mode=interaction_mode)
                     break
 
                 if case(Event.SET_MODE):
