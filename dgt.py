@@ -293,9 +293,14 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.mode_index = 0
         # Open the serial port
         attempts = 0
-        while attempts < 10:
+        while attempts < 5:
             try:
-                self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE)
+                self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE,
+                                              parity=pyserial.PARITY_NONE,
+                                              bytesize=pyserial.EIGHTBITS,
+                                              timeout=1
+                                              )
+                attempts += 1
                 break
             except pyserial.SerialException as e:
                 logging.warning(e)
@@ -591,6 +596,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                     elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":  # New game
                         logging.debug("New game")
                         self.fire(Event.NEW_GAME)
+
                     elif fen in book_map:  # Choose opening book
                         book_index = book_map.index(fen)
                         logging.debug("Opening book [%s]", get_opening_books()[book_index])
@@ -664,6 +670,7 @@ class DGTBoard(Observable, Display, threading.Thread):
 
     def run(self):
         while True:
+
             # Check if we have a message from the board
             if self.serial.inWaiting():
                 self.read_message()

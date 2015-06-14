@@ -277,7 +277,8 @@ def main():
                         game_history.pop()
                         if (play_mode == GameMode.PLAY_WHITE and game_history.turn == chess.WHITE) \
                             or (play_mode == GameMode.PLAY_BLACK and game_history.turn == chess.BLACK) \
-                            or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.ANALYSIS):
+                            or (interaction_mode == Mode.OBSERVE) \
+                            or (interaction_mode == Mode.REMOTE) or (interaction_mode == Mode.ANALYSIS):
                             if game_history.fen().split(' ')[0] == event.fen:
                                 logging.debug("Undoing game until FEN :" + event.fen)
                                 stop_thinking()
@@ -307,7 +308,7 @@ def main():
                         if check_game_state(game, play_mode):
                             think(time_control)
                             Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
-                elif interaction_mode == Mode.OBSERVE:
+                elif interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
                     stop_thinking()
                     time_control.stop()
                     fen = game.fen()
@@ -316,6 +317,7 @@ def main():
                         observe(time_control)
                         Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game), mode=interaction_mode)
                         legal_fens = compute_legal_fens(game)
+
                 elif (interaction_mode == Mode.ANALYSIS) or (interaction_mode == Mode.KIBITZ):
                     stop_thinking()
                     # time_control.stop()
@@ -383,7 +385,8 @@ def main():
                 break
 
             if case(Event.NEW_PV):
-                if (interaction_mode == Mode.ANALYSIS) or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.KIBITZ):
+                if (interaction_mode == Mode.ANALYSIS) or (interaction_mode == Mode.OBSERVE) \
+                        or (interaction_mode == Mode.REMOTE) or (interaction_mode == Mode.KIBITZ):
                     Display.show(Message.NEW_PV, pv=event.pv, interaction_mode=interaction_mode, fen=game.fen())
                 break
 

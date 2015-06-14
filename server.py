@@ -248,6 +248,10 @@ class WebDisplay(Display, threading.Thread):
             elif message == Message.USER_MOVE:
                 r['msg']= 'User move: '+str(message.move)
 
+            if message == Message.REMOTE_MODE_MOVE:
+                r['remote_play'] = True
+
+
             self.shared['last_dgt_move_msg'] = r
             EventHandler.write_to_clients(r)
 

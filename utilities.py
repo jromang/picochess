@@ -70,6 +70,8 @@ class Message(AutoNumber):
     BOOK_MOVE = ()  # Show book move
     NEW_PV = ()    # Show the new Principal Variation
     REVIEW_MODE_MOVE = () # Player is reviewing game
+    REMOTE_MODE_MOVE = () # DGT Player is playing vs network player
+
     INTERACTION_MODE = ()  # Interaction mode
     PLAY_MODE = () # Play mode
     START_NEW_GAME = ()
@@ -156,7 +158,6 @@ class Observable(object):  # Input devices are observable
         for k, v in attrs.items():
             setattr(event, k, v)
         event_queue.put(event)
-
 
 class Display(object):  # Display devices (DGT XL clock, Piface LCD, pgn file...)
     def __init__(self):
