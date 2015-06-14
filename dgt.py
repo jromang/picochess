@@ -739,12 +739,13 @@ class DGTBoard(Observable, Display, threading.Thread):
                         break
                     if case(Message.USER_MOVE):
                         self.display_move = False
+                        self.display_on_dgt_clock('oo', self.enable_dgt_clock_beep)
                         break
                     if case(Message.REVIEW_MODE_MOVE):
                         self.last_move = message.move
                         self.last_fen = message.fen
                         self.display_move = False
-                        # self.display_on_dgt_clock('ok', false)
+                        self.display_on_dgt_clock('ko', self.enable_dgt_clock_beep)
                         break
                     if case(Message.USER_TAKE_BACK):
                         self.display_on_dgt_xl('takbak', self.enable_dgt_clock_beep)

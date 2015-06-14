@@ -166,6 +166,8 @@ def main():
         else:
             # book_thread = None
             engine.set_position(game)
+            global engine_status
+            engine_status = EngineStatus.THINK
             engine.go(time.uci())
             Display.show(Message.SEARCH_STARTED)
 
@@ -176,6 +178,8 @@ def main():
         :return:
         """
         engine.set_position(game)
+        global engine_status
+        engine_status = EngineStatus.PONDER
         engine.ponder()
         Display.show(Message.SEARCH_STARTED)
 
@@ -190,6 +194,8 @@ def main():
         time.run(game.turn)
 
         engine.set_position(game)
+        global engine_status
+        engine_status = EngineStatus.PONDER
         engine.ponder()
         Display.show(Message.SEARCH_STARTED)
 
@@ -198,10 +204,12 @@ def main():
         Stop current search or book thread.
         :return:
         """
-        #if book_thread:
+        # if book_thread:
         #    book_thread.cancel()
-        #else:
+        # else:
         engine.stop()
+        global engine_status
+        engine_status = EngineStatus.WAIT
 
     def check_game_state(game, play_mode):
         """
@@ -232,11 +240,12 @@ def main():
     book = chess.polyglot.open_reader(get_opening_books()[8][1])  # Default opening book
     interaction_mode = Mode.GAME   # Interaction mode
     play_mode = GameMode.PLAY_WHITE
+    engine_status = EngineStatus.WAIT
 
     # book_thread = None  # The thread that will fire book moves
     time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=5)
 
-    #Send the engine's UCI options to all Displays
+    # Send the engine's UCI options to all Displays
     Display.show(Message.UCI_OPTION_LIST, options=engine.get().options)
     Display.show(Message.SYSTEM_INFO, info={"version": version, "location": get_location(),
                                             "books": get_opening_books(), "ip": get_ip()})
@@ -250,7 +259,8 @@ def main():
                 if event.fen in legal_fens:
                     # Check if we have to undo a previous move (sliding)
                     if interaction_mode == Mode.GAME:
-                        if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
+                        if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or \
+                                (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
                             stop_thinking()
                             if game.move_stack:
                                 game.pop()
@@ -343,12 +353,18 @@ def main():
                 legal_fens = compute_legal_fens(game)
                 time_control.stop()
                 time_control.reset()
+                if not engine_status == EngineStatus.WAIT:
+                    stop_thinking()
+
                 Display.show(Message.START_NEW_GAME)
-                if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
+                if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or \
+                        (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
                     think(time_control)
                 break
 
             if case(Event.NEW_GAME):  # User starts a new game
+                if not engine_status == EngineStatus.WAIT:
+                    stop_thinking()
                 if game.move_stack:
                     logging.debug("Starting a new game")
                     if not game.is_game_over():
@@ -375,7 +391,8 @@ def main():
                 ponder = event.ponder
                 # Check if we are in play mode and it is computer's turn
                 if interaction_mode == Mode.GAME:
-                    if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
+                    if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or \
+                            (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
                         time_control.stop()
                         fen = game.fen()
                         game.push(move)
@@ -410,7 +427,8 @@ def main():
                 else:
                     play_mode = GameMode.PLAY_WHITE
                 Display.show(Message.INTERACTION_MODE, mode=play_mode)
-                if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
+                if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or \
+                        (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
                     if check_game_state(game, play_mode):
                         think(time_control)
                 break
