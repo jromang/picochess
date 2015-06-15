@@ -35,13 +35,14 @@ import chess
 from utilities import *
 
 SPOKEN_PIECE_SOUNDS = {
-    "B": " Bishop ",
-    "N": " Knight ",
-    "R": " Rook ",
-    "Q": " Queen ",
-    "K": " King ",
+    "K": " king ",
+    "B": " bishop ",
+    "N": " knight ",
+    "R": " rook ",
+    "Q": " queen ",
     # "++": " Double Check ",
     "+": " ",
+    "#": " ",
     "x": " captures "
 }
 
@@ -94,7 +95,8 @@ class ChessTalker(Display, threading.Thread):
                         logging.debug('Announcing computer move [%s]', message.move)
                         self.computer_chesstalker_voice.say_move(message.move, message.game)
                         previous_move = str(message.move)
-                    elif message == Message.USER_MOVE and message.move and message.game and str(message.move) != previous_move:
+                    elif message == Message.USER_MOVE or message == Message.REVIEW_MODE_MOVE and message.move \
+                            and message.game and str(message.move) != previous_move:
                         logging.debug('Announcing user move [%s]', message.move)
                         self.user_chesstalker_voice.say_move(message.move, message.game)
                         previous_move = str(message.move)
@@ -545,8 +547,15 @@ class ChessTalkerVoice():
         else:
             # Short notation speech
             spoken_san = moveTextSAN
+
             for k, v in SPOKEN_PIECE_SOUNDS.items():
                 spoken_san = spoken_san.replace(k, v)
+
+            # Disambiguation for piece move
+            if 'a' <= moveTextSAN[1] <= 'h' and 'a' <= moveTextSAN[2] <= 'h':
+                spoken_san_tokens = spoken_san.split()
+                spoken_san = spoken_san_tokens[0] + ' ' + from_square + ' ' + ' '. join(spoken_san_tokens[1:])
+
             self.say_text(spoken_san)
 
             # Commented out code announces move in longer form
