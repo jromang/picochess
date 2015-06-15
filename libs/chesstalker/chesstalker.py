@@ -34,6 +34,17 @@ import logging
 import chess
 from utilities import *
 
+SPOKEN_PIECE_SOUNDS = {
+    "B": " Bishop ",
+    "N": " Knight ",
+    "R": " Rook ",
+    "Q": " Queen ",
+    "K": " King ",
+    # "++": " Double Check ",
+    "+": " ",
+    "x": " captures "
+}
+
 
 class ChessTalker(Display, threading.Thread):
     def __init__(self, user_voice, computer_voice):
@@ -532,15 +543,23 @@ class ChessTalkerVoice():
         elif moveTextSAN.startswith("O-O"):
             self.say_castles_kingside(color_moved)
         else:
-            if from_square_piece and to_square_piece:
-                # Announce capture.
-                self.say_captures(str(from_square_piece), str(to_square_piece))
-            else:
-                # Announce piece moved.
-                self.say_text(self.vocabulary_piece(str(from_square_piece)))
-            # Announce the move itself.
-            self.say_position(from_square)
-            self.say_position(to_square)
+            # Short notation speech
+            spoken_san = moveTextSAN
+            for k, v in SPOKEN_PIECE_SOUNDS.items():
+                spoken_san = spoken_san.replace(k, v)
+            self.say_text(spoken_san)
+
+            # Commented out code announces move in longer form
+            # if from_square_piece and to_square_piece:
+            #     # Announce capture.
+            #     self.say_captures(str(from_square_piece), str(to_square_piece))
+            # else:
+            #     # Announce piece moved.
+            #     self.say_text(self.vocabulary_piece(str(from_square_piece)))
+            # # Announce the move itself.
+            # self.say_position(from_square)
+            # self.say_position(to_square)
+
             # Announce promotion if necessary.
             if move.promotion:
                 self.say_promotion(moveText[4])
