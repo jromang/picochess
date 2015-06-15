@@ -27,9 +27,19 @@ class KeyboardInput(Observable, threading.Thread):
     def run(self):
         while True:
             cmd = input('PicoChess v'+version+':>')
+
             try:
-                move = chess.Move.from_uci(cmd)
-                self.fire(Event.USER_MOVE, move=move)
+                if cmd.startswith('mode:'):
+                    mode = cmd.split(':')[1]
+                    if mode.lower() == 'analysis':
+                        mode = Mode.ANALYSIS
+                    elif mode.lower() == 'remote':
+                        mode = Mode.REMOTE
+                    logging.warning("Mode: {0}".format(mode))
+                    self.fire(Event.SET_MODE, mode=mode)
+                else:
+                    move = chess.Move.from_uci(cmd)
+                    self.fire(Event.USER_MOVE, move=move)
             except ValueError:
                 logging.warning('Invalid user input [%s]', cmd)
 
