@@ -176,8 +176,8 @@ def main():
             engine.set_position(game)
             global engine_status
             engine_status = EngineStatus.THINK
-            engine.go(time.uci())
             Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
+            engine.go(time.uci())
 
     def analyse():
         """
@@ -188,8 +188,8 @@ def main():
         engine.set_position(game)
         global engine_status
         engine_status = EngineStatus.PONDER
-        engine.ponder()
         Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
+        engine.ponder()
 
     def observe(time):
         """
@@ -204,8 +204,8 @@ def main():
         engine.set_position(game)
         global engine_status
         engine_status = EngineStatus.PONDER
-        engine.ponder()
         Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
+        engine.ponder()
 
     def stop_thinking():
         """
@@ -374,37 +374,27 @@ def main():
                         stop_thinking()
 
                     Display.show(Message.START_NEW_GAME)
-            if case(Event.OPENING_BOOK):
-                logging.debug("Changing opening book [%s]", get_opening_books()[event.book_index][1])
-                book = chess.polyglot.open_reader(get_opening_books()[event.book_index][1])
-                break
+                    break
 
-            if case(Event.STOP_SEARCH):
-                result = stop_thinking()
-                move = result.bestmove
-                ponder = result.ponder
-                print(move)
-                print(ponder)
+                if case(Event.STOP_SEARCH):
+                    print('event: stopsearch')
+                    result = stop_thinking()
+                    move = result.bestmove
+                    ponder = result.ponder
+                    print(move)
+                    print(ponder)
+                    print(' ')
 
-                # copy from "BEST_MOVE"
-                if interaction_mode == Mode.GAME:
-                    if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or \
-                            (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
-                        time_control.stop()
-                        fen = game.fen()
-                        game.push(move)
-                        Display.show(Message.COMPUTER_MOVE, move=move, ponder=ponder, fen=fen, game=copy.deepcopy(game), time_control=time_control)
-                        # if check_game_state(game, interaction_mode):
-                        legal_fens = compute_legal_fens(game)
-                break
-            if case(Event.BEST_MOVE):
-                move = event.move
-                ponder = event.ponder
-                # Check if we are in play mode and it is computer's turn
-                if interaction_mode == Mode.GAME:
-                    if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or \
-                            (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
-                        think(time_control)
+                    # copy from "BEST_MOVE"
+                    if interaction_mode == Mode.GAME:
+                        if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or \
+                                (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
+                            time_control.stop()
+                            fen = game.fen()
+                            game.push(move)
+                            Display.show(Message.COMPUTER_MOVE, move=move, ponder=ponder, fen=fen, game=copy.deepcopy(game), time_control=time_control)
+                            # if check_game_state(game, interaction_mode):
+                            legal_fens = compute_legal_fens(game)
                     break
 
                 if case(Event.NEW_GAME):  # User starts a new game
@@ -472,7 +462,7 @@ def main():
                     break
 
                 if case(Event.SET_MODE):
-                    Display.show(Message.INTERACTION_MODE, mode=event.mode)  # Useful for pgn display device
+                    Display.show(Message.INTERACTION_MODE, mode=event.mode, engine_status=engine_status)  # Useful for pgn display device
                     interaction_mode = event.mode
                     break
 
@@ -486,7 +476,7 @@ def main():
                         play_mode = GameMode.PLAY_BLACK
                     else:
                         play_mode = GameMode.PLAY_WHITE
-                    Display.show(Message.INTERACTION_MODE, mode=play_mode)
+                    Display.show(Message.INTERACTION_MODE, mode=play_mode, engine_status=engine_status)
                     if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or \
                             (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
                         if check_game_state(game, play_mode):

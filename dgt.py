@@ -785,7 +785,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.display_on_dgt_clock(message.result.value, beep=self.enable_dgt_clock_beep)
                         break
                     if case(Message.INTERACTION_MODE):
-                        self.engine_status = message.enine_status
+                        self.engine_status = message.engine_status
                         self.mode = message.mode
                         self.display_on_dgt_clock(message.mode.value, beep=self.enable_dgt_clock_beep)
                         break
