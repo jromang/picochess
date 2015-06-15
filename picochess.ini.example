@@ -21,7 +21,7 @@
 ### ========================
 ### Options for the UCI-Chess engine
 ## What engine should play. Path to a UCI engine or Stockfish
-# engine = /opt/Stockfish/src/stockfish
+engine = stockfish
 ## uci-option stores options that will be passed to the engine
 # uci-option = Hash = 128
 # uci-option = Threads = 4
