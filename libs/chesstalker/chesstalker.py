@@ -95,7 +95,8 @@ class ChessTalker(Display, threading.Thread):
                         logging.debug('Announcing computer move [%s]', message.move)
                         self.computer_chesstalker_voice.say_move(message.move, message.game)
                         previous_move = str(message.move)
-                    elif message == Message.USER_MOVE and message.move and message.game and str(message.move) != previous_move:
+                    elif message == Message.USER_MOVE or message == Message.REVIEW_MODE_MOVE and message.move \
+                            and message.game and str(message.move) != previous_move:
                         logging.debug('Announcing user move [%s]', message.move)
                         self.user_chesstalker_voice.say_move(message.move, message.game)
                         previous_move = str(message.move)

@@ -298,10 +298,10 @@ def main():
                             game_history.pop()
                             if (play_mode == GameMode.PLAY_WHITE and game_history.turn == chess.WHITE) \
                                     or (play_mode == GameMode.PLAY_BLACK and game_history.turn == chess.BLACK) \
-                                    or (interaction_mode == Mode.OBSERVE) \
+                                    or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.KIBITZ) \
                                     or (interaction_mode == Mode.REMOTE) or (interaction_mode == Mode.ANALYSIS):
                                 if game_history.fen().split(' ')[0] == event.fen:
-                                    logging.debug("Undoing game until FEN :" + event.fen)
+                                    logging.info("Undoing game until FEN :" + event.fen)
                                     stop_thinking()
                                     while len(game_history.move_stack) < len(game.move_stack):
                                         game.pop()
