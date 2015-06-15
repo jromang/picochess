@@ -29,7 +29,7 @@ from email.mime.text import MIMEText
 
 
 class PgnDisplay(Display, threading.Thread):
-    def __init__(self, engine_name, pgn_file_name, email=None, fromINIMailGun_Key=None,
+    def __init__(self, pgn_file_name, engine_name, email=None, fromINIMailGun_Key=None,
                     fromIniSmtp_Server=None, fromINISmtp_User=None,
                     fromINISmtp_Pass=None, fromINISmtp_Enc=False):
         super(PgnDisplay, self).__init__()
