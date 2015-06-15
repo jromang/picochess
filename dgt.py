@@ -758,7 +758,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.last_move = message.move
                         self.last_fen = message.fen
                         self.display_move = False
-                        # self.display_on_dgt_clock('ok', self.enable_dgt_clock_beep)
+                        self.display_on_dgt_clock('ok', self.enable_dgt_clock_beep)
                         break
                     if case(Message.USER_TAKE_BACK):
                         self.display_on_dgt_xl('takbak', self.enable_dgt_clock_beep)
