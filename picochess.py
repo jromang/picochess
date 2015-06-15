@@ -68,6 +68,8 @@ def main():
     parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
     parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
     args = parser.parse_args()
+    engine_status = EngineStatus.WAIT
+
     # Enable logging
     logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
                         format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
@@ -169,7 +171,7 @@ def main():
             global engine_status
             engine_status = EngineStatus.THINK
             engine.go(time.uci())
-            Display.show(Message.SEARCH_STARTED)
+            Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
 
     def analyse():
         """
@@ -181,7 +183,7 @@ def main():
         global engine_status
         engine_status = EngineStatus.PONDER
         engine.ponder()
-        Display.show(Message.SEARCH_STARTED)
+        Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
 
     def observe(time):
         """
@@ -197,7 +199,7 @@ def main():
         global engine_status
         engine_status = EngineStatus.PONDER
         engine.ponder()
-        Display.show(Message.SEARCH_STARTED)
+        Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
 
     def stop_thinking():
         """
@@ -207,9 +209,11 @@ def main():
         # if book_thread:
         #    book_thread.cancel()
         # else:
-        engine.stop()
+        res = engine.stop()
         global engine_status
         engine_status = EngineStatus.WAIT
+        Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=res)
+        return res
 
     def check_game_state(game, play_mode):
         """
@@ -386,6 +390,24 @@ def main():
                 book = chess.polyglot.open_reader(get_opening_books()[event.book_index][1])
                 break
 
+            if case(Event.STOP_SEARCH):
+                result = stop_thinking()
+                move = result.bestmove
+                ponder = result.ponder
+                print(move)
+                print(ponder)
+
+                # copy from "BEST_MOVE"
+                if interaction_mode == Mode.GAME:
+                    if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or \
+                            (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
+                        time_control.stop()
+                        fen = game.fen()
+                        game.push(move)
+                        Display.show(Message.COMPUTER_MOVE, move=move, ponder=ponder, fen=fen, game=copy.deepcopy(game), time_control=time_control)
+                        # if check_game_state(game, interaction_mode):
+                        legal_fens = compute_legal_fens(game)
+                break
             if case(Event.BEST_MOVE):
                 move = event.move
                 ponder = event.ponder
@@ -412,7 +434,7 @@ def main():
                 break
 
             if case(Event.SET_MODE):
-                Display.show(Message.INTERACTION_MODE, mode=event.mode)  # Useful for pgn display device
+                Display.show(Message.INTERACTION_MODE, mode=event.mode, engine_status=engine_status)  # Useful for pgn display device
                 interaction_mode = event.mode
                 break
 
@@ -426,7 +448,7 @@ def main():
                     play_mode = GameMode.PLAY_BLACK
                 else:
                     play_mode = GameMode.PLAY_WHITE
-                Display.show(Message.INTERACTION_MODE, mode=play_mode)
+                Display.show(Message.INTERACTION_MODE, mode=play_mode, engine_status=engine_status)
                 if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or \
                         (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
                     if check_game_state(game, play_mode):

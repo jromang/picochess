@@ -291,6 +291,8 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.mate = None
         self.display_move = False
         self.mode_index = 0
+        self.mode = Mode.GAME
+        self.engine_status = EngineStatus.WAIT
         # Open the serial port
 
         try:
@@ -491,7 +493,16 @@ class DGTBoard(Observable, Display, threading.Thread):
                     if 17 <= message[4] <= 18 and message[5] == 51:
                         logging.info("Button 2 pressed")
                         if self.dgt_clock_menu == Menu.GAME_MENU:
-                            self.fire(Event.CHANGE_PLAYMODE)
+                            if self.engine_status == EngineStatus.WAIT:
+                                self.fire(Event.CHANGE_PLAYMODE)
+                            else:
+                                if self.mode == Mode.GAME:
+                                    # here is missing if we want "stop search" or "alternative move"
+                                    self.fire(Event.STOP_SEARCH)
+                                else:
+                                    if self.mode == Mode.OBSERVE:
+                                        # here stop/start the clock
+                                        dummy_var = ''
 
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
                             self.display_on_dgt_clock("scan", True)
@@ -730,7 +741,9 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.score = None
                         self.mate = None
                         self.display_move = False
+                        self.mode = Mode.GAME
                         self.dgt_clock_menu = Menu.GAME_MENU
+                        self.engine_status = EngineStatus.WAIT
                         break
                     if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
                         self.display_on_dgt_clock('ok', self.enable_dgt_clock_beep)
@@ -772,6 +785,8 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.display_on_dgt_clock(message.result.value, beep=self.enable_dgt_clock_beep)
                         break
                     if case(Message.INTERACTION_MODE):
+                        self.engine_status = message.enine_status
+                        self.mode = message.mode
                         self.display_on_dgt_clock(message.mode.value, beep=self.enable_dgt_clock_beep)
                         break
                     if case(Message.PLAY_MODE):
@@ -796,6 +811,13 @@ class DGTBoard(Observable, Display, threading.Thread):
                             self.display_on_dgt_xl(' ' + self.hint_move.uci(), False)
                             self.bit_board.set_fen(message.fen)
                             self.display_on_dgt_3000(self.bit_board.san(self.hint_move), False)
+                        break
+                    if case(Message.SEARCH_STARTED):
+                        self.engine_status = message.engine_status
+                        break
+                    if case(Message.SEARCH_STOPPED):
+                        self.engine_status = message.engine_status
+                        print(message.result)
                         break
                     if case():  # Default
                         pass

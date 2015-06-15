@@ -58,6 +58,7 @@ class Event(AutoNumber):
     BEST_MOVE = ()  # Engine has found a move
     NEW_PV = ()    # Engine sends a new Principal Variation
     SCORE = ()  # Engine sends a new Score
+    STOP_SEARCH = () # Engine should stop
     SET_TIME_CONTROL = ()  # User sets time control
     OUT_OF_TIME = ()
     UCI_OPTION_SET = ()  # Users sets an UCI option, contains 'name' and 'value' (strings)
@@ -77,6 +78,7 @@ class Message(AutoNumber):
     START_NEW_GAME = ()
     COMPUTER_MOVE_DONE_ON_BOARD = ()  # User has done the compute move on board
     SEARCH_STARTED = ()  # Engine has started to search
+    SEARCH_STOPPED = () # Engine has stopped the search
     USER_TAKE_BACK = ()  # User takes back his move while engine is searching
     UPDATE_CLOCK = ()  # Message send every second when to clock runs, containing white_time and black_time
     RUN_CLOCK = ()  # Say to run autonomous clock, contains time_control
