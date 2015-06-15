@@ -282,7 +282,7 @@ def main():
                         legal_moves = list(game.legal_moves)
                         Observable.fire(Event.USER_MOVE, move=legal_moves[legal_fens.index(event.fen)])
                     elif event.fen == game.fen().split(' ')[0]:  # Player had done the computer move on the board
-                        if check_game_state(game, play_mode):
+                        if check_game_state(game, play_mode) and interaction_mode == Mode.GAME:
                             Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD)
                             if time_control.mode != ClockMode.FIXED_TIME:
                                 Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
@@ -305,7 +305,7 @@ def main():
                                     or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.KIBITZ) \
                                     or (interaction_mode == Mode.REMOTE) or (interaction_mode == Mode.ANALYSIS):
                                 if game_history.fen().split(' ')[0] == event.fen:
-                                    logging.info("Undoing game until FEN :" + event.fen)
+                                    logging.debug("Undoing game until FEN :" + event.fen)
                                     stop_thinking()
                                     while len(game_history.move_stack) < len(game.move_stack):
                                         game.pop()
@@ -449,7 +449,7 @@ def main():
                     try:
                         score = int(event.score)
                         if game.turn == chess.BLACK:
-                            score *=-1
+                            score *= -1
 
                     except ValueError:
                         score = event.score
