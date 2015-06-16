@@ -816,7 +816,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                         break
                     if case(Message.SEARCH_STOPPED):
                         self.engine_status = message.engine_status
-                        print(message.result)
+                        # print(message.result)
                         break
                     if case():  # Default
                         pass

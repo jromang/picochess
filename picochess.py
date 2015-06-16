@@ -343,6 +343,8 @@ def main():
                             observe(time_control)
                             Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game),
                                          mode=interaction_mode)
+                            time.sleep(0.3)
+                            Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
                             legal_fens = compute_legal_fens(game)
 
                     elif (interaction_mode == Mode.ANALYSIS) or (interaction_mode == Mode.KIBITZ):
