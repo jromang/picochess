@@ -493,7 +493,8 @@ class DGTBoard(Observable, Display, threading.Thread):
                     if 17 <= message[4] <= 18 and message[5] == 51:
                         logging.info("Button 2 pressed")
                         if self.dgt_clock_menu == Menu.GAME_MENU:
-                            if self.engine_status == EngineStatus.WAIT:
+                            # remove the else part, cause "stop search" NOT working right now @LocutusOfPenguin #99
+                            if True or (self.engine_status == EngineStatus.WAIT):
                                 self.fire(Event.CHANGE_PLAYMODE)
                             else:
                                 if self.mode == Mode.GAME:
@@ -501,7 +502,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                                     self.fire(Event.STOP_SEARCH)
                                 else:
                                     if self.mode == Mode.OBSERVE:
-                                        # here stop/start the clock
+                                        # here missing stop/start the clock
                                         dummy_var = ''
 
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:

@@ -67,7 +67,7 @@ class Event(AutoNumber):
 
 
 class Message(AutoNumber):
-    #Messages to display devices
+    # Messages to display devices
     COMPUTER_MOVE = ()  # Show computer move
     BOOK_MOVE = ()  # Show book move
     NEW_PV = ()    # Show the new Principal Variation
@@ -123,7 +123,7 @@ class GameMenu(AutoNumber):
 
 @enum.unique
 class Mode(enum.Enum):
-    #Interaction modes
+    # Interaction modes
     GAME = 'game'
     ANALYSIS = 'analys'
     KIBITZ = 'kibitz'
@@ -132,7 +132,7 @@ class Mode(enum.Enum):
 
 @enum.unique
 class GameMode(enum.Enum):
-    #Play modes
+    # Play modes
     PLAY_WHITE = 'white'
     PLAY_BLACK = 'black'
 
@@ -215,7 +215,7 @@ def weighted_choice(book, game):
     total = sum(e.weight for e in book.get_entries_for_position(game))
     r = random.uniform(0, total)
     upto = 0
-    #for e in book.get_entries_for_position(game):
+    # for e in book.get_entries_for_position(game):
     #    print(e.move().uci() + 'w:' + str(e.weight))
     for e in book.get_entries_for_position(game):
         if upto + e.weight > r:
