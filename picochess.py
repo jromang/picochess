@@ -87,6 +87,7 @@ def main():
     engine = uci.Engine(args.engine, hostname=args.remote, username=args.user, key_file=args.server_key, password=args.password)
 
     logging.debug('Loaded engine [%s]', engine.get().name)
+    engine_name = engine.get().name
     logging.debug('Supported options [%s]', engine.get().options)
     if 'Hash' in engine.get().options:
         engine.set_option("Hash", args.hash_size)
@@ -110,7 +111,7 @@ def main():
         TerminalDisplay().start()
 
     # Save to PGN
-    PgnDisplay(args.pgn_file, email=args.email, fromINIMailGun_Key=args.mailgun_key,
+    PgnDisplay(args.pgn_file, engine_name, email=args.email, fromINIMailGun_Key=args.mailgun_key,
                         fromIniSmtp_Server=args.smtp_server, fromINISmtp_User=args.smtp_user,
                         fromINISmtp_Pass=args.smtp_pass, fromINISmtp_Enc=args.smtp_encryption).start() 
 
