@@ -87,7 +87,7 @@ class Clock(enum.Enum):
 
 @enum.unique
 class Pieces(enum.Enum):
-    #Piece codes for chess pieces:
+    # Piece codes for chess pieces:
     EMPTY = 0x00
     WPAWN = 0x01
     WROOK = 0x02
@@ -101,15 +101,15 @@ class Pieces(enum.Enum):
     BBISHOP = 0x0a
     BKING = 0x0b
     BQUEEN = 0x0c
-    PIECE1 = 0x0d #  Magic piece: Draw
-    PIECE2 = 0x0e #  Magic piece: White win
-    PIECE3 = 0x0f #  Magic piece: Black win
+    PIECE1 = 0x0d # Magic piece: Draw
+    PIECE2 = 0x0e # Magic piece: White win
+    PIECE3 = 0x0f # Magic piece: Black win
 
 
 class Messages(enum.IntEnum):
     """ DESCRIPTION OF THE MESSAGES FROM BOARD TO PC """
     MESSAGE_BIT = 0x80 #  The Message ID is the logical OR of MESSAGE_BIT and ID code
-    #ID codes
+    # ID codes
     DGT_NONE = 0x00
     DGT_BOARD_DUMP = 0x06
     DGT_BWTIME = 0x0d
@@ -334,14 +334,13 @@ class DGTBoard(Observable, Display, threading.Thread):
                         Clock.DGT_CMD_CLOCK_VERSION, Clock.DGT_CMD_CLOCK_END_MESSAGE])
         self.display_on_dgt_xl('pic'+version)
 
-
         # Get board version
         self.version = 0.0
         self.write([Commands.DGT_SEND_VERSION])
 
         # Update the board
         self.write([Commands.DGT_SEND_BRD])
-        #self._dgt_xl_stress_test()
+        # self._dgt_xl_stress_test()
 
     def _dgt_xl_stress_test(self):
         # Clock stress test
@@ -473,7 +472,6 @@ class DGTBoard(Observable, Display, threading.Thread):
                                 if self.hint_fen is None:
                                     self.display_on_dgt_clock('none')
                                 else:
-                                    # self.display_on_dgt_clock(self.hint_move.uci(), True)
                                     self.display_on_dgt_xl(' ' + self.hint_move.uci(), True)
                                     self.bit_board.set_fen(self.hint_fen)
                                     self.display_on_dgt_3000(self.bit_board.san(self.hint_move), True)
@@ -503,7 +501,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                                 else:
                                     if self.mode == Mode.OBSERVE:
                                         # here missing stop/start the clock
-                                        dummy_var = ''
+                                        pass
 
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
                             self.display_on_dgt_clock("scan", True)
@@ -550,7 +548,7 @@ class DGTBoard(Observable, Display, threading.Thread):
 
                     if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
 
-                        #Construct the ack message
+                        # Construct the ack message
                         ack0 = ((message[1]) & 0x7f) | ((message[3] << 3) & 0x80)
                         ack1 = ((message[2]) & 0x7f) | ((message[3] << 2) & 0x80)
                         # print ("Ack1: {0}".format(ack1))
@@ -583,7 +581,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                     for c in message:
                         board += piece_to_char[c]
                     logging.debug('\n' + '\n'.join(board[0+i:8+i] for i in range(0, len(board), 8)))  # Show debug board
-                    #Create fen from board
+                    # Create fen from board
                     fen = ''
                     empty = 0
                     for sq in range(0, 64):
@@ -605,13 +603,13 @@ class DGTBoard(Observable, Display, threading.Thread):
                         fen = fen[::-1]
                     if fen == "RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr":  # Check if we have to flip the board
                         logging.debug('Flipping the board')
-                        #Flip the board
+                        # Flip the board
                         self.flip_board = not self.flip_board
                         fen = fen[::-1]
                     logging.debug(fen)
                     self.dgt_fen = fen
 
-                    #Fire the appropriate event
+                    # Fire the appropriate event
                     if fen in level_map:  # User sets level
                         level = level_map.index(fen)
                         self.fire(Event.LEVEL, level=level)
