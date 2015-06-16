@@ -16,15 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import chess
 import collections
 import signal
 import subprocess
 import logging
 import threading
+import copy
 
 try:
     import queue
@@ -78,11 +76,11 @@ class OptionMap(collections.MutableMapping):
 
     def __eq__(self, other):
         for key, value in self.items():
-            if not key in other or other[key] != value:
+            if key not in other or other[key] != value:
                 return False
 
         for key, value in other.items():
-            if not key in self or self[key] != value:
+            if key not in self or self[key] != value:
                 return False
 
         return True
@@ -102,6 +100,7 @@ class InfoHandler(object):
         self.info["refutation"] = {}
         self.info["currline"] = {}
         self.info["pv"] = {}
+        self.info["score"] = {}
 
     def depth(self, x):
         """Received search depth in plies."""
@@ -129,7 +128,12 @@ class InfoHandler(object):
         self.info["pv"][self.info.get("multipv", 1)] = moves
 
     def multipv(self, num):
-        """Received a new multipv number, starting at 1."""
+        """
+        Received a new multipv number, starting at 1.
+
+        If multipv occurs in an info line, this is guaranteed to be called
+        before *score* or *pv*.
+        """
         self.info["multipv"] = num
 
     def score(self, cp, mate, lowerbound, upperbound):
@@ -143,11 +147,19 @@ class InfoHandler(object):
 
         lowerbound and upperbound are usually *False*. If *True*, the sent
         score are just a lowerbound or upperbound.
+
+        In MultiPV mode this is related to the most recent *multipv* number
+        sent by the engine.
         """
-        self.info["score"] = Score(cp, mate, lowerbound, upperbound)
+        self.info["score"][self.info.get("multipv", 1)] = Score(cp, mate, lowerbound, upperbound)
 
     def currmove(self, move):
-        """Received a move the engine is currently thinking about."""
+        """
+        Received a move the engine is currently thinking about.
+
+        These moves come directly from the engine. So the castling move
+        representation depends on the UCI_Chess960 option of the engine.
+        """
         self.info["currmove"] = move
 
     def currmovenumber(self, x):
@@ -207,6 +219,7 @@ class InfoHandler(object):
         order to keep the locking in tact.
         """
         self.lock.acquire()
+        self.info.pop("multipv", None)
 
     def post_info(self):
         """
@@ -233,6 +246,7 @@ class InfoHandler(object):
             self.info["refutation"] = {}
             self.info["currline"] = {}
             self.info["pv"] = {}
+            self.info["score"] = {}
 
     def acquire(self, blocking=True):
         return self.lock.acquire(blocking)
@@ -244,7 +258,7 @@ class InfoHandler(object):
         self.acquire()
         return self.info
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback):
         self.release()
 
 
@@ -365,9 +379,13 @@ class SetOptionCommand(IsReadyCommand):
     def __init__(self, options):
         super(SetOptionCommand, self).__init__()
 
+        self.uci_chess960 = None
         self.option_lines = []
 
         for name, value in options.items():
+            if name.lower() == "uci_chess960":
+                self.uci_chess960 = value
+
             builder = []
             builder.append("setoption name ")
             builder.append(name)
@@ -387,6 +405,9 @@ class SetOptionCommand(IsReadyCommand):
         for option_line in self.option_lines:
             engine.send_line(option_line)
 
+        if self.uci_chess960 is not None:
+            engine.uci_chess960 = self.uci_chess960
+
         super(SetOptionCommand, self).execute(engine)
 
 
@@ -400,32 +421,53 @@ class PositionCommand(IsReadyCommand):
     def __init__(self, board):
         super(PositionCommand, self).__init__()
 
+        self.board = copy.deepcopy(board)
+
+    def execute(self, engine):
         builder = []
         builder.append("position")
 
+        # Take back moves to obtain the first FEN we know. Later giving the
+        # moves explicitly allows for transposition detection.
         switchyard = collections.deque()
-        while board.move_stack:
-            switchyard.append(board.pop())
+        while self.board.move_stack:
+            switchyard.append(self.board.pop())
 
-        fen = board.fen()
-        if fen == chess.STARTING_FEN:
+        # Validate castling rights.
+        if not engine.uci_chess960:
+            standard_chess_status = self.board.status(allow_chess960=False)
+            chess960_status = self.board.status(allow_chess960=True)
+            if standard_chess_status & chess.STATUS_BAD_CASTLING_RIGHTS and not chess960_status & chess.STATUS_BAD_CASTLING_RIGHTS:
+                LOGGER.error("%s not in UCI_Chess960 mode but position has non-standard castling rights", engine.process)
+
+                # Just send the final FEN without transpositions in hopes that
+                # this will work.
+                while switchyard:
+                    self.board.push(switchyard.pop())
+
+        # Send startposition.
+        if self.board.fen() == chess.STARTING_FEN:
             builder.append("startpos")
         else:
             builder.append("fen")
-            builder.append(fen)
 
+            if engine.uci_chess960:
+                builder.append(self.board.shredder_fen())
+            else:
+                builder.append(self.board.fen())
+
+        # Send moves.
         if switchyard:
             builder.append("moves")
 
             while switchyard:
                 move = switchyard.pop()
-                builder.append(move.uci())
-                board.push(move)
+                builder.append(engine.move_to_engine(self.board, move))
+                self.board.push(move)
 
-        self.buf = " ".join(builder)
+        engine.board = self.board
+        engine.send_line(" ".join(builder))
 
-    def execute(self, engine):
-        engine.send_line(self.buf)
         super(PositionCommand, self).execute(engine)
 
 
@@ -436,11 +478,7 @@ class GoCommand(Command):
         builder = []
         builder.append("go")
 
-        if searchmoves:
-            builder.append("searchmoves")
-            for move in searchmoves:
-                builder.append(move.uci())
-
+        self.ponder = ponder
         if ponder:
             builder.append("ponder")
 
@@ -484,17 +522,27 @@ class GoCommand(Command):
         if infinite:
             builder.append("infinite")
 
+        self.searchmoves = searchmoves
+
         self.buf = " ".join(builder)
 
     def execute(self, engine):
         for info_handler in engine.info_handlers:
             info_handler.on_go()
 
+        # Append searchmoves last. They can not be built beforehand because
+        # they also depend on the UCI_Chess960 option.
+        builder = [self.buf]
+        if self.searchmoves:
+            builder.append("searchmoves")
+            for move in self.searchmoves:
+                builder.append(engine.move_to_engine(engine.board, move))
+
         engine.bestmove = None
         engine.ponder = None
         engine.bestmove_received.clear()
-        engine.send_line(self.buf)
-        if self.infinite:
+        engine.send_line(" ".join(builder))
+        if self.infinite or self.ponder:
             self.set_result(None)
         else:
             engine.bestmove_received.wait()
@@ -518,10 +566,15 @@ class StopCommand(Command):
         self.set_result(BestMove(engine.bestmove, engine.ponder))
 
 
-class PonderhitCommand(IsReadyCommand):
+class PonderhitCommand(Command):
     def execute(self, engine):
+        engine.bestmove = None
+        engine.ponder = None
+        engine.bestmove_received.clear()
         engine.send_line("ponderhit")
-        super(PonderhitCommand, self).execute(engine)
+
+        engine.bestmove_received.wait()
+        self.set_result(BestMove(engine.bestmove, engine.ponder))
 
 
 class QuitCommand(Command):
@@ -606,6 +659,7 @@ class PopenProcess(object):
     def __init__(self, command):
         self.command = command
 
+        self.process = None
         self._receiving_thread = threading.Thread(target=self._receiving_thread_target)
         self._receiving_thread.daemon = True
 
@@ -662,6 +716,9 @@ class SpurProcess(object):
 
         self._result = None
 
+        self.process = None
+        self.spawned = threading.Event()
+
         self._waiting_thread = threading.Thread(target=self._waiting_thread_target)
         self._waiting_thread.daemon = True
 
@@ -669,9 +726,15 @@ class SpurProcess(object):
         self.engine = engine
 
         self.process = self.shell.spawn(self.command, store_pid=True, allow_error=True, stdout=self)
+        self.spawned.set()
+
         self._waiting_thread.start()
 
     def write(self, byte):
+        # Wait for spawn to return. Otherwise we might already try processing
+        # data before self.process is set.
+        self.spawned.wait()
+
         # Interally called whenever a byte is received.
         if byte == b"\r":
             pass
@@ -721,6 +784,9 @@ class SpurProcess(object):
 class Engine(object):
     def __init__(self, process):
         self.process = process
+
+        self.board = chess.Board()
+        self.uci_chess960 = None
 
         self.name = None
         self.author = None
@@ -796,6 +862,46 @@ class Engine(object):
         self.return_code = self.process.wait_for_return_code()
         self.terminated.set()
 
+    def move_to_engine(self, board, move):
+        if self.uci_chess960:
+            return move.uci()
+
+        # Convert 960 castling moves to their standard equivalent.
+        if board.piece_type_at(move.from_square) == chess.KING:
+            if move.from_square == chess.E1:
+                if move.to_square == chess.H1:
+                    return "e1g1"
+                elif move.to_square == chess.A1:
+                    return "e1c1"
+            elif move.from_square == chess.E8:
+                if move.to_square == chess.H8:
+                    return "e8g8"
+                elif move.to_square == chess.A8:
+                    return "e8c8"
+
+        return move.uci()
+
+    def move_from_engine(self, board, engine_uci):
+        engine_move = chess.Move.from_uci(engine_uci)
+
+        if self.uci_chess960:
+            return engine_move
+
+        # Convert standard castling moves to 960 representation.
+        if board.piece_type_at(engine_move.from_square) == chess.KING:
+            if engine_move.from_square == chess.E1:
+                if engine_move.to_square == chess.G1:
+                    return chess.Move(chess.E1, chess.H1)
+                elif engine_move.to_square == chess.C1:
+                    return chess.Move(chess.E1, chess.A1)
+            elif engine_move.from_square == chess.E8:
+                if engine_move.to_square == chess.G8:
+                    return chess.Move(chess.E8, chess.H8)
+                elif engine_move.to_square == chess.C8:
+                    return chess.Move(chess.E8, chess.A8)
+
+        return engine_move
+
     def _id(self, arg):
         property_and_arg = arg.split(None, 1)
         if property_and_arg[0] == "name":
@@ -812,6 +918,10 @@ class Engine(object):
             return
 
     def _uciok(self):
+        # Set UCI_Chess960 default value.
+        if self.uci_chess960 is None and "UCI_Chess960" in self.options:
+            self.uci_chess960 = self.options["UCI_Chess960"].default
+
         self.uciok.set()
 
     def _readyok(self):
@@ -819,11 +929,19 @@ class Engine(object):
 
     def _bestmove(self, arg):
         tokens = arg.split(None, 2)
-        self.bestmove = chess.Move.from_uci(tokens[0])
+
+        if tokens[0] != "(none)":
+            self.bestmove = self.move_from_engine(self.board, tokens[0])
+        else:
+            self.bestmove = None
+
         if len(tokens) >= 3 and tokens[1] == "ponder" and tokens[2] != "(none)":
-            self.ponder = chess.Move.from_uci(tokens[2])
+            # Small hack: Usually we would have to make the bestmove on the
+            # board first. But enough context is in the board anyway.
+            self.ponder = self.move_from_engine(self.board, tokens[2])
         else:
             self.ponder = None
+
         self.bestmove_received.set()
 
         for info_handler in self.info_handlers:
@@ -841,11 +959,12 @@ class Engine(object):
         if not self.info_handlers:
             return
 
+        # Notify info handlers of start.
         for info_handler in self.info_handlers:
             info_handler.pre_info(arg)
 
-        current_parameter = None
-
+        # Initialize parser state.
+        board = None
         pv = None
         score_kind = None
         score_cp = None
@@ -900,6 +1019,20 @@ class Engine(object):
             for info_handler in self.info_handlers:
                 fn(info_handler, move)
 
+        # Find multipv parameter first.
+        if "multipv" in arg:
+            current_parameter = None
+            for token in arg.split(" "):
+                if token == "string":
+                    break
+
+                if current_parameter == "multipv":
+                    handle_integer_token(token, lambda handler, val: handler.multipv(val))
+
+                current_parameter = token
+
+        # Parse all other parameters.
+        current_parameter = None
         for token in arg.split(" "):
             if current_parameter == "string":
                 string.append(token)
@@ -920,6 +1053,9 @@ class Engine(object):
 
                 if current_parameter == "pv":
                     pv = []
+
+                if current_parameter in ("refutation", "pv", "currline"):
+                    board = copy.deepcopy(self.board)
             elif current_parameter == "depth":
                 handle_integer_token(token, lambda handler, val: handler.depth(val))
             elif current_parameter == "seldepth":
@@ -930,11 +1066,14 @@ class Engine(object):
                 handle_integer_token(token, lambda handler, val: handler.nodes(val))
             elif current_parameter == "pv":
                 try:
-                    pv.append(chess.Move.from_uci(token))
+                    move = self.move_from_engine(board, token)
+                    pv.append(move)
+                    board.push(move)
                 except ValueError:
                     pass
             elif current_parameter == "multipv":
-                handle_integer_token(token, lambda handler, val: handler.multipv(val))
+                # Ignore multipv. It was already parsed before anything else.
+                pass
             elif current_parameter == "score":
                 if token in ("cp", "mate"):
                     score_kind = token
@@ -967,9 +1106,12 @@ class Engine(object):
             elif current_parameter == "refutation":
                 try:
                     if refutation_move is None:
-                        refutation_move = chess.Move.from_uci(token)
+                        refutation_move = self.move_from_engine(board, token)
+                        board.push(refutation_move)
                     else:
-                        refuted_by.append(chess.Move.from_uci(token))
+                        move = self.move_from_engine(board, token)
+                        refuted_by.append(move)
+                        board.push(move)
                 except ValueError:
                     pass
             elif current_parameter == "currline":
@@ -977,7 +1119,9 @@ class Engine(object):
                     if currline_cpunr is None:
                         currline_cpunr = int(token)
                     else:
-                        currline_moves.append(chess.Move.from_uci(token))
+                        move = self.move_from_engine(board, token)
+                        currline_moves.append(move)
+                        board.push(move)
                 except ValueError:
                     pass
 
@@ -987,6 +1131,7 @@ class Engine(object):
             for info_handler in self.info_handlers:
                 info_handler.string(" ".join(string))
 
+        # Notify info handlers of end.
         for info_handler in self.info_handlers:
             info_handler.post_info()
 
@@ -1157,7 +1302,8 @@ class Engine(object):
         so that the engine knows how long to calculate.
 
         :param searchmoves: Restrict search to moves in this list.
-        :param ponder: Bool to enable pondering mode.
+        :param ponder: Bool to enable pondering mode. The engine will not stop
+            pondering in the background until a *stop* command is received.
         :param wtime: Integer of milliseconds white has left on the clock.
         :param btime: Integer of milliseconds black has left on the clock.
         :param winc: Integer of white Fisher increment.
@@ -1174,8 +1320,9 @@ class Engine(object):
         :return: **In normal search mode** a tuple of two elements. The first
             is the best move according to the engine. The second is the ponder
             move. This is the reply expected by the engine. Either of the
-            elements may be *None*. **In infinite search mode** there is no
-            result. See *stop* instead.
+            elements may be *None*. **In infinite search mode** or
+            **ponder mode** there is no result. See *stop* (or *ponderhit*)
+            instead.
         """
         return self._queue_command(GoCommand(searchmoves, ponder, wtime, btime, winc, binc, movestogo, depth, nodes, mate, movetime, infinite), async_callback)
 
@@ -1196,7 +1343,9 @@ class Engine(object):
         The engine should continue searching but should switch from pondering
         to normal search.
 
-        :return: Nothing
+        :return: A tuple of two elements. The first element is the best move
+        according to the engine. The second is the new ponder move. Either
+        of the elements may be *None*.
         """
         return self._queue_command(PonderhitCommand(), async_callback)
 

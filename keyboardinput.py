@@ -29,6 +29,7 @@ class KeyboardInput(Observable, threading.Thread):
             cmd = input('PicoChess v'+version+':>')
 
             try:
+                # commands like "mode:analysis" or "mode:remote"
                 if cmd.startswith('mode:'):
                     mode = cmd.split(':')[1]
                     if mode.lower() == 'analysis':
@@ -50,7 +51,7 @@ class TerminalDisplay(Display, threading.Thread):
 
     def run(self):
         while True:
-            #Check if we have something to display
+            # Check if we have something to display
             message = self.message_queue.get()
             if message == Message.BOOK_MOVE:
                 print('Book move')
@@ -61,3 +62,5 @@ class TerminalDisplay(Display, threading.Thread):
                 print('New game')
             elif message == Message.SEARCH_STARTED:
                 print('Computer is thinking...')
+            elif message == Message.NEW_PV:
+                print('bestmove: ' + message.pv[0])

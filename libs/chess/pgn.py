@@ -63,7 +63,7 @@ MOVETEXT_REGEX = re.compile(r"""
     |(\))
     |(\*|1-0|0-1|1/2-1/2)
     |(
-        [NBKRQ]?[a-h]?[1-8]?[\-x]?[a-h][1-8](?:=[nbrqNBRQ])?
+        [NBKRQ]?[a-h]?[1-8]?[\-x]?[a-h][1-8](?:=?[nbrqNBRQ])?
         |--
         |O-O(?:-O)?
         |0-0(?:-0)?
@@ -86,7 +86,7 @@ class GameNode(object):
 
     def board(self):
         """
-        Gets a bitboard with the position of the node.
+        Gets a board with the position of the node.
 
         It's a copy, so modifying the board will not alter the game.
         """
@@ -324,7 +324,7 @@ class Game(GameNode):
 
     def board(self):
         """
-        Gets the starting position of the game as a bitboard.
+        Gets the starting position of the game.
 
         Unless the `SetUp` and `FEN` header tags are set this is the default
         starting position.
@@ -345,8 +345,8 @@ class Game(GameNode):
             fen = chess.Board(board).fen()
 
         if fen == chess.STARTING_FEN:
-            del self.headers["SetUp"]
-            del self.headers["FEN"]
+            self.headers.pop("SetUp", None)
+            self.headers.pop("FEN", None)
         else:
             self.headers["SetUp"] = "1"
             self.headers["FEN"] = fen

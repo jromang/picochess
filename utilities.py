@@ -212,6 +212,7 @@ def get_opening_books():
 
 
 def weighted_choice(book, game):
+    return book.weighted_choice(game)
     total = sum(e.weight for e in book.get_entries_for_position(game))
     r = random.uniform(0, total)
     upto = 0
