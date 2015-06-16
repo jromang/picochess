@@ -212,17 +212,7 @@ def get_opening_books():
 
 
 def weighted_choice(book, game):
-    return book.weighted_choice(game)
-    total = sum(e.weight for e in book.get_entries_for_position(game))
-    r = random.uniform(0, total)
-    upto = 0
-    # for e in book.get_entries_for_position(game):
-    #    print(e.move().uci() + 'w:' + str(e.weight))
-    for e in book.get_entries_for_position(game):
-        if upto + e.weight > r:
-            return e.move()
-        upto += e.weight
-    return None
+    return book.weighted_choice(game).move()
 
 
 def hours_minutes_seconds(seconds):
