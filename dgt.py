@@ -491,15 +491,17 @@ class DGTBoard(Observable, Display, threading.Thread):
                     if 17 <= message[4] <= 18 and message[5] == 51:
                         logging.info("Button 2 pressed")
                         if self.dgt_clock_menu == Menu.GAME_MENU:
-                            if self.engine_status == EngineStatus.WAIT:
+                            # make that always true, cause the "stop search" (#99) doesn't work until now
+                            if True or (self.engine_status == EngineStatus.WAIT):
                                 self.fire(Event.CHANGE_PLAYMODE)
                             else:
                                 if self.mode == Mode.GAME:
-                                    # here is missing if we want "stop search" or "alternative move"
-                                    self.fire(Event.STOP_SEARCH)
+                                    # missing: do we want "stop search" or "alternative move"?
+                                    # self.fire(Event.STOP_SEARCH)
+                                    pass
                                 else:
                                     if self.mode == Mode.OBSERVE:
-                                        # here missing stop/start the clock
+                                        # missing: stop/start the clock
                                         pass
 
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
@@ -812,11 +814,11 @@ class DGTBoard(Observable, Display, threading.Thread):
                         break
                     if case(Message.SEARCH_STARTED):
                         self.engine_status = message.engine_status
-                        logging.info('Search started')
+                        # logging.info('Search started')
                         break
                     if case(Message.SEARCH_STOPPED):
                         self.engine_status = message.engine_status
-                        logging.info('Search stopped')
+                        # logging.info('Search stopped')
                         break
                     if case():  # Default
                         pass

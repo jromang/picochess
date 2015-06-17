@@ -396,27 +396,10 @@ def main():
                     Display.show(Message.START_NEW_GAME)
                     break
 
-                if case(Event.STOP_SEARCH):
-                    logging.debug('stop search')
-                    print('stop_thinking:start')
+                if case(Event.STOP_SEARCH): # issue 99 - not used right now!
+                    print('if this (stop_thinking) is working no delay should happen')
                     result = stop_thinking()
-                    print('stop_thinking:end')
-                    move = result.bestmove
-                    ponder = result.ponder
-                    print(move)
-                    print(ponder)
-                    print(' ')
-
-                    # copy from "BEST_MOVE"
-                    if True and (interaction_mode == Mode.GAME):
-                        if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or \
-                                (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
-                            time_control.stop()
-                            fen = game.fen()
-                            game.push(move)
-                            Display.show(Message.COMPUTER_MOVE, move=move, ponder=ponder, fen=fen, game=copy.deepcopy(game), time_control=time_control)
-                            # if check_game_state(game, interaction_mode):
-                            legal_fens = compute_legal_fens(game)
+                    print(result.bestmove)
                     break
 
                 if case(Event.NEW_GAME):  # User starts a new game
