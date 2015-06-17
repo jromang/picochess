@@ -496,7 +496,6 @@ class DGTBoard(Observable, Display, threading.Thread):
                             else:
                                 if self.mode == Mode.GAME:
                                     # here is missing if we want "stop search" or "alternative move"
-                                    logging.debug('fire stop')
                                     self.fire(Event.STOP_SEARCH)
                                 else:
                                     if self.mode == Mode.OBSERVE:

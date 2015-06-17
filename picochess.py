@@ -75,6 +75,7 @@ def main():
     parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
     args = parser.parse_args()
     engine_status = EngineStatus.WAIT
+    engine_thread = None
 
     # Enable logging
     logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
@@ -117,7 +118,7 @@ def main():
 
     # Create ChessTalker for speech output
     talker = None
-    if(args.user_voice or args.computer_voice):
+    if args.user_voice or args.computer_voice:
         logging.debug("Initializing ChessTalker [%s, %s]", str(args.user_voice), str(args.computer_voice))
         talker = chesstalker.chesstalker.ChessTalker(args.user_voice, args.computer_voice)
         talker.start()
@@ -125,7 +126,7 @@ def main():
         logging.debug("ChessTalker disabled")
 
     # Launch web server
-    if(args.web_server_port):
+    if args.web_server_port:
         WebServer(args.web_server_port).start()
 
     def compute_legal_fens(g):
@@ -178,7 +179,11 @@ def main():
             global engine_status
             engine_status = EngineStatus.THINK
             Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
-            engine.go(time.uci())
+
+            # engine.go(time.uci())
+            global engine_thread
+            engine_thread = threading.Timer(0, engine.go, [time.uci()])
+            engine_thread.start()
 
     def analyse():
         """
@@ -190,7 +195,10 @@ def main():
         global engine_status
         engine_status = EngineStatus.PONDER
         Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
-        engine.ponder()
+        # engine.ponder()
+        global engine_thread
+        engine_thread = threading.Timer(0, engine.ponder())
+        engine_thread.start()
 
     def observe(time):
         """
@@ -206,7 +214,10 @@ def main():
         global engine_status
         engine_status = EngineStatus.PONDER
         Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
-        engine.ponder()
+        # engine.ponder()
+        global engine_thread
+        engine_thread = threading.Timer(0, engine.ponder())
+        engine_thread.start()
 
     def stop_thinking():
         """
@@ -216,7 +227,13 @@ def main():
         # if book_thread:
         #    book_thread.cancel()
         # else:
+
+        # both ways to stop, dont work at GAME mode ;-(
         res = engine.stop()
+        if engine_thread:
+            engine_thread.cancel()
+        # res = engine.stop()
+
         global engine_status
         engine_status = EngineStatus.WAIT
         Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=res)
@@ -381,15 +398,17 @@ def main():
 
                 if case(Event.STOP_SEARCH):
                     logging.debug('stop search')
-                    # result = stop_thinking()
-                    # move = result.bestmove
-                    # ponder = result.ponder
-                    # print(move)
-                    # print(ponder)
-                    # print(' ')
+                    print('stop_thinking:start')
+                    result = stop_thinking()
+                    print('stop_thinking:end')
+                    move = result.bestmove
+                    ponder = result.ponder
+                    print(move)
+                    print(ponder)
+                    print(' ')
 
                     # copy from "BEST_MOVE"
-                    if False and (interaction_mode == Mode.GAME):
+                    if True and (interaction_mode == Mode.GAME):
                         if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or \
                                 (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
                             time_control.stop()

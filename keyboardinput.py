@@ -39,8 +39,11 @@ class KeyboardInput(Observable, threading.Thread):
                     logging.warning("Mode: {0}".format(mode))
                     self.fire(Event.SET_MODE, mode=mode)
                 else:
-                    move = chess.Move.from_uci(cmd)
-                    self.fire(Event.USER_MOVE, move=move)
+                    if cmd.startswith('stop'):
+                        self.fire(Event.STOP_SEARCH)
+                    else:
+                        move = chess.Move.from_uci(cmd)
+                        self.fire(Event.USER_MOVE, move=move)
             except ValueError:
                 logging.warning('Invalid user input [%s]', cmd)
 
@@ -63,4 +66,4 @@ class TerminalDisplay(Display, threading.Thread):
             elif message == Message.SEARCH_STARTED:
                 print('Computer is thinking...')
             elif message == Message.NEW_PV:
-                print('bestmove: ' + message.pv[0])
+                print('bestmove: ' + str(message.pv[0]))
