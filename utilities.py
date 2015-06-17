@@ -212,7 +212,11 @@ def get_opening_books():
 
 
 def weighted_choice(book, game):
-    return book.weighted_choice(game).move()
+    try:
+        b = book.weighted_choice(game)
+    except IndexError:
+        return None
+    return b.move()
 
 
 def hours_minutes_seconds(seconds):

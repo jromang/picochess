@@ -262,7 +262,7 @@ def main():
     system_info_thread = threading.Timer(0, display_system_info)
     system_info_thread.start()
 
-    #Event loop
+    # Event loop
     while True:
         try:
             event = event_queue.get()
@@ -380,16 +380,16 @@ def main():
                     break
 
                 if case(Event.STOP_SEARCH):
-                    print('event: stopsearch')
-                    result = stop_thinking()
-                    move = result.bestmove
-                    ponder = result.ponder
-                    print(move)
-                    print(ponder)
-                    print(' ')
+                    logging.debug('stop search')
+                    # result = stop_thinking()
+                    # move = result.bestmove
+                    # ponder = result.ponder
+                    # print(move)
+                    # print(ponder)
+                    # print(' ')
 
                     # copy from "BEST_MOVE"
-                    if interaction_mode == Mode.GAME:
+                    if False and (interaction_mode == Mode.GAME):
                         if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or \
                                 (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
                             time_control.stop()

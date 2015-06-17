@@ -491,12 +491,12 @@ class DGTBoard(Observable, Display, threading.Thread):
                     if 17 <= message[4] <= 18 and message[5] == 51:
                         logging.info("Button 2 pressed")
                         if self.dgt_clock_menu == Menu.GAME_MENU:
-                            # remove the else part, cause "stop search" NOT working right now @LocutusOfPenguin #99
-                            if True or (self.engine_status == EngineStatus.WAIT):
+                            if self.engine_status == EngineStatus.WAIT:
                                 self.fire(Event.CHANGE_PLAYMODE)
                             else:
                                 if self.mode == Mode.GAME:
                                     # here is missing if we want "stop search" or "alternative move"
+                                    logging.debug('fire stop')
                                     self.fire(Event.STOP_SEARCH)
                                 else:
                                     if self.mode == Mode.OBSERVE:
@@ -757,7 +757,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.last_move = message.move
                         self.last_fen = message.fen
                         self.display_move = False
-                        self.display_on_dgt_clock('ok', self.enable_dgt_clock_beep)
+                        self.display_on_dgt_clock('ko', self.enable_dgt_clock_beep)
                         break
                     if case(Message.USER_TAKE_BACK):
                         self.display_on_dgt_xl('takbak', self.enable_dgt_clock_beep)
@@ -813,10 +813,11 @@ class DGTBoard(Observable, Display, threading.Thread):
                         break
                     if case(Message.SEARCH_STARTED):
                         self.engine_status = message.engine_status
+                        logging.info('Search started')
                         break
                     if case(Message.SEARCH_STOPPED):
                         self.engine_status = message.engine_status
-                        # print(message.result)
+                        logging.info('Search stopped')
                         break
                     if case():  # Default
                         pass
