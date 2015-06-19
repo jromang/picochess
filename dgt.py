@@ -24,6 +24,7 @@ from timecontrol import *
 from struct import unpack
 from collections import OrderedDict
 from utilities import *
+from subprocess import Popen
 
 try:
     import enum
@@ -523,7 +524,8 @@ class DGTBoard(Observable, Display, threading.Thread):
                             self.fire(Event.SET_MODE, mode=mode_new)
 
                         if self.dgt_clock_menu == Menu.SETTINGS_MENU:
-                            self.display_on_dgt_clock('pic'+version)
+                            self.display_on_dgt_clock("reboot")
+                            subprocess.Popen(["sudo","reboot"])
 
                     if 65 <= message[4] <= 66 and message[5] == 53:
                         logging.info("Button 4 pressed")
