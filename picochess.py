@@ -75,7 +75,7 @@ def main():
     parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
     args = parser.parse_args()
     engine_status = EngineStatus.WAIT
-    engine_thread = None
+    # engine_thread = None
 
     # Enable logging
     logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
@@ -180,10 +180,10 @@ def main():
             engine_status = EngineStatus.THINK
             Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
 
-            # engine.go(time.uci())
-            global engine_thread
-            engine_thread = threading.Timer(0, engine.go, [time.uci()])
-            engine_thread.start()
+            engine.go(time.uci())
+            # global engine_thread
+            # engine_thread = threading.Timer(0, engine.go, [time.uci()])
+            # engine_thread.start()
 
     def analyse():
         """
@@ -195,10 +195,11 @@ def main():
         global engine_status
         engine_status = EngineStatus.PONDER
         Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
-        # engine.ponder()
-        global engine_thread
-        engine_thread = threading.Timer(0, engine.ponder())
-        engine_thread.start()
+
+        engine.ponder()
+        # global engine_thread
+        # engine_thread = threading.Timer(0, engine.ponder())
+        # engine_thread.start()
 
     def observe(time):
         """
@@ -214,10 +215,10 @@ def main():
         global engine_status
         engine_status = EngineStatus.PONDER
         Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
-        # engine.ponder()
-        global engine_thread
-        engine_thread = threading.Timer(0, engine.ponder())
-        engine_thread.start()
+        engine.ponder()
+        # global engine_thread
+        # engine_thread = threading.Timer(0, engine.ponder())
+        # engine_thread.start()
 
     def stop_thinking():
         """
@@ -227,13 +228,10 @@ def main():
         # if book_thread:
         #    book_thread.cancel()
         # else:
-
-        # both ways to stop, dont work at GAME mode ;-(
         res = engine.stop()
-        if engine_thread:
-            engine_thread.cancel()
+        # if engine_thread:
+        #    engine_thread.cancel()
         # res = engine.stop()
-
         global engine_status
         engine_status = EngineStatus.WAIT
         Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=res)
@@ -357,22 +355,21 @@ def main():
                         fen = game.fen()
                         game.push(move)
                         if check_game_state(game, play_mode):
-                            observe(time_control)
                             Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game),
                                          mode=interaction_mode)
+                            observe(time_control)
                             time.sleep(0.3)
                             Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
                             legal_fens = compute_legal_fens(game)
 
                     elif (interaction_mode == Mode.ANALYSIS) or (interaction_mode == Mode.KIBITZ):
                         stop_thinking()
-                        # time_control.stop()
                         fen = game.fen()
                         game.push(move)
                         if check_game_state(game, play_mode):
-                            analyse()
                             Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game),
                                          mode=interaction_mode)
+                            analyse()
                             legal_fens = compute_legal_fens(game)
                     break
 
@@ -390,9 +387,9 @@ def main():
                     legal_fens = compute_legal_fens(game)
                     time_control.stop()
                     time_control.reset()
-                    if not engine_status == EngineStatus.WAIT:
-                        stop_thinking()
+                    stop_thinking()
 
+                    play_mode = GameMode.PLAY_WHITE if game.turn == chess.WHITE else GameMode.PLAY_BLACK
                     Display.show(Message.START_NEW_GAME)
                     break
 
@@ -403,8 +400,7 @@ def main():
                     break
 
                 if case(Event.NEW_GAME):  # User starts a new game
-                    if not engine_status == EngineStatus.WAIT:
-                        stop_thinking()
+                    stop_thinking()
                     if game.move_stack:
                         logging.debug("Starting a new game")
                         if not game.is_game_over():
@@ -458,7 +454,7 @@ def main():
 
                     except ValueError:
                         score = event.score
-                        logging.debug('Could not convert score')
+                        logging.debug('Could not convert score ' + score)
 
                     except TypeError:
                         score = 'm {0}'.format(event.mate)
