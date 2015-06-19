@@ -68,10 +68,11 @@ These are set with the extra **white** queen. Remove the extra black queen if it
 * **F3** - 25 minute game with 5 second Fischer increment
 * **G3** - 90 minute game with 30 second Fischer increment
 
-PicoChess with White
---------------------
+Switching sides
+---------------
 
 To force PicoChess to play with White just take the black king off the board and put it back. If you want to play with White again just take the white king off the board and put it back. Note: You have to be in the starting position!
+If its your turn you can also switch sides by clicking the middle button (the position doesn't matter).
 
 System shutdown
 ---------------
@@ -85,14 +86,14 @@ When using these modes, please be patient and don't rush moves. Allow a few seco
 
 * Game mode is enabled by putting the **white** queen on the **A5** square. This is the default mode. You can play against the computer. The clock displays the remaining thinking time for both sides. Press the second button to show the position evaluation, expressed in centipawns. Press again to show a hint ("ponder move").
 * Analysis mode (enabled by **white** queen on **B5**): the computer is watching the game, it does not play itself. The clock continually displays the best move for the side to play.
-* Kibitz mode (enabled by **white** queen on **C5**): the computer is watching the game, it does not play itself. The clock continually displays the position score in centipawns for the side to play. For example: if it's White's turn and the clock displays 33, then White is ahead 33 centipawns (or 0.33 pawns). A negative score means that the other side is ahead.
+* Kibitz mode (enabled by **white** queen on **C5**): the computer is watching the game, it does not play itself. The clock continually displays the position score.
 * Observe mode (enabled by **white** queen on **D5**): the computer is watching the game, it does not play itself. The clock displays the remaining thinking time for both sides. Press the second button once to show the position evaluation, twice to show a hint.
 * Remote play mode (enabled by **white** queen on **E5**): no documentation right now
 
 Game mode is the regular mode. If you used one of the other modes, you can return back to game mode by putting the extra **white** queen on **A5**.
 You can also use Button 4 for toggling over the modes (Qa5-Qe5 only working in the starting position).
 
-(Todo: In a later version, the score will always be from White's perspective to be more consistent.)
+The position score will always be displayed in centipawns from White's perspective. For example when the clock displays 33, then White is ahead 33 centipawns (or 0.33 pawns). A negative score means black is ahead.
 
 Position setup
 --------------
@@ -108,9 +109,9 @@ Clock button support
 --------------------
 
 * First button shows the last move.
-* Second button toggles between showing the value and the best/ponder move.
+* Second button toggles between showing the position value (or "book") and the best/ponder (or book move).
 * Third button will switch sides and the computer will make your move.
-* The fourth toggles between the game modes (Game, Analyse, Kibitz, Observe)
+* The fourth toggles between the game modes (Game, Analyse, Kibitz, Observe, Remote)
 * The fifth toggles between "Position", "Engine", "System", "Game" options. Some of the options provide no functionality yet.
 
 PGN file support
@@ -118,4 +119,3 @@ PGN file support
 
 All moves of the played game along with engine are stored.
 Every game played with picochess is stored in the /opt/picochess folder as "games.pgn".
-If a position is undone, another game will be created within games.pgn.
