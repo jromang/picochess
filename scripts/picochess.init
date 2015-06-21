@@ -29,7 +29,7 @@ case "$1" in
 
       echo $dgt_port
       cd /opt/picochess
-      screen -dmUS pc /opt/picochess/picochess.py -e stockfish -d $dgt_port -web -lf picochess.log -l debug -hs 128
+      screen -dmUS pc /opt/picochess/picochess.py -d $dgt_port -web -lf picochess.log -l debug -hs 128
     ;;
   stop)
     echo "Stopping picochess"
