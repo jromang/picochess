@@ -25,11 +25,11 @@ class Informer(chess.uci.InfoHandler, Observable):
 
     def on_bestmove(self,bestmove,ponder):
         self.fire(Event.BEST_MOVE, move=bestmove, ponder=ponder)
-        super().on_bestmove(bestmove,ponder)
+        super().on_bestmove(bestmove, ponder)
 
-    def score(self,cp,mate,lowerbound,upperbound):
+    def score(self,cp, mate, lowerbound, upperbound):
         self.fire(Event.SCORE, score=cp, mate=mate)
-        super().score(cp,mate,lowerbound,upperbound)
+        super().score(cp, mate, lowerbound, upperbound)
 
     def pv(self,moves):
         self.fire(Event.NEW_PV, pv=moves)

@@ -282,7 +282,6 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.clock_lock = asyncio.Lock()
         self.enable_dgt_3000 = enable_dgt_3000
         self.enable_dgt_clock_beep = enable_dgt_clock_beep
-        self.bit_board = chess.Board()
         self.dgt_clock_menu = Menu.GAME_MENU
         self.last_move = None
         self.last_fen = None
@@ -294,8 +293,8 @@ class DGTBoard(Observable, Display, threading.Thread):
         self.mode_index = 0
         self.mode = Mode.GAME
         self.engine_status = EngineStatus.WAIT
-        # Open the serial port
 
+        # Open the serial port
         try:
             self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE,
                                           parity=pyserial.PARITY_NONE,
@@ -455,11 +454,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                         # print(self.dgt_clock_menu)
 
                         if self.dgt_clock_menu == Menu.GAME_MENU and self.last_move:
-                            self.display_on_dgt_xl(' ' + self.last_move.uci(), True)
-                            # self.display_on_dgt_3000('mov ' + mo, True)
-                            self.bit_board.set_fen(self.last_fen)
-                            # logging.info("Move is {0}".format(self.bit_board.san(message.move)))
-                            self.display_on_dgt_3000(self.bit_board.san(self.last_move), False)
+                            self.display_move_on_dgt(self.last_move, self.last_fen, self.enable_dgt_clock_beep)
 
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
                             self.setup_to_move = chess.WHITE if self.setup_to_move == chess.BLACK else chess.BLACK
@@ -473,9 +468,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                                 if self.hint_fen is None:
                                     self.display_on_dgt_clock('none')
                                 else:
-                                    self.display_on_dgt_xl(' ' + self.hint_move.uci(), True)
-                                    self.bit_board.set_fen(self.hint_fen)
-                                    self.display_on_dgt_3000(self.bit_board.san(self.hint_move), True)
+                                    self.display_move_on_dgt(self.hint_move, self.hint_fen, self.enable_dgt_clock_beep)
                             else:
                                 if self.mate is None:
                                     sc = 'none' if self.score is None else str(self.score).rjust(6)
@@ -525,7 +518,7 @@ class DGTBoard(Observable, Display, threading.Thread):
 
                         if self.dgt_clock_menu == Menu.SETTINGS_MENU:
                             self.display_on_dgt_clock("reboot")
-                            subprocess.Popen(["sudo","reboot"])
+                            subprocess.Popen(["sudo", "reboot"])
 
                     if 65 <= message[4] <= 66 and message[5] == 53:
                         logging.info("Button 4 pressed")
@@ -683,6 +676,14 @@ class DGTBoard(Observable, Display, threading.Thread):
         else:
             self.display_on_dgt_xl(text, beep=beep)
 
+    def display_move_on_dgt(self, move, fen, beep):
+        bit_board = chess.Board(fen)
+        self.display_on_dgt_xl(' ' + move.uci(), beep)
+        # self.display_on_dgt_3000('mov ' + move, True)
+        # bit_board.set_fen(fen)
+        # logging.info("Move is {0}".format(bit_board.san(move)))
+        self.display_on_dgt_3000(bit_board.san(move), beep)
+
     def light_squares_revelation_board(self, squares):
         if self.enable_board_leds:
             for sq in squares:
@@ -726,11 +727,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                                    0, 0, 0, 0, 0, 0,
                                    0x04 | 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
                         # Display the move
-                        self.display_on_dgt_xl(' ' + uci_move, self.enable_dgt_clock_beep)
-                        # self.display_on_dgt_3000('mov ' + mo, self.enable_dgt_clock_beep)
-                        self.bit_board.set_fen(message.fen)
-                        # logging.info("Move is {0}".format(self.bit_board.san(message.move)))
-                        self.display_on_dgt_3000(self.bit_board.san(message.move), self.enable_dgt_clock_beep)
+                        self.display_move_on_dgt(message.move, message.fen, self.enable_dgt_clock_beep)
                         self.light_squares_revelation_board((uci_move[0:2], uci_move[2:4]))
                         break
                     if case(Message.START_NEW_GAME):
@@ -810,9 +807,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.hint_move = message.pv[0]
                         self.hint_fen = message.fen
                         if message.interaction_mode == Mode.ANALYSIS:
-                            self.display_on_dgt_xl(' ' + self.hint_move.uci(), False)
-                            self.bit_board.set_fen(message.fen)
-                            self.display_on_dgt_3000(self.bit_board.san(self.hint_move), False)
+                            self.display_move_on_dgt(self.hint_move, self.hint_fen, False)
                         break
                     if case(Message.SEARCH_STARTED):
                         self.engine_status = message.engine_status
