@@ -55,7 +55,7 @@ class Event(AutoNumber):
     SET_PLAYMODE = () # Change play mode
     CHANGE_PLAYMODE = () # Toogle between the play modes
     SETUP_POSITION = () # Setup custom position
-    #Engine events
+    # Engine events
     BEST_MOVE = ()  # Engine has found a move
     NEW_PV = ()    # Engine sends a new Principal Variation
     SCORE = ()  # Engine sends a new Score
@@ -73,6 +73,9 @@ class Message(AutoNumber):
     NEW_PV = ()    # Show the new Principal Variation
     REVIEW_MODE_MOVE = () # Player is reviewing game
     REMOTE_MODE_MOVE = () # DGT Player is playing vs network player
+    LEVEL = () # User sets engine level (from 1 to 20).
+    TIME_CONTROL = ()
+    OPENING_BOOK = () # User chooses an opening book
 
     INTERACTION_MODE = ()  # Interaction mode
     PLAY_MODE = () # Play mode

@@ -609,9 +609,9 @@ class DGTBoard(Observable, Display, threading.Thread):
                     if fen in level_map:  # User sets level
                         level = level_map.index(fen)
                         self.fire(Event.LEVEL, level=level)
-                        Display.show(Event.LEVEL, level=level)
-                        self.display_on_dgt_xl('lvl ' + str(level), self.enable_dgt_clock_beep)
-                        self.display_on_dgt_3000('level '+ str(level), self.enable_dgt_clock_beep)
+                        # Display.show(Event.LEVEL, level=level)
+                        # self.display_on_dgt_xl('lvl ' + str(level), self.enable_dgt_clock_beep)
+                        # self.display_on_dgt_3000('level '+ str(level), self.enable_dgt_clock_beep)
                     elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":  # New game
                         logging.debug("New game")
                         self.fire(Event.NEW_GAME)
@@ -619,11 +619,10 @@ class DGTBoard(Observable, Display, threading.Thread):
                     elif fen in book_map:  # Choose opening book
                         book_index = book_map.index(fen)
                         logging.debug("Opening book [%s]", get_opening_books()[book_index])
-                        self.fire(Event.OPENING_BOOK, book_index=book_index)
-                        Display.show(Event.OPENING_BOOK, book=get_opening_books()[book_index])
-
-                        self.display_on_dgt_xl(get_opening_books()[book_index][0], self.enable_dgt_clock_beep)
-                        self.display_on_dgt_3000(get_opening_books()[book_index][0], self.enable_dgt_clock_beep)
+                        self.fire(Event.OPENING_BOOK, book=get_opening_books()[book_index])
+                        # Display.show(Event.OPENING_BOOK, book=get_opening_books()[book_index])
+                        # self.display_on_dgt_xl(get_opening_books()[book_index][0], self.enable_dgt_clock_beep)
+                        # self.display_on_dgt_3000(get_opening_books()[book_index][0], self.enable_dgt_clock_beep)
                     elif fen in mode_map:  # Set interaction mode
                         logging.debug("Interaction mode [%s]", mode_map[fen])
                         self.fire(Event.SET_MODE, mode=mode_map[fen])
@@ -632,11 +631,11 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.fire(Event.SET_PLAYMODE, mode=game_map[fen])
                     elif fen in time_control_map:
                         logging.debug("Setting time control %s", time_control_map[fen].mode)
-                        self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[fen])
-                        Display.show(Event.SET_TIME_CONTROL, time_control_string=dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)])
-
-                        self.display_on_dgt_xl(dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)], self.enable_dgt_clock_beep)
-                        self.display_on_dgt_3000(dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)], self.enable_dgt_clock_beep)
+                        self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[fen],
+                                  time_control_string=dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)])
+                        # Display.show(Event.SET_TIME_CONTROL, time_control_string=dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)])
+                        # self.display_on_dgt_xl(dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)], self.enable_dgt_clock_beep)
+                        # self.display_on_dgt_3000(dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)], self.enable_dgt_clock_beep)
                     elif fen in shutdown_map:
                         self.fire(Event.SHUTDOWN)
                         self.display_on_dgt_xl('powoff', self.enable_dgt_clock_beep)
@@ -655,15 +654,19 @@ class DGTBoard(Observable, Display, threading.Thread):
 
     def display_on_dgt_xl(self, text, beep=False):
         if self.clock_found and not self.enable_dgt_3000:
-            while len(text) < 6: text += ' '
-            if len(text) > 6: logging.warning('DGT XL clock message too long [%s]', text)
+            while len(text) < 6:
+                text += ' '
+            if len(text) > 6:
+                logging.warning('DGT XL clock message too long [%s]', text)
             self.write([Commands.DGT_CLOCK_MESSAGE, 0x0b, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_DISPLAY,
                         text[2], text[1], text[0], text[5], text[4], text[3], 0x00, 0x03 if beep else 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
     def display_on_dgt_3000(self, text, beep=False, force=False):
         if force or self.enable_dgt_3000:
-            while len(text) < 8: text += ' '
-            if len(text) > 8: logging.warning('DGT 3000 clock message too long [%s]', text)
+            while len(text) < 8:
+                text += ' '
+            if len(text) > 8:
+                logging.warning('DGT 3000 clock message too long [%s]', text)
             text = bytes(text, 'utf-8')
             self.write([Commands.DGT_CLOCK_MESSAGE, 0x0c, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_ASCII,
                         text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], 0x03 if beep else 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
@@ -758,6 +761,18 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.last_fen = message.fen
                         self.display_move = False
                         self.display_on_dgt_clock('ok', self.enable_dgt_clock_beep)
+                        break
+                    if case(Message.LEVEL):
+                        level = message.level
+                        self.display_on_dgt_xl('lvl ' + str(level), self.enable_dgt_clock_beep)
+                        self.display_on_dgt_3000('level '+ str(level), self.enable_dgt_clock_beep)
+                        break
+                    if case(Message.TIME_CONTROL):
+                        self.display_on_dgt_clock(message.time_control_string)
+                        break
+                    if case(Message.OPENING_BOOK):
+                        book_name = get_opening_books()[message.book_index][0]
+                        self.display_on_dgt_clock(book_name, self.enable_dgt_clock_beep)
                         break
                     if case(Message.USER_TAKE_BACK):
                         self.display_on_dgt_xl('takbak', self.enable_dgt_clock_beep)

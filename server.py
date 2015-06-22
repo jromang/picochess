@@ -175,7 +175,7 @@ class WebDisplay(Display, threading.Thread):
 
         if 'game_info' in self.shared:
             # game.headers["Result"] = "*"
-            game.headers["Black"] = "Picochess" if "mode_string" in self.shared["game_info"] and self.shared["game_info"]["mode_string"] == Mode.PLAY_BLACK else "User"
+            game.headers["Black"] = "Picochess" if "mode_string" in self.shared["game_info"] and self.shared["game_info"]["mode_string"] == GameMode.PLAY_BLACK else "User"
 
             game.headers["White"] = "Picochess" if game.headers["Black"] == "User" else "User"
             comp_color = "Black" if game.headers["Black"] == "Picochess" else "White"
@@ -186,7 +186,6 @@ class WebDisplay(Display, threading.Thread):
                 game.headers[comp_color+"Elo"] = "2900"
             if "time_control_string" in self.shared["game_info"]:
                 game.headers["Event"] = "Time " + self.shared["game_info"]["time_control_string"]
-
 
     # @staticmethod
     def create_game_info(self):
@@ -203,19 +202,23 @@ class WebDisplay(Display, threading.Thread):
         elif message == Message.SYSTEM_INFO:
             self.shared['system_info'] = message.info
 
-        elif message == Event.OPENING_BOOK:  # Process opening book
+        elif message == Message.OPENING_BOOK:  # Process opening book
             self.create_game_info()
             self.shared['game_info']['book'] = message.book
 
-        elif message == Event.SET_MODE:  # Process interaction mode
+        elif message == Message.INTERACTION_MODE:  # Process interaction mode
             self.create_game_info()
-            self.shared['game_info']['mode_string'] = message.mode_string
+            self.shared['game_info']['mode'] = message.mode
 
-        elif message == Event.SET_TIME_CONTROL:
+        elif message == Message.PLAY_MODE:  # Process play mode
+            self.create_game_info()
+            self.shared['game_info']['mode_string'] = message.mode
+
+        elif message == Message.TIME_CONTROL:
             self.create_game_info()
             self.shared['game_info']['time_control_string'] = message.time_control_string
 
-        elif message == Event.LEVEL:
+        elif message == Message.LEVEL:
             self.create_game_info()
             self.shared['game_info']['level'] = message.level
 
@@ -250,7 +253,6 @@ class WebDisplay(Display, threading.Thread):
 
             if message == Message.REMOTE_MODE_MOVE:
                 r['remote_play'] = True
-
 
             self.shared['last_dgt_move_msg'] = r
             EventHandler.write_to_clients(r)

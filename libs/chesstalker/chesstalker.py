@@ -91,15 +91,41 @@ class ChessTalker(Display, threading.Thread):
                     if message == Message.START_NEW_GAME and system_voice:
                         logging.debug('Announcing START_NEW_GAME')
                         system_voice.say_new_game()
-                    elif message == Message.COMPUTER_MOVE and message.move and message.game and str(message.move) != previous_move:
-                        logging.debug('Announcing computer move [%s]', message.move)
+                    elif message == Message.COMPUTER_MOVE and message.move and message.game \
+                            and str(message.move) != previous_move:
+                        logging.debug('Announcing COMPUTER_MOVE [%s]', message.move)
                         self.computer_chesstalker_voice.say_move(message.move, message.game)
                         previous_move = str(message.move)
                     elif message == Message.USER_MOVE or message == Message.REVIEW_MODE_MOVE and message.move \
                             and message.game and str(message.move) != previous_move:
-                        logging.debug('Announcing user move [%s]', message.move)
+                        logging.debug('Announcing USER_MOVE [%s]', message.move)
                         self.user_chesstalker_voice.say_move(message.move, message.game)
                         previous_move = str(message.move)
+                    elif message == Message.LEVEL:
+                        logging.debug('Announcing LEVEL [%s]', message.level)
+                        system_voice.say_level(message.level)
+                    elif message == Message.INTERACTION_MODE:
+                        logging.debug('Announcing SET_MODE [%s]', message.mode)
+                        system_voice.say_mode(message.mode)
+                    elif message == Message.OPENING_BOOK:
+                        logging.debug('Announcing OPENING_BOOK')
+                        system_voice.say_opening_book(message.book[0])
+                    elif message == Message.TIME_CONTROL:
+                        logging.debug('Announcing SET_TIME_CONTROL')
+                        if message.time_control_string.startswith("mov"):
+                            time_control_value = int(message.time_control_string[3:].strip())
+                            system_voice.say_time_control_fixed_time(time_control_value)
+                        elif message.time_control_string.startswith("bl"):
+                            time_control_value = int(message.time_control_string[2:].strip())
+                            system_voice.say_time_control_blitz(time_control_value)
+                        elif message.time_control_string.startswith("f"):
+                            time_control_values = message.time_control_string[1:].strip().split()
+                            # logging.debug('time_control_values: ' + str(time_control_values))
+                            minutes_per_game = time_control_values[0]
+                            fischer_increment = time_control_values[1]
+                            # logging.debug('minutes_per_game: ' + str(minutes_per_game))
+                            # logging.debug('fischer_increment: ' + str(fischer_increment))
+                            system_voice.say_time_control_fischer(minutes_per_game, fischer_increment)
                     elif message == Message.GAME_ENDS and message.result == GameResult.TIME_CONTROL:
                         logging.debug('Announcing GAME_ENDS/TIME_CONTROL')
                         color = ChessTalkerVoice.COLOR_WHITE if message.color == chess.WHITE else ChessTalkerVoice.COLOR_BLACK
@@ -119,32 +145,7 @@ class ChessTalker(Display, threading.Thread):
                         logging.debug('Announcing GAME_ENDS/ABORT')
                         system_voice.say_game_aborted()
                 elif messageType == "Event":
-                    if message == Event.LEVEL:
-                        logging.debug('Announcing LEVEL')
-                        system_voice.say_level(message.level)
-                    elif message == Event.OPENING_BOOK:
-                        logging.debug('Announcing OPENING_BOOK')
-                        system_voice.say_opening_book(get_opening_books()[message.book_index][0])
-                    elif message == Event.SET_MODE:
-                        logging.debug('Announcing SET_MODE')
-                        system_voice.say_mode(message.mode)
-                    elif message == Event.SET_TIME_CONTROL:
-                        logging.debug('Announcing SET_TIME_CONTROL')
-                        if message.time_control_string.startswith("mov"):
-                            time_control_value = int(message.time_control_string[3:].strip())
-                            system_voice.say_time_control_fixed_time(time_control_value)
-                        elif message.time_control_string.startswith("bl"):
-                            time_control_value = int(message.time_control_string[2:].strip())
-                            system_voice.say_time_control_blitz(time_control_value)
-                        elif message.time_control_string.startswith("f"):
-                            time_control_values = message.time_control_string[1:].strip().split()
-                            # logging.debug('time_control_values: ' + str(time_control_values))
-                            minutes_per_game = time_control_values[0]
-                            fischer_increment = time_control_values[1]
-                            # logging.debug('minutes_per_game: ' + str(minutes_per_game))
-                            # logging.debug('fischer_increment: ' + str(fischer_increment))
-                            system_voice.say_time_control_fischer(minutes_per_game, fischer_increment)
-                    elif message == Event.SHUTDOWN:
+                    if message == Event.SHUTDOWN:
                         logging.debug('Announcing SHUTDOWN')
                         system_voice.say_shutdown()
             except queue.Empty:

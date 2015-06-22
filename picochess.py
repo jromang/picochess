@@ -376,7 +376,8 @@ def main():
                 if case(Event.LEVEL):  # User sets a new level
                     level = event.level
                     logging.debug("Setting engine to level %i", level)
-                    engine.set_level(level)
+                    if engine.set_level(level):
+                        Display.show(Message.LEVEL, level=level)
                     break
 
                 if case(Event.SETUP_POSITION):  # User sets up a position
@@ -420,8 +421,9 @@ def main():
                     break
 
                 if case(Event.OPENING_BOOK):
-                    logging.debug("Changing opening book [%s]", get_opening_books()[event.book_index][1])
-                    book = chess.polyglot.open_reader(get_opening_books()[event.book_index][1])
+                    logging.debug("Changing opening book [%s]", event.book[1])
+                    book = chess.polyglot.open_reader(event.book[1])
+                    Display.show(Message.OPENING_BOOK, book=event.book)
                     break
 
                 if case(Event.BEST_MOVE):
@@ -463,12 +465,14 @@ def main():
                     break
 
                 if case(Event.SET_MODE):
-                    Display.show(Message.INTERACTION_MODE, mode=event.mode, engine_status=engine_status)  # Useful for pgn display device
+                    # Useful for pgn display device
+                    Display.show(Message.INTERACTION_MODE, mode=event.mode, engine_status=engine_status)
                     interaction_mode = event.mode
                     break
 
                 if case(Event.SET_PLAYMODE):
-                    Display.show(Message.PLAY_MODE, mode=event.mode)  # Useful for pgn display device
+                    # Useful for pgn display device
+                    Display.show(Message.PLAY_MODE, mode=event.mode)
                     play_mode = event.mode
                     break
 
@@ -477,7 +481,10 @@ def main():
                         play_mode = GameMode.PLAY_BLACK
                     else:
                         play_mode = GameMode.PLAY_WHITE
-                    Display.show(Message.INTERACTION_MODE, mode=play_mode, engine_status=engine_status)
+
+                    # @todo das ist doch falsch!
+                    # Display.show(Message.INTERACTION_MODE, mode=play_mode, engine_status=engine_status)
+                    Display.show(Message.PLAY_MODE, mode=play_mode)
                     if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or \
                             (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
                         if check_game_state(game, play_mode):
@@ -486,6 +493,7 @@ def main():
 
                 if case(Event.SET_TIME_CONTROL):
                     time_control = event.time_control
+                    Display.show(Message.TIME_CONTROL, time_control_string=event.time_control_string)
                     break
 
                 if case(Event.OUT_OF_TIME):

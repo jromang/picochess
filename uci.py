@@ -71,6 +71,7 @@ class Engine:
         """ Sets the engine playing strength, between 0 and 20. """
         if level < 0 or level > 20:
             logging.error('Level not in range (0,20) :[%i]', level)
+            return False
         if 'Skill Level' in self.engine.options:  # Stockfish uses 'Skill Level' option
             self.set_option("Skill Level", level)
         elif 'UCI_LimitStrength' in self.engine.options:  # Generic 'UCI_LimitStrength' option for other engines
@@ -85,6 +86,8 @@ class Engine:
             pass
         else:
             logging.warning("Engine does not support skill levels")
+            return False
+        return True
 
     def set_position(self, game):
         self.engine.position(game)
