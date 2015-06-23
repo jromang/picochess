@@ -103,7 +103,7 @@ Before setting custom position, choose your level and time controls with pieces 
 Setup your position. Press the rightmost button until "Position" is displayed on the clock.
 Press the leftmost button to choose side to move, Black or White.
 Press the second button to choose the board orientation, Normal or Reversed.
-Press center button, clock will respond with "Scan" and "New game". Now picochess is waiting for your next move. If you want picochess to start press the middle button.
+Press center button, clock will respond with "Scan" and "New game". Now picochess is waiting for your next move. If you want picochess to start press the center button.
 
 Clock button support
 --------------------

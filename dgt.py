@@ -771,7 +771,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.display_on_dgt_clock(message.time_control_string)
                         break
                     if case(Message.OPENING_BOOK):
-                        book_name = get_opening_books()[message.book_index][0]
+                        book_name = message.book[0]
                         self.display_on_dgt_clock(book_name, self.enable_dgt_clock_beep)
                         break
                     if case(Message.USER_TAKE_BACK):
