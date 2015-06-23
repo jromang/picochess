@@ -1613,6 +1613,7 @@ function formatEngineOutput(line) {
         return line;
     }
 
+    return null;
 //        return output;
 
 }
@@ -1788,9 +1789,11 @@ function analyze(position_update) {
     if (!window.stockfish) {
         window.stockfish = new Worker('/static/js/stockfish.js');
         window.stockfish.onmessage = function(event) {
-            $('#engineStatus').html(formatEngineOutput(event.data));
-
-        };
+            var output = formatEngineOutput(event.data);
+            if (output) {
+                $('#engineStatus').html(output.line);
+            }
+        }
     }
 //    else {
 //        if (!window.stockfish) {
