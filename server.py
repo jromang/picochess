@@ -188,6 +188,7 @@ class WebDisplay(Display, threading.Thread):
                 else:
                     game.headers[comp_color+"Elo"] = "2900"
                     game.headers[user_color+"Elo"] = "-"
+
             # http://www6.chessclub.com/help/PGN-spec saying: not valid!
             # must be set in TimeControl-tag and with other format anyway
             # if "time_control_string" in self.shared["game_info"]:

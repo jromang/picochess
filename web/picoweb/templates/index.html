@@ -1187,7 +1187,7 @@ function writeVariationTree(dom, gameMoves, gameHistoryEl) {
 function getGameHeader(h) {
 
     var gameHeaderText = '<h4>' + h.White + ' (' + h.WhiteElo + ') - ' + h.Black + ' (' + h.BlackElo + ')</h4>';
-    gameHeaderText += '<h5>' + h.Event + ', ' + h.Site + ' ' + h.EventDate + '</h5>';
+    gameHeaderText += '<h5>' + h.Event + ', ' + h.Site + ' ' + h.Date + '</h5>';
 
     return gameHeaderText;
 }
@@ -1201,7 +1201,7 @@ function writeGameText(g, dom, skip_header) {
         h.Result = '';
     }
     var gameHeaderText = '<h4>' + h.White + ' (' + h.WhiteElo + ') - ' + h.Black + ' (' + h.BlackElo + ')</h4>';
-    gameHeaderText += '<h5>' + h.Event + ', ' + h.Site + ' ' + h.EventDate + '</h5>';
+    gameHeaderText += '<h5>' + h.Event + ', ' + h.Site + ' ' + h.Date + '</h5>';
     if (skip_header) {
         gameHeaderText = '';
     }
