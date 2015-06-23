@@ -162,30 +162,36 @@ class WebDisplay(Display, threading.Thread):
 
     def create_game_header(self, game):
         game.headers["Result"] = "*"
-        game.headers["White"] = "User"
-        game.headers["WhiteElo"] = "*"
-        game.headers["BlackElo"] = "2900"
-        game.headers["Black"] = "Picochess"
-        game.headers["Event"] = "Game"
-        game.headers["EventDate"] = datetime.datetime.now().date().strftime('%Y-%m-%d')
-        game.headers["Site"] = "Pi"
+        game.headers["White"] = "None"
+        game.headers["Black"] = "None"
+        game.headers["Event"] = "PicoChess game"
+        game.headers["Date"] = datetime.datetime.now().date().strftime('%Y-%m-%d')
+        game.headers["Round"] = "?"
 
         if 'system_info' in self.shared:
             game.headers["Site"] = self.shared['system_info']['location']
+            engine_name = self.shared['system_info']['engine_name']
+        else:
+            game.headers["Site"] = "picochess.org"
+            engine_name = "Picochess"
 
         if 'game_info' in self.shared:
-            # game.headers["Result"] = "*"
-            game.headers["Black"] = "Picochess" if "mode_string" in self.shared["game_info"] and self.shared["game_info"]["mode_string"] == GameMode.PLAY_BLACK else "User"
+            if "play_mode" in self.shared["game_info"]:
+                game.headers["Black"] = engine_name if self.shared["game_info"]["play_mode"] == PlayMode.PLAY_WHITE else "User"
+                game.headers["White"] = engine_name if self.shared["game_info"]["play_mode"] == PlayMode.PLAY_BLACK else "User"
 
-            game.headers["White"] = "Picochess" if game.headers["Black"] == "User" else "User"
-            comp_color = "Black" if game.headers["Black"] == "Picochess" else "White"
-
-            if "level" in self.shared["game_info"]:
-                game.headers[comp_color+"Elo"] = "Level {0}".format(self.shared["game_info"]["level"])
-            else:
-                game.headers[comp_color+"Elo"] = "2900"
-            if "time_control_string" in self.shared["game_info"]:
-                game.headers["Event"] = "Time " + self.shared["game_info"]["time_control_string"]
+                comp_color = "Black" if self.shared["game_info"]["play_mode"] == PlayMode.PLAY_WHITE else "White"
+                user_color = "Black" if self.shared["game_info"]["play_mode"] == PlayMode.PLAY_BLACK else "White"
+                if "level" in self.shared["game_info"]:
+                    game.headers[comp_color+"Elo"] = "Level {0}".format(self.shared["game_info"]["level"])
+                    game.headers[user_color+"Elo"] = "-"
+                else:
+                    game.headers[comp_color+"Elo"] = "2900"
+                    game.headers[user_color+"Elo"] = "-"
+            # http://www6.chessclub.com/help/PGN-spec saying: not valid!
+            # must be set in TimeControl-tag and with other format anyway
+            # if "time_control_string" in self.shared["game_info"]:
+            #    game.headers["Event"] = "Time " + self.shared["game_info"]["time_control_string"]
 
     # @staticmethod
     def create_game_info(self):
@@ -212,7 +218,7 @@ class WebDisplay(Display, threading.Thread):
 
         elif message == Message.PLAY_MODE:  # Process play mode
             self.create_game_info()
-            self.shared['game_info']['mode_string'] = message.mode
+            self.shared['game_info']['play_mode'] = message.mode
 
         elif message == Message.TIME_CONTROL:
             self.create_game_info()

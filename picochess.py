@@ -39,12 +39,6 @@ import chesstalker.chesstalker
 
 import spur
 
-
-def display_system_info():
-    Display.show(Message.SYSTEM_INFO, info={"version": version, "location": get_location(),
-                                            "books": get_opening_books(), "ip": get_ip()})
-
-
 def main():
     #Command line argument parsing
     parser = configargparse.ArgParser(default_config_files=[os.path.join(os.path.dirname(__file__), "picochess.ini")])
@@ -128,6 +122,12 @@ def main():
     # Launch web server
     if args.web_server_port:
         WebServer(args.web_server_port).start()
+
+    def display_system_info():
+        Display.show(Message.SYSTEM_INFO, info={"version": version, "location": get_location(),
+                                                "books": get_opening_books(), "ip": get_ip(),
+                                                "engine_name": engine_name
+                                                })
 
     def compute_legal_fens(g):
         """
@@ -265,7 +265,7 @@ def main():
     legal_fens = compute_legal_fens(game)  # Compute the legal FENs
     book = chess.polyglot.open_reader(get_opening_books()[8][1])  # Default opening book
     interaction_mode = Mode.GAME   # Interaction mode
-    play_mode = GameMode.PLAY_WHITE
+    play_mode = PlayMode.PLAY_WHITE
     engine_status = EngineStatus.WAIT
 
     # book_thread = None  # The thread that will fire book moves
@@ -290,8 +290,8 @@ def main():
                     if event.fen in legal_fens:
                         # Check if we have to undo a previous move (sliding)
                         if interaction_mode == Mode.GAME:
-                            if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or \
-                                    (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
+                            if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
+                                    (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):
                                 stop_thinking()
                                 if game.move_stack:
                                     game.pop()
@@ -316,8 +316,8 @@ def main():
                         game_history = copy.deepcopy(game)
                         while game_history.move_stack:
                             game_history.pop()
-                            if (play_mode == GameMode.PLAY_WHITE and game_history.turn == chess.WHITE) \
-                                    or (play_mode == GameMode.PLAY_BLACK and game_history.turn == chess.BLACK) \
+                            if (play_mode == PlayMode.PLAY_WHITE and game_history.turn == chess.WHITE) \
+                                    or (play_mode == PlayMode.PLAY_BLACK and game_history.turn == chess.BLACK) \
                                     or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.KIBITZ) \
                                     or (interaction_mode == Mode.REMOTE) or (interaction_mode == Mode.ANALYSIS):
                                 if game_history.fen().split(' ')[0] == event.fen:
@@ -341,8 +341,8 @@ def main():
                         logging.warning('Illegal move [%s]', move)
                     # Check if we are in play mode and it is player's turn
                     elif interaction_mode == Mode.GAME:
-                        if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.WHITE) or \
-                                (play_mode == GameMode.PLAY_BLACK and game.turn == chess.BLACK):
+                        if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.WHITE) or \
+                                (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.BLACK):
                             time_control.stop()
                             # logging.debug("Stopping player clock")
                             game.push(move)
@@ -390,7 +390,7 @@ def main():
                     time_control.reset()
                     stop_thinking()
 
-                    play_mode = GameMode.PLAY_WHITE if game.turn == chess.WHITE else GameMode.PLAY_BLACK
+                    play_mode = PlayMode.PLAY_WHITE if game.turn == chess.WHITE else PlayMode.PLAY_BLACK
                     Display.show(Message.START_NEW_GAME)
                     break
 
@@ -414,9 +414,9 @@ def main():
                         time_control.reset()
                         Display.show(Message.START_NEW_GAME)
                         if interaction_mode == Mode.ANALYSIS:
-                            play_mode = GameMode.PLAY_WHITE
-                    if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or (
-                            play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
+                            play_mode = PlayMode.PLAY_WHITE
+                    if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or (
+                            play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):
                         think(time_control)
                     break
 
@@ -431,8 +431,8 @@ def main():
                     ponder = event.ponder
                     # Check if we are in play mode and it is computer's turn
                     if interaction_mode == Mode.GAME:
-                        if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or \
-                                (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
+                        if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
+                                (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):
                             time_control.stop()
                             fen = game.fen()
                             game.push(move)
@@ -477,16 +477,16 @@ def main():
                     break
 
                 if case(Event.CHANGE_PLAYMODE):
-                    if play_mode == GameMode.PLAY_WHITE:
-                        play_mode = GameMode.PLAY_BLACK
+                    if play_mode == PlayMode.PLAY_WHITE:
+                        play_mode = PlayMode.PLAY_BLACK
                     else:
-                        play_mode = GameMode.PLAY_WHITE
+                        play_mode = PlayMode.PLAY_WHITE
 
                     # @todo das ist doch falsch!
                     # Display.show(Message.INTERACTION_MODE, mode=play_mode, engine_status=engine_status)
                     Display.show(Message.PLAY_MODE, mode=play_mode)
-                    if (play_mode == GameMode.PLAY_WHITE and game.turn == chess.BLACK) or \
-                            (play_mode == GameMode.PLAY_BLACK and game.turn == chess.WHITE):
+                    if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
+                            (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):
                         if check_game_state(game, play_mode):
                             think(time_control)
                     break

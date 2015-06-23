@@ -134,7 +134,7 @@ class Mode(enum.Enum):
     REMOTE = 'remote'
 
 @enum.unique
-class GameMode(enum.Enum):
+class PlayMode(enum.Enum):
     # Play modes
     PLAY_WHITE = 'white'
     PLAY_BLACK = 'black'

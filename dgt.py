@@ -228,12 +228,11 @@ mode_map = {"rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR": Mode.GAME,
             "rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR": Mode.OBSERVE,
             "rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR": Mode.REMOTE}
 
-game_map = {
-            "rnbq1bnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR": GameMode.PLAY_BLACK,  # Player plays black
-            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQ1BNR": GameMode.PLAY_WHITE,  # Player plays white
-            "RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbq1bnr": GameMode.PLAY_BLACK,  # Player plays black (reversed board)
-            "RNBQ1BNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr": GameMode.PLAY_WHITE}  # Player plays white (reversed board)
-
+play_map = {
+            "rnbq1bnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR": PlayMode.PLAY_BLACK,  # Player plays black
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQ1BNR": PlayMode.PLAY_WHITE,  # Player plays white
+            "RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbq1bnr": PlayMode.PLAY_BLACK,  # Player plays black (reversed board)
+            "RNBQ1BNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr": PlayMode.PLAY_WHITE}  # Player plays white (reversed board)
 
 time_control_map = OrderedDict([
 ("rnbqkbnr/pppppppp/Q7/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=1)),
@@ -631,9 +630,9 @@ class DGTBoard(Observable, Display, threading.Thread):
                     elif fen in mode_map:  # Set interaction mode
                         logging.debug("Interaction mode [%s]", mode_map[fen])
                         self.fire(Event.SET_MODE, mode=mode_map[fen])
-                    elif fen in game_map:  # Set play mode
-                        logging.debug("Play mode [%s]", game_map[fen])
-                        self.fire(Event.SET_PLAYMODE, mode=game_map[fen])
+                    elif fen in play_map:  # Set play mode
+                        logging.debug("Play mode [%s]", play_map[fen])
+                        self.fire(Event.SET_PLAYMODE, mode=play_map[fen])
                     elif fen in time_control_map:
                         logging.debug("Setting time control %s", time_control_map[fen].mode)
                         self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[fen],
