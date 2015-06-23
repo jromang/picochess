@@ -504,7 +504,12 @@ class DGTBoard(Observable, Display, threading.Thread):
                             fen = self.dgt_fen
                             fen += " {0} KQkq - 0 1".format(to_move)
                             fen = self.complete_dgt_fen(fen)
-                            self.fire(Event.SETUP_POSITION, fen=fen)
+                            # fixes the reverse & illegal bug #104
+                            if chess.Board(fen).is_valid(False):
+                                self.flip_board = self.setup_reverse_orientation
+                                self.fire(Event.SETUP_POSITION, fen=fen)
+                            else:
+                                self.display_on_dgt_clock("badpos", True)
 
                     if 9 <= message[4] <= 10 and message[5] == 50:
                         logging.info("Button 3 pressed")
