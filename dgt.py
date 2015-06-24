@@ -501,11 +501,16 @@ class DGTBoard(Observable, Display, threading.Thread):
                             self.display_on_dgt_clock("scan", True)
                             to_move = 'w' if self.setup_to_move == chess.WHITE else 'b'
                             fen = self.dgt_fen
+                            if self.flip_board != self.setup_reverse_orientation:
+                                fen = fen[::-1]
                             fen += " {0} KQkq - 0 1".format(to_move)
                             fen = self.complete_dgt_fen(fen)
-                            # fixes the reverse & illegal bug #104
+
                             if chess.Board(fen).is_valid(False):
                                 self.flip_board = self.setup_reverse_orientation
+                                # if self.flip_board:
+                                #     f = fen.split(' ', 1)
+                                #     fen = f[0][::-1] + ' ' + f[1]
                                 self.fire(Event.SETUP_POSITION, fen=fen)
                             else:
                                 self.display_on_dgt_clock("badpos", True)
