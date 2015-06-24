@@ -91,6 +91,7 @@ class Message(AutoNumber):
     GAME_ENDS = ()  # The current game has ended, contains a 'result' (GameResult) and list of 'moves'
 
     SYSTEM_INFO = () # Information about picochess such as version etc
+    STARTUP_INFO = () # Information about the startup options
     SCORE = ()  # Score
 
 

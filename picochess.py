@@ -54,6 +54,7 @@ def main():
     parser.add_argument("-p", "--password", type=str, help="password for the remote user")
     parser.add_argument("-sk", "--server-key", type=str, help="key file used to connect to the remote server")
     parser.add_argument("-pgn", "--pgn-file", type=str, help="pgn file used to store the games", default='games.pgn')
+    parser.add_argument("-pgn_u", "--pgn-user", type=str, help="user name for the pgn file", default=None)
     parser.add_argument("-ar", "--auto-reboot", action='store_true', help="reboot system after update")
     parser.add_argument("-web", "--web-server", dest="web_server_port", nargs="?", const=80, type=int, metavar="PORT", help="launch web server")
     parser.add_argument("-mail", "--email", type=str, help="email used to send pgn files", default=None)
@@ -68,7 +69,6 @@ def main():
     parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
     parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
     args = parser.parse_args()
-    engine_status = EngineStatus.WAIT
     # engine_thread = None
 
     # Enable logging
@@ -81,8 +81,16 @@ def main():
     # Load UCI engine
     engine = uci.Engine(args.engine, hostname=args.remote, username=args.user, key_file=args.server_key, password=args.password)
 
-    logging.debug('Loaded engine [%s]', engine.get().name)
     engine_name = engine.get().name
+    if args.pgn_user:
+        user_name = args.pgn_user
+    else:
+        if args.email:
+            user_name = args.email.split('@')[0]
+        else:
+            user_name = "Player"
+
+    logging.debug('Loaded engine [%s]', engine_name)
     logging.debug('Supported options [%s]', engine.get().options)
     if 'Hash' in engine.get().options:
         engine.set_option("Hash", args.hash_size)
@@ -106,7 +114,7 @@ def main():
         TerminalDisplay().start()
 
     # Save to PGN
-    PgnDisplay(args.pgn_file, engine_name, email=args.email, fromINIMailGun_Key=args.mailgun_key,
+    PgnDisplay(args.pgn_file, email=args.email, fromINIMailGun_Key=args.mailgun_key,
                         fromIniSmtp_Server=args.smtp_server, fromINISmtp_User=args.smtp_user,
                         fromINISmtp_Pass=args.smtp_pass, fromINISmtp_Enc=args.smtp_encryption).start() 
 
@@ -126,7 +134,7 @@ def main():
     def display_system_info():
         Display.show(Message.SYSTEM_INFO, info={"version": version, "location": get_location(),
                                                 "books": get_opening_books(), "ip": get_ip(),
-                                                "engine_name": engine_name
+                                                "engine_name": engine_name, "user_name": user_name
                                                 })
 
     def compute_legal_fens(g):
@@ -162,19 +170,13 @@ def main():
             Observable.fire(Event.BEST_MOVE, move=move, ponder=book_ponder)
             Observable.fire(Event.SCORE, score='book', mate=None)
 
-        # global book_thread
         book_move = weighted_choice(book, game)
         Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time)
         time.run(game.turn)
         if book_move:
             Display.show(Message.BOOK_MOVE, move=book_move.uci())
             send_book_move(book_move)
-
-            # No need for one more thread at this point given slightly slower picochess, can bring back if needed
-            # book_thread = threading.Timer(2, send_book_move, [book_move])
-            # book_thread.start()
         else:
-            # book_thread = None
             engine.set_position(game)
             global engine_status
             engine_status = EngineStatus.THINK
@@ -225,9 +227,6 @@ def main():
         Stop current search or book thread.
         :return:
         """
-        # if book_thread:
-        #    book_thread.cancel()
-        # else:
         res = engine.stop()
         # if engine_thread:
         #    engine_thread.cancel()
@@ -261,21 +260,23 @@ def main():
             return False
         return True
 
+    # Startup - internal
     game = chess.Board()  # Create the current game
     legal_fens = compute_legal_fens(game)  # Compute the legal FENs
     book = chess.polyglot.open_reader(get_opening_books()[8][1])  # Default opening book
     interaction_mode = Mode.GAME   # Interaction mode
     play_mode = PlayMode.PLAY_WHITE
     engine_status = EngineStatus.WAIT
-
-    # book_thread = None  # The thread that will fire book moves
     time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=5)
-
-    # Send the engine's UCI options to all Displays
-    Display.show(Message.UCI_OPTION_LIST, options=engine.get().options)
 
     system_info_thread = threading.Timer(0, display_system_info)
     system_info_thread.start()
+
+    # Startup - external
+    Display.show(Message.UCI_OPTION_LIST, options=engine.get().options)
+    Display.show(Message.STARTUP_INFO, info={"interaction_mode": interaction_mode, "play_mode": play_mode,
+                                             "book": book, "time_control_string": "mov 5", "engine_status": engine_status
+    })
 
     # Event loop
     while True:
@@ -482,8 +483,6 @@ def main():
                     else:
                         play_mode = PlayMode.PLAY_WHITE
 
-                    # @todo das ist doch falsch!
-                    # Display.show(Message.INTERACTION_MODE, mode=play_mode, engine_status=engine_status)
                     Display.show(Message.PLAY_MODE, mode=play_mode)
                     if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
                             (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):

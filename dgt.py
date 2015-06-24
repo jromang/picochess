@@ -477,7 +477,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                             self.display_move = not self.display_move
 
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
-                            self.setup_reverse_orientation = False if self.setup_reverse_orientation else True
+                            self.setup_reverse_orientation = not self.setup_reverse_orientation
                             orientation = "reversed" if self.setup_reverse_orientation else "normal"
                             self.display_on_dgt_clock(orientation, True)
 
@@ -502,6 +502,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                             to_move = 'w' if self.setup_to_move == chess.WHITE else 'b'
                             fen = self.dgt_fen
                             if self.flip_board != self.setup_reverse_orientation:
+                                logging.debug('Flipping the board')
                                 fen = fen[::-1]
                             fen += " {0} KQkq - 0 1".format(to_move)
                             fen = self.complete_dgt_fen(fen)
@@ -572,7 +573,8 @@ class DGTBoard(Observable, Display, threading.Thread):
                                 self.display_on_dgt_xl('pic'+version)
 
                         ack3 = ((message[5]) & 0x7f) | ((message[0] << 2) & 0x80)
-                        if ack0 != 0x10: logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
+                        if ack0 != 0x10:
+                            logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
                         else:
                             logging.debug("Clock ACK %s", (ack0, ack1, ack2, ack3))
 
@@ -618,10 +620,8 @@ class DGTBoard(Observable, Display, threading.Thread):
                     if fen in level_map:  # User sets level
                         level = level_map.index(fen)
                         self.fire(Event.LEVEL, level=level)
-                        # Display.show(Event.LEVEL, level=level)
-                        # self.display_on_dgt_xl('lvl ' + str(level), self.enable_dgt_clock_beep)
-                        # self.display_on_dgt_3000('level '+ str(level), self.enable_dgt_clock_beep)
                     elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":  # New game
+                        print('flip_board: ', self.flip_board)
                         logging.debug("New game")
                         self.fire(Event.NEW_GAME)
 
@@ -629,9 +629,6 @@ class DGTBoard(Observable, Display, threading.Thread):
                         book_index = book_map.index(fen)
                         logging.debug("Opening book [%s]", get_opening_books()[book_index])
                         self.fire(Event.OPENING_BOOK, book=get_opening_books()[book_index])
-                        # Display.show(Event.OPENING_BOOK, book=get_opening_books()[book_index])
-                        # self.display_on_dgt_xl(get_opening_books()[book_index][0], self.enable_dgt_clock_beep)
-                        # self.display_on_dgt_3000(get_opening_books()[book_index][0], self.enable_dgt_clock_beep)
                     elif fen in mode_map:  # Set interaction mode
                         logging.debug("Interaction mode [%s]", mode_map[fen])
                         self.fire(Event.SET_MODE, mode=mode_map[fen])
@@ -642,9 +639,6 @@ class DGTBoard(Observable, Display, threading.Thread):
                         logging.debug("Setting time control %s", time_control_map[fen].mode)
                         self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[fen],
                                   time_control_string=dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)])
-                        # Display.show(Event.SET_TIME_CONTROL, time_control_string=dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)])
-                        # self.display_on_dgt_xl(dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)], self.enable_dgt_clock_beep)
-                        # self.display_on_dgt_3000(dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)], self.enable_dgt_clock_beep)
                     elif fen in shutdown_map:
                         self.fire(Event.SHUTDOWN)
                         self.display_on_dgt_xl('powoff', self.enable_dgt_clock_beep)

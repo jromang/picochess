@@ -29,13 +29,13 @@ from email.mime.text import MIMEText
 
 
 class PgnDisplay(Display, threading.Thread):
-    def __init__(self, pgn_file_name, engine_name, email=None, fromINIMailGun_Key=None,
+    def __init__(self, pgn_file_name, email=None, fromINIMailGun_Key=None,
                     fromIniSmtp_Server=None, fromINISmtp_User=None,
                     fromINISmtp_Pass=None, fromINISmtp_Enc=False):
         super(PgnDisplay, self).__init__()
         self.file_name = pgn_file_name
-        self.engine_name = engine_name
-        
+        self.engine_name = ''
+        self.user_name = ''
         if email: # check if email address is provided by picochess.ini
             self.email = email
         else: # if no email address is set then set self.email to false so skip later sending the game as via mail
@@ -56,6 +56,9 @@ class PgnDisplay(Display, threading.Thread):
             # Check if we have something to display
             try:
                 message = self.message_queue.get()
+                if message == Message.SYSTEM_INFO:
+                    self.engine_name = message.info['engine_name']
+                    self.user_name = message.info['user_name']
                 if message == Message.GAME_ENDS and message.moves:
                     logging.debug('Saving game to [' + self.file_name + ']')
                     game = chess.pgn.Game()
@@ -77,11 +80,11 @@ class PgnDisplay(Display, threading.Thread):
                     elif message.result in (GameResult.MATE, GameResult.TIME_CONTROL):
                         game.headers["Result"] = "0-1" if message.color == chess.WHITE else "1-0"
                     if message.mode == PlayMode.PLAY_WHITE:
-                        game.headers["White"] = self.email.split('@')[0] if self.email else 'Player'
+                        game.headers["White"] = self.user_name
                         game.headers["Black"] = self.engine_name
                     if message.mode == PlayMode.PLAY_BLACK:
                         game.headers["White"] = self.engine_name
-                        game.headers["Black"] = self.email.split('@')[0] if self.email else 'Player'
+                        game.headers["Black"] = self.user_name
                     # Save to file
                     file = open(self.file_name, "a")
                     exporter = chess.pgn.FileExporter(file)

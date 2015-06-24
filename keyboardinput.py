@@ -43,6 +43,8 @@ class KeyboardInput(Observable, threading.Thread):
                     #    self.fire(Event.STOP_SEARCH)
                     if cmd.startswith('newgame'):
                         self.fire(Event.NEW_GAME)
+                    elif cmd.startswith('go'):
+                        self.fire(Event.CHANGE_PLAYMODE)
                     else:
                         move = chess.Move.from_uci(cmd)
                         self.fire(Event.USER_MOVE, move=move)

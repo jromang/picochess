@@ -170,15 +170,17 @@ class WebDisplay(Display, threading.Thread):
 
         if 'system_info' in self.shared:
             game.headers["Site"] = self.shared['system_info']['location']
+            user_name = self.shared['system_info']['user_name']
             engine_name = self.shared['system_info']['engine_name']
         else:
             game.headers["Site"] = "picochess.org"
+            user_name = "User"
             engine_name = "Picochess"
 
         if 'game_info' in self.shared:
             if "play_mode" in self.shared["game_info"]:
-                game.headers["Black"] = engine_name if self.shared["game_info"]["play_mode"] == PlayMode.PLAY_WHITE else "User"
-                game.headers["White"] = engine_name if self.shared["game_info"]["play_mode"] == PlayMode.PLAY_BLACK else "User"
+                game.headers["Black"] = engine_name if self.shared["game_info"]["play_mode"] == PlayMode.PLAY_WHITE else user_name
+                game.headers["White"] = engine_name if self.shared["game_info"]["play_mode"] == PlayMode.PLAY_BLACK else user_name
 
                 comp_color = "Black" if self.shared["game_info"]["play_mode"] == PlayMode.PLAY_WHITE else "White"
                 user_color = "Black" if self.shared["game_info"]["play_mode"] == PlayMode.PLAY_BLACK else "White"
@@ -203,8 +205,17 @@ class WebDisplay(Display, threading.Thread):
         if message == Message.BOOK_MOVE:
             EventHandler.write_to_clients({'msg': 'Book move'})
 
+        elif message == Message.START_NEW_GAME:
+            EventHandler.write_to_clients({'msg': 'New game'})
+
+        elif message == Message.SEARCH_STARTED:
+            EventHandler.write_to_clients({'msg': 'Thinking..'})
+
         elif message == Message.UCI_OPTION_LIST:
             self.shared['uci_options'] = message.options
+
+        elif message == Message.STARTUP_INFO:
+            self.shared['game_info'] = message.info
 
         elif message == Message.SYSTEM_INFO:
             self.shared['system_info'] = message.info
@@ -228,12 +239,6 @@ class WebDisplay(Display, threading.Thread):
         elif message == Message.LEVEL:
             self.create_game_info()
             self.shared['game_info']['level'] = message.level
-
-        elif message == Message.START_NEW_GAME:
-            EventHandler.write_to_clients({'msg': 'New game'})
-
-        elif message == Message.SEARCH_STARTED:
-            EventHandler.write_to_clients({'msg': 'Thinking..'})
 
         elif message == Message.COMPUTER_MOVE or message == Message.USER_MOVE or message == Message.REVIEW_MODE_MOVE:
             game = pgn.Game()
