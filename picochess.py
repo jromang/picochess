@@ -436,8 +436,17 @@ def main():
                                 (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):
                             time_control.stop()
                             fen = game.fen()
+
+                            print('  before push')
+                            print(game, game.fen())
+                            print(' ')
                             game.push(move)
-                            Display.show(Message.COMPUTER_MOVE, move=move, ponder=ponder, fen=fen, game=copy.deepcopy(game),
+
+                            print('  after push')
+                            print(game, game.fen())
+                            print(' ')
+
+                            Display.show(Message.COMPUTER_MOVE, move=move, ponder=ponder, fen=fen, neu = game.fen(), game=copy.deepcopy(game),
                                          time_control=time_control)
                             # if check_game_state(game, interaction_mode):
                             legal_fens = compute_legal_fens(game)
