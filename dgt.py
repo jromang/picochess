@@ -467,7 +467,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                                 if self.hint_fen is None:
                                     self.display_on_dgt_clock('none')
                                 else:
-                                    print('b1 ', self.hint_move, self.hint_fen)
+                                    # print('b1 ', self.hint_move, self.hint_fen)
                                     self.display_move_on_dgt(self.hint_move, self.hint_fen, self.enable_dgt_clock_beep)
                             else:
                                 if self.mate is None:
@@ -725,13 +725,13 @@ class DGTBoard(Observable, Display, threading.Thread):
                         uci_move = message.move.uci()
                         self.last_move = message.move
                         self.hint_move = chess.Move.null() if message.ponder is None else message.ponder
+                        # @todo LocutusOfPenguin: getting a wrong game somehow...check it!
                         self.hint_fen = message.game.fen()
+                        # self.hint_fen = message.fen_new
                         self.last_fen = message.fen
-
-                        print('message_game:')
-                        print(message.game)
-                        print('cm ', self.hint_move, message.game.fen(), message.fen, message.neu)
-
+                        # print('message_game:')
+                        # print(message.game)
+                        # print('cm ', self.hint_move, message.game.fen(), message.fen, message.neu)
                         self.display_move = False
                         logging.info("DGT SEND BEST MOVE:"+uci_move)
                         # Stop the clock before displaying a move
@@ -830,7 +830,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                     if case(Message.NEW_PV):
                         self.hint_move = message.pv[0]
                         self.hint_fen = message.fen
-                        print('pv ', self.hint_move, self.hint_fen)
+                        # print('pv ', self.hint_move, self.hint_fen)
                         if message.interaction_mode == Mode.ANALYSIS:
                             self.display_move_on_dgt(self.hint_move, self.hint_fen, False)
                         break

@@ -435,19 +435,17 @@ def main():
                         if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
                                 (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):
                             time_control.stop()
-                            fen = game.fen()
+                            fen_old = game.fen()
 
-                            print('  before push')
-                            print(game, game.fen())
-                            print(' ')
+                            # print('  before push')
+                            # print(game, game.fen())
                             game.push(move)
 
-                            print('  after push')
-                            print(game, game.fen())
-                            print(' ')
+                            # print('  after push')
+                            # print(game, game.fen())
 
-                            Display.show(Message.COMPUTER_MOVE, move=move, ponder=ponder, fen=fen, neu = game.fen(), game=copy.deepcopy(game),
-                                         time_control=time_control)
+                            Display.show(Message.COMPUTER_MOVE, move=move, ponder=ponder, fen=fen_old, fen_new=game.fen(),
+                                         game=copy.deepcopy(game), time_control=time_control)
                             # if check_game_state(game, interaction_mode):
                             legal_fens = compute_legal_fens(game)
                     break
