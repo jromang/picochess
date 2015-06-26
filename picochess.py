@@ -386,6 +386,10 @@ def main():
 
                     game = chess.Board(event.fen)
                     game.custom_fen = event.fen
+
+                    # same code as "NEW_GAME"
+                    # btw. should also do this Abort stuff!
+
                     legal_fens = compute_legal_fens(game)
                     time_control.stop()
                     time_control.reset()
@@ -402,7 +406,6 @@ def main():
                     break
 
                 if case(Event.NEW_GAME):  # User starts a new game
-                    stop_thinking()
                     if game.move_stack:
                         logging.debug("Starting a new game")
                         if not game.is_game_over():
@@ -410,15 +413,15 @@ def main():
                             Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack),
                                          color=game.turn, mode=play_mode, custom_fen=custom_fen)
                         game = chess.Board()
-                        legal_fens = compute_legal_fens(game)
-                        time_control.stop()
-                        time_control.reset()
-                        Display.show(Message.START_NEW_GAME)
-                        if interaction_mode == Mode.ANALYSIS:
-                            play_mode = PlayMode.PLAY_WHITE
-                    if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or (
-                            play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):
-                        think(time_control)
+
+                    # same code as "SETUP_POSITION"
+                    legal_fens = compute_legal_fens(game)
+                    time_control.stop()
+                    time_control.reset()
+                    stop_thinking()
+
+                    play_mode = PlayMode.PLAY_WHITE if game.turn == chess.WHITE else PlayMode.PLAY_BLACK
+                    Display.show(Message.START_NEW_GAME)
                     break
 
                 if case(Event.OPENING_BOOK):
@@ -436,14 +439,7 @@ def main():
                                 (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):
                             time_control.stop()
                             fen_old = game.fen()
-
-                            # print('  before push')
-                            # print(game, game.fen())
                             game.push(move)
-
-                            # print('  after push')
-                            # print(game, game.fen())
-
                             Display.show(Message.COMPUTER_MOVE, move=move, ponder=ponder, fen=fen_old, fen_new=game.fen(),
                                          game=copy.deepcopy(game), time_control=time_control)
                             # if check_game_state(game, interaction_mode):

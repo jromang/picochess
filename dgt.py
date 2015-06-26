@@ -727,11 +727,8 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.hint_move = chess.Move.null() if message.ponder is None else message.ponder
                         # @todo LocutusOfPenguin: getting a wrong game somehow...check it!
                         self.hint_fen = message.game.fen()
-                        # self.hint_fen = message.fen_new
+                        # self.hint_fen = message.fen_new # game.fen() & message_fen_new should be SAME! LocutusOfBorg
                         self.last_fen = message.fen
-                        # print('message_game:')
-                        # print(message.game)
-                        # print('cm ', self.hint_move, message.game.fen(), message.fen, message.neu)
                         self.display_move = False
                         logging.info("DGT SEND BEST MOVE:"+uci_move)
                         # Stop the clock before displaying a move
