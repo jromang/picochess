@@ -75,14 +75,14 @@ class PgnDisplay(Display, threading.Thread):
                     game.headers["Round"] = "?"
                     if message.result == GameResult.ABORT:
                         game.headers["Result"] = "*"
-                    elif message.result in (GameResult.STALEMATE, GameResult.SEVENTYFIVE_MOVES, GameResult.FIVEFOLD_REPETITION):
+                    elif message.result in (GameResult.STALEMATE, GameResult.SEVENTYFIVE_MOVES, GameResult.FIVEFOLD_REPETITION, GameResult.INSUFFICIENT_MATERIAL):
                         game.headers["Result"] = "1/2-1/2"
                     elif message.result in (GameResult.MATE, GameResult.TIME_CONTROL):
                         game.headers["Result"] = "0-1" if message.color == chess.WHITE else "1-0"
-                    if message.mode == PlayMode.PLAY_WHITE:
+                    if message.play_mode == PlayMode.PLAY_WHITE:
                         game.headers["White"] = self.user_name
                         game.headers["Black"] = self.engine_name
-                    if message.mode == PlayMode.PLAY_BLACK:
+                    if message.play_mode == PlayMode.PLAY_BLACK:
                         game.headers["White"] = self.engine_name
                         game.headers["Black"] = self.user_name
                     # Save to file

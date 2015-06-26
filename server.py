@@ -230,7 +230,7 @@ class WebDisplay(Display, threading.Thread):
 
         elif message == Message.PLAY_MODE:  # Process play mode
             self.create_game_info()
-            self.shared['game_info']['play_mode'] = message.mode
+            self.shared['game_info']['play_mode'] = message.play_mode
 
         elif message == Message.TIME_CONTROL:
             self.create_game_info()

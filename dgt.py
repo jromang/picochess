@@ -108,8 +108,10 @@ class Pieces(enum.Enum):
 
 
 class Messages(enum.IntEnum):
-    """ DESCRIPTION OF THE MESSAGES FROM BOARD TO PC """
-    MESSAGE_BIT = 0x80 #  The Message ID is the logical OR of MESSAGE_BIT and ID code
+    """
+    DESCRIPTION OF THE MESSAGES FROM BOARD TO PC
+    """
+    MESSAGE_BIT = 0x80 # The Message ID is the logical OR of MESSAGE_BIT and ID code
     # ID codes
     DGT_NONE = 0x00
     DGT_BOARD_DUMP = 0x06
@@ -124,8 +126,8 @@ class Messages(enum.IntEnum):
     DGT_BOARD_DUMP_50W = 0x15  # Added for Draughts board
     DGT_BATTERY_STATUS = 0x20  # Added for Bluetooth board
     DGT_LONG_SERIALNR = 0x22  # Added for Bluetooth board
-    DGT_MSG_BOARD_DUMP = (MESSAGE_BIT | DGT_BOARD_DUMP)  # DGT_MSG_BOARD_DUMP is the message that follows
-                                                         # on a DGT_SEND_BOARD command
+    # DGT_MSG_BOARD_DUMP is the message that follows on a DGT_SEND_BOARD command
+    DGT_MSG_BOARD_DUMP = (MESSAGE_BIT | DGT_BOARD_DUMP)
     DGT_SIZE_BOARD_DUMP = 67
     DGT_SIZE_BOARD_DUMP_DRAUGHTS = 103
     DGT_MSG_BOARD_DUMP_50B = (MESSAGE_BIT|DGT_BOARD_DUMP_50B)
@@ -269,7 +271,7 @@ class DGTBoard(Observable, Display, threading.Thread):
     def __init__(self, device, enable_board_leds=False, enable_dgt_3000=False, enable_dgt_clock_beep=True):
         super(DGTBoard, self).__init__()
         self.flip_board = False
-        self.flip_clock = None
+        # self.flip_clock = None
 
         self.setup_to_move = chess.WHITE
         self.setup_reverse_orientation = False
@@ -375,8 +377,8 @@ class DGTBoard(Observable, Display, threading.Thread):
         except ValueError:
             logging.error('Invalid bytes sent {0}'.format(array))
         if message[0] == Commands.DGT_CLOCK_MESSAGE:
-            # print(message)
-            time.sleep(0.05 if self.enable_dgt_3000 else 0.5)  # Let a bit time for the message to be displayed on the clock
+            # Let a bit time for the message to be displayed on the clock
+            time.sleep(0.05 if self.enable_dgt_3000 else 0.5)
             self.clock_lock.acquire()
 
     def complete_dgt_fen(self, fen):
@@ -431,34 +433,29 @@ class DGTBoard(Observable, Display, threading.Thread):
                 #     logging.info("Got clock version number")
                 #     break
                 if case(Messages.DGT_MSG_BWTIME):
-                    # print ("GOT BW_TIME")
-                    # print ("Clock m
-                    # sg")
-                    # print (message)
-                    if message[0] == message[1] == message[2] == message[3] == message[4] == message[5] == 0:  # Clock Times message
+                    # if message[0] == message[1] == message[2] == message[3] == message[4] == message[5] == 0:  # Clock Times message
                         # print ("tumbler message: {0}".format(message))
-                        clock_status = message[6]
-                        old_flip_clock = self.flip_clock
-                        self.flip_clock = bool(clock_status & 0x02)  # tumbler position high on right player
+                        # clock_status = message[6]
+                        # old_flip_clock = self.flip_clock
+                        # self.flip_clock = bool(clock_status & 0x02)  # tumbler position high on right player
                         # if old_flip_clock is not None and self.flip_clock != old_flip_clock:
                         #     logging.debug("Tumbler pressed")
                         #     # self.write([Commands.DGT_CLOCK_MESSAGE, 0x0a, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_SETNRUN,
                         #     #            0, 0, 0, 0, 0, 0,
                         #     #            0x04 | 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
                         #     self.display_on_dgt_3000('menu')
+
                     # if message[0] == 10 and message[1] == 16 and message[3] == 10 and not message[5] and not message[6]:
 
                     if 5 <= message[4] <= 6 and message[5] == 49:
                         logging.info("Button 0 pressed")
-                        # print(self.dgt_clock_menu)
-
                         if self.dgt_clock_menu == Menu.GAME_MENU and self.last_move:
                             self.display_move_on_dgt(self.last_move, self.last_fen, self.enable_dgt_clock_beep)
 
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
                             self.setup_to_move = chess.WHITE if self.setup_to_move == chess.BLACK else chess.BLACK
-                            to_move_string = "white" if self.setup_to_move == chess.WHITE else "black"
-                            self.display_on_dgt_clock(to_move_string, True)
+                            to_move = PlayMode.PLAY_WHITE if self.setup_to_move == chess.WHITE else PlayMode.PLAY_BLACK
+                            self.display_on_dgt_clock(to_move.value, beep=True)
 
                     if 33 <= message[4] <= 34 and message[5] == 52:
                         logging.info("Button 1 pressed")
@@ -467,20 +464,19 @@ class DGTBoard(Observable, Display, threading.Thread):
                                 if self.hint_fen is None:
                                     self.display_on_dgt_clock('none')
                                 else:
-                                    # print('b1 ', self.hint_move, self.hint_fen)
                                     self.display_move_on_dgt(self.hint_move, self.hint_fen, self.enable_dgt_clock_beep)
                             else:
                                 if self.mate is None:
                                     sc = 'none' if self.score is None else str(self.score).rjust(6)
                                 else:
                                     sc = 'm ' + str(self.mate)
-                                self.display_on_dgt_clock(sc, True)
+                                self.display_on_dgt_clock(sc, beep=True)
                             self.display_move = not self.display_move
 
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
                             self.setup_reverse_orientation = not self.setup_reverse_orientation
-                            orientation = "reversed" if self.setup_reverse_orientation else "normal"
-                            self.display_on_dgt_clock(orientation, True)
+                            orientation = "w    b" if self.setup_reverse_orientation == self.flip_board else "b    w"
+                            self.display_on_dgt_clock(orientation, beep=True)
 
                     if 17 <= message[4] <= 18 and message[5] == 51:
                         logging.info("Button 2 pressed")
@@ -499,7 +495,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                                         pass
 
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
-                            self.display_on_dgt_clock("scan", True)
+                            self.display_on_dgt_clock("scan", beep=True)
                             to_move = 'w' if self.setup_to_move == chess.WHITE else 'b'
                             fen = self.dgt_fen
                             if self.flip_board != self.setup_reverse_orientation:
@@ -510,12 +506,9 @@ class DGTBoard(Observable, Display, threading.Thread):
 
                             if chess.Board(fen).is_valid(False):
                                 self.flip_board = self.setup_reverse_orientation
-                                # if self.flip_board:
-                                #     f = fen.split(' ', 1)
-                                #     fen = f[0][::-1] + ' ' + f[1]
                                 self.fire(Event.SETUP_POSITION, fen=fen)
                             else:
-                                self.display_on_dgt_clock("badpos", True)
+                                self.display_on_dgt_clock("badpos", beep=True)
 
                     if 9 <= message[4] <= 10 and message[5] == 50:
                         logging.info("Button 3 pressed")
@@ -533,7 +526,6 @@ class DGTBoard(Observable, Display, threading.Thread):
 
                     if 65 <= message[4] <= 66 and message[5] == 53:
                         logging.info("Button 4 pressed")
-
                         # self.dgt_clock_menu = Menu.self.dgt_clock_menu.value+1
                         # print(self.dgt_clock_menu)
                         # print(self.dgt_clock_menu.value)
@@ -613,6 +605,8 @@ class DGTBoard(Observable, Display, threading.Thread):
                         logging.debug('Flipping the board')
                         # Flip the board
                         self.flip_board = not self.flip_board
+                        # set standard for setup orientation too
+                        self.setup_reverse_orientation = self.flip_board
                         fen = fen[::-1]
                     logging.debug(fen)
                     self.dgt_fen = fen
@@ -622,7 +616,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                         level = level_map.index(fen)
                         self.fire(Event.LEVEL, level=level)
                     elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":  # New game
-                        print('flip_board: ', self.flip_board)
+                        # print('flip_board: ', self.flip_board)
                         logging.debug("New game")
                         self.fire(Event.NEW_GAME)
 
@@ -635,7 +629,7 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.fire(Event.SET_MODE, mode=mode_map[fen])
                     elif fen in play_map:  # Set play mode
                         logging.debug("Play mode [%s]", play_map[fen])
-                        self.fire(Event.SET_PLAYMODE, mode=play_map[fen])
+                        self.fire(Event.SET_PLAYMODE, play_mode=play_map[fen])
                     elif fen in time_control_map:
                         logging.debug("Setting time control %s", time_control_map[fen].mode)
                         self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[fen],
@@ -679,9 +673,9 @@ class DGTBoard(Observable, Display, threading.Thread):
         if self.enable_dgt_3000:
             if dgt_3000_text:
                 text = dgt_3000_text
-            self.display_on_dgt_3000(text, beep=beep)
+            self.display_on_dgt_3000(text, beep)
         else:
-            self.display_on_dgt_xl(text, beep=beep)
+            self.display_on_dgt_xl(text, beep)
 
     def display_move_on_dgt(self, move, fen, beep):
         bit_board = chess.Board(fen)
@@ -725,9 +719,9 @@ class DGTBoard(Observable, Display, threading.Thread):
                         uci_move = message.move.uci()
                         self.last_move = message.move
                         self.hint_move = chess.Move.null() if message.ponder is None else message.ponder
-                        # @todo LocutusOfPenguin: getting a wrong game somehow...check it!
                         self.hint_fen = message.game.fen()
-                        # self.hint_fen = message.fen_new # game.fen() & message_fen_new should be SAME! LocutusOfBorg
+                        # @todo LocutusOfPenguin: getting a wrong game somehow...check it!
+                        # self.hint_fen = message.fen_new # game.fen() & message_fen_new should be SAME!
                         self.last_fen = message.fen
                         self.display_move = False
                         logging.info("DGT SEND BEST MOVE:"+uci_move)
@@ -802,21 +796,21 @@ class DGTBoard(Observable, Display, threading.Thread):
                         break
                     if case(Message.GAME_ENDS):
                         # time.sleep(3)  # Let the move displayed on clock
-                        self.display_on_dgt_clock(message.result.value, beep=self.enable_dgt_clock_beep)
+                        self.display_on_dgt_clock(message.result.value, self.enable_dgt_clock_beep)
                         break
                     if case(Message.INTERACTION_MODE):
                         self.engine_status = message.engine_status
                         self.mode = message.mode
-                        self.display_on_dgt_clock(message.mode.value, beep=self.enable_dgt_clock_beep)
+                        self.display_on_dgt_clock(message.mode.value, self.enable_dgt_clock_beep)
                         break
                     if case(Message.PLAY_MODE):
-                        self.display_on_dgt_clock(message.mode.value, beep=self.enable_dgt_clock_beep)
+                        self.display_on_dgt_clock(message.play_mode.value, self.enable_dgt_clock_beep)
                         break
                     if case(Message.SCORE):
                         self.score = message.score
                         self.mate = message.mate
                         if message.interaction_mode == Mode.KIBITZ:
-                            self.display_on_dgt_clock(str(self.score).rjust(6), False)
+                            self.display_on_dgt_clock(str(self.score).rjust(6), beep=False)
                         break
                     if case(Message.BOOK_MOVE):
                         self.score = None
@@ -827,7 +821,6 @@ class DGTBoard(Observable, Display, threading.Thread):
                     if case(Message.NEW_PV):
                         self.hint_move = message.pv[0]
                         self.hint_fen = message.fen
-                        # print('pv ', self.hint_move, self.hint_fen)
                         if message.interaction_mode == Mode.ANALYSIS:
                             self.display_move_on_dgt(self.hint_move, self.hint_fen, False)
                         break

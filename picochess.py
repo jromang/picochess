@@ -242,23 +242,24 @@ def main():
         :param game:
         :return: True is the game continues, False if it has ended
         """
-        custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
+        result = None
         if game.is_stalemate():
-            Display.show(Message.GAME_ENDS, result=GameResult.STALEMATE, moves=list(game.move_stack), color=game.turn, mode=play_mode, custom_fen=custom_fen)
-            return False
+            result=GameResult.STALEMATE
         if game.is_insufficient_material():
-            Display.show(Message.GAME_ENDS, result=GameResult.INSUFFICIENT_MATERIAL, moves=list(game.move_stack), color=game.turn, mode=play_mode, custom_fen=custom_fen)
-            return False
+            result=GameResult.INSUFFICIENT_MATERIAL
         if game.is_seventyfive_moves():
-            Display.show(Message.GAME_ENDS, result=GameResult.SEVENTYFIVE_MOVES, moves=list(game.move_stack), color=game.turn, mode=play_mode, custom_fen=custom_fen)
-            return False
+            result=GameResult.SEVENTYFIVE_MOVES
         if game.is_fivefold_repetition():
-            Display.show(Message.GAME_ENDS, result=GameResult.FIVEFOLD_REPETITION, moves=list(game.move_stack), color=game.turn, mode=play_mode, custom_fen=custom_fen)
-            return False
+            result=GameResult.FIVEFOLD_REPETITION
         if game.is_game_over():
-            Display.show(Message.GAME_ENDS, result=GameResult.MATE, moves=list(game.move_stack), color=game.turn, mode=play_mode, custom_fen=custom_fen)
+            result=GameResult.MATE
+
+        if result is None:
+            return True
+        else:
+            custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
+            Display.show(Message.GAME_ENDS, result=result, moves=list(game.move_stack), color=game.turn, play_mode=play_mode, custom_fen=custom_fen)
             return False
-        return True
 
     # Startup - internal
     game = chess.Board()  # Create the current game
@@ -411,7 +412,7 @@ def main():
                         if not game.is_game_over():
                             custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
                             Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack),
-                                         color=game.turn, mode=play_mode, custom_fen=custom_fen)
+                                         color=game.turn, play_mode=play_mode, custom_fen=custom_fen)
                         game = chess.Board()
 
                     # same code as "SETUP_POSITION"
@@ -469,15 +470,13 @@ def main():
                     break
 
                 if case(Event.SET_MODE):
-                    # Useful for pgn display device
-                    Display.show(Message.INTERACTION_MODE, mode=event.mode, engine_status=engine_status)
                     interaction_mode = event.mode
+                    Display.show(Message.INTERACTION_MODE, mode=event.mode, engine_status=engine_status)
                     break
 
                 if case(Event.SET_PLAYMODE):
-                    # Useful for pgn display device
-                    Display.show(Message.PLAY_MODE, mode=event.mode)
-                    play_mode = event.mode
+                    play_mode = event.play_mode
+                    Display.show(Message.PLAY_MODE, play_mode=play_mode)
                     break
 
                 if case(Event.CHANGE_PLAYMODE):
@@ -486,7 +485,7 @@ def main():
                     else:
                         play_mode = PlayMode.PLAY_WHITE
 
-                    Display.show(Message.PLAY_MODE, mode=play_mode)
+                    Display.show(Message.PLAY_MODE, play_mode=play_mode)
                     if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
                             (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):
                         if check_game_state(game, play_mode):
@@ -502,7 +501,7 @@ def main():
                     stop_thinking()
                     custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
                     Display.show(Message.GAME_ENDS, result=GameResult.TIME_CONTROL, moves=list(game.move_stack),
-                                 color=event.color, mode=play_mode, custom_fen=custom_fen)
+                                 color=event.color, play_mode=play_mode, custom_fen=custom_fen)
                     break
 
                 if case(Event.UCI_OPTION_SET):
