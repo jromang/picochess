@@ -619,7 +619,6 @@ class DGTBoard(Observable, Display, threading.Thread):
                         # print('flip_board: ', self.flip_board)
                         logging.debug("New game")
                         self.fire(Event.NEW_GAME)
-
                     elif fen in book_map:  # Choose opening book
                         book_index = book_map.index(fen)
                         logging.debug("Opening book [%s]", get_opening_books()[book_index])

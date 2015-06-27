@@ -268,6 +268,7 @@ def main():
     interaction_mode = Mode.GAME   # Interaction mode
     play_mode = PlayMode.PLAY_WHITE
     engine_status = EngineStatus.WAIT
+    king_lifted = False
     time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=5)
 
     system_info_thread = threading.Timer(0, display_system_info)
@@ -385,11 +386,14 @@ def main():
                 if case(Event.SETUP_POSITION):  # User sets up a position
                     logging.debug("Setting up custom fen: {0}".format(event.fen))
 
+                    if game.move_stack:
+                        if not game.is_game_over():
+                            custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
+                            Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack),
+                                         color=game.turn, play_mode=play_mode, custom_fen=custom_fen)
+
                     game = chess.Board(event.fen)
                     game.custom_fen = event.fen
-
-                    # same code as "NEW_GAME"
-                    # btw. should also do this Abort stuff!
 
                     legal_fens = compute_legal_fens(game)
                     time_control.stop()
@@ -415,13 +419,18 @@ def main():
                                          color=game.turn, play_mode=play_mode, custom_fen=custom_fen)
                         game = chess.Board()
 
-                    # same code as "SETUP_POSITION"
                     legal_fens = compute_legal_fens(game)
                     time_control.stop()
                     time_control.reset()
                     stop_thinking()
 
-                    play_mode = PlayMode.PLAY_WHITE if game.turn == chess.WHITE else PlayMode.PLAY_BLACK
+                    if interaction_mode == Mode.GAME:
+                        if king_lifted:
+                            king_lifted = False
+                            if play_mode == PlayMode.PLAY_BLACK:
+                                think(time_control)
+                        else:
+                            play_mode = PlayMode.PLAY_WHITE if game.turn == chess.WHITE else PlayMode.PLAY_BLACK
                     Display.show(Message.START_NEW_GAME)
                     break
 
@@ -476,6 +485,7 @@ def main():
 
                 if case(Event.SET_PLAYMODE):
                     play_mode = event.play_mode
+                    king_lifted = True
                     Display.show(Message.PLAY_MODE, play_mode=play_mode)
                     break
 
