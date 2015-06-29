@@ -475,7 +475,7 @@ class DGTBoard(Observable, Display, threading.Thread):
 
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
                             self.setup_reverse_orientation = not self.setup_reverse_orientation
-                            orientation = "w    b" if self.setup_reverse_orientation == self.flip_board else "b    w"
+                            orientation = "b    w" if self.setup_reverse_orientation else "w    b"
                             self.display_on_dgt_clock(orientation, beep=True)
 
                     if 17 <= message[4] <= 18 and message[5] == 51:
@@ -616,7 +616,6 @@ class DGTBoard(Observable, Display, threading.Thread):
                         level = level_map.index(fen)
                         self.fire(Event.LEVEL, level=level)
                     elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":  # New game
-                        # print('flip_board: ', self.flip_board)
                         logging.debug("New game")
                         self.fire(Event.NEW_GAME)
                     elif fen in book_map:  # Choose opening book
