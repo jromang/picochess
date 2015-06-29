@@ -179,17 +179,15 @@ class WebDisplay(Display, threading.Thread):
 
         if 'game_info' in self.shared:
             if "play_mode" in self.shared["game_info"]:
+                if "level" in self.shared["game_info"]:
+                    engine_name += " (Level {0})".format(self.shared["game_info"]["level"])
                 game.headers["Black"] = engine_name if self.shared["game_info"]["play_mode"] == PlayMode.PLAY_WHITE else user_name
                 game.headers["White"] = engine_name if self.shared["game_info"]["play_mode"] == PlayMode.PLAY_BLACK else user_name
 
                 comp_color = "Black" if self.shared["game_info"]["play_mode"] == PlayMode.PLAY_WHITE else "White"
                 user_color = "Black" if self.shared["game_info"]["play_mode"] == PlayMode.PLAY_BLACK else "White"
-                if "level" in self.shared["game_info"]:
-                    game.headers[comp_color+"Elo"] = "Level {0}".format(self.shared["game_info"]["level"])
-                    game.headers[user_color+"Elo"] = "-"
-                else:
-                    game.headers[comp_color+"Elo"] = "2900"
-                    game.headers[user_color+"Elo"] = "-"
+                game.headers[comp_color+"Elo"] = "2900"
+                game.headers[user_color+"Elo"] = "-"
 
             # http://www6.chessclub.com/help/PGN-spec saying: not valid!
             # must be set in TimeControl-tag and with other format anyway
