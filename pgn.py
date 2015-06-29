@@ -36,6 +36,7 @@ class PgnDisplay(Display, threading.Thread):
         self.file_name = pgn_file_name
         self.engine_name = ''
         self.user_name = ''
+        self.level = None
         if email: # check if email address is provided by picochess.ini
             self.email = email
         else: # if no email address is set then set self.email to false so skip later sending the game as via mail
@@ -59,6 +60,8 @@ class PgnDisplay(Display, threading.Thread):
                 if message == Message.SYSTEM_INFO:
                     self.engine_name = message.info['engine_name']
                     self.user_name = message.info['user_name']
+                if message == Message.LEVEL:
+                    self.level = message.level
                 if message == Message.GAME_ENDS and message.moves:
                     logging.debug('Saving game to [' + self.file_name + ']')
                     game = chess.pgn.Game()
@@ -79,12 +82,23 @@ class PgnDisplay(Display, threading.Thread):
                         game.headers["Result"] = "1/2-1/2"
                     elif message.result in (GameResult.MATE, GameResult.TIME_CONTROL):
                         game.headers["Result"] = "0-1" if message.color == chess.WHITE else "1-0"
+
+                    if self.level is None:
+                        engine_elo = 2900
+                    else:
+                        engine_elo = "Level {0}".format(self.level)
+
                     if message.play_mode == PlayMode.PLAY_WHITE:
                         game.headers["White"] = self.user_name
                         game.headers["Black"] = self.engine_name
+                        game.headers["WhiteElo"] = "-"
+                        game.headers["BlackElo"] = engine_elo
                     if message.play_mode == PlayMode.PLAY_BLACK:
                         game.headers["White"] = self.engine_name
                         game.headers["Black"] = self.user_name
+                        game.headers["WhiteElo"] = engine_elo
+                        game.headers["BlackElo"] = "-"
+
                     # Save to file
                     file = open(self.file_name, "a")
                     exporter = chess.pgn.FileExporter(file)
