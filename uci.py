@@ -54,42 +54,45 @@ class Engine:
                     self.engine = None
                 else:
                     self.engine = chess.uci.popen_engine(path)
-            self.engine.uci()
-
-            handler = Informer()
-            self.engine.info_handlers.append(handler)
+                    self.engine.uci()
+                    handler = Informer()
+                    self.engine.info_handlers.append(handler)
+            self.options = {}
         except OSError:
             logging.exception("OS error in starting engine")
 
     def get(self):
         return self.engine
 
-    def set_option(self, name, value):
-        self.engine.options[name] = value
+    def option(self, name, value):
+        self.options[name] = value
 
-    def set_level(self, level):
+    def send(self):
+        self.engine.setoption(self.options)
+
+    def level(self, level):
         """ Sets the engine playing strength, between 0 and 20. """
         if level < 0 or level > 20:
             logging.error('Level not in range (0,20) :[%i]', level)
             return False
         if 'Skill Level' in self.engine.options:  # Stockfish uses 'Skill Level' option
-            self.set_option("Skill Level", level)
+            self.option("Skill Level", level)
         elif 'UCI_LimitStrength' in self.engine.options:  # Generic 'UCI_LimitStrength' option for other engines
             if level == 20:
-                self.set_option('UCI_LimitStrength', 'false')
+                self.option('UCI_LimitStrength', 'false')
             else:
-                self.set_option('UCI_LimitStrength', 'true')
+                self.option('UCI_LimitStrength', 'true')
                 min_elo = float(self.engine.options['UCI_Elo'][2])
                 max_elo = float(self.engine.options['UCI_Elo'][3])
                 set_elo = min(int(min_elo + (max_elo-min_elo) * (float(level)) / 19.0), int(self.engine.options['UCI_Elo'][3]))
-                self.set_option('UCI_Elo', str(set_elo))
+                self.option('UCI_Elo', str(set_elo))
             pass
         else:
             logging.warning("Engine does not support skill levels")
             return False
         return True
 
-    def set_position(self, game):
+    def position(self, game):
         self.engine.position(game)
 
     def stop(self):

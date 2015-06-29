@@ -31,6 +31,7 @@ class KeyboardInput(Observable, threading.Thread):
             try:
                 # commands like "mode:analysis" or "mode:remote"
                 # "go" or "newgame" or "setup:<legal_fen_string>"
+                # "level:<1-20>"
                 # everything else is regarded as a move string
                 if cmd.startswith('mode:'):
                     mode = cmd.split(':')[1]
@@ -48,7 +49,10 @@ class KeyboardInput(Observable, threading.Thread):
                         self.fire(Event.NEW_GAME)
                     elif cmd.startswith('go'):
                         self.fire(Event.CHANGE_PLAYMODE)
-                    elif cmd.startswith('setup'):
+                    elif cmd.startswith('level:'):
+                        level = int(cmd.split(':')[1])
+                        self.fire(Event.LEVEL, level=level)
+                    elif cmd.startswith('setup:'):
                         fen = cmd.split(':')[1]
                         if chess.Board(fen).is_valid(False):
                             self.fire(Event.SETUP_POSITION, fen=fen)

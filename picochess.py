@@ -93,15 +93,17 @@ def main():
     logging.debug('Loaded engine [%s]', engine_name)
     logging.debug('Supported options [%s]', engine.get().options)
     if 'Hash' in engine.get().options:
-        engine.set_option("Hash", args.hash_size)
+        engine.option("Hash", args.hash_size)
     if 'Threads' in engine.get().options:  # Stockfish
-        engine.set_option("Threads", args.threads)
+        engine.option("Threads", args.threads)
     if 'Core Threads' in engine.get().options:  # Hiarcs
-        engine.set_option("Core Threads", args.threads)
+        engine.option("Core Threads", args.threads)
     if args.uci_option:
         for uci_option in args.uci_option.strip('"').split(";"):
             uci_parameter = uci_option.strip().split('=')
-            engine.set_option(uci_parameter[0], uci_parameter[1])
+            engine.option(uci_parameter[0], uci_parameter[1])
+    # send the options to the engine
+    engine.send()
 
     # Connect to DGT board
     if args.dgt_port:
@@ -177,7 +179,7 @@ def main():
             Display.show(Message.BOOK_MOVE, move=book_move.uci())
             send_book_move(book_move)
         else:
-            engine.set_position(game)
+            engine.position(game)
             global engine_status
             engine_status = EngineStatus.THINK
             Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
@@ -193,7 +195,7 @@ def main():
         If a move is found in the opening book, fire an event in a few seconds.
         :return:
         """
-        engine.set_position(game)
+        engine.position(game)
         global engine_status
         engine_status = EngineStatus.PONDER
         Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
@@ -213,7 +215,7 @@ def main():
         # logging.debug("Starting clock")
         time.run(game.turn)
 
-        engine.set_position(game)
+        engine.position(game)
         global engine_status
         engine_status = EngineStatus.PONDER
         Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
@@ -379,7 +381,8 @@ def main():
                 if case(Event.LEVEL):  # User sets a new level
                     level = event.level
                     logging.debug("Setting engine to level %i", level)
-                    if engine.set_level(level):
+                    if engine.level(level):
+                        engine.send()
                         Display.show(Message.LEVEL, level=level)
                     break
 
@@ -515,7 +518,7 @@ def main():
                     break
 
                 if case(Event.UCI_OPTION_SET):
-                    engine.set_option(event.name, event.value)
+                    engine.option(event.name, event.value)
                     break
 
                 if case(Event.SHUTDOWN):
