@@ -545,7 +545,27 @@ class DGTBoard(Observable, Display, threading.Thread):
                         self.process_button0()
                     if 33 <= message[4] <= 34 and message[5] == 52:
                         logging.info("Button 1 pressed")
-                        self.process_button1()
+                        if self.dgt_clock_menu == Menu.GAME_MENU:
+                            if self.display_move:
+                                if self.hint_fen is None:
+                                    self.display_on_dgt_clock('none')
+                                else:
+                                    self.display_move_on_dgt(self.hint_move, self.hint_fen, self.enable_dgt_clock_beep)
+                            else:
+                                if self.mate is None:
+                                    sc = 'none' if self.score is None else str(self.score).rjust(6)
+                                else:
+                                    sc = 'm ' + str(self.mate)
+                                self.display_on_dgt_clock(sc, beep=True)
+                            self.display_move = not self.display_move
+
+                        if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
+                            self.setup_reverse_orientation = not self.setup_reverse_orientation
+                            orientation = "b    w" if self.setup_reverse_orientation else "w    b"
+                            self.display_on_dgt_xl(orientation, beep=True)
+                            orientation = "b      w" if self.setup_reverse_orientation else "w      b"
+                            self.display_on_dgt_3000(orientation, beep=True)
+
                     if 17 <= message[4] <= 18 and message[5] == 51:
                         logging.info("Button 2 pressed")
                         self.process_button2()
