@@ -66,7 +66,6 @@ class Event(AutoNumber):
     UCI_OPTION_SET = ()  # Users sets an UCI option, contains 'name' and 'value' (strings)
     SHUTDOWN = ()
 
-
 class Message(AutoNumber):
     # Messages to display devices
     COMPUTER_MOVE = ()  # Show computer move
@@ -95,13 +94,11 @@ class Message(AutoNumber):
     STARTUP_INFO = () # Information about the startup options
     SCORE = ()  # Score
 
-
 class Menu(AutoNumber):
     GAME_MENU = ()  # Default Menu
     SETUP_POSITION_MENU = ()  # Setup position menu
     ENGINE_MENU = ()  # Engine menu
     SETTINGS_MENU = ()  # Settings menu
-
 
 class SetupPositionMenu(AutoNumber):
     TO_MOVE_TOGGLE = ()
@@ -110,7 +107,6 @@ class SetupPositionMenu(AutoNumber):
     SPACER = ()
     SWITCH_MENU = ()  # Switch Menu
 
-
 class EngineMenu(AutoNumber):
     LEVEL = ()
     BOOK = ()
@@ -118,12 +114,11 @@ class EngineMenu(AutoNumber):
     ENG_INFO = ()
     SWITCH_MENU = ()  # Switch Menu
 
-
 class GameMenu(AutoNumber):
     LAST_MOVE = () # Show last move
-    HINT = ()  # Show hint
-    EVAL = ()  # Show evaluation of position
-    ADD_TIME = ()  # Add 1 minute to clock
+    HINT_EVAL = ()  # Show hint/evaluation
+    START_STOP = ()  # Starts/Stops the calculation
+    CHANGE_MODE = ()  # Change Modes
     SWITCH_MENU = ()  # Switch Menu
 
 @enum.unique
@@ -145,7 +140,6 @@ class ClockMode(AutoNumber):
     FIXED_TIME = ()  # Fixed seconds per move
     BLITZ = ()  # Fixed time per game
     FISCHER = ()  # Fischer increment
-
 
 class GameResult(enum.Enum):
     MATE = 'mate'
@@ -184,7 +178,6 @@ class Display(object):  # Display devices (DGT XL clock, Piface LCD, pgn file...
         for display in display_devices:
             display.message_queue.put(message)
 
-
 # switch/case instruction in python
 class switch(object):
     def __init__(self, value):
@@ -206,7 +199,6 @@ class switch(object):
         else:
             return False
 
-
 def get_opening_books():
     program_path = os.path.dirname(os.path.realpath(__file__)) + os.sep
     book_list = sorted(os.listdir(program_path +'books'))
@@ -215,7 +207,6 @@ def get_opening_books():
         library.append((book[2:book.index('.')], 'books' + os.sep + book))
     return library
 
-
 def weighted_choice(book, game):
     try:
         b = book.weighted_choice(game)
@@ -223,12 +214,10 @@ def weighted_choice(book, game):
         return None
     return b.move()
 
-
 def hours_minutes_seconds(seconds):
     m, s = divmod(seconds, 60)
     h, m = divmod(m, 60)
     return h, m, s
-
 
 def which(program):
     """ Find an executable file on the system path.
@@ -251,7 +240,6 @@ def which(program):
     logging.warning("Engine executable [%s] not found", program)
     return None
 
-
 def update_picochess(auto_reboot=False):
     git = which('git.exe' if platform.system() == 'Windows' else 'git')
     if git:
@@ -271,14 +259,12 @@ def update_picochess(auto_reboot=False):
                 if auto_reboot:
                     os.system('reboot')
 
-
 def shutdown():
     logging.debug('Shutting down system')
     if platform.system() == 'Windows':
         os.system('shutdown /s')
     else:
         os.system('shutdown -h now')
-
 
 def get_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -291,7 +277,6 @@ def get_ip():
         logging.error("No Internet Connection!")
     finally:
         s.close()
-
 
 def get_location():
     try:

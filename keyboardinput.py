@@ -32,6 +32,7 @@ class KeyboardInput(Observable, threading.Thread):
                 # commands like "mode:analysis" or "mode:remote"
                 # "go" or "newgame" or "setup:<legal_fen_string>"
                 # "level:<1-20> or "fen:<legal_fen_string>"
+                # "print:<legal_fen_string>"
                 # everything else is regarded as a move string
                 if cmd.startswith('mode:'):
                     mode = cmd.split(':')[1]
@@ -57,6 +58,9 @@ class KeyboardInput(Observable, threading.Thread):
                         # dgt board only sends the basic fen
                         # be sure, its same no matter what fen the user entered
                         self.fire(Event.FEN, fen=fen.split(' ')[0])
+                    elif cmd.startswith('print:'):
+                        fen = cmd.split(':')[1]
+                        print(chess.Board(fen))
                     elif cmd.startswith('setup:'):
                         fen = cmd.split(':')[1]
                         if chess.Board(fen).is_valid(False):

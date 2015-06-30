@@ -409,6 +409,100 @@ class DGTBoard(Observable, Display, threading.Thread):
         # TODO: Support fen positions where castling is not possible even if king and rook are on right squares
         return fen.replace("KQkq", castling_fen)
 
+    def process_button0(self):
+        if self.dgt_clock_menu == Menu.GAME_MENU and self.last_move:
+            self.display_move_on_dgt(self.last_move, self.last_fen, self.enable_dgt_clock_beep)
+
+        if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
+            self.setup_to_move = chess.WHITE if self.setup_to_move == chess.BLACK else chess.BLACK
+            to_move = PlayMode.PLAY_WHITE if self.setup_to_move == chess.WHITE else PlayMode.PLAY_BLACK
+            self.display_on_dgt_clock(to_move.value, beep=True)
+
+    def process_button1(self):
+        if self.dgt_clock_menu == Menu.GAME_MENU:
+            if self.display_move:
+                if self.hint_fen is None:
+                    self.display_on_dgt_clock('none')
+                else:
+                    self.display_move_on_dgt(self.hint_move, self.hint_fen, self.enable_dgt_clock_beep)
+            else:
+                if self.mate is None:
+                    sc = 'none' if self.score is None else str(self.score).rjust(6)
+                else:
+                    sc = 'm ' + str(self.mate)
+                self.display_on_dgt_clock(sc, beep=True)
+            self.display_move = not self.display_move
+
+        if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
+            self.setup_reverse_orientation = not self.setup_reverse_orientation
+            orientation = "b    w" if self.setup_reverse_orientation else "w    b"
+            self.display_on_dgt_xl(orientation, beep=True)
+            orientation = "b      w" if self.setup_reverse_orientation else "w      b"
+            self.display_on_dgt_3000(orientation, beep=True)
+
+    def process_button2(self):
+        if self.dgt_clock_menu == Menu.GAME_MENU:
+            # make that always true, cause the "stop search" (#99) doesn't work until now
+            if True or (self.engine_status == EngineStatus.WAIT):
+                self.fire(Event.CHANGE_PLAYMODE)
+            else:
+                if self.mode == Mode.GAME:
+                    # missing: do we want "stop search" or "alternative move"?
+                    # self.fire(Event.STOP_SEARCH)
+                    pass
+                else:
+                    if self.mode == Mode.OBSERVE:
+                        # missing: stop/start the clock
+                        pass
+
+        if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
+            self.display_on_dgt_clock("scan", beep=True)
+            to_move = 'w' if self.setup_to_move == chess.WHITE else 'b'
+            fen = self.dgt_fen
+            if self.flip_board != self.setup_reverse_orientation:
+                logging.debug('Flipping the board')
+                fen = fen[::-1]
+            fen += " {0} KQkq - 0 1".format(to_move)
+            fen = self.complete_dgt_fen(fen)
+
+            if chess.Board(fen).is_valid(False):
+                self.flip_board = self.setup_reverse_orientation
+                self.fire(Event.SETUP_POSITION, fen=fen)
+            else:
+                self.display_on_dgt_clock("badpos", beep=True)
+
+    def process_button3(self):
+        if self.dgt_clock_menu == Menu.GAME_MENU:
+            mode_list = list(iter(Mode))
+            self.mode_index += 1
+            if self.mode_index >= len(mode_list):
+                self.mode_index = 0
+            mode_new = mode_list[self.mode_index]
+            self.fire(Event.SET_MODE, mode=mode_new)
+
+        if self.dgt_clock_menu == Menu.SETTINGS_MENU:
+            self.display_on_dgt_clock("reboot")
+            subprocess.Popen(["sudo", "reboot"])
+
+    def process_button4(self):
+        # self.dgt_clock_menu = Menu.self.dgt_clock_menu.value+1
+        # print(self.dgt_clock_menu)
+        # print(self.dgt_clock_menu.value)
+        try:
+            self.dgt_clock_menu = Menu(self.dgt_clock_menu.value+1)
+        except ValueError:
+            self.dgt_clock_menu = Menu(1)
+
+        if self.dgt_clock_menu == Menu.GAME_MENU:
+            msg = 'game'
+        elif self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
+            msg = 'position'
+        elif self.dgt_clock_menu == Menu.ENGINE_MENU:
+            msg = 'engine'
+        elif self.dgt_clock_menu == Menu.SETTINGS_MENU:
+            msg = 'system'
+        self.display_on_dgt_clock(msg, beep=True)
+
     def read_message(self):
         header = unpack('>BBB', (self.serial.read(3)))
         message_id = header[0]
@@ -428,7 +522,6 @@ class DGTBoard(Observable, Display, threading.Thread):
                     self.version = float(str(message[0])+'.'+str(message[1]))
                     logging.debug("DGT board version %0.2f", self.version)
                     break
-
                 # if case():
                 #     logging.info("Got clock version number")
                 #     break
@@ -449,106 +542,20 @@ class DGTBoard(Observable, Display, threading.Thread):
 
                     if 5 <= message[4] <= 6 and message[5] == 49:
                         logging.info("Button 0 pressed")
-                        if self.dgt_clock_menu == Menu.GAME_MENU and self.last_move:
-                            self.display_move_on_dgt(self.last_move, self.last_fen, self.enable_dgt_clock_beep)
-
-                        if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
-                            self.setup_to_move = chess.WHITE if self.setup_to_move == chess.BLACK else chess.BLACK
-                            to_move = PlayMode.PLAY_WHITE if self.setup_to_move == chess.WHITE else PlayMode.PLAY_BLACK
-                            self.display_on_dgt_clock(to_move.value, beep=True)
-
+                        self.process_button0()
                     if 33 <= message[4] <= 34 and message[5] == 52:
                         logging.info("Button 1 pressed")
-                        if self.dgt_clock_menu == Menu.GAME_MENU:
-                            if self.display_move:
-                                if self.hint_fen is None:
-                                    self.display_on_dgt_clock('none')
-                                else:
-                                    self.display_move_on_dgt(self.hint_move, self.hint_fen, self.enable_dgt_clock_beep)
-                            else:
-                                if self.mate is None:
-                                    sc = 'none' if self.score is None else str(self.score).rjust(6)
-                                else:
-                                    sc = 'm ' + str(self.mate)
-                                self.display_on_dgt_clock(sc, beep=True)
-                            self.display_move = not self.display_move
-
-                        if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
-                            self.setup_reverse_orientation = not self.setup_reverse_orientation
-                            orientation = "b    w" if self.setup_reverse_orientation else "w    b"
-                            self.display_on_dgt_xl(orientation, beep=True)
-                            orientation = "b      w" if self.setup_reverse_orientation else "w      b"
-                            self.display_on_dgt_3000(orientation, beep=True)
-
+                        self.process_button1()
                     if 17 <= message[4] <= 18 and message[5] == 51:
                         logging.info("Button 2 pressed")
-                        if self.dgt_clock_menu == Menu.GAME_MENU:
-                            # make that always true, cause the "stop search" (#99) doesn't work until now
-                            if True or (self.engine_status == EngineStatus.WAIT):
-                                self.fire(Event.CHANGE_PLAYMODE)
-                            else:
-                                if self.mode == Mode.GAME:
-                                    # missing: do we want "stop search" or "alternative move"?
-                                    # self.fire(Event.STOP_SEARCH)
-                                    pass
-                                else:
-                                    if self.mode == Mode.OBSERVE:
-                                        # missing: stop/start the clock
-                                        pass
-
-                        if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
-                            self.display_on_dgt_clock("scan", beep=True)
-                            to_move = 'w' if self.setup_to_move == chess.WHITE else 'b'
-                            fen = self.dgt_fen
-                            if self.flip_board != self.setup_reverse_orientation:
-                                logging.debug('Flipping the board')
-                                fen = fen[::-1]
-                            fen += " {0} KQkq - 0 1".format(to_move)
-                            fen = self.complete_dgt_fen(fen)
-
-                            if chess.Board(fen).is_valid(False):
-                                self.flip_board = self.setup_reverse_orientation
-                                self.fire(Event.SETUP_POSITION, fen=fen)
-                            else:
-                                self.display_on_dgt_clock("badpos", beep=True)
-
+                        self.process_button2()
                     if 9 <= message[4] <= 10 and message[5] == 50:
                         logging.info("Button 3 pressed")
-                        if self.dgt_clock_menu == Menu.GAME_MENU:
-                            mode_list = list(iter(Mode))
-                            self.mode_index += 1
-                            if self.mode_index >= len(mode_list):
-                                self.mode_index = 0
-                            mode_new = mode_list[self.mode_index]
-                            self.fire(Event.SET_MODE, mode=mode_new)
-
-                        if self.dgt_clock_menu == Menu.SETTINGS_MENU:
-                            self.display_on_dgt_clock("reboot")
-                            subprocess.Popen(["sudo", "reboot"])
-
+                        self.process_button3()
                     if 65 <= message[4] <= 66 and message[5] == 53:
                         logging.info("Button 4 pressed")
-                        # self.dgt_clock_menu = Menu.self.dgt_clock_menu.value+1
-                        # print(self.dgt_clock_menu)
-                        # print(self.dgt_clock_menu.value)
-                        try:
-                            self.dgt_clock_menu = Menu(self.dgt_clock_menu.value+1)
-                        except ValueError:
-                            self.dgt_clock_menu = Menu(1)
-
-                        if self.dgt_clock_menu == Menu.GAME_MENU:
-                            msg = 'game'
-                        elif self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
-                            msg = 'position'
-                        elif self.dgt_clock_menu == Menu.ENGINE_MENU:
-                            msg = 'engine'
-                        elif self.dgt_clock_menu == Menu.SETTINGS_MENU:
-                            msg = 'system'
-
-                        self.display_on_dgt_clock(msg, beep=True)
-
+                        self.process_button4()
                     if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
-
                         # Construct the ack message
                         ack0 = ((message[1]) & 0x7f) | ((message[3] << 3) & 0x80)
                         ack1 = ((message[2]) & 0x7f) | ((message[3] << 2) & 0x80)
@@ -576,7 +583,6 @@ class DGTBoard(Observable, Display, threading.Thread):
                             if self.clock_lock.locked():
                                 self.clock_lock.release()
                             return None
-
                     break
                 if case(Messages.DGT_MSG_BOARD_DUMP):
                     board = ''
