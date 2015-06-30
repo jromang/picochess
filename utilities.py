@@ -50,6 +50,7 @@ class Event(AutoNumber):
     LEVEL = ()  # User sets engine level (from 1 to 20).
     NEW_GAME = ()  # User starts a new game
     USER_MOVE = ()  # User sends a move
+    KEYBOARD_MOVE = () # Keyboard sends a move (to be transfered to a fen)
     OPENING_BOOK = ()  # User chooses an opening book
     SET_MODE = ()  # Change interaction mode
     SET_PLAYMODE = () # Change play mode

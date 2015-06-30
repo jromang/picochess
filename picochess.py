@@ -263,6 +263,54 @@ def main():
             Display.show(Message.GAME_ENDS, result=result, moves=list(game.move_stack), color=game.turn, play_mode=play_mode, custom_fen=custom_fen)
             return False
 
+    def process_fen(fen, legal_fens):
+        if fen in legal_fens:
+            # Check if we have to undo a previous move (sliding)
+            if interaction_mode == Mode.GAME:
+                if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
+                        (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):
+                    stop_thinking()
+                    if game.move_stack:
+                        game.pop()
+            legal_moves = list(game.legal_moves)
+            Observable.fire(Event.USER_MOVE, move=legal_moves[legal_fens.index(fen)])
+        elif fen == game.fen().split(' ')[0]:  # Player had done the computer move on the board
+            if check_game_state(game, play_mode) and interaction_mode == Mode.GAME:
+                Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD)
+                if time_control.mode != ClockMode.FIXED_TIME:
+                    Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
+                    # logging.debug("Starting player clock")
+                    time_control.run(game.turn)
+        elif fen == legal_fens.root:  # Allow user to take his move back while the engine is searching
+            stop_thinking()
+            game.pop()
+            if interaction_mode == Mode.ANALYSIS:
+                analyse()
+            if interaction_mode == Mode.OBSERVE:
+                observe(time_control)
+            Display.show(Message.USER_TAKE_BACK)
+        else:  # Check if this a a previous legal position and allow user to restart from this position
+            game_history = copy.deepcopy(game)
+            while game_history.move_stack:
+                game_history.pop()
+                if (play_mode == PlayMode.PLAY_WHITE and game_history.turn == chess.WHITE) \
+                        or (play_mode == PlayMode.PLAY_BLACK and game_history.turn == chess.BLACK) \
+                        or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.KIBITZ) \
+                        or (interaction_mode == Mode.REMOTE) or (interaction_mode == Mode.ANALYSIS):
+                    if game_history.fen().split(' ')[0] == fen:
+                        logging.debug("Undoing game until FEN :" + fen)
+                        stop_thinking()
+                        while len(game_history.move_stack) < len(game.move_stack):
+                            game.pop()
+                        if interaction_mode == Mode.ANALYSIS:
+                            analyse()
+                        if interaction_mode == Mode.OBSERVE:
+                            observe(time_control)
+                        Display.show(Message.USER_TAKE_BACK)
+                        legal_fens = compute_legal_fens(game)
+                        break
+        return legal_fens
+
     # Startup - internal
     game = chess.Board()  # Create the current game
     legal_fens = compute_legal_fens(game)  # Compute the legal FENs
@@ -292,51 +340,18 @@ def main():
             logging.debug('Received event in event loop : %s', event)
             for case in switch(event):
                 if case(Event.FEN):  # User sets a new position, convert it to a move if it is legal
-                    if event.fen in legal_fens:
-                        # Check if we have to undo a previous move (sliding)
-                        if interaction_mode == Mode.GAME:
-                            if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
-                                    (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):
-                                stop_thinking()
-                                if game.move_stack:
-                                    game.pop()
-                        legal_moves = list(game.legal_moves)
-                        Observable.fire(Event.USER_MOVE, move=legal_moves[legal_fens.index(event.fen)])
-                    elif event.fen == game.fen().split(' ')[0]:  # Player had done the computer move on the board
-                        if check_game_state(game, play_mode) and interaction_mode == Mode.GAME:
-                            Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD)
-                            if time_control.mode != ClockMode.FIXED_TIME:
-                                Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
-                                # logging.debug("Starting player clock")
-                                time_control.run(game.turn)
-                    elif event.fen == legal_fens.root:  # Allow user to take his move back while the engine is searching
-                        stop_thinking()
-                        game.pop()
-                        if interaction_mode == Mode.ANALYSIS:
-                            analyse()
-                        if interaction_mode == Mode.OBSERVE:
-                            observe(time_control)
-                        Display.show(Message.USER_TAKE_BACK)
-                    else:  # Check if this a a previous legal position and allow user to restart from this position
-                        game_history = copy.deepcopy(game)
-                        while game_history.move_stack:
-                            game_history.pop()
-                            if (play_mode == PlayMode.PLAY_WHITE and game_history.turn == chess.WHITE) \
-                                    or (play_mode == PlayMode.PLAY_BLACK and game_history.turn == chess.BLACK) \
-                                    or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.KIBITZ) \
-                                    or (interaction_mode == Mode.REMOTE) or (interaction_mode == Mode.ANALYSIS):
-                                if game_history.fen().split(' ')[0] == event.fen:
-                                    logging.debug("Undoing game until FEN :" + event.fen)
-                                    stop_thinking()
-                                    while len(game_history.move_stack) < len(game.move_stack):
-                                        game.pop()
-                                    if interaction_mode == Mode.ANALYSIS:
-                                        analyse()
-                                    if interaction_mode == Mode.OBSERVE:
-                                        observe(time_control)
-                                    Display.show(Message.USER_TAKE_BACK)
-                                    legal_fens = compute_legal_fens(game)
-                                    break
+                    legal_fens = process_fen(event.fen, legal_fens)
+                    break
+
+                if case(Event.KEYBOARD_MOVE):
+                    move = event.move
+                    logging.debug('Keyboard move [%s]', move)
+                    if move not in game.legal_moves:
+                        logging.warning('Illegal move [%s]', move)
+                    else:
+                        g = copy.deepcopy(game)
+                        g.push(move)
+                        legal_fens = process_fen(g.fen().split(' ')[0], legal_fens)
                     break
 
                 if case(Event.USER_MOVE):  # User sends a new move

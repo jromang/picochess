@@ -54,7 +54,9 @@ class KeyboardInput(Observable, threading.Thread):
                         self.fire(Event.LEVEL, level=level)
                     elif cmd.startswith('fen:'):
                         fen = cmd.split(':')[1]
-                        self.fire(Event.FEN, fen=fen)
+                        # dgt board only sends the basic fen
+                        # be sure, its same no matter what fen the user entered
+                        self.fire(Event.FEN, fen=fen.split(' ')[0])
                     elif cmd.startswith('setup:'):
                         fen = cmd.split(':')[1]
                         if chess.Board(fen).is_valid(False):
@@ -63,7 +65,7 @@ class KeyboardInput(Observable, threading.Thread):
                             raise ValueError(fen)
                     else:
                         move = chess.Move.from_uci(cmd)
-                        self.fire(Event.USER_MOVE, move=move)
+                        self.fire(Event.KEYBOARD_MOVE, move=move)
             except ValueError:
                 logging.warning('Invalid user input [%s]', cmd)
 
@@ -79,9 +81,9 @@ class TerminalDisplay(Display, threading.Thread):
             if message == Message.BOOK_MOVE:
                 print('Book move')
             elif message == Message.COMPUTER_MOVE:
-                print(str(message.game))
-                print('\n' + message.game.fen())
-                print('Computer move:', message.move)
+                print('\n' + str(message.game))
+                print(message.game.fen())
+                print('\n' + 'Computer move:', message.move)
             elif message == Message.START_NEW_GAME:
                 print('New game')
             elif message == Message.SEARCH_STARTED:
