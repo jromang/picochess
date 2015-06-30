@@ -31,7 +31,7 @@ class KeyboardInput(Observable, threading.Thread):
             try:
                 # commands like "mode:analysis" or "mode:remote"
                 # "go" or "newgame" or "setup:<legal_fen_string>"
-                # "level:<1-20>"
+                # "level:<1-20> or "fen:<legal_fen_string>"
                 # everything else is regarded as a move string
                 if cmd.startswith('mode:'):
                     mode = cmd.split(':')[1]
@@ -52,6 +52,9 @@ class KeyboardInput(Observable, threading.Thread):
                     elif cmd.startswith('level:'):
                         level = int(cmd.split(':')[1])
                         self.fire(Event.LEVEL, level=level)
+                    elif cmd.startswith('fen:'):
+                        fen = cmd.split(':')[1]
+                        self.fire(Event.FEN, fen=fen)
                     elif cmd.startswith('setup:'):
                         fen = cmd.split(':')[1]
                         if chess.Board(fen).is_valid(False):
@@ -76,11 +79,21 @@ class TerminalDisplay(Display, threading.Thread):
             if message == Message.BOOK_MOVE:
                 print('Book move')
             elif message == Message.COMPUTER_MOVE:
-                print('\n' + str(message.game))
+                print(str(message.game))
+                print('\n' + message.game.fen())
                 print('Computer move:', message.move)
             elif message == Message.START_NEW_GAME:
                 print('New game')
             elif message == Message.SEARCH_STARTED:
                 print('Computer is thinking...')
+            elif message == Message.SEARCH_STOPPED:
+                print('Computer stopped thinking...')
             elif message == Message.NEW_PV:
                 print('bestmove: ' + str(message.pv[0]))
+
+            elif message == Message.COMPUTER_MOVE_DONE_ON_BOARD:
+                print('ok - computer_move_done_on_board')
+            elif message == Message.USER_MOVE:
+                print('ok - user_move')
+            elif message == Message.REVIEW_MODE_MOVE:
+                print('ok - review_mode_move')
