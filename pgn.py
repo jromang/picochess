@@ -115,7 +115,7 @@ class PgnDisplay(Display, threading.Thread):
                                 # lib with ssl encryption
                                 logging.debug("SMTP Mail delivery: Import SSL SMTP Lib")
                                 from smtplib import SMTP_SSL as SMTP
-                            else: 
+                            else:
                                 # lib without encryption (SMTP-port 21)
                                 logging.debug("SMTP Mail delivery: Import standard SMTP Lib (no SSL encryption)")
                                 from smtplib import SMTP

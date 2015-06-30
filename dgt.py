@@ -476,7 +476,9 @@ class DGTBoard(Observable, Display, threading.Thread):
                         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
                             self.setup_reverse_orientation = not self.setup_reverse_orientation
                             orientation = "b    w" if self.setup_reverse_orientation else "w    b"
-                            self.display_on_dgt_clock(orientation, beep=True)
+                            self.display_on_dgt_xl(orientation, beep=True)
+                            orientation = "b      w" if self.setup_reverse_orientation else "w      b"
+                            self.display_on_dgt_3000(orientation, beep=True)
 
                     if 17 <= message[4] <= 18 and message[5] == 51:
                         logging.info("Button 2 pressed")

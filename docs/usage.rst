@@ -4,6 +4,7 @@ Usage
 Choosing skill level
 --------------------
 Put the extra **black** queen on your DGT board to select skill level. Putting it on square A6 will select level 0 (easiest), while B6 selects level 1, C6 selects level 2, etc. If no skill level is selected, PicoChess uses level 20 (the highest level) by default. Level 20 can also be selected by placing the extra black queen on square E4.
+(Remove the extra white queen if it is still on the board.)
 
 * Level  0 estimates about 1100 Elo (Absolute beginner)
 * Level 10 estimates about 1750 Elo (Mediate club player )
@@ -12,7 +13,8 @@ Put the extra **black** queen on your DGT board to select skill level. Putting i
 Choosing opening books
 ----------------------
 
-Opening books are also selected with the extra **black** queen:
+Opening books are also selected with the extra **black** queen.
+(Remove the extra white queen if it is still on the board.)
 
 * **A3** - No book
 * **B3** - ECO A - Flank
@@ -44,7 +46,8 @@ Time controls are set with the extra **white** queen.
 Blitz Levels
 ------------
 
-Blitz time controls are set with the extra **white** queen. Remove the extra black queen if it is still on the board.
+Blitz time controls are set with the extra **white** queen.
+(Remove the extra black queen if it is still on the board.)
 
 * **A4** - 1 minute game
 * **B4** - 3 minute game
@@ -58,7 +61,8 @@ Blitz time controls are set with the extra **white** queen. Remove the extra bla
 Fischer Increment Blitz Levels
 ------------------------------
 
-These are set with the extra **white** queen. Remove the extra black queen if it is still on the board.
+These are set with the extra **white** queen.
+(Remove the extra black queen if it is still on the board.)
 
 * **A3** - 3 minute game with 2 second Fischer increment
 * **B3** - 4 minute game with 2 second Fischer increment
@@ -72,7 +76,7 @@ Switching sides
 ---------------
 
 To force PicoChess to play with White just take the black king off the board and put it back. If you want to play with White again just take the white king off the board and put it back. Note: You have to be in the starting position!
-If its your turn you can also switch sides by clicking the middle button (the position doesn't matter).
+If its your turn you can also switch sides by clicking the third button (the position doesn't matter).
 
 System shutdown
 ---------------
@@ -102,8 +106,8 @@ Before setting custom position, choose your level and time controls with pieces 
 
 Setup your position. Press the rightmost button until "Position" is displayed on the clock.
 Press the leftmost button to choose side to move, Black or White.
-Press the second button to choose the board orientation, Normal or Reversed.
-Press center button, clock will respond with "Scan" and "New game". Now picochess is waiting for your next move. If you want picochess to start press the center button.
+Press the second button to choose the board orientation, "b" & "w" showing the starting side for each color. So for example white pawns moving from w to b side.
+Press third button, clock will respond with "Scan" and "New game". Now picochess is waiting for your next move. If you want picochess to start press the third button.
 
 Clock button support
 --------------------
