@@ -278,19 +278,24 @@ class DGTBoard(Observable, Display, threading.Thread):
 
                 if 5 <= message[4] <= 6 and message[5] == 49:
                     logging.info("Button 0 pressed")
-                    self.process_button0()
+                    self.fire(Message.BUTTON_PRESSED, button=0)
+                    # self.process_button0()
                 if 33 <= message[4] <= 34 and message[5] == 52:
                     logging.info("Button 1 pressed")
-                    self.process_button1()
+                    self.fire(Message.BUTTON_PRESSED, button=1)
+                    # self.process_button1()
                 if 17 <= message[4] <= 18 and message[5] == 51:
                     logging.info("Button 2 pressed")
-                    self.process_button2()
+                    self.fire(Message.BUTTON_PRESSED, button=2)
+                    # self.process_button2()
                 if 9 <= message[4] <= 10 and message[5] == 50:
                     logging.info("Button 3 pressed")
-                    self.process_button3()
+                    self.fire(Message.BUTTON_PRESSED, button=3)
+                    # self.process_button3()
                 if 65 <= message[4] <= 66 and message[5] == 53:
                     logging.info("Button 4 pressed")
-                    self.process_button4()
+                    self.fire(Message.BUTTON_PRESSED, button=4)
+                    # self.process_button4()
                 if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
                     # Construct the ack message
                     ack0 = ((message[1]) & 0x7f) | ((message[3] << 3) & 0x80)
@@ -375,8 +380,8 @@ class DGTBoard(Observable, Display, threading.Thread):
             self.write([Commands.DGT_CLOCK_MESSAGE, 0x0b, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_DISPLAY,
                         text[2], text[1], text[0], text[5], text[4], text[3], 0x00, 0x03 if beep else 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
-    def display_on_dgt_3000(self, text, beep=False, force=False):
-        if force or self.enable_dgt_3000:
+    def display_on_dgt_3000(self, text, beep=False):
+        if self.enable_dgt_3000:
             while len(text) < 8:
                 text += ' '
             if len(text) > 8:
@@ -385,12 +390,12 @@ class DGTBoard(Observable, Display, threading.Thread):
             self.write([Commands.DGT_CLOCK_MESSAGE, 0x0c, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_ASCII,
                         text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], 0x03 if beep else 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
-    def display_on_dgt_clock(self, text, beep=False, dgt_3000_text=None):
+    def display_on_dgt_clock(self, text, beep=False, dgt_xl_text=None):
         if self.enable_dgt_3000:
-            if dgt_3000_text:
-                text = dgt_3000_text
             self.display_on_dgt_3000(text, beep)
         else:
+            if dgt_xl_text:
+                text = dgt_xl_text
             self.display_on_dgt_xl(text, beep)
 
     def display_move_on_dgt(self, move, fen, beep):
@@ -412,6 +417,17 @@ class DGTBoard(Observable, Display, threading.Thread):
         if self.enable_board_leds:
             self.write([Commands.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
 
+    def stop_clock(self):
+        self.write([Commands.DGT_CLOCK_MESSAGE, 0x0a, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_SETNRUN,
+           0, 0, 0, 0, 0, 0,
+           0x04 | 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+
+    def start_clock(self, w_hms, b_hms, side):
+        self.write([Commands.DGT_CLOCK_MESSAGE, 0x0a, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_SETNRUN,
+            w_hms[0], w_hms[1], w_hms[2], b_hms[0], b_hms[1], b_hms[2],
+            side, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+        self.write([Commands.DGT_CLOCK_MESSAGE, 0x03, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_END, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+
     def run(self):
         while True:
             # Check if we have a message from the board
@@ -426,3 +442,29 @@ class DGTBoard(Observable, Display, threading.Thread):
                     self.send_command(command)
                 except queue.Empty:
                     pass
+            # Check if we have something to display
+            try:
+                message = self.message_queue.get_nowait()
+                for case in switch(message):
+                    if case(Dgt.DISPLAY_MOVE):
+                        self.stop_clock()
+                        break
+                    if case(Dgt.DISPLAY_TEXT):
+                        self.display_on_dgt_clock(message.text, message.beep)
+                        break
+                    if case(Dgt.LIGHT_CLEAR):
+                        self.clear_light_revelation_board()
+                        break
+                    if case(Dgt.LIGHT_SQUARES):
+                        self.light_squares_revelation_board(message.squares)
+                        break
+                    if case(Dgt.STOP_CLOCK):
+                        self.stop_clock()
+                        break
+                    if case(Dgt.START_CLOCK):
+                        self.start_clock(message.w_hms, message.b_hms, message.side)
+                        break
+                    if case():  # Default
+                        pass
+            except queue.Empty:
+                pass

@@ -665,8 +665,8 @@ class DGTBoard(Observable, Display, threading.Thread):
             self.write([Commands.DGT_CLOCK_MESSAGE, 0x0b, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_DISPLAY,
                         text[2], text[1], text[0], text[5], text[4], text[3], 0x00, 0x03 if beep else 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
-    def display_on_dgt_3000(self, text, beep=False, force=False):
-        if force or self.enable_dgt_3000:
+    def display_on_dgt_3000(self, text, beep=False):
+        if self.enable_dgt_3000:
             while len(text) < 8:
                 text += ' '
             if len(text) > 8:
@@ -675,12 +675,12 @@ class DGTBoard(Observable, Display, threading.Thread):
             self.write([Commands.DGT_CLOCK_MESSAGE, 0x0c, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_ASCII,
                         text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], 0x03 if beep else 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
-    def display_on_dgt_clock(self, text, beep=False, dgt_3000_text=None):
+    def display_on_dgt_clock(self, text, beep=False, dgt_xl_text=None):
         if self.enable_dgt_3000:
-            if dgt_3000_text:
-                text = dgt_3000_text
             self.display_on_dgt_3000(text, beep)
         else:
+            if dgt_xl_text:
+                text = dgt_xl_text
             self.display_on_dgt_xl(text, beep)
 
     def display_move_on_dgt(self, move, fen, beep):
