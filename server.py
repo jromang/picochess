@@ -272,7 +272,7 @@ class WebDisplay(Display, threading.Thread):
 
     def run(self):
         while True:
-            #Check if we have something to display
+            # Check if we have something to display
             message = self.message_queue.get()
             # print(message.options)
             self.create_task(message)

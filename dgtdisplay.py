@@ -413,6 +413,49 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         elif button == 4:
                             self.process_button4()
                         break
+                    if case(Message.DGT_FEN):
+                        fen = message.fen
+                        if self.flip_board:  # Flip the board if needed
+                            fen = fen[::-1]
+                        if fen == "RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr":  # Check if we have to flip the board
+                            logging.debug('Flipping the board')
+                            # Flip the board
+                            self.flip_board = not self.flip_board
+                            # set standard for setup orientation too
+                            self.setup_reverse_orientation = self.flip_board
+                            fen = fen[::-1]
+                        logging.debug(fen)
+                        self.dgt_fen = fen
+
+                        # Fire the appropriate event
+                        if fen in level_map:  # User sets level
+                            level = level_map.index(fen)
+                            self.fire(Event.LEVEL, level=level)
+                        elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":  # New game
+                            logging.debug("New game")
+                            self.fire(Event.NEW_GAME)
+                        elif fen in book_map:  # Choose opening book
+                            book_index = book_map.index(fen)
+                            logging.debug("Opening book [%s]", get_opening_books()[book_index])
+                            self.fire(Event.OPENING_BOOK, book=get_opening_books()[book_index])
+                        elif fen in mode_map:  # Set interaction mode
+                            logging.debug("Interaction mode [%s]", mode_map[fen])
+                            self.fire(Event.SET_MODE, mode=mode_map[fen])
+                        elif fen in play_map:  # Set play mode
+                            logging.debug("Play mode [%s]", play_map[fen])
+                            self.fire(Event.SET_PLAYMODE, play_mode=play_map[fen])
+                        elif fen in time_control_map:
+                            logging.debug("Setting time control %s", time_control_map[fen].mode)
+                            self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[fen],
+                                      time_control_string=dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)])
+                        elif fen in shutdown_map:
+                            self.fire(Event.SHUTDOWN)
+                            Display.show(Dgt.DISPLAY_TEXT, text="poweroff", beep=self.enable_dgt_clock_beep)
+                            # self.display_on_dgt_xl('powoff', self.enable_dgt_clock_beep)
+                            # self.display_on_dgt_3000('poweroff', self.enable_dgt_clock_beep)
+                        else:
+                            logging.debug("Fen")
+                            self.fire(Event.FEN, fen=fen)
                     if case():  # Default
                         pass
             except queue.Empty:

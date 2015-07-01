@@ -348,7 +348,7 @@ class DGTHardware(Observable, Display, threading.Thread):
                 # Now we have a FEN -> fire a fen-event with it
                 # Attention: This fen is NOT flipped!!
                 logging.debug("Fen")
-                self.fire(Event.FEN2, fen=fen)
+                self.fire(Message.DGT_FEN, fen=fen)
                 break
             if case(Messages.DGT_MSG_FIELD_UPDATE):
                 self.write([Commands.DGT_SEND_BRD])  # Ask for the board when a piece moved
