@@ -32,7 +32,7 @@ class KeyboardInput(Observable, threading.Thread):
                 # commands like "mode:analysis" or "mode:remote"
                 # "go" or "newgame" or "setup:<legal_fen_string>"
                 # "level:<1-20> or "fen:<legal_fen_string>"
-                # "print:<legal_fen_string>"
+                # "print:<legal_fen_string>" or "button:<0-4>"
                 # everything else is regarded as a move string
                 if cmd.startswith('mode:'):
                     mode = cmd.split(':')[1]
@@ -61,6 +61,9 @@ class KeyboardInput(Observable, threading.Thread):
                     elif cmd.startswith('print:'):
                         fen = cmd.split(':')[1]
                         print(chess.Board(fen))
+                    elif cmd.startswith('button:'):
+                        button = cmd.split(':')[1]
+                        self.fire(Event.BUTTON_PRESSED, button=button)
                     elif cmd.startswith('setup:'):
                         fen = cmd.split(':')[1]
                         if chess.Board(fen).is_valid(False):
@@ -82,24 +85,43 @@ class TerminalDisplay(Display, threading.Thread):
         while True:
             # Check if we have something to display
             message = self.message_queue.get()
-            if message == Message.BOOK_MOVE:
-                print('Book move')
-            elif message == Message.COMPUTER_MOVE:
-                print('\n' + str(message.game))
-                print(message.game.fen())
-                print('\n' + 'Computer move:', message.move)
-            elif message == Message.START_NEW_GAME:
-                print('New game')
-            elif message == Message.SEARCH_STARTED:
-                print('Computer is thinking...')
-            elif message == Message.SEARCH_STOPPED:
-                print('Computer stopped thinking...')
-            elif message == Message.NEW_PV:
-                print('bestmove: ' + str(message.pv[0]))
+            for case in switch(message):
+                if case(Message.BOOK_MOVE):
+                    print('Book move')
+                    break
+                if case(Message.COMPUTER_MOVE):
+                    print('\n' + str(message.game))
+                    print(message.game.fen())
+                    print('\n' + 'Computer move:', message.move)
+                    break
+                if case(Message.START_NEW_GAME):
+                    print('New game')
+                    break
+                if case(Message.SEARCH_STARTED):
+                    print('Computer is thinking...')
+                    break
+                if case(Message.SEARCH_STOPPED):
+                    print('Computer stopped thinking...')
+                    break
+                if case(Message.NEW_PV):
+                    print('bestmove: ' + str(message.pv[0]))
+                    break
 
-            elif message == Message.COMPUTER_MOVE_DONE_ON_BOARD:
-                print('ok - computer_move_done_on_board')
-            elif message == Message.USER_MOVE:
-                print('ok - user_move')
-            elif message == Message.REVIEW_MODE_MOVE:
-                print('ok - review_mode_move')
+                if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
+                    print('ok - computer_move_done_on_board')
+                    break
+                if case(Message.USER_MOVE):
+                    print('ok - user_move')
+                    break
+                if case(Message.REVIEW_MODE_MOVE):
+                    print('ok - review_mode_move')
+                    break
+
+                if case(Dgt.DISPLAY_MOVE):
+                    print('DGT clock(mov): ' + str(message.move))
+                    break
+                if case(Dgt.DISPLAY_TEXT):
+                    print('DGT clock(txt): ' +message.text)
+                    break
+                if case():  # Default
+                    pass

@@ -58,6 +58,7 @@ class Event(AutoNumber):
     SET_PLAYMODE = ()  # Change play mode
     CHANGE_PLAYMODE = ()  # Toogle between the play modes
     SETUP_POSITION = ()  # Setup custom position
+    BUTTON_PRESSED = () # User pressed a button at the dgt clock
     # Engine events
     BEST_MOVE = ()  # Engine has found a move
     NEW_PV = ()  # Engine sends a new Principal Variation

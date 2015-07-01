@@ -36,6 +36,8 @@ from keyboardinput import KeyboardInput, TerminalDisplay
 from pgn import PgnDisplay
 from server import WebServer
 import chesstalker.chesstalker
+from dgthardware import DGTHardware
+from dgtdisplay import DGTDisplay
 
 import spur
 
@@ -106,9 +108,12 @@ def main():
     engine.send()
 
     # Connect to DGT board
+    DGTDisplay(args.enable_dgt_board_leds, args.dgt_3000_clock, not args.disable_dgt_clock_beep).start()
+
     if args.dgt_port:
         logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
-        dgt.DGTBoard(args.dgt_port, args.enable_dgt_board_leds, args.dgt_3000_clock, not args.disable_dgt_clock_beep).start()
+        # dgt.DGTBoard(args.dgt_port, args.enable_dgt_board_leds, args.dgt_3000_clock, not args.disable_dgt_clock_beep).start()
+        DGTHardware(args.dgt_port).start()
     else:
         logging.warning("No DGT board port provided")
         # Enable keyboard input and terminal display
@@ -540,6 +545,10 @@ def main():
                     if talker:
                         talker.say_event(event)
                     shutdown()
+                    break
+
+                if case(Event.BUTTON_PRESSED):
+                    Display.show(Message.BUTTON_PRESSED, button=event.button)
                     break
 
                 if case():  # Default
