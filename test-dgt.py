@@ -186,11 +186,12 @@ piece_to_char = {
     0x07: 'p', 0x08: 'r', 0x09: 'n', 0x0a: 'b', 0x0b: 'k', 0x0c: 'q', 0x00: '.'
 }
 
-class DGTHardware(Observable, Display, threading.Thread):
+class DGTBoard(Observable, Display, threading.Thread):
 
-    def __init__(self, device):
-        super(DGTHardware, self).__init__()
+    def __init__(self, device, enable_board_leds=False, enable_dgt_3000=False, enable_dgt_clock_beep=True):
+        super(DGTBoard, self).__init__()
 
+        self.enable_board_leds = enable_board_leds
         self.write_queue = queue.Queue()
         self.clock_lock = asyncio.Lock()
 
@@ -405,15 +406,15 @@ class DGTHardware(Observable, Display, threading.Thread):
         # logging.info("Move is {0}".format(bit_board.san(move)))
         self.display_on_dgt_3000(bit_board.san(move), beep)
 
-    def light_squares_revelation_board(self, squares, enable_board_leds):
-        if enable_board_leds:
+    def light_squares_revelation_board(self, squares):
+        if self.enable_board_leds:
             for sq in squares:
                 dgt_square = (8 - int(sq[1])) * 8 + ord(sq[0]) - ord('a')
                 logging.debug("REV2 light on square %s(%i)", sq, dgt_square)
                 self.write([Commands.DGT_SET_LEDS, 0x04, 0x01, dgt_square, dgt_square])
 
-    def clear_light_revelation_board(self, enable_board_leds):
-        if enable_board_leds:
+    def clear_light_revelation_board(self):
+        if self.enable_board_leds:
             self.write([Commands.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
 
     def stop_clock(self):
@@ -446,16 +447,16 @@ class DGTHardware(Observable, Display, threading.Thread):
                 message = self.message_queue.get_nowait()
                 for case in switch(message):
                     if case(Dgt.DISPLAY_MOVE):
-                        self.display_move_on_dgt(message.move, message.fen, message.beep)
+                        self.stop_clock()
                         break
                     if case(Dgt.DISPLAY_TEXT):
                         self.display_on_dgt_clock(message.text, message.beep)
                         break
                     if case(Dgt.LIGHT_CLEAR):
-                        self.clear_light_revelation_board(message.enable_board_leds)
+                        self.clear_light_revelation_board()
                         break
                     if case(Dgt.LIGHT_SQUARES):
-                        self.light_squares_revelation_board(message.squares, message.enable_board_leds)
+                        self.light_squares_revelation_board(message.squares)
                         break
                     if case(Dgt.STOP_CLOCK):
                         self.stop_clock()
