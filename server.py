@@ -111,6 +111,7 @@ class InfoHandler(tornado.web.RequestHandler):
 class PGNHandler(tornado.web.RequestHandler):
     def initialize(self, shared=None):
         self.shared = shared
+
     def get(self, *args, **kwargs):
         action = self.get_argument("action")
         # print (action)

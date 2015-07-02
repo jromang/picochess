@@ -188,11 +188,12 @@ piece_to_char = {
 
 class DGTHardware(Observable, Display, threading.Thread):
 
-    def __init__(self, device):
+    def __init__(self, device, enable_dgt_3000):
         super(DGTHardware, self).__init__()
 
         self.write_queue = queue.Queue()
         self.clock_lock = asyncio.Lock()
+        self.enable_dgt_3000 = enable_dgt_3000
 
         # Open the serial port
         try:
@@ -277,23 +278,23 @@ class DGTHardware(Observable, Display, threading.Thread):
 
                 if 5 <= message[4] <= 6 and message[5] == 49:
                     logging.info("Button 0 pressed")
-                    self.fire(Message.BUTTON_PRESSED, button=0)
+                    self.fire(Event.BUTTON_PRESSED, button=0)
                     # self.process_button0()
                 if 33 <= message[4] <= 34 and message[5] == 52:
                     logging.info("Button 1 pressed")
-                    self.fire(Message.BUTTON_PRESSED, button=1)
+                    self.fire(Event.BUTTON_PRESSED, button=1)
                     # self.process_button1()
                 if 17 <= message[4] <= 18 and message[5] == 51:
                     logging.info("Button 2 pressed")
-                    self.fire(Message.BUTTON_PRESSED, button=2)
+                    self.fire(Event.BUTTON_PRESSED, button=2)
                     # self.process_button2()
                 if 9 <= message[4] <= 10 and message[5] == 50:
                     logging.info("Button 3 pressed")
-                    self.fire(Message.BUTTON_PRESSED, button=3)
+                    self.fire(Event.BUTTON_PRESSED, button=3)
                     # self.process_button3()
                 if 65 <= message[4] <= 66 and message[5] == 53:
                     logging.info("Button 4 pressed")
-                    self.fire(Message.BUTTON_PRESSED, button=4)
+                    self.fire(Event.BUTTON_PRESSED, button=4)
                     # self.process_button4()
                 if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
                     # Construct the ack message
@@ -348,7 +349,7 @@ class DGTHardware(Observable, Display, threading.Thread):
                 # Now we have a FEN -> fire a fen-event with it
                 # Attention: This fen is NOT flipped!!
                 logging.debug("Fen")
-                self.fire(Message.DGT_FEN, fen=fen)
+                self.fire(Event.DGT_FEN, fen=fen)
                 break
             if case(Messages.DGT_MSG_FIELD_UPDATE):
                 self.write([Commands.DGT_SEND_BRD])  # Ask for the board when a piece moved

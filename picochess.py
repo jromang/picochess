@@ -113,7 +113,7 @@ def main():
     if args.dgt_port:
         logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
         # dgt.DGTBoard(args.dgt_port, args.enable_dgt_board_leds, args.dgt_3000_clock, not args.disable_dgt_clock_beep).start()
-        DGTHardware(args.dgt_port).start()
+        DGTHardware(args.dgt_port, args.dgt_3000_clock).start()
     else:
         logging.warning("No DGT board port provided")
         # Enable keyboard input and terminal display
@@ -549,6 +549,10 @@ def main():
 
                 if case(Event.BUTTON_PRESSED):
                     Display.show(Message.BUTTON_PRESSED, button=event.button)
+                    break
+
+                if case(Event.DGT_FEN):
+                    Display.show(Message.DGT_FEN, fen=event.fen)
                     break
 
                 if case():  # Default
