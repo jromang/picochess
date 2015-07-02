@@ -107,8 +107,8 @@ class Dgt(AutoNumber):
     DISPLAY_TEXT = ()
     LIGHT_CLEAR = ()
     LIGHT_SQUARES = ()
-    STOP_CLOCK = ()
-    START_CLOCK = ()
+    CLOCK_STOP = ()
+    CLOCK_START = ()
 
 
 class Menu(AutoNumber):
@@ -146,9 +146,9 @@ class GameMenu(AutoNumber):
 class Mode(enum.Enum):
     # Interaction modes
     GAME = 'game'
-    ANALYSIS = 'analys'
+    ANALYSIS = 'analyse'
     KIBITZ = 'kibitz'
-    OBSERVE = 'observ'
+    OBSERVE = 'observe'
     REMOTE = 'remote'
 
 

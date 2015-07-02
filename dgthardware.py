@@ -458,10 +458,10 @@ class DGTHardware(Observable, Display, threading.Thread):
                     if case(Dgt.LIGHT_SQUARES):
                         self.light_squares_revelation_board(message.squares, message.enable_board_leds)
                         break
-                    if case(Dgt.STOP_CLOCK):
+                    if case(Dgt.CLOCK_STOP):
                         self.stop_clock()
                         break
-                    if case(Dgt.START_CLOCK):
+                    if case(Dgt.CLOCK_START):
                         self.start_clock(message.w_hms, message.b_hms, message.side)
                         break
                     if case():  # Default

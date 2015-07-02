@@ -86,16 +86,9 @@ class TerminalDisplay(Display, threading.Thread):
             # Check if we have something to display
             message = self.message_queue.get()
             for case in switch(message):
-                if case(Message.BOOK_MOVE):
-                    print('Book move')
-                    break
                 if case(Message.COMPUTER_MOVE):
                     print('\n' + str(message.game))
                     print(message.game.fen())
-                    print('\n' + 'Computer move:', message.move)
-                    break
-                if case(Message.START_NEW_GAME):
-                    print('New game')
                     break
                 if case(Message.SEARCH_STARTED):
                     print('Computer is thinking...')
@@ -103,25 +96,18 @@ class TerminalDisplay(Display, threading.Thread):
                 if case(Message.SEARCH_STOPPED):
                     print('Computer stopped thinking...')
                     break
-                if case(Message.NEW_PV):
-                    print('bestmove: ' + str(message.pv[0]))
-                    break
-
-                if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
-                    print('ok - computer_move_done_on_board')
-                    break
-                if case(Message.USER_MOVE):
-                    print('ok - user_move')
-                    break
-                if case(Message.REVIEW_MODE_MOVE):
-                    print('ok - review_mode_move')
-                    break
 
                 if case(Dgt.DISPLAY_MOVE):
-                    print('DGT clock(mov): ' + str(message.move))
+                    print('DGT clock mov:' + str(message.move))
                     break
                 if case(Dgt.DISPLAY_TEXT):
-                    print('DGT clock(txt): ' +message.text)
+                    print('DGT clock txt:' +message.text)
+                    break
+                if case(Dgt.CLOCK_START):
+                    print('DGT clock time started')
+                    break
+                if case(Dgt.CLOCK_STOP):
+                    print('DGT clock time stopped')
                     break
                 if case():  # Default
                     pass
