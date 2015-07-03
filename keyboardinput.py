@@ -29,26 +29,18 @@ class KeyboardInput(Observable, threading.Thread):
             cmd = input('PicoChess v'+version+':>')
 
             try:
-                # commands like "mode:analysis" or "mode:remote"
-                # "go" or "newgame" or "setup:<legal_fen_string>"
+                # commands like "go" or "newgame" or "stop"
+                # "setup:<legal_fen_string>"
                 # "level:<1-20> or "fen:<legal_fen_string>"
                 # "print:<legal_fen_string>" or "button:<0-4>"
                 # everything else is regarded as a move string
-                if cmd.startswith('mode:'):
-                    mode = cmd.split(':')[1]
-                    if mode.lower() == 'analysis':
-                        mode = Mode.ANALYSIS
-                    elif mode.lower() == 'remote':
-                        mode = Mode.REMOTE
-                    logging.warning("Mode: {0}".format(mode))
-                    self.fire(Event.SET_MODE, mode=mode)
+                if cmd.startswith('newgame'):
+                    self.fire(Event.NEW_GAME)
                 else:
                     # this doesn't work see #99
                     # if cmd.startswith('stop'):
                     #    self.fire(Event.STOP_SEARCH)
-                    if cmd.startswith('newgame'):
-                        self.fire(Event.NEW_GAME)
-                    elif cmd.startswith('go'):
+                    if cmd.startswith('go'):
                         self.fire(Event.CHANGE_PLAYMODE)
                     elif cmd.startswith('level:'):
                         level = int(cmd.split(':')[1])
