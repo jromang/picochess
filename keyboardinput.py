@@ -91,7 +91,7 @@ class TerminalDisplay(Display, threading.Thread):
                     print(message.game.fen())
                     break
                 if case(Message.SEARCH_STARTED):
-                    print('Computer is thinking...')
+                    print('Computer starts thinking...')
                     break
                 if case(Message.SEARCH_STOPPED):
                     print('Computer stopped thinking...')

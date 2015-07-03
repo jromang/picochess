@@ -188,8 +188,9 @@ def main():
             global engine_status
             engine_status = EngineStatus.THINK
             Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
-
-            engine.go(time.uci())
+            res = engine.go(time.uci())
+            engine_status = EngineStatus.WAIT
+            Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=res)
             # global engine_thread
             # engine_thread = threading.Timer(0, engine.go, [time.uci()])
             # engine_thread.start()
@@ -204,7 +205,6 @@ def main():
         global engine_status
         engine_status = EngineStatus.PONDER
         Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
-
         engine.ponder()
         # global engine_thread
         # engine_thread = threading.Timer(0, engine.ponder())
