@@ -219,7 +219,7 @@ class DGTHardware(Observable, Display, threading.Thread):
         # Get clock version
         self.write([Commands.DGT_CLOCK_MESSAGE, 0x03, Clock.DGT_CMD_CLOCK_START_MESSAGE,
                         Clock.DGT_CMD_CLOCK_VERSION, Clock.DGT_CMD_CLOCK_END_MESSAGE])
-        self.display_on_dgt_xl('pic'+version)
+        self._display_on_dgt_xl('pic'+version)
 
         # Get board version
         self.version = 0.0
@@ -308,9 +308,7 @@ class DGTHardware(Observable, Display, threading.Thread):
                         main_version = ack2 >> 4
                         if main_version == 2:
                             self.enable_dgt_3000 = True
-                            self.display_on_dgt_3000('pico '+version)
-                        else:
-                            self.display_on_dgt_xl('pic'+version)
+                        self.display_on_dgt_clock('pico '+version, 'pic'+version, beep=True)
 
                     ack3 = ((message[5]) & 0x7f) | ((message[0] << 2) & 0x80)
                     if ack0 != 0x10:
@@ -371,7 +369,7 @@ class DGTHardware(Observable, Display, threading.Thread):
             self.process_message(message_id, message)
             return message_id
 
-    def display_on_dgt_xl(self, text, beep=False):
+    def _display_on_dgt_xl(self, text, beep=False):
         if self.clock_found and not self.enable_dgt_3000:
             while len(text) < 6:
                 text += ' '
@@ -380,7 +378,7 @@ class DGTHardware(Observable, Display, threading.Thread):
             self.write([Commands.DGT_CLOCK_MESSAGE, 0x0b, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_DISPLAY,
                         text[2], text[1], text[0], text[5], text[4], text[3], 0x00, 0x03 if beep else 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
-    def display_on_dgt_3000(self, text, beep=False):
+    def _display_on_dgt_3000(self, text, beep=False):
         if self.enable_dgt_3000:
             while len(text) < 8:
                 text += ' '
@@ -390,21 +388,21 @@ class DGTHardware(Observable, Display, threading.Thread):
             self.write([Commands.DGT_CLOCK_MESSAGE, 0x0c, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_ASCII,
                         text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], 0x03 if beep else 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
-    def display_on_dgt_clock(self, text, beep=False, dgt_xl_text=None):
+    def display_on_dgt_clock(self, text, dgt_xl_text=None, beep=False):
         if self.enable_dgt_3000:
-            self.display_on_dgt_3000(text, beep)
+            self._display_on_dgt_3000(text, beep)
         else:
             if dgt_xl_text:
                 text = dgt_xl_text
-            self.display_on_dgt_xl(text, beep)
+            self._display_on_dgt_xl(text, beep)
 
     def display_move_on_dgt(self, move, fen, beep):
         bit_board = chess.Board(fen)
-        self.display_on_dgt_xl(' ' + move.uci(), beep)
+        self._display_on_dgt_xl(' ' + move.uci(), beep)
         # self.display_on_dgt_3000('mov ' + move, True)
         # bit_board.set_fen(fen)
         # logging.info("Move is {0}".format(bit_board.san(move)))
-        self.display_on_dgt_3000(bit_board.san(move), beep)
+        self._display_on_dgt_3000(bit_board.san(move), beep)
 
     def light_squares_revelation_board(self, squares, enable_board_leds):
         if enable_board_leds:
@@ -450,7 +448,8 @@ class DGTHardware(Observable, Display, threading.Thread):
                         self.display_move_on_dgt(message.move, message.fen, message.beep)
                         break
                     if case(Dgt.DISPLAY_TEXT):
-                        self.display_on_dgt_clock(message.text, message.beep)
+                        xltext = message.xl if hasattr(message, 'xl') else None
+                        self.display_on_dgt_clock(message.text, xltext, message.beep)
                         break
                     if case(Dgt.LIGHT_CLEAR):
                         self.clear_light_revelation_board(message.enable_board_leds)
