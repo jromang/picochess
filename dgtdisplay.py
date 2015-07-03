@@ -136,13 +136,13 @@ class DGTDisplay(Observable, Display, threading.Thread):
         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
             self.setup_to_move = chess.WHITE if self.setup_to_move == chess.BLACK else chess.BLACK
             to_move = PlayMode.PLAY_WHITE if self.setup_to_move == chess.WHITE else PlayMode.PLAY_BLACK
-            Display.show(Dgt.DISPLAY_TEXT, text=to_move.value, beep=True)
+            Display.show(Dgt.DISPLAY_TEXT, text=to_move.value, xl=None, beep=True)
 
     def process_button1(self):
         if self.dgt_clock_menu == Menu.GAME_MENU:
             if self.display_move:
                 if self.hint_fen is None:
-                    Display.show(Dgt.DISPLAY_TEXT, text="none", beep=False)
+                    Display.show(Dgt.DISPLAY_TEXT, text="none", xl=None, beep=False)
                 else:
                     Display.show(Dgt.DISPLAY_MOVE, move=self.hint_move, fen=self.hint_fen, beep=self.enable_dgt_clock_beep)
             else:
@@ -150,7 +150,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
                     sc = 'none' if self.score is None else str(self.score).rjust(6)
                 else:
                     sc = 'm ' + str(self.mate)
-                Display.show(Dgt.DISPLAY_TEXT, text=sc, beep=True)
+                Display.show(Dgt.DISPLAY_TEXT, text=sc, xl=None, beep=True)
             self.display_move = not self.display_move
 
         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
@@ -204,7 +204,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         pass
 
         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
-            Display.show(Dgt.DISPLAY_TEXT, text="scan", beep=True)
+            Display.show(Dgt.DISPLAY_TEXT, text="scan", xl=None, beep=True)
             to_move = 'w' if self.setup_to_move == chess.WHITE else 'b'
             fen = self.dgt_fen
             if self.flip_board != self.setup_reverse_orientation:
@@ -229,7 +229,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
             self.fire(Event.SET_MODE, mode=mode_new)
 
         if self.dgt_clock_menu == Menu.SETTINGS_MENU:
-            Display.show(Dgt.DISPLAY_TEXT, text="reboot", beep=True)
+            Display.show(Dgt.DISPLAY_TEXT, text="reboot", xl=None, beep=True)
             subprocess.Popen(["sudo", "reboot"])
 
     def process_button4(self):
@@ -288,30 +288,30 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         self.engine_status = EngineStatus.WAIT
                         break
                     if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
-                        Display.show(Dgt.DISPLAY_TEXT, text="ok", beep=self.enable_dgt_clock_beep)
+                        Display.show(Dgt.DISPLAY_TEXT, text="ok", xl=None, beep=self.enable_dgt_clock_beep)
                         Display.show(Dgt.LIGHT_CLEAR, enable_board_leds=self.enable_board_leds)
                         self.display_move = False
                         break
                     if case(Message.USER_MOVE):
                         self.display_move = False
-                        Display.show(Dgt.DISPLAY_TEXT, text="ok", beep=self.enable_dgt_clock_beep)
+                        Display.show(Dgt.DISPLAY_TEXT, text="ok", xl=None, beep=self.enable_dgt_clock_beep)
                         break
                     if case(Message.REVIEW_MODE_MOVE):
                         self.last_move = message.move
                         self.last_fen = message.fen
                         self.display_move = False
-                        Display.show(Dgt.DISPLAY_TEXT, text="ok", beep=self.enable_dgt_clock_beep)
+                        Display.show(Dgt.DISPLAY_TEXT, text="ok", xl=None, beep=self.enable_dgt_clock_beep)
                         break
                     if case(Message.LEVEL):
                         level = str(message.level)
                         Display.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=self.enable_dgt_clock_beep)
                         break
                     if case(Message.TIME_CONTROL):
-                        Display.show(Dgt.DISPLAY_TEXT, text=message.time_control_string, beep=self.enable_dgt_clock_beep)
+                        Display.show(Dgt.DISPLAY_TEXT, text=message.time_control_string, xl=None, beep=self.enable_dgt_clock_beep)
                         break
                     if case(Message.OPENING_BOOK):
                         book_name = message.book[0]
-                        Display.show(Dgt.DISPLAY_TEXT, text=book_name, beep=self.enable_dgt_clock_beep)
+                        Display.show(Dgt.DISPLAY_TEXT, text=book_name, xl=None, beep=self.enable_dgt_clock_beep)
                         break
                     if case(Message.USER_TAKE_BACK):
                         Display.show(Dgt.DISPLAY_TEXT, text="takeback", xl="takbak", beep=self.enable_dgt_clock_beep)
@@ -319,12 +319,12 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         break
                     if case(Message.GAME_ENDS):
                         # time.sleep(3)  # Let the move displayed on clock
-                        Display.show(Dgt.DISPLAY_TEXT, text=message.result.value, beep=self.enable_dgt_clock_beep)
+                        Display.show(Dgt.DISPLAY_TEXT, text=message.result.value, xl=None, beep=self.enable_dgt_clock_beep)
                         break
                     if case(Message.INTERACTION_MODE):
                         self.engine_status = message.engine_status
                         self.mode = message.mode
-                        Display.show(Dgt.DISPLAY_TEXT, text=message.mode.value, beep=self.enable_dgt_clock_beep)
+                        Display.show(Dgt.DISPLAY_TEXT, text=message.mode.value, xl=None, beep=self.enable_dgt_clock_beep)
                         break
                     if case(Message.PLAY_MODE):
                         pm = message.play_mode.value
@@ -334,13 +334,13 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         self.score = message.score
                         self.mate = message.mate
                         if message.interaction_mode == Mode.KIBITZ:
-                            Display.show(Dgt.DISPLAY_TEXT, text=str(self.score).rjust(6), beep=False)
+                            Display.show(Dgt.DISPLAY_TEXT, text=str(self.score).rjust(6), xl=None, beep=False)
                         break
                     if case(Message.BOOK_MOVE):
                         self.score = None
                         self.mate = None
                         self.display_move = False
-                        Display.show(Dgt.DISPLAY_TEXT, text="book", beep=False)
+                        Display.show(Dgt.DISPLAY_TEXT, text="book", xl=None, beep=False)
                         break
                     if case(Message.NEW_PV):
                         self.hint_move = message.pv[0]

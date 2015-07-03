@@ -37,6 +37,7 @@ from server import WebServer
 import chesstalker.chesstalker
 from dgthardware import DGTHardware
 from dgtdisplay import DGTDisplay
+from virtualhardware import VirtualHardware
 
 import spur
 
@@ -111,13 +112,13 @@ def main():
 
     if args.dgt_port:
         logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
-        # dgt.DGTBoard(args.dgt_port, args.enable_dgt_board_leds, args.dgt_3000_clock, not args.disable_dgt_clock_beep).start()
         DGTHardware(args.dgt_port, args.dgt_3000_clock).start()
     else:
         logging.warning("No DGT board port provided")
         # Enable keyboard input and terminal display
         KeyboardInput().start()
         TerminalDisplay().start()
+        VirtualHardware().start()
 
     # Save to PGN
     PgnDisplay(args.pgn_file, email=args.email, fromINIMailGun_Key=args.mailgun_key,

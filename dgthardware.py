@@ -443,8 +443,7 @@ class DGTHardware(Observable, Display, threading.Thread):
                         self.display_move_on_dgt(message.move, message.fen, message.beep)
                         break
                     if case(Dgt.DISPLAY_TEXT):
-                        xltext = message.xl if hasattr(message, 'xl') else None
-                        self.display_on_dgt_clock(message.text, xltext, message.beep)
+                        self.display_on_dgt_clock(message.text, message.xl, message.beep)
                         break
                     if case(Dgt.LIGHT_CLEAR):
                         self.clear_light_revelation_board(message.enable_board_leds)

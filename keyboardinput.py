@@ -91,21 +91,5 @@ class TerminalDisplay(Display, threading.Thread):
                 if case(Message.SEARCH_STOPPED):
                     print('Computer stopped thinking...')
                     break
-
-                if case(Dgt.DISPLAY_MOVE):
-                    fen = message.fen
-                    move = message.move
-                    bit_board = chess.Board(fen)
-                    print('DGT clock mov:' + str(message.move) + "/" + bit_board.san(move))
-                    break
-                if case(Dgt.DISPLAY_TEXT):
-                    print('DGT clock txt:' +message.text)
-                    break
-                if case(Dgt.CLOCK_START):
-                    print('DGT clock time started ', (message.w_hms, message.b_hms, message.side))
-                    break
-                if case(Dgt.CLOCK_STOP):
-                    print('DGT clock time stopped')
-                    break
                 if case():  # Default
                     pass
