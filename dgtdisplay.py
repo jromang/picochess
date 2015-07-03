@@ -317,19 +317,6 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         Display.show(Dgt.DISPLAY_TEXT, text="takeback", xl="takbak", beep=self.enable_dgt_clock_beep)
                         self.display_move = False
                         break
-                    if case(Message.RUN_CLOCK):
-                        # @todo Make this code independent from DGT Hex codes => more abstract
-                        tc = message.time_control
-                        w_hms = hours_minutes_seconds(int(tc.clock_time[chess.WHITE]))
-                        b_hms = hours_minutes_seconds(int(tc.clock_time[chess.BLACK]))
-                        side = 0x01 if (message.turn == chess.WHITE) != self.flip_board else 0x02
-                        if tc.mode == ClockMode.FIXED_TIME:
-                            side = 0x02
-                            b_hms = hours_minutes_seconds(tc.seconds_per_move)
-                        if self.flip_board:
-                            w_hms, b_hms = b_hms, w_hms
-                        Display.show(Dgt.CLOCK_START, w_hms=w_hms, b_hms=b_hms, side=side)
-                        break
                     if case(Message.GAME_ENDS):
                         # time.sleep(3)  # Let the move displayed on clock
                         Display.show(Dgt.DISPLAY_TEXT, text=message.result.value, beep=self.enable_dgt_clock_beep)
@@ -368,6 +355,19 @@ class DGTDisplay(Observable, Display, threading.Thread):
                     if case(Message.SEARCH_STOPPED):
                         self.engine_status = message.engine_status
                         # logging.info('Search stopped')
+                        break
+                    if case(Message.RUN_CLOCK):
+                        # @todo Make this code independent from DGT Hex codes => more abstract
+                        tc = message.time_control
+                        w_hms = hours_minutes_seconds(int(tc.clock_time[chess.WHITE]))
+                        b_hms = hours_minutes_seconds(int(tc.clock_time[chess.BLACK]))
+                        side = 0x01 if (message.turn == chess.WHITE) != self.flip_board else 0x02
+                        if tc.mode == ClockMode.FIXED_TIME:
+                            side = 0x02
+                            b_hms = hours_minutes_seconds(tc.seconds_per_move)
+                        if self.flip_board:
+                            w_hms, b_hms = b_hms, w_hms
+                        Display.show(Dgt.CLOCK_START, w_hms=w_hms, b_hms=b_hms, side=side)
                         break
                     if case(Message.BUTTON_PRESSED):
                         button = int(message.button)

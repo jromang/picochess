@@ -546,7 +546,7 @@ def main():
                     shutdown()
                     break
 
-                if case(Event.BUTTON_PRESSED):
+                if case(Event.DGT_BUTTON):
                     Display.show(Message.BUTTON_PRESSED, button=event.button)
                     break
 

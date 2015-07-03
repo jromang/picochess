@@ -278,24 +278,19 @@ class DGTHardware(Observable, Display, threading.Thread):
 
                 if 5 <= message[4] <= 6 and message[5] == 49:
                     logging.info("Button 0 pressed")
-                    self.fire(Event.BUTTON_PRESSED, button=0)
-                    # self.process_button0()
+                    self.fire(Event.DGT_BUTTON, button=0)
                 if 33 <= message[4] <= 34 and message[5] == 52:
                     logging.info("Button 1 pressed")
-                    self.fire(Event.BUTTON_PRESSED, button=1)
-                    # self.process_button1()
+                    self.fire(Event.DGT_BUTTON, button=1)
                 if 17 <= message[4] <= 18 and message[5] == 51:
                     logging.info("Button 2 pressed")
-                    self.fire(Event.BUTTON_PRESSED, button=2)
-                    # self.process_button2()
+                    self.fire(Event.DGT_BUTTON, button=2)
                 if 9 <= message[4] <= 10 and message[5] == 50:
                     logging.info("Button 3 pressed")
-                    self.fire(Event.BUTTON_PRESSED, button=3)
-                    # self.process_button3()
+                    self.fire(Event.DGT_BUTTON, button=3)
                 if 65 <= message[4] <= 66 and message[5] == 53:
                     logging.info("Button 4 pressed")
-                    self.fire(Event.BUTTON_PRESSED, button=4)
-                    # self.process_button4()
+                    self.fire(Event.DGT_BUTTON, button=4)
                 if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
                     # Construct the ack message
                     ack0 = ((message[1]) & 0x7f) | ((message[3] << 3) & 0x80)

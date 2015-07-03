@@ -58,7 +58,8 @@ class Event(AutoNumber):
     SET_PLAYMODE = ()  # Change play mode
     CHANGE_PLAYMODE = ()  # Toogle between the play modes
     SETUP_POSITION = ()  # Setup custom position
-    BUTTON_PRESSED = () # User pressed a button at the dgt clock
+    # dgt events
+    DGT_BUTTON = () # User pressed a button at the dgt clock
     DGT_FEN = () # DGT board sends a fen
     # Engine events
     BEST_MOVE = ()  # Engine has found a move
@@ -103,6 +104,7 @@ class Message(AutoNumber):
 
 
 class Dgt(AutoNumber):
+    # Commands to the DGThardware (or the virtual hardware)
     DISPLAY_MOVE = ()
     DISPLAY_TEXT = ()
     LIGHT_CLEAR = ()

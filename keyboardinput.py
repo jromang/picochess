@@ -45,23 +45,26 @@ class KeyboardInput(Observable, threading.Thread):
                     elif cmd.startswith('level:'):
                         level = int(cmd.split(':')[1])
                         self.fire(Event.LEVEL, level=level)
-                    elif cmd.startswith('fen:'):
-                        fen = cmd.split(':')[1]
-                        # dgt board only sends the basic fen
-                        # be sure, its same no matter what fen the user entered
-                        self.fire(Event.FEN, fen=fen.split(' ')[0])
                     elif cmd.startswith('print:'):
                         fen = cmd.split(':')[1]
                         print(chess.Board(fen))
-                    elif cmd.startswith('button:'):
-                        button = cmd.split(':')[1]
-                        self.fire(Event.BUTTON_PRESSED, button=button)
                     elif cmd.startswith('setup:'):
                         fen = cmd.split(':')[1]
                         if chess.Board(fen).is_valid(False):
                             self.fire(Event.SETUP_POSITION, fen=fen)
                         else:
                             raise ValueError(fen)
+                    # Here starts the simulation of a dgt-board!
+                    # Let the user send events like the board would do
+                    elif cmd.startswith('fen:'):
+                        fen = cmd.split(':')[1]
+                        # dgt board only sends the basic fen => be sure
+                        # it's same no matter what fen the user entered
+                        self.fire(Event.DGT_FEN, fen=fen.split(' ')[0])
+                    elif cmd.startswith('button:'):
+                        button = cmd.split(':')[1]
+                        self.fire(Event.DGT_BUTTON, button=button)
+                    # end simulation code
                     else:
                         move = chess.Move.from_uci(cmd)
                         self.fire(Event.KEYBOARD_MOVE, move=move)
