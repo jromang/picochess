@@ -84,12 +84,18 @@ class TerminalDisplay(Display, threading.Thread):
                 if case(Message.COMPUTER_MOVE):
                     print('\n' + str(message.game))
                     print(message.game.fen())
+                    # emulate the user doing the computer move on vBoard
+                    Observable.fire(Event.DGT_FEN, fen=message.game.fen().split(' ')[0])
                     break
                 if case(Message.SEARCH_STARTED):
                     print('Computer starts thinking...')
                     break
                 if case(Message.SEARCH_STOPPED):
                     print('Computer stopped thinking...')
+                    break
+                if case(Message.RUN_CLOCK):
+                    # print(message.turn, message.time_control)
+                    print('run_clock')
                     break
                 if case():  # Default
                     pass
