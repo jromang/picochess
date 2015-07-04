@@ -26,6 +26,10 @@ class Informer(chess.uci.InfoHandler, Observable):
         super(Informer, self).__init__()
         self.mate_found = False
 
+    def on_go(self):
+        self.mate_found = False
+        super().on_go()
+
     def on_bestmove(self,bestmove,ponder):
         self.fire(Event.BEST_MOVE, move=bestmove, ponder=ponder)
         super().on_bestmove(bestmove, ponder)
