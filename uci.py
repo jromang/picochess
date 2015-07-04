@@ -22,17 +22,24 @@ import chess.uci
 
 
 class Informer(chess.uci.InfoHandler, Observable):
+    def __init__(self):
+        super(Informer, self).__init__()
+        self.mate_found = False
 
     def on_bestmove(self,bestmove,ponder):
         self.fire(Event.BEST_MOVE, move=bestmove, ponder=ponder)
         super().on_bestmove(bestmove, ponder)
 
     def score(self,cp, mate, lowerbound, upperbound):
-        self.fire(Event.SCORE, score=cp, mate=mate)
+        if mate is None:
+            self.fire(Event.SCORE, score=cp, mate=mate)
+        else:
+            self.mate_found = True
         super().score(cp, mate, lowerbound, upperbound)
 
     def pv(self,moves):
-        self.fire(Event.NEW_PV, pv=moves)
+        if not self.mate_found:
+            self.fire(Event.NEW_PV, pv=moves)
         super().pv(moves)
 
 
