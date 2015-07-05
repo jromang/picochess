@@ -19,6 +19,18 @@ from threading import Timer
 import chess
 from utilities import *
 
+from threading import Event, Thread
+
+def call_repeatedly(interval, func, *args):
+    stopped = Event()
+
+    def loop():
+        while not stopped.wait(interval): # the first call is in `interval` secs
+            func(*args)
+
+    Thread(target=loop).start()
+    return stopped.set
+
 class VirtualHardware(Observable, Display, threading.Thread):
     def __init__(self):
         super(VirtualHardware, self).__init__()
@@ -67,9 +79,10 @@ class VirtualHardware(Observable, Display, threading.Thread):
 
         def stop(self):
             self._timer.cancel()
+            self._timer.join()
             self.is_running = False
 
-    def runclock(self,w_hms, b_hms, side):
+    def runclock(self, w_hms, b_hms, side):
         print(w_hms, b_hms, side)
 
     def run(self):
@@ -88,11 +101,13 @@ class VirtualHardware(Observable, Display, threading.Thread):
                     break
                 if case(Dgt.CLOCK_START):
                     print('DGT clock time started ', (message.w_hms, message.b_hms, message.side))
-                    self.rt = self.RepeatedTimer(1, self.runclock, message.w_hms, message.b_hms, message.side)
+                    # self.rt = self.RepeatedTimer(1, self.runclock, message.w_hms, message.b_hms, message.side)
+                    self.rt = call_repeatedly(1, self.runclock, message.w_hms, message.b_hms, message.side)
                     break
                 if case(Dgt.CLOCK_STOP):
                     print('DGT clock time stopped')
-                    self.rt.stop()
+                    # self.rt.stop()
+                    self.rt()
                     break
                 if case(Dgt.LIGHT_CLEAR):
                     pass
