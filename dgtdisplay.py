@@ -359,15 +359,15 @@ class DGTDisplay(Observable, Display, threading.Thread):
                     if case(Message.RUN_CLOCK):
                         # @todo Make this code independent from DGT Hex codes => more abstract
                         tc = message.time_control
-                        w_hms = hours_minutes_seconds(int(tc.clock_time[chess.WHITE]))
-                        b_hms = hours_minutes_seconds(int(tc.clock_time[chess.BLACK]))
+                        time_left = int(tc.clock_time[chess.WHITE])
+                        time_right = int(tc.clock_time[chess.BLACK])
                         side = 0x01 if (message.turn == chess.WHITE) != self.flip_board else 0x02
                         if tc.mode == ClockMode.FIXED_TIME:
                             side = 0x02
-                            b_hms = hours_minutes_seconds(tc.seconds_per_move)
+                            time_right = tc.seconds_per_move
                         if self.flip_board:
-                            w_hms, b_hms = b_hms, w_hms
-                        Display.show(Dgt.CLOCK_START, w_hms=w_hms, b_hms=b_hms, side=side)
+                            time_left, time_right = time_right, time_left
+                        Display.show(Dgt.CLOCK_START, time_left=time_left, time_right=time_right, side=side)
                         break
                     if case(Message.BUTTON_PRESSED):
                         button = int(message.button)

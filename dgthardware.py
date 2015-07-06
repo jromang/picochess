@@ -415,9 +415,11 @@ class DGTHardware(Observable, Display, threading.Thread):
            0, 0, 0, 0, 0, 0,
            0x04 | 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
-    def start_clock(self, w_hms, b_hms, side):
+    def start_clock(self, time_left, time_right, side):
+        l_hms = hours_minutes_seconds(time_left)
+        r_hms = hours_minutes_seconds(time_right)
         self.write([Commands.DGT_CLOCK_MESSAGE, 0x0a, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_SETNRUN,
-            w_hms[0], w_hms[1], w_hms[2], b_hms[0], b_hms[1], b_hms[2],
+            l_hms[0], l_hms[1], l_hms[2], r_hms[0], r_hms[1], r_hms[2],
             side, Clock.DGT_CMD_CLOCK_END_MESSAGE])
         self.write([Commands.DGT_CLOCK_MESSAGE, 0x03, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_END, Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
@@ -455,7 +457,7 @@ class DGTHardware(Observable, Display, threading.Thread):
                         self.stop_clock()
                         break
                     if case(Dgt.CLOCK_START):
-                        self.start_clock(message.w_hms, message.b_hms, message.side)
+                        self.start_clock(message.time_left, message.time_right, message.side)
                         break
                     if case():  # Default
                         pass

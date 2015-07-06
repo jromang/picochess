@@ -21,40 +21,13 @@ from utilities import *
 
 from threading import Event, Thread
 
-def call_repeatedly(interval, func, *args):
-    stopped = Event()
-
-    def loop():
-        while not stopped.wait(interval): # the first call is in `interval` secs
-            func(*args)
-
-    Thread(target=loop).start()
-    return stopped.set
-
 class VirtualHardware(Observable, Display, threading.Thread):
     def __init__(self):
         super(VirtualHardware, self).__init__()
         self.rt = None
-
-    class PeriodicTimer(object):
-        def __init__(self, interval, callback):
-            self.interval = interval
-            self.thread = None
-
-            @functools.wraps(callback)
-            def wrapper(*args, **kwargs):
-                result = callback(*args, **kwargs)
-                if result:
-                    self.thread = threading.Timer(self.interval, self.callback)
-                    self.thread.start()
-            self.callback = wrapper
-
-        def start(self):
-            self.thread = threading.Timer(self.interval, self.callback)
-            self.thread.start()
-
-        def stop(self):
-            self.thread.cancel()
+        self.time_left = None
+        self.time_right = None
+        self.time_side = None
 
     class RepeatedTimer(object):
         def __init__(self, interval, function, *args, **kwargs):
@@ -82,8 +55,18 @@ class VirtualHardware(Observable, Display, threading.Thread):
             self._timer.join()
             self.is_running = False
 
-    def runclock(self, w_hms, b_hms, side):
-        print(w_hms, b_hms, side)
+    def runclock(self):
+        if self.time_side == 1:
+            self.time_left -= 1
+        else:
+            self.time_right -= 1
+        if self.time_left <= 0:
+            print('Time flag fallen on left side')
+        if self.time_right <= 0:
+            print('Time flag fallen on right side')
+        l_hms = hours_minutes_seconds(self.time_left)
+        r_hms = hours_minutes_seconds(self.time_right)
+        Display.show(Dgt.DISPLAY_TEXT, text='{} : {}'.format(l_hms, r_hms))
 
     def run(self):
         while True:
@@ -100,14 +83,18 @@ class VirtualHardware(Observable, Display, threading.Thread):
                     print('DGT clock txt:' + message.text)
                     break
                 if case(Dgt.CLOCK_START):
-                    print('DGT clock time started ', (message.w_hms, message.b_hms, message.side))
-                    # self.rt = self.RepeatedTimer(1, self.runclock, message.w_hms, message.b_hms, message.side)
-                    self.rt = call_repeatedly(1, self.runclock, message.w_hms, message.b_hms, message.side)
+                    self.time_left = message.time_left
+                    self.time_right = message.time_right
+                    self.time_side = message.side
+
+                    print('DGT clock time started at ', (self.time_left, self.time_right))
+                    if self.rt:
+                        self.rt.stop()
+                    self.rt = self.RepeatedTimer(1, self.runclock)
                     break
                 if case(Dgt.CLOCK_STOP):
-                    print('DGT clock time stopped')
-                    # self.rt.stop()
-                    self.rt()
+                    print('DGT clock time stopped at ', (self.time_left, self.time_right))
+                    self.rt.stop()
                     break
                 if case(Dgt.LIGHT_CLEAR):
                     pass
