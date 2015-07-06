@@ -16,6 +16,7 @@
 
 import threading
 import chess
+import time
 import logging
 from utilities import *
 
@@ -29,20 +30,17 @@ class KeyboardInput(Observable, threading.Thread):
             cmd = input('PicoChess v'+version+':>')
 
             try:
-                # commands like "go" or "newgame" or "stop"
-                # "setup:<legal_fen_string>"
-                # "level:<1-20> or "fen:<legal_fen_string>"
-                # "print:<legal_fen_string>" or "button:<0-4>"
+                # commands like "newgame" or "setup:<legal_fen_string>"
+                # "level:<1-20>" or "print:<legal_fen_string>"
+                #
+                # for simulating a dgt board use the following commands
+                # "fen:<legal_fen_string>" or "button:<0-4>"
+                #
                 # everything else is regarded as a move string
                 if cmd.startswith('newgame'):
                     self.fire(Event.NEW_GAME)
                 else:
-                    # this doesn't work see #99
-                    # if cmd.startswith('stop'):
-                    #    self.fire(Event.STOP_SEARCH)
-                    if cmd.startswith('go'):
-                        self.fire(Event.CHANGE_PLAYMODE)
-                    elif cmd.startswith('level:'):
+                    if cmd.startswith('level:'):
                         level = int(cmd.split(':')[1])
                         self.fire(Event.LEVEL, level=level)
                     elif cmd.startswith('print:'):
@@ -66,6 +64,7 @@ class KeyboardInput(Observable, threading.Thread):
                         self.fire(Event.DGT_BUTTON, button=button)
                     # end simulation code
                     else:
+                        # move => fen => virtual board sends fen
                         move = chess.Move.from_uci(cmd)
                         self.fire(Event.KEYBOARD_MOVE, move=move)
             except ValueError:
@@ -84,7 +83,8 @@ class TerminalDisplay(Display, threading.Thread):
                 if case(Message.COMPUTER_MOVE):
                     print('\n' + str(message.game))
                     print(message.game.fen())
-                    # emulate the user doing the computer move on vBoard
+                    # print('emulate user to make the computer move...sleeping for one second')
+                    # time.sleep(1)
                     Observable.fire(Event.DGT_FEN, fen=message.game.fen().split(' ')[0])
                     break
                 if case(Message.SEARCH_STARTED):
@@ -92,10 +92,6 @@ class TerminalDisplay(Display, threading.Thread):
                     break
                 if case(Message.SEARCH_STOPPED):
                     print('Computer stopped thinking...')
-                    break
-                if case(Message.RUN_CLOCK):
-                    # print(message.turn, message.time_control)
-                    print('run_clock')
                     break
                 if case():  # Default
                     pass
