@@ -118,7 +118,7 @@ def main():
         # Enable keyboard input and terminal display
         KeyboardInput().start()
         TerminalDisplay().start()
-        VirtualHardware().start()
+        VirtualHardware(args.dgt_3000_clock).start()
 
     # Save to PGN
     PgnDisplay(args.pgn_file, email=args.email, fromINIMailGun_Key=args.mailgun_key,

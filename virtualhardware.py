@@ -14,20 +14,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import threading, functools
+import threading
 from threading import Timer
 import chess
 from utilities import *
 
-from threading import Event, Thread
-
 class VirtualHardware(Observable, Display, threading.Thread):
-    def __init__(self):
+    def __init__(self, dgt_3000_clock):
         super(VirtualHardware, self).__init__()
         self.rt = None
         self.time_left = None
         self.time_right = None
         self.time_side = None
+        self.dgt3000_clock = dgt_3000_clock
 
     class RepeatedTimer(object):
         def __init__(self, interval, function, *args, **kwargs):
@@ -52,7 +51,6 @@ class VirtualHardware(Observable, Display, threading.Thread):
 
         def stop(self):
             self._timer.cancel()
-            self._timer.join()
             self.is_running = False
 
     def runclock(self):
@@ -62,8 +60,10 @@ class VirtualHardware(Observable, Display, threading.Thread):
             self.time_right -= 1
         if self.time_left <= 0:
             print('Time flag fallen on left side')
+            self.time_left = 0
         if self.time_right <= 0:
             print('Time flag fallen on right side')
+            self.time_right = 0
         l_hms = hours_minutes_seconds(self.time_left)
         r_hms = hours_minutes_seconds(self.time_right)
         Display.show(Dgt.DISPLAY_TEXT, text='{} : {}'.format(l_hms, r_hms))
@@ -74,10 +74,14 @@ class VirtualHardware(Observable, Display, threading.Thread):
             message = self.message_queue.get()
             for case in switch(message):
                 if case(Dgt.DISPLAY_MOVE):
-                    fen = message.fen
                     move = message.move
-                    bit_board = chess.Board(fen)
-                    print('DGT clock mov:' + str(message.move) + "/" + bit_board.san(move))
+                    if self.dgt3000_clock:
+                        fen = message.fen
+                        bit_board = chess.Board(fen)
+                        move_string = bit_board.san(move)
+                    else:
+                        move_string = str(move)
+                    print('DGT clock mov:' + move_string)
                     break
                 if case(Dgt.DISPLAY_TEXT):
                     print('DGT clock txt:' + message.text)
@@ -95,12 +99,6 @@ class VirtualHardware(Observable, Display, threading.Thread):
                 if case(Dgt.CLOCK_STOP):
                     print('DGT clock time stopped at ', (self.time_left, self.time_right))
                     self.rt.stop()
-                    break
-                if case(Dgt.LIGHT_CLEAR):
-                    pass
-                    break
-                if case(Dgt.LIGHT_SQUARES):
-                    pass
                     break
                 if case():  # Default
                     pass
