@@ -71,7 +71,7 @@ def main():
     parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
     parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
     args = parser.parse_args()
-    # engine_thread = None
+    engine_thread = None
 
     # Enable logging
     logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
@@ -188,12 +188,12 @@ def main():
             global engine_status
             engine_status = EngineStatus.THINK
             Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
-            res = engine.go(time.uci())
-            engine_status = EngineStatus.WAIT
-            Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=res)
-            # global engine_thread
-            # engine_thread = threading.Timer(0, engine.go, [time.uci()])
-            # engine_thread.start()
+            # res = engine.go(time.uci())
+            # engine_status = EngineStatus.WAIT
+            # Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=res)
+            global engine_thread
+            engine_thread = threading.Timer(0, engine.go, [time.uci()])
+            engine_thread.start()
 
     def analyse():
         """
@@ -205,10 +205,10 @@ def main():
         global engine_status
         engine_status = EngineStatus.PONDER
         Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
-        engine.ponder()
-        # global engine_thread
-        # engine_thread = threading.Timer(0, engine.ponder())
-        # engine_thread.start()
+        # engine.ponder()
+        global engine_thread
+        engine_thread = threading.Timer(0, engine.ponder())
+        engine_thread.start()
 
     def observe(time):
         """
@@ -224,20 +224,20 @@ def main():
         global engine_status
         engine_status = EngineStatus.PONDER
         Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
-        engine.ponder()
-        # global engine_thread
-        # engine_thread = threading.Timer(0, engine.ponder())
-        # engine_thread.start()
+        # engine.ponder()
+        global engine_thread
+        engine_thread = threading.Timer(0, engine.ponder())
+        engine_thread.start()
 
     def stop_thinking():
         """
         Stop current search or book thread.
         :return:
         """
-        res = engine.stop()
-        # if engine_thread:
-        #    engine_thread.cancel()
         # res = engine.stop()
+        if engine_thread:
+            engine_thread.cancel()
+        res = engine.stop()
         global engine_status
         engine_status = EngineStatus.WAIT
         Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=res)
@@ -267,6 +267,9 @@ def main():
             custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
             Display.show(Message.GAME_ENDS, result=result, moves=list(game.move_stack), color=game.turn, play_mode=play_mode, custom_fen=custom_fen)
             return False
+
+    # d4, nf6, Bg5 play situation
+    # rnbqkb1r/pppppppp/5n2/6B1/3P4/8/PPP1PPPP/RN1QKBNR
 
     def process_fen(fen, legal_fens):
         if fen in legal_fens:
