@@ -67,7 +67,9 @@ class KeyboardInput(Observable, threading.Thread):
                         # it's same no matter what fen the user entered
                         self.fire(Event.DGT_FEN, fen=fen.split(' ')[0])
                     elif cmd.startswith('button:'):
-                        button = cmd.split(':')[1]
+                        button = int(cmd.split(':')[1])
+                        if button not in range(4):
+                            raise ValueError(button)
                         self.fire(Event.DGT_BUTTON, button=button)
                     # end simulation code
                     else:
