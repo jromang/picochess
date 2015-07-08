@@ -30,8 +30,8 @@ class KeyboardInput(Observable, threading.Thread):
             cmd = input('PicoChess v'+version+':>')
 
             try:
-                # commands like "newgame" or "setup:<legal_fen_string>"
-                # "level:<1-20>" or "print:<legal_fen_string>"
+                # commands like "newgame" or "setup:<legal_fen_string>" or
+                # "level:<1-20>" or "print:<legal_fen_string>" or "book:<name>"
                 #
                 # for simulating a dgt board use the following commands
                 # "fen:<legal_fen_string>" or "button:<0-4>"
@@ -40,7 +40,14 @@ class KeyboardInput(Observable, threading.Thread):
                 if cmd.startswith('newgame'):
                     self.fire(Event.NEW_GAME)
                 else:
-                    if cmd.startswith('level:'):
+                    if cmd.startswith('book:'):
+                        book_name = cmd.split(':')[1]
+                        book_list = get_opening_books()
+                        book = next((b for b in book_list if b[0] == book_name), None)
+                        if book is None:
+                            raise ValueError(book_name)
+                        self.fire(Event.OPENING_BOOK, book=book)
+                    elif cmd.startswith('level:'):
                         level = int(cmd.split(':')[1])
                         self.fire(Event.LEVEL, level=level)
                     elif cmd.startswith('print:'):

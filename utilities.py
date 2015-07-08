@@ -233,7 +233,7 @@ class switch(object):
 def get_opening_books():
     program_path = os.path.dirname(os.path.realpath(__file__)) + os.sep
     book_list = sorted(os.listdir(program_path + 'books'))
-    library = [('nobook', program_path + 'books/nobook.bin')]
+    library = []
     for book in book_list:
         library.append((book[2:book.index('.')], 'books' + os.sep + book))
     return library
