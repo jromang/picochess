@@ -393,7 +393,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
                             # set standard for setup orientation too
                             self.setup_reverse_orientation = self.flip_board
                             fen = fen[::-1]
-                        logging.debug(fen)
+                        logging.debug("DGT-Fen: " + fen)
                         self.dgt_fen = fen
 
                         # Fire the appropriate event
@@ -421,7 +421,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
                             self.fire(Event.SHUTDOWN)
                             Display.show(Dgt.DISPLAY_TEXT, text="poweroff", xl="powoff", beep=self.enable_dgt_clock_beep)
                         else:
-                            logging.debug("Fen")
+                            logging.debug("Fire Event.Fen with " + fen)
                             self.fire(Event.FEN, fen=fen)
                     if case():  # Default
                         pass
