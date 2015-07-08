@@ -269,7 +269,7 @@ def main():
             return False
 
     # d4, nf6, Bg5 play situation
-    # rnbqkb1r/pppppppp/5n2/6B1/3P4/8/PPP1PPPP/RN1QKBNR  w KQkq - 0 2
+    # rnbqkb1r/pppppppp/5n2/6B1/3P4/8/PPP1PPPP/RN1QKBNR b KQkq - 2 2
 
     def process_fen(fen, legal_fens):
         if fen in legal_fens:
