@@ -262,7 +262,7 @@ class DGTHardware(Observable, Display, threading.Thread):
             #     logging.info("Got clock version number")
             #     break
             if case(Messages.DGT_MSG_BWTIME):
-                # Marius This is commented - but also this is against Docu. no need for 1=2=3=4=5 = 0?!? strange
+                # Marius: This is commented - but also this is against Docu. no need for 1=2=3=4=5 = 0?!? strange
 
                 # if message[0] == message[1] == message[2] == message[3] == message[4] == message[5] == 0:  # Clock Times message
                     # print ("tumbler message: {0}".format(message))
@@ -311,16 +311,16 @@ class DGTHardware(Observable, Display, threading.Thread):
 
                     ack3 = ((message[5]) & 0x7f) | ((message[0] << 2) & 0x80)
                     if ack0 != 0x10:
+                        # Marius: here we getting often a 0x20 instead of 0x40
                         logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
                     else:
-                        # Marius: here we getting often a 0x20 instead of 0x40
                         logging.debug("Clock ACK %s", (ack0, ack1, ack2, ack3))
 
                         if self.clock_lock.locked():
                             self.clock_lock.release()
                         return None
                 else:
-                    # Marius: here is one problem
+                    # Marius: here is another problem
                     # it saying 0:89 and not 0:59 for the clock - also 30:00 is not 30:00 and so on.
                     print(message)
                 break
