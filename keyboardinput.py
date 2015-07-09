@@ -97,10 +97,10 @@ class TerminalDisplay(Display, threading.Thread):
                     Observable.fire(Event.DGT_FEN, fen=message.game.fen().split(' ')[0])
                     break
                 if case(Message.SEARCH_STARTED):
-                    print('Computer starts thinking...')
+                    print('Computer starts thinking - new mode: ' + str(message.engine_status))
                     break
                 if case(Message.SEARCH_STOPPED):
-                    print('Computer stopped thinking...')
+                    print('Computer stopped thinking - old mode: ' + str(message.engine_status))
                     break
                 if case():  # Default
                     pass

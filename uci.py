@@ -95,7 +95,7 @@ class Engine:
                 self.option('UCI_LimitStrength', 'true')
                 min_elo = float(self.engine.options['UCI_Elo'][2])
                 max_elo = float(self.engine.options['UCI_Elo'][3])
-                set_elo = min(int(min_elo + (max_elo-min_elo) * (float(level)) / 19.0), int(self.engine.options['UCI_Elo'][3]))
+                set_elo = min(int(min_elo + (max_elo-min_elo) * (float(level)) / 19.0), int(max_elo))
                 self.option('UCI_Elo', str(set_elo))
             pass
         else:
@@ -113,4 +113,5 @@ class Engine:
         return self.engine.go(**time_dict)
 
     def ponder(self):
-        return self.engine.go(ponder=True, infinite=True, async_callback=True)
+        return self.engine.go(ponder=True, infinite=True)
+

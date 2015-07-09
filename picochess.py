@@ -185,13 +185,13 @@ def main():
             send_book_move(book_move)
         else:
             engine.position(game)
-            global engine_status
+            nonlocal engine_status
             engine_status = EngineStatus.THINK
             Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
             # res = engine.go(time.uci())
             # engine_status = EngineStatus.WAIT
             # Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=res)
-            global engine_thread
+            nonlocal engine_thread
             engine_thread = threading.Timer(0, engine.go, [time.uci()])
             engine_thread.start()
 
@@ -202,12 +202,12 @@ def main():
         :return:
         """
         engine.position(game)
-        global engine_status
+        nonlocal engine_status
         engine_status = EngineStatus.PONDER
         Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
         # engine.ponder()
-        global engine_thread
-        engine_thread = threading.Timer(0, engine.ponder())
+        nonlocal engine_thread
+        engine_thread = threading.Timer(0, engine.ponder)
         engine_thread.start()
 
     def observe(time):
@@ -221,12 +221,12 @@ def main():
         time.run(game.turn)
 
         engine.position(game)
-        global engine_status
+        nonlocal engine_status
         engine_status = EngineStatus.PONDER
         Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
         # engine.ponder()
-        global engine_thread
-        engine_thread = threading.Timer(0, engine.ponder())
+        nonlocal engine_thread
+        engine_thread = threading.Timer(0, engine.ponder)
         engine_thread.start()
 
     def stop_thinking():
@@ -235,12 +235,13 @@ def main():
         :return:
         """
         # res = engine.stop()
+        nonlocal engine_thread
         if engine_thread:
             engine_thread.cancel()
         res = engine.stop()
-        global engine_status
-        engine_status = EngineStatus.WAIT
+        nonlocal engine_status
         Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=res)
+        engine_status = EngineStatus.WAIT
         return res
 
     def check_game_state(game, play_mode):
@@ -469,6 +470,10 @@ def main():
                 if case(Event.BEST_MOVE):
                     move = event.move
                     ponder = event.ponder
+                    # The next three lines now here, cause of threads @ think()
+                    res = chess.uci.BestMove(move, ponder)
+                    Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=res)
+                    engine_status = EngineStatus.WAIT
                     # Check if we are in play mode and it is computer's turn
                     if interaction_mode == Mode.GAME:
                         if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
