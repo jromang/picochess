@@ -269,9 +269,6 @@ def main():
             Display.show(Message.GAME_ENDS, result=result, moves=list(game.move_stack), color=game.turn, play_mode=play_mode, custom_fen=custom_fen)
             return False
 
-    # d4, nf6, Bg5 play situation
-    # rnbqkb1r/pppppppp/5n2/6B1/3P4/8/PPP1PPPP/RN1QKBNR b KQkq - 2 2
-
     def process_fen(fen, legal_fens):
         if fen in legal_fens:
             # Check if we have to undo a previous move (sliding)
@@ -290,7 +287,7 @@ def main():
                     Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
                     # logging.debug("Starting player clock")
                     time_control.run(game.turn)
-        elif fen == legal_fens.root:  # Allow user to take his move back while the engine is searching
+        elif False and fen == legal_fens.root:  # Allow user to take his move back while the engine is searching
             stop_thinking()
             game.pop()
             if interaction_mode == Mode.ANALYSIS:
@@ -302,7 +299,7 @@ def main():
             game_history = copy.deepcopy(game)
             while game_history.move_stack:
                 game_history.pop()
-                if (play_mode == PlayMode.PLAY_WHITE and game_history.turn == chess.WHITE) \
+                if True or (play_mode == PlayMode.PLAY_WHITE and game_history.turn == chess.WHITE) \
                         or (play_mode == PlayMode.PLAY_BLACK and game_history.turn == chess.BLACK) \
                         or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.KIBITZ) \
                         or (interaction_mode == Mode.REMOTE) or (interaction_mode == Mode.ANALYSIS):

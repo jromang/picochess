@@ -186,6 +186,7 @@ piece_to_char = {
     0x07: 'p', 0x08: 'r', 0x09: 'n', 0x0a: 'b', 0x0b: 'k', 0x0c: 'q', 0x00: '.'
 }
 
+
 class DGTHardware(Observable, Display, threading.Thread):
 
     def __init__(self, device, enable_dgt_3000):
@@ -194,6 +195,7 @@ class DGTHardware(Observable, Display, threading.Thread):
         self.write_queue = queue.Queue()
         self.clock_lock = asyncio.Lock()
         self.enable_dgt_3000 = enable_dgt_3000
+        self.displayed_text = None # The current clock display or None if in ClockNRun mode or unknown text
 
         # Open the serial port
         try:
@@ -303,7 +305,7 @@ class DGTHardware(Observable, Display, threading.Thread):
                         main_version = ack2 >> 4
                         if main_version == 2:
                             self.enable_dgt_3000 = True
-                        self.display_on_dgt_clock('pico '+version, 'pic'+version, beep=True)
+                        self.display_text_on_clock('pico '+version, 'pic'+version, beep=True)
 
                     ack3 = ((message[5]) & 0x7f) | ((message[0] << 2) & 0x80)
                     if ack0 != 0x10:
@@ -314,6 +316,8 @@ class DGTHardware(Observable, Display, threading.Thread):
                         if self.clock_lock.locked():
                             self.clock_lock.release()
                         return None
+                else:
+                    self.displayed_text = None  # reset the saved text to unknown
                 break
             if case(Messages.DGT_MSG_BOARD_DUMP):
                 board = ''
@@ -383,21 +387,28 @@ class DGTHardware(Observable, Display, threading.Thread):
             self.write([Commands.DGT_CLOCK_MESSAGE, 0x0c, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_ASCII,
                         text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], 0x03 if beep else 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
-    def display_on_dgt_clock(self, text, dgt_xl_text=None, beep=False):
+    def display_text_on_clock(self, text, dgt_xl_text=None, beep=False, force=True):
         if self.enable_dgt_3000:
-            self._display_on_dgt_3000(text, beep)
+            if force or self.displayed_text != text:
+                self._display_on_dgt_3000(text, beep)
         else:
             if dgt_xl_text:
                 text = dgt_xl_text
-            self._display_on_dgt_xl(text, beep)
+            if force or self.displayed_text != text:
+                self._display_on_dgt_xl(text, beep)
+        self.displayed_text = text
 
-    def display_move_on_dgt(self, move, fen, beep):
-        bit_board = chess.Board(fen)
-        self._display_on_dgt_xl(' ' + move.uci(), beep)
-        # self.display_on_dgt_3000('mov ' + move, True)
-        # bit_board.set_fen(fen)
-        # logging.info("Move is {0}".format(bit_board.san(move)))
-        self._display_on_dgt_3000(bit_board.san(move), beep)
+    def display_move_on_clock(self, move, fen, beep= False, force=True):
+        if self.enable_dgt_3000:
+            bit_board = chess.Board(fen)
+            text = bit_board.san(move)
+            if force or self.displayed_text != text:
+                self._display_on_dgt_3000(text, beep)
+        else:
+            text = ' ' + move.uci()
+            if force or self.displayed_text != text:
+                self._display_on_dgt_xl(text, beep)
+        self.displayed_text = text
 
     def light_squares_revelation_board(self, squares, enable_board_leds):
         if enable_board_leds:
@@ -442,10 +453,10 @@ class DGTHardware(Observable, Display, threading.Thread):
                 message = self.message_queue.get_nowait()
                 for case in switch(message):
                     if case(Dgt.DISPLAY_MOVE):
-                        self.display_move_on_dgt(message.move, message.fen, message.beep)
+                        self.display_move_on_clock(message.move, message.fen, message.beep)
                         break
                     if case(Dgt.DISPLAY_TEXT):
-                        self.display_on_dgt_clock(message.text, message.xl, message.beep)
+                        self.display_text_on_clock(message.text, message.xl, message.beep)
                         break
                     if case(Dgt.LIGHT_CLEAR):
                         self.clear_light_revelation_board(message.enable_board_leds)

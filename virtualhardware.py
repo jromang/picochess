@@ -20,13 +20,14 @@ import chess
 from utilities import *
 
 class VirtualHardware(Observable, Display, threading.Thread):
-    def __init__(self, dgt_3000_clock):
+    def __init__(self, enable_dgt_3000):
         super(VirtualHardware, self).__init__()
         self.rt = None
         self.time_left = None
         self.time_right = None
         self.time_side = None
-        self.dgt3000_clock = dgt_3000_clock
+        self.enable_dgt_3000 = enable_dgt_3000
+        self.displayed_text = None # The current clock display or None if in ClockNRun mode or unknown text
 
     class RepeatedTimer(object):
         def __init__(self, interval, function, *args, **kwargs):
@@ -66,7 +67,41 @@ class VirtualHardware(Observable, Display, threading.Thread):
             self.time_right = 0
         l_hms = hours_minutes_seconds(self.time_left)
         r_hms = hours_minutes_seconds(self.time_right)
+        self.displayed_text = None # reset saved text to unknown
         Display.show(Dgt.DISPLAY_TEXT, text='{} : {}'.format(l_hms, r_hms))
+
+    def display_move_on_clock(self, move, fen, beep):
+        if self.enable_dgt_3000:
+            bit_board = chess.Board(fen)
+            move_string = bit_board.san(move)
+        else:
+            move_string = str(move)
+        print('DGT clock mov:' + move_string)
+
+    def display_text_on_clock(self, text, dgt_xl_text=None, beep=False, force=True):
+        if self.enable_dgt_3000:
+            if force or self.displayed_text != text:
+                print('DGT clock txt:' + text)
+        else:
+            if dgt_xl_text:
+                text = dgt_xl_text
+            if force or self.displayed_text != text:
+                print('DGT clock txt:' + text)
+        self.displayed_text = text
+
+    def stop_clock(self):
+        print('DGT clock time stopped at ', (self.time_left, self.time_right))
+        self.rt.stop()
+
+    def start_clock(self, time_left, time_right, side):
+        self.time_left = time_left
+        self.time_right = time_right
+        self.time_side = side
+
+        print('DGT clock time started at ', (self.time_left, self.time_right))
+        if self.rt:
+            self.rt.stop()
+        self.rt = self.RepeatedTimer(1, self.runclock)
 
     def run(self):
         while True:
@@ -74,31 +109,16 @@ class VirtualHardware(Observable, Display, threading.Thread):
             message = self.message_queue.get()
             for case in switch(message):
                 if case(Dgt.DISPLAY_MOVE):
-                    move = message.move
-                    if self.dgt3000_clock:
-                        fen = message.fen
-                        bit_board = chess.Board(fen)
-                        move_string = bit_board.san(move)
-                    else:
-                        move_string = str(move)
-                    print('DGT clock mov:' + move_string)
+                    self.display_move_on_clock(message.move, message.fen, message.beep)
                     break
                 if case(Dgt.DISPLAY_TEXT):
-                    print('DGT clock txt:' + message.text)
+                    self.display_text_on_clock(message.text, message.xl, message.beep)
                     break
                 if case(Dgt.CLOCK_START):
-                    self.time_left = message.time_left
-                    self.time_right = message.time_right
-                    self.time_side = message.side
-
-                    print('DGT clock time started at ', (self.time_left, self.time_right))
-                    if self.rt:
-                        self.rt.stop()
-                    self.rt = self.RepeatedTimer(1, self.runclock)
+                    self.start_clock(message.time_left, message.time_right, message.side)
                     break
                 if case(Dgt.CLOCK_STOP):
-                    print('DGT clock time stopped at ', (self.time_left, self.time_right))
-                    self.rt.stop()
+                    self.stop_clock()
                     break
                 if case():  # Default
                     pass
