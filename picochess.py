@@ -237,7 +237,15 @@ def main():
         nonlocal engine_thread
         if engine_thread:
             engine_thread.cancel()
-        res = engine.stop()
+        logging.info('Trying to stop engine')
+        nonlocal engine
+        if interaction_mode == Mode.GAME:
+            # @todo i'm not interested in return code, instead should return the best pv from before
+            res = engine.quit()
+            engine = uci.Engine(args.engine, hostname=args.remote, username=args.user, key_file=args.server_key, password=args.password)
+        else:
+            res = engine.stop()
+        logging.info('engine now stopped res=' + format(res))
         nonlocal engine_status
         Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=res)
         engine_status = EngineStatus.WAIT
@@ -286,30 +294,23 @@ def main():
                     Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
                     # logging.debug("Starting player clock")
                     time_control.run(game.turn)
-        elif False and fen == legal_fens.root:  # Allow user to take his move back while the engine is searching
-            stop_thinking()
-            game.pop()
-            if interaction_mode == Mode.ANALYSIS:
-                analyse()
-            if interaction_mode == Mode.OBSERVE:
-                observe(time_control)
-            Display.show(Message.USER_TAKE_BACK)
         else:  # Check if this a a previous legal position and allow user to restart from this position
             game_history = copy.deepcopy(game)
             while game_history.move_stack:
                 game_history.pop()
-                if True or (play_mode == PlayMode.PLAY_WHITE and game_history.turn == chess.WHITE) \
-                        or (play_mode == PlayMode.PLAY_BLACK and game_history.turn == chess.BLACK) \
-                        or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.KIBITZ) \
-                        or (interaction_mode == Mode.REMOTE) or (interaction_mode == Mode.ANALYSIS):
+                if True:
+                        # or (play_mode == PlayMode.PLAY_WHITE and game_history.turn == chess.WHITE) \
+                        # or (play_mode == PlayMode.PLAY_BLACK and game_history.turn == chess.BLACK) \
+                        # or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.KIBITZ) \
+                        # or (interaction_mode == Mode.REMOTE) or (interaction_mode == Mode.ANALYSIS):
                     if game_history.fen().split(' ')[0] == fen:
                         logging.debug("Undoing game until FEN :" + fen)
                         stop_thinking()
                         while len(game_history.move_stack) < len(game.move_stack):
                             game.pop()
-                        if interaction_mode == Mode.ANALYSIS:
+                        if interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
                             analyse()
-                        if interaction_mode == Mode.OBSERVE:
+                        if interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
                             observe(time_control)
                         Display.show(Message.USER_TAKE_BACK)
                         legal_fens = compute_legal_fens(game)
@@ -375,8 +376,8 @@ def main():
                                 Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
                                 think(time_control)
                     elif interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
-                        stop_thinking()
                         time_control.stop()
+                        stop_thinking()
                         fen = game.fen()
                         game.push(move)
                         if check_game_state(game, play_mode):

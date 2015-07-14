@@ -115,3 +115,5 @@ class Engine:
     def ponder(self):
         return self.engine.go(ponder=True, infinite=True)
 
+    def quit(self):
+        return self.engine.quit()

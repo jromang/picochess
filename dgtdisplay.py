@@ -102,6 +102,7 @@ dgt_xl_time_control_list = ["mov  1", "mov  3", "mov  5", "mov 10", "mov 15", "m
                             "bl   1", "bl   3", "bl   5", "bl  10", "bl  15", "bl  30", "bl  60", "bl  90",
                             "f 3  2", "f 4  2", "f 5  3", "f 5  5", "f25  5", "f15  5", "f90 30"]
 
+
 class DGTDisplay(Observable, Display, threading.Thread):
 
     def __init__(self, enable_board_leds=False, enable_dgt_3000=False, enable_dgt_clock_beep=True):
@@ -349,12 +350,14 @@ class DGTDisplay(Observable, Display, threading.Thread):
                             Display.show(Dgt.DISPLAY_MOVE, move=self.hint_move, fen=self.hint_fen, beep=False)
                         break
                     if case(Message.SEARCH_STARTED):
+                        text = 'Search think started' if message.engine_status == EngineStatus.THINK else 'Search ponder started'
                         self.engine_status = message.engine_status
-                        # logging.info('Search started')
+                        logging.info(text)
                         break
                     if case(Message.SEARCH_STOPPED):
+                        text = 'Search already stopped' if self.engine_status == EngineStatus.WAIT else 'Search stopped'
                         self.engine_status = message.engine_status
-                        # logging.info('Search stopped')
+                        logging.info(text)
                         break
                     if case(Message.RUN_CLOCK):
                         # @todo Make this code independent from DGT Hex codes => more abstract
