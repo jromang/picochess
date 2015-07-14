@@ -374,6 +374,7 @@ class DGTHardware(Observable, Display, threading.Thread):
                 text += ' '
             if len(text) > 6:
                 logging.warning('DGT XL clock message too long [%s]', text)
+            logging.debug(text)
             self.write([Commands.DGT_CLOCK_MESSAGE, 0x0b, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_DISPLAY,
                         text[2], text[1], text[0], text[5], text[4], text[3], 0x00, 0x03 if beep else 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
@@ -383,6 +384,7 @@ class DGTHardware(Observable, Display, threading.Thread):
                 text += ' '
             if len(text) > 8:
                 logging.warning('DGT 3000 clock message too long [%s]', text)
+            logging.debug(text)
             text = bytes(text, 'utf-8')
             self.write([Commands.DGT_CLOCK_MESSAGE, 0x0c, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_ASCII,
                         text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], 0x03 if beep else 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
@@ -398,7 +400,7 @@ class DGTHardware(Observable, Display, threading.Thread):
                 self._display_on_dgt_xl(text, beep)
         self.displayed_text = text
 
-    def display_move_on_clock(self, move, fen, beep= False, force=True):
+    def display_move_on_clock(self, move, fen, beep=False, force=True):
         if self.enable_dgt_3000:
             bit_board = chess.Board(fen)
             text = bit_board.san(move)

@@ -68,24 +68,27 @@ class VirtualHardware(Observable, Display, threading.Thread):
         l_hms = hours_minutes_seconds(self.time_left)
         r_hms = hours_minutes_seconds(self.time_right)
         self.displayed_text = None # reset saved text to unknown
-        Display.show(Dgt.DISPLAY_TEXT, text='{} : {}'.format(l_hms, r_hms))
+        Display.show(Dgt.DISPLAY_TEXT, text='{} : {}'.format(l_hms, r_hms), xl=None, beep=False)
 
-    def display_move_on_clock(self, move, fen, beep):
+    def display_move_on_clock(self, move, fen, beep=False):
         if self.enable_dgt_3000:
             bit_board = chess.Board(fen)
             move_string = bit_board.san(move)
         else:
             move_string = str(move)
+        logging.debug(move_string)
         print('DGT clock mov:' + move_string)
 
     def display_text_on_clock(self, text, dgt_xl_text=None, beep=False, force=True):
         if self.enable_dgt_3000:
             if force or self.displayed_text != text:
+                logging.debug(text)
                 print('DGT clock txt:' + text)
         else:
             if dgt_xl_text:
                 text = dgt_xl_text
             if force or self.displayed_text != text:
+                logging.debug(text)
                 print('DGT clock txt:' + text)
         self.displayed_text = text
 
