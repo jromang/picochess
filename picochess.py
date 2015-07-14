@@ -76,6 +76,7 @@ def main():
     # Enable logging
     logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
                         format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
+    logging.getLogger("chess.uci").setLevel(logging.INFO) # don't want to get so many python-chess uci messages
 
     # Update
     update_picochess(args.auto_reboot)
@@ -197,8 +198,7 @@ def main():
 
     def analyse():
         """
-        Starts a new search on the current game.
-        If a move is found in the opening book, fire an event in a few seconds.
+        Starts a new ponder search on the current game.
         :return:
         """
         engine.position(game)
@@ -212,8 +212,7 @@ def main():
 
     def observe(time):
         """
-        Starts a new search on the current game.
-        If a move is found in the opening book, fire an event in a few seconds.
+        Starts a new ponder search on the current game.
         :return:
         """
         Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time)
@@ -231,7 +230,7 @@ def main():
 
     def stop_thinking():
         """
-        Stop current search or book thread.
+        Stop current search.
         :return:
         """
         # res = engine.stop()
