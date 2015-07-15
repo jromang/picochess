@@ -78,7 +78,7 @@ class TimeControl(object):
 
     def uci(self):
         """Returns remaining time for both players in an UCI dict"""
-        uci_dict = {}
+        uci_dict = {'async_callback': True}
         if self.mode in (ClockMode.BLITZ, ClockMode.FISCHER):
             uci_dict['wtime'] = str(int(self.clock_time[chess.WHITE] * 1000))
             uci_dict['btime'] = str(int(self.clock_time[chess.BLACK] * 1000))

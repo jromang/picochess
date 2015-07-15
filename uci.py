@@ -69,6 +69,7 @@ class Engine:
                     handler = Informer()
                     self.engine.info_handlers.append(handler)
             self.options = {}
+            self.command = None
         except OSError:
             logging.exception("OS error in starting engine")
 
@@ -110,10 +111,15 @@ class Engine:
         return self.engine.stop()
 
     def go(self, time_dict):
-        return self.engine.go(**time_dict)
+        self.command = self.engine.go(**time_dict)
+        return self.command
 
     def ponder(self):
         return self.engine.go(ponder=True, infinite=True)
 
     def quit(self):
-        return self.engine.quit()
+        try:
+            return self.command.result(timeout=0)
+        except chess.uci.TimeoutError:
+            return None
+        # return self.engine.quit()

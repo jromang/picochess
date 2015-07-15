@@ -235,17 +235,18 @@ def main():
         """
         # res = engine.stop()
         nonlocal engine_thread
+        print(engine_thread)
         if engine_thread:
             engine_thread.cancel()
+        print(engine_thread)
         logging.info('Trying to stop engine')
         nonlocal engine
         if interaction_mode == Mode.GAME:
-            # @todo i'm not interested in return code, instead should return the best pv from before
-            res = engine.quit()
-            engine = uci.Engine(args.engine, hostname=args.remote, username=args.user, key_file=args.server_key, password=args.password)
+            engine.quit()
+            res = pv_game_mode
         else:
             res = engine.stop()
-        logging.info('engine now stopped res=' + format(res))
+        logging.info('engine now stopped')
         nonlocal engine_status
         Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=res)
         engine_status = EngineStatus.WAIT
@@ -335,6 +336,8 @@ def main():
     Display.show(Message.STARTUP_INFO, info={"interaction_mode": interaction_mode, "play_mode": play_mode,
                                              "book": book, "time_control_string": "mov 5", "engine_status": engine_status
     })
+
+    pv_game_mode = None
 
     # Event loop
     while True:
@@ -429,9 +432,9 @@ def main():
                     break
 
                 if case(Event.STOP_SEARCH): # issue 99 - not used right now!
-                    print('if this (stop_thinking) is working no delay should happen')
+                    print('stop-search result:')
                     result = stop_thinking()
-                    print(result.bestmove)
+                    print(result)
                     break
 
                 if case(Event.NEW_GAME):  # User starts a new game
@@ -488,6 +491,8 @@ def main():
                     if (interaction_mode == Mode.ANALYSIS) or (interaction_mode == Mode.OBSERVE) \
                             or (interaction_mode == Mode.REMOTE) or (interaction_mode == Mode.KIBITZ):
                         Display.show(Message.NEW_PV, pv=event.pv, interaction_mode=interaction_mode, fen=game.fen())
+                    elif len(event.pv) > 1:
+                        pv_game_mode = chess.uci.BestMove(event.pv[0], event.pv[1])
                     break
 
                 if case(Event.SCORE):
