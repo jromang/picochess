@@ -66,12 +66,6 @@ mode_map = {"rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR": Mode.GAME,
             "rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR": Mode.OBSERVE,
             "rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR": Mode.REMOTE}
 
-play_map = {
-            "rnbq1bnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR": PlayMode.PLAY_BLACK,  # Player plays black
-            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQ1BNR": PlayMode.PLAY_WHITE,  # Player plays white
-            "RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbq1bnr": PlayMode.PLAY_BLACK,  # Player plays black (reversed board)
-            "RNBQ1BNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr": PlayMode.PLAY_WHITE}  # Player plays white (reversed board)
-
 time_control_map = OrderedDict([
 ("rnbqkbnr/pppppppp/Q7/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=1)),
 ("rnbqkbnr/pppppppp/1Q6/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=3)),
@@ -269,8 +263,6 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         self.last_fen = message.fen
                         self.display_move = False
                         logging.info("DGT SEND BEST MOVE:"+uci_move)
-                        # Stop the clock before displaying a move
-                        Display.show(Dgt.CLOCK_STOP)
                         # Display the move
                         Display.show(Dgt.DISPLAY_MOVE, move=message.move, fen=message.fen, beep=self.enable_dgt_clock_beep)
                         Display.show(Dgt.LIGHT_SQUARES, squares=(uci_move[0:2], uci_move[2:4]), enable_board_leds=self.enable_board_leds)
@@ -372,6 +364,9 @@ class DGTDisplay(Observable, Display, threading.Thread):
                             time_left, time_right = time_right, time_left
                         Display.show(Dgt.CLOCK_START, time_left=time_left, time_right=time_right, side=side)
                         break
+                    if case(Message.STOP_CLOCK):
+                        Display.show(Dgt.CLOCK_STOP)
+                        break
                     if case(Message.BUTTON_PRESSED):
                         button = int(message.button)
                         if button == 0:
@@ -413,11 +408,8 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         elif fen in mode_map:  # Set interaction mode
                             logging.debug("Interaction mode [%s]", mode_map[fen])
                             self.fire(Event.SET_MODE, mode=mode_map[fen])
-                        elif fen in play_map:  # Set play mode
-                            logging.debug("Play mode [%s]", play_map[fen])
-                            self.fire(Event.SET_PLAYMODE, play_mode=play_map[fen])
                         elif fen in time_control_map:
-                            logging.debug("Setting time control %s", time_control_map[fen].mode)
+                            logging.debug("Time control [%s]", time_control_map[fen].mode)
                             self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[fen],
                                       time_control_string=dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)])
                         elif fen in shutdown_map:

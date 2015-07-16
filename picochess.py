@@ -216,7 +216,6 @@ def main():
         :return:
         """
         Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time)
-        # logging.debug("Starting clock")
         time.run(game.turn)
 
         engine.position(game)
@@ -242,6 +241,12 @@ def main():
         Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=res)
         engine_status = EngineStatus.WAIT
         return res
+
+    def stop_thinking_and_clock():
+        nonlocal time_control
+        time_control.stop()
+        Display.show(Message.STOP_CLOCK)
+        return stop_thinking()
 
     def check_game_state(game, play_mode):
         """
@@ -284,7 +289,6 @@ def main():
                 Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD)
                 if time_control.mode != ClockMode.FIXED_TIME:
                     Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
-                    # logging.debug("Starting player clock")
                     time_control.run(game.turn)
         else:  # Check if this a a previous legal position and allow user to restart from this position
             game_history = copy.deepcopy(game)
@@ -316,7 +320,6 @@ def main():
     interaction_mode = Mode.GAME   # Interaction mode
     play_mode = PlayMode.PLAY_WHITE
     engine_status = EngineStatus.WAIT
-    king_lifted = False
     time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=5)
 
     system_info_thread = threading.Timer(0, display_system_info)
@@ -364,14 +367,13 @@ def main():
                         if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.WHITE) or \
                                 (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.BLACK):
                             time_control.stop()
-                            # logging.debug("Stopping player clock")
+                            Display.show(Message.STOP_CLOCK)
                             game.push(move)
                             if check_game_state(game, play_mode):
                                 Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
                                 think(time_control)
                     elif interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
-                        time_control.stop()
-                        stop_thinking()
+                        stop_thinking_and_clock()
                         fen = game.fen()
                         game.push(move)
                         if check_game_state(game, play_mode):
@@ -414,9 +416,8 @@ def main():
                     game.custom_fen = event.fen
 
                     legal_fens = compute_legal_fens(game)
-                    time_control.stop()
+                    stop_thinking_and_clock()
                     time_control.reset()
-                    stop_thinking()
 
                     play_mode = PlayMode.PLAY_WHITE if game.turn == chess.WHITE else PlayMode.PLAY_BLACK
                     Display.show(Message.START_NEW_GAME)
@@ -424,7 +425,7 @@ def main():
 
                 if case(Event.STOP_SEARCH): # issue 99 - not used right now!
                     print('stop-search result:')
-                    result = stop_thinking()
+                    result = stop_thinking_and_clock()
                     print(result)
                     break
 
@@ -438,17 +439,11 @@ def main():
                         game = chess.Board()
 
                     legal_fens = compute_legal_fens(game)
-                    time_control.stop()
+                    stop_thinking_and_clock()
                     time_control.reset()
-                    stop_thinking()
 
                     if interaction_mode == Mode.GAME:
-                        if king_lifted:
-                            king_lifted = False
-                            if play_mode == PlayMode.PLAY_BLACK:
-                                think(time_control)
-                        else:
-                            play_mode = PlayMode.PLAY_WHITE if game.turn == chess.WHITE else PlayMode.PLAY_BLACK
+                        play_mode = PlayMode.PLAY_WHITE if game.turn == chess.WHITE else PlayMode.PLAY_BLACK
                     Display.show(Message.START_NEW_GAME)
                     break
 
@@ -470,6 +465,7 @@ def main():
                         if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
                                 (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):
                             time_control.stop()
+                            Display.show(Message.STOP_CLOCK)
                             fen_old = game.fen()
                             game.push(move)
                             Display.show(Message.COMPUTER_MOVE, move=move, ponder=ponder, fen=fen_old, fen_new=game.fen(),
@@ -479,11 +475,12 @@ def main():
                     break
 
                 if case(Event.NEW_PV):
-                    if (interaction_mode == Mode.ANALYSIS) or (interaction_mode == Mode.OBSERVE) \
-                            or (interaction_mode == Mode.REMOTE) or (interaction_mode == Mode.KIBITZ):
+                    if interaction_mode == Mode.GAME:
+                        move = event.pv[0] if len(event.pv) > 0 else None
+                        ponder = event.pv[1] if len(event.pv) > 1 else None
+                        pv_game_mode = chess.uci.BestMove(move, ponder)
+                    else:
                         Display.show(Message.NEW_PV, pv=event.pv, interaction_mode=interaction_mode, fen=game.fen())
-                    elif len(event.pv) > 1:
-                        pv_game_mode = chess.uci.BestMove(event.pv[0], event.pv[1])
                     break
 
                 if case(Event.SCORE):
@@ -507,18 +504,8 @@ def main():
                     Display.show(Message.INTERACTION_MODE, mode=event.mode, engine_status=engine_status)
                     break
 
-                if case(Event.SET_PLAYMODE):
-                    play_mode = event.play_mode
-                    king_lifted = True
-                    Display.show(Message.PLAY_MODE, play_mode=play_mode)
-                    break
-
                 if case(Event.CHANGE_PLAYMODE):
-                    if play_mode == PlayMode.PLAY_WHITE:
-                        play_mode = PlayMode.PLAY_BLACK
-                    else:
-                        play_mode = PlayMode.PLAY_WHITE
-
+                    play_mode = PlayMode.PLAY_WHITE if play_mode == PlayMode.PLAY_BLACK else PlayMode.PLAY_BLACK
                     Display.show(Message.PLAY_MODE, play_mode=play_mode)
                     if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
                             (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):
@@ -532,7 +519,7 @@ def main():
                     break
 
                 if case(Event.OUT_OF_TIME):
-                    stop_thinking()
+                    stop_thinking_and_clock()
                     custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
                     Display.show(Message.GAME_ENDS, result=GameResult.TIME_CONTROL, moves=list(game.move_stack),
                                  color=event.color, play_mode=play_mode, custom_fen=custom_fen)

@@ -93,8 +93,11 @@ class VirtualHardware(Observable, Display, threading.Thread):
         self.displayed_text = text
 
     def stop_clock(self):
-        print('DGT clock time stopped at ', (self.time_left, self.time_right))
-        self.rt.stop()
+        if self.rt:
+            print('DGT clock time stopped at ', (self.time_left, self.time_right))
+            self.rt.stop()
+        else:
+            print('clock not ready')
 
     def start_clock(self, time_left, time_right, side):
         self.time_left = time_left

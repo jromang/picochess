@@ -32,7 +32,7 @@ except ImportError:
 
 
 # picochess version
-version = '046'
+version = '047'
 
 event_queue = queue.Queue()
 display_devices = []
@@ -55,7 +55,6 @@ class Event(AutoNumber):
     KEYBOARD_MOVE = ()  # Keyboard sends a move (to be transfered to a fen)
     OPENING_BOOK = ()  # User chooses an opening book
     SET_MODE = ()  # Change interaction mode
-    SET_PLAYMODE = ()  # Change play mode
     CHANGE_PLAYMODE = ()  # Toogle between the play modes
     SETUP_POSITION = ()  # Setup custom position
     # dgt events
@@ -63,8 +62,8 @@ class Event(AutoNumber):
     DGT_FEN = () # DGT board sends a fen
     # Engine events
     BEST_MOVE = ()  # Engine has found a move
-    NEW_PV = ()  # Engine sends a new Principal Variation
-    SCORE = ()  # Engine sends a new Score
+    NEW_PV = ()  # Engine sends a new principal variation
+    SCORE = ()  # Engine sends a new score
     STOP_SEARCH = ()  # Engine should stop
     SET_TIME_CONTROL = ()  # User sets time control
     OUT_OF_TIME = ()
@@ -94,6 +93,7 @@ class Message(AutoNumber):
     USER_TAKE_BACK = ()  # User takes back his move while engine is searching
     UPDATE_CLOCK = ()  # Message send every second when to clock runs, containing white_time and black_time
     RUN_CLOCK = ()  # Say to run autonomous clock, contains time_control
+    STOP_CLOCK = () # Stops the clock
     USER_MOVE = ()  # Player has done a move on board
     UCI_OPTION_LIST = ()  # Contains 'options', a dict of the current engine's UCI options
     GAME_ENDS = ()  # The current game has ended, contains a 'result' (GameResult) and list of 'moves'
