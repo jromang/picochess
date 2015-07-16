@@ -303,6 +303,8 @@ class DGTHardware(Observable, Display, threading.Thread):
                         if not self.clock_found:
                             self.clock_found = True
                         main_version = ack2 >> 4
+                        sub_version = ack2 & 0x0f
+                        logging.debug("Clock version %s", (main_version, sub_version))
                         if main_version == 2:
                             self.enable_dgt_3000 = True
                         self.display_text_on_clock('pico '+version, 'pic'+version, beep=True)
