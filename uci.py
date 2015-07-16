@@ -123,3 +123,6 @@ class Engine:
         except chess.uci.TimeoutError:
             return None
         # return self.engine.quit()
+
+    def result(self, result):
+        self.command.set_result(result)

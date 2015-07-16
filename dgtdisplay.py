@@ -191,13 +191,13 @@ class DGTDisplay(Observable, Display, threading.Thread):
             return fen.replace("KQkq", castling_fen)
 
         if self.dgt_clock_menu == Menu.GAME_MENU:
-            if self.engine_status == EngineStatus.WAIT:
+            # make that always true, cause the "stop search" (#99) doesn't work until now
+            if True or (self.engine_status == EngineStatus.WAIT):
                 self.fire(Event.CHANGE_PLAYMODE)
             else:
                 if self.mode == Mode.GAME:
                     # missing: do we want "stop search" or "alternative move"?
-                    # for the moment we only support "stop_search"
-                    self.fire(Event.STOP_SEARCH)
+                    # self.fire(Event.STOP_SEARCH)
                     pass
                 else:
                     if self.mode == Mode.OBSERVE:

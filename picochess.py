@@ -235,18 +235,9 @@ def main():
         """
         # res = engine.stop()
         nonlocal engine_thread
-        print(engine_thread)
         if engine_thread:
             engine_thread.cancel()
-        print(engine_thread)
-        logging.info('Trying to stop engine')
-        nonlocal engine
-        if interaction_mode == Mode.GAME:
-            engine.quit()
-            res = pv_game_mode
-        else:
-            res = engine.stop()
-        logging.info('engine now stopped')
+        res = engine.stop()
         nonlocal engine_status
         Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=res)
         engine_status = EngineStatus.WAIT
