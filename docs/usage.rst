@@ -72,16 +72,14 @@ These are set with the extra **white** queen.
 * **F3** - 25 minute game with 5 second Fischer increment
 * **G3** - 90 minute game with 30 second Fischer increment
 
-Switching sides
----------------
+Clock button support
+--------------------
 
-To force PicoChess to play with White just take the black king off the board and put it back. If you want to play with White again just take the white king off the board and put it back. Note: You have to be in the starting position!
-If its your turn you can also switch sides by clicking the third button (the position doesn't matter).
-
-System shutdown
----------------
-
-From the start position, replace the white king with the extra white queen; this will shut down the machine (takes a few seconds until the blue light turns off). You can also do it with only the two white queens on the board (on e1,d1).
+* First button shows the last move.
+* Second button toggles between showing the position value (or "book") and the best/ponder (or book move).
+* Third button will switch sides and the computer will make your move.
+* The fourth toggles between the game modes (Game, Analyse, Kibitz, Observe, Remote)
+* The fifth toggles between "Position", "Engine", "System", "Game" options. Some of the options provide no functionality yet.
 
 Playing/Training Modes
 ----------------------
@@ -95,7 +93,7 @@ When using these modes, please be patient and don't rush moves. Allow a few seco
 * Remote play mode (enabled by **white** queen on **E5**): no documentation right now
 
 Game mode is the regular mode. If you used one of the other modes, you can return back to game mode by putting the extra **white** queen on **A5**.
-You can also use Button 4 for toggling over the modes (Qa5-Qe5 only working in the starting position).
+You can also press the fourth button for toggling over the modes (Qa5-Qe5 only working in the starting position).
 
 The position score will always be displayed in centipawns from White's perspective. For example when the clock displays 33, then White is ahead 33 centipawns (or 0.33 pawns). A negative score means black is ahead.
 
@@ -109,14 +107,10 @@ Press the leftmost button to choose side to move, Black or White.
 Press the second button to choose the board orientation, "b" & "w" showing the starting side for each color. So for example white pawns moving from w to b side.
 Press third button, clock will respond with "Scan" and "New game". Now picochess is waiting for your next move. If you want picochess to start press the third button.
 
-Clock button support
---------------------
+System shutdown
+---------------
 
-* First button shows the last move.
-* Second button toggles between showing the position value (or "book") and the best/ponder (or book move).
-* Third button will switch sides and the computer will make your move.
-* The fourth toggles between the game modes (Game, Analyse, Kibitz, Observe, Remote)
-* The fifth toggles between "Position", "Engine", "System", "Game" options. Some of the options provide no functionality yet.
+From the start position, replace the white king with the extra white queen; this will shut down the machine (takes a few seconds until the blue light turns off). You can also do it with only the two white queens on the board (on e1,d1).
 
 PGN file support
 ----------------
