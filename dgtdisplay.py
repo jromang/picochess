@@ -136,10 +136,10 @@ class DGTDisplay(Observable, Display, threading.Thread):
     def process_button1(self):
         if self.dgt_clock_menu == Menu.GAME_MENU:
             if self.display_move:
-                if self.hint_fen is None:
-                    Display.show(Dgt.DISPLAY_TEXT, text="none", xl=None, beep=False)
-                else:
+                if bool(self.hint_move):
                     Display.show(Dgt.DISPLAY_MOVE, move=self.hint_move, fen=self.hint_fen, beep=self.enable_dgt_clock_beep)
+                else:
+                    Display.show(Dgt.DISPLAY_TEXT, text="none", xl=None, beep=False)
             else:
                 if self.mate is None:
                     sc = 'none' if self.score is None else str(self.score).rjust(6)
