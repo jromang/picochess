@@ -217,22 +217,13 @@ def main():
         """
         Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time)
         time.run(game.turn)
-
-        engine.position(game)
-        nonlocal engine_status
-        engine_status = EngineStatus.PONDER
-        Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
-        # engine.ponder()
-        nonlocal engine_thread
-        engine_thread = threading.Timer(0, engine.ponder)
-        engine_thread.start()
+        analyse()
 
     def stop_thinking():
         """
         Stop current search.
         :return:
         """
-        # res = engine.stop()
         nonlocal engine_thread
         if engine_thread:
             engine_thread.cancel()
@@ -294,24 +285,24 @@ def main():
             game_history = copy.deepcopy(game)
             while game_history.move_stack:
                 game_history.pop()
-                if True:
-                        # or (play_mode == PlayMode.PLAY_WHITE and game_history.turn == chess.WHITE) \
-                        # or (play_mode == PlayMode.PLAY_BLACK and game_history.turn == chess.BLACK) \
-                        # or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.KIBITZ) \
-                        # or (interaction_mode == Mode.REMOTE) or (interaction_mode == Mode.ANALYSIS):
-                    if game_history.fen().split(' ')[0] == fen:
-                        logging.debug("Undoing game until FEN :" + fen)
-                        stop_thinking()
-                        while len(game_history.move_stack) < len(game.move_stack):
-                            game.pop()
-                        if interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
-                            analyse()
-                        if interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
-                            observe(time_control)
-                        Display.show(Message.USER_TAKE_BACK)
-                        legal_fens = compute_legal_fens(game)
-                        break
+                if game_history.fen().split(' ')[0] == fen:
+                    logging.debug("Undoing game until FEN :" + fen)
+                    stop_thinking()
+                    while len(game_history.move_stack) < len(game.move_stack):
+                        game.pop()
+                    if interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
+                        analyse()
+                    if interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
+                        observe(time_control)
+                    Display.show(Message.USER_TAKE_BACK)
+                    legal_fens = compute_legal_fens(game)
+                    break
         return legal_fens
+
+    def set_wait_state():
+        if interaction_mode == Mode.GAME:
+            nonlocal play_mode
+            play_mode = PlayMode.PLAY_WHITE if game.turn == chess.WHITE else PlayMode.PLAY_BLACK
 
     # Startup - internal
     game = chess.Board()  # Create the current game
@@ -419,7 +410,8 @@ def main():
                     stop_thinking_and_clock()
                     time_control.reset()
 
-                    play_mode = PlayMode.PLAY_WHITE if game.turn == chess.WHITE else PlayMode.PLAY_BLACK
+                    interaction_mode = Mode.GAME
+                    set_wait_state()
                     Display.show(Message.START_NEW_GAME)
                     break
 
@@ -442,8 +434,7 @@ def main():
                     stop_thinking_and_clock()
                     time_control.reset()
 
-                    if interaction_mode == Mode.GAME:
-                        play_mode = PlayMode.PLAY_WHITE if game.turn == chess.WHITE else PlayMode.PLAY_BLACK
+                    set_wait_state()
                     Display.show(Message.START_NEW_GAME)
                     break
 
@@ -501,16 +492,20 @@ def main():
 
                 if case(Event.SET_MODE):
                     interaction_mode = event.mode
+                    set_wait_state()  # if switched to game mode, bring to waiting / maybe a ponder is still running!
                     Display.show(Message.INTERACTION_MODE, mode=event.mode, engine_status=engine_status)
                     break
 
                 if case(Event.CHANGE_PLAYMODE):
                     play_mode = PlayMode.PLAY_WHITE if play_mode == PlayMode.PLAY_BLACK else PlayMode.PLAY_BLACK
                     Display.show(Message.PLAY_MODE, play_mode=play_mode)
-                    if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
-                            (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):
-                        if check_game_state(game, play_mode):
-                            think(time_control)
+                    # @todo since we can only be here, if the computer is waiting - that
+                    # @todo also means in game mode! the next two if's cant be false
+                    if interaction_mode == Mode.GAME:
+                        if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
+                                (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):
+                            if check_game_state(game, play_mode):
+                                think(time_control)
                     break
 
                 if case(Event.SET_TIME_CONTROL):
