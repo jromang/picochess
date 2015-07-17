@@ -492,8 +492,10 @@ def main():
 
                 if case(Event.SET_MODE):
                     interaction_mode = event.mode
-                    set_wait_state()  # if switched to game mode, bring to waiting / maybe a ponder is still running!
-                    Display.show(Message.INTERACTION_MODE, mode=event.mode, engine_status=engine_status)
+                    if interaction_mode == Mode.GAME and engine_status == EngineStatus.PONDER:
+                        stop_thinking()  # stop the ponder mode, if we switch to game
+                    set_wait_state()  # if switched to game mode, bring to waiting
+                    Display.show(Message.INTERACTION_MODE, mode=event.mode)
                     break
 
                 if case(Event.CHANGE_PLAYMODE):

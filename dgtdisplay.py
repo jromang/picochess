@@ -318,7 +318,6 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         Display.show(Dgt.DISPLAY_TEXT, text=message.result.value, xl=None, beep=self.enable_dgt_clock_beep)
                         break
                     if case(Message.INTERACTION_MODE):
-                        self.engine_status = message.engine_status  # this is nonsense!! doesn't depend interaction_mode
                         self.mode = message.mode
                         Display.show(Dgt.DISPLAY_TEXT, text=message.mode.value, xl=None, beep=self.enable_dgt_clock_beep)
                         break
@@ -351,7 +350,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         break
                     if case(Message.SEARCH_STOPPED):
                         text = 'Search already stopped' if self.engine_status == EngineStatus.WAIT else 'Search stopped'
-                        self.engine_status = message.engine_status
+                        self.engine_status = EngineStatus.WAIT
                         logging.info(text)
                         break
                     if case(Message.RUN_CLOCK):
