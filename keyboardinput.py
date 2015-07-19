@@ -97,10 +97,20 @@ class TerminalDisplay(Display, threading.Thread):
                     Observable.fire(Event.DGT_FEN, fen=message.game.fen().split(' ')[0])
                     break
                 if case(Message.SEARCH_STARTED):
-                    print('Computer starts thinking - new mode: ' + str(message.engine_status))
+                    if message.engine_status == EngineStatus.THINK:
+                        print('Computer starts thinking')
+                    if message.engine_status == EngineStatus.PONDER:
+                        print('Computer searchs pondering')
+                    if message.engine_status == EngineStatus.WAIT:
+                        print('Computer searchs waiting - hmmm')
                     break
                 if case(Message.SEARCH_STOPPED):
-                    print('Computer stopped thinking - old mode: ' + str(message.engine_status))
+                    if message.engine_status == EngineStatus.THINK:
+                        print('Computer stops thinking')
+                    if message.engine_status == EngineStatus.PONDER:
+                        print('Computer stops pondering')
+                    if message.engine_status == EngineStatus.WAIT:
+                        print('Computer stops waiting - hmmm')
                     break
                 if case():  # Default
                     pass

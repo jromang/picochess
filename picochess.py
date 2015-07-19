@@ -219,7 +219,7 @@ def main():
         time.run(game.turn)
         analyse()
 
-    def stop_thinking():
+    def stop_search():
         """
         Stop current search.
         :return:
@@ -229,14 +229,18 @@ def main():
             engine_thread.cancel()
         engine.stop()
         nonlocal engine_status
-        Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=res)
+        # @todo pv_game_mode is actually wrong, only valid in game mode => but result isnt used
+        Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=pv_game_mode)
         engine_status = EngineStatus.WAIT
 
-    def stop_thinking_and_clock():
+    def stop_clock():
         nonlocal time_control
         time_control.stop()
         Display.show(Message.STOP_CLOCK)
-        stop_thinking()
+    
+    def stop_search_and_clock():
+        stop_clock()
+        stop_search()
 
     def check_game_state(game, play_mode):
         """
@@ -269,7 +273,7 @@ def main():
             if interaction_mode == Mode.GAME:
                 if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
                         (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):
-                    stop_thinking()
+                    stop_search()
                     if game.move_stack:
                         game.pop()
             legal_moves = list(game.legal_moves)
@@ -286,7 +290,7 @@ def main():
                 game_history.pop()
                 if game_history.fen().split(' ')[0] == fen:
                     logging.debug("Undoing game until FEN :" + fen)
-                    stop_thinking()
+                    stop_search()
                     while len(game_history.move_stack) < len(game.move_stack):
                         game.pop()
                     if interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
@@ -363,7 +367,7 @@ def main():
                                 Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
                                 think(time_control)
                     elif interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
-                        stop_thinking_and_clock()
+                        stop_search_and_clock()
                         fen = game.fen()
                         game.push(move)
                         if check_game_state(game, play_mode):
@@ -375,7 +379,7 @@ def main():
                             legal_fens = compute_legal_fens(game)
 
                     elif (interaction_mode == Mode.ANALYSIS) or (interaction_mode == Mode.KIBITZ):
-                        stop_thinking()
+                        stop_search()
                         fen = game.fen()
                         game.push(move)
                         if check_game_state(game, play_mode):
@@ -406,7 +410,7 @@ def main():
                     game.custom_fen = event.fen
 
                     legal_fens = compute_legal_fens(game)
-                    stop_thinking_and_clock()
+                    stop_search_and_clock()
                     time_control.reset()
 
                     interaction_mode = Mode.GAME
@@ -417,7 +421,7 @@ def main():
                 if case(Event.STOP_SEARCH):
                     move = pv_game_mode.bestmove
                     ponder = pv_game_mode.ponder
-                    stop_thinking_and_clock()
+                    stop_search_and_clock()
                     time_control.stop()
                     Display.show(Message.STOP_CLOCK)
                     fen_old = game.fen()
@@ -438,7 +442,7 @@ def main():
                         game = chess.Board()
 
                     legal_fens = compute_legal_fens(game)
-                    stop_thinking_and_clock()
+                    stop_search_and_clock()
                     time_control.reset()
 
                     set_wait_state()
@@ -499,9 +503,10 @@ def main():
 
                 if case(Event.SET_MODE):
                     interaction_mode = event.mode
-                    # make our live easy: stop thinking (not needed if switch between the pondering modes)
-                    # and stop the clock (not needed, if clock isnt running, like in analysis mode). @todo
-                    stop_thinking_and_clock()
+                    if engine_status == EngineStatus.THINK:
+                        stop_search()  # dont need to stop, if pondering
+                    if interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
+                        stop_clock()  # only stop, if the clock is really running
                     set_wait_state()
                     Display.show(Message.INTERACTION_MODE, mode=event.mode)
                     break
@@ -509,13 +514,8 @@ def main():
                 if case(Event.CHANGE_PLAYMODE):
                     play_mode = PlayMode.PLAY_WHITE if play_mode == PlayMode.PLAY_BLACK else PlayMode.PLAY_BLACK
                     Display.show(Message.PLAY_MODE, play_mode=play_mode)
-                    # @todo since we can only be here, if the computer is waiting - that
-                    # @todo also means in game mode! the next two if's cant be false
-                    if interaction_mode == Mode.GAME:
-                        if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
-                                (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):
-                            if check_game_state(game, play_mode):
-                                think(time_control)
+                    if check_game_state(game, play_mode):
+                        think(time_control)
                     break
 
                 if case(Event.SET_TIME_CONTROL):
@@ -524,7 +524,7 @@ def main():
                     break
 
                 if case(Event.OUT_OF_TIME):
-                    stop_thinking_and_clock()
+                    stop_search_and_clock()
                     custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
                     Display.show(Message.GAME_ENDS, result=GameResult.TIME_CONTROL, moves=list(game.move_stack),
                                  color=event.color, play_mode=play_mode, custom_fen=custom_fen)

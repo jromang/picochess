@@ -185,11 +185,15 @@ class DGTDisplay(Observable, Display, threading.Thread):
             return fen.replace("KQkq", castling_fen)
 
         if self.dgt_clock_menu == Menu.GAME_MENU:
-            if self.engine_status == EngineStatus.THINK and self.mode == Mode.GAME:
-                self.fire(Event.STOP_SEARCH)
-            else:
-                self.fire(Event.CHANGE_PLAYMODE)
-
+            if self.mode == Mode.GAME:
+                if self.engine_status == EngineStatus.THINK:
+                    self.fire(Event.STOP_SEARCH)
+                else:
+                    self.fire(Event.CHANGE_PLAYMODE)
+            if self.mode == Mode.OBSERVE or self.mode == Mode.REMOTE:
+                pass # @todo implement "toggle start/stop" clock
+            if self.mode == Mode.ANALYSIS or self.mode == Mode.KIBITZ:
+                Display.show(Dgt.DISPLAY_TEXT, text="error", xl=None, beep=True)
         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
             Display.show(Dgt.DISPLAY_TEXT, text="scan", xl=None, beep=True)
             to_move = 'w' if self.setup_to_move == chess.WHITE else 'b'
