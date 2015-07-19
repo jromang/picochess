@@ -227,17 +227,16 @@ def main():
         nonlocal engine_thread
         if engine_thread:
             engine_thread.cancel()
-        res = engine.stop()
+        engine.stop()
         nonlocal engine_status
         Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=res)
         engine_status = EngineStatus.WAIT
-        return res
 
     def stop_thinking_and_clock():
         nonlocal time_control
         time_control.stop()
         Display.show(Message.STOP_CLOCK)
-        return stop_thinking()
+        stop_thinking()
 
     def check_game_state(game, play_mode):
         """
@@ -415,10 +414,18 @@ def main():
                     Display.show(Message.START_NEW_GAME)
                     break
 
-                if case(Event.STOP_SEARCH): # issue 99 - not used right now!
-                    print('stop-search result:')
-                    result = stop_thinking_and_clock()
-                    print(result)
+                if case(Event.STOP_SEARCH):
+                    move = pv_game_mode.bestmove
+                    ponder = pv_game_mode.ponder
+                    stop_thinking_and_clock()
+                    time_control.stop()
+                    Display.show(Message.STOP_CLOCK)
+                    fen_old = game.fen()
+                    game.push(move)
+                    Display.show(Message.COMPUTER_MOVE, move=move, ponder=ponder, fen=fen_old, fen_new=game.fen(),
+                                 game=copy.deepcopy(game), time_control=time_control)
+                    # if check_game_state(game, interaction_mode):
+                    legal_fens = compute_legal_fens(game)
                     break
 
                 if case(Event.NEW_GAME):  # User starts a new game
@@ -492,9 +499,10 @@ def main():
 
                 if case(Event.SET_MODE):
                     interaction_mode = event.mode
-                    if interaction_mode == Mode.GAME and engine_status == EngineStatus.PONDER:
-                        stop_thinking()  # stop the ponder mode, if we switch to game
-                    set_wait_state()  # if switched to game mode, bring to waiting
+                    # make our live easy: stop thinking (not needed if switch between the pondering modes)
+                    # and stop the clock (not needed, if clock isnt running, like in analysis mode). @todo
+                    stop_thinking_and_clock()
+                    set_wait_state()
                     Display.show(Message.INTERACTION_MODE, mode=event.mode)
                     break
 

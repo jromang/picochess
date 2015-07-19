@@ -185,16 +185,10 @@ class DGTDisplay(Observable, Display, threading.Thread):
             return fen.replace("KQkq", castling_fen)
 
         if self.dgt_clock_menu == Menu.GAME_MENU:
-            # change the play_mode is only valid when computer is waiting (users turn)
-            # (=>only possible in game-mode) cause thinking can't be stopped right now
-            if self.engine_status == EngineStatus.WAIT:
-                self.fire(Event.CHANGE_PLAYMODE)
+            if self.engine_status == EngineStatus.THINK and self.mode == Mode.GAME:
+                self.fire(Event.STOP_SEARCH)
             else:
-                # if in game mode, stop the search (see above)
-                # if in analysis mode, show error message
-                # if in observe/remote mode, toggle between halt/run clock
-                # for now we show an error ;-)
-                Display.show(Dgt.DISPLAY_TEXT, text="error", xl=None, beep=True)
+                self.fire(Event.CHANGE_PLAYMODE)
 
         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
             Display.show(Dgt.DISPLAY_TEXT, text="scan", xl=None, beep=True)
@@ -214,17 +208,12 @@ class DGTDisplay(Observable, Display, threading.Thread):
 
     def process_button3(self):
         if self.dgt_clock_menu == Menu.GAME_MENU:
-            # during thinking (=>only possible in game mode), its not valid to
-            # change the game-mode cause thinking can't be stopped right now
-            if self.engine_status != EngineStatus.THINK:
-                mode_list = list(iter(Mode))
-                self.mode_index += 1
-                if self.mode_index >= len(mode_list):
-                    self.mode_index = 0
-                mode_new = mode_list[self.mode_index]
-                self.fire(Event.SET_MODE, mode=mode_new)
-            else:
-                Display.show(Dgt.DISPLAY_TEXT, text="error", xl=None, beep=True)
+            mode_list = list(iter(Mode))
+            self.mode_index += 1
+            if self.mode_index >= len(mode_list):
+                self.mode_index = 0
+            mode_new = mode_list[self.mode_index]
+            self.fire(Event.SET_MODE, mode=mode_new)
 
         if self.dgt_clock_menu == Menu.SETTINGS_MENU:
             Display.show(Dgt.DISPLAY_TEXT, text="reboot", xl=None, beep=True)

@@ -107,7 +107,7 @@ class Engine:
         self.engine.position(game)
 
     def stop(self):
-        return self.engine.stop()
+        self.engine.stop()
 
     def go(self, time_dict):
         return self.engine.go(**time_dict)
