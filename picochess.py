@@ -502,11 +502,11 @@ def main():
                     break
 
                 if case(Event.SET_MODE):
+                    if interaction_mode == Mode.GAME or interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
+                        stop_clock()  # only stop, if the clock is really running
                     interaction_mode = event.mode
                     if engine_status == EngineStatus.THINK:
                         stop_search()  # dont need to stop, if pondering
-                    if interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
-                        stop_clock()  # only stop, if the clock is really running
                     set_wait_state()
                     Display.show(Message.INTERACTION_MODE, mode=event.mode)
                     break
