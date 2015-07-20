@@ -734,7 +734,7 @@ class Move(object):
             promotion = PIECE_SYMBOLS.index(uci[4])
             return cls(SQUARE_NAMES.index(uci[0:2]), SQUARE_NAMES.index(uci[2:4]), promotion)
         else:
-            raise ValueError("expected uci string to be of length 4 or 5")
+            raise ValueError("expected uci string to be of length 4 or 5: {0}".format(repr(uci)))
 
     @classmethod
     def null(cls):
@@ -1831,16 +1831,24 @@ class Board(object):
 
         fen.append(self.castling_xfen())
 
-        # Insert en-passant square only if at least pseudo legal.
+        # Insert en-passant square only if legal.
         if self.ep_square:
+            # Get potential capturing pawns.
             if self.turn == WHITE:
-                ep_mask = shift_down(BB_SQUARES[self.ep_square])
+                ep_masks = shift_down(BB_SQUARES[self.ep_square])
             else:
-                ep_mask = shift_up(BB_SQUARES[self.ep_square])
-            ep_mask = shift_left(ep_mask) | shift_right(ep_mask)
+                ep_masks = shift_up(BB_SQUARES[self.ep_square])
+            ep_masks = shift_left(ep_masks) | shift_right(ep_masks)
+            ep_masks = ep_masks & self.pawns & self.occupied_co[self.turn]
 
-            if ep_mask & self.pawns & self.occupied_co[self.turn]:
-                fen.append(SQUARE_NAMES[self.ep_square])
+            # Check legality.
+            while ep_masks:
+                ep_mask = ep_masks & -ep_masks
+                move = Move(bit_scan(ep_mask), self.ep_square)
+                if self.is_legal(move):
+                    fen.append(SQUARE_NAMES[self.ep_square])
+                    break
+                ep_masks = ep_masks & (ep_masks - 1)
             else:
                 fen.append("-")
         else:
@@ -2107,7 +2115,7 @@ class Board(object):
             if rook is not None and rook >= 0 and move in self.generate_castling_moves():
                 return move
             else:
-                raise ValueError("illegal san: {0}".format(repr(san)))
+                raise ValueError("illegal san: {0} in {1}".format(repr(san), self.fen()))
         elif san in ("O-O-O", "O-O-O+", "O-O-O#"):
             king = self.kings & self.occupied_co[self.turn]
             rooks = self.castling_rights & (BB_RANK_1 if self.turn == WHITE else BB_RANK_8)
@@ -2117,7 +2125,7 @@ class Board(object):
             if rook is not None and rook >= 0 and move in self.generate_castling_moves():
                 return move
             else:
-                raise ValueError("illegal san: {0}, {1}".format(repr(san), repr(self)))
+                raise ValueError("illegal san: {0} in {1}".format(repr(san), self.fen()))
 
         # Match normal moves.
         match = SAN_REGEX.match(san)
@@ -2169,12 +2177,12 @@ class Board(object):
                 continue
 
             if matched_move:
-                raise ValueError("ambiguous san: {0}".format(repr(san)))
+                raise ValueError("ambiguous san: {0} in {1}".format(repr(san), self.fen()))
 
             matched_move = move
 
         if not matched_move:
-            raise ValueError("illegal san: {0}".format(repr(san)))
+            raise ValueError("illegal san: {0} in {1}".format(repr(san), self.fen()))
 
         return matched_move
 
@@ -2345,7 +2353,7 @@ class Board(object):
                         move.to_square = A8
 
         if not self.is_legal(move):
-            raise ValueError("illegal uci: {0}".format(repr(uci)))
+            raise ValueError("illegal uci: {0} in {1}".format(repr(uci), self.fen()))
 
         return move
 
