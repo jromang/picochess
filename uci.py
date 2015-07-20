@@ -30,7 +30,7 @@ class Informer(chess.uci.InfoHandler, Observable):
         self.mate_found = False
         super().on_go()
 
-    def on_bestmove(self,bestmove,ponder):
+    def on_bestmove(self,bestmove, ponder):
         self.fire(Event.BEST_MOVE, move=bestmove, ponder=ponder)
         super().on_bestmove(bestmove, ponder)
 
@@ -69,6 +69,7 @@ class Engine:
                     handler = Informer()
                     self.engine.info_handlers.append(handler)
             self.options = {}
+            self.future = None
         except OSError:
             logging.exception("OS error in starting engine")
 
@@ -108,10 +109,13 @@ class Engine:
 
     def stop(self):
         self.engine.stop()
+        return self.future.result()
 
     def go(self, time_dict):
-        return self.engine.go(**time_dict)
+        self.future = self.engine.go(**time_dict)
+        return self.future
 
     def ponder(self):
-        return self.engine.go(ponder=True, infinite=True)
+        self.future = self.engine.go(ponder=True, infinite=True, async_callback=True)
+        return self.future
 

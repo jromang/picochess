@@ -71,7 +71,8 @@ def main():
     parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
     parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
     args = parser.parse_args()
-    engine_thread = None
+
+    # engine_thread = None
 
     # Enable logging
     logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
@@ -189,12 +190,7 @@ def main():
             nonlocal engine_status
             engine_status = EngineStatus.THINK
             Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
-            # res = engine.go(time.uci())
-            # engine_status = EngineStatus.WAIT
-            # Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=res)
-            nonlocal engine_thread
-            engine_thread = threading.Timer(0, engine.go, [time.uci()])
-            engine_thread.start()
+            engine.go(time.uci())
 
     def analyse():
         """
@@ -205,10 +201,7 @@ def main():
         nonlocal engine_status
         engine_status = EngineStatus.PONDER
         Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
-        # engine.ponder()
-        nonlocal engine_thread
-        engine_thread = threading.Timer(0, engine.ponder)
-        engine_thread.start()
+        engine.ponder()
 
     def observe(time):
         """
@@ -224,14 +217,16 @@ def main():
         Stop current search.
         :return:
         """
-        nonlocal engine_thread
-        if engine_thread:
-            engine_thread.cancel()
-        engine.stop()
         nonlocal engine_status
-        # @todo pv_game_mode is actually wrong, only valid in game mode => but result isnt used
-        Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=pv_game_mode)
-        engine_status = EngineStatus.WAIT
+        if engine_status == EngineStatus.WAIT:
+            logging.debug('engine already stopped')
+            print('Why we stop an already stopped engine??')
+            return None
+        else:
+            res = engine.stop()
+            Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=res)
+            engine_status = EngineStatus.WAIT
+            return res
 
     def stop_clock():
         nonlocal time_control
@@ -240,7 +235,7 @@ def main():
     
     def stop_search_and_clock():
         stop_clock()
-        stop_search()
+        return stop_search()
 
     def check_game_state(game, play_mode):
         """
@@ -378,7 +373,7 @@ def main():
                             Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
                             legal_fens = compute_legal_fens(game)
 
-                    elif (interaction_mode == Mode.ANALYSIS) or (interaction_mode == Mode.KIBITZ):
+                    elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
                         stop_search()
                         fen = game.fen()
                         game.push(move)
@@ -419,9 +414,9 @@ def main():
                     break
 
                 if case(Event.STOP_SEARCH):
-                    move = pv_game_mode.bestmove
-                    ponder = pv_game_mode.ponder
-                    stop_search_and_clock()
+                    res = stop_search_and_clock()
+                    move = res.bestmove
+                    ponder = res.ponder
                     time_control.stop()
                     Display.show(Message.STOP_CLOCK)
                     fen_old = game.fen()
@@ -456,31 +451,32 @@ def main():
                     break
 
                 if case(Event.BEST_MOVE):
-                    move = event.move
-                    ponder = event.ponder
-                    # The next three lines now here, cause of threads @ think()
-                    res = chess.uci.BestMove(move, ponder)
-                    Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=res)
-                    engine_status = EngineStatus.WAIT
-                    # Check if we are in play mode and it is computer's turn
-                    if interaction_mode == Mode.GAME:
-                        if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
-                                (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):
-                            time_control.stop()
-                            Display.show(Message.STOP_CLOCK)
-                            fen_old = game.fen()
-                            game.push(move)
-                            Display.show(Message.COMPUTER_MOVE, move=move, ponder=ponder, fen=fen_old, fen_new=game.fen(),
-                                         game=copy.deepcopy(game), time_control=time_control)
-                            # if check_game_state(game, interaction_mode):
-                            legal_fens = compute_legal_fens(game)
+                    if engine_status != EngineStatus.PONDER:
+                        move = event.move
+                        ponder = event.ponder
+                        res = chess.uci.BestMove(move, ponder)
+                        Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=res)
+                        engine_status = EngineStatus.WAIT
+                        # Check if we are in play mode and it is computer's turn
+                        if interaction_mode == Mode.GAME:
+                            if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
+                                    (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):
+                                time_control.stop()
+                                Display.show(Message.STOP_CLOCK)
+                                fen_old = game.fen()
+                                game.push(move)
+                                Display.show(Message.COMPUTER_MOVE, move=move, ponder=ponder, fen=fen_old, fen_new=game.fen(),
+                                             game=copy.deepcopy(game), time_control=time_control)
+                                # if check_game_state(game, interaction_mode):
+                                legal_fens = compute_legal_fens(game)
                     break
 
                 if case(Event.NEW_PV):
                     if interaction_mode == Mode.GAME:
-                        move = event.pv[0] if len(event.pv) > 0 else None
-                        ponder = event.pv[1] if len(event.pv) > 1 else None
-                        pv_game_mode = chess.uci.BestMove(move, ponder)
+                        pass
+                        # move = event.pv[0] if len(event.pv) > 0 else None
+                        # ponder = event.pv[1] if len(event.pv) > 1 else None
+                        # pv_game_mode = chess.uci.BestMove(move, ponder)
                     else:
                         Display.show(Message.NEW_PV, pv=event.pv, interaction_mode=interaction_mode, fen=game.fen())
                     break
@@ -507,6 +503,13 @@ def main():
                     interaction_mode = event.mode
                     if engine_status == EngineStatus.THINK:
                         stop_search()  # dont need to stop, if pondering
+                    if engine_status == EngineStatus.PONDER and interaction_mode == Mode.GAME:
+                        stop_search()  # if change from ponder modes to game, also stops the pondering
+                    if engine_status == EngineStatus.WAIT:  # if new mode = pondering, start the pondering
+                        if interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
+                            analyse()
+                        if interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
+                            observe(time_control)
                     set_wait_state()
                     Display.show(Message.INTERACTION_MODE, mode=event.mode)
                     break

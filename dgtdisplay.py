@@ -277,19 +277,19 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         self.engine_status = EngineStatus.WAIT
                         break
                     if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
-                        Display.show(Dgt.DISPLAY_TEXT, text="ok", xl=None, beep=self.enable_dgt_clock_beep)
+                        Display.show(Dgt.DISPLAY_TEXT, text="ok/done", xl=None, beep=self.enable_dgt_clock_beep)
                         Display.show(Dgt.LIGHT_CLEAR, enable_board_leds=self.enable_board_leds)
                         self.display_move = False
                         break
                     if case(Message.USER_MOVE):
                         self.display_move = False
-                        Display.show(Dgt.DISPLAY_TEXT, text="ok", xl=None, beep=self.enable_dgt_clock_beep)
+                        Display.show(Dgt.DISPLAY_TEXT, text="ok/user", xl=None, beep=self.enable_dgt_clock_beep)
                         break
                     if case(Message.REVIEW_MODE_MOVE):
                         self.last_move = message.move
                         self.last_fen = message.fen
                         self.display_move = False
-                        Display.show(Dgt.DISPLAY_TEXT, text="ok", xl=None, beep=self.enable_dgt_clock_beep)
+                        Display.show(Dgt.DISPLAY_TEXT, text="ok/mode", xl=None, beep=self.enable_dgt_clock_beep)
                         break
                     if case(Message.LEVEL):
                         level = str(message.level)
@@ -342,7 +342,9 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         logging.info(text)
                         break
                     if case(Message.SEARCH_STOPPED):
-                        text = 'Search already stopped' if self.engine_status == EngineStatus.WAIT else 'Search stopped'
+                        text = 'Search think stopped' if self.engine_status == EngineStatus.THINK else 'Search ponder stopped'
+                        if self.engine_status == EngineStatus.WAIT:
+                            text = 'Search wait stopped - strange!'
                         self.engine_status = EngineStatus.WAIT
                         logging.info(text)
                         break
