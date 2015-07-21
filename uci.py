@@ -31,7 +31,7 @@ class Informer(chess.uci.InfoHandler, Observable):
         super().on_go()
 
     def on_bestmove(self,bestmove, ponder):
-        self.fire(Event.BEST_MOVE, move=bestmove, ponder=ponder)
+        self.fire(Event.BEST_MOVE, result=chess.uci.BestMove(bestmove, ponder))
         super().on_bestmove(bestmove, ponder)
 
     def score(self,cp, mate, lowerbound, upperbound):

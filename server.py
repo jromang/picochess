@@ -258,7 +258,7 @@ class WebDisplay(Display, threading.Thread):
             r = {'move': str(message.move), 'pgn': pgn_str, 'fen': fen}
 
             if message == Message.COMPUTER_MOVE:
-                r['msg']= 'Computer move: '+str(message.move)
+                r['msg']= 'Computer move: '+str(message.result.bestmove)
             elif message == Message.USER_MOVE:
                 r['msg']= 'User move: '+str(message.move)
 

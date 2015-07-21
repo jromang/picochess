@@ -191,7 +191,8 @@ class DGTDisplay(Observable, Display, threading.Thread):
                 else:
                     self.fire(Event.CHANGE_PLAYMODE)
             if self.mode == Mode.OBSERVE or self.mode == Mode.REMOTE:
-                pass # @todo implement "toggle start/stop" clock
+                # @todo implement "toggle start/stop" clock
+                Display.show(Dgt.DISPLAY_TEXT, text="no funct", xl="nofunc", beep=True)
             if self.mode == Mode.ANALYSIS or self.mode == Mode.KIBITZ:
                 Display.show(Dgt.DISPLAY_TEXT, text="error", xl=None, beep=True)
         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
@@ -250,9 +251,11 @@ class DGTDisplay(Observable, Display, threading.Thread):
                 message = self.message_queue.get_nowait()
                 for case in switch(message):
                     if case(Message.COMPUTER_MOVE):
-                        uci_move = message.move.uci()
-                        self.last_move = message.move
-                        self.hint_move = chess.Move.null() if message.ponder is None else message.ponder
+                        move = message.result.bestmove
+                        ponder = message.result.ponder
+                        uci_move = move.uci()
+                        self.last_move = move
+                        self.hint_move = chess.Move.null() if ponder is None else ponder
                         self.hint_fen = message.game.fen()
                         # @todo LocutusOfPenguin: getting a wrong game somehow...check it!
                         # self.hint_fen = message.fen_new # game.fen() & message_fen_new should be SAME!
@@ -260,7 +263,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         self.display_move = False
                         logging.info("DGT SEND BEST MOVE:"+uci_move)
                         # Display the move
-                        Display.show(Dgt.DISPLAY_MOVE, move=message.move, fen=message.fen, beep=self.enable_dgt_clock_beep)
+                        Display.show(Dgt.DISPLAY_MOVE, move=move, fen=message.fen, beep=self.enable_dgt_clock_beep)
                         Display.show(Dgt.LIGHT_SQUARES, squares=(uci_move[0:2], uci_move[2:4]), enable_board_leds=self.enable_board_leds)
                         break
                     if case(Message.START_NEW_GAME):
@@ -277,19 +280,19 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         self.engine_status = EngineStatus.WAIT
                         break
                     if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
-                        Display.show(Dgt.DISPLAY_TEXT, text="ok/done", xl=None, beep=self.enable_dgt_clock_beep)
+                        Display.show(Dgt.DISPLAY_TEXT, text="ok done", xl=None, beep=self.enable_dgt_clock_beep)
                         Display.show(Dgt.LIGHT_CLEAR, enable_board_leds=self.enable_board_leds)
                         self.display_move = False
                         break
                     if case(Message.USER_MOVE):
                         self.display_move = False
-                        Display.show(Dgt.DISPLAY_TEXT, text="ok/user", xl=None, beep=self.enable_dgt_clock_beep)
+                        Display.show(Dgt.DISPLAY_TEXT, text="ok user", xl=None, beep=self.enable_dgt_clock_beep)
                         break
                     if case(Message.REVIEW_MODE_MOVE):
                         self.last_move = message.move
                         self.last_fen = message.fen
                         self.display_move = False
-                        Display.show(Dgt.DISPLAY_TEXT, text="ok/mode", xl=None, beep=self.enable_dgt_clock_beep)
+                        Display.show(Dgt.DISPLAY_TEXT, text="ok mode", xl=None, beep=self.enable_dgt_clock_beep)
                         break
                     if case(Message.LEVEL):
                         level = str(message.level)

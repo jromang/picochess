@@ -111,7 +111,6 @@ class TerminalDisplay(Display, threading.Thread):
                         print('Computer stops pondering')
                     if message.engine_status == EngineStatus.WAIT:
                         print('Computer stops waiting - hmmm')
-                    print('Search result: ' + format(message.result))
                     break
                 if case():  # Default
                     pass
