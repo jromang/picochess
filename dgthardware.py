@@ -319,7 +319,17 @@ class DGTHardware(Observable, Display, threading.Thread):
                             self.clock_lock.release()
                         return None
                 else:
-                    self.displayed_text = None  # reset the saved text to unknown
+                    self.displayed_text = None  # reset saved text to unknown
+                    r_hours = message[0] & 0x0f
+                    r_mins = (message[1] >> 4) * 10 + message[1] & 0x0f
+                    r_secs = (message[2] >> 4) * 10 + message[1] & 0x0f
+                    l_hours = message[3] & 0x0f
+                    l_mins = (message[4] >> 4) * 10 + message[4] & 0x0f
+                    l_secs = (message[5] >> 4) * 10 + message[5] & 0x0f
+
+                    l_time = l_hours * 3600 + l_mins * 60 + l_secs
+                    r_time = r_hours * 3600 + r_mins * 60 + r_secs
+                    logging.debug('dgt clock time received {} : {}'.format(l_time, r_time))
                 break
             if case(Messages.DGT_MSG_BOARD_DUMP):
                 board = ''
