@@ -314,22 +314,18 @@ class DGTHardware(Observable, Display, threading.Thread):
                         logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
                     else:
                         logging.debug("Clock ACK %s", (ack0, ack1, ack2, ack3))
-
                         if self.clock_lock.locked():
                             self.clock_lock.release()
                         return None
-                else:
+                else:  # @todo filter out the all-zero messages
                     self.displayed_text = None  # reset saved text to unknown
                     r_hours = message[0] & 0x0f
-                    r_mins = (message[1] >> 4) * 10 + message[1] & 0x0f
-                    r_secs = (message[2] >> 4) * 10 + message[1] & 0x0f
+                    r_mins = (message[1] >> 4) * 10 + (message[1] & 0x0f)
+                    r_secs = (message[2] >> 4) * 10 + (message[1] & 0x0f)
                     l_hours = message[3] & 0x0f
-                    l_mins = (message[4] >> 4) * 10 + message[4] & 0x0f
-                    l_secs = (message[5] >> 4) * 10 + message[5] & 0x0f
-
-                    l_time = l_hours * 3600 + l_mins * 60 + l_secs
-                    r_time = r_hours * 3600 + r_mins * 60 + r_secs
-                    logging.debug('dgt clock time received {} : {}'.format(l_time, r_time))
+                    l_mins = (message[4] >> 4) * 10 + (message[4] & 0x0f)
+                    l_secs = (message[5] >> 4) * 10 + (message[5] & 0x0f)
+                    logging.info('dgt clock time received {} : {}'.format((l_hours, l_mins, l_secs), (r_hours, r_mins, r_secs)))
                 break
             if case(Messages.DGT_MSG_BOARD_DUMP):
                 board = ''
