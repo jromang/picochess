@@ -317,7 +317,7 @@ class DGTHardware(Observable, Display, threading.Thread):
                         if self.clock_lock.locked():
                             self.clock_lock.release()
                         return None
-                else:  # @todo filter out the all-zero messages
+                elif any(message):
                     self.displayed_text = None  # reset saved text to unknown
                     r_hours = message[0] & 0x0f
                     r_mins = (message[1] >> 4) * 10 + (message[1] & 0x0f)
