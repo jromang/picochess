@@ -183,6 +183,12 @@ class EngineStatus(AutoNumber):
     WAIT = ()
 
 
+class BeepLevel(AutoNumber):
+    YES = ()
+    NO = ()
+    CONFIG = ()
+
+
 class Observable(object):  # Input devices are observable
     def __init__(self):
         super(Observable, self).__init__()

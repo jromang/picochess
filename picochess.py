@@ -72,18 +72,18 @@ def main():
     parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
     args = parser.parse_args()
 
-    # engine_thread = None
-
     # Enable logging
     logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
-                        format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
-    logging.getLogger("chess.uci").setLevel(logging.INFO) # don't want to get so many python-chess uci messages
+                        format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s',
+                        datefmt="%Y-%m-%d %H:%M:%S")
+    logging.getLogger("chess.uci").setLevel(logging.INFO)  # don't want to get so many python-chess uci messages
 
     # Update
     update_picochess(args.auto_reboot)
 
     # Load UCI engine
-    engine = uci.Engine(args.engine, hostname=args.remote, username=args.user, key_file=args.server_key, password=args.password)
+    engine = uci.Engine(args.engine, hostname=args.remote, username=args.user,
+                        key_file=args.server_key, password=args.password)
 
     engine_name = engine.get().name
     if args.pgn_user:
@@ -109,23 +109,25 @@ def main():
     # send the options to the engine
     engine.send()
 
-    # Connect to DGT board
-    DGTDisplay(args.enable_dgt_board_leds, args.dgt_3000_clock, not args.disable_dgt_clock_beep).start()
+    # This class talks to DGTHardware or VirtualHardware
+    DGTDisplay().start()
 
     if args.dgt_port:
+        # Connect to DGT board
         logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
-        DGTHardware(args.dgt_port, args.dgt_3000_clock).start()
+        DGTHardware(args.dgt_port, args.enable_dgt_board_leds, args.dgt_3000_clock, args.disable_dgt_clock_beep).start()
     else:
-        logging.warning("No DGT board port provided")
         # Enable keyboard input and terminal display
+        logging.warning("No DGT board port provided")
         KeyboardInput().start()
         TerminalDisplay().start()
         VirtualHardware(args.dgt_3000_clock).start()
 
     # Save to PGN
-    PgnDisplay(args.pgn_file, email=args.email, fromINIMailGun_Key=args.mailgun_key,
-                        fromIniSmtp_Server=args.smtp_server, fromINISmtp_User=args.smtp_user,
-                        fromINISmtp_Pass=args.smtp_pass, fromINISmtp_Enc=args.smtp_encryption).start() 
+    PgnDisplay(
+        args.pgn_file, email=args.email, fromINIMailGun_Key=args.mailgun_key,
+        fromIniSmtp_Server=args.smtp_server, fromINISmtp_User=args.smtp_user,
+        fromINISmtp_Pass=args.smtp_pass, fromINISmtp_Enc=args.smtp_encryption).start()
 
     # Create ChessTalker for speech output
     talker = None
@@ -317,8 +319,6 @@ def main():
                                              "book": book, "time_control_string": "mov 5", "engine_status": engine_status
     })
 
-    pv_game_mode = None
-
     # Event loop
     while True:
         try:
@@ -466,9 +466,6 @@ def main():
                 if case(Event.NEW_PV):
                     if interaction_mode == Mode.GAME:
                         pass
-                        # move = event.pv[0] if len(event.pv) > 0 else None
-                        # ponder = event.pv[1] if len(event.pv) > 1 else None
-                        # pv_game_mode = chess.uci.BestMove(move, ponder)
                     else:
                         Display.show(Message.NEW_PV, pv=event.pv, interaction_mode=interaction_mode, fen=game.fen())
                     break
