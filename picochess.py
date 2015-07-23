@@ -186,11 +186,7 @@ def main():
             Observable.fire(Event.SCORE, score='book', mate=None)
         else:
             engine.position(game)
-            nonlocal engine_status
-            if engine_status != EngineStatus.WAIT:
-                logging.warning('Search think still not waiting - strange!')
-            engine_status = EngineStatus.THINK
-            Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
+            Display.show(Message.SEARCH_STARTED, engine_status=EngineStatus.THINK)
             engine.go(time.uci())
 
     def analyse(game):
@@ -199,11 +195,7 @@ def main():
         :return:
         """
         engine.position(game)
-        nonlocal engine_status
-        if engine_status != EngineStatus.WAIT:
-            logging.warning('Search ponder still not waiting - strange!')
-        engine_status = EngineStatus.PONDER
-        Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
+        Display.show(Message.SEARCH_STARTED, engine_status=EngineStatus.PONDER)
         engine.ponder()
 
     def observe(game, time):
@@ -220,13 +212,7 @@ def main():
         Stop current search.
         :return:
         """
-        nonlocal engine_status
-        if engine_status == EngineStatus.WAIT:
-            logging.info('engine already stopped')
-            print('Why we stop an already stopped engine??')
-            return None
-        else:
-            return engine.stop()
+        return engine.stop()
 
     def stop_clock():
         nonlocal time_control
@@ -259,7 +245,8 @@ def main():
             return True
         else:
             custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
-            Display.show(Message.GAME_ENDS, result=result, moves=list(game.move_stack), color=game.turn, play_mode=play_mode, custom_fen=custom_fen)
+            Display.show(Message.GAME_ENDS, result=result, moves=list(game.move_stack),
+                         color=game.turn, play_mode=play_mode, custom_fen=custom_fen)
             return False
 
     def process_fen(fen, legal_fens):
@@ -308,7 +295,6 @@ def main():
     book = chess.polyglot.open_reader(get_opening_books()[8][1])  # Default opening book (gm1950)
     interaction_mode = Mode.GAME   # Interaction mode
     play_mode = PlayMode.PLAY_WHITE
-    engine_status = EngineStatus.WAIT
     time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=5)
 
     system_info_thread = threading.Timer(0, display_system_info)
@@ -317,8 +303,7 @@ def main():
     # Startup - external
     Display.show(Message.UCI_OPTION_LIST, options=engine.get().options)
     Display.show(Message.STARTUP_INFO, info={"interaction_mode": interaction_mode, "play_mode": play_mode,
-                                             "book": book, "time_control_string": "mov 5", "engine_status": engine_status
-    })
+                                             "book": book, "time_control_string": "mov 5"})
 
     # Event loop
     while True:
@@ -412,7 +397,7 @@ def main():
                     break
 
                 if case(Event.STOP_SEARCH):
-                    if engine_status == EngineStatus.THINK:
+                    if engine.get_status() == EngineStatus.THINK:
                         stop_search_and_clock()
                     else:
                         play_mode = PlayMode.PLAY_WHITE if play_mode == PlayMode.PLAY_BLACK else PlayMode.PLAY_BLACK
@@ -445,10 +430,9 @@ def main():
                     break
 
                 if case(Event.BEST_MOVE):
-                    Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=event.result)
-                    engine_status = EngineStatus.WAIT
+                    Display.show(Message.SEARCH_STOPPED, engine_status=engine.get_status(), result=event.result)
 
-                    if engine_status != EngineStatus.PONDER:
+                    if engine.get_status() != EngineStatus.PONDER:
                         # Check if we are in play mode and it is computer's turn
                         if interaction_mode == Mode.GAME:
                             if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
@@ -487,13 +471,12 @@ def main():
                     break
 
                 if case(Event.SET_MODE):
-                    print('engine-status: ' + str(engine_status))
                     if interaction_mode == Mode.GAME or interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
                         stop_clock()  # only stop, if the clock is really running
                     interaction_mode = event.mode
-                    if engine_status == EngineStatus.THINK:
+                    if engine.get_status() == EngineStatus.THINK:
                         stop_search()  # dont need to stop, if pondering
-                    if engine_status == EngineStatus.PONDER and interaction_mode == Mode.GAME:
+                    if engine.get_status() == EngineStatus.PONDER and interaction_mode == Mode.GAME:
                         stop_search()  # if change from ponder modes to game, also stops the pondering
                     set_wait_state()
                     Display.show(Message.INTERACTION_MODE, mode=event.mode)

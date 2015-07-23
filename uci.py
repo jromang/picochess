@@ -70,6 +70,10 @@ class Engine:
                     self.engine.info_handlers.append(handler)
             self.options = {}
             self.future = None
+
+            self.res = None
+            self.status = EngineStatus.WAIT
+
         except OSError:
             logging.exception("OS error in starting engine")
 
@@ -108,14 +112,29 @@ class Engine:
         self.engine.position(game)
 
     def stop(self):
+        if self.status == EngineStatus.WAIT:
+            logging.info('engine already stopped')
         self.engine.stop()
         return self.future.result()
 
     def go(self, time_dict):
+        if self.status != EngineStatus.WAIT:
+            logging.warning('Search think still not waiting - strange!')
+        self.status = EngineStatus.THINK
+        time_dict['async_callback'] = self.callback
         self.future = self.engine.go(**time_dict)
         return self.future
 
     def ponder(self):
-        self.future = self.engine.go(ponder=True, infinite=True, async_callback=True)
+        if self.status != EngineStatus.WAIT:
+            logging.warning('Search ponder still not waiting - strange!')
+        self.status = EngineStatus.PONDER
+        self.future = self.engine.go(ponder=True, infinite=True, async_callback=self.callback)
         return self.future
 
+    def callback(self, command):
+        self.status = EngineStatus.WAIT
+        self.res = command.result()
+
+    def get_status(self):
+        return self.status

@@ -113,7 +113,6 @@ class DGTDisplay(Observable, Display, threading.Thread):
         self.reset_hint_and_score()
         self.mode_index = 0
         self.mode = Mode.GAME
-        # self.engine_status = EngineStatus.WAIT
 
     def reset_hint_and_score(self):
         self.hint_move = chess.Move.null()
@@ -266,7 +265,6 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         self.reset_hint_and_score()
                         self.mode = Mode.GAME
                         self.dgt_clock_menu = Menu.GAME_MENU
-                        # self.engine_status = EngineStatus.WAIT
                         break
                     if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
                         Display.show(Dgt.DISPLAY_TEXT, text="ok done", xl=None, beep=BeepLevel.CONFIG)
