@@ -301,6 +301,13 @@ class DGTHardware(Observable, Display, threading.Thread):
                     ack1 = ((message[2]) & 0x7f) | ((message[3] << 2) & 0x80)
                     ack2 = ((message[4]) & 0x7f) | ((message[0] << 3) & 0x80)
                     ack3 = ((message[5]) & 0x7f) | ((message[0] << 2) & 0x80)
+                    if ack1 == 0x88:
+                        # 6-49 34-52 18-51 10-50 66-53 | 0 => 4
+                        #      38-52 22-51 14-50 70-53 | 01 => 04
+                        #            50-51 42-50 98-53 | 12 => 14
+                        #                  26-50 82-53 | 23 => 24
+                        #                        74-53 | 34
+                        print(ack2, ack3)
                     if ack1 == 0x09:
                         if not self.clock_found:
                             self.clock_found = True
@@ -317,7 +324,7 @@ class DGTHardware(Observable, Display, threading.Thread):
                         if self.clock_lock.locked():
                             self.clock_lock.release()
                         return None
-                elif any(message):
+                elif any(message[:6]):
                     self.displayed_text = None  # reset saved text to unknown
                     r_hours = message[0] & 0x0f
                     r_mins = (message[1] >> 4) * 10 + (message[1] & 0x0f)

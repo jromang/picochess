@@ -121,7 +121,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
 
     def process_button0(self):
         if self.dgt_clock_menu == Menu.GAME_MENU and self.last_move:
-            Display.show(Dgt.DISPLAY_MOVE, move=self.last_move, fen=self.last_fen, beep=BeepLevel.Config)
+            Display.show(Dgt.DISPLAY_MOVE, move=self.last_move, fen=self.last_fen, beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
             self.setup_to_move = chess.WHITE if self.setup_to_move == chess.BLACK else chess.BLACK
@@ -132,7 +132,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
         if self.dgt_clock_menu == Menu.GAME_MENU:
             if self.display_move:
                 if bool(self.hint_move):
-                    Display.show(Dgt.DISPLAY_MOVE, move=self.hint_move, fen=self.hint_fen, beep=BeepLevel.Config)
+                    Display.show(Dgt.DISPLAY_MOVE, move=self.hint_move, fen=self.hint_fen, beep=BeepLevel.CONFIG)
                 else:
                     Display.show(Dgt.DISPLAY_TEXT, text="none", xl=None, beep=BeepLevel.NO)
             else:
@@ -258,11 +258,11 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         self.display_move = False
                         logging.info("DGT SEND BEST MOVE:"+uci_move)
                         # Display the move
-                        Display.show(Dgt.DISPLAY_MOVE, move=move, fen=message.fen, beep=BeepLevel.Config)
+                        Display.show(Dgt.DISPLAY_MOVE, move=move, fen=message.fen, beep=BeepLevel.CONFIG)
                         Display.show(Dgt.LIGHT_SQUARES, squares=(uci_move[0:2], uci_move[2:4]))
                         break
                     if case(Message.START_NEW_GAME):
-                        Display.show(Dgt.DISPLAY_TEXT, text="new game", xl="newgam", beep=BeepLevel.Config)
+                        Display.show(Dgt.DISPLAY_TEXT, text="new game", xl="newgam", beep=BeepLevel.CONFIG)
                         Display.show(Dgt.LIGHT_CLEAR)
                         self.last_move = None
                         self.hint_move = chess.Move.null()
@@ -275,46 +275,46 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         self.engine_status = EngineStatus.WAIT
                         break
                     if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
-                        Display.show(Dgt.DISPLAY_TEXT, text="ok done", xl=None, beep=BeepLevel.Config)
+                        Display.show(Dgt.DISPLAY_TEXT, text="ok done", xl=None, beep=BeepLevel.CONFIG)
                         Display.show(Dgt.LIGHT_CLEAR)
                         self.display_move = False
                         break
                     if case(Message.USER_MOVE):
                         self.display_move = False
-                        Display.show(Dgt.DISPLAY_TEXT, text="ok user", xl=None, beep=BeepLevel.Config)
+                        Display.show(Dgt.DISPLAY_TEXT, text="ok user", xl=None, beep=BeepLevel.CONFIG)
                         break
                     if case(Message.REVIEW_MODE_MOVE):
                         self.last_move = message.move
                         self.last_fen = message.fen
                         self.display_move = False
-                        Display.show(Dgt.DISPLAY_TEXT, text="ok mode", xl=None, beep=BeepLevel.Config)
+                        Display.show(Dgt.DISPLAY_TEXT, text="ok mode", xl=None, beep=BeepLevel.CONFIG)
                         break
                     if case(Message.LEVEL):
                         level = str(message.level)
-                        Display.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.Config)
+                        Display.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.CONFIG)
                         break
                     if case(Message.TIME_CONTROL):
-                        Display.show(Dgt.DISPLAY_TEXT, text=message.time_control_string, xl=None, beep=BeepLevel.Config)
+                        Display.show(Dgt.DISPLAY_TEXT, text=message.time_control_string, xl=None, beep=BeepLevel.CONFIG)
                         break
                     if case(Message.OPENING_BOOK):
                         book_name = message.book[0]
-                        Display.show(Dgt.DISPLAY_TEXT, text=book_name, xl=None, beep=BeepLevel.Config)
+                        Display.show(Dgt.DISPLAY_TEXT, text=book_name, xl=None, beep=BeepLevel.CONFIG)
                         break
                     if case(Message.USER_TAKE_BACK):
-                        Display.show(Dgt.DISPLAY_TEXT, text="takeback", xl="takbak", beep=BeepLevel.Config)
+                        Display.show(Dgt.DISPLAY_TEXT, text="takeback", xl="takbak", beep=BeepLevel.CONFIG)
                         self.display_move = False
                         break
                     if case(Message.GAME_ENDS):
                         # time.sleep(3)  # Let the move displayed on clock
-                        Display.show(Dgt.DISPLAY_TEXT, text=message.result.value, xl=None, beep=BeepLevel.Config)
+                        Display.show(Dgt.DISPLAY_TEXT, text=message.result.value, xl=None, beep=BeepLevel.CONFIG)
                         break
                     if case(Message.INTERACTION_MODE):
                         self.mode = message.mode
-                        Display.show(Dgt.DISPLAY_TEXT, text=message.mode.value, xl=None, beep=BeepLevel.Config)
+                        Display.show(Dgt.DISPLAY_TEXT, text=message.mode.value, xl=None, beep=BeepLevel.CONFIG)
                         break
                     if case(Message.PLAY_MODE):
                         pm = message.play_mode.value
-                        Display.show(Dgt.DISPLAY_TEXT, text=pm, xl=pm[:6], beep=BeepLevel.Config)
+                        Display.show(Dgt.DISPLAY_TEXT, text=pm, xl=pm[:6], beep=BeepLevel.CONFIG)
                         break
                     if case(Message.SCORE):
                         self.score = message.score
@@ -409,7 +409,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
                                       time_control_string=dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)])
                         elif fen in shutdown_map:
                             self.fire(Event.SHUTDOWN)
-                            Display.show(Dgt.DISPLAY_TEXT, text="poweroff", xl="powoff", beep=BeepLevel.Config)
+                            Display.show(Dgt.DISPLAY_TEXT, text="poweroff", xl="powoff", beep=BeepLevel.CONFIG)
                         else:
                             logging.debug("Fire Event.Fen with " + fen)
                             self.fire(Event.FEN, fen=fen)

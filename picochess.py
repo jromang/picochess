@@ -292,6 +292,7 @@ def main():
                     if interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
                         observe(copy.deepcopy(game), time_control)
                     Display.show(Message.USER_TAKE_BACK)
+                    # @todo inform that hint&value @display should be "NONE"
                     legal_fens = compute_legal_fens(game)
                     break
         return legal_fens
