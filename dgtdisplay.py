@@ -110,14 +110,17 @@ class DGTDisplay(Observable, Display, threading.Thread):
         self.dgt_clock_menu = Menu.GAME_MENU
         self.last_move = None
         self.last_fen = None
+        self.reset_hint_and_score()
+        self.mode_index = 0
+        self.mode = Mode.GAME
+        self.engine_status = EngineStatus.WAIT
+
+    def reset_hint_and_score(self):
         self.hint_move = chess.Move.null()
         self.hint_fen = None
         self.score = None
         self.mate = None
         self.display_move = False
-        self.mode_index = 0
-        self.mode = Mode.GAME
-        self.engine_status = EngineStatus.WAIT
 
     def process_button0(self):
         if self.dgt_clock_menu == Menu.GAME_MENU and self.last_move:
@@ -265,11 +268,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         Display.show(Dgt.DISPLAY_TEXT, text="new game", xl="newgam", beep=BeepLevel.CONFIG)
                         Display.show(Dgt.LIGHT_CLEAR)
                         self.last_move = None
-                        self.hint_move = chess.Move.null()
-                        self.hint_fen = None
-                        self.score = None
-                        self.mate = None
-                        self.display_move = False
+                        self.reset_hint_and_score()
                         self.mode = Mode.GAME
                         self.dgt_clock_menu = Menu.GAME_MENU
                         self.engine_status = EngineStatus.WAIT
@@ -301,8 +300,8 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         Display.show(Dgt.DISPLAY_TEXT, text=book_name, xl=None, beep=BeepLevel.CONFIG)
                         break
                     if case(Message.USER_TAKE_BACK):
+                        self.reset_hint_and_score()
                         Display.show(Dgt.DISPLAY_TEXT, text="takeback", xl="takbak", beep=BeepLevel.CONFIG)
-                        self.display_move = False
                         break
                     if case(Message.GAME_ENDS):
                         # time.sleep(3)  # Let the move displayed on clock

@@ -266,35 +266,22 @@ class DGTHardware(Observable, Display, threading.Thread):
             #     logging.info("Got clock version number")
             #     break
             if case(Messages.DGT_MSG_BWTIME):
-                # if message[0] == message[1] == message[2] == message[3] == message[4] == message[5] == 0:  # Clock Times message
-                    # print ("tumbler message: {0}".format(message))
-                    # clock_status = message[6]
-                    # old_flip_clock = self.flip_clock
-                    # self.flip_clock = bool(clock_status & 0x02)  # tumbler position high on right player
-                    # if old_flip_clock is not None and self.flip_clock != old_flip_clock:
-                    #     logging.debug("Tumbler pressed")
-                    #     # self.write([Commands.DGT_CLOCK_MESSAGE, 0x0a, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_SETNRUN,
-                    #     #            0, 0, 0, 0, 0, 0,
-                    #     #            0x04 | 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
-                    #     self.display_on_dgt_3000('menu')
-
-                # if message[0] == 10 and message[1] == 16 and message[3] == 10 and not message[5] and not message[6]:
-
-                if 5 <= message[4] <= 6 and message[5] == 49:
-                    logging.info("Button 0 pressed")
-                    self.fire(Event.DGT_BUTTON, button=0)
-                if 33 <= message[4] <= 34 and message[5] == 52:
-                    logging.info("Button 1 pressed")
-                    self.fire(Event.DGT_BUTTON, button=1)
-                if 17 <= message[4] <= 18 and message[5] == 51:
-                    logging.info("Button 2 pressed")
-                    self.fire(Event.DGT_BUTTON, button=2)
-                if 9 <= message[4] <= 10 and message[5] == 50:
-                    logging.info("Button 3 pressed")
-                    self.fire(Event.DGT_BUTTON, button=3)
-                if 65 <= message[4] <= 66 and message[5] == 53:
-                    logging.info("Button 4 pressed")
-                    self.fire(Event.DGT_BUTTON, button=4)
+                # This is OLD (soon be deleted) see at "ack1 = 0x88" for the correct version!
+                # if 5 <= message[4] <= 6 and message[5] == 49:
+                #     logging.info("Button 0 pressed")
+                #     self.fire(Event.DGT_BUTTON, button=0)
+                # if 33 <= message[4] <= 34 and message[5] == 52:
+                #     logging.info("Button 1 pressed")
+                #     self.fire(Event.DGT_BUTTON, button=1)
+                # if 17 <= message[4] <= 18 and message[5] == 51:
+                #     logging.info("Button 2 pressed")
+                #     self.fire(Event.DGT_BUTTON, button=2)
+                # if 9 <= message[4] <= 10 and message[5] == 50:
+                #     logging.info("Button 3 pressed")
+                #     self.fire(Event.DGT_BUTTON, button=3)
+                # if 65 <= message[4] <= 66 and message[5] == 53:
+                #     logging.info("Button 4 pressed")
+                #     self.fire(Event.DGT_BUTTON, button=4)
                 if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
                     # Construct the ack message
                     ack0 = ((message[1]) & 0x7f) | ((message[3] << 3) & 0x80)
@@ -302,12 +289,27 @@ class DGTHardware(Observable, Display, threading.Thread):
                     ack2 = ((message[4]) & 0x7f) | ((message[0] << 3) & 0x80)
                     ack3 = ((message[5]) & 0x7f) | ((message[0] << 2) & 0x80)
                     if ack1 == 0x88:
-                        # 6-49 34-52 18-51 10-50 66-53 | 0 => 4
-                        #      38-52 22-51 14-50 70-53 | 01 => 04
-                        #            50-51 42-50 98-53 | 12 => 14
-                        #                  26-50 82-53 | 23 => 24
-                        #                        74-53 | 34
-                        print(ack2, ack3)
+                        # this are the other (ack2-ack3) codes, f.e. for 2 buttons pressed at same time
+                        # 6-49 34-52 18-51 10-50 66-53 | single button
+                        #      38-52 22-51 14-50 70-53 | button 0 + 1-4
+                        #            50-51 42-50 98-53 | button 1 + 2-4
+                        #                  26-50 82-53 | button 2 + 3-4
+                        #                        74-53 | button 3 + 4
+                        if ack3 == 49:
+                            logging.info("Button 0 pressed")
+                            self.fire(Event.DGT_BUTTON, button=0)
+                        if ack3 == 52:
+                            logging.info("Button 1 pressed")
+                            self.fire(Event.DGT_BUTTON, button=1)
+                        if ack3 == 51:
+                            logging.info("Button 2 pressed")
+                            self.fire(Event.DGT_BUTTON, button=2)
+                        if ack3 == 50:
+                            logging.info("Button 3 pressed")
+                            self.fire(Event.DGT_BUTTON, button=3)
+                        if ack3 == 53:
+                            logging.info("Button 4 pressed")
+                            self.fire(Event.DGT_BUTTON, button=4)
                     if ack1 == 0x09:
                         if not self.clock_found:
                             self.clock_found = True
