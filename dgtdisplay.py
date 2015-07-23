@@ -113,7 +113,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
         self.reset_hint_and_score()
         self.mode_index = 0
         self.mode = Mode.GAME
-        self.engine_status = EngineStatus.WAIT
+        # self.engine_status = EngineStatus.WAIT
 
     def reset_hint_and_score(self):
         self.hint_move = chess.Move.null()
@@ -183,11 +183,9 @@ class DGTDisplay(Observable, Display, threading.Thread):
             return fen.replace("KQkq", castling_fen)
 
         if self.dgt_clock_menu == Menu.GAME_MENU:
+            print('mode: ' + str(self.mode))
             if self.mode == Mode.GAME:
-                if self.engine_status == EngineStatus.THINK:
-                    self.fire(Event.STOP_SEARCH)
-                else:
-                    self.fire(Event.CHANGE_PLAYMODE)
+                self.fire(Event.STOP_SEARCH)
             if self.mode == Mode.OBSERVE or self.mode == Mode.REMOTE:
                 # @todo implement "toggle start/stop" clock
                 Display.show(Dgt.DISPLAY_TEXT, text="no funct", xl="nofunc", beep=BeepLevel.YES)
@@ -251,16 +249,13 @@ class DGTDisplay(Observable, Display, threading.Thread):
                     if case(Message.COMPUTER_MOVE):
                         move = message.result.bestmove
                         ponder = message.result.ponder
-                        uci_move = move.uci()
                         self.last_move = move
                         self.hint_move = chess.Move.null() if ponder is None else ponder
                         self.hint_fen = message.game.fen()
-                        # @todo LocutusOfPenguin: getting a wrong game somehow...check it!
-                        # self.hint_fen = message.fen_new # game.fen() & message_fen_new should be SAME!
                         self.last_fen = message.fen
                         self.display_move = False
-                        logging.info("DGT SEND BEST MOVE:"+uci_move)
                         # Display the move
+                        uci_move = move.uci()
                         Display.show(Dgt.DISPLAY_MOVE, move=move, fen=message.fen, beep=BeepLevel.CONFIG)
                         Display.show(Dgt.LIGHT_SQUARES, squares=(uci_move[0:2], uci_move[2:4]))
                         break
@@ -271,7 +266,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         self.reset_hint_and_score()
                         self.mode = Mode.GAME
                         self.dgt_clock_menu = Menu.GAME_MENU
-                        self.engine_status = EngineStatus.WAIT
+                        # self.engine_status = EngineStatus.WAIT
                         break
                     if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
                         Display.show(Dgt.DISPLAY_TEXT, text="ok done", xl=None, beep=BeepLevel.CONFIG)
@@ -332,18 +327,6 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         self.hint_fen = message.fen
                         if message.interaction_mode == Mode.ANALYSIS:
                             Display.show(Dgt.DISPLAY_MOVE, move=self.hint_move, fen=self.hint_fen, beep=BeepLevel.NO)
-                        break
-                    if case(Message.SEARCH_STARTED):
-                        text = 'Search think started' if message.engine_status == EngineStatus.THINK else 'Search ponder started'
-                        self.engine_status = message.engine_status
-                        logging.info(text)
-                        break
-                    if case(Message.SEARCH_STOPPED):
-                        text = 'Search think stopped' if self.engine_status == EngineStatus.THINK else 'Search ponder stopped'
-                        if self.engine_status == EngineStatus.WAIT:
-                            text = 'Search wait stopped - strange!'
-                        self.engine_status = EngineStatus.WAIT
-                        logging.info(text)
                         break
                     if case(Message.RUN_CLOCK):
                         # @todo Make this code independent from DGT Hex codes => more abstract

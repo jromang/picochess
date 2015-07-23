@@ -55,7 +55,6 @@ class Event(AutoNumber):
     KEYBOARD_MOVE = ()  # Keyboard sends a move (to be transfered to a fen)
     OPENING_BOOK = ()  # User chooses an opening book
     SET_MODE = ()  # Change interaction mode
-    CHANGE_PLAYMODE = ()  # Toogle between the play modes
     SETUP_POSITION = ()  # Setup custom position
     # dgt events
     DGT_BUTTON = () # User pressed a button at the dgt clock

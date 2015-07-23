@@ -92,8 +92,9 @@ class TerminalDisplay(Display, threading.Thread):
                 if case(Message.COMPUTER_MOVE):
                     print('\n' + str(message.game))
                     print(message.game.fen())
-                    # print('emulate user to make the computer move...sleeping for one second')
-                    # time.sleep(1)
+                    print('emulate user to make the computer move...sleeping for one second')
+                    time.sleep(1)
+                    logging.debug('emulate user now finished doing computer move')
                     Observable.fire(Event.DGT_FEN, fen=message.game.fen().split(' ')[0])
                     break
                 if case(Message.SEARCH_STARTED):

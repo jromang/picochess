@@ -179,14 +179,16 @@ def main():
         time.run(game.turn)
         if book_move:
             Display.show(Message.BOOK_MOVE, move=book_move)
-            game.push(book_move)
-            book_ponder = weighted_choice(book, game)
-            game.pop()
+            g = copy.deepcopy(game)
+            g.push(book_move)
+            book_ponder = weighted_choice(book, g)
             Observable.fire(Event.BEST_MOVE, result=chess.uci.BestMove(book_move, book_ponder))
             Observable.fire(Event.SCORE, score='book', mate=None)
         else:
             engine.position(game)
             nonlocal engine_status
+            if engine_status != EngineStatus.WAIT:
+                logging.warning('Search think still not waiting - strange!')
             engine_status = EngineStatus.THINK
             Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
             engine.go(time.uci())
@@ -198,6 +200,8 @@ def main():
         """
         engine.position(game)
         nonlocal engine_status
+        if engine_status != EngineStatus.WAIT:
+            logging.warning('Search ponder still not waiting - strange!')
         engine_status = EngineStatus.PONDER
         Display.show(Message.SEARCH_STARTED, engine_status=engine_status)
         engine.ponder()
@@ -222,10 +226,7 @@ def main():
             print('Why we stop an already stopped engine??')
             return None
         else:
-            res = engine.stop()
-            Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=res)
-            engine_status = EngineStatus.WAIT
-            return res
+            return engine.stop()
 
     def stop_clock():
         nonlocal time_control
@@ -411,15 +412,13 @@ def main():
                     break
 
                 if case(Event.STOP_SEARCH):
-                    res = stop_search_and_clock()
-                    time_control.stop()
-                    Display.show(Message.STOP_CLOCK)
-                    fen_old = game.fen()
-                    game.push(res.bestmove)
-                    Display.show(Message.COMPUTER_MOVE, result=res, fen=fen_old, fen_new=game.fen(),
-                                 game=copy.deepcopy(game), time_control=time_control)
-                    # if check_game_state(game, interaction_mode):
-                    legal_fens = compute_legal_fens(game)
+                    if engine_status == EngineStatus.THINK:
+                        stop_search_and_clock()
+                    else:
+                        play_mode = PlayMode.PLAY_WHITE if play_mode == PlayMode.PLAY_BLACK else PlayMode.PLAY_BLACK
+                        Display.show(Message.PLAY_MODE, play_mode=play_mode)
+                        if check_game_state(game, play_mode):
+                            think(copy.deepcopy(game), time_control)
                     break
 
                 if case(Event.NEW_GAME):  # User starts a new game
@@ -446,9 +445,10 @@ def main():
                     break
 
                 if case(Event.BEST_MOVE):
+                    Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=event.result)
+                    engine_status = EngineStatus.WAIT
+
                     if engine_status != EngineStatus.PONDER:
-                        Display.show(Message.SEARCH_STOPPED, engine_status=engine_status, result=event.result)
-                        engine_status = EngineStatus.WAIT
                         # Check if we are in play mode and it is computer's turn
                         if interaction_mode == Mode.GAME:
                             if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
@@ -457,7 +457,7 @@ def main():
                                 Display.show(Message.STOP_CLOCK)
                                 fen_old = game.fen()
                                 game.push(event.result.bestmove)
-                                Display.show(Message.COMPUTER_MOVE, result=event.result, fen=fen_old, fen_new=game.fen(),
+                                Display.show(Message.COMPUTER_MOVE, result=event.result, fen=fen_old,
                                              game=copy.deepcopy(game), time_control=time_control)
                                 # if check_game_state(game, interaction_mode):
                                 legal_fens = compute_legal_fens(game)
@@ -487,6 +487,7 @@ def main():
                     break
 
                 if case(Event.SET_MODE):
+                    print('engine-status: ' + str(engine_status))
                     if interaction_mode == Mode.GAME or interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
                         stop_clock()  # only stop, if the clock is really running
                     interaction_mode = event.mode
@@ -494,20 +495,8 @@ def main():
                         stop_search()  # dont need to stop, if pondering
                     if engine_status == EngineStatus.PONDER and interaction_mode == Mode.GAME:
                         stop_search()  # if change from ponder modes to game, also stops the pondering
-                    if engine_status == EngineStatus.WAIT:  # if new mode = pondering, start the pondering
-                        if interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
-                            analyse(copy.deepcopy(game))
-                        if interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
-                            observe(copy.deepcopy(game), time_control)
                     set_wait_state()
                     Display.show(Message.INTERACTION_MODE, mode=event.mode)
-                    break
-
-                if case(Event.CHANGE_PLAYMODE):
-                    play_mode = PlayMode.PLAY_WHITE if play_mode == PlayMode.PLAY_BLACK else PlayMode.PLAY_BLACK
-                    Display.show(Message.PLAY_MODE, play_mode=play_mode)
-                    if check_game_state(game, play_mode):
-                        think(copy.deepcopy(game), time_control)
                     break
 
                 if case(Event.SET_TIME_CONTROL):
