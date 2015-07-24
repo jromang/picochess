@@ -82,7 +82,7 @@ class EventHandler(WebSocketHandler):
 
     @classmethod
     def write_to_clients(cls, msg):
-        # print "Writing to clients"
+        # print("Writing to clients")
         for client in cls.clients:
             client.write_message(msg)
 
@@ -255,14 +255,17 @@ class WebDisplay(Display, threading.Thread):
             game.export(exporter, headers=True, comments=False, variations=False)
             fen = message.game.fen()
             pgn_str = str(exporter)
-            r = {'move': str(message.move), 'pgn': pgn_str, 'fen': fen}
+            r = {'pgn': pgn_str, 'fen': fen}
 
             if message == Message.COMPUTER_MOVE:
-                r['msg']= 'Computer move: '+str(message.result.bestmove)
+                r['move'] = message.result.bestmove.uci()
+                r['msg'] = 'Computer move: ' + str(message.result.bestmove)
             elif message == Message.USER_MOVE:
-                r['msg']= 'User move: '+str(message.move)
+                r['move'] = message.move
+                r['msg'] = 'User move: ' + str(message.move)
 
             if message == Message.REMOTE_MODE_MOVE:
+                r['move'] = 'User move: ' +  str(message.move)
                 r['remote_play'] = True
 
             self.shared['last_dgt_move_msg'] = r
