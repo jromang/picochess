@@ -313,7 +313,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
                     if case(Message.SCORE):
                         self.score = message.score
                         self.mate = message.mate
-                        if message.interaction_mode == Mode.KIBITZ:
+                        if message.mode == Mode.KIBITZ:
                             Display.show(Dgt.DISPLAY_TEXT, text=str(self.score).rjust(6), xl=None, beep=BeepLevel.NO)
                         break
                     if case(Message.BOOK_MOVE):
@@ -325,7 +325,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
                     if case(Message.NEW_PV):
                         self.hint_move = message.pv[0]
                         self.hint_fen = message.fen
-                        if message.interaction_mode == Mode.ANALYSIS:
+                        if message.mode == Mode.ANALYSIS:
                             Display.show(Dgt.DISPLAY_MOVE, move=self.hint_move, fen=self.hint_fen, beep=BeepLevel.NO)
                         break
                     if case(Message.RUN_CLOCK):

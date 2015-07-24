@@ -211,7 +211,6 @@ class DGTHardware(Observable, Display, threading.Thread):
 
         # Set the board update mode
         self.serial.write(bytearray([Commands.DGT_SEND_UPDATE_NICE.value]))
-
         # Detect DGT XL clock
         self.clock_found = False
         # we sending a beep command, and see if its ack'ed
@@ -222,12 +221,9 @@ class DGTHardware(Observable, Display, threading.Thread):
         # Get clock version
         self.write([Commands.DGT_CLOCK_MESSAGE, 0x03, Clock.DGT_CMD_CLOCK_START_MESSAGE,
                         Clock.DGT_CMD_CLOCK_VERSION, Clock.DGT_CMD_CLOCK_END_MESSAGE])
-        # self._display_on_dgt_xl('pic'+version)
-
         # Get board version
         self.board_version = 0.0
         self.write([Commands.DGT_SEND_VERSION])
-
         # Update the board
         self.write([Commands.DGT_SEND_BRD])
 

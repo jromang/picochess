@@ -186,7 +186,6 @@ def main():
             Observable.fire(Event.SCORE, score='book', mate=None)
         else:
             engine.position(game)
-            Display.show(Message.SEARCH_STARTED, engine_status=EngineStatus.THINK)
             engine.go(time.uci())
 
     def analyse(game):
@@ -195,7 +194,6 @@ def main():
         :return:
         """
         engine.position(game)
-        Display.show(Message.SEARCH_STARTED, engine_status=EngineStatus.PONDER)
         engine.ponder()
 
     def observe(game, time):
@@ -355,7 +353,6 @@ def main():
                             time.sleep(0.3)
                             Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
                             legal_fens = compute_legal_fens(game)
-
                     elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
                         stop_search()
                         fen = game.fen()
@@ -377,27 +374,23 @@ def main():
 
                 if case(Event.SETUP_POSITION):  # User sets up a position
                     logging.debug("Setting up custom fen: {0}".format(event.fen))
-
                     if game.move_stack:
                         if not game.is_game_over():
                             custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
                             Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack),
                                          color=game.turn, play_mode=play_mode, custom_fen=custom_fen)
-
                     game = chess.Board(event.fen)
                     game.custom_fen = event.fen
-
                     legal_fens = compute_legal_fens(game)
                     stop_search_and_clock()
                     time_control.reset()
-
                     interaction_mode = Mode.GAME
                     set_wait_state()
                     Display.show(Message.START_NEW_GAME)
                     break
 
                 if case(Event.STOP_SEARCH):
-                    if engine.get_status() == EngineStatus.THINK:
+                    if engine.is_thinking():
                         stop_search_and_clock()
                     else:
                         play_mode = PlayMode.PLAY_WHITE if play_mode == PlayMode.PLAY_BLACK else PlayMode.PLAY_BLACK
@@ -414,11 +407,9 @@ def main():
                             Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack),
                                          color=game.turn, play_mode=play_mode, custom_fen=custom_fen)
                         game = chess.Board()
-
                     legal_fens = compute_legal_fens(game)
                     stop_search_and_clock()
                     time_control.reset()
-
                     set_wait_state()
                     Display.show(Message.START_NEW_GAME)
                     break
@@ -430,9 +421,7 @@ def main():
                     break
 
                 if case(Event.BEST_MOVE):
-                    Display.show(Message.SEARCH_STOPPED, engine_status=engine.get_status(), result=event.result)
-
-                    if engine.get_status() != EngineStatus.PONDER:
+                    if not engine.is_pondering():
                         # Check if we are in play mode and it is computer's turn
                         if interaction_mode == Mode.GAME:
                             if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
@@ -451,7 +440,7 @@ def main():
                     if interaction_mode == Mode.GAME:
                         pass
                     else:
-                        Display.show(Message.NEW_PV, pv=event.pv, interaction_mode=interaction_mode, fen=game.fen())
+                        Display.show(Message.NEW_PV, pv=event.pv, mode=interaction_mode, fen=game.fen())
                     break
 
                 if case(Event.SCORE):
@@ -459,24 +448,22 @@ def main():
                         score = int(event.score)
                         if game.turn == chess.BLACK:
                             score *= -1
-
                     except ValueError:
                         score = event.score
                         logging.debug('Could not convert score ' + score)
-
                     except TypeError:
                         score = 'm {0}'.format(event.mate)
 
-                    Display.show(Message.SCORE, score=score, mate=event.mate, interaction_mode=interaction_mode)
+                    Display.show(Message.SCORE, score=score, mate=event.mate, mode=interaction_mode)
                     break
 
                 if case(Event.SET_MODE):
                     if interaction_mode == Mode.GAME or interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
                         stop_clock()  # only stop, if the clock is really running
                     interaction_mode = event.mode
-                    if engine.get_status() == EngineStatus.THINK:
+                    if engine.is_thinking():
                         stop_search()  # dont need to stop, if pondering
-                    if engine.get_status() == EngineStatus.PONDER and interaction_mode == Mode.GAME:
+                    if engine.is_pondering() and interaction_mode == Mode.GAME:
                         stop_search()  # if change from ponder modes to game, also stops the pondering
                     set_wait_state()
                     Display.show(Message.INTERACTION_MODE, mode=event.mode)

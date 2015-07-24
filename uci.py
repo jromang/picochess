@@ -47,16 +47,19 @@ class Informer(chess.uci.InfoHandler, Observable):
         super().pv(moves)
 
 
-class Engine:
+class Engine(Display):
 
     def __init__(self, path, hostname=None, username=None, key_file=None, password=None):
+        super(Engine, self).__init__()
         try:
             if hostname:
                 logging.info("Connecting to [%s]", hostname)
                 if key_file:
-                    shell = spur.SshShell(hostname=hostname, username=username, private_key_file=key_file, missing_host_key=paramiko.AutoAddPolicy())
+                    shell = spur.SshShell(hostname=hostname, username=username, private_key_file=key_file,
+                                          missing_host_key=paramiko.AutoAddPolicy())
                 else:
-                    shell = spur.SshShell(hostname=hostname, username=username, password=password, missing_host_key=paramiko.AutoAddPolicy())
+                    shell = spur.SshShell(hostname=hostname, username=username, password=password,
+                                          missing_host_key=paramiko.AutoAddPolicy())
                 self.engine = chess.uci.spur_spwan_engine(shell, [path])
             else:
                 path = which(path)
@@ -113,7 +116,7 @@ class Engine:
 
     def stop(self):
         if self.status == EngineStatus.WAIT:
-            logging.info('engine already stopped')
+            logging.info('Engine already stopped')
             return self.res
         self.engine.stop()
         return self.future.result()
@@ -123,6 +126,8 @@ class Engine:
             logging.warning('Search think still not waiting - strange!')
         self.status = EngineStatus.THINK
         time_dict['async_callback'] = self.callback
+
+        Display.show(Message.SEARCH_STARTED, engine_status=self.status)
         self.future = self.engine.go(**time_dict)
         return self.future
 
@@ -130,12 +135,21 @@ class Engine:
         if self.status != EngineStatus.WAIT:
             logging.warning('Search ponder still not waiting - strange!')
         self.status = EngineStatus.PONDER
+
+        Display.show(Message.SEARCH_STARTED, engine_status=self.status)
         self.future = self.engine.go(ponder=True, infinite=True, async_callback=self.callback)
         return self.future
 
     def callback(self, command):
-        self.status = EngineStatus.WAIT
         self.res = command.result()
+        Display.show(Message.SEARCH_STOPPED, engine_status=self.status, result=self.res)
+        self.status = EngineStatus.WAIT
 
-    def get_status(self):
-        return self.status
+    def is_thinking(self):
+        return self.status == EngineStatus.THINK
+
+    def is_pondering(self):
+        return self.status == EngineStatus.PONDER
+
+    def is_waiting(self):
+        return self.status == EngineStatus.WAIT
