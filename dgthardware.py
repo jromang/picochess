@@ -212,10 +212,9 @@ class DGTHardware(Observable, Display, threading.Thread):
         # Set the board update mode
         self.serial.write(bytearray([Commands.DGT_SEND_UPDATE_NICE.value]))
 
-        # self.clock_found = True
-
         # Detect DGT XL clock
         self.clock_found = False
+        # we sending a beep command, and see if its ack'ed
         self.serial.write(bytearray([0x2b, 0x04, 0x03, 0x0b, 1, 0x00]))
         time.sleep(1)
         # logging.debug('DGT clock found' if self.clock_found else 'DGT clock NOT found')
@@ -223,10 +222,10 @@ class DGTHardware(Observable, Display, threading.Thread):
         # Get clock version
         self.write([Commands.DGT_CLOCK_MESSAGE, 0x03, Clock.DGT_CMD_CLOCK_START_MESSAGE,
                         Clock.DGT_CMD_CLOCK_VERSION, Clock.DGT_CMD_CLOCK_END_MESSAGE])
-        self._display_on_dgt_xl('pic'+version)
+        # self._display_on_dgt_xl('pic'+version)
 
         # Get board version
-        self.version = 0.0
+        self.board_version = 0.0
         self.write([Commands.DGT_SEND_VERSION])
 
         # Update the board
@@ -259,29 +258,13 @@ class DGTHardware(Observable, Display, threading.Thread):
     def process_message(self, message_id, message):
         for case in switch(message_id):
             if case(Messages.DGT_MSG_VERSION):  # Get the DGT board version
-                self.version = float(str(message[0])+'.'+str(message[1]))
-                logging.debug("DGT board version %0.2f", self.version)
+                self.board_version = float(str(message[0]) + '.' + str(message[1]))
+                logging.debug("DGT board version %0.2f", self.board_version)
                 break
             # if case():
             #     logging.info("Got clock version number")
             #     break
             if case(Messages.DGT_MSG_BWTIME):
-                # This is OLD (soon be deleted) see at "ack1 = 0x88" for the correct version!
-                # if 5 <= message[4] <= 6 and message[5] == 49:
-                #     logging.info("Button 0 pressed")
-                #     self.fire(Event.DGT_BUTTON, button=0)
-                # if 33 <= message[4] <= 34 and message[5] == 52:
-                #     logging.info("Button 1 pressed")
-                #     self.fire(Event.DGT_BUTTON, button=1)
-                # if 17 <= message[4] <= 18 and message[5] == 51:
-                #     logging.info("Button 2 pressed")
-                #     self.fire(Event.DGT_BUTTON, button=2)
-                # if 9 <= message[4] <= 10 and message[5] == 50:
-                #     logging.info("Button 3 pressed")
-                #     self.fire(Event.DGT_BUTTON, button=3)
-                # if 65 <= message[4] <= 66 and message[5] == 53:
-                #     logging.info("Button 4 pressed")
-                #     self.fire(Event.DGT_BUTTON, button=4)
                 if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
                     # Construct the ack message
                     ack0 = ((message[1]) & 0x7f) | ((message[3] << 3) & 0x80)
@@ -289,8 +272,8 @@ class DGTHardware(Observable, Display, threading.Thread):
                     ack2 = ((message[4]) & 0x7f) | ((message[0] << 3) & 0x80)
                     ack3 = ((message[5]) & 0x7f) | ((message[0] << 2) & 0x80)
                     if ack1 == 0x88:
-                        # this are the other (ack2-ack3) codes, f.e. for 2 buttons pressed at same time
-                        # 6-49 34-52 18-51 10-50 66-53 | single button
+                        # this are the other (ack2-ack3) codes
+                        # 6-49 34-52 18-51 10-50 66-53 | button 0-4 (single)
                         #      38-52 22-51 14-50 70-53 | button 0 + 1-4
                         #            50-51 42-50 98-53 | button 1 + 2-4
                         #                  26-50 82-53 | button 2 + 3-4
@@ -310,9 +293,8 @@ class DGTHardware(Observable, Display, threading.Thread):
                         if ack3 == 53:
                             logging.info("Button 4 pressed")
                             self.fire(Event.DGT_BUTTON, button=4)
-                    if ack1 == 0x09:
-                        if not self.clock_found:
-                            self.clock_found = True
+                    if ack1 == 0x09:  # we using the beep command, to find out if a clock is there
+                        self.clock_found = True
                         main_version = ack2 >> 4
                         sub_version = ack2 & 0x0f
                         logging.debug("Clock version %s", (main_version, sub_version))

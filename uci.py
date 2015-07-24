@@ -114,6 +114,7 @@ class Engine:
     def stop(self):
         if self.status == EngineStatus.WAIT:
             logging.info('engine already stopped')
+            return self.res
         self.engine.stop()
         return self.future.result()
 

@@ -108,7 +108,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
         self.dgt_fen = None
 
         self.dgt_clock_menu = Menu.GAME_MENU
-        self.last_move = None
+        self.last_move = chess.Move.null()
         self.last_fen = None
         self.reset_hint_and_score()
         self.mode_index = 0
@@ -122,8 +122,11 @@ class DGTDisplay(Observable, Display, threading.Thread):
         self.display_move = False
 
     def process_button0(self):
-        if self.dgt_clock_menu == Menu.GAME_MENU and self.last_move:
-            Display.show(Dgt.DISPLAY_MOVE, move=self.last_move, fen=self.last_fen, beep=BeepLevel.CONFIG)
+        if self.dgt_clock_menu == Menu.GAME_MENU:
+            if self.last_move:
+                Display.show(Dgt.DISPLAY_MOVE, move=self.last_move, fen=self.last_fen, beep=BeepLevel.CONFIG)
+            else:
+                Display.show(Dgt.DISPLAY_TEXT, text="none", xl=None, beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
             self.setup_to_move = chess.WHITE if self.setup_to_move == chess.BLACK else chess.BLACK
@@ -182,7 +185,6 @@ class DGTDisplay(Observable, Display, threading.Thread):
             return fen.replace("KQkq", castling_fen)
 
         if self.dgt_clock_menu == Menu.GAME_MENU:
-            print('mode: ' + str(self.mode))
             if self.mode == Mode.GAME:
                 self.fire(Event.STOP_SEARCH)
             if self.mode == Mode.OBSERVE or self.mode == Mode.REMOTE:
@@ -261,25 +263,25 @@ class DGTDisplay(Observable, Display, threading.Thread):
                     if case(Message.START_NEW_GAME):
                         Display.show(Dgt.DISPLAY_TEXT, text="new game", xl="newgam", beep=BeepLevel.CONFIG)
                         Display.show(Dgt.LIGHT_CLEAR)
-                        self.last_move = None
+                        self.last_move = chess.Move.null()
                         self.reset_hint_and_score()
                         self.mode = Mode.GAME
                         self.dgt_clock_menu = Menu.GAME_MENU
                         break
                     if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
-                        Display.show(Dgt.DISPLAY_TEXT, text="ok done", xl=None, beep=BeepLevel.CONFIG)
+                        Display.show(Dgt.DISPLAY_TEXT, text="ok done", xl="okdone", beep=BeepLevel.CONFIG)
                         Display.show(Dgt.LIGHT_CLEAR)
                         self.display_move = False
                         break
                     if case(Message.USER_MOVE):
                         self.display_move = False
-                        Display.show(Dgt.DISPLAY_TEXT, text="ok user", xl=None, beep=BeepLevel.CONFIG)
+                        Display.show(Dgt.DISPLAY_TEXT, text="ok user", xl="okuser", beep=BeepLevel.CONFIG)
                         break
                     if case(Message.REVIEW_MODE_MOVE):
                         self.last_move = message.move
                         self.last_fen = message.fen
                         self.display_move = False
-                        Display.show(Dgt.DISPLAY_TEXT, text="ok mode", xl=None, beep=BeepLevel.CONFIG)
+                        Display.show(Dgt.DISPLAY_TEXT, text="ok mode", xl="okmode", beep=BeepLevel.CONFIG)
                         break
                     if case(Message.LEVEL):
                         level = str(message.level)
