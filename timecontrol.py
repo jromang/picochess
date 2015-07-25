@@ -76,9 +76,11 @@ class TimeControl(object):
             # logging.debug("updated time.clock is {0}".format(self.clock_time[self.active_color]))
             self.active_color = None
 
+    def is_ticking(self):
+        return self.active_color is not None
+
     def uci(self):
         """Returns remaining time for both players in an UCI dict"""
-        # uci_dict = {'async_callback': True}
         uci_dict = {}
         if self.mode in (ClockMode.BLITZ, ClockMode.FISCHER):
             uci_dict['wtime'] = str(int(self.clock_time[chess.WHITE] * 1000))

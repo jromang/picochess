@@ -63,7 +63,8 @@ class Event(AutoNumber):
     BEST_MOVE = ()  # Engine has found a move
     NEW_PV = ()  # Engine sends a new principal variation
     SCORE = ()  # Engine sends a new score
-    STOP_SEARCH = ()  # Engine should stop
+    STARTSTOP_THINK = ()  # Engine should start/stop thinking
+    STARTSTOP_CLOCK = ()  # Clock should start/stop
     SET_TIME_CONTROL = ()  # User sets time control
     OUT_OF_TIME = ()
     UCI_OPTION_SET = ()  # Users sets an UCI option, contains 'name' and 'value' (strings)

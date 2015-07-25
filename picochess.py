@@ -336,8 +336,7 @@ def main():
                     elif interaction_mode == Mode.GAME:
                         if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.WHITE) or \
                                 (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.BLACK):
-                            time_control.stop()
-                            Display.show(Message.STOP_CLOCK)
+                            stop_clock()
                             game.push(move)
                             if check_game_state(game, play_mode):
                                 Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
@@ -350,8 +349,9 @@ def main():
                             Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game),
                                          mode=interaction_mode)
                             observe(copy.deepcopy(game), time_control)
-                            time.sleep(0.3)
-                            Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
+                            # LocutusOfPenguin: observe already sending out an RUN_CLOCK message!
+                            # time.sleep(0.3)
+                            # Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
                             legal_fens = compute_legal_fens(game)
                     elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
                         stop_search()
@@ -389,7 +389,7 @@ def main():
                     Display.show(Message.START_NEW_GAME)
                     break
 
-                if case(Event.STOP_SEARCH):
+                if case(Event.STARTSTOP_THINK):
                     if engine.is_thinking():
                         stop_search_and_clock()
                     else:
@@ -397,6 +397,14 @@ def main():
                         Display.show(Message.PLAY_MODE, play_mode=play_mode)
                         if check_game_state(game, play_mode):
                             think(copy.deepcopy(game), time_control)
+                    break
+
+                if case(Event.STARTSTOP_CLOCK):
+                    if time_control.is_ticking():
+                        stop_clock()
+                    else:
+                        Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
+                        time_control.run(game.turn)
                     break
 
                 if case(Event.NEW_GAME):  # User starts a new game
@@ -426,8 +434,7 @@ def main():
                         if interaction_mode == Mode.GAME:
                             if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
                                     (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):
-                                time_control.stop()
-                                Display.show(Message.STOP_CLOCK)
+                                stop_clock()
                                 fen_old = game.fen()
                                 game.push(event.result.bestmove)
                                 Display.show(Message.COMPUTER_MOVE, result=event.result, fen=fen_old,
