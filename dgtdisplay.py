@@ -113,6 +113,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
         self.reset_hint_and_score()
         self.mode_index = 0
         self.mode = Mode.GAME
+        self.clock_running = False
 
     def reset_hint_and_score(self):
         self.hint_move = chess.Move.null()
@@ -188,8 +189,14 @@ class DGTDisplay(Observable, Display, threading.Thread):
             if self.mode == Mode.GAME:
                 self.fire(Event.STOP_SEARCH)
             if self.mode == Mode.OBSERVE or self.mode == Mode.REMOTE:
-                # @todo implement "toggle start/stop" clock
-                Display.show(Dgt.DISPLAY_TEXT, text="no funct", xl="nofunc", beep=BeepLevel.YES)
+                if self.clock_running:
+                    self.clock_running = False
+                    # Display.show(Message.STOP_CLOCK)
+                else:
+                    self.clock_running = True
+                    # Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time)
+                text = 'start' if self.clock_running else 'stop'
+                Display.show(Dgt.DISPLAY_TEXT, text=text, xl=None, beep=BeepLevel.YES)
             if self.mode == Mode.ANALYSIS or self.mode == Mode.KIBITZ:
                 Display.show(Dgt.DISPLAY_TEXT, text="error", xl=None, beep=BeepLevel.YES)
         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
@@ -267,6 +274,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         self.reset_hint_and_score()
                         self.mode = Mode.GAME
                         self.dgt_clock_menu = Menu.GAME_MENU
+                        self.clock_running = False
                         break
                     if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
                         Display.show(Dgt.DISPLAY_TEXT, text="ok done", xl="okdone", beep=BeepLevel.CONFIG)
@@ -329,6 +337,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
                             Display.show(Dgt.DISPLAY_MOVE, move=self.hint_move, fen=self.hint_fen, beep=BeepLevel.NO)
                         break
                     if case(Message.RUN_CLOCK):
+                        self.clock_running = True
                         # @todo Make this code independent from DGT Hex codes => more abstract
                         tc = message.time_control
                         time_left = int(tc.clock_time[chess.WHITE])
@@ -342,6 +351,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         Display.show(Dgt.CLOCK_START, time_left=time_left, time_right=time_right, side=side)
                         break
                     if case(Message.STOP_CLOCK):
+                        self.clock_running = False
                         Display.show(Dgt.CLOCK_STOP)
                         break
                     if case(Message.BUTTON_PRESSED):
