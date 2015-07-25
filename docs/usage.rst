@@ -78,9 +78,9 @@ Clock button support
 * First button shows the last move.
 * Second button toggles between showing the position value (or "book") and the best/ponder (or book move).
 * Third button will
-- **in Game mode** witch sides and the computer will make next move (your turn) or stop the search and play out the best move (computer turn).
-- **in Observe/Remote mode** halt/start the clock (not yet implemented)
- - **in Analysis/Kibitz mode** no function. An error message is displayed
+    - **in Game mode** switch sides and the computer will make next move (your turn) or stop the search and play out the best move (computer turn).
+    - **in Observe/Remote mode** halt/start the clock (not yet implemented)
+    - **in Analysis/Kibitz mode** no function. An error message is displayed
 * The fourth toggles between the game modes (Game, Analyse, Kibitz, Observe, Remote)
 * The fifth toggles between "Position", "Engine", "System", "Game" options. Some of the options provide no functionality yet.
 
