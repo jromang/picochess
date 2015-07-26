@@ -19,7 +19,7 @@ import chess
 import time
 import logging
 from utilities import *
-
+from timecontrol import *
 
 class KeyboardInput(Observable, threading.Thread):
     def __init__(self):
@@ -27,7 +27,7 @@ class KeyboardInput(Observable, threading.Thread):
 
     def run(self):
         while True:
-            cmd = input('PicoChess v'+version+':>')
+            cmd = input('PicoChess v'+version+':>').lower()
 
             try:
                 # commands like "newgame" or "setup:<legal_fen_string>" or
@@ -50,6 +50,20 @@ class KeyboardInput(Observable, threading.Thread):
                     elif cmd.startswith('level:'):
                         level = int(cmd.split(':')[1])
                         self.fire(Event.LEVEL, level=level)
+                    elif cmd.startswith('time:'):
+                        time_mode = cmd.split(':')[1]
+                        if time_mode == 'blitz':
+                            time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=5)
+                            time_string = 'bl   5'
+                        elif time_mode == 'fixed':
+                            time_control = TimeControl(ClockMode.FIXED_TIME, seconds_per_move=5)
+                            time_string = 'mov  5'
+                        elif time_mode == 'fischer':
+                            time_control = TimeControl(ClockMode.FISCHER, minutes_per_game=3, fischer_increment=2)
+                            time_string = 'f 3  2'
+                        else:
+                            raise ValueError(time)
+                        self.fire(Event.SET_TIME_CONTROL, time_control=time_control, time_control_string=time_string)
                     elif cmd.startswith('print:'):
                         fen = cmd.split(':')[1]
                         print(chess.Board(fen))

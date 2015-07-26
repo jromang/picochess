@@ -81,8 +81,8 @@ class Message(AutoNumber):
     LEVEL = ()  # User sets engine level (from 1 to 20).
     TIME_CONTROL = ()
     OPENING_BOOK = ()  # User chooses an opening book
-    BUTTON_PRESSED = () # Clock button pressed
-    DGT_FEN = () # DGT Board sends a fen
+    BUTTON_PRESSED = ()  # Clock button pressed
+    DGT_FEN = ()  # DGT Board sends a fen
 
     INTERACTION_MODE = ()  # Interaction mode
     PLAY_MODE = ()  # Play mode
@@ -91,9 +91,8 @@ class Message(AutoNumber):
     SEARCH_STARTED = ()  # Engine has started to search
     SEARCH_STOPPED = ()  # Engine has stopped the search
     USER_TAKE_BACK = ()  # User takes back his move while engine is searching
-    UPDATE_CLOCK = ()  # Message send every second when to clock runs, containing white_time and black_time
     RUN_CLOCK = ()  # Say to run autonomous clock, contains time_control
-    STOP_CLOCK = () # Stops the clock
+    STOP_CLOCK = ()  # Stops the clock
     USER_MOVE = ()  # Player has done a move on board
     UCI_OPTION_LIST = ()  # Contains 'options', a dict of the current engine's UCI options
     GAME_ENDS = ()  # The current game has ended, contains a 'result' (GameResult) and list of 'moves'

@@ -60,15 +60,15 @@ class VirtualHardware(Observable, Display, threading.Thread):
         else:
             self.time_right -= 1
         if self.time_left <= 0:
-            print('Time flag fallen on left side')
+            print('DGT clock flag: left')
             self.time_left = 0
         if self.time_right <= 0:
-            print('Time flag fallen on right side')
+            print('DGT clock flag: right')
             self.time_right = 0
         l_hms = hours_minutes_seconds(self.time_left)
         r_hms = hours_minutes_seconds(self.time_right)
         self.displayed_text = None # reset saved text to unknown
-        Display.show(Dgt.DISPLAY_TEXT, text='{} : {}'.format(l_hms, r_hms), xl=None, beep=BeepLevel.NO)
+        Display.show(Dgt.DISPLAY_TEXT, text='{} - {}'.format(l_hms, r_hms), xl=None, beep=BeepLevel.NO)
 
     def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):
         if self.enable_dgt_3000:
@@ -77,19 +77,19 @@ class VirtualHardware(Observable, Display, threading.Thread):
         else:
             move_string = str(move)
         logging.debug(move_string)
-        print('DGT clock mov:' + move_string)
+        print('DGT clock move:' + move_string)
 
     def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG, force=True):
         if self.enable_dgt_3000:
             if force or self.displayed_text != text:
                 logging.debug(text)
-                print('DGT clock txt:' + text)
+                print('DGT clock text:' + text)
         else:
             if dgt_xl_text:
                 text = dgt_xl_text
             if force or self.displayed_text != text:
                 logging.debug(text)
-                print('DGT clock txt:' + text)
+                print('DGT clock text:' + text)
         self.displayed_text = text
 
     def stop_clock(self):
