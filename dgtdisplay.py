@@ -328,6 +328,12 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         if message.mode == Mode.ANALYSIS:
                             Display.show(Dgt.DISPLAY_MOVE, move=self.hint_move, fen=self.hint_fen, beep=BeepLevel.NO)
                         break
+                    if case(Message.SEARCH_STARTED):
+                        logging.debug('Search started')
+                        break
+                    if case(Message.SEARCH_STOPPED):
+                        logging.debug('Search stopped')
+                        break
                     if case(Message.RUN_CLOCK):
                         # @todo Make this code independent from DGT Hex codes => more abstract
                         tc = message.time_control
