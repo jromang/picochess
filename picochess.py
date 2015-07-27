@@ -349,9 +349,6 @@ def main():
                             Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game),
                                          mode=interaction_mode)
                             observe(copy.deepcopy(game), time_control)
-                            # LocutusOfPenguin: observe already sending out an RUN_CLOCK message!
-                            # time.sleep(0.3)
-                            # Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
                             legal_fens = compute_legal_fens(game)
                     elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
                         stop_search()

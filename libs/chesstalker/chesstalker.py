@@ -92,12 +92,12 @@ class ChessTalker(Display, threading.Thread):
                         logging.debug('Announcing START_NEW_GAME')
                         system_voice.say_new_game()
                     elif message == Message.COMPUTER_MOVE and message.result.bestmove and message.game \
-                            and str(message.result.bestmove) != previous_move:
+                            and str(message.result.bestmove) != previous_move and self.computer_chesstalker_voice is not None:
                         logging.debug('Announcing COMPUTER_MOVE [%s]', message.result.bestmove)
                         self.computer_chesstalker_voice.say_move(message.result.bestmove, message.game)
                         previous_move = str(message.result.bestmove)
                     elif message == Message.USER_MOVE or message == Message.REVIEW_MODE_MOVE and message.move \
-                            and message.game and str(message.move) != previous_move:
+                            and message.game and str(message.move) != previous_move and self.user_chesstalker_voice is not None:
                         logging.debug('Announcing USER_MOVE [%s]', message.move)
                         self.user_chesstalker_voice.say_move(message.move, message.game)
                         previous_move = str(message.move)
