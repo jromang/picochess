@@ -246,6 +246,8 @@ class DGTDisplay(Observable, Display, threading.Thread):
             # Check if we have something to display
             try:
                 message = self.message_queue.get_nowait()
+                if type(message).__name__ == 'Message':
+                    logging.debug("Read message from queue: %s", message)
                 for case in switch(message):
                     if case(Message.COMPUTER_MOVE):
                         move = message.result.bestmove
@@ -399,7 +401,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
                             self.fire(Event.SHUTDOWN)
                             Display.show(Dgt.DISPLAY_TEXT, text="poweroff", xl="powoff", beep=BeepLevel.CONFIG)
                         else:
-                            logging.debug("Fire Event.Fen with " + fen)
+                            logging.debug("Evt-Fen: " + fen)
                             self.fire(Event.FEN, fen=fen)
                     if case():  # Default
                         pass

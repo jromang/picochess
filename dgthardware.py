@@ -457,6 +457,8 @@ class DGTHardware(Observable, Display, threading.Thread):
             # Check if we have something to display
             try:
                 message = self.message_queue.get_nowait()
+                if type(message).__name__ == 'Dgt':
+                    logging.debug("Read dgt from queue: %s", message)
                 for case in switch(message):
                     if case(Dgt.DISPLAY_MOVE):
                         self.display_move_on_clock(message.move, message.fen, message.beep)

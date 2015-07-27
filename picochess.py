@@ -454,7 +454,8 @@ def main():
                             score *= -1
                     except ValueError:
                         score = event.score
-                        logging.debug('Could not convert score ' + score)
+                        if score != 'book':
+                            logging.debug('Could not convert score ' + score)
                     except TypeError:
                         score = 'm {0}'.format(event.mate)
 

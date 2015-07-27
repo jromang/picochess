@@ -19,6 +19,7 @@ from threading import Timer
 import chess
 from utilities import *
 
+
 class VirtualHardware(Observable, Display, threading.Thread):
     def __init__(self, enable_dgt_3000):
         super(VirtualHardware, self).__init__()
@@ -113,6 +114,8 @@ class VirtualHardware(Observable, Display, threading.Thread):
         while True:
             # Check if we have something to display
             message = self.message_queue.get()
+            if type(message).__name__ == 'Dgt':
+                logging.debug("Read dgt from queue: %s", message)
             for case in switch(message):
                 if case(Dgt.DISPLAY_MOVE):
                     self.display_move_on_clock(message.move, message.fen, message.beep)
