@@ -71,7 +71,7 @@ class VirtualHardware(Observable, HardwareDisplay, threading.Thread):
         self.displayed_text = None # reset saved text to unknown
 
         # self.display_text_on_clock(text='{} - {}'.format(l_hms, r_hms), dgt_xl_text=None, beep=BeepLevel.NO)
-        Display.show(Dgt.DISPLAY_TEXT, text='{} - {}'.format(l_hms, r_hms), xl=None, beep=BeepLevel.NO)
+        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='{} - {}'.format(l_hms, r_hms), xl=None, beep=BeepLevel.NO)
 
     def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):
         if self.enable_dgt_3000:
