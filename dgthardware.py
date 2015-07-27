@@ -187,7 +187,7 @@ piece_to_char = {
 }
 
 
-class DGTHardware(Observable, Display, threading.Thread):
+class DGTHardware(Observable, HardwareDisplay, threading.Thread):
 
     def __init__(self, device, enable_board_leds, enable_dgt_3000, disable_dgt_clock_beep):
         super(DGTHardware, self).__init__()
@@ -456,9 +456,9 @@ class DGTHardware(Observable, Display, threading.Thread):
                     pass
             # Check if we have something to display
             try:
-                message = self.message_queue.get_nowait()
-                if type(message).__name__ == 'Dgt':
-                    logging.debug("Read dgt from queue: %s", message)
+                message = self.dgt_queue.get_nowait()
+                # if type(message).__name__ == 'Dgt':
+                logging.debug("Read dgt from queue: %s", message)
                 for case in switch(message):
                     if case(Dgt.DISPLAY_MOVE):
                         self.display_move_on_clock(message.move, message.fen, message.beep)
