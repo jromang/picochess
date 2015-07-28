@@ -245,7 +245,7 @@ class DGTDisplay(Observable, HardwareDisplay, Display, threading.Thread):
         while True:
             # Check if we have something to display
             try:
-                message = self.message_queue.get_nowait()
+                message = self.message_queue.get()
                 if type(message).__name__ == 'Message':
                     logging.debug("Read message from queue: %s", message)
                 for case in switch(message):
@@ -403,7 +403,9 @@ class DGTDisplay(Observable, HardwareDisplay, Display, threading.Thread):
                         else:
                             logging.debug("Evt-Fen: " + fen)
                             self.fire(Event.FEN, fen=fen)
+                        break
                     if case():  # Default
+                        # print(message)
                         pass
             except queue.Empty:
                 pass
