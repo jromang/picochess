@@ -54,6 +54,7 @@ class Event(AutoNumber):
     LEVEL = ()  # User sets engine level (from 1 to 20).
     NEW_GAME = ()  # User starts a new game
     USER_MOVE = ()  # User sends a move
+    USER_MOVE2 = ()  # User sends a move
     KEYBOARD_MOVE = ()  # Keyboard sends a move (to be transfered to a fen)
     OPENING_BOOK = ()  # User chooses an opening book
     SET_MODE = ()  # Change interaction mode
@@ -63,6 +64,7 @@ class Event(AutoNumber):
     DGT_FEN = () # DGT board sends a fen
     # Engine events
     BEST_MOVE = ()  # Engine has found a move
+    BEST_MOVE2 = ()  # Engine has found a move
     NEW_PV = ()  # Engine sends a new principal variation
     SCORE = ()  # Engine sends a new score
     STARTSTOP_THINK = ()  # Engine should start/stop thinking

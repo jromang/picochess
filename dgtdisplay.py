@@ -382,26 +382,27 @@ class DGTDisplay(Observable, HardwareDisplay, Display, threading.Thread):
                         # Fire the appropriate event
                         if fen in level_map:  # User sets level
                             level = level_map.index(fen)
+                            logging.debug("Map-Fen: New level")
                             self.fire(Event.LEVEL, level=level)
                         elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":  # New game
-                            logging.debug("New game")
+                            logging.debug("Map-Fen: New game")
                             self.fire(Event.NEW_GAME)
                         elif fen in book_map:  # Choose opening book
                             book_index = book_map.index(fen)
-                            logging.debug("Opening book [%s]", get_opening_books()[book_index])
+                            logging.debug("Map-Fen: Opening book [%s]", get_opening_books()[book_index])
                             self.fire(Event.OPENING_BOOK, book=get_opening_books()[book_index])
                         elif fen in mode_map:  # Set interaction mode
-                            logging.debug("Interaction mode [%s]", mode_map[fen])
+                            logging.debug("Map-Fen: Interaction mode [%s]", mode_map[fen])
                             self.fire(Event.SET_MODE, mode=mode_map[fen])
                         elif fen in time_control_map:
-                            logging.debug("Time control [%s]", time_control_map[fen].mode)
+                            logging.debug("Map-Fen: Time control [%s]", time_control_map[fen].mode)
                             self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[fen],
                                       time_control_string=dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)])
                         elif fen in shutdown_map:
+                            logging.debug("Map-Fen: shutdown")
                             self.fire(Event.SHUTDOWN)
                             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="poweroff", xl="powoff", beep=BeepLevel.CONFIG)
                         else:
-                            logging.debug("Evt-Fen: " + fen)
                             self.fire(Event.FEN, fen=fen)
                         break
                     if case():  # Default
