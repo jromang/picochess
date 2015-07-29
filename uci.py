@@ -30,10 +30,6 @@ class Informer(chess.uci.InfoHandler, Observable):
         self.mate_found = False
         super().on_go()
 
-    def on_bestmove(self,bestmove, ponder):
-        # self.fire(Event.BEST_MOVE, result=chess.uci.BestMove(bestmove, ponder))
-        super().on_bestmove(bestmove, ponder)
-
     def score(self,cp, mate, lowerbound, upperbound):
         if mate is None or not self.mate_found:
             self.fire(Event.SCORE, score=cp, mate=mate)
@@ -144,7 +140,7 @@ class Engine(Display):
         self.res = command.result()
         Display.show(Message.SEARCH_STOPPED, engine_status=self.status, result=self.res)
         if self.status != EngineStatus.PONDER:
-            Observable.fire(Event.BEST_MOVE2, result=self.res, book=False)
+            Observable.fire(Event.BEST_MOVE, result=self.res, book=False)
         self.status = EngineStatus.WAIT
 
     def is_thinking(self):

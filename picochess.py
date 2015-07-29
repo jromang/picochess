@@ -191,7 +191,7 @@ def main():
             g = copy.deepcopy(game)
             g.push(book_move)
             book_ponder = weighted_choice(book, g)
-            Observable.fire(Event.BEST_MOVE2, result=chess.uci.BestMove(book_move, book_ponder), book=True)
+            Observable.fire(Event.BEST_MOVE, result=chess.uci.BestMove(book_move, book_ponder), book=True)
             Observable.fire(Event.SCORE, score='book', mate=None)
         else:
             engine.position(game)
@@ -266,7 +266,7 @@ def main():
                     if game.move_stack:
                         game.pop()
             legal_moves = list(game.legal_moves)
-            Observable.fire(Event.USER_MOVE2, move=legal_moves[legal_fens.index(fen)])
+            Observable.fire(Event.USER_MOVE, move=legal_moves[legal_fens.index(fen)])
         elif fen == game.fen().split(' ')[0]:  # Player had done the computer move on the board
             if check_game_state(game, play_mode) and interaction_mode == Mode.GAME:
                 Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD)
@@ -361,41 +361,6 @@ def main():
                     logging.debug('User move [%s]', move)
                     if move not in game.legal_moves:
                         logging.warning('Illegal move [%s]', move)
-                    # Check if we are in play mode and it is player's turn
-                    elif interaction_mode == Mode.GAME:
-                        if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.WHITE) or \
-                                (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.BLACK):
-                            stop_clock()
-                            game.push(move)
-                            if check_game_state(game, play_mode):
-                                Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
-                                time.sleep(0.1)
-                                think(copy.deepcopy(game), time_control)
-                    elif interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
-                        stop_search_and_clock()
-                        fen = game.fen()
-                        game.push(move)
-                        if check_game_state(game, play_mode):
-                            Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game),
-                                         mode=interaction_mode)
-                            observe(copy.deepcopy(game), time_control)
-                            legal_fens = compute_legal_fens(game)
-                    elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
-                        stop_search()
-                        fen = game.fen()
-                        game.push(move)
-                        if check_game_state(game, play_mode):
-                            Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game),
-                                         mode=interaction_mode)
-                            analyse(copy.deepcopy(game))
-                            legal_fens = compute_legal_fens(game)
-                    break
-
-                if case(Event.USER_MOVE2):  # User sends a new move - new version
-                    move = event.move
-                    logging.debug('User move [%s]', move)
-                    if move not in game.legal_moves:
-                        logging.warning('Illegal move [%s]', move)
                     else:
                         game = handle_move(move, game)
                         # if check_game_state(game, interaction_mode):
@@ -467,23 +432,6 @@ def main():
                     break
 
                 if case(Event.BEST_MOVE):
-                    if event.book:
-                        Display.show(Message.BOOK_MOVE, result=event.result)
-                    if not engine.is_pondering():
-                        # Check if we are in play mode and it is computer's turn
-                        if interaction_mode == Mode.GAME:
-                            if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
-                                    (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):
-                                stop_clock()
-                                fen_old = game.fen()
-                                game.push(event.result.bestmove)
-                                Display.show(Message.COMPUTER_MOVE, result=event.result, fen=fen_old,
-                                             game=copy.deepcopy(game), time_control=time_control)
-                                # if check_game_state(game, interaction_mode):
-                                legal_fens = compute_legal_fens(game)
-                    break
-
-                if case(Event.BEST_MOVE2):  # new version
                     if event.book:
                         Display.show(Message.BOOK_MOVE, result=event.result)
                     game = handle_move(event.result.bestmove, game)
