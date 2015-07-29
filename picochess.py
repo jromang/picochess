@@ -41,15 +41,18 @@ from virtualhardware import VirtualHardware
 
 import spur
 
+
 def main():
-    #Command line argument parsing
+    # Command line argument parsing
     parser = configargparse.ArgParser(default_config_files=[os.path.join(os.path.dirname(__file__), "picochess.ini")])
     parser.add_argument("-e", "--engine", type=str, help="UCI engine executable path", default='stockfish')
-    parser.add_argument("-d", "--dgt-port", type=str, help="enable dgt board on the given serial port such as /dev/ttyUSB0")
+    parser.add_argument("-d", "--dgt-port", type=str,
+                        help="enable dgt board on the given serial port such as /dev/ttyUSB0")
     parser.add_argument("-leds", "--enable-dgt-board-leds", action='store_true', help="enable dgt board leds")
     parser.add_argument("-hs", "--hash-size", type=int, help="hashtable size in MB (default:64)", default=64)
     parser.add_argument("-t", "--threads", type=int, help="number of engine threads (default:1)", default=1)
-    parser.add_argument("-l", "--log-level", choices=['notset', 'debug', 'info', 'warning', 'error', 'critical'], default='warning', help="logging level")
+    parser.add_argument("-l", "--log-level", choices=['notset', 'debug', 'info', 'warning', 'error', 'critical'],
+                        default='warning', help="logging level")
     parser.add_argument("-lf", "--log-file", type=str, help="log to the given file")
     parser.add_argument("-r", "--remote", type=str, help="remote server running the engine")
     parser.add_argument("-u", "--user", type=str, help="remote user on server running the engine")
@@ -58,16 +61,21 @@ def main():
     parser.add_argument("-pgn", "--pgn-file", type=str, help="pgn file used to store the games", default='games.pgn')
     parser.add_argument("-pgn_u", "--pgn-user", type=str, help="user name for the pgn file", default=None)
     parser.add_argument("-ar", "--auto-reboot", action='store_true', help="reboot system after update")
-    parser.add_argument("-web", "--web-server", dest="web_server_port", nargs="?", const=80, type=int, metavar="PORT", help="launch web server")
+    parser.add_argument("-web", "--web-server", dest="web_server_port", nargs="?", const=80, type=int, metavar="PORT",
+                        help="launch web server")
     parser.add_argument("-mail", "--email", type=str, help="email used to send pgn files", default=None)
     parser.add_argument("-mail_s", "--smtp_server", type=str, help="Adress of email server", default=None)
     parser.add_argument("-mail_u", "--smtp_user", type=str, help="Username for email server", default=None)
     parser.add_argument("-mail_p", "--smtp_pass", type=str, help="Password for email server", default=None)
-    parser.add_argument("-mail_enc", "--smtp_encryption", action='store_true', help="use ssl encryption connection to smtp-Server")
-    parser.add_argument("-mk", "--mailgun-key", type=str, help="key used to send emails via Mailgun Webservice", default=None)
-    parser.add_argument("-uci", "--uci-option", type=str, help="pass an UCI option to the engine (name;value)", default=None)
+    parser.add_argument("-mail_enc", "--smtp_encryption", action='store_true',
+                        help="use ssl encryption connection to smtp-Server")
+    parser.add_argument("-mk", "--mailgun-key", type=str, help="key used to send emails via Mailgun Webservice",
+                        default=None)
+    parser.add_argument("-uci", "--uci-option", type=str, help="pass an UCI option to the engine (name;value)",
+                        default=None)
     parser.add_argument("-dgt3000", "--dgt-3000-clock", action='store_true', help="use dgt 3000 clock")
-    parser.add_argument("-nobeep", "--disable-dgt-clock-beep", action='store_true', help="disable beeps on the dgt clock")
+    parser.add_argument("-nobeep", "--disable-dgt-clock-beep", action='store_true',
+                        help="disable beeps on the dgt clock")
     parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
     parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
     args = parser.parse_args()
@@ -155,6 +163,7 @@ def main():
         :param g: The game
         :return: A list of legal FENs, and the root FEN
         """
+
         class FenList(list):
             def __init__(self, *args):
                 list.__init__(self, *args)
@@ -178,11 +187,11 @@ def main():
         Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time)
         time.run(game.turn)
         if book_move:
-            Display.show(Message.BOOK_MOVE, move=book_move)
+            # Display.show(Message.BOOK_MOVE, move=book_move)
             g = copy.deepcopy(game)
             g.push(book_move)
             book_ponder = weighted_choice(book, g)
-            Observable.fire(Event.BEST_MOVE, result=chess.uci.BestMove(book_move, book_ponder))
+            Observable.fire(Event.BEST_MOVE, result=chess.uci.BestMove(book_move, book_ponder), book=True)
             Observable.fire(Event.SCORE, score='book', mate=None)
         else:
             engine.position(game)
@@ -216,7 +225,7 @@ def main():
         nonlocal time_control
         time_control.stop()
         Display.show(Message.STOP_CLOCK)
-    
+
     def stop_search_and_clock():
         stop_clock()
         return stop_search()
@@ -229,15 +238,15 @@ def main():
         """
         result = None
         if game.is_stalemate():
-            result=GameResult.STALEMATE
+            result = GameResult.STALEMATE
         if game.is_insufficient_material():
-            result=GameResult.INSUFFICIENT_MATERIAL
+            result = GameResult.INSUFFICIENT_MATERIAL
         if game.is_seventyfive_moves():
-            result=GameResult.SEVENTYFIVE_MOVES
+            result = GameResult.SEVENTYFIVE_MOVES
         if game.is_fivefold_repetition():
-            result=GameResult.FIVEFOLD_REPETITION
+            result = GameResult.FIVEFOLD_REPETITION
         if game.is_game_over():
-            result=GameResult.MATE
+            result = GameResult.MATE
 
         if result is None:
             return True
@@ -287,11 +296,31 @@ def main():
             nonlocal play_mode
             play_mode = PlayMode.PLAY_WHITE if game.turn == chess.WHITE else PlayMode.PLAY_BLACK
 
+    def handle_move(move, game):
+        fen = game.fen()
+        game.push(move)
+        if interaction_mode == Mode.GAME:
+            stop_clock()
+            if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.WHITE) or (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.BLACK):
+                Display.show(Message.COMPUTER_MOVE, result=event.result, fen=fen, game=copy.deepcopy(game), time_control=time_control)
+            else:
+                Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
+                think(copy.deepcopy(game), time_control)
+        elif interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
+            stop_search_and_clock()
+            Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game), mode=interaction_mode)
+            observe(copy.deepcopy(game), time_control)
+        elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
+            stop_search()
+            Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game), mode=interaction_mode)
+            analyse(copy.deepcopy(game))
+        return game
+
     # Startup - internal
     game = chess.Board()  # Create the current game
     legal_fens = compute_legal_fens(game)  # Compute the legal FENs
     book = chess.polyglot.open_reader(get_opening_books()[8][1])  # Default opening book (gm1950)
-    interaction_mode = Mode.GAME   # Interaction mode
+    interaction_mode = Mode.GAME  # Interaction mode
     play_mode = PlayMode.PLAY_WHITE
     time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=5)
 
@@ -332,33 +361,10 @@ def main():
                     logging.debug('User move [%s]', move)
                     if move not in game.legal_moves:
                         logging.warning('Illegal move [%s]', move)
-                    # Check if we are in play mode and it is player's turn
-                    elif interaction_mode == Mode.GAME:
-                        if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.WHITE) or \
-                                (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.BLACK):
-                            stop_clock()
-                            game.push(move)
-                            if check_game_state(game, play_mode):
-                                Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
-                                think(copy.deepcopy(game), time_control)
-                    elif interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
-                        stop_search_and_clock()
-                        fen = game.fen()
-                        game.push(move)
-                        if check_game_state(game, play_mode):
-                            Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game),
-                                         mode=interaction_mode)
-                            observe(copy.deepcopy(game), time_control)
-                            legal_fens = compute_legal_fens(game)
-                    elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
-                        stop_search()
-                        fen = game.fen()
-                        game.push(move)
-                        if check_game_state(game, play_mode):
-                            Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game),
-                                         mode=interaction_mode)
-                            analyse(copy.deepcopy(game))
-                            legal_fens = compute_legal_fens(game)
+                    else:
+                        game = handle_move(move, game)
+                        # if check_game_state(game, interaction_mode):
+                        legal_fens = compute_legal_fens(game)
                     break
 
                 if case(Event.LEVEL):  # User sets a new level
@@ -426,18 +432,10 @@ def main():
                     break
 
                 if case(Event.BEST_MOVE):
-                    if not engine.is_pondering():
-                        # Check if we are in play mode and it is computer's turn
-                        if interaction_mode == Mode.GAME:
-                            if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
-                                    (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):
-                                stop_clock()
-                                fen_old = game.fen()
-                                game.push(event.result.bestmove)
-                                Display.show(Message.COMPUTER_MOVE, result=event.result, fen=fen_old,
-                                             game=copy.deepcopy(game), time_control=time_control)
-                                # if check_game_state(game, interaction_mode):
-                                legal_fens = compute_legal_fens(game)
+                    if event.book:
+                        Display.show(Message.BOOK_MOVE, result=event.result)
+                    game = handle_move(event.result.bestmove, game)
+                    legal_fens = compute_legal_fens(game)
                     break
 
                 if case(Event.NEW_PV):
@@ -508,6 +506,7 @@ def main():
                     logging.warning("Event not handled : [%s]", event)
 
             event_queue.task_done()
+
 
 if __name__ == '__main__':
     main()

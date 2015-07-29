@@ -32,10 +32,12 @@ except ImportError:
 
 
 # picochess version
-version = '048'
+version = '049'
 
 event_queue = queue.Queue()
+# dgt_queue = queue.Queue()
 display_devices = []
+dgtdisplay_devices = []
 
 
 class AutoNumber(enum.Enum):
@@ -211,6 +213,20 @@ class Display(object):  # Display devices (DGT XL clock, Piface LCD, pgn file...
             setattr(message, k, v)
         for display in display_devices:
             display.message_queue.put(message)
+
+
+class HardwareDisplay(object):  # Display devices (DGT XL clock, Piface LCD, pgn file...)
+    def __init__(self):
+        super(HardwareDisplay, self).__init__()
+        self.dgt_queue = queue.Queue()
+        dgtdisplay_devices.append(self)
+
+    @staticmethod
+    def show(message, **attrs):  # Sends a message on each display device
+        for k, v in attrs.items():
+            setattr(message, k, v)
+        for display in dgtdisplay_devices:
+            display.dgt_queue.put(message)
 
 
 # switch/case instruction in python

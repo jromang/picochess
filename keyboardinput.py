@@ -21,6 +21,7 @@ import logging
 from utilities import *
 from timecontrol import *
 
+
 class KeyboardInput(Observable, threading.Thread):
     def __init__(self):
         super(KeyboardInput, self).__init__()

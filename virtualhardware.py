@@ -20,7 +20,7 @@ import chess
 from utilities import *
 
 
-class VirtualHardware(Observable, Display, threading.Thread):
+class VirtualHardware(Observable, HardwareDisplay, threading.Thread):
     def __init__(self, enable_dgt_3000):
         super(VirtualHardware, self).__init__()
         self.rt = None
@@ -69,7 +69,9 @@ class VirtualHardware(Observable, Display, threading.Thread):
         l_hms = hours_minutes_seconds(self.time_left)
         r_hms = hours_minutes_seconds(self.time_right)
         self.displayed_text = None # reset saved text to unknown
-        Display.show(Dgt.DISPLAY_TEXT, text='{} - {}'.format(l_hms, r_hms), xl=None, beep=BeepLevel.NO)
+
+        # self.display_text_on_clock(text='{} - {}'.format(l_hms, r_hms), dgt_xl_text=None, beep=BeepLevel.NO)
+        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='{} - {}'.format(l_hms, r_hms), xl=None, beep=BeepLevel.NO)
 
     def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):
         if self.enable_dgt_3000:
@@ -113,9 +115,9 @@ class VirtualHardware(Observable, Display, threading.Thread):
     def run(self):
         while True:
             # Check if we have something to display
-            message = self.message_queue.get()
-            if type(message).__name__ == 'Dgt':
-                logging.debug("Read dgt from queue: %s", message)
+            message = self.dgt_queue.get()
+            # if type(message).__name__ == 'Dgt':
+            logging.debug("Read dgt from queue: %s", message)
             for case in switch(message):
                 if case(Dgt.DISPLAY_MOVE):
                     self.display_move_on_clock(message.move, message.fen, message.beep)
