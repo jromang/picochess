@@ -83,7 +83,7 @@ class Message(AutoNumber):
     LEVEL = ()  # User sets engine level (from 1 to 20).
     TIME_CONTROL = ()
     OPENING_BOOK = ()  # User chooses an opening book
-    BUTTON_PRESSED = ()  # Clock button pressed
+    DGT_BUTTON = ()  # Clock button pressed
     DGT_FEN = ()  # DGT Board sends a fen
 
     INTERACTION_MODE = ()  # Interaction mode

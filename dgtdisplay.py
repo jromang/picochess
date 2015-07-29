@@ -97,6 +97,8 @@ dgt_xl_time_control_list = ["mov  1", "mov  3", "mov  5", "mov 10", "mov 15", "m
                             "f 3  2", "f 4  2", "f 5  3", "f 5  5", "f25  5", "f15  5", "f90 30"]
 
 
+# reads from Message (Display) and writes to DGT queue (HardwareDisplay).
+# For the two Message.DGT_* coming from *hardware, process them, and send out Event.*
 class DGTDisplay(Observable, HardwareDisplay, Display, threading.Thread):
 
     def __init__(self):
@@ -352,7 +354,7 @@ class DGTDisplay(Observable, HardwareDisplay, Display, threading.Thread):
                     if case(Message.STOP_CLOCK):
                         HardwareDisplay.show(Dgt.CLOCK_STOP)
                         break
-                    if case(Message.BUTTON_PRESSED):
+                    if case(Message.DGT_BUTTON):
                         button = int(message.button)
                         if button == 0:
                             self.process_button0()

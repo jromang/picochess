@@ -495,7 +495,7 @@ def main():
                     break
 
                 if case(Event.DGT_BUTTON):
-                    Display.show(Message.BUTTON_PRESSED, button=event.button)
+                    Display.show(Message.DGT_BUTTON, button=event.button)
                     break
 
                 if case(Event.DGT_FEN):

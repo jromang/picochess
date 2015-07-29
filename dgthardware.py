@@ -187,7 +187,8 @@ piece_to_char = {
 }
 
 
-class DGTHardware(Observable, HardwareDisplay, threading.Thread):
+# reads from DGT queue (HardwareDisplay), and writes to Message.DGT_FEN & Message.DGT_BUTTON (Display)
+class DGTHardware(Display, HardwareDisplay, threading.Thread):
 
     def __init__(self, device, enable_board_leds, enable_dgt_3000, disable_dgt_clock_beep):
         super(DGTHardware, self).__init__()
@@ -276,24 +277,24 @@ class DGTHardware(Observable, HardwareDisplay, threading.Thread):
                         #                        74-53 | button 3 + 4
                         if ack3 == 49:
                             logging.info("Button 0 pressed")
-                            self.fire(Event.DGT_BUTTON, button=0)
+                            Display.show(Message.DGT_BUTTON, button=0)
                         if ack3 == 52:
                             logging.info("Button 1 pressed")
-                            self.fire(Event.DGT_BUTTON, button=1)
+                            Display.show(Message.DGT_BUTTON, button=1)
                         if ack3 == 51:
                             logging.info("Button 2 pressed")
-                            self.fire(Event.DGT_BUTTON, button=2)
+                            Display.show(Message.DGT_BUTTON, button=2)
                         if ack3 == 50:
                             logging.info("Button 3 pressed")
-                            self.fire(Event.DGT_BUTTON, button=3)
+                            Display.show(Message.DGT_BUTTON, button=3)
                         if ack3 == 53:
                             logging.info("Button 4 pressed")
-                            self.fire(Event.DGT_BUTTON, button=4)
+                            Display.show(Message.DGT_BUTTON, button=4)
                     if ack1 == 0x09:  # we using the beep command, to find out if a clock is there
                         self.clock_found = True
                         main_version = ack2 >> 4
                         sub_version = ack2 & 0x0f
-                        logging.debug("Clock version %s", (main_version, sub_version))
+                        logging.debug("DGT clock version %0.2f", float(str(main_version) + '.' + str(sub_version)))
                         if main_version == 2:
                             self.enable_dgt_3000 = True
                         self.display_text_on_clock('pico '+version, 'pic'+version, beep=BeepLevel.YES)
@@ -312,7 +313,7 @@ class DGTHardware(Observable, HardwareDisplay, threading.Thread):
                     l_hours = message[3] & 0x0f
                     l_mins = (message[4] >> 4) * 10 + (message[4] & 0x0f)
                     l_secs = (message[5] >> 4) * 10 + (message[5] & 0x0f)
-                    logging.info('dgt clock time received {} : {}'.format((l_hours, l_mins, l_secs), (r_hours, r_mins, r_secs)))
+                    logging.info('DGT clock time received {} : {}'.format((l_hours, l_mins, l_secs), (r_hours, r_mins, r_secs)))
                 break
             if case(Messages.DGT_MSG_BOARD_DUMP):
                 board = ''
@@ -341,7 +342,7 @@ class DGTHardware(Observable, HardwareDisplay, threading.Thread):
                 # Now we have a FEN -> fire a fen-event with it
                 # Attention: This fen is NOT flipped!!
                 logging.debug("Fen")
-                self.fire(Event.DGT_FEN, fen=fen)
+                Display.show(Message.DGT_FEN, fen=fen)
                 break
             if case(Messages.DGT_MSG_FIELD_UPDATE):
                 self.write([Commands.DGT_SEND_BRD])  # Ask for the board when a piece moved
