@@ -115,21 +115,24 @@ class VirtualHardware(Display, HardwareDisplay, threading.Thread):
     def run(self):
         while True:
             # Check if we have something to display
-            message = self.dgt_queue.get()
-            # if type(message).__name__ == 'Dgt':
-            logging.debug("Read dgt from queue: %s", message)
-            for case in switch(message):
-                if case(Dgt.DISPLAY_MOVE):
-                    self.display_move_on_clock(message.move, message.fen, message.beep)
-                    break
-                if case(Dgt.DISPLAY_TEXT):
-                    self.display_text_on_clock(message.text, message.xl, message.beep)
-                    break
-                if case(Dgt.CLOCK_START):
-                    self.start_clock(message.time_left, message.time_right, message.side)
-                    break
-                if case(Dgt.CLOCK_STOP):
-                    self.stop_clock()
-                    break
-                if case():  # Default
-                    pass
+            try:
+                message = self.dgt_queue.get_nowait()
+                # if type(message).__name__ == 'Dgt':
+                logging.debug("Read dgt from queue: %s", message)
+                for case in switch(message):
+                    if case(Dgt.DISPLAY_MOVE):
+                        self.display_move_on_clock(message.move, message.fen, message.beep)
+                        break
+                    if case(Dgt.DISPLAY_TEXT):
+                        self.display_text_on_clock(message.text, message.xl, message.beep)
+                        break
+                    if case(Dgt.CLOCK_START):
+                        self.start_clock(message.time_left, message.time_right, message.side)
+                        break
+                    if case(Dgt.CLOCK_STOP):
+                        self.stop_clock()
+                        break
+                    if case():  # Default
+                        pass
+            except queue.Empty:
+                pass
