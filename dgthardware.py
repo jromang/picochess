@@ -349,8 +349,17 @@ class DGTHardware(Observable, HardwareDisplay, threading.Thread):
             if case():  # Default
                 logging.warning("DGT message not handled : [%s]", Messages(message_id))
 
-    def read_message(self):
-        header = unpack('>BBB', (self.serial.read(3)))
+    def read_message(self, head = None):
+        header_len = 3
+        if head:
+            header = head + self.serial.read(header_len-1)
+        else:
+            header = self.serial.read(header_len)
+
+        pattern = '>'+'B'*header_len
+        header = unpack(pattern, header)
+
+        # header = unpack('>BBB', (self.serial.read(3)))
         message_id = header[0]
         message_length = (header[1] << 7) + header[2] - 3
 
@@ -443,10 +452,13 @@ class DGTHardware(Observable, HardwareDisplay, threading.Thread):
     def run(self):
         while True:
             # Check if we have a message from the board
-            if self.serial.inWaiting():
-                self.read_message()
-            else:
-                time.sleep(0.1)  # Sleep a little bit to avoid CPU usage
+            c = self.serial.read(1)
+            if c:
+                self.read_message(head=c)
+            # if self.serial.inWaiting():
+            #     self.read_message()
+            # else:
+            #     time.sleep(0.1)  # Sleep a little bit to avoid CPU usage
             if not self.clock_lock.locked():
                 # Check if we have something to send
                 try:
