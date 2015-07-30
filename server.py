@@ -261,7 +261,7 @@ class WebDisplay(Display, threading.Thread):
                 r['move'] = message.result.bestmove.uci()
                 r['msg'] = 'Computer move: ' + str(message.result.bestmove)
             elif message == Message.USER_MOVE:
-                r['move'] = message.move
+                r['move'] = message.move.uci()
                 r['msg'] = 'User move: ' + str(message.move)
 
             if message == Message.REMOTE_MODE_MOVE:

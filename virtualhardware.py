@@ -20,7 +20,8 @@ import chess
 from utilities import *
 
 
-class VirtualHardware(Observable, HardwareDisplay, threading.Thread):
+# reads from DGT queue (HardwareDisplay), and writes to Message.DGT_FEN & Message.DGT_BUTTON (Display)
+class VirtualHardware(Display, HardwareDisplay, threading.Thread):
     def __init__(self, enable_dgt_3000):
         super(VirtualHardware, self).__init__()
         self.rt = None
@@ -70,7 +71,6 @@ class VirtualHardware(Observable, HardwareDisplay, threading.Thread):
         r_hms = hours_minutes_seconds(self.time_right)
         self.displayed_text = None # reset saved text to unknown
 
-        # self.display_text_on_clock(text='{} - {}'.format(l_hms, r_hms), dgt_xl_text=None, beep=BeepLevel.NO)
         HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='{} - {}'.format(l_hms, r_hms), xl=None, beep=BeepLevel.NO)
 
     def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):

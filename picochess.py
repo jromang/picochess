@@ -245,7 +245,7 @@ def main():
             result = GameResult.SEVENTYFIVE_MOVES
         if game.is_fivefold_repetition():
             result = GameResult.FIVEFOLD_REPETITION
-        if game.is_game_over():
+        if game.is_checkmate():
             result = GameResult.MATE
 
         if result is None:
@@ -278,8 +278,9 @@ def main():
             while game_history.move_stack:
                 game_history.pop()
                 if game_history.fen().split(' ')[0] == fen:
-                    logging.debug("Current game FEN: " + str(game.fen))
-                    logging.debug("Undoing game until FEN :" + fen)
+                    logging.debug("Legal Fens root       : " + str(legal_fens.root))
+                    logging.debug("Current game FEN      : " + str(game.fen()))
+                    logging.debug("Undoing game until FEN: " + fen)
                     stop_search()
                     while len(game_history.move_stack) < len(game.move_stack):
                         game.pop()
@@ -496,7 +497,7 @@ def main():
                     break
 
                 if case(Event.DGT_BUTTON):
-                    Display.show(Message.BUTTON_PRESSED, button=event.button)
+                    Display.show(Message.DGT_BUTTON, button=event.button)
                     break
 
                 if case(Event.DGT_FEN):

@@ -33,6 +33,7 @@ class KeyboardInput(Observable, threading.Thread):
             try:
                 # commands like "newgame" or "setup:<legal_fen_string>" or
                 # "level:<1-20>" or "print:<legal_fen_string>" or "book:<name>"
+                # or "time:blitz|fixed|fischer" for 5mins/5secs/3+2mins games
                 #
                 # for simulating a dgt board use the following commands
                 # "fen:<legal_fen_string>" or "button:<0-4>"
@@ -110,7 +111,7 @@ class TerminalDisplay(Display, threading.Thread):
                     print('emulate user to make the computer move...sleeping for one second')
                     time.sleep(1)
                     logging.debug('emulate user now finished doing computer move')
-                    Observable.fire(Event.DGT_FEN, fen=message.game.fen().split(' ')[0])
+                    Display.show(Message.DGT_FEN, fen=message.game.fen().split(' ')[0])
                     break
                 if case(Message.SEARCH_STARTED):
                     if message.engine_status == EngineStatus.THINK:

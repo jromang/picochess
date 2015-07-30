@@ -46,14 +46,14 @@ class Commands(enum.Enum):
     DGT_SEND_CLK = 0x41  # Results in a DGT_MSG_BWTIME message
     DGT_SEND_BRD = 0x42  # Results in a DGT_MSG_BOARD_DUMP message
     DGT_SEND_UPDATE = 0x43  # Results in DGT_MSG_FIELD_UPDATE messages and DGT_MSG_BWTIME messages
-                            # as long as the board is in UPDATE mode
+    # as long as the board is in UPDATE mode
     DGT_SEND_UPDATE_BRD = 0x44  # Results in DGT_MSG_FIELD_UPDATE messages as long as the board is in UPDATE_BOARD mode
     DGT_RETURN_SERIALNR = 0x45  # Results in a DGT_MSG_SERIALNR message
     DGT_RETURN_BUSADRES = 0x46  # Results in a DGT_MSG_BUSADRES message
     DGT_SEND_TRADEMARK = 0x47  # Results in a DGT_MSG_TRADEMARK message
     DGT_SEND_EE_MOVES = 0x49  # Results in a DGT_MSG_EE_MOVES message
     DGT_SEND_UPDATE_NICE = 0x4b  # Results in DGT_MSG_FIELD_UPDATE messages and DGT_MSG_BWTIME messages,
-                                 # the latter only at time changes, as long as the board is in UPDATE_NICE mode
+    # the latter only at time changes, as long as the board is in UPDATE_NICE mode
     DGT_SEND_BATTERY_STATUS = 0x4c  # New command for bluetooth board. Requests the battery status from the board.
     DGT_SEND_VERSION = 0x4d  # Results in a DGT_MSG_VERSION message
     DGT_SEND_BRD_50B = 0x50  # Results in a DGT_MSG_BOARD_DUMP_50 message: only the black squares
@@ -63,25 +63,25 @@ class Commands(enum.Enum):
     DGT_SCAN_100 = 0x54  # Sets the board in scanning all squares. This is written in EEPROM
     DGT_RETURN_LONG_SERIALNR = 0x55  # Results in a DGT_LONG_SERIALNR message
     DGT_SET_LEDS = 0x60  # Only for the Revelation II to switch a LED pattern on. This is a command that
-                         # has three extra bytes with data.
+    # has three extra bytes with data.
     # Clock commands, returns ACK message if mode is in UPDATE or UPDATE_NICE
     DGT_CLOCK_MESSAGE = 0x2b  # This message contains a command for the clock.
 
 
 class Clock(enum.Enum):
     DGT_CMD_CLOCK_DISPLAY = 0x01  # This command can control the segments of six 7-segment characters,
-                                  # two dots, two semicolons and the two '1' symbols.
+    # two dots, two semicolons and the two '1' symbols.
     DGT_CMD_CLOCK_ICONS = 0x02  # Used to control the clock icons like flags etc.
     DGT_CMD_CLOCK_END = 0x03  # This command clears the message and brings the clock back to the
-                              # normal display (showing clock times).
+    # normal display (showing clock times).
     DGT_CMD_CLOCK_BUTTON = 0x08  # Requests the current button pressed (if any).
     DGT_CMD_CLOCK_VERSION = 0x09  # This commands requests the clock version.
     DGT_CMD_CLOCK_SETNRUN = 0x0a  # This commands controls the clock times and counting direction, when
-                                  # the clock is in mode 23. A clock can be paused or counting down. But
-                                  # counting up isn't supported on current DGT XL's (1.14 and lower) yet.
+    # the clock is in mode 23. A clock can be paused or counting down. But
+    # counting up isn't supported on current DGT XL's (1.14 and lower) yet.
     DGT_CMD_CLOCK_BEEP = 0x0b  # This clock command turns the beep on, for a specified time (64ms * byte 5)
     DGT_CMD_CLOCK_ASCII = 0x0c  # This clock commands sends a ASCII message to the clock that
-                                # can be displayed only by the DGT3000.
+    # can be displayed only by the DGT3000.
     DGT_CMD_CLOCK_START_MESSAGE = 0x03
     DGT_CMD_CLOCK_END_MESSAGE = 0x00
 
@@ -102,16 +102,16 @@ class Pieces(enum.Enum):
     BBISHOP = 0x0a
     BKING = 0x0b
     BQUEEN = 0x0c
-    PIECE1 = 0x0d # Magic piece: Draw
-    PIECE2 = 0x0e # Magic piece: White win
-    PIECE3 = 0x0f # Magic piece: Black win
+    PIECE1 = 0x0d  # Magic piece: Draw
+    PIECE2 = 0x0e  # Magic piece: White win
+    PIECE3 = 0x0f  # Magic piece: Black win
 
 
 class Messages(enum.IntEnum):
     """
     DESCRIPTION OF THE MESSAGES FROM BOARD TO PC
     """
-    MESSAGE_BIT = 0x80 # The Message ID is the logical OR of MESSAGE_BIT and ID code
+    MESSAGE_BIT = 0x80  # The Message ID is the logical OR of MESSAGE_BIT and ID code
     # ID codes
     DGT_NONE = 0x00
     DGT_BOARD_DUMP = 0x06
@@ -130,9 +130,9 @@ class Messages(enum.IntEnum):
     DGT_MSG_BOARD_DUMP = (MESSAGE_BIT | DGT_BOARD_DUMP)
     DGT_SIZE_BOARD_DUMP = 67
     DGT_SIZE_BOARD_DUMP_DRAUGHTS = 103
-    DGT_MSG_BOARD_DUMP_50B = (MESSAGE_BIT|DGT_BOARD_DUMP_50B)
+    DGT_MSG_BOARD_DUMP_50B = (MESSAGE_BIT | DGT_BOARD_DUMP_50B)
     DGT_SIZE_BOARD_DUMP_50B = 53
-    DGT_MSG_BOARD_DUMP_50W = (MESSAGE_BIT|DGT_BOARD_DUMP_50W)
+    DGT_MSG_BOARD_DUMP_50W = (MESSAGE_BIT | DGT_BOARD_DUMP_50W)
     DGT_SIZE_BOARD_DUMP_50W = 53
     DGT_MSG_BWTIME = (MESSAGE_BIT | DGT_BWTIME)
     DGT_SIZE_BWTIME = 10
@@ -165,19 +165,20 @@ class Messages(enum.IntEnum):
     EE_NOP = 0x7f
     EE_NOP2 = 0x00
 
+
 char_to_DGTXL = {
-    '0': 0x01 | 0x02 | 0x20 | 0x08 | 0x04 | 0x10,  '1':  0x02 | 0x04,  '2':  0x01 | 0x40 | 0x08 | 0x02 | 0x10,
-    '3': 0x01 | 0x40 | 0x08 | 0x02 | 0x04, '4': 0x20 | 0x04 | 0x40 | 0x02,  '5': 0x01 | 0x40 | 0x08 | 0x20 | 0x04,
+    '0': 0x01 | 0x02 | 0x20 | 0x08 | 0x04 | 0x10, '1': 0x02 | 0x04, '2': 0x01 | 0x40 | 0x08 | 0x02 | 0x10,
+    '3': 0x01 | 0x40 | 0x08 | 0x02 | 0x04, '4': 0x20 | 0x04 | 0x40 | 0x02, '5': 0x01 | 0x40 | 0x08 | 0x20 | 0x04,
     '6': 0x01 | 0x40 | 0x08 | 0x20 | 0x04 | 0x10, '7': 0x02 | 0x04 | 0x01,
     '8': 0x01 | 0x02 | 0x20 | 0x40 | 0x04 | 0x10 | 0x08, '9': 0x01 | 0x40 | 0x08 | 0x02 | 0x04 | 0x20,
-    'a': 0x01 | 0x02 | 0x20 | 0x40 | 0x04 | 0x10, 'b': 0x20 | 0x04 | 0x40 | 0x08 | 0x10,  'c': 0x01 | 0x20 | 0x10 | 0x08,
+    'a': 0x01 | 0x02 | 0x20 | 0x40 | 0x04 | 0x10, 'b': 0x20 | 0x04 | 0x40 | 0x08 | 0x10, 'c': 0x01 | 0x20 | 0x10 | 0x08,
     'd': 0x10 | 0x40 | 0x08 | 0x02 | 0x04, 'e': 0x01 | 0x40 | 0x08 | 0x20 | 0x10, 'f': 0x01 | 0x40 | 0x20 | 0x10,
     'g': 0x01 | 0x20 | 0x10 | 0x08 | 0x04, 'h': 0x20 | 0x10 | 0x04 | 0x40, 'i': 0x02 | 0x04,
     'j': 0x02 | 0x04 | 0x08 | 0x10, 'k': 0x01 | 0x20 | 0x40 | 0x04 | 0x10, 'l': 0x20 | 0x10 | 0x08,
     'm': 0x01 | 0x40 | 0x04 | 0x10, 'n': 0x40 | 0x04 | 0x10, 'o': 0x40 | 0x04 | 0x10 | 0x08,
-    'p': 0x01 | 0x40 | 0x20 | 0x10 | 0x02,  'q': 0x01 | 0x40 | 0x20 | 0x04 | 0x02, 'r': 0x40 | 0x10,
+    'p': 0x01 | 0x40 | 0x20 | 0x10 | 0x02, 'q': 0x01 | 0x40 | 0x20 | 0x04 | 0x02, 'r': 0x40 | 0x10,
     's': 0x01 | 0x40 | 0x08 | 0x20 | 0x04, 't': 0x20 | 0x10 | 0x08 | 0x40, 'u': 0x08 | 0x02 | 0x20 | 0x04 | 0x10,
-    'v': 0x08 | 0x02 | 0x20,  'w': 0x40 | 0x08 | 0x20 | 0x02, 'x': 0x20 | 0x10 | 0x04 | 0x40 | 0x02,
+    'v': 0x08 | 0x02 | 0x20, 'w': 0x40 | 0x08 | 0x20 | 0x02, 'x': 0x20 | 0x10 | 0x04 | 0x40 | 0x02,
     'y': 0x20 | 0x08 | 0x04 | 0x40 | 0x02, 'z': 0x01 | 0x40 | 0x08 | 0x02 | 0x10, ' ': 0x00, '-': 0x40
 }
 
@@ -187,8 +188,8 @@ piece_to_char = {
 }
 
 
-class DGTHardware(Observable, HardwareDisplay, threading.Thread):
-
+# reads from DGT queue (HardwareDisplay), and writes to Message.DGT_FEN & Message.DGT_BUTTON (Display)
+class DGTHardware(Display, HardwareDisplay, threading.Thread):
     def __init__(self, device, enable_board_leds, enable_dgt_3000, disable_dgt_clock_beep):
         super(DGTHardware, self).__init__()
 
@@ -220,7 +221,7 @@ class DGTHardware(Observable, HardwareDisplay, threading.Thread):
 
         # Get clock version
         self.write([Commands.DGT_CLOCK_MESSAGE, 0x03, Clock.DGT_CMD_CLOCK_START_MESSAGE,
-                        Clock.DGT_CMD_CLOCK_VERSION, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+                    Clock.DGT_CMD_CLOCK_VERSION, Clock.DGT_CMD_CLOCK_END_MESSAGE])
         # Get board version
         self.board_version = 0.0
         self.write([Commands.DGT_SEND_VERSION])
@@ -235,8 +236,10 @@ class DGTHardware(Observable, HardwareDisplay, threading.Thread):
         logging.debug('->DGT [%s]', mes)
         array = []
         for v in message:
-            if type(v) is int: array.append(v)
-            elif isinstance(v, enum.Enum): array.append(v.value)
+            if type(v) is int:
+                array.append(v)
+            elif isinstance(v, enum.Enum):
+                array.append(v.value)
             elif type(v) is str:
                 for c in v:
                     array.append(char_to_DGTXL[c])
@@ -276,27 +279,27 @@ class DGTHardware(Observable, HardwareDisplay, threading.Thread):
                         #                        74-53 | button 3 + 4
                         if ack3 == 49:
                             logging.info("Button 0 pressed")
-                            self.fire(Event.DGT_BUTTON, button=0)
+                            Display.show(Message.DGT_BUTTON, button=0)
                         if ack3 == 52:
                             logging.info("Button 1 pressed")
-                            self.fire(Event.DGT_BUTTON, button=1)
+                            Display.show(Message.DGT_BUTTON, button=1)
                         if ack3 == 51:
                             logging.info("Button 2 pressed")
-                            self.fire(Event.DGT_BUTTON, button=2)
+                            Display.show(Message.DGT_BUTTON, button=2)
                         if ack3 == 50:
                             logging.info("Button 3 pressed")
-                            self.fire(Event.DGT_BUTTON, button=3)
+                            Display.show(Message.DGT_BUTTON, button=3)
                         if ack3 == 53:
                             logging.info("Button 4 pressed")
-                            self.fire(Event.DGT_BUTTON, button=4)
+                            Display.show(Message.DGT_BUTTON, button=4)
                     if ack1 == 0x09:  # we using the beep command, to find out if a clock is there
                         self.clock_found = True
                         main_version = ack2 >> 4
                         sub_version = ack2 & 0x0f
-                        logging.debug("Clock version %s", (main_version, sub_version))
+                        logging.debug("DGT clock version %0.2f", float(str(main_version) + '.' + str(sub_version)))
                         if main_version == 2:
                             self.enable_dgt_3000 = True
-                        self.display_text_on_clock('pico '+version, 'pic'+version, beep=BeepLevel.YES)
+                        self.display_text_on_clock('pico ' + version, 'pic' + version, beep=BeepLevel.YES)
                     if ack0 != 0x10:
                         logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
                     else:
@@ -312,13 +315,14 @@ class DGTHardware(Observable, HardwareDisplay, threading.Thread):
                     l_hours = message[3] & 0x0f
                     l_mins = (message[4] >> 4) * 10 + (message[4] & 0x0f)
                     l_secs = (message[5] >> 4) * 10 + (message[5] & 0x0f)
-                    logging.info('dgt clock time received {} : {}'.format((l_hours, l_mins, l_secs), (r_hours, r_mins, r_secs)))
+                    logging.info(
+                        'DGT clock time received {} : {}'.format((l_hours, l_mins, l_secs), (r_hours, r_mins, r_secs)))
                 break
             if case(Messages.DGT_MSG_BOARD_DUMP):
                 board = ''
                 for c in message:
                     board += piece_to_char[c]
-                logging.debug('\n' + '\n'.join(board[0+i:8+i] for i in range(0, len(board), 8)))  # Show debug board
+                logging.debug('\n' + '\n'.join(board[0 + i:8 + i] for i in range(0, len(board), 8)))  # Show debug board
                 # Create fen from board
                 fen = ''
                 empty = 0
@@ -341,7 +345,7 @@ class DGTHardware(Observable, HardwareDisplay, threading.Thread):
                 # Now we have a FEN -> fire a fen-event with it
                 # Attention: This fen is NOT flipped!!
                 logging.debug("Fen")
-                self.fire(Event.DGT_FEN, fen=fen)
+                Display.show(Message.DGT_FEN, fen=fen)
                 break
             if case(Messages.DGT_MSG_FIELD_UPDATE):
                 self.write([Commands.DGT_SEND_BRD])  # Ask for the board when a piece moved
@@ -368,7 +372,7 @@ class DGTHardware(Observable, HardwareDisplay, threading.Thread):
         except ValueError:
             logging.warning("Unknown message value %i", message_id)
         if message_length:
-            message = unpack('>'+str(message_length)+'B', (self.serial.read(message_length)))
+            message = unpack('>' + str(message_length) + 'B', (self.serial.read(message_length)))
             self.process_message(message_id, message)
             return message_id
 
@@ -379,8 +383,10 @@ class DGTHardware(Observable, HardwareDisplay, threading.Thread):
             if len(text) > 6:
                 logging.warning('DGT XL clock message too long [%s]', text)
             logging.debug(text)
-            self.write([Commands.DGT_CLOCK_MESSAGE, 0x0b, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_DISPLAY,
-                        text[2], text[1], text[0], text[5], text[4], text[3], 0x00, 0x03 if beep else 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+            self.write(
+                [Commands.DGT_CLOCK_MESSAGE, 0x0b, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_DISPLAY,
+                 text[2], text[1], text[0], text[5], text[4], text[3], 0x00, 0x03 if beep else 0x01,
+                 Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
     def _display_on_dgt_3000(self, text, beep=False):
         if self.enable_dgt_3000:
@@ -391,7 +397,8 @@ class DGTHardware(Observable, HardwareDisplay, threading.Thread):
             logging.debug(text)
             text = bytes(text, 'utf-8')
             self.write([Commands.DGT_CLOCK_MESSAGE, 0x0c, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_ASCII,
-                        text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], 0x03 if beep else 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+                        text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], 0x03 if beep else 0x01,
+                        Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
     def get_beep_level(self, beeplevel):
         if beeplevel == BeepLevel.YES:
@@ -438,16 +445,17 @@ class DGTHardware(Observable, HardwareDisplay, threading.Thread):
 
     def stop_clock(self):
         self.write([Commands.DGT_CLOCK_MESSAGE, 0x0a, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_SETNRUN,
-           0, 0, 0, 0, 0, 0,
-           0x04 | 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+                    0, 0, 0, 0, 0, 0,
+                    0x04 | 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
     def start_clock(self, time_left, time_right, side):
         l_hms = hours_minutes_seconds(time_left)
         r_hms = hours_minutes_seconds(time_right)
         self.write([Commands.DGT_CLOCK_MESSAGE, 0x0a, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_SETNRUN,
-            l_hms[0], l_hms[1], l_hms[2], r_hms[0], r_hms[1], r_hms[2],
-            side, Clock.DGT_CMD_CLOCK_END_MESSAGE])
-        self.write([Commands.DGT_CLOCK_MESSAGE, 0x03, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_END, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+                    l_hms[0], l_hms[1], l_hms[2], r_hms[0], r_hms[1], r_hms[2],
+                    side, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+        self.write([Commands.DGT_CLOCK_MESSAGE, 0x03, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_END,
+                    Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
     def run(self):
         while True:
