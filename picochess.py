@@ -278,7 +278,9 @@ def main():
             while game_history.move_stack:
                 game_history.pop()
                 if game_history.fen().split(' ')[0] == fen:
-                    logging.debug("Undoing game until FEN :" + fen)
+                    logging.debug("Legal Fens root       : " + str(legal_fens.root))
+                    logging.debug("Current game FEN      : " + str(game.fen()))
+                    logging.debug("Undoing game until FEN: " + fen)
                     stop_search()
                     while len(game_history.move_stack) < len(game.move_stack):
                         game.pop()
