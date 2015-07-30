@@ -33,6 +33,7 @@ class KeyboardInput(Observable, threading.Thread):
             try:
                 # commands like "newgame" or "setup:<legal_fen_string>" or
                 # "level:<1-20>" or "print:<legal_fen_string>" or "book:<name>"
+                # or "time:blitz|fixed|fischer" for 5mins/5secs/3+2mins games
                 #
                 # for simulating a dgt board use the following commands
                 # "fen:<legal_fen_string>" or "button:<0-4>"

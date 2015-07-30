@@ -245,7 +245,7 @@ def main():
             result = GameResult.SEVENTYFIVE_MOVES
         if game.is_fivefold_repetition():
             result = GameResult.FIVEFOLD_REPETITION
-        if game.is_game_over():
+        if game.is_checkmate():
             result = GameResult.MATE
 
         if result is None:
