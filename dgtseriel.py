@@ -86,27 +86,6 @@ class Clock(enum.Enum):
     DGT_CMD_CLOCK_END_MESSAGE = 0x00
 
 
-@enum.unique
-class Pieces(enum.Enum):
-    # Piece codes for chess pieces:
-    EMPTY = 0x00
-    WPAWN = 0x01
-    WROOK = 0x02
-    WKNIGHT = 0x03
-    WBISHOP = 0x04
-    WKING = 0x05
-    WQUEEN = 0x06
-    BPAWN = 0x07
-    BROOK = 0x08
-    BKNIGHT = 0x09
-    BBISHOP = 0x0a
-    BKING = 0x0b
-    BQUEEN = 0x0c
-    PIECE1 = 0x0d  # Magic piece: Draw
-    PIECE2 = 0x0e  # Magic piece: White win
-    PIECE3 = 0x0f  # Magic piece: Black win
-
-
 class Messages(enum.IntEnum):
     """
     DESCRIPTION OF THE MESSAGES FROM BOARD TO PC
@@ -188,17 +167,13 @@ piece_to_char = {
 }
 
 
-# reads from DGT queue (HardwareDisplay), and writes to Message.DGT_FEN & Message.DGT_BUTTON (Display)
-class DGTSeriell(Display, HardwareDisplay, threading.Thread):
-    def __init__(self, device, enable_board_leds, enable_dgt_3000, disable_dgt_clock_beep):
-        super(DGTSeriell, self).__init__()
+class DGTSeriel(Display, HardwareDisplay, threading.Thread):
+    def __init__(self, device, enable_dgt_3000):
+        super(DGTSeriel, self).__init__()
 
         self.serial_queue = queue.Queue()
         self.clock_lock = asyncio.Lock()
         self.enable_dgt_3000 = enable_dgt_3000
-        self.enable_board_leds = enable_board_leds
-        self.disable_dgt_clock_beep = disable_dgt_clock_beep
-        self.displayed_text = None  # The current clock display or None if in ClockNRun mode or unknown text
 
         # Open the serial port
         try:
@@ -299,16 +274,14 @@ class DGTSeriell(Display, HardwareDisplay, threading.Thread):
                         logging.debug("DGT clock version %0.2f", float(str(main_version) + '.' + str(sub_version)))
                         if main_version == 2:
                             self.enable_dgt_3000 = True
-                        self.display_text_on_clock('pico ' + version, 'pic' + version, beep=BeepLevel.YES)
+                        # self.display_text_on_clock('pico ' + version, 'pic' + version, beep=BeepLevel.YES)
                     if ack0 != 0x10:
                         logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
                     else:
                         logging.debug("Clock ACK %s", (ack0, ack1, ack2, ack3))
                         if self.clock_lock.locked():
                             self.clock_lock.release()
-                        return None
                 elif any(message[:6]):
-                    self.displayed_text = None  # reset saved text to unknown
                     r_hours = message[0] & 0x0f
                     r_mins = (message[1] >> 4) * 10 + (message[1] & 0x0f)
                     r_secs = (message[2] >> 4) * 10 + (message[1] & 0x0f)
@@ -385,7 +358,7 @@ class DGTSeriell(Display, HardwareDisplay, threading.Thread):
             if not self.clock_lock.locked():
                 # Check if we have something to send
                 try:
-                    command = self.seriel_queue.get_nowait()
+                    command = self.serial_queue.get_nowait()
                     self.send_command(command)
                 except queue.Empty:
                     pass

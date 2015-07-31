@@ -14,22 +14,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import threading
 from threading import Timer
 import chess
-from utilities import *
+from dgtinterface import *
 
 
-# reads from DGT queue (HardwareDisplay), and writes to Message.DGT_FEN & Message.DGT_BUTTON (Display)
-class VirtualHardware(Display, HardwareDisplay, threading.Thread):
-    def __init__(self, enable_dgt_3000):
-        super(VirtualHardware, self).__init__()
+class DGTVirtual(DGTInterface):
+    def __init__(self, device, enable_board_leds, enable_dgt_3000, disable_dgt_clock_beep):
+        super(DGTVirtual, self).__init__(device, enable_board_leds, enable_dgt_3000, disable_dgt_clock_beep)
         self.rt = None
         self.time_left = None
         self.time_right = None
         self.time_side = None
-        self.enable_dgt_3000 = enable_dgt_3000
-        self.displayed_text = None # The current clock display or None if in ClockNRun mode or unknown text
 
     class RepeatedTimer(object):
         def __init__(self, interval, function, *args, **kwargs):
@@ -73,7 +69,7 @@ class VirtualHardware(Display, HardwareDisplay, threading.Thread):
 
         HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='{} - {}'.format(l_hms, r_hms), xl=None, beep=BeepLevel.NO)
 
-    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):
+    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG, force=True):
         if self.enable_dgt_3000:
             bit_board = chess.Board(fen)
             move_string = bit_board.san(move)
@@ -112,24 +108,8 @@ class VirtualHardware(Display, HardwareDisplay, threading.Thread):
             self.rt.stop()
         self.rt = self.RepeatedTimer(1, self.runclock)
 
-    def run(self):
-        while True:
-            # Check if we have something to display
-            message = self.dgt_queue.get()
-            # if type(message).__name__ == 'Dgt':
-            logging.debug("Read dgt from queue: %s", message)
-            for case in switch(message):
-                if case(Dgt.DISPLAY_MOVE):
-                    self.display_move_on_clock(message.move, message.fen, message.beep)
-                    break
-                if case(Dgt.DISPLAY_TEXT):
-                    self.display_text_on_clock(message.text, message.xl, message.beep)
-                    break
-                if case(Dgt.CLOCK_START):
-                    self.start_clock(message.time_left, message.time_right, message.side)
-                    break
-                if case(Dgt.CLOCK_STOP):
-                    self.stop_clock()
-                    break
-                if case():  # Default
-                    pass
+    def light_squares_revelation_board(self, squares):
+        pass
+
+    def clear_light_revelation_board(self):
+        pass

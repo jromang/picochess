@@ -23,6 +23,7 @@ from timecontrol import *
 from collections import OrderedDict
 from utilities import *
 
+from dgtinterface import *
 
 level_map = ("rnbqkbnr/pppppppp/q7/8/8/8/PPPPPPPP/RNBQKBNR",
              "rnbqkbnr/pppppppp/1q6/8/8/8/PPPPPPPP/RNBQKBNR",
@@ -97,9 +98,7 @@ dgt_xl_time_control_list = ["mov  1", "mov  3", "mov  5", "mov 10", "mov 15", "m
                             "f 3  2", "f 4  2", "f 5  3", "f 5  5", "f25  5", "f15  5", "f90 30"]
 
 
-# reads from Message (Display) and writes to DGT queue (HardwareDisplay).
-# For the two Message.DGT_* coming from *hardware, process them, and send out Event.*
-class DGTDisplay(Observable, HardwareDisplay, Display, threading.Thread):
+class DGTDisplay(Observable, DGTInterface):
 
     def __init__(self):
         super(DGTDisplay, self).__init__()
