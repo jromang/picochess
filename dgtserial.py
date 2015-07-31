@@ -167,9 +167,9 @@ piece_to_char = {
 }
 
 
-class DGTSeriel(Display, HardwareDisplay, threading.Thread):
+class DGTSerial(Display, HardwareDisplay, threading.Thread):
     def __init__(self, device, enable_dgt_3000):
-        super(DGTSeriel, self).__init__()
+        super(DGTSerial, self).__init__()
 
         self.serial_queue = queue.Queue()
         self.clock_lock = asyncio.Lock()
