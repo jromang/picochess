@@ -23,7 +23,7 @@ from utilities import *
 
 class DGTInterface(Display, HardwareDisplay, threading.Thread):
     def __init__(self, device, enable_board_leds, enable_dgt_3000, disable_dgt_clock_beep):
-        super(DGTInterface, self).__init__()
+        super(DGTInterface, self).__init__(device, enable_dgt_3000)
 
         self.enable_dgt_3000 = enable_dgt_3000
         self.enable_board_leds = enable_board_leds
