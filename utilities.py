@@ -35,7 +35,8 @@ except ImportError:
 version = '049'
 
 event_queue = queue.Queue()
-# dgt_queue = queue.Queue()
+serial_queue = queue.Queue()
+
 display_devices = []
 dgtdisplay_devices = []
 

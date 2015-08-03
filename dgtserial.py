@@ -171,7 +171,6 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
     def __init__(self, device, enable_dgt_3000):
         super(DGTSerial, self).__init__()
 
-        self.serial_queue = queue.Queue()
         self.clock_lock = asyncio.Lock()
         self.enable_dgt_3000 = enable_dgt_3000
 
@@ -204,7 +203,7 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
         self.write([Commands.DGT_SEND_BRD])
 
     def write(self, message):
-        self.serial_queue.put(message)
+        serial_queue.put(message)
 
     def send_command(self, message):
         mes = message[3] if message[0] == Commands.DGT_CLOCK_MESSAGE else message[0]
@@ -358,7 +357,7 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
             if not self.clock_lock.locked():
                 # Check if we have something to send
                 try:
-                    command = self.serial_queue.get_nowait()
+                    command = serial_queue.get_nowait()
                     self.send_command(command)
                 except queue.Empty:
                     pass
