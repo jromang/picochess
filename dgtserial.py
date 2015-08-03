@@ -207,7 +207,7 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
 
     def send_command(self, message):
         mes = message[3] if message[0] == Commands.DGT_CLOCK_MESSAGE else message[0]
-        logging.debug('->DGT [%s]', mes)
+        logging.debug('->DGT [%s], length:%i', mes, len(message))
         array = []
         for v in message:
             if type(v) is int:
@@ -277,7 +277,7 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
                     if ack0 != 0x10:
                         logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
                     else:
-                        logging.debug("Clock ACK %s", (ack0, ack1, ack2, ack3))
+                        logging.debug("Clock ACK [%s] %s", Messages(ack1), (ack0, ack1, ack2, ack3))
                         if self.clock_lock.locked():
                             self.clock_lock.release()
                 elif any(message[:6]):
@@ -289,6 +289,8 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
                     l_secs = (message[5] >> 4) * 10 + (message[5] & 0x0f)
                     logging.info(
                         'DGT clock time received {} : {}'.format((l_hours, l_mins, l_secs), (r_hours, r_mins, r_secs)))
+                else:
+                    logging.debug('Ignored message from clock')
                 break
             if case(Messages.DGT_MSG_BOARD_DUMP):
                 board = ''
@@ -314,9 +316,8 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
                             fen += "/"
                         empty = 0
 
-                # Now we have a FEN -> fire a fen-event with it
                 # Attention: This fen is NOT flipped!!
-                logging.debug("Fen")
+                logging.debug("Raw-Fen: " + fen)
                 Display.show(Message.DGT_FEN, fen=fen)
                 break
             if case(Messages.DGT_MSG_FIELD_UPDATE):
@@ -325,7 +326,7 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
             if case():  # Default
                 logging.warning("DGT message not handled : [%s]", Messages(message_id))
 
-    def read_message(self, head = None):
+    def read_message(self, head=None):
         header_len = 3
         if head:
             header = head + self.serial.read(header_len-1)

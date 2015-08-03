@@ -303,12 +303,12 @@ def main():
         game.push(move)
         if interaction_mode == Mode.GAME:
             stop_clock()
-            time.sleep(0.1)
+            # time.sleep(0.1)
             if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.WHITE) or (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.BLACK):
                 Display.show(Message.COMPUTER_MOVE, result=event.result, fen=fen, game=copy.deepcopy(game), time_control=time_control)
             else:
                 Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
-                time.sleep(0.3)
+                # time.sleep(0.3)
                 think(copy.deepcopy(game), time_control)
         elif interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
             stop_search_and_clock()
