@@ -206,7 +206,7 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
         serial_queue.put(message)
 
     def send_command(self, message):
-        mes = message[3] if message[0] == Commands.DGT_CLOCK_MESSAGE else message[0]
+        mes = message[3] if message[0].value == Commands.DGT_CLOCK_MESSAGE.value else message[0]
         logging.debug('->DGT [%s], length:%i', mes, len(message))
         array = []
         for v in message:
@@ -277,7 +277,7 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
                     if ack0 != 0x10:
                         logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
                     else:
-                        logging.debug("Clock ACK [%s] %s", Messages(ack1), (ack0, ack1, ack2, ack3))
+                        logging.debug("Clock ACK [%s] %s", Clock(ack1), (ack0, ack1, ack2, ack3))
                         if self.clock_lock.locked():
                             self.clock_lock.release()
                 elif any(message[:6]):
