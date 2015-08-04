@@ -87,7 +87,7 @@ def main():
     logging.getLogger("chess.uci").setLevel(logging.INFO)  # don't want to get so many python-chess uci messages
 
     # Update
-    update_picochess(args.auto_reboot)
+    # update_picochess(args.auto_reboot)
 
     # Load UCI engine
     engine = uci.Engine(args.engine, hostname=args.remote, username=args.user,
