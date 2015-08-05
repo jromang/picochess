@@ -277,7 +277,7 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
                     if ack0 != 0x10:
                         logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
                     else:
-                        logging.debug("Clock ACK [%s] %s", Clock(ack1), (ack0, ack1, ack2, ack3))
+                        logging.debug("Clock ACK [%s]", Clock(ack1))
                         if self.clock_lock.locked():
                             self.clock_lock.release()
                 elif any(message[:6]):
@@ -289,8 +289,12 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
                     l_secs = (message[5] >> 4) * 10 + (message[5] & 0x0f)
                     logging.info(
                         'DGT clock time received {} : {}'.format((l_hours, l_mins, l_secs), (r_hours, r_mins, r_secs)))
+                    # if self.clock_lock.locked():
+                    #     self.clock_lock.release()
                 else:
                     logging.debug('Ignored message from clock')
+                    # if self.clock_lock.locked():
+                    #     self.clock_lock.release()
                 break
             if case(Messages.DGT_MSG_BOARD_DUMP):
                 board = ''
