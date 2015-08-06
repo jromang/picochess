@@ -173,34 +173,11 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
 
         self.clock_lock = asyncio.Lock()
         self.enable_dgt_3000 = enable_dgt_3000
+        self.device = device
 
-        # Open the serial port
-        try:
-            self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE,
-                                          parity=pyserial.PARITY_NONE,
-                                          bytesize=pyserial.EIGHTBITS,
-                                          timeout=2
-                                          )
-        except pyserial.SerialException as e:
-            logging.warning(e)
-
-        # Set the board update mode
-        self.serial.write(bytearray([Commands.DGT_SEND_UPDATE_NICE.value]))
-        # Detect DGT XL clock
         self.clock_found = False
-        # we sending a beep command, and see if its ack'ed
-        self.serial.write(bytearray([0x2b, 0x04, 0x03, 0x0b, 1, 0x00]))
-        time.sleep(1)
-        # logging.debug('DGT clock found' if self.clock_found else 'DGT clock NOT found')
-
-        # Get clock version
-        self.write([Commands.DGT_CLOCK_MESSAGE, 0x03, Clock.DGT_CMD_CLOCK_START_MESSAGE,
-                    Clock.DGT_CMD_CLOCK_VERSION, Clock.DGT_CMD_CLOCK_END_MESSAGE])
-        # Get board version
         self.board_version = 0.0
-        self.write([Commands.DGT_SEND_VERSION])
-        # Update the board
-        self.write([Commands.DGT_SEND_BRD])
+        self.serial = None
 
     def write(self, message):
         serial_queue.put(message)
@@ -208,6 +185,8 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
     def send_command(self, message):
         mes = message[3] if message[0].value == Commands.DGT_CLOCK_MESSAGE.value else message[0]
         logging.debug('->DGT [%s], length:%i', mes, len(message))
+        if mes.value == Clock.DGT_CMD_CLOCK_ASCII.value:
+            logging.debug(message[4:10])
         array = []
         for v in message:
             if type(v) is int:
@@ -289,12 +268,12 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
                     l_secs = (message[5] >> 4) * 10 + (message[5] & 0x0f)
                     logging.info(
                         'DGT clock time received {} : {}'.format((l_hours, l_mins, l_secs), (r_hours, r_mins, r_secs)))
-                    # if self.clock_lock.locked():
-                    #     self.clock_lock.release()
+                    if self.clock_lock.locked():
+                        self.clock_lock.release()
                 else:
                     logging.debug('Ignored message from clock')
-                    # if self.clock_lock.locked():
-                    #     self.clock_lock.release()
+                    if self.clock_lock.locked():
+                        self.clock_lock.release()
                 break
             if case(Messages.DGT_MSG_BOARD_DUMP):
                 board = ''
@@ -353,7 +332,36 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
             self.process_message(message_id, message)
             return message_id
 
+    def startup(self, device):
+        # Open the serial port
+        try:
+            self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE,
+                                          parity=pyserial.PARITY_NONE,
+                                          bytesize=pyserial.EIGHTBITS,
+                                          timeout=2
+                                          )
+        except pyserial.SerialException as e:
+            logging.warning(e)
+            return
+
+        # Set the board update mode
+        self.serial.write(bytearray([Commands.DGT_SEND_UPDATE_NICE.value]))
+        # we sending a beep command, and see if its ack'ed
+        self.serial.write(bytearray([0x2b, 0x04, 0x03, 0x0b, 1, 0x00]))
+        time.sleep(1)
+        # logging.debug('DGT clock found' if self.clock_found else 'DGT clock NOT found')
+
+        # Get clock version
+        self.write([Commands.DGT_CLOCK_MESSAGE, 0x03, Clock.DGT_CMD_CLOCK_START_MESSAGE,
+                    Clock.DGT_CMD_CLOCK_VERSION, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+        # Get board version
+        self.write([Commands.DGT_SEND_VERSION])
+        # Update the board
+        self.write([Commands.DGT_SEND_BRD])
+
     def run(self):
+        self.startup(self.device)
+
         while True:
             # Check if we have a message from the board
             c = self.serial.read(1)
