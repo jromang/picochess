@@ -37,7 +37,7 @@ from server import WebServer
 import chesstalker.chesstalker
 from dgthardware import DGTHardware
 from dgtdisplay import DGTDisplay
-from virtualhardware import VirtualHardware
+from dgtvirtual import DGTVirtual
 
 import spur
 
@@ -87,7 +87,7 @@ def main():
     logging.getLogger("chess.uci").setLevel(logging.INFO)  # don't want to get so many python-chess uci messages
 
     # Update
-    update_picochess(args.auto_reboot)
+    # update_picochess(args.auto_reboot)
 
     # Load UCI engine
     engine = uci.Engine(args.engine, hostname=args.remote, username=args.user,
@@ -129,7 +129,7 @@ def main():
         logging.warning("No DGT board port provided")
         KeyboardInput().start()
         TerminalDisplay().start()
-        VirtualHardware(args.dgt_3000_clock).start()
+        DGTVirtual(args.dgt_port, args.enable_dgt_board_leds, args.dgt_3000_clock, args.disable_dgt_clock_beep).start()
 
     # Save to PGN
     PgnDisplay(
@@ -219,7 +219,7 @@ def main():
         Stop current search.
         :return:
         """
-        return engine.stop()
+        engine.stop()
 
     def stop_clock():
         nonlocal time_control
@@ -228,7 +228,7 @@ def main():
 
     def stop_search_and_clock():
         stop_clock()
-        return stop_search()
+        stop_search()
 
     def check_game_state(game, play_mode):
         """
@@ -303,10 +303,12 @@ def main():
         game.push(move)
         if interaction_mode == Mode.GAME:
             stop_clock()
+            # time.sleep(0.1)
             if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.WHITE) or (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.BLACK):
                 Display.show(Message.COMPUTER_MOVE, result=event.result, fen=fen, game=copy.deepcopy(game), time_control=time_control)
             else:
                 Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
+                # time.sleep(0.3)
                 think(copy.deepcopy(game), time_control)
         elif interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
             stop_search_and_clock()
