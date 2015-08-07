@@ -18,13 +18,13 @@ import logging
 import queue
 import serial as pyserial
 import chess
-import time
+# import time
 
 from timecontrol import *
 from struct import unpack
-from collections import OrderedDict
+# from collections import OrderedDict
 from utilities import *
-from subprocess import Popen
+# from subprocess import Popen
 
 try:
     import enum
@@ -84,6 +84,7 @@ class Clock(enum.Enum):
     # can be displayed only by the DGT3000.
     DGT_CMD_CLOCK_START_MESSAGE = 0x03
     DGT_CMD_CLOCK_END_MESSAGE = 0x00
+    DGT_ACK_CLOCK_BUTTON = 0x88  # Ack of a clock button
 
 
 class Messages(enum.IntEnum):
@@ -204,7 +205,8 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
             logging.error('Invalid bytes sent {0}'.format(array))
         if message[0] == Commands.DGT_CLOCK_MESSAGE:
             # Let a bit time for the message to be displayed on the clock
-            time.sleep(0.05 if self.enable_dgt_3000 else 0.5)
+            # time.sleep(0.05 if self.enable_dgt_3000 else 0.5)
+            logging.debug('DGT clock locked')
             self.clock_lock.acquire()
 
     def process_message(self, message_id, message):
@@ -258,6 +260,7 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
                     else:
                         logging.debug("Clock ACK [%s]", Clock(ack1))
                         if self.clock_lock.locked():
+                            logging.debug('DGT clock unlocked')
                             self.clock_lock.release()
                 elif any(message[:6]):
                     r_hours = message[0] & 0x0f
@@ -269,10 +272,12 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
                     logging.info(
                         'DGT clock time received {} : {}'.format((l_hours, l_mins, l_secs), (r_hours, r_mins, r_secs)))
                     if self.clock_lock.locked():
+                        logging.debug('DGT clock unlocked')
                         self.clock_lock.release()
                 else:
-                    logging.debug('Ignored message from clock')
+                    logging.debug('DGT clock message ignored')
                     if self.clock_lock.locked():
+                        logging.debug('DGT clock unlocked')
                         self.clock_lock.release()
                 break
             if case(Messages.DGT_MSG_BOARD_DUMP):
@@ -345,10 +350,13 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
             return
 
         # Set the board update mode
-        self.serial.write(bytearray([Commands.DGT_SEND_UPDATE_NICE.value]))
+        # self.serial.write(bytearray([Commands.DGT_SEND_UPDATE_NICE.value]))
+        self.write([Commands.DGT_SEND_UPDATE_NICE])
         # we sending a beep command, and see if its ack'ed
-        self.serial.write(bytearray([0x2b, 0x04, 0x03, 0x0b, 1, 0x00]))
-        time.sleep(1)
+        # self.serial.write(bytearray([0x2b, 0x04, 0x03, 0x0b, 1, 0x00]))
+        self.write([Commands.DGT_CLOCK_MESSAGE, 0x04, Clock.DGT_CMD_CLOCK_START_MESSAGE,
+                    Clock.DGT_CMD_CLOCK_BEEP, 1, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+        # time.sleep(1)
         # logging.debug('DGT clock found' if self.clock_found else 'DGT clock NOT found')
 
         # Get clock version
@@ -374,3 +382,5 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
                     self.send_command(command)
                 except queue.Empty:
                     pass
+            else:
+                logging.debug('DGT Clock still locked')
