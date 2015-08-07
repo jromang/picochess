@@ -367,26 +367,29 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
         # Update the board
         self.write([Commands.DGT_SEND_BRD])
 
-    def run(self):
-        self.startup(self.device)
-
+    def process_incoming_forever(self):
         while True:
-            # Check if we have a message from the board
-            # c = self.serial.read(1)
-            # if c:
-            #     self.read_message(head=c)
-            if self.serial.inWaiting():
-                self.read_message()
-            else:
-                time.sleep(0.1)  # Sleep a little bit to avoid CPU usage
+            c = self.serial.read(1)
+            if c:
+                self.read_message(head=c)
 
+    def process_outgoing_forever(self):
+        while True:
             if not self.clock_lock.locked():
                 # Check if we have something to send
                 try:
-                    command = serial_queue.get_nowait()
+                    command = serial_queue.get()
                     # print ("get without waiting..")
                     self.send_command(command)
                 except queue.Empty:
                     pass
             else:
                 logging.debug('DGT Clock still locked')
+
+    def run(self):
+        self.startup(self.device)
+        incoming_thread = threading.Timer(0, self.process_incoming_forever)
+        incoming_thread.start()
+
+        outgoing_thread = threading.Timer(0, self.process_outgoing_forever)
+        outgoing_thread.start()
