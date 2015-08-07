@@ -29,7 +29,6 @@ class DGTInterface(Display, HardwareDisplay, threading.Thread):
         self.enable_board_leds = enable_board_leds
         self.disable_dgt_clock_beep = disable_dgt_clock_beep
         self.displayed_text = None  # The current clock display or None if in ClockNRun mode or unknown text
-        # self.dgt_queue = queue.Queue()
 
     def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG, force=True):
         raise NotImplementedError()
@@ -54,7 +53,6 @@ class DGTInterface(Display, HardwareDisplay, threading.Thread):
             # Check if we have something to display
             try:
                 message = self.dgt_queue.get()
-                # if type(message).__name__ == 'Dgt':
                 logging.debug("Read dgt from queue: %s", message)
                 for case in switch(message):
                     if case(Dgt.DISPLAY_MOVE):

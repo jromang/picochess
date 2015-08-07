@@ -22,9 +22,7 @@ import chess
 
 from timecontrol import *
 from struct import unpack
-# from collections import OrderedDict
 from utilities import *
-# from subprocess import Popen
 
 try:
     import enum
@@ -204,8 +202,6 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
         except ValueError:
             logging.error('Invalid bytes sent {0}'.format(array))
         if message[0] == Commands.DGT_CLOCK_MESSAGE:
-            # Let a bit time for the message to be displayed on the clock
-            # time.sleep(0.05 if self.enable_dgt_3000 else 0.5)
             logging.debug('DGT clock locked')
             self.clock_lock.acquire()
 
@@ -350,15 +346,10 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
             return
 
         # Set the board update mode
-        # self.serial.write(bytearray([Commands.DGT_SEND_UPDATE_NICE.value]))
         self.write([Commands.DGT_SEND_UPDATE_NICE])
         # we sending a beep command, and see if its ack'ed
-        # self.serial.write(bytearray([0x2b, 0x04, 0x03, 0x0b, 1, 0x00]))
         self.write([Commands.DGT_CLOCK_MESSAGE, 0x04, Clock.DGT_CMD_CLOCK_START_MESSAGE,
                     Clock.DGT_CMD_CLOCK_BEEP, 1, Clock.DGT_CMD_CLOCK_END_MESSAGE])
-        # time.sleep(1)
-        # logging.debug('DGT clock found' if self.clock_found else 'DGT clock NOT found')
-
         # Get clock version
         self.write([Commands.DGT_CLOCK_MESSAGE, 0x03, Clock.DGT_CMD_CLOCK_START_MESSAGE,
                     Clock.DGT_CMD_CLOCK_VERSION, Clock.DGT_CMD_CLOCK_END_MESSAGE])
@@ -384,7 +375,7 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
                 except queue.Empty:
                     pass
             else:
-                logging.debug('DGT Clock still locked')
+                logging.debug('DGT clock still locked')
 
     def run(self):
         self.startup(self.device)
