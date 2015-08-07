@@ -372,13 +372,19 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
 
         while True:
             # Check if we have a message from the board
-            c = self.serial.read(1)
-            if c:
-                self.read_message(head=c)
+            # c = self.serial.read(1)
+            # if c:
+            #     self.read_message(head=c)
+            if self.serial.inWaiting():
+                self.read_message()
+            else:
+                time.sleep(0.1)  # Sleep a little bit to avoid CPU usage
+
             if not self.clock_lock.locked():
                 # Check if we have something to send
                 try:
                     command = serial_queue.get_nowait()
+                    # print ("get without waiting..")
                     self.send_command(command)
                 except queue.Empty:
                     pass

@@ -53,7 +53,7 @@ class DGTInterface(Display, HardwareDisplay, threading.Thread):
         while True:
             # Check if we have something to display
             try:
-                message = self.dgt_queue.get_nowait()
+                message = self.dgt_queue.get()
                 # if type(message).__name__ == 'Dgt':
                 logging.debug("Read dgt from queue: %s", message)
                 for case in switch(message):

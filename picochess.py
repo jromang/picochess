@@ -219,7 +219,7 @@ def main():
         Stop current search.
         :return:
         """
-        return engine.stop()
+        engine.stop()
 
     def stop_clock():
         nonlocal time_control
@@ -228,7 +228,7 @@ def main():
 
     def stop_search_and_clock():
         stop_clock()
-        return stop_search()
+        stop_search()
 
     def check_game_state(game, play_mode):
         """
