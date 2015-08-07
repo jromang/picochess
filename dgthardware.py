@@ -18,61 +18,7 @@ import logging
 import chess
 from dgtinterface import *
 from dgtserial import *
-
-try:
-    import enum
-except ImportError:  # Python 3.3 support
-    import enum34 as enum
-
-
-@enum.unique
-class Commands(enum.Enum):
-    """ COMMAND CODES FROM PC TO BOARD """
-    # Commands not resulting in returning messages:
-    DGT_SEND_RESET = 0x40  # Puts the board in IDLE mode, cancelling any UPDATE mode
-    DGT_STARTBOOTLOADER = 0x4e  # Makes a long jump to the FC00 boot loader code. Start FLIP now
-    # Commands resulting in returning message(s):
-    DGT_SEND_CLK = 0x41  # Results in a DGT_MSG_BWTIME message
-    DGT_SEND_BRD = 0x42  # Results in a DGT_MSG_BOARD_DUMP message
-    DGT_SEND_UPDATE = 0x43  # Results in DGT_MSG_FIELD_UPDATE messages and DGT_MSG_BWTIME messages
-    # as long as the board is in UPDATE mode
-    DGT_SEND_UPDATE_BRD = 0x44  # Results in DGT_MSG_FIELD_UPDATE messages as long as the board is in UPDATE_BOARD mode
-    DGT_RETURN_SERIALNR = 0x45  # Results in a DGT_MSG_SERIALNR message
-    DGT_RETURN_BUSADRES = 0x46  # Results in a DGT_MSG_BUSADRES message
-    DGT_SEND_TRADEMARK = 0x47  # Results in a DGT_MSG_TRADEMARK message
-    DGT_SEND_EE_MOVES = 0x49  # Results in a DGT_MSG_EE_MOVES message
-    DGT_SEND_UPDATE_NICE = 0x4b  # Results in DGT_MSG_FIELD_UPDATE messages and DGT_MSG_BWTIME messages,
-    # the latter only at time changes, as long as the board is in UPDATE_NICE mode
-    DGT_SEND_BATTERY_STATUS = 0x4c  # New command for bluetooth board. Requests the battery status from the board.
-    DGT_SEND_VERSION = 0x4d  # Results in a DGT_MSG_VERSION message
-    DGT_SEND_BRD_50B = 0x50  # Results in a DGT_MSG_BOARD_DUMP_50 message: only the black squares
-    DGT_SCAN_50B = 0x51  # Sets the board in scanning only the black squares. This is written in EEPROM
-    DGT_SEND_BRD_50W = 0x52  # Results in a DGT_MSG_BOARD_DUMP_50 message: only the black squares
-    DGT_SCAN_50W = 0x53  # Sets the board in scanning only the black squares. This is written in EEPROM.
-    DGT_SCAN_100 = 0x54  # Sets the board in scanning all squares. This is written in EEPROM
-    DGT_RETURN_LONG_SERIALNR = 0x55  # Results in a DGT_LONG_SERIALNR message
-    DGT_SET_LEDS = 0x60  # Only for the Revelation II to switch a LED pattern on. This is a command that
-    # has three extra bytes with data.
-    # Clock commands, returns ACK message if mode is in UPDATE or UPDATE_NICE
-    DGT_CLOCK_MESSAGE = 0x2b  # This message contains a command for the clock.
-
-
-class Clock(enum.Enum):
-    DGT_CMD_CLOCK_DISPLAY = 0x01  # This command can control the segments of six 7-segment characters,
-    # two dots, two semicolons and the two '1' symbols.
-    DGT_CMD_CLOCK_ICONS = 0x02  # Used to control the clock icons like flags etc.
-    DGT_CMD_CLOCK_END = 0x03  # This command clears the message and brings the clock back to the
-    # normal display (showing clock times).
-    DGT_CMD_CLOCK_BUTTON = 0x08  # Requests the current button pressed (if any).
-    DGT_CMD_CLOCK_VERSION = 0x09  # This commands requests the clock version.
-    DGT_CMD_CLOCK_SETNRUN = 0x0a  # This commands controls the clock times and counting direction, when
-    # the clock is in mode 23. A clock can be paused or counting down. But
-    # counting up isn't supported on current DGT XL's (1.14 and lower) yet.
-    DGT_CMD_CLOCK_BEEP = 0x0b  # This clock command turns the beep on, for a specified time (64ms * byte 5)
-    DGT_CMD_CLOCK_ASCII = 0x0c  # This clock commands sends a ASCII message to the clock that
-    # can be displayed only by the DGT3000.
-    DGT_CMD_CLOCK_START_MESSAGE = 0x03
-    DGT_CMD_CLOCK_END_MESSAGE = 0x00
+from utilities import *
 
 
 class DGTHardware(DGTInterface, DGTSerial):
@@ -162,4 +108,3 @@ class DGTHardware(DGTInterface, DGTSerial):
                     side, Clock.DGT_CMD_CLOCK_END_MESSAGE])
         self.write([Commands.DGT_CLOCK_MESSAGE, 0x03, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_END,
                     Clock.DGT_CMD_CLOCK_END_MESSAGE])
-

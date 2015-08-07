@@ -191,6 +191,116 @@ class BeepLevel(AutoNumber):
     CONFIG = ()
 
 
+@enum.unique
+class Commands(enum.Enum):
+    """ COMMAND CODES FROM PC TO BOARD """
+    # Commands not resulting in returning messages:
+    DGT_SEND_RESET = 0x40  # Puts the board in IDLE mode, cancelling any UPDATE mode
+    DGT_STARTBOOTLOADER = 0x4e  # Makes a long jump to the FC00 boot loader code. Start FLIP now
+    # Commands resulting in returning message(s):
+    DGT_SEND_CLK = 0x41  # Results in a DGT_MSG_BWTIME message
+    DGT_SEND_BRD = 0x42  # Results in a DGT_MSG_BOARD_DUMP message
+    DGT_SEND_UPDATE = 0x43  # Results in DGT_MSG_FIELD_UPDATE messages and DGT_MSG_BWTIME messages
+    # as long as the board is in UPDATE mode
+    DGT_SEND_UPDATE_BRD = 0x44  # Results in DGT_MSG_FIELD_UPDATE messages as long as the board is in UPDATE_BOARD mode
+    DGT_RETURN_SERIALNR = 0x45  # Results in a DGT_MSG_SERIALNR message
+    DGT_RETURN_BUSADRES = 0x46  # Results in a DGT_MSG_BUSADRES message
+    DGT_SEND_TRADEMARK = 0x47  # Results in a DGT_MSG_TRADEMARK message
+    DGT_SEND_EE_MOVES = 0x49  # Results in a DGT_MSG_EE_MOVES message
+    DGT_SEND_UPDATE_NICE = 0x4b  # Results in DGT_MSG_FIELD_UPDATE messages and DGT_MSG_BWTIME messages,
+    # the latter only at time changes, as long as the board is in UPDATE_NICE mode
+    DGT_SEND_BATTERY_STATUS = 0x4c  # New command for bluetooth board. Requests the battery status from the board.
+    DGT_SEND_VERSION = 0x4d  # Results in a DGT_MSG_VERSION message
+    DGT_SEND_BRD_50B = 0x50  # Results in a DGT_MSG_BOARD_DUMP_50 message: only the black squares
+    DGT_SCAN_50B = 0x51  # Sets the board in scanning only the black squares. This is written in EEPROM
+    DGT_SEND_BRD_50W = 0x52  # Results in a DGT_MSG_BOARD_DUMP_50 message: only the black squares
+    DGT_SCAN_50W = 0x53  # Sets the board in scanning only the black squares. This is written in EEPROM.
+    DGT_SCAN_100 = 0x54  # Sets the board in scanning all squares. This is written in EEPROM
+    DGT_RETURN_LONG_SERIALNR = 0x55  # Results in a DGT_LONG_SERIALNR message
+    DGT_SET_LEDS = 0x60  # Only for the Revelation II to switch a LED pattern on. This is a command that
+    # has three extra bytes with data.
+    # Clock commands, returns ACK message if mode is in UPDATE or UPDATE_NICE
+    DGT_CLOCK_MESSAGE = 0x2b  # This message contains a command for the clock.
+
+
+class Clock(enum.Enum):
+    DGT_CMD_CLOCK_DISPLAY = 0x01  # This command can control the segments of six 7-segment characters,
+    # two dots, two semicolons and the two '1' symbols.
+    DGT_CMD_CLOCK_ICONS = 0x02  # Used to control the clock icons like flags etc.
+    DGT_CMD_CLOCK_END = 0x03  # This command clears the message and brings the clock back to the
+    # normal display (showing clock times).
+    DGT_CMD_CLOCK_BUTTON = 0x08  # Requests the current button pressed (if any).
+    DGT_CMD_CLOCK_VERSION = 0x09  # This commands requests the clock version.
+    DGT_CMD_CLOCK_SETNRUN = 0x0a  # This commands controls the clock times and counting direction, when
+    # the clock is in mode 23. A clock can be paused or counting down. But
+    # counting up isn't supported on current DGT XL's (1.14 and lower) yet.
+    DGT_CMD_CLOCK_BEEP = 0x0b  # This clock command turns the beep on, for a specified time (64ms * byte 5)
+    DGT_CMD_CLOCK_ASCII = 0x0c  # This clock commands sends a ASCII message to the clock that
+    # can be displayed only by the DGT3000.
+    DGT_CMD_CLOCK_START_MESSAGE = 0x03
+    DGT_CMD_CLOCK_END_MESSAGE = 0x00
+    DGT_ACK_CLOCK_BUTTON = 0x88  # Ack of a clock button
+
+
+class Messages(enum.IntEnum):
+    """
+    DESCRIPTION OF THE MESSAGES FROM BOARD TO PC
+    """
+    MESSAGE_BIT = 0x80  # The Message ID is the logical OR of MESSAGE_BIT and ID code
+    # ID codes
+    DGT_NONE = 0x00
+    DGT_BOARD_DUMP = 0x06
+    DGT_BWTIME = 0x0d
+    DGT_FIELD_UPDATE = 0x0e
+    DGT_EE_MOVES = 0x0f
+    DGT_BUSADRES = 0x10
+    DGT_SERIALNR = 0x11
+    DGT_TRADEMARK = 0x12
+    DGT_VERSION = 0x13
+    DGT_BOARD_DUMP_50B = 0x14  # Added for Draughts board
+    DGT_BOARD_DUMP_50W = 0x15  # Added for Draughts board
+    DGT_BATTERY_STATUS = 0x20  # Added for Bluetooth board
+    DGT_LONG_SERIALNR = 0x22  # Added for Bluetooth board
+    # DGT_MSG_BOARD_DUMP is the message that follows on a DGT_SEND_BOARD command
+    DGT_MSG_BOARD_DUMP = (MESSAGE_BIT | DGT_BOARD_DUMP)
+    DGT_SIZE_BOARD_DUMP = 67
+    DGT_SIZE_BOARD_DUMP_DRAUGHTS = 103
+    DGT_MSG_BOARD_DUMP_50B = (MESSAGE_BIT | DGT_BOARD_DUMP_50B)
+    DGT_SIZE_BOARD_DUMP_50B = 53
+    DGT_MSG_BOARD_DUMP_50W = (MESSAGE_BIT | DGT_BOARD_DUMP_50W)
+    DGT_SIZE_BOARD_DUMP_50W = 53
+    DGT_MSG_BWTIME = (MESSAGE_BIT | DGT_BWTIME)
+    DGT_SIZE_BWTIME = 10
+    DGT_MSG_FIELD_UPDATE = (MESSAGE_BIT | DGT_FIELD_UPDATE)
+    DGT_SIZE_FIELD_UPDATE = 5
+    DGT_MSG_TRADEMARK = (MESSAGE_BIT | DGT_TRADEMARK)
+    DGT_MSG_BUSADRES = (MESSAGE_BIT | DGT_BUSADRES)
+    DGT_SIZE_BUSADRES = 5
+    DGT_MSG_SERIALNR = (MESSAGE_BIT | DGT_SERIALNR)
+    DGT_SIZE_SERIALNR = 8
+    DGT_MSG_LONG_SERIALNR = (MESSAGE_BIT | DGT_LONG_SERIALNR)
+    DGT_SIZE_LONG_SERIALNR = 13
+    DGT_MSG_VERSION = (MESSAGE_BIT | DGT_VERSION)
+    DGT_SIZE_VERSION = 5
+    DGT_MSG_BATTERY_STATUS = (MESSAGE_BIT | DGT_BATTERY_STATUS)
+    DGT_SIZE_BATTERY_STATUS = 7
+    DGT_MSG_EE_MOVES = (MESSAGE_BIT | DGT_EE_MOVES)
+    # Definition of the one-byte EEPROM message codes
+    EE_POWERUP = 0x6a
+    EE_EOF = 0x6b
+    EE_FOURROWS = 0x6c
+    EE_EMPTYBOARD = 0x6d
+    EE_DOWNLOADED = 0x6e
+    EE_BEGINPOS = 0x6f
+    EE_BEGINPOS_ROT = 0x7a
+    EE_START_TAG = 0x7b
+    EE_WATCHDOG_ACTION = 0x7c
+    EE_FUTURE_1 = 0x7d
+    EE_FUTURE_2 = 0x7e
+    EE_NOP = 0x7f
+    EE_NOP2 = 0x00
+
+
 class Observable(object):  # Input devices are observable
     def __init__(self):
         super(Observable, self).__init__()
