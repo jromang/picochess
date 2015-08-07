@@ -303,7 +303,6 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="takeback", xl="takbak", beep=BeepLevel.CONFIG)
                         break
                     if case(Message.GAME_ENDS):
-                        # time.sleep(3)  # Let the move displayed on clock
                         HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=message.result.value, xl=None, beep=BeepLevel.CONFIG)
                         break
                     if case(Message.INTERACTION_MODE):

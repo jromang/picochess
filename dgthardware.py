@@ -80,7 +80,6 @@ class DGTHardware(DGTInterface, DGTSerial):
         super(DGTHardware, self).__init__(device, enable_board_leds, enable_dgt_3000, disable_dgt_clock_beep)
         self.displayed_text = None  # The current clock display or None if in ClockNRun mode or unknown text
         self.clock_found = True
-        # does that work?!?
         DGTSerial(device, enable_dgt_3000).start()
 
     def _display_on_dgt_xl(self, text, beep=False):
