@@ -56,11 +56,12 @@ piece_to_char = {
 }
 
 
-class DGTSerial(Display, HardwareDisplay, threading.Thread):
+class DGTSerial(Display, HardwareDisplay):
     def __init__(self, device, enable_dgt_3000):
         super(DGTSerial, self).__init__()
 
         self.clock_lock = asyncio.Lock()
+        self.lock = False
         self.enable_dgt_3000 = enable_dgt_3000
         self.device = device
 
@@ -93,7 +94,8 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
             logging.error('Invalid bytes sent {0}'.format(array))
         if message[0] == Commands.DGT_CLOCK_MESSAGE:
             logging.debug('DGT clock locked')
-            self.clock_lock.acquire()
+            # self.clock_lock.acquire()
+            self.lock = True
 
     def process_message(self, message_id, message):
         for case in switch(message_id):
@@ -145,9 +147,13 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
                         logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
                     else:
                         logging.debug("Clock ACK [%s]", Clock(ack1))
-                        if self.clock_lock.locked():
+                        # if self.clock_lock.locked():
+                        if self.lock:
                             logging.debug('DGT clock unlocked')
-                            self.clock_lock.release()
+                            # self.clock_lock.release()
+                            self.lock = False
+                        else:
+                            logging.debug('DGT clock already released')
                 elif any(message[:6]):
                     r_hours = message[0] & 0x0f
                     r_mins = (message[1] >> 4) * 10 + (message[1] & 0x0f)
@@ -157,14 +163,22 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
                     l_secs = (message[5] >> 4) * 10 + (message[5] & 0x0f)
                     logging.info(
                         'DGT clock time received {} : {}'.format((l_hours, l_mins, l_secs), (r_hours, r_mins, r_secs)))
-                    if self.clock_lock.locked():
+                    # if self.clock_lock.locked():
+                    if self.lock:
                         logging.debug('DGT clock unlocked')
-                        self.clock_lock.release()
+                        # self.clock_lock.release()
+                        self.lock = False
+                    else:
+                        logging.debug('DGT clock already released')
                 else:
                     logging.debug('DGT clock message ignored')
-                    if self.clock_lock.locked():
+                    # if self.clock_lock.locked():
+                    if self.lock:
                         logging.debug('DGT clock unlocked')
-                        self.clock_lock.release()
+                        self.lock = False
+                        # self.clock_lock.release()
+                    else:
+                        logging.debug('DGT clock already released')
                 break
             if case(Messages.DGT_MSG_BOARD_DUMP):
                 board = ''
@@ -256,7 +270,8 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
 
     def process_outgoing_forever(self):
         while True:
-            if not self.clock_lock.locked():
+            # if not self.clock_lock.locked():
+            if not self.lock:
                 # Check if we have something to send
                 try:
                     command = serial_queue.get()
@@ -264,8 +279,6 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
                     self.send_command(command)
                 except queue.Empty:
                     pass
-            else:
-                logging.debug('DGT clock still locked')
 
     def run(self):
         self.startup(self.device)
