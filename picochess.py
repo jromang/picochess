@@ -123,13 +123,13 @@ def main():
     if args.dgt_port:
         # Connect to DGT board
         logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
-        DGTHardware(args.dgt_port, args.enable_dgt_board_leds, args.dgt_3000_clock, args.disable_dgt_clock_beep).start()
+        DGTHardware(args.dgt_port, args.enable_dgt_board_leds, args.disable_dgt_clock_beep).start()
     else:
         # Enable keyboard input and terminal display
         logging.warning("No DGT board port provided")
         KeyboardInput().start()
         TerminalDisplay().start()
-        DGTVirtual(args.dgt_port, args.enable_dgt_board_leds, args.dgt_3000_clock, args.disable_dgt_clock_beep).start()
+        DGTVirtual(args.dgt_port, args.enable_dgt_board_leds, args.disable_dgt_clock_beep).start()
 
     # Save to PGN
     PgnDisplay(

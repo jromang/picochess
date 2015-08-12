@@ -19,13 +19,15 @@ import queue
 
 import threading
 from utilities import *
+import time
 
 
 class DGTInterface(Display, HardwareDisplay, threading.Thread):
-    def __init__(self, device, enable_board_leds, enable_dgt_3000, disable_dgt_clock_beep):
-        super(DGTInterface, self).__init__(device, enable_dgt_3000)
+    def __init__(self, device, enable_board_leds, disable_dgt_clock_beep):
+        super(DGTInterface, self).__init__(device)
 
-        self.enable_dgt_3000 = enable_dgt_3000
+        self.enable_dgt_3000 = False
+        self.clock_found = False
         self.enable_board_leds = enable_board_leds
         self.disable_dgt_clock_beep = disable_dgt_clock_beep
         self.displayed_text = None  # The current clock display or None if in ClockNRun mode or unknown text
@@ -73,6 +75,12 @@ class DGTInterface(Display, HardwareDisplay, threading.Thread):
                     if case(Dgt.CLOCK_START):
                         self.start_clock(message.time_left, message.time_right, message.side)
                         break
+                    if case(Dgt.CLOCK_VERSION):
+                        self.clock_found = True
+                        if message.main_version == 2:
+                            self.enable_dgt_3000 = True
+                        self.display_text_on_clock('pico ' + version, 'pic' + version, beep=BeepLevel.YES)
+                        time.sleep(2)
                     if case():  # Default
                         pass
             except queue.Empty:

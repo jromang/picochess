@@ -86,6 +86,7 @@ class Message(AutoNumber):
     OPENING_BOOK = ()  # User chooses an opening book
     DGT_BUTTON = ()  # Clock button pressed
     DGT_FEN = ()  # DGT Board sends a fen
+    DGT_CLOCK_VERSION = ()  # DGT Board sends the clock version
 
     INTERACTION_MODE = ()  # Interaction mode
     PLAY_MODE = ()  # Play mode
@@ -113,6 +114,7 @@ class Dgt(AutoNumber):
     LIGHT_SQUARES = ()
     CLOCK_STOP = ()
     CLOCK_START = ()
+    CLOCK_VERSION = ()  # DGT Board sends the clock version
 
 
 class Menu(AutoNumber):

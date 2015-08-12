@@ -22,12 +22,10 @@ from utilities import *
 
 
 class DGTHardware(DGTInterface, DGTSerial):
-    def __init__(self, device, enable_board_leds, enable_dgt_3000, disable_dgt_clock_beep):
-        super(DGTHardware, self).__init__(device, enable_board_leds, enable_dgt_3000, disable_dgt_clock_beep)
+    def __init__(self, device, enable_board_leds, disable_dgt_clock_beep):
+        super(DGTHardware, self).__init__(device, enable_board_leds, disable_dgt_clock_beep)
         self.displayed_text = None  # The current clock display or None if in ClockNRun mode or unknown text
-        self.clock_found = True
-        # DGTSerial(device, enable_dgt_3000).start()
-        DGTSerial(device, enable_dgt_3000).run()
+        DGTSerial(device).run()
 
     def _display_on_dgt_xl(self, text, beep=False):
         if self.clock_found and not self.enable_dgt_3000:

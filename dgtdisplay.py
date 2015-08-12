@@ -406,6 +406,9 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         else:
                             self.fire(Event.FEN, fen=fen)
                         break
+                    if case(Message.DGT_CLOCK_VERSION):
+                        HardwareDisplay.show(Dgt.CLOCK_VERSION, main_version=message.main_version, sub_version=message.sub_version)
+                        break
                     if case():  # Default
                         # print(message)
                         pass

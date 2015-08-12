@@ -20,8 +20,8 @@ from dgtinterface import *
 
 
 class DGTVirtual(DGTInterface):
-    def __init__(self, device, enable_board_leds, enable_dgt_3000, disable_dgt_clock_beep):
-        super(DGTVirtual, self).__init__(device, enable_board_leds, enable_dgt_3000, disable_dgt_clock_beep)
+    def __init__(self, device, enable_board_leds, disable_dgt_clock_beep):
+        super(DGTVirtual, self).__init__(device, enable_board_leds, disable_dgt_clock_beep)
         self.rt = None
         self.time_left = None
         self.time_right = None
