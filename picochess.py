@@ -267,7 +267,8 @@ def main():
                         game.pop()
             legal_moves = list(game.legal_moves)
             Observable.fire(Event.USER_MOVE, move=legal_moves[legal_fens.index(fen)])
-        elif fen == game.fen().split(' ')[0]:  # Player had done the computer move on the board
+        # elif fen == game.fen().split(' ')[0]:  # Player had done the computer move on the board
+        elif fen == last_computer_move:  # Player had done the computer move on the board
             if check_game_state(game, play_mode) and interaction_mode == Mode.GAME:
                 Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD)
                 if time_control.mode != ClockMode.FIXED_TIME:
@@ -305,9 +306,12 @@ def main():
     def handle_move(move, game):
         fen = game.fen()
         game.push(move)
+        nonlocal last_computer_move
+        last_computer_move = None
         if interaction_mode == Mode.GAME:
             stop_clock()
             if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.WHITE) or (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.BLACK):
+                last_computer_move = game.fen().split(' ')[0]
                 Display.show(Message.COMPUTER_MOVE, result=event.result, fen=fen, game=copy.deepcopy(game), time_control=time_control)
             else:
                 Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
@@ -329,6 +333,7 @@ def main():
     interaction_mode = Mode.GAME  # Interaction mode
     play_mode = PlayMode.PLAY_WHITE
     time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=5)
+    last_computer_move = None
 
     system_info_thread = threading.Timer(0, display_system_info)
     system_info_thread.start()
@@ -394,6 +399,7 @@ def main():
                     stop_search_and_clock()
                     time_control.reset()
                     interaction_mode = Mode.GAME
+                    last_computer_move = None
                     set_wait_state()
                     Display.show(Message.START_NEW_GAME)
                     break
@@ -425,6 +431,7 @@ def main():
                                          color=game.turn, play_mode=play_mode, custom_fen=custom_fen)
                         game = chess.Board()
                     legal_fens = compute_legal_fens(game)
+                    last_computer_move = None
                     stop_search_and_clock()
                     time_control.reset()
                     set_wait_state()

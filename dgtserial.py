@@ -72,7 +72,7 @@ class DGTSerial(Display, HardwareDisplay):
         mes = message[3] if message[0].value == Commands.DGT_CLOCK_MESSAGE.value else message[0]
         logging.debug('->DGT [%s], length:%i', mes, len(message))
         if mes.value == Clock.DGT_CMD_CLOCK_ASCII.value:
-            logging.debug('      ' + str(message[4:10]))
+            logging.debug('ASCII ' + str(message[4:10]))
         array = []
         for v in message:
             if type(v) is int:
