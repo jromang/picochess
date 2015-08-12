@@ -277,20 +277,24 @@ def main():
             game_history = copy.deepcopy(game)
             while game_history.move_stack:
                 game_history.pop()
-                if game_history.fen().split(' ')[0] == fen:
-                    logging.debug("Legal Fens root       : " + str(legal_fens.root))
-                    logging.debug("Current game FEN      : " + str(game.fen()))
-                    logging.debug("Undoing game until FEN: " + fen)
-                    stop_search()
-                    while len(game_history.move_stack) < len(game.move_stack):
-                        game.pop()
-                    if interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
-                        analyse(copy.deepcopy(game))
-                    if interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
-                        observe(copy.deepcopy(game), time_control)
-                    Display.show(Message.USER_TAKE_BACK)
-                    legal_fens = compute_legal_fens(game)
-                    break
+                if (play_mode == PlayMode.PLAY_WHITE and game_history.turn == chess.WHITE) \
+                    or (play_mode == PlayMode.PLAY_BLACK and game_history.turn == chess.BLACK) \
+                    or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.KIBITZ) \
+                    or (interaction_mode == Mode.REMOTE) or (interaction_mode == Mode.ANALYSIS):
+                    if game_history.fen().split(' ')[0] == fen:
+                        logging.debug("Legal Fens root       : " + str(legal_fens.root))
+                        logging.debug("Current game FEN      : " + str(game.fen()))
+                        logging.debug("Undoing game until FEN: " + fen)
+                        stop_search()
+                        while len(game_history.move_stack) < len(game.move_stack):
+                            game.pop()
+                        if interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
+                            analyse(copy.deepcopy(game))
+                        if interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
+                            observe(copy.deepcopy(game), time_control)
+                        Display.show(Message.USER_TAKE_BACK)
+                        legal_fens = compute_legal_fens(game)
+                        break
         return legal_fens
 
     def set_wait_state():
