@@ -341,7 +341,11 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         # @todo Make this code independent from DGT Hex codes => more abstract
                         tc = message.time_control
                         time_left = int(tc.clock_time[chess.WHITE])
+                        if time_left < 0:
+                            time_left = 0
                         time_right = int(tc.clock_time[chess.BLACK])
+                        if time_right < 0:
+                            time_right = 0
                         side = 0x01 if (message.turn == chess.WHITE) != self.flip_board else 0x02
                         if tc.mode == ClockMode.FIXED_TIME:
                             side = 0x02
