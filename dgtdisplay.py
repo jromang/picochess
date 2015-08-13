@@ -273,19 +273,19 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         self.dgt_clock_menu = Menu.GAME_MENU
                         break
                     if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok done", xl="okdone", beep=BeepLevel.CONFIG)
+                        # HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok done", xl="okdone", beep=BeepLevel.CONFIG)
                         HardwareDisplay.show(Dgt.LIGHT_CLEAR)
                         self.display_move = False
                         break
                     if case(Message.USER_MOVE):
                         self.display_move = False
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok user", xl="okuser", beep=BeepLevel.CONFIG)
+                        # HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok user", xl="okuser", beep=BeepLevel.CONFIG)
                         break
                     if case(Message.REVIEW_MODE_MOVE):
                         self.last_move = message.move
                         self.last_fen = message.fen
                         self.display_move = False
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok mode", xl="okmode", beep=BeepLevel.CONFIG)
+                        # HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok mode", xl="okmode", beep=BeepLevel.CONFIG)
                         break
                     if case(Message.LEVEL):
                         level = str(message.level)
