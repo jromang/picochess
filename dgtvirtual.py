@@ -19,7 +19,13 @@ import chess
 from dgtinterface import *
 
 
-class DGTVirtual(DGTInterface):
+class DGTDummy(Display, HardwareDisplay):
+    def __init__(self, device):
+        super(DGTDummy, self).__init__()
+        self.device = device
+
+
+class DGTVirtual(DGTInterface, DGTDummy):
     def __init__(self, device, enable_board_leds, disable_dgt_clock_beep):
         super(DGTVirtual, self).__init__(device, enable_board_leds, disable_dgt_clock_beep)
         self.rt = None
