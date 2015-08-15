@@ -382,6 +382,9 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                             self.setup_reverse_orientation = self.flip_board
                             fen = fen[::-1]
                         logging.debug("DGT-Fen: " + fen)
+                        if fen == self.dgt_fen:
+                            logging.debug('Ignore same fen')
+                            break
                         self.dgt_fen = fen
 
                         # Fire the appropriate event

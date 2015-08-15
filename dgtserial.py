@@ -248,7 +248,7 @@ class DGTSerial(Display, HardwareDisplay):
 
     def process_outgoing_forever(self):
         while True:
-            if True or not self.clock_lock:
+            if not self.clock_lock:
                 # Check if we have something to send
                 try:
                     command = serial_queue.get()
