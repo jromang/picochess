@@ -24,7 +24,7 @@ import time
 
 class DGTInterface(Display, HardwareDisplay, threading.Thread):
     def __init__(self, device, enable_board_leds, disable_dgt_clock_beep):
-        super(DGTInterface, self).__init__(device)
+        super(DGTInterface, self).__init__()
 
         self.enable_dgt_3000 = False
         self.clock_found = False

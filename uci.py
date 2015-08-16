@@ -19,26 +19,39 @@ import logging
 import spur
 import paramiko
 import chess.uci
-
+import threading
 
 class Informer(chess.uci.InfoHandler, Observable):
     def __init__(self):
         super(Informer, self).__init__()
         self.mate_found = False
-        self.depth = 0
+        self.dep = 0
+        self.allow = True
 
     def on_go(self):
         self.mate_found = False
-        self.depth = 0
+        self.dep = 0
+        self.allow = True
         super().on_go()
 
-    def depth(self, d):
-        self.depth = d
-        super().depth(d)
+    def depth(self, dep):
+        self.dep = dep
+        super().depth(dep)
+
+    def _reset_allow(self):
+        self.allow = True
+
+    def _allow_fire(self):
+        if self.allow:
+            self.allow = False
+            threading.Timer(0.5, self._reset_allow)
+            return True
+        else:
+            return False
 
     def score(self, cp, mate, lowerbound, upperbound):
         if mate is None or not self.mate_found:
-            if self.depth > 5:
+            if self._allow_fire():
                 self.fire(Event.SCORE, score=cp, mate=mate)
         if mate is not None and not self.mate_found:
             self.mate_found = True
@@ -46,7 +59,7 @@ class Informer(chess.uci.InfoHandler, Observable):
 
     def pv(self, moves):
         if not self.mate_found:
-            if self.depth > 5:
+            if self._allow_fire():
                 self.fire(Event.NEW_PV, pv=moves)
         super().pv(moves)
 
