@@ -313,15 +313,18 @@ def main():
                 Display.show(Message.COMPUTER_MOVE, result=result, fen=fen, game=copy.deepcopy(game), time_control=time_control)
             else:
                 Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
-                think(copy.deepcopy(game), time_control)
+                if check_game_state(game, play_mode):
+                    think(copy.deepcopy(game), time_control)
         elif interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
             stop_search_and_clock()
             Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game), mode=interaction_mode)
-            observe(copy.deepcopy(game), time_control)
+            if check_game_state(game, play_mode):
+                observe(copy.deepcopy(game), time_control)
         elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
             stop_search()
             Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game), mode=interaction_mode)
-            analyse(copy.deepcopy(game))
+            if check_game_state(game, play_mode):
+                analyse(copy.deepcopy(game))
         return game
 
     # Startup - internal
