@@ -28,7 +28,7 @@ import uci
 
 import threading
 import copy
-import time
+# import time
 from timecontrol import TimeControl
 from utilities import *
 from keyboardinput import KeyboardInput, TerminalDisplay
@@ -39,7 +39,7 @@ from dgthardware import DGTHardware
 from dgtdisplay import DGTDisplay
 from dgtvirtual import DGTVirtual
 
-import spur
+# import spur
 
 
 def main():

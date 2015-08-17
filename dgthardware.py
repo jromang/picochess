@@ -212,9 +212,16 @@ class DGTHardware(DGTInterface):
 
     def process_incoming_forever(self):
         while True:
-            c = self.serial.read(1)
-            if c:
-                self.read_message(head=c)
+            try:
+                c = self.serial.read(1)
+                if c:
+                    self.read_message(head=c)
+            except pyserial.SerialException as e:
+                # device reports readiness to read but returned no data (device disconnected?)
+                pass
+            finally:
+                logging.debug('Closing serial port')
+                self.serial.close()
 
     def process_outgoing_forever(self):
         while True:
