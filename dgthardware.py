@@ -29,11 +29,24 @@ class DGTHardware(DGTInterface):
         self.clock_lock = False
         self.serial = None
 
-        self.startup(device)
+        print('Hardware-Init')
+        # Open the serial port
+        try:
+            self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE,
+                                          parity=pyserial.PARITY_NONE,
+                                          bytesize=pyserial.EIGHTBITS,
+                                          timeout=2
+                                          )
+        except pyserial.SerialException as e:
+            logging.warning(e)
+            return
+
         incoming_thread = threading.Timer(0, self.process_incoming_forever)
         incoming_thread.start()
         outgoing_thread = threading.Timer(0, self.process_outgoing_forever)
         outgoing_thread.start()
+
+        self.startup(device)
 
     def write(self, message):
         serial_queue.put(message)
@@ -186,17 +199,6 @@ class DGTHardware(DGTInterface):
             return message_id
 
     def startup(self, device):
-        # Open the serial port
-        try:
-            self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE,
-                                          parity=pyserial.PARITY_NONE,
-                                          bytesize=pyserial.EIGHTBITS,
-                                          timeout=2
-                                          )
-        except pyserial.SerialException as e:
-            logging.warning(e)
-            return
-
         # Set the board update mode
         self.write([Commands.DGT_SEND_UPDATE_NICE])
         # we sending a beep command, and see if its ack'ed
@@ -219,9 +221,6 @@ class DGTHardware(DGTInterface):
             except pyserial.SerialException as e:
                 # device reports readiness to read but returned no data (device disconnected?)
                 pass
-            finally:
-                logging.debug('Closing serial port')
-                self.serial.close()
 
     def process_outgoing_forever(self):
         while True:
