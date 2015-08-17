@@ -300,7 +300,8 @@ def main():
             nonlocal play_mode
             play_mode = PlayMode.PLAY_WHITE if game.turn == chess.WHITE else PlayMode.PLAY_BLACK
 
-    def handle_move(move, game):
+    def handle_move(result, game):
+        move = result.bestmove
         fen = game.fen()
         game.push(move)
         nonlocal last_computer_move
@@ -309,7 +310,7 @@ def main():
             stop_clock()
             if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.WHITE) or (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.BLACK):
                 last_computer_move = game.fen().split(' ')[0]
-                Display.show(Message.COMPUTER_MOVE, result=event.result, fen=fen, game=copy.deepcopy(game), time_control=time_control)
+                Display.show(Message.COMPUTER_MOVE, result=result, fen=fen, game=copy.deepcopy(game), time_control=time_control)
             else:
                 Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
                 think(copy.deepcopy(game), time_control)
@@ -370,7 +371,8 @@ def main():
                     if move not in game.legal_moves:
                         logging.warning('Illegal move [%s]', move)
                     else:
-                        game = handle_move(move, game)
+                        result = chess.BestMove(bestmove=move, ponder=None)
+                        game = handle_move(result, game)
                         # if check_game_state(game, interaction_mode):
                         legal_fens = compute_legal_fens(game)
                     break
@@ -444,7 +446,7 @@ def main():
                 if case(Event.BEST_MOVE):
                     if event.book:
                         Display.show(Message.BOOK_MOVE, result=event.result)
-                    game = handle_move(event.result.bestmove, game)
+                    game = handle_move(event.result, game)
                     legal_fens = compute_legal_fens(game)
                     break
 
