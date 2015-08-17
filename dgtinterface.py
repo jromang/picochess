@@ -23,7 +23,7 @@ import time
 
 
 class DGTInterface(Display, HardwareDisplay, threading.Thread):
-    def __init__(self, device, enable_board_leds, disable_dgt_clock_beep):
+    def __init__(self, enable_board_leds, disable_dgt_clock_beep):
         super(DGTInterface, self).__init__()
 
         self.enable_dgt_3000 = False
@@ -49,6 +49,13 @@ class DGTInterface(Display, HardwareDisplay, threading.Thread):
 
     def start_clock(self, time_left, time_right, side):
         raise NotImplementedError()
+
+    def get_beep_level(self, beeplevel):
+        if beeplevel == BeepLevel.YES:
+            return True
+        if beeplevel == BeepLevel.NO:
+            return False
+        return not self.disable_dgt_clock_beep
 
     def run(self):
         while True:

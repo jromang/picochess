@@ -23,7 +23,7 @@ from utilities import *
 
 class DGTHardware(DGTInterface):
     def __init__(self, device, enable_board_leds, disable_dgt_clock_beep):
-        super(DGTHardware, self).__init__(device, enable_board_leds, disable_dgt_clock_beep)
+        super(DGTHardware, self).__init__(enable_board_leds, disable_dgt_clock_beep)
         self.displayed_text = None  # The current clock display or None if in ClockNRun mode or unknown text
 
         self.clock_lock = False
@@ -118,6 +118,7 @@ class DGTHardware(DGTInterface):
                     l_secs = (message[5] >> 4) * 10 + (message[5] & 0x0f)
                     logging.info(
                         'DGT clock time received {} : {}'.format((l_hours, l_mins, l_secs), (r_hours, r_mins, r_secs)))
+                    self.displayed_text = None # reset saved text to unknown
                 else:
                     logging.debug('DGT clock message ignored')
 
@@ -249,13 +250,6 @@ class DGTHardware(DGTInterface):
             self.write([Commands.DGT_CLOCK_MESSAGE, 0x0c, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_ASCII,
                         text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], 0x03 if beep else 0x01,
                         Clock.DGT_CMD_CLOCK_END_MESSAGE])
-
-    def get_beep_level(self, beeplevel):
-        if beeplevel == BeepLevel.YES:
-            return True
-        if beeplevel == BeepLevel.NO:
-            return False
-        return not self.disable_dgt_clock_beep
 
     def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG, force=True):
         beep = self.get_beep_level(beep)
