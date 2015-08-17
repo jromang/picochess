@@ -116,11 +116,11 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         self.mode_index = 0
         self.mode = Mode.GAME
 
-        self.engine_level = 20 # Default level is 20
-        self.n_levels = 21     # Default engine (Stockfish) has 21 playing levels
+        self.engine_level = 20  # Default level is 20
+        self.n_levels = 21  # Default engine (Stockfish) has 21 playing levels
 
-        self.book_index = 7    # Default book is 7 - book 'h'
-        self.n_books = 11      # Default is 11 installed books
+        self.book_index = 7  # Default book is 7 - book 'h'
+        self.n_books = 11  # Default is 11 installed books
 
     def reset_hint_and_score(self):
         self.hint_move = chess.Move.null()
@@ -142,7 +142,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=to_move.value, xl=None, beep=BeepLevel.YES)
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
-            self.book_index = ((self.book_index+1)%self.n_books)
+            self.book_index = ((self.book_index+1) % self.n_books)
             self.fire(Event.OPENING_BOOK, book=get_opening_books()[self.book_index])
 
     def process_button1(self):
@@ -167,7 +167,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=orientation, xl=orientation_xl, beep=BeepLevel.YES)
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
-            self.engine_level = ((self.engine_level-1)%self.n_levels)
+            self.engine_level = ((self.engine_level-1) % self.n_levels)
             self.fire(Event.LEVEL, level=self.engine_level)
 
     def process_button2(self):
