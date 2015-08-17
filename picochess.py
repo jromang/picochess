@@ -28,7 +28,6 @@ import uci
 
 import threading
 import copy
-# import time
 from timecontrol import TimeControl
 from utilities import *
 from keyboardinput import KeyboardInput, TerminalDisplay
@@ -38,8 +37,6 @@ import chesstalker.chesstalker
 from dgthardware import DGTHardware
 from dgtdisplay import DGTDisplay
 from dgtvirtual import DGTVirtual
-
-# import spur
 
 
 def main():
