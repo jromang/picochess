@@ -374,7 +374,7 @@ def main():
                     if move not in game.legal_moves:
                         logging.warning('Illegal move [%s]', move)
                     else:
-                        result = chess.BestMove(bestmove=move, ponder=None)
+                        result = chess.uci.BestMove(bestmove=move, ponder=None)
                         game = handle_move(result, game)
                         # if check_game_state(game, interaction_mode):
                         legal_fens = compute_legal_fens(game)
