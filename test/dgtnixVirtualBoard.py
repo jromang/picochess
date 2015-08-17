@@ -92,8 +92,8 @@ def timeMessageThread(client, lock):
 #                second = True
 #            lock.release()
         except socket.error:
-            print ""
-            print "client closed, press enter to quit"
+            print("")
+            print("client closed, press enter to quit")
             clockon="end"
 
 #not yet safe, obviously :)
@@ -130,7 +130,6 @@ def printBoard(board):
     pr += "|\n"
     sys.stdout.write(pr)
 
-
 def waitForInitialisationMessages(client):
     while init=="false":
         try:
@@ -138,12 +137,13 @@ def waitForInitialisationMessages(client):
             manageMessage(client, data)
 
         except socket.error:
-            print "client closed"
+            print("client closed")
             return
 
 
 def secondsToHMS(seconds):
     return (seconds/3600, (seconds%3600) / 60,  (seconds%3600) % 60)
+
 def convertToTimeFormat(value):
     value = (value << 4) / 10
     return value
@@ -196,17 +196,17 @@ def manageClockMessage(client, data):
 
         message = []
 
-        for i in xrange(6):
+        for i in range(6):
             message.append(convertLCDToChar(client.recv(1)))
 
         # For some (obscure?) reason, these bits must be swapped for the DGT XL clock
         message[0], message[2] = message[2], message[0]
         message[3], message[5] = message[5], message[3]
 
-        for i in xrange(3):
+        for i in range(3):
             client.recv(1)
 
-        print "Clock message received: [%s] "%message
+        print("Clock message received: [%s] "%message)
         client.send(_DGTNIX_BWTIME)
         client.send(_DGTNIX_NONE)
 
@@ -255,7 +255,7 @@ def convertLCDToChar(b):
                      0x20|0x10|0x04|0x40|0x02:'x',
                      0x20|0x08|0x04|0x40|0x02:'y',
                      0x01|0x40|0x08|0x02|0x10:'z'}
-    if lcd_char_map.has_key(ord(b)):
+    if ord(b) in lcd_char_map:
         return lcd_char_map[ord(b)]
     return ' '
 
@@ -310,22 +310,22 @@ def manageMessage(client, data):
         elif data==_DGTNIX_SEND_RESET:
             message= "received DGTNIX_SEND_RESET"
         elif data==_DGTNIX_SEND_UPDATE:
-            print "received DGTNIX_SEND_UPDATE"
+            print("received DGTNIX_SEND_UPDATE")
             init="true"
 
         ####################This message are not handled by dgtnix !
         elif data==_DGTNIX_SEND_EE_MOVES:
-            print "received DGTNIX_SEND_EE_MOVES"
-            print "this message is not handled by dgtnix"
+            print("received DGTNIX_SEND_EE_MOVES")
+            print("this message is not handled by dgtnix")
             sys.exit()
         elif data==_DGTNIX_SEND_CLK:
-            print "received DGTNIX_SEND_CLK"
-            print "this message is not handled by dgtnix"
+            print("received DGTNIX_SEND_CLK")
+            print("this message is not handled by dgtnix")
             sys.exit()
         else:
-            message= "unrecognized message from dgtnix:%c" % data
+            message= "unrecognized message from dgtnix:%c" % data#
+            print(message)
             sys.exit()
-        print message
 
 
 def pieceToChar(piece):
@@ -360,23 +360,23 @@ def pieceToChar(piece):
 
 def toColumnLine(c, l):
     if ascii.isalpha(c) == False:
-        print "invalid column"
+        print("invalid column")
         return -1,-1
     if ascii.isupper(c):
-        cColumn = string.lower(c)
+        cColumn = c.lower()
     else:
         cColumn = c
     column = ord(cColumn) - ord('a')
     if column < 0 or column > 7 :
-        print "invalid column"
+        print("invalid column")
         return -1,-1
     if ascii.isdigit(l) == False:
-        print "invalid line"
+        print("invalid line")
         return -1,-1
     line = int(l) - 1
     line = 7 - line
     if line < 0 or line > 7:
-        print "invalid line"
+        print("invalid line")
         return -1,-1
     return column, line
 
@@ -413,7 +413,7 @@ def charToPiece(char):
 def manageStandardMove(c, board):
 
     if len (c) != 4:
-        print "invalid command :%s " % c
+        print("invalid command :%s " % c)
         return 0
     column_i, line_i = toColumnLine(c[0], c[1])
     if column_i == -1:
@@ -422,7 +422,7 @@ def manageStandardMove(c, board):
     if column_f == -1:
         return 0
     if getPiece(board, line_i+1, column_i+1) == _DGTNIX_EMPTY:
-        print "move piece from %c%c impossible, the square is empty" % ( c[0], c[1])
+        print("move piece from %c%c impossible, the square is empty" % ( c[0], c[1]))
         return 0
     piece = getPiece(board, line_i+1, column_i+1)
     msgRemove = "t"+chr(ord('a')+column_i)+str(8-line_i)
@@ -440,17 +440,17 @@ def manageStandardMove(c, board):
 
 def manageRemovePiece(c, board):
     if len(c) != 3:
-        print "invalid command"
+        print("invalid command")
         return 0
     column, line = toColumnLine(c[1], c[2])
     if column == -1:
         return 0
     position = column + line * 8
     if getPiece(board, line+1, column+1) == _DGTNIX_EMPTY:
-        print "cannot take piece from %c%c, the square is empty" %(c[1], c[2])
+        print("cannot take piece from %c%c, the square is empty" %(c[1], c[2]))
         return 1
     piece, sPiece = pieceToChar(getPiece(board, line+1, column+1))
-    print "Removing %s from %c%c" %(sPiece, c[1], c[2])
+    print("Removing %s from %c%c" %(sPiece, c[1], c[2]))
     safesend(client, _DGTNIX_FIELD_UPDATE)
     safesend(client, _DGTNIX_NONE)
     safesend(client, chr(5))
@@ -461,11 +461,11 @@ def manageRemovePiece(c, board):
 
 def manageAddPiece(c, board):
     if len(c) != 3:
-        print "invalid command"
+        print("invalid command")
         return 0
     piece, sPiece = charToPiece(c[0])
-    if(piece == 0):
-        print "invalid piece"
+    if piece == 0:
+        print("invalid piece")
         return 0
     column, line = toColumnLine(c[1], c[2])
     if column == -1:
@@ -473,9 +473,9 @@ def manageAddPiece(c, board):
 
     position = column + line * 8
     if getPiece(board, line+1, column+1) != _DGTNIX_EMPTY:
-        print "cannot add piece on %c%c, the square is not empty!" %(c[1], c[2])
+        print("cannot add piece on %c%c, the square is not empty!" %(c[1], c[2]))
         return 2, column, line
-    print "Adding %s on %c%c" %(sPiece, c[1], c[2])
+    print("Adding %s on %c%c" %(sPiece, c[1], c[2]))
     safesend(client, _DGTNIX_FIELD_UPDATE)
     safesend(client, _DGTNIX_NONE)
     safesend(client, chr(5))
@@ -485,19 +485,19 @@ def manageAddPiece(c, board):
     return 1
 
 filename=""
-print "**************************"
-print "* dgtnix virtual board   *"
-print "**************************"
+print("**************************")
+print("* dgtnix virtual board   *")
+print("**************************")
 if len(sys.argv) == 1:
     filename="/tmp/dgtnixBoard"
-    print "Using default filename for socket(%s)" % filename
-    print "(you can change it by passing the filename as first argument)"
-    print "Use this name as the port for the dgtnixInit(const char *port) function"
+    print("Using default filename for socket(%s)" % filename)
+    print("(you can change it by passing the filename as first argument)")
+    print("Use this name as the port for the dgtnixInit(const char *port) function")
 elif len(sys.argv) == 2:
     filename= sys.argv[1]
-    print "using %s filename for socket" % sys.argv[1]
+    print("using %s filename for socket" % sys.argv[1])
 else:
-    print "usage:%s <exchangeFile>" % sys.argv[0]
+    print("usage:%s <exchangeFile>" % sys.argv[0])
     sys.exit()
 
 if os.path.exists(filename):
@@ -505,17 +505,18 @@ if os.path.exists(filename):
 try:
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     sock.bind(filename)
-except socket.error, (errno, strerror):
-    print "open->I/O error(%s): %s" % (errno, strerror)
+except socket.error as msg:
+    # print "open->I/O error(%s): %s" % (errno, strerror)
+    print('open->I/O error(%s)', msg)
     if os.path.exists(filename):
-        os.remove(filename)
+       os.remove(filename)
     sys.exit()
 
 sock.listen(1)
 while 1:
-    print "Waiting for a client to connect on %s (Ctrl-c to quit)" % filename
+    print("Waiting for a client to connect on %s (Ctrl-c to quit)" % filename)
     (client, address)=sock.accept()
-    print "*Connected*"
+    print("*Connected*")
     board=initBoard()
     waitForInitialisationMessages(client)
     clockon=False
@@ -525,10 +526,14 @@ while 1:
     btime = 10000
     wtime = 1000
     wturn = True
-    lock=thread.allocate_lock()
-    thread.start_new_thread(timeMessageThread, (client, lock, ))
+    # lock=thread.allocate_lock()
+    # thread.start_new_thread(timeMessageThread, (client, lock, ))
+    lock = threading.Lock
+    x = threading.Thread(timeMessageThread, (client, lock, )).setDaemon(True).start()
+    lock = x.lock
+
     savedCommands=""
-    print "command mode(h for help)"
+    print("command mode(h for help)")
     try:
         while 1:
             sys.stdout.write("command:")
@@ -555,79 +560,79 @@ while 1:
                 if command == "":
                     continue
                 if command == "quit" or command == "q":
-                    print "bye"
+                    print("bye")
                     client.close()
                     sys.exit()
                 elif command == "help" or command == "h" or command =="?":
-                    print "Here is a list of the implemented commands :"
-                    print "   -h or help or ? : display this help"
-                    print "   -q or quit : quit"
-                    print "   -d or display : display the board"
-                    print "   -c or commands : display previous commands"
-                    print "   -add piece simply by typing the piece and the square"
-                    print "     white pieces :K,Q,R,B,N,P"
-                    print "     black pieces :k,q,r,b,n,p"
-                    print "     the square notation (as for example a8) is case independant"
-                    print "     example, Qa8 add a white queen on a8 (if the square is free)"
-                    print "   -t : take/remove a piece followed square "
-                    print "     ta4 remove piece from a4 if exists example"
-                    print "   -e2e4 : you can append move in the standard form "
-                    print "          a piece 'take' will be generated and  "
-                    print "          a second if the destination square is not empty "
-                    print "          and then a piece add"
-                    print "   -s/whitetime/blacktime or swatch/whitetime/blacktime"
-                    print "     turn the clock on with times whitetime and blacktime"
-                    print "     or turn the clock off if the clock was on (in this case "
-                    print "     whitetime and blacktime are obviously facultatives"
-                    print "     example: s/600/1200 start the clock with white time 10 minutes"
-                    print "     and black time 20 minutes"
-                    print "     time values are integers in seconds !!"
-                    print "   -o or otherplayer"
-                    print "     simulate a push on the clock button"
-                    print "     if it was white's turns, then it is now black's turns and"
-                    print "     reciprocally"
-                    print "   -z/time or zzz/time"
-                    print "    simply sleep for time seconds"
-                    print "    time value is real number in seconds !!"
-                    print ""
-                    print "You can combine multiple commands by separating them with comma"
-                    print "For example you can generate an initial position by typing :"
+                    print("Here is a list of the implemented commands :")
+                    print("   -h or help or ? : display this help")
+                    print("   -q or quit : quit")
+                    print("   -d or display : display the board")
+                    print("   -c or commands : display previous commands")
+                    print("   -add piece simply by typing the piece and the square")
+                    print("     white pieces :K,Q,R,B,N,P")
+                    print("     black pieces :k,q,r,b,n,p")
+                    print("     the square notation (as for example a8) is case independant")
+                    print("     example, Qa8 add a white queen on a8 (if the square is free)")
+                    print("   -t : take/remove a piece followed square ")
+                    print("     ta4 remove piece from a4 if exists example")
+                    print("   -e2e4 : you can append move in the standard form ")
+                    print("          a piece 'take' will be generated and  ")
+                    print("          a second if the destination square is not empty ")
+                    print("          and then a piece add")
+                    print("   -s/whitetime/blacktime or swatch/whitetime/blacktime")
+                    print("     turn the clock on with times whitetime and blacktime")
+                    print("     or turn the clock off if the clock was on (in this case ")
+                    print("     whitetime and blacktime are obviously facultatives")
+                    print("     example: s/600/1200 start the clock with white time 10 minutes")
+                    print("     and black time 20 minutes")
+                    print("     time values are integers in seconds !!")
+                    print("   -o or otherplayer")
+                    print("     simulate a push on the clock button")
+                    print("     if it was white's turns, then it is now black's turns and")
+                    print("     reciprocally")
+                    print("   -z/time or zzz/time")
+                    print("    simply sleep for time seconds")
+                    print("    time value is real number in seconds !!")
+                    print("")
+                    print("You can combine multiple commands by separating them with comma")
+                    print("For example you can generate an initial position by typing :")
                     sys.stdout.write("Rh1, Ng1, Bf1, Ke1, Qd1, Bc1, Nb1, Ra1,")
                     sys.stdout.write("Ph2, Pg2, Pf2, Pe2, Pd2, Pc2, Pb2, Pa2,")
                     sys.stdout.write("rh8, ng8, bf8, ke8, qd8, bc8, nb8, ra8,")
                     sys.stdout.write("ph7, pg7, pf7, pe7, pd7, pc7, pb7, pa7\n")
-                    print "and you can even simulate a real game (here Fischer/Spassky 1992.11.04)"
-                    print "by issuing such commands :"
+                    print("and you can even simulate a real game (here Fischer/Spassky 1992.11.04)")
+                    print("by issuing such commands :")
                     sys.stdout.write(gameExample)
-                    print "Note that at the connection, the virtual board is clear of any piece."
+                    print("Note that at the connection, the virtual board is clear of any piece.")
                 elif command == "display" or command == "d":
                     printBoard(board)
                 elif command == "commands" or  command == "c":
-                    print savedCommands
+                    print(savedCommands)
                     continue
                 elif command.startswith("swatch") or  command[0] == "s":
                     lock.acquire()
                     if clockon == True:
                         clockon = False
-                        print "clock off"
+                        print("clock off")
                     else:
                         wtime=int(command.split('/')[1])
                         btime=int(command.split('/')[2])
                         clockon= True
                         wturn = True
-                        print "clock set to on, white player, times :%ds / %ds" % ( wtime, btime)
+                        print("clock set to on, white player, times :%ds / %ds" % ( wtime, btime))
                     lock.release()
                 elif command == "otherplayer" or command == "o":
                     lock.acquire()
                     if wturn == True:
-                        print "changed player's turn to black's turn"
+                        print("changed player's turn to black's turn")
                         wturn = False
                     else:
-                        print "changed player's turn to white's turn"
+                        print("changed player's turn to white's turn")
                         wturn = True
                     lock.release()
                 elif command.startswith("zzz") or command[0] == "z":
-                    print "sleeping for %1.2f seconds" % float(command.split('/')[1])
+                    print("sleeping for %1.2f seconds" % float(command.split('/')[1]))
                     time.sleep(float(command.split('/')[1]))
                 elif len(command) == 4:
                     lock.acquire()
