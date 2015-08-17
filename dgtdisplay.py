@@ -116,6 +116,12 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         self.mode_index = 0
         self.mode = Mode.GAME
 
+        self.engine_level = 20 # Default level is 20
+        self.n_levels = 21     # Default engine (Stockfish) has 21 playing levels
+
+        self.book_index = 7    # Default book is 7 - book 'h'
+        self.n_books = 11      # Default is 11 installed books
+
     def reset_hint_and_score(self):
         self.hint_move = chess.Move.null()
         self.hint_fen = None
@@ -134,6 +140,10 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             self.setup_to_move = chess.WHITE if self.setup_to_move == chess.BLACK else chess.BLACK
             to_move = PlayMode.PLAY_WHITE if self.setup_to_move == chess.WHITE else PlayMode.PLAY_BLACK
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=to_move.value, xl=None, beep=BeepLevel.YES)
+
+        if self.dgt_clock_menu == Menu.ENGINE_MENU:
+            self.book_index = ((self.book_index+1)%self.n_books)
+            self.fire(Event.OPENING_BOOK, book=get_opening_books()[self.book_index])
 
     def process_button1(self):
         if self.dgt_clock_menu == Menu.GAME_MENU:
@@ -155,6 +165,10 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             orientation_xl = "b    w" if self.setup_reverse_orientation else "w    b"
             orientation = " b     w" if self.setup_reverse_orientation else " w     b"
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=orientation, xl=orientation_xl, beep=BeepLevel.YES)
+
+        if self.dgt_clock_menu == Menu.ENGINE_MENU:
+            self.engine_level = ((self.engine_level-1)%self.n_levels)
+            self.fire(Event.LEVEL, level=self.engine_level)
 
     def process_button2(self):
 
@@ -222,6 +236,10 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         if self.dgt_clock_menu == Menu.SETTINGS_MENU:
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="reboot", xl=None, beep=BeepLevel.YES)
             subprocess.Popen(["sudo", "reboot"])
+
+        if self.dgt_clock_menu == Menu.ENGINE_MENU:
+            self.engine_level = ((self.engine_level+1)%self.n_levels)
+            self.fire(Event.LEVEL, level=self.engine_level)
 
     def process_button4(self):
         # self.dgt_clock_menu = Menu.self.dgt_clock_menu.value+1
@@ -390,15 +408,16 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         # Fire the appropriate event
                         if fen in level_map:  # User sets level
                             level = level_map.index(fen)
+                            self.engine_level = level
                             logging.debug("Map-Fen: New level")
                             self.fire(Event.LEVEL, level=level)
                         elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":  # New game
                             logging.debug("Map-Fen: New game")
                             self.fire(Event.NEW_GAME)
                         elif fen in book_map:  # Choose opening book
-                            book_index = book_map.index(fen)
-                            logging.debug("Map-Fen: Opening book [%s]", get_opening_books()[book_index])
-                            self.fire(Event.OPENING_BOOK, book=get_opening_books()[book_index])
+                            self.book_index = book_map.index(fen)
+                            logging.debug("Map-Fen: Opening book [%s]", get_opening_books()[self.book_index])
+                            self.fire(Event.OPENING_BOOK, book=get_opening_books()[self.book_index])
                         elif fen in mode_map:  # Set interaction mode
                             logging.debug("Map-Fen: Interaction mode [%s]", mode_map[fen])
                             self.fire(Event.SET_MODE, mode=mode_map[fen])
