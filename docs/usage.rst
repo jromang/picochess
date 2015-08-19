@@ -76,7 +76,7 @@ Clock button support
 --------------------
 
 * First button shows the last move.
-    - **in Time mode** it will cycle through Fischer, Fixed and Blitz time controls.
+    - in Time mode it will cycle through Fischer, Fixed and Blitz time controls.
 * Second button toggles between showing the position value (or "book") and the best/ponder (or book move).
 * Third button will
     - **in Game mode** switch sides and the computer will make next move (your turn) or stop the search and play out the best move (computer turn).
