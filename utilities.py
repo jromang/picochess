@@ -141,11 +141,11 @@ class EngineMenu(AutoNumber):
 
 
 class TimeMenu(AutoNumber):
-    TIME_FIXED = ()  # Show last move
-    TIME__BLITZ = ()  # Show hint/evaluation
-    TIME_FISCHER = ()  # Starts/Stops the calculation
-    SPACER = ()  # Change Modes
-    SWITCH_MENU = ()  # Switch Menu
+    TIME_FIXED = () 
+    TIME__BLITZ = ()  
+    TIME_FISCHER = ()  
+    SPACER = ()  
+    SWITCH_MENU = ()  
 
 
 class GameMenu(AutoNumber):
