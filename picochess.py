@@ -335,6 +335,7 @@ def main():
     play_mode = PlayMode.PLAY_WHITE
     time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=5)
     last_computer_move = None
+    game_declared = False # User declared resignation or draw
 
     system_info_thread = threading.Timer(0, display_system_info)
     system_info_thread.start()
@@ -391,7 +392,7 @@ def main():
                 if case(Event.SETUP_POSITION):  # User sets up a position
                     logging.debug("Setting up custom fen: {0}".format(event.fen))
                     if game.move_stack:
-                        if not game.is_game_over():
+                        if (not game.is_game_over()) and (not game_declared):
                             custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
                             Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack),
                                          color=game.turn, play_mode=play_mode, custom_fen=custom_fen)
@@ -404,6 +405,7 @@ def main():
                     last_computer_move = None
                     set_wait_state()
                     Display.show(Message.START_NEW_GAME)
+                    game_declared = False
                     break
 
                 if case(Event.STARTSTOP_THINK):
@@ -427,7 +429,7 @@ def main():
                 if case(Event.NEW_GAME):  # User starts a new game
                     if game.move_stack:
                         logging.debug("Starting a new game")
-                        if not game.is_game_over():
+                        if (not game.is_game_over()) and (not game_declared):
                             custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
                             Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack),
                                          color=game.turn, play_mode=play_mode, custom_fen=custom_fen)
@@ -438,6 +440,15 @@ def main():
                     time_control.reset()
                     set_wait_state()
                     Display.show(Message.START_NEW_GAME)
+                    game_declared = False
+                    break
+
+                if case(Event.DRAWRESIGN):
+                    result = event.result
+                    if not game_declared:  # in case user leaves kinga in place while moving other pieces
+                        Display.show(Message.GAME_ENDS, result=result, moves=list(game.move_stack),
+                            color=game.turn, play_mode=play_mode, custom_fen=None)
+                        game_declared = True
                     break
 
                 if case(Event.OPENING_BOOK):
