@@ -68,6 +68,18 @@ mode_map = {"rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR": Mode.GAME,
             "rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR": Mode.OBSERVE,
             "rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR": Mode.REMOTE}
 
+drawresign_map = OrderedDict([
+("8/8/8/3k4/4K3/8/8/8", GameResult.RESIGN_WHITE),
+("8/8/8/3K4/4k3/8/8/8", GameResult.RESIGN_WHITE),
+("8/8/8/4k3/3K4/8/8/8", GameResult.RESIGN_BLACK),
+("8/8/8/4K3/3k4/8/8/8", GameResult.RESIGN_BLACK),
+("8/8/8/3kK3/8/8/8/8", GameResult.DRAW),
+("8/8/8/3Kk3/8/8/8/8", GameResult.DRAW),
+("8/8/8/8/3kK3/8/8/8", GameResult.DRAW),
+("8/8/8/8/3Kk3/8/8/8", GameResult.DRAW)
+])
+
+
 time_controls = {ClockMode.FIXED_TIME: "Fixed",
                  ClockMode.BLITZ: "Blitz",
                  ClockMode.FISCHER: "Fischer"}
@@ -129,6 +141,8 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         self.time_control_mode = ClockMode.BLITZ
         self.time_control_fen = list(time_control_map.keys())[10]  #Default time control: Blitz, 5min
         self.time_control_selected_index = 0 #index for selecting new time control
+
+        self.drawresign_fen = None
 
     def reset_hint_and_score(self):
         self.hint_move = chess.Move.null()
@@ -314,6 +328,10 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         self.time_control_mode = time_control_map[self.time_control_fen].mode # Reset time control fen to match current time control
         self.time_control_selected_index = 0
 
+    def drawresign(self):
+        rnk_8, rnk_7, rnk_6, rnk_5, rnk_4, rnk_3, rnk_2, rnk_1 = self.dgt_fen.split("/")
+        self.drawresign_fen = "8/8/8/"+rnk_5+"/"+rnk_4+"/8/8/8"
+
     def run(self):
         while True:
             # Check if we have something to display
@@ -443,6 +461,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         break
                     if case(Message.DGT_FEN):
                         fen = message.fen
+
                         if self.flip_board:  # Flip the board if needed
                             fen = fen[::-1]
                         if fen == "RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr":  # Check if we have to flip the board
@@ -457,7 +476,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                             logging.debug('Ignore same fen')
                             break
                         self.dgt_fen = fen
-
+                        self.drawresign()
                         # Fire the appropriate event
                         if fen in level_map:  # User sets level
                             level = level_map.index(fen)
@@ -484,6 +503,8 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                             logging.debug("Map-Fen: shutdown")
                             self.fire(Event.SHUTDOWN)
                             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="poweroff", xl="powoff", beep=BeepLevel.CONFIG)
+                        elif self.drawresign_fen in drawresign_map:
+                            self.fire(Event.DRAWRESIGN, result=drawresign_map[self.drawresign_fen])
                         else:
                             self.fire(Event.FEN, fen=fen)
                         break
