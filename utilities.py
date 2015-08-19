@@ -54,6 +54,7 @@ class Event(AutoNumber):
     FEN = ()  # User has moved one or more pieces, and we have a new fen position.
     LEVEL = ()  # User sets engine level (from 1 to 20).
     NEW_GAME = ()  # User starts a new game
+    DRAWRESIGN = () # User declares a resignation or draw
     USER_MOVE = ()  # User sends a move
     KEYBOARD_MOVE = ()  # Keyboard sends a move (to be transfered to a fen)
     OPENING_BOOK = ()  # User chooses an opening book
@@ -178,7 +179,7 @@ class ClockMode(AutoNumber):
     BLITZ = ()  # Fixed time per game
     FISCHER = ()  # Fischer increment
 
-
+@enum.unique
 class GameResult(enum.Enum):
     MATE = 'mate'
     STALEMATE = 'stalemate'
@@ -187,6 +188,9 @@ class GameResult(enum.Enum):
     SEVENTYFIVE_MOVES = '75 moves'
     FIVEFOLD_REPETITION = 'repetition'
     ABORT = 'abort'
+    RESIGN_WHITE = 'W wins'
+    RESIGN_BLACK = 'B wins'
+    DRAW = 'draw'
 
 
 class EngineStatus(AutoNumber):
