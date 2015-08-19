@@ -121,6 +121,7 @@ class Menu(AutoNumber):
     GAME_MENU = ()  # Default Menu
     SETUP_POSITION_MENU = ()  # Setup position menu
     ENGINE_MENU = ()  # Engine menu
+    TIME_MENU = () # Time controls menu
     SETTINGS_MENU = ()  # Settings menu
 
 
@@ -135,8 +136,15 @@ class SetupPositionMenu(AutoNumber):
 class EngineMenu(AutoNumber):
     LEVEL = ()
     BOOK = ()
-    TIME = ()
     ENG_INFO = ()
+    SWITCH_MENU = ()  # Switch Menu
+
+
+class TimeMenu(AutoNumber):
+    TIME_FIXED = ()  # Show last move
+    TIME__BLITZ = ()  # Show hint/evaluation
+    TIME_FISCHER = ()  # Starts/Stops the calculation
+    SPACER = ()  # Change Modes
     SWITCH_MENU = ()  # Switch Menu
 
 
