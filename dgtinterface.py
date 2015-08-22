@@ -19,6 +19,7 @@ import queue
 
 import threading
 from utilities import *
+import time
 
 
 class DGTInterface(Display, HardwareDisplay, threading.Thread):
@@ -48,6 +49,13 @@ class DGTInterface(Display, HardwareDisplay, threading.Thread):
     def start_clock(self, time_left, time_right, side):
         raise NotImplementedError()
 
+    def get_beep_level(self, beeplevel):
+        if beeplevel == BeepLevel.YES:
+            return True
+        if beeplevel == BeepLevel.NO:
+            return False
+        return not self.disable_dgt_clock_beep
+
     def run(self):
         while True:
             # Check if we have something to display
@@ -73,6 +81,12 @@ class DGTInterface(Display, HardwareDisplay, threading.Thread):
                     if case(Dgt.CLOCK_START):
                         self.start_clock(message.time_left, message.time_right, message.side)
                         break
+                    if case(Dgt.CLOCK_VERSION):
+                        self.clock_found = True
+                        if message.main_version == 2:
+                            self.enable_dgt_3000 = True
+                        self.display_text_on_clock('pico ' + version, 'pic' + version, beep=BeepLevel.YES)
+                        time.sleep(2)
                     if case():  # Default
                         pass
             except queue.Empty:

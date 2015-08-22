@@ -28,7 +28,6 @@ import uci
 
 import threading
 import copy
-import time
 from timecontrol import TimeControl
 from utilities import *
 from keyboardinput import KeyboardInput, TerminalDisplay
@@ -38,8 +37,6 @@ import chesstalker.chesstalker
 from dgthardware import DGTHardware
 from dgtdisplay import DGTDisplay
 from dgtvirtual import DGTVirtual
-
-import spur
 
 
 def main():
@@ -267,7 +264,8 @@ def main():
                         game.pop()
             legal_moves = list(game.legal_moves)
             Observable.fire(Event.USER_MOVE, move=legal_moves[legal_fens.index(fen)])
-        elif fen == game.fen().split(' ')[0]:  # Player had done the computer move on the board
+        # elif fen == game.fen().split(' ')[0]:  # Player had done the computer move on the board
+        elif fen == last_computer_move:  # Player had done the computer move on the board
             if check_game_state(game, play_mode) and interaction_mode == Mode.GAME:
                 Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD)
                 if time_control.mode != ClockMode.FIXED_TIME:
@@ -277,20 +275,24 @@ def main():
             game_history = copy.deepcopy(game)
             while game_history.move_stack:
                 game_history.pop()
-                if game_history.fen().split(' ')[0] == fen:
-                    logging.debug("Legal Fens root       : " + str(legal_fens.root))
-                    logging.debug("Current game FEN      : " + str(game.fen()))
-                    logging.debug("Undoing game until FEN: " + fen)
-                    stop_search()
-                    while len(game_history.move_stack) < len(game.move_stack):
-                        game.pop()
-                    if interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
-                        analyse(copy.deepcopy(game))
-                    if interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
-                        observe(copy.deepcopy(game), time_control)
-                    Display.show(Message.USER_TAKE_BACK)
-                    legal_fens = compute_legal_fens(game)
-                    break
+                if (play_mode == PlayMode.PLAY_WHITE and game_history.turn == chess.WHITE) \
+                    or (play_mode == PlayMode.PLAY_BLACK and game_history.turn == chess.BLACK) \
+                    or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.KIBITZ) \
+                    or (interaction_mode == Mode.REMOTE) or (interaction_mode == Mode.ANALYSIS):
+                    if game_history.fen().split(' ')[0] == fen:
+                        logging.debug("Legal Fens root       : " + str(legal_fens.root))
+                        logging.debug("Current game FEN      : " + str(game.fen()))
+                        logging.debug("Undoing game until FEN: " + fen)
+                        stop_search()
+                        while len(game_history.move_stack) < len(game.move_stack):
+                            game.pop()
+                        if interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
+                            analyse(copy.deepcopy(game))
+                        if interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
+                            observe(copy.deepcopy(game), time_control)
+                        Display.show(Message.USER_TAKE_BACK)
+                        legal_fens = compute_legal_fens(game)
+                        break
         return legal_fens
 
     def set_wait_state():
@@ -298,24 +300,31 @@ def main():
             nonlocal play_mode
             play_mode = PlayMode.PLAY_WHITE if game.turn == chess.WHITE else PlayMode.PLAY_BLACK
 
-    def handle_move(move, game):
+    def handle_move(result, game):
+        move = result.bestmove
         fen = game.fen()
         game.push(move)
+        nonlocal last_computer_move
+        last_computer_move = None
         if interaction_mode == Mode.GAME:
             stop_clock()
             if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.WHITE) or (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.BLACK):
-                Display.show(Message.COMPUTER_MOVE, result=event.result, fen=fen, game=copy.deepcopy(game), time_control=time_control)
+                last_computer_move = game.fen().split(' ')[0]
+                Display.show(Message.COMPUTER_MOVE, result=result, fen=fen, game=copy.deepcopy(game), time_control=time_control)
             else:
                 Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
-                think(copy.deepcopy(game), time_control)
+                if check_game_state(game, play_mode):
+                    think(copy.deepcopy(game), time_control)
         elif interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
             stop_search_and_clock()
             Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game), mode=interaction_mode)
-            observe(copy.deepcopy(game), time_control)
+            if check_game_state(game, play_mode):
+                observe(copy.deepcopy(game), time_control)
         elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
             stop_search()
             Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=copy.deepcopy(game), mode=interaction_mode)
-            analyse(copy.deepcopy(game))
+            if check_game_state(game, play_mode):
+                analyse(copy.deepcopy(game))
         return game
 
     # Startup - internal
@@ -325,6 +334,8 @@ def main():
     interaction_mode = Mode.GAME  # Interaction mode
     play_mode = PlayMode.PLAY_WHITE
     time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=5)
+    last_computer_move = None
+    game_declared = False # User declared resignation or draw
 
     system_info_thread = threading.Timer(0, display_system_info)
     system_info_thread.start()
@@ -364,7 +375,8 @@ def main():
                     if move not in game.legal_moves:
                         logging.warning('Illegal move [%s]', move)
                     else:
-                        game = handle_move(move, game)
+                        result = chess.uci.BestMove(bestmove=move, ponder=None)
+                        game = handle_move(result, game)
                         # if check_game_state(game, interaction_mode):
                         legal_fens = compute_legal_fens(game)
                     break
@@ -380,7 +392,7 @@ def main():
                 if case(Event.SETUP_POSITION):  # User sets up a position
                     logging.debug("Setting up custom fen: {0}".format(event.fen))
                     if game.move_stack:
-                        if not game.is_game_over():
+                        if (not game.is_game_over()) and (not game_declared):
                             custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
                             Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack),
                                          color=game.turn, play_mode=play_mode, custom_fen=custom_fen)
@@ -390,8 +402,10 @@ def main():
                     stop_search_and_clock()
                     time_control.reset()
                     interaction_mode = Mode.GAME
+                    last_computer_move = None
                     set_wait_state()
                     Display.show(Message.START_NEW_GAME)
+                    game_declared = False
                     break
 
                 if case(Event.STARTSTOP_THINK):
@@ -415,16 +429,26 @@ def main():
                 if case(Event.NEW_GAME):  # User starts a new game
                     if game.move_stack:
                         logging.debug("Starting a new game")
-                        if not game.is_game_over():
+                        if (not game.is_game_over()) and (not game_declared):
                             custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
                             Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack),
                                          color=game.turn, play_mode=play_mode, custom_fen=custom_fen)
                         game = chess.Board()
                     legal_fens = compute_legal_fens(game)
+                    last_computer_move = None
                     stop_search_and_clock()
                     time_control.reset()
                     set_wait_state()
                     Display.show(Message.START_NEW_GAME)
+                    game_declared = False
+                    break
+
+                if case(Event.DRAWRESIGN):
+                    result = event.result
+                    if not game_declared:  # in case user leaves kinga in place while moving other pieces
+                        Display.show(Message.GAME_ENDS, result=result, moves=list(game.move_stack),
+                            color=game.turn, play_mode=play_mode, custom_fen=None)
+                        game_declared = True
                     break
 
                 if case(Event.OPENING_BOOK):
@@ -436,7 +460,7 @@ def main():
                 if case(Event.BEST_MOVE):
                     if event.book:
                         Display.show(Message.BOOK_MOVE, result=event.result)
-                    game = handle_move(event.result.bestmove, game)
+                    game = handle_move(event.result, game)
                     legal_fens = compute_legal_fens(game)
                     break
 

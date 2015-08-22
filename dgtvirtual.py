@@ -65,30 +65,29 @@ class DGTVirtual(DGTInterface):
             self.time_right = 0
         l_hms = hours_minutes_seconds(self.time_left)
         r_hms = hours_minutes_seconds(self.time_right)
-        self.displayed_text = None # reset saved text to unknown
+        self.displayed_text = None  # reset saved text to unknown
 
         HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='{} - {}'.format(l_hms, r_hms), xl=None, beep=BeepLevel.NO)
 
     def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG, force=True):
+        # beep = self.get_beep_level(beep)
         if self.enable_dgt_3000:
             bit_board = chess.Board(fen)
             move_string = bit_board.san(move)
         else:
             move_string = str(move)
-        logging.debug(move_string)
-        print('DGT clock move:' + move_string)
+        if force or self.displayed_text != move_string:
+            logging.debug(move_string)
+            print('DGT clock move:' + move_string)
+        self.displayed_text = move_string
 
     def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG, force=True):
-        if self.enable_dgt_3000:
-            if force or self.displayed_text != text:
-                logging.debug(text)
-                print('DGT clock text:' + text)
-        else:
-            if dgt_xl_text:
-                text = dgt_xl_text
-            if force or self.displayed_text != text:
-                logging.debug(text)
-                print('DGT clock text:' + text)
+        # beep = self.get_beep_level(beep)
+        if dgt_xl_text and not self.enable_dgt_3000:
+            text = dgt_xl_text
+        if force or self.displayed_text != text:
+            logging.debug(text)
+            print('DGT clock text:' + text)
         self.displayed_text = text
 
     def stop_clock(self):
@@ -96,7 +95,7 @@ class DGTVirtual(DGTInterface):
             print('DGT clock time stopped at ', (self.time_left, self.time_right))
             self.rt.stop()
         else:
-            print('clock not ready')
+            print('Clock not ready')
 
     def start_clock(self, time_left, time_right, side):
         self.time_left = time_left

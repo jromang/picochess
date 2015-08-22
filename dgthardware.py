@@ -52,13 +52,6 @@ class DGTHardware(DGTInterface, DGTSerial):
                         text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], 0x03 if beep else 0x01,
                         Clock.DGT_CMD_CLOCK_END_MESSAGE])
 
-    def get_beep_level(self, beeplevel):
-        if beeplevel == BeepLevel.YES:
-            return True
-        if beeplevel == BeepLevel.NO:
-            return False
-        return not self.disable_dgt_clock_beep
-
     def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG, force=True):
         beep = self.get_beep_level(beep)
         if self.enable_dgt_3000:
