@@ -19,26 +19,58 @@ import logging
 import spur
 import paramiko
 import chess.uci
+from threading import Timer
 
 
 class Informer(chess.uci.InfoHandler, Observable):
     def __init__(self):
         super(Informer, self).__init__()
-        self.mate_found = False
+        self.dep = 0
+        self.allow_score = True
+        self.allow_pv = True
 
     def on_go(self):
-        self.mate_found = False
+        self.dep = 0
+        self.allow_score = True
+        self.allow_pv = True
         super().on_go()
 
-    def score(self,cp, mate, lowerbound, upperbound):
-        if mate is None or not self.mate_found:
+    def depth(self, dep):
+        self.dep = dep
+        super().depth(dep)
+
+    def _reset_allow_score(self):
+        logging.debug('score-lock stopped')
+        self.allow_score = True
+
+    def _reset_allow_pv(self):
+        self.allow_pv = True
+
+    def _allow_fire_score(self):
+        if self.allow_score:
+            self.allow_score = False
+            Timer(0.2, self._reset_allow_score).start()
+            logging.debug('score-lock started')
+            return True
+        else:
+            logging.debug('score-lock still active')
+            return False
+
+    def _allow_fire_pv(self):
+        if self.allow_pv:
+            self.allow_pv = False
+            Timer(0.2, self._reset_allow_pv).start()
+            return True
+        else:
+            return False
+
+    def score(self, cp, mate, lowerbound, upperbound):
+        if self._allow_fire_score():
             self.fire(Event.SCORE, score=cp, mate=mate)
-        if mate is not None:
-            self.mate_found = True
         super().score(cp, mate, lowerbound, upperbound)
 
-    def pv(self,moves):
-        if not self.mate_found:
+    def pv(self, moves):
+        if self._allow_fire_pv():
             self.fire(Event.NEW_PV, pv=moves)
         super().pv(moves)
 
