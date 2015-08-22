@@ -144,6 +144,15 @@ class ChessTalker(Display, threading.Thread):
                     elif message == Message.GAME_ENDS and message.result == GameResult.ABORT:
                         logging.debug('Announcing GAME_ENDS/ABORT')
                         system_voice.say_game_aborted()
+                    elif message == Message.GAME_ENDS and message.result == GameResult.DRAW:
+                        logging.debug('Announcing DRAW')
+                        system_voice.say_draw()
+                    elif message == Message.GAME_ENDS and message.result == GameResult.RESIGN_WHITE:
+                        logging.debug('Announcing WHITE WIN')
+                        system_voice.say_winner(ChessTalkerVoice.COLOR_WHITE)
+                    elif message == Message.GAME_ENDS and message.result == GameResult.RESIGN_BLACK:
+                        logging.debug('Announcing BLACK WIN')
+                        system_voice.say_winner(ChessTalkerVoice.COLOR_BLACK)
                 elif messageType == "Event":
                     if message == Event.SHUTDOWN:
                         logging.debug('Announcing SHUTDOWN')

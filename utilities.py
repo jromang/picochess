@@ -32,7 +32,7 @@ except ImportError:
 
 
 # picochess version
-version = '049'
+version = '050'
 
 event_queue = queue.Queue()
 serial_queue = queue.Queue()
@@ -54,6 +54,7 @@ class Event(AutoNumber):
     FEN = ()  # User has moved one or more pieces, and we have a new fen position.
     LEVEL = ()  # User sets engine level (from 1 to 20).
     NEW_GAME = ()  # User starts a new game
+    DRAWRESIGN = () # User declares a resignation or draw
     USER_MOVE = ()  # User sends a move
     KEYBOARD_MOVE = ()  # Keyboard sends a move (to be transfered to a fen)
     OPENING_BOOK = ()  # User chooses an opening book
@@ -86,6 +87,7 @@ class Message(AutoNumber):
     OPENING_BOOK = ()  # User chooses an opening book
     DGT_BUTTON = ()  # Clock button pressed
     DGT_FEN = ()  # DGT Board sends a fen
+    DGT_CLOCK_VERSION = ()  # DGT Board sends the clock version
 
     INTERACTION_MODE = ()  # Interaction mode
     PLAY_MODE = ()  # Play mode
@@ -113,12 +115,14 @@ class Dgt(AutoNumber):
     LIGHT_SQUARES = ()
     CLOCK_STOP = ()
     CLOCK_START = ()
+    CLOCK_VERSION = ()  # DGT Board sends the clock version
 
 
 class Menu(AutoNumber):
     GAME_MENU = ()  # Default Menu
     SETUP_POSITION_MENU = ()  # Setup position menu
     ENGINE_MENU = ()  # Engine menu
+    TIME_MENU = () # Time controls menu
     SETTINGS_MENU = ()  # Settings menu
 
 
@@ -133,9 +137,16 @@ class SetupPositionMenu(AutoNumber):
 class EngineMenu(AutoNumber):
     LEVEL = ()
     BOOK = ()
-    TIME = ()
     ENG_INFO = ()
     SWITCH_MENU = ()  # Switch Menu
+
+
+class TimeMenu(AutoNumber):
+    TIME_FIXED = ()
+    TIME__BLITZ = ()
+    TIME_FISCHER = ()
+    SPACER = ()
+    SWITCH_MENU = ()
 
 
 class GameMenu(AutoNumber):
@@ -168,7 +179,7 @@ class ClockMode(AutoNumber):
     BLITZ = ()  # Fixed time per game
     FISCHER = ()  # Fischer increment
 
-
+@enum.unique
 class GameResult(enum.Enum):
     MATE = 'mate'
     STALEMATE = 'stalemate'
@@ -177,6 +188,9 @@ class GameResult(enum.Enum):
     SEVENTYFIVE_MOVES = '75 moves'
     FIVEFOLD_REPETITION = 'repetition'
     ABORT = 'abort'
+    RESIGN_WHITE = 'W wins'
+    RESIGN_BLACK = 'B wins'
+    DRAW = 'draw'
 
 
 class EngineStatus(AutoNumber):

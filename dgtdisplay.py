@@ -68,6 +68,22 @@ mode_map = {"rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR": Mode.GAME,
             "rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR": Mode.OBSERVE,
             "rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR": Mode.REMOTE}
 
+drawresign_map = OrderedDict([
+("8/8/8/3k4/4K3/8/8/8", GameResult.RESIGN_WHITE),
+("8/8/8/3K4/4k3/8/8/8", GameResult.RESIGN_WHITE),
+("8/8/8/4k3/3K4/8/8/8", GameResult.RESIGN_BLACK),
+("8/8/8/4K3/3k4/8/8/8", GameResult.RESIGN_BLACK),
+("8/8/8/3kK3/8/8/8/8", GameResult.DRAW),
+("8/8/8/3Kk3/8/8/8/8", GameResult.DRAW),
+("8/8/8/8/3kK3/8/8/8", GameResult.DRAW),
+("8/8/8/8/3Kk3/8/8/8", GameResult.DRAW)
+])
+
+
+time_controls = {ClockMode.FIXED_TIME: "Fixed",
+                 ClockMode.BLITZ: "Blitz",
+                 ClockMode.FISCHER: "Fischer"}
+
 time_control_map = OrderedDict([
 ("rnbqkbnr/pppppppp/Q7/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=1)),
 ("rnbqkbnr/pppppppp/1Q6/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=3)),
@@ -116,6 +132,18 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         self.mode_index = 0
         self.mode = Mode.GAME
 
+        self.engine_level = 20 # Default level is 20
+        self.n_levels = 21     # Default engine (Stockfish) has 21 playing levels
+        self.book_index = 8    # Default book is 8 - book 'g'
+        self.n_books = 11      # Default is 11 installed books
+        self.engine_show_level = True
+
+        self.time_control_mode = ClockMode.BLITZ
+        self.time_control_fen = list(time_control_map.keys())[10]  #Default time control: Blitz, 5min
+        self.time_control_selected_index = 0 #index for selecting new time control
+
+        self.drawresign_fen = None
+
     def reset_hint_and_score(self):
         self.hint_move = chess.Move.null()
         self.hint_fen = None
@@ -134,6 +162,18 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             self.setup_to_move = chess.WHITE if self.setup_to_move == chess.BLACK else chess.BLACK
             to_move = PlayMode.PLAY_WHITE if self.setup_to_move == chess.WHITE else PlayMode.PLAY_BLACK
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=to_move.value, xl=None, beep=BeepLevel.YES)
+
+        if self.dgt_clock_menu == Menu.ENGINE_MENU:
+            self.book_index = ((self.book_index+1)%self.n_books)
+            self.fire(Event.OPENING_BOOK, book=get_opening_books()[self.book_index])
+
+        if self.dgt_clock_menu == Menu.TIME_MENU:
+            try:
+                self.time_control_mode = ClockMode(self.time_control_mode.value+1)
+            except ValueError:
+                self.time_control_mode = ClockMode(1)
+            self.time_control_selected_index = 0
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=time_controls[self.time_control_mode], xl=None, beep=BeepLevel.CONFIG)
 
     def process_button1(self):
         if self.dgt_clock_menu == Menu.GAME_MENU:
@@ -155,6 +195,10 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             orientation_xl = "b    w" if self.setup_reverse_orientation else "w    b"
             orientation = " b     w" if self.setup_reverse_orientation else " w     b"
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=orientation, xl=orientation_xl, beep=BeepLevel.YES)
+
+        if self.dgt_clock_menu == Menu.ENGINE_MENU:
+            self.engine_level = ((self.engine_level-1)%self.n_levels)
+            self.fire(Event.LEVEL, level=self.engine_level)
 
     def process_button2(self):
 
@@ -191,9 +235,9 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 self.fire(Event.STARTSTOP_THINK)
             if self.mode == Mode.OBSERVE or self.mode == Mode.REMOTE:
                 self.fire(Event.STARTSTOP_CLOCK)
-
             if self.mode == Mode.ANALYSIS or self.mode == Mode.KIBITZ:
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="error", xl=None, beep=BeepLevel.YES)
+
         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="scan", xl=None, beep=BeepLevel.YES)
             to_move = 'w' if self.setup_to_move == chess.WHITE else 'b'
@@ -210,6 +254,21 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             else:
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="bad pos", xl="badpos", beep=BeepLevel.YES)
 
+        if self.dgt_clock_menu == Menu.ENGINE_MENU:
+            if self.engine_show_level:
+                # Display current level
+                level = str(self.engine_level)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.CONFIG)
+                self.engine_show_level = False
+            else:
+                # Display current book
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=(get_opening_books()[self.book_index])[0], xl=None, beep=BeepLevel.CONFIG)
+                self.engine_show_level = True
+
+        if self.dgt_clock_menu == Menu.TIME_MENU:
+            time_control_string = dgt_xl_time_control_list[list(time_control_map.keys()).index(self.time_control_fen)]
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=time_control_string, xl=None, beep=BeepLevel.CONFIG)
+
     def process_button3(self):
         if self.dgt_clock_menu == Menu.GAME_MENU:
             mode_list = list(iter(Mode))
@@ -222,6 +281,27 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         if self.dgt_clock_menu == Menu.SETTINGS_MENU:
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="reboot", xl=None, beep=BeepLevel.YES)
             subprocess.Popen(["sudo", "reboot"])
+
+        if self.dgt_clock_menu == Menu.ENGINE_MENU:
+            self.engine_level = ((self.engine_level+1)%self.n_levels)
+            self.fire(Event.LEVEL, level=self.engine_level)
+
+        if self.dgt_clock_menu == Menu.TIME_MENU:
+            local_fen_map = list(time_control_map.keys())
+            fens_dirty = True
+            while fens_dirty:
+                fens_dirty = False
+                for key in local_fen_map:
+                    if self.time_control_mode != time_control_map[key].mode:
+                        local_fen_map.remove(key)
+                        fens_dirty = True
+                        break
+            if self.time_control_selected_index >= len(local_fen_map):
+                self.time_control_selected_index = 0
+            self.time_control_fen = local_fen_map[self.time_control_selected_index]
+            self.time_control_selected_index += 1
+            self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[self.time_control_fen],
+                time_control_string=dgt_xl_time_control_list[list(time_control_map.keys()).index(self.time_control_fen)])
 
     def process_button4(self):
         # self.dgt_clock_menu = Menu.self.dgt_clock_menu.value+1
@@ -239,9 +319,18 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             msg = 'position'
         elif self.dgt_clock_menu == Menu.ENGINE_MENU:
             msg = 'engine'
+        elif self.dgt_clock_menu == Menu.TIME_MENU:
+            msg = "time"
         elif self.dgt_clock_menu == Menu.SETTINGS_MENU:
             msg = 'system'
         HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.YES)
+        self.engine_show_level = True  # Reset engine display
+        self.time_control_mode = time_control_map[self.time_control_fen].mode # Reset time control fen to match current time control
+        self.time_control_selected_index = 0
+
+    def drawresign(self):
+        rnk_8, rnk_7, rnk_6, rnk_5, rnk_4, rnk_3, rnk_2, rnk_1 = self.dgt_fen.split("/")
+        self.drawresign_fen = "8/8/8/"+rnk_5+"/"+rnk_4+"/8/8/8"
 
     def run(self):
         while True:
@@ -273,19 +362,19 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         self.dgt_clock_menu = Menu.GAME_MENU
                         break
                     if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok done", xl="okdone", beep=BeepLevel.CONFIG)
+                        # HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok done", xl="okdone", beep=BeepLevel.CONFIG)
                         HardwareDisplay.show(Dgt.LIGHT_CLEAR)
                         self.display_move = False
                         break
                     if case(Message.USER_MOVE):
                         self.display_move = False
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok user", xl="okuser", beep=BeepLevel.CONFIG)
+                        # HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok user", xl="okuser", beep=BeepLevel.CONFIG)
                         break
                     if case(Message.REVIEW_MODE_MOVE):
                         self.last_move = message.move
                         self.last_fen = message.fen
                         self.display_move = False
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok mode", xl="okmode", beep=BeepLevel.CONFIG)
+                        # HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok mode", xl="okmode", beep=BeepLevel.CONFIG)
                         break
                     if case(Message.LEVEL):
                         level = str(message.level)
@@ -341,7 +430,11 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         # @todo Make this code independent from DGT Hex codes => more abstract
                         tc = message.time_control
                         time_left = int(tc.clock_time[chess.WHITE])
+                        if time_left < 0:
+                            time_left = 0
                         time_right = int(tc.clock_time[chess.BLACK])
+                        if time_right < 0:
+                            time_right = 0
                         side = 0x01 if (message.turn == chess.WHITE) != self.flip_board else 0x02
                         if tc.mode == ClockMode.FIXED_TIME:
                             side = 0x02
@@ -368,6 +461,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         break
                     if case(Message.DGT_FEN):
                         fen = message.fen
+
                         if self.flip_board:  # Flip the board if needed
                             fen = fen[::-1]
                         if fen == "RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr":  # Check if we have to flip the board
@@ -378,20 +472,24 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                             self.setup_reverse_orientation = self.flip_board
                             fen = fen[::-1]
                         logging.debug("DGT-Fen: " + fen)
+                        if fen == self.dgt_fen:
+                            logging.debug('Ignore same fen')
+                            break
                         self.dgt_fen = fen
-
+                        self.drawresign()
                         # Fire the appropriate event
                         if fen in level_map:  # User sets level
                             level = level_map.index(fen)
+                            self.engine_level = level
                             logging.debug("Map-Fen: New level")
                             self.fire(Event.LEVEL, level=level)
                         elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":  # New game
                             logging.debug("Map-Fen: New game")
                             self.fire(Event.NEW_GAME)
                         elif fen in book_map:  # Choose opening book
-                            book_index = book_map.index(fen)
-                            logging.debug("Map-Fen: Opening book [%s]", get_opening_books()[book_index])
-                            self.fire(Event.OPENING_BOOK, book=get_opening_books()[book_index])
+                            self.book_index = book_map.index(fen)
+                            logging.debug("Map-Fen: Opening book [%s]", get_opening_books()[self.book_index])
+                            self.fire(Event.OPENING_BOOK, book=get_opening_books()[self.book_index])
                         elif fen in mode_map:  # Set interaction mode
                             logging.debug("Map-Fen: Interaction mode [%s]", mode_map[fen])
                             self.fire(Event.SET_MODE, mode=mode_map[fen])
@@ -399,12 +497,19 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                             logging.debug("Map-Fen: Time control [%s]", time_control_map[fen].mode)
                             self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[fen],
                                       time_control_string=dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)])
+                            self.time_control_mode = time_control_map[fen].mode
+                            self.time_control_fen = fen
                         elif fen in shutdown_map:
                             logging.debug("Map-Fen: shutdown")
                             self.fire(Event.SHUTDOWN)
                             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="poweroff", xl="powoff", beep=BeepLevel.CONFIG)
+                        elif self.drawresign_fen in drawresign_map:
+                            self.fire(Event.DRAWRESIGN, result=drawresign_map[self.drawresign_fen])
                         else:
                             self.fire(Event.FEN, fen=fen)
+                        break
+                    if case(Message.DGT_CLOCK_VERSION):
+                        HardwareDisplay.show(Dgt.CLOCK_VERSION, main_version=message.main_version, sub_version=message.sub_version)
                         break
                     if case():  # Default
                         # print(message)

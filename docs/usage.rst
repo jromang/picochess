@@ -76,13 +76,16 @@ Clock button support
 --------------------
 
 * First button shows the last move.
+    - in **Time mode** it will cycle through Fischer, Fixed and Blitz time controls.
 * Second button toggles between showing the position value (or "book") and the best/ponder (or book move).
 * Third button will
-    - **in Game mode** switch sides and the computer will make next move (your turn) or stop the search and play out the best move (computer turn).
-    - **in Observe/Remote mode** halt/start the clock
-    - **in Analysis/Kibitz mode** no function. An error message is displayed
-* The fourth toggles between the playing modes (Game, Analyse, Kibitz, Observe, Remote)
-* The fifth toggles between "Position", "Engine", "System", "Game" options. Some of the options provide no functionality yet.
+    - in **Game mode** switch sides and the computer will make next move (your turn) or stop the search and play out the best move (computer turn).
+    - in **Time mode** display current time control.
+    - in **Observe/Remote mode** halt/start the clock
+    - in **Analysis/Kibitz mode** no function. An error message is displayed
+* The fourth will toggle between the playing modes (Game, Analyse, Kibitz, Observe, Remote)
+    - in **Time mode** it will select a new time control of the type currently in use (Fischer, Fixed or Blitz).
+* The fifth toggles between "Position", "Engine", "Time", "System", "Game" options. Some of the options provide no functionality yet.
 
 Playing/Training Modes
 ----------------------
