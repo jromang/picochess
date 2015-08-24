@@ -56,17 +56,22 @@ piece_to_char = {
 }
 
 
-class DGTSerial(Display, HardwareDisplay, threading.Thread):
-    def __init__(self, device, enable_dgt_3000):
+class DGTSerial(Display):
+    def __init__(self, device):
         super(DGTSerial, self).__init__()
-
-        self.clock_lock = asyncio.Lock()
-        self.enable_dgt_3000 = enable_dgt_3000
         self.device = device
 
-        self.clock_found = False
-        self.board_version = 0.0
-        self.serial = None
+        self.clock_lock = asyncio.Lock()
+        # Open the serial port
+        try:
+            self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE,
+                                          parity=pyserial.PARITY_NONE,
+                                          bytesize=pyserial.EIGHTBITS,
+                                          timeout=2
+                                          )
+        except pyserial.SerialException as e:
+            logging.warning(e)
+            return
 
     def write(self, message):
         serial_queue.put(message)
@@ -98,8 +103,8 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
     def process_message(self, message_id, message):
         for case in switch(message_id):
             if case(Messages.DGT_MSG_VERSION):  # Get the DGT board version
-                self.board_version = float(str(message[0]) + '.' + str(message[1]))
-                logging.debug("DGT board version %0.2f", self.board_version)
+                board_version = float(str(message[0]) + '.' + str(message[1]))
+                logging.debug("DGT board version %0.2f", board_version)
                 break
             # if case():
             #     logging.info("Got clock version number")
@@ -134,13 +139,10 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
                             logging.info("Button 4 pressed")
                             Display.show(Message.DGT_BUTTON, button=4)
                     if ack1 == 0x09:  # we using the beep command, to find out if a clock is there
-                        self.clock_found = True
                         main_version = ack2 >> 4
                         sub_version = ack2 & 0x0f
                         logging.debug("DGT clock version %0.2f", float(str(main_version) + '.' + str(sub_version)))
-                        if main_version == 2:
-                            self.enable_dgt_3000 = True
-                        # self.display_text_on_clock('pico ' + version, 'pic' + version, beep=BeepLevel.YES)
+                        Display.show(Message.DGT_CLOCK_VERSION, main_version=main_version, sub_version=sub_version)
                     if ack0 != 0x10:
                         logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
                     else:
@@ -223,18 +225,7 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
             self.process_message(message_id, message)
             return message_id
 
-    def startup(self, device):
-        # Open the serial port
-        try:
-            self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE,
-                                          parity=pyserial.PARITY_NONE,
-                                          bytesize=pyserial.EIGHTBITS,
-                                          timeout=2
-                                          )
-        except pyserial.SerialException as e:
-            logging.warning(e)
-            return
-
+    def startup(self):
         # Set the board update mode
         self.write([Commands.DGT_SEND_UPDATE_NICE])
         # we sending a beep command, and see if its ack'ed
@@ -268,7 +259,7 @@ class DGTSerial(Display, HardwareDisplay, threading.Thread):
                 logging.debug('DGT clock still locked')
 
     def run(self):
-        self.startup(self.device)
+        self.startup()
         incoming_thread = threading.Timer(0, self.process_incoming_forever)
         incoming_thread.start()
 
