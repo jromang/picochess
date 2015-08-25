@@ -134,7 +134,6 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
 
         self.engine_level = 20 # Default level is 20
         self.n_levels = 21     # Default engine (Stockfish) has 21 playing levels
-        self.engine_show_level = True
 
         self.book_index = 8    # Default book is 8 - book 'g'
         self.all_books=get_opening_books()
@@ -165,9 +164,11 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             to_move = PlayMode.PLAY_WHITE if self.setup_to_move == chess.WHITE else PlayMode.PLAY_BLACK
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=to_move.value, xl=None, beep=BeepLevel.YES)
 
-        if self.dgt_clock_menu == Menu.ENGINE_MENU:
-            self.book_index = ((self.book_index+1)%self.n_books)
-            self.fire(Event.OPENING_BOOK, book=get_opening_books()[self.book_index])
+        if self.dgt_clock_menu == Menu.ENGINE_MENU: # Place holder
+            pass
+
+        if self.dgt_clock_menu == Menu.BOOK_MENU: # Place holder
+            pass
 
         if self.dgt_clock_menu == Menu.TIME_MENU:
             try:
@@ -201,6 +202,10 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
             self.engine_level = ((self.engine_level-1)%self.n_levels)
             self.fire(Event.LEVEL, level=self.engine_level)
+
+        if self.dgt_clock_menu == Menu.BOOK_MENU:
+            self.book_index = ((self.book_index-1)%self.n_books)
+            self.fire(Event.OPENING_BOOK, book=self.all_books[self.book_index])
 
     def process_button2(self):
 
@@ -257,15 +262,13 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="bad pos", xl="badpos", beep=BeepLevel.YES)
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
-            if self.engine_show_level:
-                # Display current level
-                level = str(self.engine_level)
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.CONFIG)
-                self.engine_show_level = False
-            else:
-                # Display current book
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=(get_opening_books()[self.book_index])[0], xl=None, beep=BeepLevel.CONFIG)
-                self.engine_show_level = True
+            # Display current level
+            level = str(self.engine_level)
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.CONFIG)
+
+        if self.dgt_clock_menu == Menu.BOOK_MENU
+            # Display current book
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=self.all_books[self.book_index][0], xl=None, beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.TIME_MENU:
             time_control_string = dgt_xl_time_control_list[list(time_control_map.keys()).index(self.time_control_fen)]
@@ -284,9 +287,13 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="reboot", xl=None, beep=BeepLevel.YES)
             subprocess.Popen(["sudo", "reboot"])
 
-        if self.dgt_clock_menu == Menu.ENGINE_MENU:
-            self.engine_level = ((self.engine_level+1)%self.n_levels)
-            self.fire(Event.LEVEL, level=self.engine_level)
+#        if self.dgt_clock_menu == Menu.ENGINE_MENU:
+#            self.engine_level = ((self.engine_level+1)%self.n_levels)
+#            self.fire(Event.LEVEL, level=self.engine_level)
+
+#        if self.dgt_clock_menu == Menu.BOOK_MENU:
+#            self.book_index = ((self.book_index+1)%self.n_books)
+#            self.fire(Event.OPENING_BOOK, book=self.all_books[self.book_index])
 
         if self.dgt_clock_menu == Menu.TIME_MENU:
             local_fen_map = list(time_control_map.keys())
@@ -321,12 +328,13 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             msg = 'position'
         elif self.dgt_clock_menu == Menu.ENGINE_MENU:
             msg = 'engine'
+        elif self.dgt_clock_menu == Menu.BOOK_MENU:
+            msg = 'book'
         elif self.dgt_clock_menu == Menu.TIME_MENU:
             msg = "time"
         elif self.dgt_clock_menu == Menu.SETTINGS_MENU:
             msg = 'system'
         HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.YES)
-        self.engine_show_level = True  # Reset engine display
         self.time_control_mode = time_control_map[self.time_control_fen].mode # Reset time control fen to match current time control
         self.time_control_selected_index = 0
 

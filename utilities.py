@@ -58,6 +58,7 @@ class Event(AutoNumber):
     USER_MOVE = ()  # User sends a move
     KEYBOARD_MOVE = ()  # Keyboard sends a move (to be transfered to a fen)
     OPENING_BOOK = ()  # User chooses an opening book
+    NEW_ENGINE = () # Change engine
     SET_MODE = ()  # Change interaction mode
     SETUP_POSITION = ()  # Setup custom position
     # dgt events
@@ -122,6 +123,7 @@ class Menu(AutoNumber):
     GAME_MENU = ()  # Default Menu
     SETUP_POSITION_MENU = ()  # Setup position menu
     ENGINE_MENU = ()  # Engine menu
+    BOOK_MENU = ()  # Book menu
     TIME_MENU = () # Time controls menu
     SETTINGS_MENU = ()  # Settings menu
 
@@ -136,10 +138,14 @@ class SetupPositionMenu(AutoNumber):
 
 class EngineMenu(AutoNumber):
     LEVEL = ()
-    BOOK = ()
+    ENGINE = ()
     ENG_INFO = ()
     SWITCH_MENU = ()  # Switch Menu
 
+class BookMenu(AutoNumber):
+    BOOK = ()
+    BOOK_INFO = ()
+    SWITCH_MENU = ()  # Switch Menu
 
 class TimeMenu(AutoNumber):
     TIME_FIXED = () 
