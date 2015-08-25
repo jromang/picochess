@@ -134,9 +134,11 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
 
         self.engine_level = 20 # Default level is 20
         self.n_levels = 21     # Default engine (Stockfish) has 21 playing levels
-        self.book_index = 8    # Default book is 8 - book 'g'
-        self.n_books = 11      # Default is 11 installed books
         self.engine_show_level = True
+
+        self.book_index = 8    # Default book is 8 - book 'g'
+        self.all_books=get_opening_books()
+        self.n_books = len(self.all_books)
 
         self.time_control_mode = ClockMode.BLITZ
         self.time_control_fen = list(time_control_map.keys())[10]  #Default time control: Blitz, 5min

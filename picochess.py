@@ -16,9 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-# Branch Flex
-
-
 import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "libs"))
@@ -92,7 +89,6 @@ def main():
     # Load UCI engine
     engine = uci.Engine(args.engine, hostname=args.remote, username=args.user,
                         key_file=args.server_key, password=args.password)
-
     engine_name = engine.get().name
     if args.pgn_user:
         user_name = args.pgn_user
@@ -101,7 +97,6 @@ def main():
             user_name = args.email.split('@')[0]
         else:
             user_name = "Player"
-
     logging.debug('Loaded engine [%s]', engine_name)
     logging.debug('Supported options [%s]', engine.get().options)
     if 'Hash' in engine.get().options:

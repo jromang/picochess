@@ -126,8 +126,9 @@ class Engine(Display):
                 self.option('UCI_LimitStrength', 'false')
             else:
                 self.option('UCI_LimitStrength', 'true')
-                min_elo = float(self.engine.options['UCI_Elo'][2])
-                max_elo = float(self.engine.options['UCI_Elo'][3])
+                
+                elo_1, elo_2 = float(self.engine.options['UCI_Elo'][2]), float(self.engine.options['UCI_Elo'][3])
+                min_elo, max_elo = min(elo_1, elo_2), max(elo_1, elo_2)
                 set_elo = min(int(min_elo + (max_elo-min_elo) * (float(level)) / 19.0), int(max_elo))
                 self.option('UCI_Elo', str(set_elo))
             pass
@@ -138,6 +139,9 @@ class Engine(Display):
 
     def position(self, game):
         self.engine.position(game)
+
+    def quit(self):
+        return self.engine.quit()
 
     def stop(self):
         if self.status == EngineStatus.WAIT:
