@@ -126,7 +126,7 @@ def main():
         logging.warning("No DGT board port provided")
         KeyboardInput().start()
         TerminalDisplay().start()
-        DGTVirtual(args.dgt_port, args.enable_dgt_board_leds, args.disable_dgt_clock_beep).start()
+        DGTVirtual(args.enable_dgt_board_leds, args.disable_dgt_clock_beep).start()
 
     # Save to PGN
     PgnDisplay(
