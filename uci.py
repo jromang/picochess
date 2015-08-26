@@ -40,25 +40,31 @@ class Informer(chess.uci.InfoHandler, Observable):
         super().depth(dep)
 
     def _reset_allow_score(self):
+        logging.debug('score-lock stopped')
         self.allow_score = True
 
     def _reset_allow_pv(self):
+        logging.debug('pv-lock stopped')
         self.allow_pv = True
 
     def _allow_fire_score(self):
         if self.allow_score:
             self.allow_score = False
             Timer(0.2, self._reset_allow_score).start()
+            logging.debug('score-lock started')
             return True
         else:
+            logging.debug('score-lock still active')
             return False
 
     def _allow_fire_pv(self):
         if self.allow_pv:
             self.allow_pv = False
             Timer(0.2, self._reset_allow_pv).start()
+            logging.debug('pv-lock started')
             return True
         else:
+            logging.debug('pv-lock still active')
             return False
 
     def score(self, cp, mate, lowerbound, upperbound):

@@ -22,7 +22,7 @@ from utilities import *
 import time
 
 
-class DGTInterface(Display, HardwareDisplay, threading.Thread):
+class DGTInterface(HardwareDisplay, threading.Thread):
     def __init__(self, enable_board_leds, disable_dgt_clock_beep):
         super(DGTInterface, self).__init__()
 
