@@ -78,7 +78,7 @@ class PgnDisplay(Display, threading.Thread):
                     game.headers["Round"] = "?"
                     if message.result == GameResult.ABORT:
                         game.headers["Result"] = "*"
-                    elif message.result in (GameResult.DRAW, GameResult.STALEMATE, GameResult.SEVENTYFIVE_MOVES, 
+                    elif message.result in (GameResult.DRAW, GameResult.STALEMATE, GameResult.SEVENTYFIVE_MOVES,
                         GameResult.FIVEFOLD_REPETITION, GameResult.INSUFFICIENT_MATERIAL):
                         game.headers["Result"] = "1/2-1/2"
                     elif message.result in (GameResult.RESIGN_WHITE, GameResult.RESIGN_BLACK):

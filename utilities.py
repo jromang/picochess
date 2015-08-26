@@ -32,7 +32,7 @@ except ImportError:
 
 
 # picochess version
-version = '050'
+version = '051'
 
 event_queue = queue.Queue()
 serial_queue = queue.Queue()
@@ -142,11 +142,11 @@ class EngineMenu(AutoNumber):
 
 
 class TimeMenu(AutoNumber):
-    TIME_FIXED = () 
-    TIME__BLITZ = ()  
-    TIME_FISCHER = ()  
-    SPACER = ()  
-    SWITCH_MENU = ()  
+    TIME_FIXED = ()
+    TIME__BLITZ = ()
+    TIME_FISCHER = ()
+    SPACER = ()
+    SWITCH_MENU = ()
 
 
 class GameMenu(AutoNumber):

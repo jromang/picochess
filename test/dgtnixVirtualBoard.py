@@ -11,7 +11,7 @@ import threading
 from curses import ascii
 import string
 import array
-import thread
+# import thread
 import struct
 
 
