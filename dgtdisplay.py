@@ -201,6 +201,35 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             self.fire(Event.LEVEL, level=self.engine_level)
 
     def process_button2(self):
+
+        def complete_dgt_fen(fen):
+            # fen = str(self.setup_chessboard.fen())
+            can_castle = False
+            castling_fen = ''
+            bit_board = chess.Board(fen)
+
+            if bit_board.piece_at(chess.E1) == chess.Piece.from_symbol("K") and bit_board.piece_at(chess.H1) == chess.Piece.from_symbol("R"):
+                can_castle = True
+                castling_fen += 'K'
+
+            if bit_board.piece_at(chess.E1) == chess.Piece.from_symbol("K") and bit_board.piece_at(chess.A1) == chess.Piece.from_symbol("R"):
+                can_castle = True
+                castling_fen += 'Q'
+
+            if bit_board.piece_at(chess.E8) == chess.Piece.from_symbol("k") and bit_board.piece_at(chess.H8) == chess.Piece.from_symbol("r"):
+                can_castle = True
+                castling_fen += 'k'
+
+            if bit_board.piece_at(chess.E8) == chess.Piece.from_symbol("k") and bit_board.piece_at(chess.A8) == chess.Piece.from_symbol("r"):
+                can_castle = True
+                castling_fen += 'q'
+
+            if not can_castle:
+                castling_fen = '-'
+
+            # TODO: Support fen positions where castling is not possible even if king and rook are on right squares
+            return fen.replace("KQkq", castling_fen)
+
         if self.dgt_clock_menu == Menu.GAME_MENU:
             if self.mode == Mode.GAME:
                 self.fire(Event.STARTSTOP_THINK)
@@ -211,16 +240,17 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
 
         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="scan", xl=None, beep=BeepLevel.YES)
+            to_move = 'w' if self.setup_to_move == chess.WHITE else 'b'
             fen = self.dgt_fen
             if self.flip_board != self.setup_reverse_orientation:
                 logging.debug('Flipping the board')
                 fen = fen[::-1]
-            bit_board = chess.Board(fen)
-            bit_board.turn = self.setup_to_move
+            fen += " {0} KQkq - 0 1".format(to_move)
+            fen = complete_dgt_fen(fen)
 
-            if bit_board.is_valid(False):
+            if chess.Board(fen).is_valid(False):
                 self.flip_board = self.setup_reverse_orientation
-                self.fire(Event.SETUP_POSITION, fen=bit_board.epd() + ' 0 1')
+                self.fire(Event.SETUP_POSITION, fen=fen)
             else:
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="bad pos", xl="badpos", beep=BeepLevel.YES)
 
