@@ -35,13 +35,16 @@ class TimeControl(object):
 
     def reset(self):
         """Resets the clock's times for both players"""
-        self.clock_time = {chess.WHITE: float(self.minutes_per_game * 60), chess.BLACK: float(self.minutes_per_game * 60)}  # Player remaining time, in seconds
+        self.clock_time = {chess.WHITE: float(self.minutes_per_game * 60),
+                           chess.BLACK: float(self.minutes_per_game * 60)}  # Player remaining time, in seconds
         self.active_color = None
 
     def out_of_time(self, time_start):
         """Fires an OUT_OF_TIME event"""
         if self.active_color is not None:
-            logging.debug('Firing an OUT_OF_TIME event, current clock time (before subtracting) is {0} and color is {1}, out of time event started from {2}'.format(self.clock_time[self.active_color], self.active_color, time_start))
+            logging.debug(
+                'Firing an OUT_OF_TIME event, current clock time (before subtracting) is {0} and color is {1}, out of time event started from {2}'.format(
+                    self.clock_time[self.active_color], self.active_color, time_start))
             Observable.fire(Event.OUT_OF_TIME, color=self.active_color)
 
     def run(self, color):
@@ -56,11 +59,11 @@ class TimeControl(object):
 
             # Only start thread if thread is not already started for same color, and the player has not already lost on time
             if self.clock_time[color] > 0 and self.active_color is not None and self.run_color != self.active_color:
-                self.timer = threading.Timer(copy.copy(self.clock_time[color]), self.out_of_time, [copy.copy(self.clock_time[color])])
+                self.timer = threading.Timer(copy.copy(self.clock_time[color]), self.out_of_time,
+                                             [copy.copy(self.clock_time[color])])
                 self.timer.start()
                 self.run_color = self.active_color
                 # logging.info("Started out of time event at {0} for {1}".format(copy.copy(self.clock_time[color]), color))
-
 
     def stop(self):
         """Stop the clocks"""

@@ -18,12 +18,12 @@ import logging
 import queue
 import os
 import platform
-import random
+# import random
 import subprocess
 import urllib.request
 import socket
 import json
-from xml.dom.minidom import parseString
+# from xml.dom.minidom import parseString
 
 try:
     import enum
@@ -54,15 +54,15 @@ class Event(AutoNumber):
     FEN = ()  # User has moved one or more pieces, and we have a new fen position.
     LEVEL = ()  # User sets engine level (from 1 to 20).
     NEW_GAME = ()  # User starts a new game
-    DRAWRESIGN = () # User declares a resignation or draw
+    DRAWRESIGN = ()  # User declares a resignation or draw
     USER_MOVE = ()  # User sends a move
     KEYBOARD_MOVE = ()  # Keyboard sends a move (to be transfered to a fen)
     OPENING_BOOK = ()  # User chooses an opening book
     SET_MODE = ()  # Change interaction mode
     SETUP_POSITION = ()  # Setup custom position
     # dgt events
-    DGT_BUTTON = () # User pressed a button at the dgt clock
-    DGT_FEN = () # DGT board sends a fen
+    DGT_BUTTON = ()  # User pressed a button at the dgt clock
+    DGT_FEN = ()  # DGT board sends a fen
     # Engine events
     BEST_MOVE = ()  # Engine has found a move
     NEW_PV = ()  # Engine sends a new principal variation
@@ -122,7 +122,7 @@ class Menu(AutoNumber):
     GAME_MENU = ()  # Default Menu
     SETUP_POSITION_MENU = ()  # Setup position menu
     ENGINE_MENU = ()  # Engine menu
-    TIME_MENU = () # Time controls menu
+    TIME_MENU = ()  # Time controls menu
     SETTINGS_MENU = ()  # Settings menu
 
 
@@ -178,6 +178,7 @@ class ClockMode(AutoNumber):
     FIXED_TIME = ()  # Fixed seconds per move
     BLITZ = ()  # Fixed time per game
     FISCHER = ()  # Fischer increment
+
 
 @enum.unique
 class GameResult(enum.Enum):
@@ -438,7 +439,7 @@ def update_picochess(auto_reboot=False):
             output = subprocess.Popen([git, "status", "-uno"], stdout=subprocess.PIPE).communicate()[0].decode(
                 encoding='UTF-8')
             logging.debug(output)
-            if not 'up-to-date' in output:
+            if 'up-to-date' not in output:
                 # Update
                 logging.debug('Updating')
                 output = subprocess.Popen([git, "pull", "origin", "stable"], stdout=subprocess.PIPE).communicate()[

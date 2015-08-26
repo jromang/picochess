@@ -69,45 +69,44 @@ mode_map = {"rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR": Mode.GAME,
             "rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR": Mode.REMOTE}
 
 drawresign_map = OrderedDict([
-("8/8/8/3k4/4K3/8/8/8", GameResult.RESIGN_WHITE),
-("8/8/8/3K4/4k3/8/8/8", GameResult.RESIGN_WHITE),
-("8/8/8/4k3/3K4/8/8/8", GameResult.RESIGN_BLACK),
-("8/8/8/4K3/3k4/8/8/8", GameResult.RESIGN_BLACK),
-("8/8/8/3kK3/8/8/8/8", GameResult.DRAW),
-("8/8/8/3Kk3/8/8/8/8", GameResult.DRAW),
-("8/8/8/8/3kK3/8/8/8", GameResult.DRAW),
-("8/8/8/8/3Kk3/8/8/8", GameResult.DRAW)
+    ("8/8/8/3k4/4K3/8/8/8", GameResult.RESIGN_WHITE),
+    ("8/8/8/3K4/4k3/8/8/8", GameResult.RESIGN_WHITE),
+    ("8/8/8/4k3/3K4/8/8/8", GameResult.RESIGN_BLACK),
+    ("8/8/8/4K3/3k4/8/8/8", GameResult.RESIGN_BLACK),
+    ("8/8/8/3kK3/8/8/8/8", GameResult.DRAW),
+    ("8/8/8/3Kk3/8/8/8/8", GameResult.DRAW),
+    ("8/8/8/8/3kK3/8/8/8", GameResult.DRAW),
+    ("8/8/8/8/3Kk3/8/8/8", GameResult.DRAW)
 ])
-
 
 time_controls = {ClockMode.FIXED_TIME: "Fixed",
                  ClockMode.BLITZ: "Blitz",
                  ClockMode.FISCHER: "Fischer"}
 
 time_control_map = OrderedDict([
-("rnbqkbnr/pppppppp/Q7/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=1)),
-("rnbqkbnr/pppppppp/1Q6/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=3)),
-("rnbqkbnr/pppppppp/2Q5/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=5)),
-("rnbqkbnr/pppppppp/3Q4/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=10)),
-("rnbqkbnr/pppppppp/4Q3/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=15)),
-("rnbqkbnr/pppppppp/5Q2/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=30)),
-("rnbqkbnr/pppppppp/6Q1/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=60)),
-("rnbqkbnr/pppppppp/7Q/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=120)),
-("rnbqkbnr/pppppppp/8/8/Q7/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.BLITZ, minutes_per_game=1)),
-("rnbqkbnr/pppppppp/8/8/1Q6/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.BLITZ, minutes_per_game=3)),
-("rnbqkbnr/pppppppp/8/8/2Q5/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.BLITZ, minutes_per_game=5)),
-("rnbqkbnr/pppppppp/8/8/3Q4/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.BLITZ, minutes_per_game=10)),
-("rnbqkbnr/pppppppp/8/8/4Q3/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.BLITZ, minutes_per_game=15)),
-("rnbqkbnr/pppppppp/8/8/5Q2/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.BLITZ, minutes_per_game=30)),
-("rnbqkbnr/pppppppp/8/8/6Q1/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.BLITZ, minutes_per_game=60)),
-("rnbqkbnr/pppppppp/8/8/7Q/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.BLITZ, minutes_per_game=90)),
-("rnbqkbnr/pppppppp/8/8/8/Q7/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=3, fischer_increment=2)),
-("rnbqkbnr/pppppppp/8/8/8/1Q6/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=4, fischer_increment=2)),
-("rnbqkbnr/pppppppp/8/8/8/2Q5/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=5, fischer_increment=3)),
-("rnbqkbnr/pppppppp/8/8/8/3Q4/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=5, fischer_increment=5)),
-("rnbqkbnr/pppppppp/8/8/8/5Q2/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=25, fischer_increment=5)),
-("rnbqkbnr/pppppppp/8/8/8/4Q3/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=15, fischer_increment=5)),
-("rnbqkbnr/pppppppp/8/8/8/6Q1/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=90, fischer_increment=30))
+    ("rnbqkbnr/pppppppp/Q7/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=1)),
+    ("rnbqkbnr/pppppppp/1Q6/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=3)),
+    ("rnbqkbnr/pppppppp/2Q5/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=5)),
+    ("rnbqkbnr/pppppppp/3Q4/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=10)),
+    ("rnbqkbnr/pppppppp/4Q3/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=15)),
+    ("rnbqkbnr/pppppppp/5Q2/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=30)),
+    ("rnbqkbnr/pppppppp/6Q1/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=60)),
+    ("rnbqkbnr/pppppppp/7Q/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FIXED_TIME, seconds_per_move=120)),
+    ("rnbqkbnr/pppppppp/8/8/Q7/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.BLITZ, minutes_per_game=1)),
+    ("rnbqkbnr/pppppppp/8/8/1Q6/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.BLITZ, minutes_per_game=3)),
+    ("rnbqkbnr/pppppppp/8/8/2Q5/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.BLITZ, minutes_per_game=5)),
+    ("rnbqkbnr/pppppppp/8/8/3Q4/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.BLITZ, minutes_per_game=10)),
+    ("rnbqkbnr/pppppppp/8/8/4Q3/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.BLITZ, minutes_per_game=15)),
+    ("rnbqkbnr/pppppppp/8/8/5Q2/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.BLITZ, minutes_per_game=30)),
+    ("rnbqkbnr/pppppppp/8/8/6Q1/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.BLITZ, minutes_per_game=60)),
+    ("rnbqkbnr/pppppppp/8/8/7Q/8/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.BLITZ, minutes_per_game=90)),
+    ("rnbqkbnr/pppppppp/8/8/8/Q7/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=3, fischer_increment=2)),
+    ("rnbqkbnr/pppppppp/8/8/8/1Q6/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=4, fischer_increment=2)),
+    ("rnbqkbnr/pppppppp/8/8/8/2Q5/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=5, fischer_increment=3)),
+    ("rnbqkbnr/pppppppp/8/8/8/3Q4/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=5, fischer_increment=5)),
+    ("rnbqkbnr/pppppppp/8/8/8/5Q2/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=25, fischer_increment=5)),
+    ("rnbqkbnr/pppppppp/8/8/8/4Q3/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=15, fischer_increment=5)),
+    ("rnbqkbnr/pppppppp/8/8/8/6Q1/PPPPPPPP/RNBQKBNR", TimeControl(ClockMode.FISCHER, minutes_per_game=90, fischer_increment=30))
 ])
 
 dgt_xl_time_control_list = ["mov  1", "mov  3", "mov  5", "mov 10", "mov 15", "mov 30", "mov 60", "mov120",
@@ -116,7 +115,6 @@ dgt_xl_time_control_list = ["mov  1", "mov  3", "mov  5", "mov 10", "mov 15", "m
 
 
 class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
-
     def __init__(self):
         super(DGTDisplay, self).__init__()
         self.flip_board = False
@@ -132,15 +130,15 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         self.mode_index = 0
         self.mode = Mode.GAME
 
-        self.engine_level = 20 # Default level is 20
-        self.n_levels = 21     # Default engine (Stockfish) has 21 playing levels
-        self.book_index = 8    # Default book is 8 - book 'g'
-        self.n_books = 11      # Default is 11 installed books
+        self.engine_level = 20  # Default level is 20
+        self.n_levels = 21  # Default engine (Stockfish) has 21 playing levels
+        self.book_index = 8  # Default book is 8 - book 'g'
+        self.n_books = 11  # Default is 11 installed books
         self.engine_show_level = True
 
         self.time_control_mode = ClockMode.BLITZ
-        self.time_control_fen = list(time_control_map.keys())[10]  #Default time control: Blitz, 5min
-        self.time_control_selected_index = 0 #index for selecting new time control
+        self.time_control_fen = list(time_control_map.keys())[10]  # Default time control: Blitz, 5min
+        self.time_control_selected_index = 0  # index for selecting new time control
 
         self.drawresign_fen = None
 
@@ -164,22 +162,24 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=to_move.value, xl=None, beep=BeepLevel.YES)
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
-            self.book_index = ((self.book_index+1)%self.n_books)
+            self.book_index = ((self.book_index + 1) % self.n_books)
             self.fire(Event.OPENING_BOOK, book=get_opening_books()[self.book_index])
 
         if self.dgt_clock_menu == Menu.TIME_MENU:
             try:
-                self.time_control_mode = ClockMode(self.time_control_mode.value+1)
+                self.time_control_mode = ClockMode(self.time_control_mode.value + 1)
             except ValueError:
                 self.time_control_mode = ClockMode(1)
             self.time_control_selected_index = 0
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=time_controls[self.time_control_mode], xl=None, beep=BeepLevel.CONFIG)
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=time_controls[self.time_control_mode], xl=None,
+                                 beep=BeepLevel.CONFIG)
 
     def process_button1(self):
         if self.dgt_clock_menu == Menu.GAME_MENU:
             if self.display_move:
                 if bool(self.hint_move):
-                    HardwareDisplay.show(Dgt.DISPLAY_MOVE, move=self.hint_move, fen=self.hint_fen, beep=BeepLevel.CONFIG)
+                    HardwareDisplay.show(Dgt.DISPLAY_MOVE, move=self.hint_move, fen=self.hint_fen,
+                                         beep=BeepLevel.CONFIG)
                 else:
                     HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="none", xl=None, beep=BeepLevel.NO)
             else:
@@ -197,7 +197,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=orientation, xl=orientation_xl, beep=BeepLevel.YES)
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
-            self.engine_level = ((self.engine_level-1)%self.n_levels)
+            self.engine_level = ((self.engine_level - 1) % self.n_levels)
             self.fire(Event.LEVEL, level=self.engine_level)
 
     def process_button2(self):
@@ -262,7 +262,8 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 self.engine_show_level = False
             else:
                 # Display current book
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=(get_opening_books()[self.book_index])[0], xl=None, beep=BeepLevel.CONFIG)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=(get_opening_books()[self.book_index])[0], xl=None,
+                                     beep=BeepLevel.CONFIG)
                 self.engine_show_level = True
 
         if self.dgt_clock_menu == Menu.TIME_MENU:
@@ -283,7 +284,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             subprocess.Popen(["sudo", "reboot"])
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
-            self.engine_level = ((self.engine_level+1)%self.n_levels)
+            self.engine_level = ((self.engine_level + 1) % self.n_levels)
             self.fire(Event.LEVEL, level=self.engine_level)
 
         if self.dgt_clock_menu == Menu.TIME_MENU:
@@ -301,14 +302,15 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             self.time_control_fen = local_fen_map[self.time_control_selected_index]
             self.time_control_selected_index += 1
             self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[self.time_control_fen],
-                time_control_string=dgt_xl_time_control_list[list(time_control_map.keys()).index(self.time_control_fen)])
+                      time_control_string=dgt_xl_time_control_list[
+                          list(time_control_map.keys()).index(self.time_control_fen)])
 
     def process_button4(self):
         # self.dgt_clock_menu = Menu.self.dgt_clock_menu.value+1
         # print(self.dgt_clock_menu)
         # print(self.dgt_clock_menu.value)
         try:
-            self.dgt_clock_menu = Menu(self.dgt_clock_menu.value+1)
+            self.dgt_clock_menu = Menu(self.dgt_clock_menu.value + 1)
         except ValueError:
             self.dgt_clock_menu = Menu(1)
 
@@ -325,12 +327,13 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             msg = 'system'
         HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.YES)
         self.engine_show_level = True  # Reset engine display
-        self.time_control_mode = time_control_map[self.time_control_fen].mode # Reset time control fen to match current time control
+        self.time_control_mode = time_control_map[
+            self.time_control_fen].mode  # Reset time control fen to match current time control
         self.time_control_selected_index = 0
 
     def drawresign(self):
         rnk_8, rnk_7, rnk_6, rnk_5, rnk_4, rnk_3, rnk_2, rnk_1 = self.dgt_fen.split("/")
-        self.drawresign_fen = "8/8/8/"+rnk_5+"/"+rnk_4+"/8/8/8"
+        self.drawresign_fen = "8/8/8/" + rnk_5 + "/" + rnk_4 + "/8/8/8"
 
     def run(self):
         while True:
@@ -378,10 +381,12 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         break
                     if case(Message.LEVEL):
                         level = str(message.level)
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.CONFIG)
+                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level,
+                                             beep=BeepLevel.CONFIG)
                         break
                     if case(Message.TIME_CONTROL):
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=message.time_control_string, xl=None, beep=BeepLevel.CONFIG)
+                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=message.time_control_string, xl=None,
+                                             beep=BeepLevel.CONFIG)
                         break
                     if case(Message.OPENING_BOOK):
                         book_name = message.book[0]
@@ -392,7 +397,8 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="takeback", xl="takbak", beep=BeepLevel.CONFIG)
                         break
                     if case(Message.GAME_ENDS):
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=message.result.value, xl=None, beep=BeepLevel.CONFIG)
+                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=message.result.value, xl=None,
+                                             beep=BeepLevel.CONFIG)
                         break
                     if case(Message.INTERACTION_MODE):
                         self.mode = message.mode
@@ -406,7 +412,8 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         self.score = message.score
                         self.mate = message.mate
                         if message.mode == Mode.KIBITZ:
-                            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=str(self.score).rjust(6), xl=None, beep=BeepLevel.NO)
+                            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=str(self.score).rjust(6), xl=None,
+                                                 beep=BeepLevel.NO)
                         break
                     if case(Message.BOOK_MOVE):
                         self.score = None
@@ -418,7 +425,8 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         self.hint_move = message.pv[0]
                         self.hint_fen = message.fen
                         if message.mode == Mode.ANALYSIS:
-                            HardwareDisplay.show(Dgt.DISPLAY_MOVE, move=self.hint_move, fen=self.hint_fen, beep=BeepLevel.NO)
+                            HardwareDisplay.show(Dgt.DISPLAY_MOVE, move=self.hint_move, fen=self.hint_fen,
+                                                 beep=BeepLevel.NO)
                         break
                     if case(Message.SEARCH_STARTED):
                         logging.debug('Search started')
@@ -496,7 +504,8 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         elif fen in time_control_map:
                             logging.debug("Map-Fen: Time control [%s]", time_control_map[fen].mode)
                             self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[fen],
-                                      time_control_string=dgt_xl_time_control_list[list(time_control_map.keys()).index(fen)])
+                                      time_control_string=dgt_xl_time_control_list[
+                                          list(time_control_map.keys()).index(fen)])
                             self.time_control_mode = time_control_map[fen].mode
                             self.time_control_fen = fen
                         elif fen in shutdown_map:
@@ -509,7 +518,8 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                             self.fire(Event.FEN, fen=fen)
                         break
                     if case(Message.DGT_CLOCK_VERSION):
-                        HardwareDisplay.show(Dgt.CLOCK_VERSION, main_version=message.main_version, sub_version=message.sub_version)
+                        HardwareDisplay.show(Dgt.CLOCK_VERSION, main_version=message.main_version,
+                                             sub_version=message.sub_version)
                         break
                     if case():  # Default
                         # print(message)

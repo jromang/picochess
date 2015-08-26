@@ -30,16 +30,16 @@ from email.mime.text import MIMEText
 
 class PgnDisplay(Display, threading.Thread):
     def __init__(self, pgn_file_name, email=None, fromINIMailGun_Key=None,
-                    fromIniSmtp_Server=None, fromINISmtp_User=None,
-                    fromINISmtp_Pass=None, fromINISmtp_Enc=False):
+                 fromIniSmtp_Server=None, fromINISmtp_User=None,
+                 fromINISmtp_Pass=None, fromINISmtp_Enc=False):
         super(PgnDisplay, self).__init__()
         self.file_name = pgn_file_name
         self.engine_name = ''
         self.user_name = ''
         self.level = None
-        if email: # check if email address is provided by picochess.ini
+        if email:  # check if email address is provided by picochess.ini
             self.email = email
-        else: # if no email address is set then set self.email to false so skip later sending the game as via mail
+        else:  # if no email address is set then set self.email to false so skip later sending the game as via mail
             self.email = False
         # store information for SMTP based mail delivery
         self.smtp_server = fromIniSmtp_Server
@@ -79,7 +79,7 @@ class PgnDisplay(Display, threading.Thread):
                     if message.result == GameResult.ABORT:
                         game.headers["Result"] = "*"
                     elif message.result in (GameResult.DRAW, GameResult.STALEMATE, GameResult.SEVENTYFIVE_MOVES,
-                        GameResult.FIVEFOLD_REPETITION, GameResult.INSUFFICIENT_MATERIAL):
+                                            GameResult.FIVEFOLD_REPETITION, GameResult.INSUFFICIENT_MATERIAL):
                         game.headers["Result"] = "1/2-1/2"
                     elif message.result in (GameResult.RESIGN_WHITE, GameResult.RESIGN_BLACK):
                         game.headers["Result"] = "1-0" if message.result == GameResult.RESIGN_WHITE else "0-1"
@@ -108,8 +108,8 @@ class PgnDisplay(Display, threading.Thread):
                     game.export(exporter)
                     file.close()
                     # section send email
-                    if self.email: # check if email adress to send the game to is provided
-                        if self.smtp_server: # check if smtp server adress provided
+                    if self.email:  # check if email adress to send the game to is provided
+                        if self.smtp_server:  # check if smtp server adress provided
                             # if self.smtp_server is not provided than don't try to send email via smtp service
                             logging.debug("SMTP Mail delivery: Started")
                             # change to smtp based mail delivery
@@ -124,14 +124,15 @@ class PgnDisplay(Display, threading.Thread):
                                 from smtplib import SMTP
                             try:
                                 msg = MIMEText(str(game), 'plain')  # pack the game to Email body
-                                msg['Subject']= "Game PGN"          # put subject to mail
+                                msg['Subject'] = "Game PGN"  # put subject to mail
                                 msg['From'] = "Your PicoChess computer <no-reply@picochess.org>"
                                 logging.debug("SMTP Mail delivery: trying to connect to " + self.smtp_server)
-                                conn = SMTP(self.smtp_server)       # contact smtp server
-                                conn.set_debuglevel(False)          # no debug info from smtp lib
+                                conn = SMTP(self.smtp_server)  # contact smtp server
+                                conn.set_debuglevel(False)  # no debug info from smtp lib
                                 logging.debug("SMTP Mail delivery: trying to log to SMTP Server")
-                                logging.debug("SMTP Mail delivery: Username=" + self.smtp_user + ", Pass=" + self.smtp_pass)
-                                conn.login(self.smtp_user, self.smtp_pass) # login at smtp server
+                                logging.debug(
+                                    "SMTP Mail delivery: Username=" + self.smtp_user + ", Pass=" + self.smtp_pass)
+                                conn.login(self.smtp_user, self.smtp_pass)  # login at smtp server
                                 try:
                                     logging.debug("SMTP Mail delivery: trying to send email")
                                     conn.sendmail('no-reply@picochess.org', self.email, msg.as_string())
@@ -146,13 +147,13 @@ class PgnDisplay(Display, threading.Thread):
                                 logging.error("SMTP Mail delivery: Failed")
                                 logging.error("SMTP Mail delivery: " + str(exec))
                         # smtp based system end
-                        if self.mailgun_key: # check if we have the mailgun-key available to send the game successful
+                        if self.mailgun_key:  # check if we have the mailgun-key available to send the game successful
                             out = requests.post("https://api.mailgun.net/v2/picochess.org/messages",
-                                            auth=("api", self.mailgun_key),
-                                            data={"from": "Your PicoChess computer <no-reply@picochess.org>",
-                                            "to": self.email,
-                                            "subject": "Game PGN",
-                                            "text": str(game)})
+                                                auth=("api", self.mailgun_key),
+                                                data={"from": "Your PicoChess computer <no-reply@picochess.org>",
+                                                      "to": self.email,
+                                                      "subject": "Game PGN",
+                                                      "text": str(game)})
                             logging.debug(out)
             except queue.Empty:
                 pass
