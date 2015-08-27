@@ -134,8 +134,14 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
 
         self.engine_level = 20 # Default level is 20
         self.n_levels = 21     # Default engine (Stockfish) has 21 playing levels
+        self.engine_restart = False
+        self.engine_index = 2       # Dummy values .. set later
+        self.engine_menu_index = 2
+        self.installed_engines = get_installed_engines()
+        self.n_engines = len(self.installed_engines)
 
         self.book_index = 8    # Default book is 8 - book 'g'
+        self.book_menu_index = 8 # Sync with above
         self.all_books=get_opening_books()
         self.n_books = len(self.all_books)
 
@@ -165,7 +171,13 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=to_move.value, xl=None, beep=BeepLevel.YES)
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU: # Place holder
-            pass
+#            request_engine = [e[0] for e in self.installed_engines][self.engine_index]
+#            logging.debug("wibble: Requesting new engine -> [%s]", request_engine)
+            self.fire(Event.NEW_ENGINE, eng=self.installed_engines[self.engine_index])
+            logging.debug("wibble: Engine request -> [%s]", self.installed_engines[self.engine_index])
+#            self.fire(Event.NEW_ENGINE, engine=[e[0] for e in self.installed_engines][self.engine_index])
+#            self.fire(Event.NEW_ENGINE, engine=list(self.installed_engines[1])[self.engine_index])
+            self.engine_restart = True
 
         if self.dgt_clock_menu == Menu.BOOK_MENU: # Place holder
             pass
@@ -266,9 +278,9 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             level = str(self.engine_level)
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.CONFIG)
 
-        if self.dgt_clock_menu == Menu.BOOK_MENU
+        if self.dgt_clock_menu == Menu.BOOK_MENU:
             # Display current book
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=self.all_books[self.book_index][0], xl=None, beep=BeepLevel.CONFIG)
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=(self.all_books[self.book_index])[0], xl=None, beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.TIME_MENU:
             time_control_string = dgt_xl_time_control_list[list(time_control_map.keys()).index(self.time_control_fen)]
@@ -287,13 +299,13 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="reboot", xl=None, beep=BeepLevel.YES)
             subprocess.Popen(["sudo", "reboot"])
 
-#        if self.dgt_clock_menu == Menu.ENGINE_MENU:
-#            self.engine_level = ((self.engine_level+1)%self.n_levels)
-#            self.fire(Event.LEVEL, level=self.engine_level)
+        if self.dgt_clock_menu == Menu.ENGINE_MENU:
+            self.engine_level = ((self.engine_level+1)%self.n_levels)
+            self.fire(Event.LEVEL, level=self.engine_level)
 
-#        if self.dgt_clock_menu == Menu.BOOK_MENU:
-#            self.book_index = ((self.book_index+1)%self.n_books)
-#            self.fire(Event.OPENING_BOOK, book=self.all_books[self.book_index])
+        if self.dgt_clock_menu == Menu.BOOK_MENU:
+            self.book_index = ((self.book_index+1)%self.n_books)
+            self.fire(Event.OPENING_BOOK, book=self.all_books[self.book_index])
 
         if self.dgt_clock_menu == Menu.TIME_MENU:
             local_fen_map = list(time_control_map.keys())
@@ -350,6 +362,23 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 if type(message).__name__ == 'Message':
                     logging.debug("Read message from queue: %s", message)
                 for case in switch(message):
+                    if case(Message.ENGINE_READY):      # Just need the engine name
+                        if self.engine_restart:
+                            logging.debug('wibble: Engine Event in [%s]', message.eng)
+                            self.engine_index = self.installed_engines.index(message.eng)
+                            self.engine_menu_index = self.engine_index
+                            logging.debug('wibble: Engine Event index [%s]', index)
+                        else: #initial startup
+                            logging.debug("wibble: ENGINE_READY startup event -> [%s]", message.eng)
+                            for index in range(0, self.n_engines):
+                                full_path, short = self.installed_engines[index]
+                                if full_path == message.eng[0]:
+                                    self.engine_index = index
+                                    self.engine_menu_index = self.engine_index
+                                    logging.debug("wibble: Computed engine index -> [%s]", self.engine_index)
+                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="Eng Rdy", xl="ok", beep=BeepLevel.CONFIG)
+                        self.engine_restart = False
+                        break
                     if case(Message.COMPUTER_MOVE):
                         move = message.result.bestmove
                         ponder = message.result.ponder

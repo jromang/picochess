@@ -83,6 +83,7 @@ class Message(AutoNumber):
     NEW_PV = ()  # Show the new Principal Variation
     REVIEW_MODE_MOVE = ()  # Player is reviewing game
     REMOTE_MODE_MOVE = ()  # DGT Player is playing vs network player
+    ENGINE_READY = ()
     LEVEL = ()  # User sets engine level (from 1 to 20).
     TIME_CONTROL = ()
     OPENING_BOOK = ()  # User chooses an opening book
@@ -142,10 +143,12 @@ class EngineMenu(AutoNumber):
     ENG_INFO = ()
     SWITCH_MENU = ()  # Switch Menu
 
+
 class BookMenu(AutoNumber):
     BOOK = ()
     BOOK_INFO = ()
     SWITCH_MENU = ()  # Switch Menu
+
 
 class TimeMenu(AutoNumber):
     TIME_FIXED = ()
@@ -388,6 +391,16 @@ def get_opening_books():
     library = []
     for book in book_list:
         library.append((book[2:book.index('.')], 'books' + os.sep + book))
+    return library
+
+
+def get_installed_engines():
+    program_path = os.path.dirname(os.path.realpath(__file__)) + os.sep
+    engine_list = sorted(os.listdir(program_path + 'engines'))
+    library = []
+    for engine in engine_list:
+        if not ('.' in engine):
+            library.append((program_path+'engines'+os.sep+engine, engine))
     return library
 
 
