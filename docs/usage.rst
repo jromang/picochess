@@ -145,9 +145,10 @@ Clock buttons (in Engine menu)
 Clock buttons (in Time menu)
 ----------------------------
 
-* First button will cycle through "Fischer", "Fixed" and "Blitz" time controls
-* Third button will display current time control
-* Fourth button will select a new time control of the type currently in use ("Fischer", "Fixed" or "Blitz")
+* First button cycles through "Fischer", "Fixed" and "Blitz" time controls
+* Second button goes down in the time control list of the type currently in use ("Fischer", "Fixed" or "Blitz")
+* Third button selects a new time control of the type currently in use ("Fischer", "Fixed" or "Blitz")
+* Fourth button goes up in the time control list of the type currently in use ("Fischer", "Fixed" or "Blitz")
 
 Clock buttons (in Book menu)
 ----------------------------
