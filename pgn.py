@@ -65,7 +65,6 @@ class PgnDisplay(Display, threading.Thread):
                 if message == Message.ENGINE_READY:
                     if message.eng[0] != message.eng[1]:   # Ignore startup
                         self.engine_name = message.ename
-                        logging.debug("wibble: not startup name->[%s]", message.ename)
                     else:                               # Just do this once at startup not after every game! Do while user messing around
                         self.location = get_location()  # with first game / setting options etc
                 if message == Message.GAME_ENDS and message.moves:
