@@ -30,6 +30,8 @@ Put the extra **black** queen on your DGT board to select skill level. Putting i
 * Level 10 estimates about 1750 Elo (Mediate club player )
 * Level 20 estimates about 2570 Elo (Advanced tournament player)
 
+Another way to choose the skill level is by entering the "Level" menu with the clock buttons. Detailed explanation is below.
+
 Choosing opening books
 ----------------------
 
@@ -65,7 +67,7 @@ Time controls are set with the extra **white** queen.
 * **G6** - 60 seconds per move
 * **H6** - 120 seconds per move
 
-Another way to choose the opening book is by entering the "Time" menu with the clock buttons. Detailed explanation is below.
+Another way to choose the time control is by entering the "Time" menu with the clock buttons. Detailed explanation is below.
 
 Blitz Levels
 ------------
@@ -82,8 +84,6 @@ Blitz time controls are set with the extra **white** queen.
 * **G4** - 60 minute game (1 hour)
 * **H4** - 90 minute game (1 hour and 30 minutes)
 
-Another way to choose the opening book is by entering the "Time" menu with the clock buttons. Detailed explanation is below.
-
 Fischer Increment Blitz Levels
 ------------------------------
 
@@ -98,18 +98,18 @@ These are set with the extra **white** queen.
 * **F3** - 25 minute game with 5 second Fischer increment
 * **G3** - 90 minute game with 30 second Fischer increment
 
-Another way to choose the opening book is by entering the "Time" menu with the clock buttons. Detailed explanation is below.
 
 Clock button support (general)
 ------------------------------
 
-The fifth (right most) button toggles between "Game", "Position", "Engine", "Time", "Book", "System" menu.
+The fifth (right most) button toggles between "Game", "Position", "Level", "Time", "Engine", "Book", "System" menus.
 Depending with menu you choose, the other 4 buttons have different functionality. Its explained in detail below.
 
 * **Game Menu** - Regular Menu Shows Infos during game playing
 * **Position Menu** - Setup a custom position
-* **Engine Menu** - Change the engine
+* **Level Menu** - Change the skill level
 * **Time Menu** - Change time controls
+* **Engine Menu** - Change the engine
 * **Book Menu** - Change the opening book
 * **System Menu** - No functionality right now
 
@@ -134,6 +134,22 @@ First setup your position.
 * Third button scans in the position on board. Clock will respond with "Scan" and "New game". Now picochess is waiting for your next move. If you want picochess to start press the third button
 * Fouth button has no function
 
+Clock buttons (in Level menu)
+------------------------------
+
+* First button shows the current selected skill level
+* Second button goes down in skill level
+* Third button chooses the current selected level
+* Fourth button goes up in skill level
+
+Clock buttons (in Time menu)
+----------------------------
+
+* First button cycles through "Fischer", "Fixed" and "Blitz" time controls
+* Second button goes down in the time control list of the type currently in use ("Fischer", "Fixed" or "Blitz")
+* Third button chooses the selected time control
+* Fourth button goes up in the time control list of the type currently in use ("Fischer", "Fixed" or "Blitz")
+
 Clock buttons (in Engine menu)
 ------------------------------
 
@@ -142,14 +158,6 @@ Clock buttons (in Engine menu)
 * Third button chooses the current selected engine
 * Fourth button goes up in the engines list
 
-Clock buttons (in Time menu)
-----------------------------
-
-* First button cycles through "Fischer", "Fixed" and "Blitz" time controls
-* Second button goes down in the time control list of the type currently in use ("Fischer", "Fixed" or "Blitz")
-* Third button selects a new time control of the type currently in use ("Fischer", "Fixed" or "Blitz")
-* Fourth button goes up in the time control list of the type currently in use ("Fischer", "Fixed" or "Blitz")
-
 Clock buttons (in Book menu)
 ----------------------------
 
@@ -157,6 +165,7 @@ Clock buttons (in Book menu)
 * Second button goes down in the books list
 * Third button chooses the current selected book
 * Fourth button goes up in the book list
+It is possible to select any additional books you may have installed from the clock buttons, but the selection from the board is fixed.
 
 System shutdown
 ---------------
