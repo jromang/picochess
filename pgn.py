@@ -29,11 +29,12 @@ from email.mime.text import MIMEText
 
 
 class PgnDisplay(Display, threading.Thread):
-    def __init__(self, pgn_file_name, email=None, fromINIMailGun_Key=None,
+    def __init__(self, network, pgn_file_name, email=None, fromINIMailGun_Key=None,
                     fromIniSmtp_Server=None, fromINISmtp_User=None,
                     fromINISmtp_Pass=None, fromINISmtp_Enc=False):
         super(PgnDisplay, self).__init__()
         self.file_name = pgn_file_name
+        self.network = network
         self.engine_name = ''
         self.user_name = ''
         self.level = None
@@ -65,8 +66,10 @@ class PgnDisplay(Display, threading.Thread):
                 if message == Message.ENGINE_READY:
                     if message.eng[0] != message.eng[1]:   # Ignore startup
                         self.engine_name = message.eng[1]
-                    else:                               # Just do this once at startup not after every game! Do while user messing around
+                    elif network:                       # Just do this once at startup not after every game! Do while user messing around
                         self.location = get_location()  # with first game / setting options etc
+                    else:
+                        self.location = "?"
                 if message == Message.GAME_ENDS and message.moves:
                     logging.debug('Saving game to [' + self.file_name + ']')
                     game = chess.pgn.Game()
@@ -114,7 +117,7 @@ class PgnDisplay(Display, threading.Thread):
                     file.flush()
                     file.close()
                     # section send email
-                    if self.email: # check if email adress to send the game to is provided
+                    if self.email and network: # check if email adress to send the game to is provided
                         if self.smtp_server: # check if smtp server adress provided
                             # if self.smtp_server is not provided than don't try to send email via smtp service
                             logging.debug("SMTP Mail delivery: Started")
