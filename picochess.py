@@ -76,6 +76,7 @@ def main():
                         help="disable beeps on the dgt clock")
     parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
     parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
+    parser.add_argument("-net", "--network", type=str, help="enable/disable network operations", default='True')
     args = parser.parse_args()
 
     # Enable logging
@@ -84,8 +85,12 @@ def main():
                         datefmt="%Y-%m-%d %H:%M:%S")
     logging.getLogger("chess.uci").setLevel(logging.INFO)  # don't want to get so many python-chess uci messages
 
+    # Check for netowrk or not
+    network_enabled = (args.network == 'True')
+
     # Update
-    update_picochess(args.auto_reboot)
+    if network_enabled:
+        update_picochess(args.auto_reboot)
 
     # This class talks to DGTHardware or DGTVirtual
     DGTDisplay().start()
@@ -103,7 +108,7 @@ def main():
 
     # Save to PGN
     PgnDisplay(
-        args.pgn_file, email=args.email, fromINIMailGun_Key=args.mailgun_key,
+        args.pgn_file, net=args.network, email=args.email, fromINIMailGun_Key=args.mailgun_key,
         fromIniSmtp_Server=args.smtp_server, fromINISmtp_User=args.smtp_user,
         fromINISmtp_Pass=args.smtp_pass, fromINISmtp_Enc=args.smtp_encryption).start()
     if args.pgn_user:
@@ -124,7 +129,7 @@ def main():
         logging.debug("ChessTalker disabled")
 
     # Launch web server
-    if args.web_server_port:
+    if args.web_server_port and network_enabled:
         WebServer(args.web_server_port).start()
 
 
