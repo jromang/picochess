@@ -149,6 +149,15 @@ class Engine(Display):
     def quit(self):
         return self.engine.quit()
 
+    def terminate(self):
+        return self.engine.terminate()
+
+    def kill(self):
+        return self.engine.kill()
+
+    def popen_engine(self, path):
+        self.engine = chess.uci.popen_engine(path)
+
     def stop(self):
         if self.status == EngineStatus.WAIT:
             logging.info('Engine already stopped')

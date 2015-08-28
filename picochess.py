@@ -146,9 +146,6 @@ def main():
             engine.option(uci_parameter[0], uci_parameter[1])
     # send the options to the engine
     engine.send()
-    logging.debug('wibble: Engine ready -> [%s]', args.engine)
-
-
 
 
     def display_system_info():
@@ -397,37 +394,49 @@ def main():
                     break
 
                 if case(Event.NEW_ENGINE):
-                    logging.debug("wibble: New engine requested -> [%s]", event.eng[0])
-                    # Stop the old engine
-#                    engine.stop()
-                    # Load the new one and send args.
-                    # Local engines only
-#                    engine = uci.Engine(event.eng, hostname=None, username=None, key_file=None, password=None)
-#                    engine_name = engine.get().name
-#                    logging.debug('wibble: Loaded new engine -> [%s]', engine_name)
-#                    if 'Hash' in engine.get().options:
-#                        engine.option("Hash", args.hash_size)
-#                    if 'Threads' in engine.get().options:  # Stockfish
-#                        engine.option("Threads", args.threads)
-#                    if 'Core Threads' in engine.get().options:  # Hiarcs
-#                        engine.option("Core Threads", args.threads)
-#                    if args.uci_option:
-#                        for uci_option in args.uci_option.strip('"').split(";"):
-#                            uci_parameter = uci_option.strip().split('=')
-#                            engine.option(uci_parameter[0], uci_parameter[1])
-                    # send the options to the engine
-#                    engine.send()
-
-#                    Display.show(Message.UCI_OPTION_LIST, options=engine.get().options)
-
-
-                    Display.show(Message.ENGINE_READY, eng=event.eng)
-
-                    #Send user selected engine level to new engine
-#                    logging.debug("Setting engine to level %i", engine_level)
-#                    if engine_level and engine.level(engine_level):
-#                        engine.send()
-#                        Display.show(Message.LEVEL, level=engine_level)
+                    # Stop the old engine cleanly
+                    engine.stop()
+                    # Closeout the engine process and threads
+                    # The all return non-zero error codes, 0=success
+                    engine_shutdown = False
+                    if engine.quit():   # Ask nicely
+                        if engine.terminate():  # If you won't go nicely.... 
+                            if engine.kill():       # Right that doe's it!
+                                logging.debug('Serious: Engine shutdown failure')
+                                Display.show(Message.ENGINE_READY, eng=('fail', 'fail'))
+                            else:
+                                engine_shutdown = True
+                        else:
+                            engine_shutdown = True
+                    else:
+                        engine_shutdown = True
+                    if engine_shutdown:
+                        # Load the new one and send args.
+                        # Local engines only
+#                        engine = uci.Engine(event.eng[0], hostname=None, username=None, key_file=None, password=None)
+                        engine.popen_engine(event.eng[0])
+                        logging.debug("New engine loaded [%s]", event.eng[0])
+                        engine_name = engine.get().name
+                        if 'Hash' in engine.get().options:
+                            engine.option("Hash", args.hash_size)
+                        if 'Threads' in engine.get().options:  # Stockfish
+                            engine.option("Threads", args.threads)
+                        if 'Core Threads' in engine.get().options:  # Hiarcs
+                                engine.option("Core Threads", args.threads)
+                        if args.uci_option:
+                            for uci_option in args.uci_option.strip('"').split(";"):
+                                uci_parameter = uci_option.strip().split('=')
+                                engine.option(uci_parameter[0], uci_parameter[1])
+                        # send the options to the engine
+                        engine.send()
+                        # Notify other display processes    
+                        Display.show(Message.UCI_OPTION_LIST, options=engine.get().options)
+                        Display.show(Message.ENGINE_READY, eng=event.eng)
+                        #Send user selected engine level to new engine
+                        if engine_level and engine.level(engine_level):
+                            logging.debug("Setting engine to level %i", engine_level)
+                            engine.send()
+                            Display.show(Message.LEVEL, level=engine_level)
 
                     break
 

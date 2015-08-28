@@ -124,6 +124,7 @@ class Menu(AutoNumber):
     GAME_MENU = ()  # Default Menu
     SETUP_POSITION_MENU = ()  # Setup position menu
     ENGINE_MENU = ()  # Engine menu
+    LEVEL_MENU = ()  # Playing strength
     BOOK_MENU = ()  # Book menu
     TIME_MENU = () # Time controls menu
     SETTINGS_MENU = ()  # Settings menu

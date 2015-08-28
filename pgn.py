@@ -62,19 +62,31 @@ class PgnDisplay(Display, threading.Thread):
                     self.user_name = message.info['user_name']
                 if message == Message.LEVEL:
                     self.level = message.level
+                if message == Message.ENGINE_READY:
+                    if message.eng[0] != message.eng[1]:   # Ignore startup
+                        self.engine_name = message.eng[1]
+                    else:                               # Just do this once at startup not after every game! Do while user messing around
+                        self.location = get_location()  # with first game / setting options etc
                 if message == Message.GAME_ENDS and message.moves:
                     logging.debug('Saving game to [' + self.file_name + ']')
+                    logging.debug("wibble: Game ends. Saving to [%s]", self.file_name)
                     game = chess.pgn.Game()
                     if message.custom_fen:
                         b = chess.Board(message.custom_fen)
                         game.setup(b)
+                        logging.debug("wibble: Custom FEN")
                     node = game
+                    logging.debug("wibble: Noding moves")
                     for move in message.moves:
                         node = node.add_main_variation(move)
+                    logging.debug("wibble: Noded moves")
                     # Headers
                     game.headers["Event"] = "PicoChess game"
-                    game.headers["Site"] = get_location()
+                    logging.debug("wibble: Getting location")
+                    game.headers["Site"] = self.location
+                    logging.debug("wibble: Got location, getting time")
                     game.headers["Date"] = datetime.date.today().strftime('%Y.%m.%d')
+                    logging.debug("wibble: Got time")
                     game.headers["Round"] = "?"
                     if message.result == GameResult.ABORT:
                         game.headers["Result"] = "*"
@@ -86,26 +98,39 @@ class PgnDisplay(Display, threading.Thread):
                     elif message.result in (GameResult.MATE, GameResult.TIME_CONTROL):
                         game.headers["Result"] = "0-1" if message.color == chess.WHITE else "1-0"
 
+                    logging.debug("wibble: Headers 1")
                     if self.level is None:
                         engine_level = ""
                     else:
                         engine_level = " (Level {0})".format(self.level)
 
+                    logging.debug("wibble: Headers 2")
                     if message.play_mode == PlayMode.PLAY_WHITE:
+                        logging.debug("wibble: Headers 2.1")
                         game.headers["White"] = self.user_name
+                        logging.debug("wibble: Headers 2.2 engine->[%s] level->[%s]", self.engine_name, engine_level)
                         game.headers["Black"] = self.engine_name + engine_level
+                        logging.debug("wibble: Headers 2.3")
                         game.headers["WhiteElo"] = "-"
+                        logging.debug("wibble: Headers 2.4")
                         game.headers["BlackElo"] = "2900"
                     if message.play_mode == PlayMode.PLAY_BLACK:
                         game.headers["White"] = self.engine_name + engine_level
                         game.headers["Black"] = self.user_name
                         game.headers["WhiteElo"] = "2900"
                         game.headers["BlackElo"] = "-"
+                    logging.debug("wibble: Headers 3")
 
                     # Save to file
+                    logging.debug("wibble: Open file")
                     file = open(self.file_name, "a")
+                    logging.debug("wibble: File Exporter")
                     exporter = chess.pgn.FileExporter(file)
+                    logging.debug("wibble: Game Export")
                     game.export(exporter)
+                    logging.debug("wibble: Flush file")
+                    file.flush()
+                    logging.debug("wibble: Close file")
                     file.close()
                     # section send email
                     if self.email: # check if email adress to send the game to is provided
@@ -154,5 +179,7 @@ class PgnDisplay(Display, threading.Thread):
                                             "subject": "Game PGN",
                                             "text": str(game)})
                             logging.debug(out)
+                elif message == Message.GAME_ENDS:
+                    logging.debug('wibble: Game ends NO MOVES')
             except queue.Empty:
                 pass
