@@ -158,6 +158,9 @@ class Engine(Display):
     def popen_engine(self, path):
         self.engine = chess.uci.popen_engine(path)
 
+    def uci(self):
+        self.engine.uci()
+
     def stop(self):
         if self.status == EngineStatus.WAIT:
             logging.info('Engine already stopped')

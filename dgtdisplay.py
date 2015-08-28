@@ -404,6 +404,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                             if not (message.eng[0] == 'fail'):
                                 self.engine_index = self.installed_engines.index(message.eng)
                                 self.engine_menu_index = self.engine_index
+                                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='Ok', xl='Ok', beep=BeepLevel.CONFIG)
                             else:
                                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='Error', xl='Error', beep=BeepLevel.CONFIG)
                         else: # for initial startup, message has a different format from our local book
@@ -412,7 +413,6 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                                 if full_path == message.eng[0]:
                                     self.engine_index = index
                                     self.engine_menu_index = self.engine_index
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='Ok', xl='Ok', beep=BeepLevel.CONFIG)
                         self.engine_restart = False
                         break
                     if case(Message.COMPUTER_MOVE):

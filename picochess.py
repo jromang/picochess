@@ -348,7 +348,6 @@ def main():
                                              "book": book, "time_control_string": "mov 5"})
 
     Display.show(Message.ENGINE_READY, eng=(args.engine, args.engine))
-
     # Event loop
     while True:
         try:
@@ -401,7 +400,7 @@ def main():
                     engine_shutdown = False
                     if engine.quit():   # Ask nicely
                         if engine.terminate():  # If you won't go nicely.... 
-                            if engine.kill():       # Right that doe's it!
+                            if engine.kill():       # Right that does it!
                                 logging.debug('Serious: Engine shutdown failure')
                                 Display.show(Message.ENGINE_READY, eng=('fail', 'fail'))
                             else:
@@ -415,7 +414,7 @@ def main():
                         # Local engines only
 #                        engine = uci.Engine(event.eng[0], hostname=None, username=None, key_file=None, password=None)
                         engine.popen_engine(event.eng[0])
-                        logging.debug("New engine loaded [%s]", event.eng[0])
+                        engine.uci()
                         engine_name = engine.get().name
                         if 'Hash' in engine.get().options:
                             engine.option("Hash", args.hash_size)
@@ -431,13 +430,11 @@ def main():
                         engine.send()
                         # Notify other display processes    
                         Display.show(Message.UCI_OPTION_LIST, options=engine.get().options)
-                        Display.show(Message.ENGINE_READY, eng=event.eng)
+                        Display.show(Message.ENGINE_READY, ename=engine_name, eng=event.eng)
                         #Send user selected engine level to new engine
                         if engine_level and engine.level(engine_level):
-                            logging.debug("Setting engine to level %i", engine_level)
                             engine.send()
                             Display.show(Message.LEVEL, level=engine_level)
-
                     break
 
                 if case(Event.SETUP_POSITION):  # User sets up a position
