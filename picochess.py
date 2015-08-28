@@ -154,8 +154,14 @@ def main():
 
 
     def display_system_info():
-        Display.show(Message.SYSTEM_INFO, info={"version": version, "location": get_location(),
-                                                "books": get_opening_books(), "ip": get_ip(),
+        if network_enabled:
+            place = get_location()
+            addr = get_ip()
+        else:
+            place = "?"
+            addr = "?"
+        Display.show(Message.SYSTEM_INFO, info={"version": version, "location": place,
+                                                "books": get_opening_books(), "ip": addr,
                                                 "engine_name": engine_name, "user_name": user_name
                                                 })
 
