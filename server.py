@@ -31,6 +31,7 @@ import datetime
 
 _workers = ThreadPool(5)
 
+
 class ChannelHandler(tornado.web.RequestHandler):
     def initialize(self, shared=None):
         self.shared = shared
@@ -63,10 +64,11 @@ class ChannelHandler(tornado.web.RequestHandler):
 
             # print("pgn: {0}".format(pgn))
 
-            r = {'type': 'broadcast', 'msg': 'Received position from Spectators!', 'pgn': str(exporter), 'fen':fen}
+            r = {'type': 'broadcast', 'msg': 'Received position from Spectators!', 'pgn': str(exporter), 'fen': fen}
             EventHandler.write_to_clients(r)
 
-        # if action == 'pause_cloud_engine':
+            # if action == 'pause_cloud_engine':
+
 
 class EventHandler(WebSocketHandler):
     clients = set()
@@ -85,6 +87,7 @@ class EventHandler(WebSocketHandler):
         # print("Writing to clients")
         for client in cls.clients:
             client.write_message(msg)
+
 
 class DGTHandler(tornado.web.RequestHandler):
     def initialize(self, shared=None):
@@ -135,7 +138,6 @@ class WebServer(Observable, threading.Thread):
             (r'/pgn', PGNHandler, dict(shared=shared)),
             (r'/info', InfoHandler, dict(shared=shared)),
 
-
             (r'/channel', ChannelHandler, dict(shared=shared)),
             (r'.*', tornado.web.FallbackHandler, {'fallback': wsgi_app})
         ])
@@ -152,7 +154,7 @@ class WebDisplay(Display, threading.Thread):
         self.shared = shared
 
     @staticmethod
-    def run_background(func, callback, args=(), kwds = None):
+    def run_background(func, callback, args=(), kwds=None):
         if not kwds:
             kwds = {}
 
@@ -182,18 +184,20 @@ class WebDisplay(Display, threading.Thread):
             if "play_mode" in self.shared["game_info"]:
                 if "level" in self.shared["game_info"]:
                     engine_name += " (Level {0})".format(self.shared["game_info"]["level"])
-                game.headers["Black"] = engine_name if self.shared["game_info"]["play_mode"] == PlayMode.PLAY_WHITE else user_name
-                game.headers["White"] = engine_name if self.shared["game_info"]["play_mode"] == PlayMode.PLAY_BLACK else user_name
+                game.headers["Black"] = engine_name if self.shared["game_info"][
+                                                           "play_mode"] == PlayMode.PLAY_WHITE else user_name
+                game.headers["White"] = engine_name if self.shared["game_info"][
+                                                           "play_mode"] == PlayMode.PLAY_BLACK else user_name
 
                 comp_color = "Black" if self.shared["game_info"]["play_mode"] == PlayMode.PLAY_WHITE else "White"
                 user_color = "Black" if self.shared["game_info"]["play_mode"] == PlayMode.PLAY_BLACK else "White"
-                game.headers[comp_color+"Elo"] = "2900"
-                game.headers[user_color+"Elo"] = "-"
+                game.headers[comp_color + "Elo"] = "2900"
+                game.headers[user_color + "Elo"] = "-"
 
-            # http://www6.chessclub.com/help/PGN-spec saying: not valid!
-            # must be set in TimeControl-tag and with other format anyway
-            # if "time_control_string" in self.shared["game_info"]:
-            #    game.headers["Event"] = "Time " + self.shared["game_info"]["time_control_string"]
+                # http://www6.chessclub.com/help/PGN-spec saying: not valid!
+                # must be set in TimeControl-tag and with other format anyway
+                # if "time_control_string" in self.shared["game_info"]:
+                #    game.headers["Event"] = "Time " + self.shared["game_info"]["time_control_string"]
 
     # @staticmethod
     def create_game_info(self):
@@ -265,7 +269,7 @@ class WebDisplay(Display, threading.Thread):
                 r['msg'] = 'User move: ' + str(message.move)
 
             if message == Message.REMOTE_MODE_MOVE:
-                r['move'] = 'User move: ' +  str(message.move)
+                r['move'] = 'User move: ' + str(message.move)
                 r['remote_play'] = True
 
             self.shared['last_dgt_move_msg'] = r

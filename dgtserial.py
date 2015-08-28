@@ -18,7 +18,6 @@ import logging
 import queue
 import serial as pyserial
 import chess
-# import time
 
 from timecontrol import *
 from struct import unpack
@@ -28,10 +27,6 @@ try:
     import enum
 except ImportError:  # Python 3.3 support
     import enum34 as enum
-try:
-    import asyncio
-except ImportError:  # Python 3.3 support
-    import asyncio34 as asyncio
 
 
 char_to_DGTXL = {

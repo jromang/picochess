@@ -18,6 +18,7 @@
 
 import sys
 import os
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "libs"))
 import configargparse
 import chess
@@ -288,9 +289,9 @@ def main():
             while game_history.move_stack:
                 game_history.pop()
                 if (play_mode == PlayMode.PLAY_WHITE and game_history.turn == chess.WHITE) \
-                    or (play_mode == PlayMode.PLAY_BLACK and game_history.turn == chess.BLACK) \
-                    or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.KIBITZ) \
-                    or (interaction_mode == Mode.REMOTE) or (interaction_mode == Mode.ANALYSIS):
+                        or (play_mode == PlayMode.PLAY_BLACK and game_history.turn == chess.BLACK) \
+                        or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.KIBITZ) \
+                        or (interaction_mode == Mode.REMOTE) or (interaction_mode == Mode.ANALYSIS):
                     if game_history.fen().split(' ')[0] == fen:
                         logging.debug("Legal Fens root       : " + str(legal_fens.root))
                         logging.debug("Current game FEN      : " + str(game.fen()))
@@ -322,7 +323,8 @@ def main():
             stop_clock()
             if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.WHITE) or (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.BLACK):
                 last_computer_move = game.fen().split(' ')[0]
-                Display.show(Message.COMPUTER_MOVE, result=result, fen=fen, game=copy.deepcopy(game), time_control=time_control)
+                Display.show(Message.COMPUTER_MOVE, result=result, fen=fen, game=copy.deepcopy(game),
+                             time_control=time_control)
             else:
                 Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
                 if check_game_state(game, play_mode):
@@ -451,7 +453,7 @@ def main():
                 if case(Event.SETUP_POSITION):  # User sets up a position
                     logging.debug("Setting up custom fen: {0}".format(event.fen))
                     if game.move_stack:
-                        if (not game.is_game_over()) and (not game_declared):
+                        if game.is_game_over() or game_declared:
                             custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
                             Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack),
                                          color=game.turn, play_mode=play_mode, custom_fen=custom_fen)
@@ -504,9 +506,9 @@ def main():
 
                 if case(Event.DRAWRESIGN):
                     result = event.result
-                    if not game_declared:  # in case user leaves kinga in place while moving other pieces
-                        Display.show(Message.GAME_ENDS, result=result, moves=list(game.move_stack),
-                            color=game.turn, play_mode=play_mode, custom_fen=None)
+                    if not game_declared:  # in case user leaves kings in place while moving other pieces
+                        Display.show(Message.GAME_ENDS, result=result, moves=list(game.move_stack), color=game.turn,
+                                     play_mode=play_mode, custom_fen=None)
                         game_declared = True
                     break
 

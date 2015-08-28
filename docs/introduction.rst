@@ -1,12 +1,12 @@
 Introduction
 ============
 
-.. image :: http://91.68.209.10/bmi/img24.imageshack.us/img24/6651/imgp0232r.png
+.. image :: https://lh5.googleusercontent.com/-uw57fAjEjDs/UHTKNhEuIVI/AAAAAAAAABQ/WT_rY9-uNss/
 
 Presentation
 ------------
 
-The goal the this project is to create a dedicated chess computer based on tiny ARM computers with the `DGT eboard <http://www.dgtprojects.com/site/products/electronic-boards>`_ and `DGT XL Clock <http://www.dgtprojects.com/site/products/clocks/174-dgt-xl-red-beige>`_.
+The goal the this project is to create a dedicated chess computer based on tiny ARM computers with the `DGT eboard <http://www.digitalgametechnology.com/index.php/products/electronic-boards>`_ and `DGT XL Clock <http://www.digitalgametechnology.com/index.php/products/clocks1/174-dgt-xl-red-beige>`_ or `DGT 3000 Clock <http://www.digitalgametechnology.com/index.php/products/clocks1/418-dgt3000>`_
 
 
 Features
