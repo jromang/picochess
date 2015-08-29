@@ -168,6 +168,8 @@ Clock buttons (in Book menu)
 * Third button chooses the current selected book
 * Fourth button goes up in the book list
 It is possible to select any additional books you may have installed from the clock buttons, but the selection from the board is fixed.
+Books must be in the Polyglot (.bin) format and must be named <letter><"-"><book name>, eg "a-nobook.bin" or "m-benoni.bin". Books appear in alphabetical order in the menu. 
+Books "a" to "j" are used for setting from the board and contain the existing system books; they can be changed to make others available from the board.
 
 System shutdown
 ---------------
