@@ -29,6 +29,7 @@ import uci
 
 import threading
 import copy
+import gc
 from timecontrol import TimeControl
 from utilities import *
 from keyboardinput import KeyboardInput, TerminalDisplay
@@ -41,6 +42,9 @@ from dgtvirtual import DGTVirtual
 
 
 def main():
+  
+    # Enable garbage collection - needed for engine swapping as objects orphaned
+    gc.enable()
 
     # Command line argument parsing
     parser = configargparse.ArgParser(default_config_files=[os.path.join(os.path.dirname(__file__), "picochess.ini")])
@@ -130,7 +134,7 @@ def main():
         logging.debug("ChessTalker disabled")
 
     # Launch web server
-    if args.web_server_port and network_enabled:
+    if args.web_server_port:
         WebServer(args.web_server_port).start()
 
 
@@ -359,8 +363,8 @@ def main():
     Display.show(Message.UCI_OPTION_LIST, options=engine.get().options)
     Display.show(Message.STARTUP_INFO, info={"interaction_mode": interaction_mode, "play_mode": play_mode,
                                              "book": book, "time_control_string": "mov 5"})
-
     Display.show(Message.ENGINE_READY, eng=(args.engine, args.engine))
+
     # Event loop
     while True:
         try:
@@ -425,10 +429,12 @@ def main():
                     if engine_shutdown:
                         # Load the new one and send args.
                         # Local engines only
-#                        engine = uci.Engine(event.eng[0], hostname=None, username=None, key_file=None, password=None)
-                        engine.popen_engine(event.eng[0])
-                        engine.uci()
+                        engine = uci.Engine(event.eng[0], hostname=None, username=None, key_file=None, password=None)
                         engine_name = engine.get().name
+                        # Schedule cleanup of old objects
+                        cleanup_thread = threading.Timer(10, gc.collect()) # wait 10 seconds for engine to load and play to resume
+                        cleanup_thread.start()
+                        # Restore options - this doesn't deal with any supplementary uci options sent 'in game', see event.UCI_OPTION_SET
                         if 'Hash' in engine.get().options:
                             engine.option("Hash", args.hash_size)
                         if 'Threads' in engine.get().options:  # Stockfish
@@ -443,11 +449,20 @@ def main():
                         engine.send()
                         # Notify other display processes    
                         Display.show(Message.UCI_OPTION_LIST, options=engine.get().options)
-                        Display.show(Message.ENGINE_READY, ename=engine_name, eng=event.eng)
                         #Send user selected engine level to new engine
                         if engine_level and engine.level(engine_level):
                             engine.send()
                             Display.show(Message.LEVEL, level=engine_level)
+                        # Go back to analysing or observing
+                        if interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
+                            analyse(copy.deepcopy(game))
+                        if interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
+                            observe(copy.deepcopy(game), time_control)
+                        # All done - rock'n'roll
+                        Display.show(Message.ENGINE_READY, ename=engine_name, eng=event.eng)
+                    else:
+                        logging.debug('Serious: Engine shutdown failure')
+                        Display.show(Message.ENGINE_READY, eng=('fail', 'fail'))
                     break
 
                 if case(Event.SETUP_POSITION):  # User sets up a position
@@ -572,6 +587,7 @@ def main():
                     break
 
                 if case(Event.UCI_OPTION_SET):
+                    # Nowhere calls this yet, but they will need to be saved for engine restart
                     engine.option(event.name, event.value)
                     break
 

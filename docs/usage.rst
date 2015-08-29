@@ -157,6 +157,8 @@ Clock buttons (in Engine menu)
 * Second button goes down in the engines list
 * Third button chooses the current selected engine
 * Fourth button goes up in the engines list
+It should be noted that not all engines work at the same speed. If you switch engines whilst in 'Analyze' or 'Kibitz' training modes
+and (after the 'Ok' message) picoChess seems sluggish or not updating, probably a slow engine has been selected.
 
 Clock buttons (in Book menu)
 ----------------------------

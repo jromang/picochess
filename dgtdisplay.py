@@ -405,7 +405,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                                 self.engine_menu_index = self.engine_index
                                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='Ok', xl='Ok', beep=BeepLevel.CONFIG)
                             else:
-                                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='Error', xl='Error', beep=BeepLevel.CONFIG)
+                                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='Error', xl='Err', beep=BeepLevel.CONFIG)
                         else: # for initial startup, message has a different format from our local book
                             for index in range(0, self.n_engines):
                                 full_path, short = self.installed_engines[index]
