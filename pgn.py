@@ -29,13 +29,14 @@ from email.mime.text import MIMEText
 
 
 class PgnDisplay(Display, threading.Thread):
-    def __init__(self, pgn_file_name, email=None, fromINIMailGun_Key=None,
-                 fromIniSmtp_Server=None, fromINISmtp_User=None,
-                 fromINISmtp_Pass=None, fromINISmtp_Enc=False):
+    def __init__(self, pgn_file_name, net, email=None, fromINIMailGun_Key=None,
+                    fromIniSmtp_Server=None, fromINISmtp_User=None,
+                    fromINISmtp_Pass=None, fromINISmtp_Enc=False):
         super(PgnDisplay, self).__init__()
         self.file_name = pgn_file_name
         self.engine_name = ''
         self.user_name = ''
+        self.network_enabled = (net == 'True')
         self.level = None
         if email:  # check if email address is provided by picochess.ini
             self.email = email
@@ -62,6 +63,13 @@ class PgnDisplay(Display, threading.Thread):
                     self.user_name = message.info['user_name']
                 if message == Message.LEVEL:
                     self.level = message.level
+                if message == Message.ENGINE_READY:
+                    if message.eng[0] != message.eng[1]:   # Ignore startup
+                        self.engine_name = message.ename
+                    elif self.network_enabled:          # Just do this once at startup not after every game! Do while user messing around
+                        self.location = get_location()  # with first game / setting options etc
+                    else:
+                        self.location = '?'
                 if message == Message.GAME_ENDS and message.moves:
                     logging.debug('Saving game to [' + self.file_name + ']')
                     game = chess.pgn.Game()
@@ -73,7 +81,7 @@ class PgnDisplay(Display, threading.Thread):
                         node = node.add_main_variation(move)
                     # Headers
                     game.headers["Event"] = "PicoChess game"
-                    game.headers["Site"] = get_location()
+                    game.headers["Site"] = self.location
                     game.headers["Date"] = datetime.date.today().strftime('%Y.%m.%d')
                     game.headers["Round"] = "?"
                     if message.result == GameResult.ABORT:
@@ -106,10 +114,11 @@ class PgnDisplay(Display, threading.Thread):
                     file = open(self.file_name, "a")
                     exporter = chess.pgn.FileExporter(file)
                     game.export(exporter)
+                    file.flush()
                     file.close()
                     # section send email
-                    if self.email:  # check if email adress to send the game to is provided
-                        if self.smtp_server:  # check if smtp server adress provided
+                    if self.email and self.network_enabled: # check if email adress to send the game to is provided
+                        if self.smtp_server: # check if smtp server adress provided
                             # if self.smtp_server is not provided than don't try to send email via smtp service
                             logging.debug("SMTP Mail delivery: Started")
                             # change to smtp based mail delivery
