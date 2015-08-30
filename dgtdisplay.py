@@ -564,6 +564,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         if fen in level_map:  # User sets level
                             level = level_map.index(fen)
                             self.engine_level = level
+                            self.engine_level_menu = level
                             logging.debug("Map-Fen: New level")
                             self.fire(Event.LEVEL, level=level)
                         elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":  # New game
