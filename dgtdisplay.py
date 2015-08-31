@@ -298,6 +298,10 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             else:
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="bad pos", xl="badpos", beep=BeepLevel.YES)
 
+        if self.dgt_clock_menu == Menu.SETTINGS_MENU:
+            self.fire(Event.SHUTDOWN)
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="poweroff", xl="powoff", beep=BeepLevel.CONFIG)
+
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
             # This is a handshake change so index values changed and sync'd in the response below
             self.fire(Event.NEW_ENGINE, eng=self.installed_engines[self.engine_menu_index])
@@ -560,6 +564,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         if fen in level_map:  # User sets level
                             level = level_map.index(fen)
                             self.engine_level = level
+                            self.engine_level_menu = level
                             logging.debug("Map-Fen: New level")
                             self.fire(Event.LEVEL, level=level)
                         elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":  # New game

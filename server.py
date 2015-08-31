@@ -172,9 +172,12 @@ class WebDisplay(Display, threading.Thread):
         game.headers["Round"] = "?"
 
         if 'system_info' in self.shared:
-            game.headers["Site"] = self.shared['system_info']['location']
-            user_name = self.shared['system_info']['user_name']
-            engine_name = self.shared['system_info']['engine_name']
+            if "location" in self.shared['system_info']:
+                game.headers["Site"] = self.shared['system_info']['location']
+            if "user_name" in self.shared['system_info']:
+                user_name = self.shared['system_info']['user_name']
+            if "engine_name" in self.shared['system_info']:
+                engine_name = self.shared['system_info']['engine_name']
         else:
             game.headers["Site"] = "picochess.org"
             user_name = "User"
@@ -242,6 +245,10 @@ class WebDisplay(Display, threading.Thread):
         elif message == Message.LEVEL:
             self.create_game_info()
             self.shared['game_info']['level'] = message.level
+
+        elif message == Message.ENGINE_READY:
+            if message.eng[0] != message.eng[1]:   # Ignore initial startup
+                self.shared['system_info']['engine_name'] = message.ename
 
         elif message == Message.COMPUTER_MOVE or message == Message.USER_MOVE or message == Message.REVIEW_MODE_MOVE:
             game = pgn.Game()
