@@ -191,7 +191,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 level = str(self.engine_level)
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.CONFIG)
             else:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="No Levels", xl="No ", beep=BeepLevel.CONFIG)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="No Levels", xl="No Lvl", beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
             # Display current engine
@@ -241,14 +241,14 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 level = str(self.engine_level_menu)
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.CONFIG)
             else:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="No Levels", xl="No ", beep=BeepLevel.CONFIG)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="No Level", xl="No Lvl", beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
-            self.engine_menu_index = ((self.engine_menu_index-1)%self.n_engines)
+            self.engine_menu_index = ((self.engine_menu_index-1) % self.n_engines)
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=(self.installed_engines[self.engine_menu_index])[1], xl=None, beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.BOOK_MENU:
-            self.book_menu_index = ((self.book_menu_index-1)%self.n_books)
+            self.book_menu_index = ((self.book_menu_index-1) % self.n_books)
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=(self.all_books[self.book_menu_index])[0], xl=None, beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.TIME_MENU:
@@ -320,15 +320,15 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         if self.dgt_clock_menu == Menu.BOOK_MENU:
             if self.book_index != self.book_menu_index:
                 self.fire(Event.OPENING_BOOK, book=self.all_books[self.book_index])
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='Ok', xl='Ok', beep=BeepLevel.CONFIG)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='Ok', xl=None, beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.LEVEL_MENU:
             if self.engine_has_levels:
                 if self.engine_level != self.engine_level_menu:
                     self.fire(Event.LEVEL, level=self.engine_level_menu)
-                    HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="Ok", xl="Ok", beep=BeepLevel.CONFIG)
+                    HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="Ok", xl=None, beep=BeepLevel.CONFIG)
             else:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="No Levels", xl="No ", beep=BeepLevel.CONFIG)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="No Level", xl="No Lvl", beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.TIME_MENU: 
             if self.time_control_index != self.time_control_menu_index:
@@ -355,7 +355,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 level = str(self.engine_level_menu)
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.CONFIG)
             else:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="No Levels", xl="No ", beep=BeepLevel.CONFIG)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="No Level", xl="No Lvl", beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
             self.engine_menu_index = ((self.engine_menu_index+1)%self.n_engines)
@@ -422,9 +422,9 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                                 self.engine_index = self.installed_engines.index(message.eng)
                                 self.engine_menu_index = self.engine_index
                                 self.engine_has_levels = message.has_levels
-                                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='Ok', xl='Ok', beep=BeepLevel.CONFIG)
+                                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='Ok', xl=None, beep=BeepLevel.CONFIG)
                             else:
-                                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='Error', xl='Err', beep=BeepLevel.CONFIG)
+                                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='Error', xl=None, beep=BeepLevel.CONFIG)
                         else:  # for initial startup, message has a different format from our local book
                             for index in range(0, self.n_engines):
                                 full_path, short = self.installed_engines[index]
