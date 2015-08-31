@@ -130,26 +130,26 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         self.mode_index = 0
         self.mode = Mode.GAME
 
-        self.engine_level = 20 # Default level is 20
+        self.engine_level = 20  # Default level is 20
         self.engine_level_menu = self.engine_level
-        self.n_levels = 21     # Default engine (Stockfish) has 21 playing levels
+        self.n_levels = 21  # Default engine (Stockfish) has 21 playing levels
         self.engine_restart = False
-        self.engine_index = 2       # Dummy values .. set later
+        self.engine_index = 2  # Dummy values .. set later
         self.engine_menu_index = 2
         self.installed_engines = get_installed_engines()
         self.n_engines = len(self.installed_engines)
 
-        self.book_index = 8    # Default book is 8 - book 'g'
-        self.book_menu_index = 8 # Sync with above
+        self.book_index = 8  # Default book is 8 - book 'g'
+        self.book_menu_index = 8  # Sync with above
         self.all_books = get_opening_books()
         self.n_books = len(self.all_books)
 
         self.time_control_mode = ClockMode.BLITZ
         self.time_control_fen_map = None
         self.build_time_control_fens()
-        self.time_control_index = 10       #index for selecting new time control
-        self.time_control_menu_index = 2   #index for selecting new time control
-        self.time_control_fen = list(time_control_map.keys())[self.time_control_index]  #Default time control: Blitz, 5min
+        self.time_control_index = 10  # index for selecting new time control
+        self.time_control_menu_index = 2  # index for selecting new time control
+        self.time_control_fen = list(time_control_map.keys())[self.time_control_index]  # Default time control: Blitz, 5min
 
         self.drawresign_fen = None
 
@@ -410,7 +410,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='Ok', xl='Ok', beep=BeepLevel.CONFIG)
                             else:
                                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='Error', xl='Err', beep=BeepLevel.CONFIG)
-                        else: # for initial startup, message has a different format from our local book
+                        else:  # for initial startup, message has a different format from our local book
                             for index in range(0, self.n_engines):
                                 full_path, short = self.installed_engines[index]
                                 if full_path == message.eng[0]:

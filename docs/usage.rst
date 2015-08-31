@@ -135,7 +135,7 @@ First setup your position.
 * Fouth button has no function
 
 Clock buttons (in Level menu)
-------------------------------
+-----------------------------
 
 * First button shows the current selected skill level
 * Second button goes down in skill level
@@ -157,6 +157,7 @@ Clock buttons (in Engine menu)
 * Second button goes down in the engines list
 * Third button chooses the current selected engine
 * Fourth button goes up in the engines list
+
 It should be noted that not all engines work at the same speed. If you switch engines whilst in 'Analyze' or 'Kibitz' training modes
 and (after the 'Ok' message) picoChess seems sluggish or not updating, probably a slow engine has been selected.
 
@@ -167,6 +168,7 @@ Clock buttons (in Book menu)
 * Second button goes down in the books list
 * Third button chooses the current selected book
 * Fourth button goes up in the book list
+
 It is possible to select any additional books you may have installed from the clock buttons, but the selection from the board is fixed.
 Books must be in the Polyglot (.bin) format and must be named <letter><"-"><book name>, eg "a-nobook.bin" or "m-benoni.bin". Books appear in alphabetical order in the menu. 
 Books "a" to "j" are used for setting from the board and contain the existing system books; they can be changed to make others available from the board.

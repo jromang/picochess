@@ -137,8 +137,7 @@ def main():
     if args.web_server_port:
         WebServer(args.web_server_port).start()
 
-
-    # Gentlmen, start your engines...
+    # Gentlemen, start your engines...
     engine = uci.Engine(args.engine, hostname=args.remote, username=args.user,
                         key_file=args.server_key, password=args.password)
     engine_name = engine.get().name
@@ -156,7 +155,6 @@ def main():
             engine.option(uci_parameter[0], uci_parameter[1])
     # send the options to the engine
     engine.send()
-
 
     def display_system_info():
         if network_enabled:
