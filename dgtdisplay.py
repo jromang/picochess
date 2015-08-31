@@ -133,6 +133,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         self.engine_level = 20  # Default level is 20
         self.engine_level_menu = self.engine_level
         self.n_levels = 21  # Default engine (Stockfish) has 21 playing levels
+        self.engine_has_levels = False # Not all engines support levels - assume not
         self.engine_restart = False
         self.engine_index = 2  # Dummy values .. set later
         self.engine_menu_index = 2
@@ -185,9 +186,12 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=to_move.value, xl=None, beep=BeepLevel.YES)
 
         if self.dgt_clock_menu == Menu.LEVEL_MENU:
-            # Display current level
-            level = str(self.engine_level)
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.CONFIG)
+            if self.engine_has_levels:
+                # Display current level
+                level = str(self.engine_level)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.CONFIG)
+            else:
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="No Levels", xl="No ", beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
             # Display current engine
@@ -232,9 +236,12 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=orientation, xl=orientation_xl, beep=BeepLevel.YES)
 
         if self.dgt_clock_menu == Menu.LEVEL_MENU:
-            self.engine_level_menu = ((self.engine_level_menu-1)%self.n_levels)
-            level = str(self.engine_level_menu)
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.CONFIG)
+            if self.engine_has_levels:
+                self.engine_level_menu = ((self.engine_level_menu-1)%self.n_levels)
+                level = str(self.engine_level_menu)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.CONFIG)
+            else:
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="No Levels", xl="No ", beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
             self.engine_menu_index = ((self.engine_menu_index-1)%self.n_engines)
@@ -298,32 +305,36 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             else:
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="bad pos", xl="badpos", beep=BeepLevel.YES)
 
-        if self.dgt_clock_menu == Menu.SETTINGS_MENU:
-            self.fire(Event.SHUTDOWN)
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="poweroff", xl="powoff", beep=BeepLevel.CONFIG)
+#        if self.dgt_clock_menu == Menu.SETTINGS_MENU:
+#            self.fire(Event.SHUTDOWN)
+#            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="poweroff", xl="powoff", beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
+            # Reset level selections
+            self.engine_level_menu = self.engine_level
+            self.engine_has_levels = False
             # This is a handshake change so index values changed and sync'd in the response below
             self.fire(Event.NEW_ENGINE, eng=self.installed_engines[self.engine_menu_index])
             self.engine_restart = True
 
         if self.dgt_clock_menu == Menu.BOOK_MENU:
             if self.book_index != self.book_menu_index:
-                self.book_index = self.book_menu_index
                 self.fire(Event.OPENING_BOOK, book=self.all_books[self.book_index])
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='Ok', xl='Ok', beep=BeepLevel.CONFIG)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='Ok', xl='Ok', beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.LEVEL_MENU:
-            if self.engine_level != self.engine_level_menu:
-                self.engine_level = self.engine_level_menu
-                self.fire(Event.LEVEL, level=self.engine_level)
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="Ok", xl="Ok", beep=BeepLevel.CONFIG)
+            if self.engine_has_levels:
+                if self.engine_level != self.engine_level_menu:
+                    self.fire(Event.LEVEL, level=self.engine_level_menu)
+                    HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="Ok", xl="Ok", beep=BeepLevel.CONFIG)
+            else:
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="No Levels", xl="No ", beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.TIME_MENU: 
             if self.time_control_index != self.time_control_menu_index:
                 self.time_control_index = self.time_control_menu_index
                 self.time_control_fen = self.time_control_fen_map[self.time_control_index]
-            self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[self.time_control_fen], time_control_string='Ok')
+                self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[self.time_control_fen], time_control_string='Ok')
 
     def process_button3(self):
         if self.dgt_clock_menu == Menu.GAME_MENU:
@@ -339,9 +350,12 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             subprocess.Popen(["sudo", "reboot"])
 
         if self.dgt_clock_menu == Menu.LEVEL_MENU:
-            self.engine_level_menu = ((self.engine_level_menu+1)%self.n_levels)
-            level = str(self.engine_level_menu)
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.CONFIG)
+            if self.engine_has_levels:
+                self.engine_level_menu = ((self.engine_level_menu+1)%self.n_levels)
+                level = str(self.engine_level_menu)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.CONFIG)
+            else:
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="No Levels", xl="No ", beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
             self.engine_menu_index = ((self.engine_menu_index+1)%self.n_engines)
@@ -407,6 +421,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                             if not (message.eng[0] == 'fail'):
                                 self.engine_index = self.installed_engines.index(message.eng)
                                 self.engine_menu_index = self.engine_index
+                                self.engine_has_levels = message.has_levels
                                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='Ok', xl='Ok', beep=BeepLevel.CONFIG)
                             else:
                                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='Error', xl='Err', beep=BeepLevel.CONFIG)
@@ -416,6 +431,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                                 if full_path == message.eng[0]:
                                     self.engine_index = index
                                     self.engine_menu_index = self.engine_index
+                                    self.engine_has_levels = message.has_levels
                         self.engine_restart = False
                         break
                     if case(Message.COMPUTER_MOVE):
@@ -456,7 +472,12 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         break
                     if case(Message.LEVEL):
                         level = str(message.level)
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level,
+                        if self.engine_restart:
+                            pass
+                        elif self.engine_level != self.engine_level_menu:
+                            self.engine_level = self.engine_level_menu
+                        else:
+                            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level,
                                              beep=BeepLevel.CONFIG)
                         break
                     if case(Message.TIME_CONTROL):
@@ -465,7 +486,10 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         break
                     if case(Message.OPENING_BOOK):
                         book_name = message.book[0]
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=book_name, xl=None, beep=BeepLevel.CONFIG)
+                        if self.book_index != self.book_menu_index:
+                            self.book_index = self.book_menu_index
+                        else:
+                            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=book_name, xl=None, beep=BeepLevel.CONFIG)
                         break
                     if case(Message.USER_TAKE_BACK):
                         self.reset_hint_and_score()
@@ -531,16 +555,17 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         break
                     if case(Message.DGT_BUTTON):
                         button = int(message.button)
-                        if button == 0:
-                            self.process_button0()
-                        elif button == 1:
-                            self.process_button1()
-                        elif button == 2:
-                            self.process_button2()
-                        elif button == 3:
-                            self.process_button3()
-                        elif button == 4:
-                            self.process_button4()
+                        if not self.engine_restart:
+                            if button == 0:
+                                self.process_button0()
+                            elif button == 1:
+                                self.process_button1()
+                            elif button == 2:
+                                self.process_button2()
+                            elif button == 3:
+                                self.process_button3()
+                            elif button == 4:
+                                self.process_button4()
                         break
                     if case(Message.DGT_FEN):
                         fen = message.fen
