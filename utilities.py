@@ -166,6 +166,10 @@ class GameMenu(AutoNumber):
     CHANGE_MODE = ()  # Change Modes
     SWITCH_MENU = ()  # Switch Menu
 
+class PowerMenu(AutoNumber):
+    CONFIRM_NONE = ()  # Nothing to confirm from power menu
+    CONFIRM_PWR = ()  # Confirm the PowerOff request
+    CONFIRM_RBT = ()  # Confirm the Reboot request
 
 @enum.unique
 class Mode(enum.Enum):
