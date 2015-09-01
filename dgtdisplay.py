@@ -129,6 +129,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         self.reset_hint_and_score()
         self.mode_index = 0
         self.mode = Mode.GAME
+        self.awaiting_confirm = PowerMenu.CONFIRM_NONE
 
         self.engine_level = 20  # Default level is 20
         self.engine_level_menu = self.engine_level
@@ -153,6 +154,17 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         self.time_control_fen = list(time_control_map.keys())[self.time_control_index]  # Default time control: Blitz, 5min
 
         self.drawresign_fen = None
+
+    def power_off(self):
+        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="Good Bye", xl="Bye!", beep=BeepLevel.CONFIG)
+        self.engine_restart = True
+        self.fire(Event.SHUTDOWN)
+
+    def reboot(self):
+        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="Pls Wait", xl="Wait!", beep=BeepLevel.CONFIG)
+        self.engine_restart = True
+        reboot_thread = threading.Timer(3, subprocess.Popen(["sudo", "reboot"]))
+        reboot_thread.start()
 
     def build_time_control_fens(self):
             # Build the fen map for menu selection - faster to process than full map
@@ -305,9 +317,9 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             else:
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="bad pos", xl="badpos", beep=BeepLevel.YES)
 
-#        if self.dgt_clock_menu == Menu.SETTINGS_MENU:
-#            self.fire(Event.SHUTDOWN)
-#            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="poweroff", xl="powoff", beep=BeepLevel.CONFIG)
+        if self.dgt_clock_menu == Menu.SETTINGS_MENU:
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="pwroff ?", xl="off ?", beep=BeepLevel.CONFIG)
+            self.awaiting_confirm = PowerMenu.CONFIRM_PWR
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
             # Reset level selections
@@ -346,8 +358,8 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             self.fire(Event.SET_MODE, mode=mode_new)
 
         if self.dgt_clock_menu == Menu.SETTINGS_MENU:
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="reboot", xl=None, beep=BeepLevel.YES)
-            subprocess.Popen(["sudo", "reboot"])
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="reboot ?", xl="boot ?", beep=BeepLevel.CONFIG)
+            self.awaiting_confirm = PowerMenu.CONFIRM_RBT
 
         if self.dgt_clock_menu == Menu.LEVEL_MENU:
             if self.engine_has_levels:
@@ -555,7 +567,14 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         break
                     if case(Message.DGT_BUTTON):
                         button = int(message.button)
-                        if not self.engine_restart:
+                        if not (self.awaiting_confirm == PowerMenu.CONFIRM_NONE):
+                            if (self.awaiting_confirm == PowerMenu.CONFIRM_PWR) and (button == 2):
+                                self.power_off()
+                            if (self.awaiting_confirm == PowerMenu.CONFIRM_RBT) and (button == 3):
+                                self.reboot()
+                            else: # Abort!
+                                self.awaiting_confirm = PowerMenu.CONFIRM_NONE   
+                        if not self.engine_restart and (self.awaiting_confirm == PowerMenu.CONFIRM_NONE):
                             if button == 0:
                                 self.process_button0()
                             elif button == 1:
@@ -611,8 +630,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                             self.time_control_fen = fen
                         elif fen in shutdown_map:
                             logging.debug("Map-Fen: shutdown")
-                            self.fire(Event.SHUTDOWN)
-                            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="poweroff", xl="powoff", beep=BeepLevel.CONFIG)
+                            self.power_off()
                         elif self.drawresign_fen in drawresign_map:
                             self.fire(Event.DRAWRESIGN, result=drawresign_map[self.drawresign_fen])
                         else:
