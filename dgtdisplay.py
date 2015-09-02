@@ -145,6 +145,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         self.book_menu_index = 8  # Sync with above
         self.all_books = get_opening_books()
         self.n_books = len(self.all_books)
+        self.book_from_fen = False
 
         self.time_control_mode = ClockMode.BLITZ
         self.time_control_fen_map = None
@@ -331,8 +332,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
 
         if self.dgt_clock_menu == Menu.BOOK_MENU:
             if self.book_index != self.book_menu_index:
-                self.fire(Event.OPENING_BOOK, book=self.all_books[self.book_index])
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok book", xl="okbook", beep=BeepLevel.CONFIG)
+                self.fire(Event.OPENING_BOOK, book=self.all_books[self.book_menu_index])
 
         if self.dgt_clock_menu == Menu.LEVEL_MENU:
             if self.engine_has_levels:
@@ -498,10 +498,13 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         break
                     if case(Message.OPENING_BOOK):
                         book_name = message.book[0]
+                        if self.book_from_fen:
+                            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=book_name, xl=None, beep=BeepLevel.CONFIG)
+                            self.book_from_fen = False
+                            self.book_menu_index = self.book_index # Not necessary but cleaner
                         if self.book_index != self.book_menu_index:
                             self.book_index = self.book_menu_index
-                        else:
-                            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=book_name, xl=None, beep=BeepLevel.CONFIG)
+                            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok book", xl="okbook", beep=BeepLevel.CONFIG)
                         break
                     if case(Message.USER_TAKE_BACK):
                         self.reset_hint_and_score()
@@ -618,6 +621,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                             self.book_index = book_map.index(fen)
                             logging.debug("Map-Fen: Opening book [%s]", get_opening_books()[self.book_index])
                             self.fire(Event.OPENING_BOOK, book=get_opening_books()[self.book_index])
+                            self.book_from_fen = True
                         elif fen in mode_map:  # Set interaction mode
                             logging.debug("Map-Fen: Interaction mode [%s]", mode_map[fen])
                             self.fire(Event.SET_MODE, mode=mode_map[fen])
