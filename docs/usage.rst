@@ -4,7 +4,8 @@ Usage
 Setup the starting position
 ---------------------------
 Place the pieces in starting position. It doesn't matter if you have the white or black pieces in front of you. Both ways will work. Keep in mind that with black pieces in front of you the (printed) coordinates of your dgt-board also reversed.
-You can now start a game by moving a piece or press the middle button to let picochess start. Also you can change the default settings of 5mins blitz against stockfish in strongest level by placing the white&black extra queen on the appropriate square or use the clock buttons (for detailed infomation see below).
+You can now start a game by moving a piece or press the middle button to let picochess start.
+Also you can change the default settings of 5mins blitz against stockfish in strongest level by placing the white&black extra queen on the appropriate square or use the clock buttons (for detailed infomation see below).
 Please keep in mind that placing the extra queens only working if you are in the starting position whereas the clock buttons always working regardless the chess position.
 
 Playing/Training Modes
@@ -185,8 +186,8 @@ Clock Buttons (in System menu)
 
 * First button has no function
 * Second button has no function
-* Third button shutdown the machine. You have to press twice to actiate this shutdown (for your safety). Pressing another button cancels it
-* Fourth button reboots the machine. You have to press twice to actiate this reboot (for your safety). Pressing another button cancels it
+* Third button shutdown the machine. You have to press twice to activate this shutdown (for your safety). Pressing another button cancels it
+* Fourth button reboots the machine. You have to press twice to activate this reboot (for your safety). Pressing another button cancels it
 
 System shutdown
 ---------------
