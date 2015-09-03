@@ -4,6 +4,8 @@ Usage
 Setup the starting position
 ---------------------------
 Place the pieces in starting position. It doesn't matter if you have the white or black pieces in front of you. Both ways will work. Keep in mind that with black pieces in front of you the (printed) coordinates of your dgt-board also reversed.
+You can now start a game by moving a piece or press the middle button to let picochess start. Also you can change the default settings of 5mins blitz against stockfish in strongest level by placing the white&black extra queen on the appropriate square or use the clock buttons (for detailed infomation see below).
+Please keep in mind that placing the extra queens only working if you are in the starting position whereas the clock buttons always working regardless the chess position.
 
 Playing/Training Modes
 ----------------------
@@ -14,7 +16,7 @@ When using these modes, please be patient and don't rush moves. Allow a few seco
 * Analysis mode (enabled by **white** queen on **B5**): the computer is watching the game, it does not play itself. The clock continually displays the best move for the side to play.
 * Kibitz mode (enabled by **white** queen on **C5**): the computer is watching the game, it does not play itself. The clock continually displays the position score.
 * Observe mode (enabled by **white** queen on **D5**): the computer is watching the game, it does not play itself. The clock displays the remaining thinking time for both sides. Press the second button once to show the position evaluation, twice to show a hint.
-* Remote play mode (enabled by **white** queen on **E5**): no documentation right now
+* Remote play mode (enabled by **white** queen on **E5**): this modus is right now not implemented (future use). It will allow you to play against someone over internet.
 
 Game mode is the regular mode. If you used one of the other modes, you can return back to game mode by putting the extra **white** queen on **A5**.
 You can also press the fourth button for toggling over the modes (Qa5-Qe5 only working in the starting position).
@@ -35,7 +37,7 @@ Another way to choose the skill level is by entering the "Level" menu with the c
 Choosing opening books
 ----------------------
 
-Opening books are also selected with the extra **black** queen.
+Opening books are set with the extra **black** queen.
 (Remove the extra white queen if it is still on the board)
 
 * **A3** - No book
@@ -55,7 +57,14 @@ Another way to choose the opening book is by entering the "Book" menu with the c
 Setting up time controls
 ------------------------
 
-Time controls are set with the extra **white** queen.
+Picochess supports 3 variants of different time controls (Fixed, Blitz, Fischer). You can choose them by placing the extra **white** queen.
+(Remove the extra black queen if it is still on the board).
+Another way to choose the time control is by entering the "Time" menu with the clock buttons. Detailed explanation is below.
+
+Fixed Levels
+------------
+
+Fixed time controls are set with the extra **white** queen.
 (Remove the extra black queen if it is still on the board)
 
 * **A6** - 1 second per move
@@ -66,8 +75,6 @@ Time controls are set with the extra **white** queen.
 * **F6** - 30 seconds per move
 * **G6** - 60 seconds per move
 * **H6** - 120 seconds per move
-
-Another way to choose the time control is by entering the "Time" menu with the clock buttons. Detailed explanation is below.
 
 Blitz Levels
 ------------
@@ -111,7 +118,7 @@ Depending with menu you choose, the other 4 buttons have different functionality
 * **Time Menu** - Change time controls
 * **Engine Menu** - Change the engine
 * **Book Menu** - Change the opening book
-* **System Menu** - No functionality right now
+* **System Menu** - Shutdown/Reboot the machine
 
 Clock buttons (in Game menu)
 ----------------------------
@@ -122,7 +129,7 @@ Clock buttons (in Game menu)
     - in **Game mode** switch sides and the computer will make next move (your turn) or stop the search and play out the best move (computer turn)
     - in **Observe/Remote mode** halt/start the clock
     - in **Analysis/Kibitz mode** no function. An error message is displayed
-* The fourth will toggle between the playing modes (Game, Analyse, Kibitz, Observe, Remote)
+* The fourth will toggle between the playing modes (Game, Analysis, Kibitz, Observe, Remote)
 
 Clock buttons (in Position menu)
 --------------------------------
@@ -131,7 +138,7 @@ First setup your position.
 
 * First button chooses the side to move, Black or White
 * Second button chooses the board orientation, "b" & "w" showing the starting side for each color. So for example white pawns moving from w to b side
-* Third button scans in the position on board. Clock will respond with "Scan" and "New game". Now picochess is waiting for your next move. If you want picochess to start press the third button
+* Third button scans in the position on board. Clock will respond with "scan" and "new game". Now picochess is waiting for your next move. If you want picochess to start press the third button
 * Fouth button has no function
 
 Clock buttons (in Level menu)
@@ -172,6 +179,14 @@ Clock buttons (in Book menu)
 It is possible to select any additional books you may have installed from the clock buttons, but the selection from the board is fixed.
 Books must be in the Polyglot (.bin) format and must be named <letter><"-"><book name>, eg "a-nobook.bin" or "m-benoni.bin". Books appear in alphabetical order in the menu. 
 Books "a" to "j" are used for setting from the board and contain the existing system books; they can be changed to make others available from the board.
+
+Clock Buttons (in System menu)
+------------------------------
+
+* First button has no function
+* Second button has no function
+* Third button shutdown the machine. You have to press twice to actiate this shutdown (for your safety). Pressing another button cancels it
+* Fourth button reboots the machine. You have to press twice to actiate this reboot (for your safety). Pressing another button cancels it
 
 System shutdown
 ---------------
