@@ -82,7 +82,9 @@ def main():
     parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
     parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
     parser.add_argument("-net", "--network", type=str, help="enable/disable network operations", default='True')
-    parser.add_argument("-v", "--version", action='version', version='%(prog)s version {}'.format(version), help="show current version", default=None)
+    parser.add_argument("-nookmove", "--disable-ok-move", action='store_false', help="enable/disable ok move messages")
+    parser.add_argument("-v", "--version", action='version', version='%(prog)s version {}'.format(version),
+                        help="show current version", default=None)
 
     args = parser.parse_args()
 
@@ -100,7 +102,7 @@ def main():
         update_picochess(args.auto_reboot)
 
     # This class talks to DGTHardware or DGTVirtual
-    DGTDisplay().start()
+    DGTDisplay(args.disable_ok_move).start()
 
     if args.dgt_port:
         # Connect to DGT board
