@@ -82,6 +82,8 @@ def main():
     parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
     parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
     parser.add_argument("-net", "--network", type=str, help="enable/disable network operations", default='True')
+    parser.add_argument("-v", "--version", action='version', version='%(prog)s version {}'.format(version), help="show current version", default=None)
+
     args = parser.parse_args()
 
     # Enable logging
