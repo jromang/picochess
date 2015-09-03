@@ -136,10 +136,10 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         self.n_levels = 21  # Default engine (Stockfish) has 21 playing levels
         self.engine_has_levels = False # Not all engines support levels - assume not
         self.engine_restart = False
-        self.engine_index = 2  # Dummy values .. set later
-        self.engine_menu_index = 2
-        self.installed_engines = get_installed_engines()
-        self.n_engines = len(self.installed_engines)
+        self.engine_index = 0  # Dummy values .. set later
+        self.engine_menu_index = 0
+        self.installed_engines = None
+        self.n_engines = 0
 
         self.book_index = 8  # Default book is 8 - book 'g'
         self.book_menu_index = 8  # Sync with above
@@ -438,6 +438,8 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                             else:
                                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='error', xl=None, beep=BeepLevel.CONFIG)
                         else:  # for initial startup, message has a different format from our local book
+                            self.installed_engines = get_installed_engines(message.eng[0])
+                            self.n_engines = len(self.installed_engines)
                             for index in range(0, self.n_engines):
                                 full_path, short = self.installed_engines[index]
                                 if full_path == message.eng[0]:
