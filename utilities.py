@@ -400,13 +400,13 @@ def get_opening_books():
     return library
 
 
-def get_installed_engines():
-    program_path = os.path.dirname(os.path.realpath(__file__)) + os.sep
-    engine_list = sorted(os.listdir(program_path + 'engines'), key=str.lower)
+def get_installed_engines(engine):
+    engine_path = (engine.rsplit(os.sep, 1))[0]
+    engine_list = sorted(os.listdir(engine_path), key=str.lower)
     library = []
     for engine in engine_list:
         if not ('.' in engine):
-            library.append((program_path+'engines'+os.sep+engine, engine))
+            library.append((engine_path+os.sep+engine, engine))
     return library
 
 
