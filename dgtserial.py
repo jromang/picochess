@@ -84,7 +84,7 @@ class DGTSerial(Display):
                 array.append(v.value)
             elif type(v) is str:
                 for c in v:
-                    array.append(char_to_DGTXL[c])
+                    array.append(char_to_DGTXL[c.lower()])
             else:
                 logging.error('Type not supported : [%s]', type(v))
         try:
