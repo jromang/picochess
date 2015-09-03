@@ -433,11 +433,10 @@ def main():
                     if engine_shutdown:
                         # Load the new one and send args.
                         # Local engines only
-                        engine = uci.Engine(event.eng[0], hostname=None, username=None, key_file=None, password=None)
+                        engine = uci.Engine(event.eng[0])
                         engine_name = engine.get().name
                         # Schedule cleanup of old objects
-                        cleanup_thread = threading.Timer(10, gc.collect()) # wait 10 seconds for engine to load and play to resume
-                        cleanup_thread.start()
+                        gc.collect()
                         # Restore options - this doesn't deal with any supplementary uci options sent 'in game', see event.UCI_OPTION_SET
                         if 'Hash' in engine.get().options:
                             engine.option("Hash", args.hash_size)
