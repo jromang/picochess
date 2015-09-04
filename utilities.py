@@ -396,7 +396,8 @@ def get_opening_books():
     book_list = sorted(os.listdir(program_path + 'books'))
     library = []
     for book in book_list:
-        library.append((book[2:book.index('.')], 'books' + os.sep + book))
+        if (not os.path.isdir('books' + os.sep + book)):  # Cant's use isfile() as that doesn't count links
+            library.append((book[2:book.index('.')], 'books' + os.sep + book))
     return library
 
 
@@ -405,8 +406,8 @@ def get_installed_engines(engine):
     engine_list = sorted(os.listdir(engine_path), key=str.lower)
     library = []
     for engine in engine_list:
-        if not ('.' in engine):
-            library.append((engine_path+os.sep+engine, engine))
+        if (not ('.' in engine))and (not os.path.isdir(engine_path + os.sep + engine)):  # Cant's use isfile() as that doesn't count links
+            library.append((engine_path + os.sep + engine, engine))
     return library
 
 
