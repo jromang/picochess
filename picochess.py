@@ -434,7 +434,8 @@ def main():
                         engine_name = engine.get().name
                         # Schedule cleanup of old objects
                         gc.collect()
-                        # Restore options - this doesn't deal with any supplementary uci options sent 'in game', see event.UCI_OPTION_SET
+                        # Restore options -
+                        # this doesn't deal with any supplementary uci options sent 'in game', see event.UCI_OPTION_SET
                         if 'Hash' in engine.get().options:
                             engine.option("Hash", args.hash_size)
                         if 'Threads' in engine.get().options:  # Stockfish
@@ -451,7 +452,7 @@ def main():
                         Display.show(Message.UCI_OPTION_LIST, options=engine.get().options)
                         # This engine supports playing level?
                         has_levels = ('Skill Level' in engine.get().options) or ('UCI_LimitStrength' in engine.get().options)
-                        #Send user selected engine level to new engine
+                        # Send user selected engine level to new engine
                         if engine_level and engine.level(engine_level):
                             engine.send()
                             Display.show(Message.LEVEL, level=engine_level)
