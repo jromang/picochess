@@ -102,6 +102,7 @@ class Engine(Display):
                     self.engine.uci()
                     handler = Informer()
                     self.engine.info_handlers.append(handler)
+                    self.path = path   # Save changing the engine class in chess lib
             self.options = {}
             self.future = None
 

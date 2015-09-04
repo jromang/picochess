@@ -141,7 +141,11 @@ def main():
     # Gentlemen, start your engines...
     engine = uci.Engine(args.engine, hostname=args.remote, username=args.user,
                         key_file=args.server_key, password=args.password)
-    engine_name = engine.get().name
+    try:        
+        engine_name = engine.get().name
+    except AttributeError:
+        logging.debug("FATAL: no engines started")
+        os._exit(-1)
     logging.debug('Loaded engine [%s]', engine_name)
     logging.debug('Supported options [%s]', engine.get().options)
     if 'Hash' in engine.get().options:
@@ -411,15 +415,17 @@ def main():
                     break
 
                 if case(Event.NEW_ENGINE):
+                    engine_shutdown = False
+                    engine_fallback = False
+                    old_path = engine.path
                     # Stop the old engine cleanly
                     engine.stop()
                     # Closeout the engine process and threads
                     # The all return non-zero error codes, 0=success
-                    engine_shutdown = False
                     if engine.quit():   # Ask nicely
                         if engine.terminate():  # If you won't go nicely.... 
                             if engine.kill():       # Right that does it!
-                                logging.debug('Serious: Engine shutdown failure')
+                                logging.error('Serious: Engine shutdown failure')
                                 Display.show(Message.ENGINE_READY, eng=('fail', 'fail'))
                             else:
                                 engine_shutdown = True
@@ -431,7 +437,19 @@ def main():
                         # Load the new one and send args.
                         # Local engines only
                         engine = uci.Engine(event.eng[0])
-                        engine_name = engine.get().name
+                        try:        
+                            engine_name = engine.get().name
+                        except AttributeError:
+                            # New engine failed to start, restart old engine
+                            logging.error("New engine failed to start, reverting to %s", old_path)
+                            engine_fallback = True
+                            engine = uci.Engine(old_path)
+                            try:
+                                engine_name = engine.get().name
+                            except AttributeError:
+                                # Help - old engine failed to restart. There is no engine
+                                logging.error("FATAL: no engines started")
+                                os._exit(-1)
                         # Schedule cleanup of old objects
                         gc.collect()
                         # Restore options - this doesn't deal with any supplementary uci options sent 'in game', see event.UCI_OPTION_SET
@@ -461,9 +479,12 @@ def main():
                         if interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
                             observe(copy.deepcopy(game), time_control)
                         # All done - rock'n'roll
-                        Display.show(Message.ENGINE_READY, ename=engine_name, eng=event.eng, has_levels=has_levels)
+                        if not engine_fallback:
+                            Display.show(Message.ENGINE_READY, ename=engine_name, eng=event.eng, has_levels=has_levels)
+                        else:
+                            Display.show(Message.ENGINE_READY, eng=('fail', 'fail'))
                     else:
-                        logging.debug('Serious: Engine shutdown failure')
+                        logging.error('Serious: Engine failed to stop')
                         Display.show(Message.ENGINE_READY, eng=('fail', 'fail'))
                     break
 
