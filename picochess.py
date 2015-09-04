@@ -81,7 +81,7 @@ def main():
                         help="disable beeps on the dgt clock")
     parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
     parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
-    parser.add_argument("-net", "--network", type=str, help="enable/disable network operations", default='True')
+    parser.add_argument("-inet", "--enable-internet", action='store_true', help="enable/disable internet lookups")
     parser.add_argument("-nookmove", "--disable-ok-move", action='store_false', help="enable/disable ok move messages")
     parser.add_argument("-v", "--version", action='version', version='%(prog)s version {}'.format(version),
                         help="show current version", default=None)
@@ -94,11 +94,8 @@ def main():
                         datefmt="%Y-%m-%d %H:%M:%S")
     logging.getLogger("chess.uci").setLevel(logging.INFO)  # don't want to get so many python-chess uci messages
 
-    # Check for netowrk or not
-    network_enabled = (args.network == 'True')
-
     # Update
-    if network_enabled:
+    if args.enable_internet:
         update_picochess(args.auto_reboot)
 
     # This class talks to DGTHardware or DGTVirtual
@@ -117,7 +114,7 @@ def main():
 
     # Save to PGN
     PgnDisplay(
-        args.pgn_file, net=args.network, email=args.email, fromINIMailGun_Key=args.mailgun_key,
+        args.pgn_file, net=args.enable_internet, email=args.email, fromINIMailGun_Key=args.mailgun_key,
         fromIniSmtp_Server=args.smtp_server, fromINISmtp_User=args.smtp_user,
         fromINISmtp_Pass=args.smtp_pass, fromINISmtp_Enc=args.smtp_encryption).start()
     if args.pgn_user:
@@ -161,7 +158,7 @@ def main():
     engine.send()
 
     def display_system_info():
-        if network_enabled:
+        if args.enable_internet:
             place = get_location()
             addr = get_ip()
         else:
