@@ -36,7 +36,7 @@ class PgnDisplay(Display, threading.Thread):
         self.file_name = pgn_file_name
         self.engine_name = ''
         self.user_name = ''
-        self.network_enabled = (net == 'True')
+        self.network_enabled = net
         self.level = None
         if email:  # check if email address is provided by picochess.ini
             self.email = email
