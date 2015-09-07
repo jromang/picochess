@@ -22,7 +22,6 @@ import signal
 import subprocess
 import logging
 import threading
-import copy
 import concurrent.futures
 
 try:
@@ -93,10 +92,13 @@ class OptionMap(collections.MutableMapping):
         return True
 
     def copy(self):
-        return OptionMap(self._store.values())
+        return type(self)(self._store.values())
+
+    def __copy__(self):
+        return self.copy()
 
     def __repr__(self):
-        return "{0}({1})".format(self.__class__.__name__, dict(self.items()))
+        return "{0}({1})".format(type(self).__name__, dict(self.items()))
 
 
 class InfoHandler(object):
@@ -573,7 +575,7 @@ class Engine(object):
                 self.ponder = chess.Move.from_uci(tokens[2])
                 if self.ponder.from_square in (chess.E1, chess.E8) and self.ponder.to_square in (chess.C1, chess.C8, chess.G1, chess.G8):
                     # Make a copy of the board to avoid race conditions.
-                    board = copy.deepcopy(self.board)
+                    board = self.board.copy()
                     board.push(self.bestmove)
                     self.ponder = board.parse_uci(tokens[2])
             except ValueError:
@@ -588,12 +590,10 @@ class Engine(object):
     def _copyprotection(self, arg):
         # TODO: Implement copyprotection
         LOGGER.error("engine copyprotection not supported")
-        pass
 
     def _registration(self, arg):
         # TODO: Implement registration
         LOGGER.error("engine registration not supported")
-        pass
 
     def _info(self, arg):
         if not self.info_handlers:
@@ -697,7 +697,7 @@ class Engine(object):
                     pv = []
 
                 if current_parameter in ("refutation", "pv", "currline"):
-                    board = copy.deepcopy(self.board)
+                    board = self.board.copy()
             elif current_parameter == "depth":
                 handle_integer_token(token, lambda handler, val: handler.depth(val))
             elif current_parameter == "seldepth":
@@ -1001,7 +1001,8 @@ class Engine(object):
 
         :return: Nothing
 
-        :raises: *EngineStateException* is the engine is still calculating.
+        :raises: :exc:`~chess.uci.EngineStateException` if the engine is still
+            calculating.
         """
         # Raise if this is called while the engine is still calculating.
         with self.state_changed:
@@ -1018,9 +1019,13 @@ class Engine(object):
             switchyard.append(board.pop())
 
         # Validate castling rights.
-        if not self.uci_chess960:
-            standard_chess_status = board.status(allow_chess960=False)
-            chess960_status = board.status(allow_chess960=True)
+        if not self.uci_chess960 and board.chess960:
+            chess960_status = board.status()
+
+            board.chess960 = False
+            standard_chess_status = board.status()
+            board.chess960 = True
+
             if standard_chess_status & chess.STATUS_BAD_CASTLING_RIGHTS and not chess960_status & chess.STATUS_BAD_CASTLING_RIGHTS:
                 LOGGER.error("not in UCI_Chess960 mode but position has non-standard castling rights")
 
@@ -1049,7 +1054,7 @@ class Engine(object):
                 builder.append(board.uci(move, chess960=self.uci_chess960))
                 board.push(move)
 
-        self.board = copy.deepcopy(board)
+        self.board = board.copy()
 
         def command():
             with self.semaphore:
@@ -1095,7 +1100,8 @@ class Engine(object):
             to the engine. The second is the ponder move. This is the reply
             as sent by the engine. Either of the elements may be *None*.
 
-        :raises: *EngineStateException* if the engine is already calculating.
+        :raises: :exc:`~chess.uci.EngineStateException` if the engine is
+            already calculating.
         """
         with self.state_changed:
             if not self.idle:
@@ -1218,8 +1224,8 @@ class Engine(object):
 
         :return: Nothing.
 
-        :raises: *EngineStateException* if the engine is not currently
-            searching in ponder mode.
+        :raises: :exc:`~chess.uci.EngineStateException` if the engine is not
+            currently searching in ponder mode.
         """
         with self.state_changed:
             if self.idle:

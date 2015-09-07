@@ -18,12 +18,10 @@ import logging
 import queue
 import os
 import platform
-# import random
 import subprocess
 import urllib.request
 import socket
 import json
-# from xml.dom.minidom import parseString
 
 try:
     import enum
@@ -166,10 +164,12 @@ class GameMenu(AutoNumber):
     CHANGE_MODE = ()  # Change Modes
     SWITCH_MENU = ()  # Switch Menu
 
+
 class PowerMenu(AutoNumber):
     CONFIRM_NONE = ()  # Nothing to confirm from power menu
     CONFIRM_PWR = ()  # Confirm the PowerOff request
     CONFIRM_RBT = ()  # Confirm the Reboot request
+
 
 @enum.unique
 class Mode(enum.Enum):

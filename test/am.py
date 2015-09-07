@@ -11,12 +11,13 @@ import chess.polyglot
 import chess.uci
 
 
-class Tester():
+class Tester:
     def __init__(self, bookreader, game):
         self.bookreader = bookreader
         self.game = game
         self.bookmoves = set()
         self.gamemoves = set()
+        self.setup()
 
     def setup(self):
         for entry in self.bookreader.find_all(self.game):
@@ -45,6 +46,7 @@ class Tester():
         if bm:
             self.bookmoves.discard(bm)
             book_move = bm.move()
+            self.discard(book_move)
             g = copy.deepcopy(self.game)
             g.push(book_move)
             try:
@@ -55,7 +57,7 @@ class Tester():
             return chess.uci.BestMove(book_move, book_ponder)
         return None
 
-    def make(self, move):
+    def discard(self, move):
         self.gamemoves.discard(move)
         if not self.gamemoves:
             self.setup()
@@ -63,21 +65,44 @@ class Tester():
 
 class Informer(chess.uci.InfoHandler):
     def on_go(self):
-        print('onGO called')
+        # print('onGO called')
         super().on_go()
         pass
 
     def on_bestmove(self, bestmove, ponder):
-        print('onBEST called')
-        print(bestmove)
-        print(ponder)
+        # print('onBEST called')
+        # print(bestmove)
+        # print(ponder)
         super().on_bestmove(bestmove, ponder)
 
-# engine = chess.uci.popen_engine("../engines/stockfish6/stockfish_6_x64")
-# engine.uci()
 
-# handler = Informer()
-# engine.info_handlers.append(handler)
+def think(tester, game):
+    """
+    Starts a new search on the current game.
+    If a move is found in the opening book, fire an event in a few seconds.
+    :return:
+    """
+    book_move = tester.book()
+    if book_move:
+        print('Book Result:')
+        print(book_move)
+    else:
+        engine.position(game)
+
+        uci_dict = {}
+        uci_dict['searchmoves'] = t.all()
+        uci_dict['wtime'] = 2000
+        uci_dict['btime'] = 2000
+        result = engine.go(**uci_dict)
+        print('Search Result:')
+        print(result)
+
+# engine = chess.uci.popen_engine("../engines/stockfish6/stockfish_6_x64")
+engine = chess.uci.popen_engine("../engines/stockfish")
+engine.uci()
+
+handler = Informer()
+engine.info_handlers.append(handler)
 
 # fen_game = 'r1r3k1/pp1q1pp1/4pn1p/1B1p1n2/3P4/1QN1P2P/PP3PP1/2R1R1K1 b - - 0 1'
 # board = chess.Board(fen_game)
@@ -101,16 +126,28 @@ t.setup()
 
 print(t.all())
 print('')
-t.make(random.choice(list(t.all())))
+t.discard(random.choice(list(t.all())))
 print(t.all())
 print('')
 
-print(t.book())
-print('')
-print(t.book())
-print('')
-print(t.book())
-print('')
-print(t.book())
-print('')  # after 1.f4, should result in "None" cause only 4 moves in bin-file
-print(t.book())
+# print(t.book())
+# print('')
+# print(t.book())
+# print('')
+# print(t.book())
+# print('')
+# print(t.book())
+# print('')  # after 1.f4, should result in "None" cause only 4 moves in bin-file
+# print(t.book())
+
+think(t, board)
+think(t, board)
+think(t, board)
+think(t, board)
+
+think(t, board)
+think(t, board)
+think(t, board)
+think(t, board)
+print('end')
+

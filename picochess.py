@@ -40,6 +40,59 @@ from dgthardware import DGTHardware
 from dgtdisplay import DGTDisplay
 from dgtvirtual import DGTVirtual
 
+import random
+
+
+class AlternativeMover:
+    def __init__(self, bookreader, game):
+        self.bookreader = bookreader
+        self.game = game
+        self.bookmoves = set()
+        self.gamemoves = set()
+        self.setup()
+
+    def setup(self):
+        for entry in self.bookreader.find_all(self.game):
+            self.bookmoves.add(entry)
+
+        for move in self.game.legal_moves:
+            self.gamemoves.add(move)
+
+    def all(self):
+        return self.gamemoves
+
+    def weighted_choice(self):
+        total_weights = sum(entry.weight for entry in self.bookmoves)
+        if not total_weights:
+            return None
+        choice = random.randint(0, total_weights - 1)
+        current_sum = 0
+        for entry in self.bookmoves:
+            current_sum += entry.weight
+            if current_sum > choice:
+                return entry
+        assert False
+
+    def book(self):
+        bm = self.weighted_choice()
+        if bm:
+            self.bookmoves.discard(bm)
+            book_move = bm.move()
+            self.discard(book_move)
+            g = copy.deepcopy(self.game)
+            g.push(book_move)
+            try:
+                bp = self.bookreader.weighted_choice(g)
+                book_ponder = bp.move()
+            except IndexError:
+                book_ponder = None
+            return chess.uci.BestMove(book_move, book_ponder)
+        return None
+
+    def discard(self, move):
+        self.gamemoves.discard(move)
+        if not self.gamemoves:
+            self.setup()
 
 def main():
   
@@ -200,19 +253,19 @@ def main():
         If a move is found in the opening book, fire an event in a few seconds.
         :return:
         """
-        book_move = weighted_choice(book, game)
         Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time)
         time.run(game.turn)
+
+        book_move = searchmoves.book()
         if book_move:
-            # Display.show(Message.BOOK_MOVE, move=book_move)
-            g = copy.deepcopy(game)
-            g.push(book_move)
-            book_ponder = weighted_choice(book, g)
-            Observable.fire(Event.BEST_MOVE, result=chess.uci.BestMove(book_move, book_ponder), book=True)
+            Observable.fire(Event.BEST_MOVE, result=book_move, book=True)
             Observable.fire(Event.SCORE, score='book', mate=None)
         else:
             engine.position(game)
+            uci_dict = time.uci()
+            uci_dict['searchmoves'] = searchmoves.all()
             engine.go(time.uci())
+
 
     def analyse(game):
         """
@@ -324,7 +377,8 @@ def main():
         move = result.bestmove
         fen = game.fen()
         game.push(move)
-        nonlocal last_computer_move
+        nonlocal last_computer_move, searchmoves
+        searchmoves = AlternativeMover(book, game)
         last_computer_move = None
         if interaction_mode == Mode.GAME:
             stop_clock()
@@ -352,6 +406,7 @@ def main():
     game = chess.Board()  # Create the current game
     legal_fens = compute_legal_fens(game)  # Compute the legal FENs
     book = chess.polyglot.open_reader(get_opening_books()[8][1])  # Default opening book (gm1950)
+    searchmoves = AlternativeMover(book, game)
     interaction_mode = Mode.GAME  # Interaction mode
     play_mode = PlayMode.PLAY_WHITE
     time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=5)
@@ -504,6 +559,7 @@ def main():
                     interaction_mode = Mode.GAME
                     last_computer_move = None
                     set_wait_state()
+                    searchmoves = AlternativeMover(book, game)
                     Display.show(Message.START_NEW_GAME)
                     game_declared = False
                     break
@@ -539,6 +595,7 @@ def main():
                     stop_search_and_clock()
                     time_control.reset()
                     set_wait_state()
+                    searchmoves = AlternativeMover(book, game)
                     Display.show(Message.START_NEW_GAME)
                     game_declared = False
                     break
@@ -554,12 +611,15 @@ def main():
                 if case(Event.OPENING_BOOK):
                     logging.debug("Changing opening book [%s]", event.book[1])
                     book = chess.polyglot.open_reader(event.book[1])
+                    searchmoves = AlternativeMover(book, game)
                     Display.show(Message.OPENING_BOOK, book=event.book)
                     break
 
                 if case(Event.BEST_MOVE):
                     if event.book:
                         Display.show(Message.BOOK_MOVE, result=event.result)
+                    else:
+                        searchmoves.discard(event.result.bestmove)
                     game = handle_move(event.result, game)
                     legal_fens = compute_legal_fens(game)
                     break
