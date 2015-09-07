@@ -364,14 +364,14 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
 
         if self.dgt_clock_menu == Menu.LEVEL_MENU:
             if self.engine_has_levels:
-                self.engine_level_menu = ((self.engine_level_menu+1)%self.n_levels)
+                self.engine_level_menu = ((self.engine_level_menu+1) % self.n_levels)
                 level = str(self.engine_level_menu)
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.CONFIG)
             else:
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no level", xl="no lvl", beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
-            self.engine_menu_index = ((self.engine_menu_index+1)%self.n_engines)
+            self.engine_menu_index = ((self.engine_menu_index+1) % self.n_engines)
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=(self.installed_engines[self.engine_menu_index])[1], xl=None, beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.BOOK_MENU:
@@ -383,7 +383,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             if self.time_control_menu_index >= len(self.time_control_fen_map):
                 self.time_control_menu_index = 0
             msg = dgt_xl_time_control_list[list(time_control_map.keys()).index(self.time_control_fen_map[self.time_control_menu_index])]
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg, beep=BeepLevel.CONFIG)
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=None, beep=BeepLevel.CONFIG)
 
     def process_button4(self):
         # self.dgt_clock_menu = Menu.self.dgt_clock_menu.value+1
@@ -507,7 +507,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         if self.book_from_fen:
                             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=book_name, xl=None, beep=BeepLevel.CONFIG)
                             self.book_from_fen = False
-                            self.book_menu_index = self.book_index # Not necessary but cleaner
+                            self.book_menu_index = self.book_index  # Not necessary but cleaner
                         if self.book_index != self.book_menu_index:
                             self.book_index = self.book_menu_index
                             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok book", xl="okbook", beep=BeepLevel.CONFIG)
@@ -517,8 +517,8 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="takeback", xl="takbak", beep=BeepLevel.CONFIG)
                         break
                     if case(Message.GAME_ENDS):
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=message.result.value, xl=None,
-                                             beep=BeepLevel.CONFIG)
+                        ge = message.result.value
+                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=ge, xl=None, beep=BeepLevel.CONFIG)
                         break
                     if case(Message.INTERACTION_MODE):
                         self.mode = message.mode

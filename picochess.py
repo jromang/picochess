@@ -337,9 +337,12 @@ def main():
                         game.pop()
             legal_moves = list(game.legal_moves)
             Observable.fire(Event.USER_MOVE, move=legal_moves[legal_fens.index(fen)])
-        # elif fen == game.fen().split(' ')[0]:  # Player had done the computer move on the board
-        elif fen == last_computer_move:  # Player had done the computer move on the board
+        elif fen == last_computer_fen:  # Player had done the computer move on the board
             if check_game_state(game, play_mode) and interaction_mode == Mode.GAME:
+                # finally reset all alternative moves see: handle_move()
+                nonlocal searchmoves
+                searchmoves = AlternativeMover(book, game)
+
                 Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD)
                 if time_control.mode != ClockMode.FIXED_TIME:
                     Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
@@ -377,16 +380,21 @@ def main():
         move = result.bestmove
         fen = game.fen()
         game.push(move)
-        nonlocal last_computer_move, searchmoves
-        searchmoves = AlternativeMover(book, game)
-        last_computer_move = None
+        nonlocal last_computer_fen
+        last_computer_fen = None
         if interaction_mode == Mode.GAME:
             stop_clock()
-            if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.WHITE) or (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.BLACK):
-                last_computer_move = game.fen().split(' ')[0]
+            # If UserMove: reset all alternative moves
+            # If ComputerMove: disallow this move, and finally reset all if DONE_ON_BOARD event @see: process_fen()
+            nonlocal searchmoves
+            if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.WHITE)\
+                    or (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.BLACK):
+                last_computer_fen = game.fen().split(' ')[0]
+                searchmoves.discard(move)
                 Display.show(Message.COMPUTER_MOVE, result=result, fen=fen, game=copy.deepcopy(game),
                              time_control=time_control)
             else:
+                searchmoves = AlternativeMover(book, game)
                 Display.show(Message.USER_MOVE, move=move, game=copy.deepcopy(game))
                 if check_game_state(game, play_mode):
                     think(copy.deepcopy(game), time_control)
@@ -410,8 +418,8 @@ def main():
     interaction_mode = Mode.GAME  # Interaction mode
     play_mode = PlayMode.PLAY_WHITE
     time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=5)
-    last_computer_move = None
-    game_declared = False # User declared resignation or draw
+    last_computer_fen = None
+    game_declared = False  # User declared resignation or draw
     engine_level = None
 
     system_info_thread = threading.Timer(0, display_system_info)
@@ -557,7 +565,7 @@ def main():
                     stop_search_and_clock()
                     time_control.reset()
                     interaction_mode = Mode.GAME
-                    last_computer_move = None
+                    last_computer_fen = None
                     set_wait_state()
                     searchmoves = AlternativeMover(book, game)
                     Display.show(Message.START_NEW_GAME)
@@ -585,13 +593,13 @@ def main():
                 if case(Event.NEW_GAME):  # User starts a new game
                     if game.move_stack:
                         logging.debug("Starting a new game")
-                        if (not game.is_game_over()) and (not game_declared):
+                        if not (game.is_game_over() or game_declared):
                             custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
                             Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack),
                                          color=game.turn, play_mode=play_mode, custom_fen=custom_fen)
                         game = chess.Board()
                     legal_fens = compute_legal_fens(game)
-                    last_computer_move = None
+                    last_computer_fen = None
                     stop_search_and_clock()
                     time_control.reset()
                     set_wait_state()
@@ -618,8 +626,6 @@ def main():
                 if case(Event.BEST_MOVE):
                     if event.book:
                         Display.show(Message.BOOK_MOVE, result=event.result)
-                    else:
-                        searchmoves.discard(event.result.bestmove)
                     game = handle_move(event.result, game)
                     legal_fens = compute_legal_fens(game)
                     break
