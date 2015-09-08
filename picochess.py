@@ -243,9 +243,9 @@ def main():
         fens = FenList()
         for move in g.legal_moves:
             g.push(move)
-            fens.append(g.fen().split(' ')[0])
+            fens.append(g.board_fen())
             g.pop()
-        fens.root = g.fen().split(' ')[0]
+        fens.root = g.board_fen()
         return fens
 
     def think(game, time):
@@ -356,7 +356,7 @@ def main():
                         or (play_mode == PlayMode.PLAY_BLACK and game_history.turn == chess.BLACK) \
                         or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.KIBITZ) \
                         or (interaction_mode == Mode.REMOTE) or (interaction_mode == Mode.ANALYSIS):
-                    if game_history.fen().split(' ')[0] == fen:
+                    if game_history.board_fen() == fen:
                         logging.debug("Legal Fens root       : " + str(legal_fens.root))
                         logging.debug("Current game FEN      : " + str(game.fen()))
                         logging.debug("Undoing game until FEN: " + fen)
@@ -390,7 +390,7 @@ def main():
             nonlocal searchmoves
             if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.WHITE)\
                     or (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.BLACK):
-                last_computer_fen = game.fen().split(' ')[0]
+                last_computer_fen = game.board_fen()
                 searchmoves.discard(move)
                 Display.show(Message.COMPUTER_MOVE, result=result, fen=fen, game=game.copy(), time_control=time_control)
             else:
@@ -454,7 +454,7 @@ def main():
                     else:
                         g = game.copy()
                         g.push(move)
-                        legal_fens = process_fen(g.fen().split(' ')[0], legal_fens)
+                        legal_fens = process_fen(g.board_fen(), legal_fens)
                     break
 
                 if case(Event.USER_MOVE):  # User sends a new move
