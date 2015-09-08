@@ -31,42 +31,23 @@ class KeyboardInput(Observable, threading.Thread):
             cmd = input('PicoChess v'+version+':>').lower()
 
             try:
-                # commands like "newgame" or "setup:<legal_fen_string>" or
-                # "level:<1-20>" or "print:<legal_fen_string>" or "book:<name>"
-                # or "time:blitz|fixed|fischer" for 5mins/5secs/3+2mins games
+                # commands like "newgame:<w|b>" or "setup:<legal_fen_string>"
+                # or "print:<legal_fen_string>"
                 #
                 # for simulating a dgt board use the following commands
                 # "fen:<legal_fen_string>" or "button:<0-4>"
                 #
                 # everything else is regarded as a move string
-                if cmd.startswith('newgame'):
-                    self.fire(Event.NEW_GAME)
+                if cmd.startswith('newgame:'):
+                    side = cmd.split(':')[1]
+                    if side == 'w':
+                        self.fire(Event.DGT_FEN, fen='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR')
+                    elif side == 'b':
+                        self.fire(Event.DGT_FEN, fen='RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr')
+                    else:
+                        raise ValueError(cmd)
                 else:
-                    if cmd.startswith('book:'):
-                        book_name = cmd.split(':')[1]
-                        book_list = get_opening_books()
-                        book = next((b for b in book_list if b[0] == book_name), None)
-                        if book is None:
-                            raise ValueError(book_name)
-                        self.fire(Event.OPENING_BOOK, book=book)
-                    elif cmd.startswith('level:'):
-                        level = int(cmd.split(':')[1])
-                        self.fire(Event.LEVEL, level=level)
-                    elif cmd.startswith('time:'):
-                        time_mode = cmd.split(':')[1]
-                        if time_mode == 'blitz':
-                            time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=5)
-                            time_string = 'bl   5'
-                        elif time_mode == 'fixed':
-                            time_control = TimeControl(ClockMode.FIXED_TIME, seconds_per_move=5)
-                            time_string = 'mov  5'
-                        elif time_mode == 'fischer':
-                            time_control = TimeControl(ClockMode.FISCHER, minutes_per_game=3, fischer_increment=2)
-                            time_string = 'f 3  2'
-                        else:
-                            raise ValueError(time)
-                        self.fire(Event.SET_TIME_CONTROL, time_control=time_control, time_control_string=time_string)
-                    elif cmd.startswith('print:'):
+                    if cmd.startswith('print:'):
                         fen = cmd.split(':')[1]
                         print(chess.Board(fen))
                     elif cmd.startswith('setup:'):
@@ -84,7 +65,7 @@ class KeyboardInput(Observable, threading.Thread):
                         self.fire(Event.DGT_FEN, fen=fen.split(' ')[0])
                     elif cmd.startswith('button:'):
                         button = int(cmd.split(':')[1])
-                        if button not in range(4):
+                        if button not in range(5):
                             raise ValueError(button)
                         self.fire(Event.DGT_BUTTON, button=button)
                     # end simulation code
@@ -108,8 +89,8 @@ class TerminalDisplay(Display, threading.Thread):
                 if case(Message.COMPUTER_MOVE):
                     print('\n' + str(message.game))
                     print(message.game.fen())
-                    print('emulate user to make the computer move...sleeping for one second')
-                    time.sleep(1)
+                    print('emulate user to make the computer move...sleeping for three seconds')
+                    time.sleep(3)
                     logging.debug('emulate user now finished doing computer move')
                     Display.show(Message.DGT_FEN, fen=message.game.fen().split(' ')[0])
                     break
