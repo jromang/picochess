@@ -198,7 +198,7 @@ def main():
         engine_name = engine.get().name
     except AttributeError:
         logging.debug("FATAL: no engines started")
-        os._exit(-1)
+        sys.exit(-1)
     logging.debug('Loaded engine [%s]', engine_name)
     logging.debug('Supported options [%s]', engine.get().options)
     if 'Hash' in engine.get().options:
@@ -487,7 +487,7 @@ def main():
                     # The all return non-zero error codes, 0=success
                     if engine.quit():   # Ask nicely
                         if engine.terminate():  # If you won't go nicely.... 
-                            if engine.kill():       # Right that does it!
+                            if engine.kill():  # Right that does it!
                                 logging.error('Serious: Engine shutdown failure')
                                 Display.show(Message.ENGINE_READY, eng=('fail', 'fail'))
                             else:
@@ -512,7 +512,7 @@ def main():
                             except AttributeError:
                                 # Help - old engine failed to restart. There is no engine
                                 logging.error("FATAL: no engines started")
-                                os._exit(-1)
+                                sys.exit(-1)
                         # Schedule cleanup of old objects
                         gc.collect()
                         # Restore options -

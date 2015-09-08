@@ -117,12 +117,13 @@ dgt_xl_time_control_list = ["mov  1", "mov  3", "mov  5", "mov 10", "mov 15", "m
 class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
     def __init__(self, ok_move_messages):
         super(DGTDisplay, self).__init__()
-        self.flip_board = False
-
         self.ok_moves_messages = ok_move_messages
+
         self.setup_to_move = chess.WHITE
         self.setup_reverse_orientation = False
+        self.flip_board = False
         self.dgt_fen = None
+        self.alternative = False
 
         self.dgt_clock_menu = Menu.GAME_MENU
         self.last_move = chess.Move.null()
@@ -298,7 +299,10 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
 
         if self.dgt_clock_menu == Menu.GAME_MENU:
             if self.mode == Mode.GAME:
-                self.fire(Event.STARTSTOP_THINK)
+                if self.alternative:
+                    pass
+                else:
+                    self.fire(Event.STARTSTOP_THINK)
             if self.mode == Mode.OBSERVE or self.mode == Mode.REMOTE:
                 self.fire(Event.STARTSTOP_CLOCK)
             if self.mode == Mode.ANALYSIS or self.mode == Mode.KIBITZ:
@@ -452,6 +456,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                     if case(Message.COMPUTER_MOVE):
                         move = message.result.bestmove
                         ponder = message.result.ponder
+                        self.alternative = True
                         self.last_move = move
                         self.hint_move = chess.Move.null() if ponder is None else ponder
                         self.hint_fen = message.game.fen()
@@ -469,15 +474,18 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         self.reset_hint_and_score()
                         self.mode = Mode.GAME
                         self.dgt_clock_menu = Menu.GAME_MENU
+                        self.alternative = False
                         break
                     if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
                         if self.ok_moves_messages:
                             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok pico", xl="okpico", beep=BeepLevel.CONFIG)
                         HardwareDisplay.show(Dgt.LIGHT_CLEAR)
                         self.display_move = False
+                        self.alternative = False
                         break
                     if case(Message.USER_MOVE):
                         self.display_move = False
+                        self.alternative = False
                         if self.ok_moves_messages:
                             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok user", xl="okuser", beep=BeepLevel.CONFIG)
                         break
@@ -504,6 +512,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         break
                     if case(Message.OPENING_BOOK):
                         book_name = message.book[0]
+                        self.alternative = False
                         if self.book_from_fen:
                             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=book_name, xl=None, beep=BeepLevel.CONFIG)
                             self.book_from_fen = False
@@ -514,6 +523,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         break
                     if case(Message.USER_TAKE_BACK):
                         self.reset_hint_and_score()
+                        self.alternative = False
                         HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="takeback", xl="takbak", beep=BeepLevel.CONFIG)
                         break
                     if case(Message.GAME_ENDS):
@@ -522,6 +532,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         break
                     if case(Message.INTERACTION_MODE):
                         self.mode = message.mode
+                        self.alternative = False
                         HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=message.mode.value, xl=None, beep=BeepLevel.CONFIG)
                         break
                     if case(Message.PLAY_MODE):
