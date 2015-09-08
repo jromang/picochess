@@ -111,6 +111,11 @@ class DGTSerial(Display):
                     ack1 = ((message[2]) & 0x7f) | ((message[3] << 2) & 0x80)
                     ack2 = ((message[4]) & 0x7f) | ((message[0] << 3) & 0x80)
                     ack3 = ((message[5]) & 0x7f) | ((message[0] << 2) & 0x80)
+                    if ack0 != 0x10:
+                        logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
+                        return
+                    else:
+                        logging.debug("Clock ACK [%s]", Clock(ack1))
                     if ack1 == 0x88:
                         # this are the other (ack2-ack3) codes
                         # 6-49 34-52 18-51 10-50 66-53 | button 0-4 (single)
@@ -138,11 +143,6 @@ class DGTSerial(Display):
                         sub_version = ack2 & 0x0f
                         logging.debug("DGT clock version %0.2f", float(str(main_version) + '.' + str(sub_version)))
                         Display.show(Message.DGT_CLOCK_VERSION, main_version=main_version, sub_version=sub_version)
-                    if ack0 != 0x10:
-                        logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
-                        return
-                    else:
-                        logging.debug("Clock ACK [%s]", Clock(ack1))
                 elif any(message[:6]):
                     r_hours = message[0] & 0x0f
                     r_mins = (message[1] >> 4) * 10 + (message[1] & 0x0f)
