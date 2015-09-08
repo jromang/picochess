@@ -173,7 +173,6 @@ class PowerMenu(AutoNumber):
 
 @enum.unique
 class Mode(enum.Enum):
-    # Interaction modes
     GAME = 'game'
     ANALYSIS = 'analyse'
     KIBITZ = 'kibitz'
@@ -183,7 +182,6 @@ class Mode(enum.Enum):
 
 @enum.unique
 class PlayMode(enum.Enum):
-    # Play modes
     PLAY_WHITE = 'white'
     PLAY_BLACK = 'black'
 
@@ -396,7 +394,7 @@ def get_opening_books():
     book_list = sorted(os.listdir(program_path + 'books'))
     library = []
     for book in book_list:
-        if (not os.path.isdir('books' + os.sep + book)):  # Cant's use isfile() as that doesn't count links
+        if not os.path.isdir('books' + os.sep + book):  # Can't use isfile() as that doesn't count links
             library.append((book[2:book.index('.')], 'books' + os.sep + book))
     return library
 
@@ -406,17 +404,9 @@ def get_installed_engines(engine):
     engine_list = sorted(os.listdir(engine_path), key=str.lower)
     library = []
     for engine in engine_list:
-        if (not ('.' in engine))and (not os.path.isdir(engine_path + os.sep + engine)):  # Cant's use isfile() as that doesn't count links
+        if not (('.' in engine) or os.path.isdir(engine_path + os.sep + engine)):  # Can't use isfile() as that doesn't count links
             library.append((engine_path + os.sep + engine, engine))
     return library
-
-
-def weighted_choice(book, game):
-    try:
-        b = book.weighted_choice(game)
-    except IndexError:
-        return None
-    return b.move()
 
 
 def hours_minutes_seconds(seconds):
@@ -453,22 +443,22 @@ def which(program):
 def update_picochess(auto_reboot=False):
     git = which('git.exe' if platform.system() == 'Windows' else 'git')
     if git:
-        branch = subprocess.Popen([git, "rev-parse", "--abbrev-ref", "HEAD"], stdout=subprocess.PIPE).communicate()[
-            0].decode(encoding='UTF-8').rstrip()
+        branch = subprocess.Popen([git, "rev-parse", "--abbrev-ref", "HEAD"],
+                                  stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8').rstrip()
         if branch == 'stable':
             # Fetch remote repo
-            output = subprocess.Popen([git, "remote", "update"], stdout=subprocess.PIPE).communicate()[0].decode(
-                encoding='UTF-8')
+            output = subprocess.Popen([git, "remote", "update"],
+                                      stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
             logging.debug(output)
             # Check if update is needed
-            output = subprocess.Popen([git, "status", "-uno"], stdout=subprocess.PIPE).communicate()[0].decode(
-                encoding='UTF-8')
+            output = subprocess.Popen([git, "status", "-uno"],
+                                      stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
             logging.debug(output)
             if 'up-to-date' not in output:
                 # Update
                 logging.debug('Updating')
-                output = subprocess.Popen([git, "pull", "origin", "stable"], stdout=subprocess.PIPE).communicate()[
-                    0].decode(encoding='UTF-8')
+                output = subprocess.Popen([git, "pull", "origin", "stable"],
+                                          stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
                 logging.debug(output)
                 if auto_reboot:
                     os.system('reboot')
