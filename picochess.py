@@ -79,7 +79,7 @@ class AlternativeMover:
             self.bookmoves.discard(bm)
             book_move = bm.move()
             self.discard(book_move)
-            g = self.game.copy()
+            g = copy.deepcopy(self.game)
             g.push(book_move)
             try:
                 bp = self.bookreader.weighted_choice(g)
@@ -262,7 +262,7 @@ def main():
             Observable.fire(Event.BEST_MOVE, result=book_move, book=True)
             Observable.fire(Event.SCORE, score='book', mate=None)
         else:
-            engine.position(game)
+            engine.position(copy.deepcopy(game))
             uci_dict = time.uci()
             uci_dict['searchmoves'] = searchmoves.all()
             engine.go(time.uci())
@@ -273,7 +273,7 @@ def main():
         Starts a new ponder search on the current game.
         :return:
         """
-        engine.position(game)
+        engine.position(copy.deepcopy(game))
         engine.ponder()
 
     def observe(game, time):
@@ -349,7 +349,7 @@ def main():
                     Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
                     time_control.run(game.turn)
         else:  # Check if this a a previous legal position and allow user to restart from this position
-            game_history = game.copy()
+            game_history = copy.deepcopy(game)
             while game_history.move_stack:
                 game_history.pop()
                 if (play_mode == PlayMode.PLAY_WHITE and game_history.turn == chess.WHITE) \
@@ -364,9 +364,9 @@ def main():
                         while len(game_history.move_stack) < len(game.move_stack):
                             game.pop()
                         if interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
-                            analyse(game.copy())
+                            analyse(game)
                         if interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
-                            observe(game.copy(), time_control)
+                            observe(game, time_control)
                         Display.show(Message.USER_TAKE_BACK)
                         legal_fens = compute_legal_fens(game)
                         break
@@ -397,17 +397,17 @@ def main():
                 searchmoves = AlternativeMover(book, game)
                 Display.show(Message.USER_MOVE, move=move, game=game.copy())
                 if check_game_state(game, play_mode):
-                    think(game.copy(), time_control)
+                    think(game, time_control)
         elif interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
             stop_search_and_clock()
             Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=game.copy(), mode=interaction_mode)
             if check_game_state(game, play_mode):
-                observe(game.copy(), time_control)
+                observe(game, time_control)
         elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
             stop_search()
             Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=game.copy(), mode=interaction_mode)
             if check_game_state(game, play_mode):
-                analyse(game.copy())
+                analyse(game)
         return game
 
     # Startup - internal
@@ -452,7 +452,7 @@ def main():
                     if move not in game.legal_moves:
                         logging.warning('Illegal move [%s]', move)
                     else:
-                        g = game.copy()
+                        g = copy.deepcopy(game)
                         g.push(move)
                         legal_fens = process_fen(g.board_fen(), legal_fens)
                     break
@@ -539,9 +539,9 @@ def main():
                             Display.show(Message.LEVEL, level=engine_level)
                         # Go back to analysing or observing
                         if interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
-                            analyse(game.copy())
+                            analyse(game)
                         if interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
-                            observe(game.copy(), time_control)
+                            observe(game, time_control)
                         # All done - rock'n'roll
                         if not engine_fallback:
                             Display.show(Message.ENGINE_READY, ename=engine_name, eng=event.eng, has_levels=has_levels)
@@ -579,7 +579,7 @@ def main():
                         play_mode = PlayMode.PLAY_WHITE if play_mode == PlayMode.PLAY_BLACK else PlayMode.PLAY_BLACK
                         Display.show(Message.PLAY_MODE, play_mode=play_mode)
                         if check_game_state(game, play_mode):
-                            think(game.copy(), time_control)
+                            think(game, time_control)
                     break
 
                 if case(Event.STARTSTOP_CLOCK):

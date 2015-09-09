@@ -300,6 +300,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         if self.dgt_clock_menu == Menu.GAME_MENU:
             if self.mode == Mode.GAME:
                 if self.alternative:
+                    logging.debug('alternative move not implemented')
                     pass
                 else:
                     self.fire(Event.STARTSTOP_THINK)
