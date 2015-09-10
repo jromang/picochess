@@ -267,7 +267,6 @@ def main():
             uci_dict['searchmoves'] = searchmoves.all()
             engine.go(time.uci())
 
-
     def analyse(game):
         """
         Starts a new ponder search on the current game.
