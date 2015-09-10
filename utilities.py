@@ -59,6 +59,12 @@ class Event(AutoNumber):
     NEW_ENGINE = () # Change engine
     SET_MODE = ()  # Change interaction mode
     SETUP_POSITION = ()  # Setup custom position
+    STARTSTOP_THINK = ()  # Engine should start/stop thinking
+    STARTSTOP_CLOCK = ()  # Clock should start/stop
+    SET_TIME_CONTROL = ()  # User sets time control
+    UCI_OPTION_SET = ()  # Users sets an UCI option, contains 'name' and 'value' (strings)
+    SHUTDOWN = ()  # User wants to shutdown the machine
+    ALTERNATIVE_MOVE = ()  # User wants engine to recalculate the position
     # dgt events
     DGT_BUTTON = ()  # User pressed a button at the dgt clock
     DGT_FEN = ()  # DGT board sends a fen
@@ -66,12 +72,7 @@ class Event(AutoNumber):
     BEST_MOVE = ()  # Engine has found a move
     NEW_PV = ()  # Engine sends a new principal variation
     SCORE = ()  # Engine sends a new score
-    STARTSTOP_THINK = ()  # Engine should start/stop thinking
-    STARTSTOP_CLOCK = ()  # Clock should start/stop
-    SET_TIME_CONTROL = ()  # User sets time control
-    OUT_OF_TIME = ()
-    UCI_OPTION_SET = ()  # Users sets an UCI option, contains 'name' and 'value' (strings)
-    SHUTDOWN = ()
+    OUT_OF_TIME = ()  # Clock flag fallen
 
 
 class Message(AutoNumber):
@@ -105,6 +106,7 @@ class Message(AutoNumber):
     SYSTEM_INFO = ()  # Information about picochess such as version etc
     STARTUP_INFO = ()  # Information about the startup options
     SCORE = ()  # Score
+    ALTERNATIVE_MOVE = ()  # User wants another move to be calculated
 
 
 class Dgt(AutoNumber):

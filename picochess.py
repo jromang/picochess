@@ -323,7 +323,6 @@ def main():
                 # finally reset all alternative moves see: handle_move()
                 nonlocal searchmoves
                 searchmoves.reset()
-
                 Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD)
                 if time_control.mode != ClockMode.FIXED_TIME:
                     Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time_control)
@@ -560,6 +559,12 @@ def main():
                         Display.show(Message.PLAY_MODE, play_mode=play_mode)
                         if check_game_state(game, play_mode):
                             think(game, time_control)
+                    break
+
+                if case(Event.ALTERNATIVE_MOVE):
+                    game.pop()
+                    Display.show(Message.ALTERNATIVE_MOVE)
+                    think(game, time_control)
                     break
 
                 if case(Event.STARTSTOP_CLOCK):

@@ -300,7 +300,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         if self.dgt_clock_menu == Menu.GAME_MENU:
             if self.mode == Mode.GAME:
                 if self.alternative:
-                    HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="not impl", xl="noimpl", beep=BeepLevel.YES)
+                    self.fire(Event.ALTERNATIVE_MOVE)
                 else:
                     self.fire(Event.STARTSTOP_THINK)
             if self.mode == Mode.OBSERVE or self.mode == Mode.REMOTE:
@@ -324,7 +324,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="bad pos", xl="badpos", beep=BeepLevel.YES)
 
         if self.dgt_clock_menu == Menu.SETTINGS_MENU:
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="pwroff ?", xl="-off-", beep=BeepLevel.CONFIG)
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="pwroff ?", xl="-off-", beep=BeepLevel.YES)
             self.awaiting_confirm = PowerMenu.CONFIRM_PWR
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
@@ -363,7 +363,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             self.fire(Event.SET_MODE, mode=mode_new)
 
         if self.dgt_clock_menu == Menu.SETTINGS_MENU:
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="reboot ?", xl="-boot-", beep=BeepLevel.CONFIG)
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="reboot ?", xl="-boot-", beep=BeepLevel.YES)
             self.awaiting_confirm = PowerMenu.CONFIRM_RBT
 
         if self.dgt_clock_menu == Menu.LEVEL_MENU:
@@ -495,6 +495,9 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         self.display_move = False
                         if self.ok_moves_messages:
                             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok move", xl="okmove", beep=BeepLevel.CONFIG)
+                        break
+                    if case(Message.ALTERNATIVE_MOVE):
+                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="alt move", xl="altmov", beep=BeepLevel.CONFIG)
                         break
                     if case(Message.LEVEL):
                         level = str(message.level)
