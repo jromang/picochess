@@ -12,17 +12,19 @@ import chess.uci
 
 
 class Mover:
-    def __init__(self, bookreader):
-        self.bookreader = bookreader
+    def __init__(self):
         self.excludemoves = set()
 
     def all(self, game):
         searchmoves = set(game.legal_moves) - self.excludemoves
+        if not searchmoves:
+            self.reset()
+            return set(game.legal_moves)
         return searchmoves
 
-    def book(self, game):
+    def book(self, bookreader, game):
         try:
-            bm = self.bookreader.weighted_choice(game, self.excludemoves)
+            bm = bookreader.weighted_choice(game, self.excludemoves)
         except IndexError:
             return None
 
@@ -31,7 +33,7 @@ class Mover:
         g = copy.deepcopy(game)
         g.push(book_move)
         try:
-            bp = self.bookreader.weighted_choice(g)
+            bp = bookreader.weighted_choice(g)
             book_ponder = bp.move()
         except IndexError:
             book_ponder = None
@@ -39,6 +41,9 @@ class Mover:
 
     def add(self, move):
         self.excludemoves.add(move)
+
+    def reset(self):
+        self.excludemoves = set()
 
 
 class Informer(chess.uci.InfoHandler):
@@ -61,7 +66,7 @@ def think(mover, game):
     If a move is found in the opening book, fire an event in a few seconds.
     :return:
     """
-    book_move = mover.book(game)
+    book_move = mover.book(reader, game)
     if book_move:
         print('Book Result:')
         print(book_move)
@@ -88,24 +93,24 @@ board.push_san('f4')
 reader = chess.polyglot.open_reader("../books/g-fun.bin")
 
 print('Mover:')
-m = Mover(reader)
+m = Mover()
 # print(m.all(board))
 # print('')
 # m.add(random.choice(list(m.all(board))))
 # print(m.all(board))
 # print('')
 
-print(m.book(board))
+print(m.book(reader, board))
 print('')
-print(m.book(board))
+print(m.book(reader, board))
 print('')
-print(m.book(board))
+print(m.book(reader, board))
 print('')
-print(m.book(board))
+print(m.book(reader, board))
 print('')  # after 1.f4, should result in "None" cause only 4 moves in bin-file
-print(m.book(board))
+print(m.book(reader, board))
 
-m = Mover(reader)  # restart with an empty ignore-list
+m.reset()
 print('Thinker:')
 think(m, board)
 think(m, board)
