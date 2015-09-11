@@ -578,9 +578,10 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         if time_right < 0:
                             time_right = 0
                         side = 0x01 if (message.turn == chess.WHITE) != self.flip_board else 0x02
-                        if tc.mode == ClockMode.FIXED_TIME:
-                            side = 0x02
-                            time_right = tc.seconds_per_move
+                        if tc.mode == ClockMode.FIXED_TIME:  # LocutusOfPenguin: does that solve #27?
+                            # side = 0x02
+                            # time_right = tc.seconds_per_move
+                            time_left = time_right = tc.seconds_per_move
                         if self.flip_board:
                             time_left, time_right = time_right, time_left
                         HardwareDisplay.show(Dgt.CLOCK_START, time_left=time_left, time_right=time_right, side=side)
