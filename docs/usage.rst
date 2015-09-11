@@ -49,7 +49,7 @@ Opening books are set with the extra **black** queen.
 * **E3** - ECO D - Closed
 * **F3** - ECO E - Indian
 * **G3** - Fun
-* **H3** - Varied. (Default)
+* **H3** - Varied (Default)
 * **H4** - GM_1950 (> 2500 ELO GM games from 1950 till 2013)
 * **G4** - Performance
 * **F4** - Stockfish optimized book v 2.11 by Salvo Spitaleri

@@ -392,7 +392,7 @@ def main():
     # Startup - internal
     game = chess.Board()  # Create the current game
     legal_fens = compute_legal_fens(game)  # Compute the legal FENs
-    book = chess.polyglot.open_reader(get_opening_books()[8][1])  # Default opening book (gm1950)
+    book = chess.polyglot.open_reader(get_opening_books()[7][1])  # Default opening book (varied)
     searchmoves = AlternativeMover()
     interaction_mode = Mode.GAME  # Interaction mode
     play_mode = PlayMode.PLAY_WHITE
