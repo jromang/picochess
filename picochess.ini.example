@@ -17,6 +17,8 @@
 # disable-dgt-clock-beep
 ## Should a confirmation message (after moves) be displayed?
 # disable-ok-move = false
+## Specify the serial port your dgt-board is connected to
+# dgt-port = /dev/ttyACM0
 ## This is DEPRECATED since PicoChess V0.5x - Pls don't use it anymore!!
 ## The value is not taken into account. It will be deleted soon.
 # dgt-3000-clock = true

@@ -128,7 +128,7 @@ Clock buttons (in Game menu)
 * First button shows the last move
 * Second button toggles between showing the position value (or "book") and the best/ponder (or book move)
 * Third button will
-    - in **Game mode** switch sides and the computer will make next move (your turn) or stop the search and play out the best move (computer turn). When its your turn but you havent done the displayed computer move from display, it will calculate an alternative move (first trying to play a book move if possible). If no moves left, it starts at beginning again (all legal moves)
+    - in **Game mode** switch sides and the computer will make next move (your turn) or stop the search and play out the best move (computer turn). When its your turn but you havent done the displayed computer move, it will calculate an alternative move (first trying to play a book move if possible). If no moves left, it starts at beginning again
     - in **Observe/Remote mode** halt/start the clock
     - in **Analysis/Kibitz mode** no function. An error message is displayed
 * The fourth will toggle between the playing modes (Game, Analysis, Kibitz, Observe, Remote)
@@ -198,5 +198,12 @@ From the start position, replace the white king with the extra white queen; this
 PGN file support
 ----------------
 
-All moves of the played game along with engine are stored.
+All moves of the played game along with engine are stored at the end of the game.
 Every game played with picochess is stored in the /opt/picochess folder as "games.pgn".
+If you want to end it before and write out the pgn file including the correct result, you can do as following:
+Placing the two kings on opposite centre squares will signal a resignation:
+    - If both kings on white, the result is white wins and the game recorded 1-0
+    - If both kings on black, the result is black wins and the game recorded 0-1
+
+Placing the kings on adjacent centre squares on the same rank signals a draw and the game recorded 1/2-1/2.
+The 4 and 5 rank must be clear of other pieces - only kings.
