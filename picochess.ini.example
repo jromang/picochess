@@ -1,5 +1,5 @@
 ### ===============================
-### = picochess.ini.example v0.36 =
+### = picochess.ini.example v0.53 =
 ### ===============================
 ### Example and description how to configure PicoChess
 ### To use this file, simply copy this file to picochess.ini and edit the appropriate settings
@@ -15,13 +15,26 @@
 # enable-dgt-board-leds = true
 ## disable-dgt-clock-beep disables the beep of the DGT-clock. To disable the beep remove #, to enable comment the next line with #
 # disable-dgt-clock-beep
+## Should a confirmation message (after moves) be displayed?
+# disable-ok-move = false
+## This is DEPRECATED since PicoChess V0.5x - Pls don't use it anymore!!
+## The value is not taken into account. It will be deleted soon.
+# dgt-3000-clock = true
 
 ### ========================
 ### = Chess engine options =
 ### ========================
 ### Options for the UCI-Chess engine
-## What engine should play. Path to a UCI engine or Stockfish
-engine = stockfish
+## What engine should play. Path to a (startup) UCI engine
+engine = engines/stockfish
+## Where is the server with the engine
+# remote = engine.remote-domain.com
+## What user to use for connect to the remote-engine server
+# user = user@remote-domain.com
+## What password for the remote-engine-server
+# pass = your_secret_password
+## The secret server-key for the remote-engine-server
+# server-key = your_secret_key
 ## uci-option stores options that will be passed to the engine
 # uci-option = Hash = 128
 # uci-option = Threads = 4
@@ -47,7 +60,8 @@ engine = stockfish
 # smtp_user = your_username
 ## smtp_pass is necessary if your smtp server requires authentication, sets your password
 # smtp_pass = your_secret_password
-## Should PicoChess SSL-encrypt the communication with your smtp server (Port 465)? If so, uncomment the next line smtp_encryption. Otherwise PicoChess will use the default and unencrypted SMTP Port 21. Some SMTP Server require an SSL encryption (e.g. GMAIL).
+## Should PicoChess SSL-encrypt the communication with your smtp server (Port 465)? If so, uncomment the next line smtp_encryption.
+## Otherwise PicoChess will use the default and unencrypted SMTP Port 21. Some SMTP Server require an SSL encryption (e.g. GMAIL).
 # smtp_encryption
 ### ==========================================
 ### = Section for email delivery via Mailgun =
@@ -69,3 +83,14 @@ engine = stockfish
 # user-voice = en:Elsie
 ## computer-voice for computer moves announcement
 # computer-voice = en:Marvin
+## PicoChess writes pgn files at end of game.
+# pgn_file = games.png
+# pgn-user = player
+## Picochess connects to the internet like ip adr, update of newest software etc.
+## If you have a troublesome internet connection, please deactivate it.
+# enable-internet = false
+## After an update should the machine reboot automatically?
+# auto-reboot = true
+## The port of the webserver
+# web-server = 8080
+

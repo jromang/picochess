@@ -83,7 +83,7 @@ def main():
 
     # Command line argument parsing
     parser = configargparse.ArgParser(default_config_files=[os.path.join(os.path.dirname(__file__), "picochess.ini")])
-    parser.add_argument("-e", "--engine", type=str, help="UCI engine executable path", default='stockfish')
+    parser.add_argument("-e", "--engine", type=str, help="UCI engine executable path", default='engines/stockfish')
     parser.add_argument("-d", "--dgt-port", type=str,
                         help="enable dgt board on the given serial port such as /dev/ttyUSB0")
     parser.add_argument("-leds", "--enable-dgt-board-leds", action='store_true', help="enable dgt board leds")
@@ -111,7 +111,7 @@ def main():
                         default=None)
     parser.add_argument("-uci", "--uci-option", type=str, help="pass an UCI option to the engine (name;value)",
                         default=None)
-    parser.add_argument("-dgt3000", "--dgt-3000-clock", action='store_true', help="use dgt 3000 clock")
+    parser.add_argument("-dgt3000", "--dgt-3000-clock", action='store_true', help="use dgt 3000 clock (DEPRECATED!)")
     parser.add_argument("-nobeep", "--disable-dgt-clock-beep", action='store_true',
                         help="disable beeps on the dgt clock")
     parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
