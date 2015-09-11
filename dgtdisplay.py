@@ -136,15 +136,15 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         self.engine_level = 20  # Default level is 20
         self.engine_level_menu = self.engine_level
         self.n_levels = 21  # Default engine (Stockfish) has 21 playing levels
-        self.engine_has_levels = False # Not all engines support levels - assume not
+        self.engine_has_levels = False  # Not all engines support levels - assume not
         self.engine_restart = False
         self.engine_index = 0  # Dummy values .. set later
         self.engine_menu_index = 0
         self.installed_engines = None
         self.n_engines = 0
 
-        self.book_index = 8  # Default book is 8 - book 'g'
-        self.book_menu_index = 8  # Sync with above
+        self.book_index = 7  # Default book is 7 - book 'h'
+        self.book_menu_index = 7  # Sync with above
         self.all_books = get_opening_books()
         self.n_books = len(self.all_books)
         self.book_from_fen = False
@@ -207,6 +207,9 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.CONFIG)
             else:
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no level", xl="no lvl", beep=BeepLevel.CONFIG)
+
+        if self.dgt_clock_menu == Menu.SETTINGS_MENU:
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='pico ' + version, xl='pic ' + version, beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
             # Display current engine
