@@ -246,7 +246,7 @@ def main():
             engine.position(copy.deepcopy(game))
             uci_dict = time.uci()
             uci_dict['searchmoves'] = searchmoves.all(game)
-            engine.go(time.uci())
+            engine.go(uci_dict)
 
     def analyse(game):
         """
