@@ -52,7 +52,7 @@ class KeyboardInput(Observable, threading.Thread):
                         print(chess.Board(fen))
                     elif cmd.startswith('setup:'):
                         fen = cmd.split(':')[1]
-                        if chess.Board(fen).is_valid(False):
+                        if chess.Board(fen).is_valid():
                             self.fire(Event.SETUP_POSITION, fen=fen)
                         else:
                             raise ValueError(fen)

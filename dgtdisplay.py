@@ -317,7 +317,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 fen = fen[::-1]
             fen += " {0} KQkq - 0 1".format(to_move)
             fen = complete_dgt_fen(fen)
-            if chess.Board(fen).is_valid(False):
+            if chess.Board(fen).is_valid():
                 self.flip_board = self.setup_reverse_orientation
                 self.fire(Event.SETUP_POSITION, fen=fen)
             else:
