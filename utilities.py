@@ -18,12 +18,10 @@ import logging
 import queue
 import os
 import platform
-# import random
 import subprocess
 import urllib.request
 import socket
 import json
-# from xml.dom.minidom import parseString
 
 try:
     import enum
@@ -61,6 +59,12 @@ class Event(AutoNumber):
     NEW_ENGINE = () # Change engine
     SET_MODE = ()  # Change interaction mode
     SETUP_POSITION = ()  # Setup custom position
+    STARTSTOP_THINK = ()  # Engine should start/stop thinking
+    STARTSTOP_CLOCK = ()  # Clock should start/stop
+    SET_TIME_CONTROL = ()  # User sets time control
+    UCI_OPTION_SET = ()  # Users sets an UCI option, contains 'name' and 'value' (strings)
+    SHUTDOWN = ()  # User wants to shutdown the machine
+    ALTERNATIVE_MOVE = ()  # User wants engine to recalculate the position
     # dgt events
     DGT_BUTTON = ()  # User pressed a button at the dgt clock
     DGT_FEN = ()  # DGT board sends a fen
@@ -68,12 +72,7 @@ class Event(AutoNumber):
     BEST_MOVE = ()  # Engine has found a move
     NEW_PV = ()  # Engine sends a new principal variation
     SCORE = ()  # Engine sends a new score
-    STARTSTOP_THINK = ()  # Engine should start/stop thinking
-    STARTSTOP_CLOCK = ()  # Clock should start/stop
-    SET_TIME_CONTROL = ()  # User sets time control
-    OUT_OF_TIME = ()
-    UCI_OPTION_SET = ()  # Users sets an UCI option, contains 'name' and 'value' (strings)
-    SHUTDOWN = ()
+    OUT_OF_TIME = ()  # Clock flag fallen
 
 
 class Message(AutoNumber):
@@ -107,6 +106,7 @@ class Message(AutoNumber):
     SYSTEM_INFO = ()  # Information about picochess such as version etc
     STARTUP_INFO = ()  # Information about the startup options
     SCORE = ()  # Score
+    ALTERNATIVE_MOVE = ()  # User wants another move to be calculated
 
 
 class Dgt(AutoNumber):
@@ -166,14 +166,15 @@ class GameMenu(AutoNumber):
     CHANGE_MODE = ()  # Change Modes
     SWITCH_MENU = ()  # Switch Menu
 
+
 class PowerMenu(AutoNumber):
     CONFIRM_NONE = ()  # Nothing to confirm from power menu
     CONFIRM_PWR = ()  # Confirm the PowerOff request
     CONFIRM_RBT = ()  # Confirm the Reboot request
 
+
 @enum.unique
 class Mode(enum.Enum):
-    # Interaction modes
     GAME = 'game'
     ANALYSIS = 'analyse'
     KIBITZ = 'kibitz'
@@ -183,7 +184,6 @@ class Mode(enum.Enum):
 
 @enum.unique
 class PlayMode(enum.Enum):
-    # Play modes
     PLAY_WHITE = 'white'
     PLAY_BLACK = 'black'
 
@@ -396,7 +396,7 @@ def get_opening_books():
     book_list = sorted(os.listdir(program_path + 'books'))
     library = []
     for book in book_list:
-        if (not os.path.isdir('books' + os.sep + book)):  # Cant's use isfile() as that doesn't count links
+        if not os.path.isdir('books' + os.sep + book):  # Can't use isfile() as that doesn't count links
             library.append((book[2:book.index('.')], 'books' + os.sep + book))
     return library
 
@@ -406,17 +406,9 @@ def get_installed_engines(engine):
     engine_list = sorted(os.listdir(engine_path), key=str.lower)
     library = []
     for engine in engine_list:
-        if (not ('.' in engine))and (not os.path.isdir(engine_path + os.sep + engine)):  # Cant's use isfile() as that doesn't count links
+        if not (('.' in engine) or os.path.isdir(engine_path + os.sep + engine)):  # Can't use isfile() as that doesn't count links
             library.append((engine_path + os.sep + engine, engine))
     return library
-
-
-def weighted_choice(book, game):
-    try:
-        b = book.weighted_choice(game)
-    except IndexError:
-        return None
-    return b.move()
 
 
 def hours_minutes_seconds(seconds):
@@ -453,22 +445,22 @@ def which(program):
 def update_picochess(auto_reboot=False):
     git = which('git.exe' if platform.system() == 'Windows' else 'git')
     if git:
-        branch = subprocess.Popen([git, "rev-parse", "--abbrev-ref", "HEAD"], stdout=subprocess.PIPE).communicate()[
-            0].decode(encoding='UTF-8').rstrip()
+        branch = subprocess.Popen([git, "rev-parse", "--abbrev-ref", "HEAD"],
+                                  stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8').rstrip()
         if branch == 'stable':
             # Fetch remote repo
-            output = subprocess.Popen([git, "remote", "update"], stdout=subprocess.PIPE).communicate()[0].decode(
-                encoding='UTF-8')
+            output = subprocess.Popen([git, "remote", "update"],
+                                      stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
             logging.debug(output)
             # Check if update is needed
-            output = subprocess.Popen([git, "status", "-uno"], stdout=subprocess.PIPE).communicate()[0].decode(
-                encoding='UTF-8')
+            output = subprocess.Popen([git, "status", "-uno"],
+                                      stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
             logging.debug(output)
             if 'up-to-date' not in output:
                 # Update
                 logging.debug('Updating')
-                output = subprocess.Popen([git, "pull", "origin", "stable"], stdout=subprocess.PIPE).communicate()[
-                    0].decode(encoding='UTF-8')
+                output = subprocess.Popen([git, "pull", "origin", "stable"],
+                                          stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
                 logging.debug(output)
                 if auto_reboot:
                     os.system('reboot')

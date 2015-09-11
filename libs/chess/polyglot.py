@@ -31,28 +31,34 @@ ENTRY_STRUCT = struct.Struct(">QHHI")
 class Entry(collections.namedtuple("Entry", ["key", "raw_move", "weight", "learn"])):
     """An entry from a polyglot opening book."""
 
-    def move(self):
-        """Gets the move (as a `Move` object)."""
+    def move(self, chess960=False):
+        """Gets the move (as a :class:`~chess.Move` object)."""
         # Extract source and target square.
         to_square = self.raw_move & 0x3f
         from_square = (self.raw_move >> 6) & 0x3f
 
         # Extract the promotion type.
         promotion_part = (self.raw_move >> 12) & 0x7
-        if promotion_part == 4:
-            return chess.Move(from_square, to_square, chess.QUEEN)
-        elif promotion_part == 3:
-            return chess.Move(from_square, to_square, chess.ROOK)
-        elif promotion_part == 2:
-            return chess.Move(from_square, to_square, chess.BISHOP)
-        elif promotion_part == 1:
-            return chess.Move(from_square, to_square, chess.KNIGHT)
-        else:
-            return chess.Move(from_square, to_square)
+        promotion = promotion_part + 1 if promotion_part else None
+
+        # Convert castling moves.
+        if not chess960 and not promotion:
+            if from_square == chess.E1:
+                if to_square == chess.H1:
+                    return chess.Move(chess.E1, chess.G1)
+                elif to_square == chess.A1:
+                    return chess.Move(chess.E1, chess.C1)
+            elif from_square == chess.E8:
+                if to_square == chess.H8:
+                    return chess.Move(chess.E8, chess.G8)
+                elif to_square == chess.A8:
+                    return chess.Move(chess.E8, chess.C8)
+
+        return chess.Move(from_square, to_square, promotion)
 
 
 class MemoryMappedReader(object):
-    """Maps a polylgot opening book to memory."""
+    """Maps a polyglot opening book to memory."""
 
     def __init__(self, filename):
         self.fd = os.open(filename, os.O_RDONLY | os.O_BINARY if hasattr(os, "O_BINARY") else os.O_RDONLY)
@@ -90,7 +96,7 @@ class MemoryMappedReader(object):
             raise IndexError()
 
         if key < 0:
-            key = len(self) - key
+            key = len(self) + key
 
         try:
             key, raw_move, weight, learn = ENTRY_STRUCT.unpack_from(self.mmap, key * ENTRY_STRUCT.size)
@@ -123,71 +129,85 @@ class MemoryMappedReader(object):
     def __contains__(self, entry):
         return any(current == entry for current in self.find_all(entry.key, entry.weight))
 
-    def find(self, board, minimum_weight=1):
-        """
-        Finds the main entry for the given position or zobrist hash.
-
-        The main entry is the first entry with the highest weight.
-
-        By default entries with weight *0* are excluded. This is a common way
-        to delete entries from an opening book without compacting it. Pass
-        *minimum_weight=0* to select all entries.
-
-        Raises *IndexError* if no entries are found.
-        """
-        try:
-            return max(self.find_all(board, minimum_weight), key=lambda entry: entry.weight)
-        except ValueError:
-            raise IndexError()
-
-    def find_all(self, board, minimum_weight=1):
+    def find_all(self, board, minimum_weight=1, exclude_moves=()):
         """Seeks a specific position and yields corresponding entries."""
         try:
             zobrist_hash = board.zobrist_hash()
         except AttributeError:
             zobrist_hash = int(board)
+            board = None
 
         i = self.bisect_key_left(zobrist_hash)
         size = len(self)
 
         while i < size:
             entry = self[i]
+            i += 1
 
             if entry.key != zobrist_hash:
                 break
-            else:
-                yield entry
 
-            i += 1
+            if entry.weight < minimum_weight:
+                continue
 
-    def choice(self, board, minimum_weight=1, random=random):
+            if board:
+                move = entry.move(chess960=board.chess960)
+            elif exclude_moves:
+                move = entry.move()
+
+            if exclude_moves and move in exclude_moves:
+                continue
+
+            if board and not board.is_legal(move):
+                continue
+
+            yield entry
+
+    def find(self, board, minimum_weight=1, exclude_moves=()):
+        """
+        Finds the main entry for the given position or zobrist hash.
+
+        The main entry is the first entry with the highest weight.
+
+        By default entries with weight ``0`` are excluded. This is a common way
+        to delete entries from an opening book without compacting it. Pass
+        *minimum_weight* ``0`` to select all entries.
+
+        Raises :exc:`IndexError` if no entries are found.
+        """
+        try:
+            return max(self.find_all(board, minimum_weight, exclude_moves), key=lambda entry: entry.weight)
+        except ValueError:
+            raise IndexError()
+
+    def choice(self, board, minimum_weight=1, exclude_moves=(), random=random):
         """
         Uniformly selects a random entry for the given position.
 
-        Raises *IndexError* if no entries are found.
+        Raises :exc:`IndexError` if no entries are found.
         """
-        total_entries = sum(1 for entry in self.find_all(board, minimum_weight))
+        total_entries = sum(1 for entry in self.find_all(board, minimum_weight, exclude_moves))
         if not total_entries:
             raise IndexError()
 
         choice = random.randint(0, total_entries - 1)
-        return next(itertools.islice(self.find_all(board, minimum_weight), choice, None))
+        return next(itertools.islice(self.find_all(board, minimum_weight, exclude_moves), choice, None))
 
-    def weighted_choice(self, board, random=random):
+    def weighted_choice(self, board, exclude_moves=(), random=random):
         """
-        Selects a random entry for the given position, distrubuted by the
+        Selects a random entry for the given position, distributed by the
         weights of the entries.
 
-        Raises *IndexError* if no entries are found.
+        Raises :exc:`IndexError` if no entries are found.
         """
-        total_weights = sum(entry.weight for entry in self.find_all(board))
+        total_weights = sum(entry.weight for entry in self.find_all(board, exclude_moves=exclude_moves))
         if not total_weights:
             raise IndexError()
 
         choice = random.randint(0, total_weights - 1)
 
         current_sum = 0
-        for entry in self.find_all(board):
+        for entry in self.find_all(board, exclude_moves=exclude_moves):
             current_sum += entry.weight
             if current_sum > choice:
                 return entry
@@ -199,7 +219,7 @@ def open_reader(path):
     """
     Creates a reader for the file at the given path.
 
-    >>> with open_reader("data/opening-books/performance.bin") as reader:
+    >>> with open_reader("data/polyglot/performance.bin") as reader:
     ...    for entry in reader.find_all(board):
     ...        print(entry.move(), entry.weight, entry.learn)
     e2e4 1 0

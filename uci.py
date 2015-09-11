@@ -192,7 +192,7 @@ class Engine(Display):
         self.res = command.result()
         Display.show(Message.SEARCH_STOPPED, engine_status=self.status, result=self.res)
         if self.status != EngineStatus.PONDER:
-            Observable.fire(Event.BEST_MOVE, result=self.res, book=False)
+            Observable.fire(Event.BEST_MOVE, result=self.res, inbook=False)
         self.status = EngineStatus.WAIT
 
     def is_thinking(self):

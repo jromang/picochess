@@ -11,106 +11,114 @@ import chess.polyglot
 import chess.uci
 
 
-class Tester():
-    def __init__(self, bookreader, game):
-        self.bookreader = bookreader
-        self.game = game
-        self.bookmoves = set()
-        self.gamemoves = set()
+class Mover:
+    def __init__(self):
+        self.excludemoves = set()
 
-    def setup(self):
-        for entry in self.bookreader.find_all(self.game):
-            self.bookmoves.add(entry)
+    def all(self, game):
+        searchmoves = set(game.legal_moves) - self.excludemoves
+        if not searchmoves:
+            self.reset()
+            return set(game.legal_moves)
+        return searchmoves
 
-        for move in self.game.legal_moves:
-            self.gamemoves.add(move)
-
-    def all(self):
-        return self.gamemoves
-
-    def weighted_choice(self):
-        total_weights = sum(entry.weight for entry in self.bookmoves)
-        if not total_weights:
+    def book(self, bookreader, game):
+        try:
+            bm = bookreader.weighted_choice(game, self.excludemoves)
+        except IndexError:
             return None
-        choice = random.randint(0, total_weights - 1)
-        current_sum = 0
-        for entry in self.bookmoves:
-            current_sum += entry.weight
-            if current_sum > choice:
-                return entry
-        assert False
 
-    def book(self):
-        bm = self.weighted_choice()
-        if bm:
-            self.bookmoves.discard(bm)
-            book_move = bm.move()
-            g = copy.deepcopy(self.game)
-            g.push(book_move)
-            try:
-                bp = self.bookreader.weighted_choice(g)
-                book_ponder = bp.move()
-            except IndexError:
-                book_ponder = None
-            return chess.uci.BestMove(book_move, book_ponder)
-        return None
+        book_move = bm.move()
+        self.add(book_move)
+        g = copy.deepcopy(game)
+        g.push(book_move)
+        try:
+            bp = bookreader.weighted_choice(g)
+            book_ponder = bp.move()
+        except IndexError:
+            book_ponder = None
+        return chess.uci.BestMove(book_move, book_ponder)
 
-    def make(self, move):
-        self.gamemoves.discard(move)
-        if not self.gamemoves:
-            self.setup()
+    def add(self, move):
+        self.excludemoves.add(move)
+
+    def reset(self):
+        self.excludemoves = set()
 
 
 class Informer(chess.uci.InfoHandler):
     def on_go(self):
-        print('onGO called')
+        # print('onGO called')
         super().on_go()
         pass
 
     def on_bestmove(self, bestmove, ponder):
-        print('onBEST called')
-        print(bestmove)
-        print(ponder)
+        # print('onBEST called')
+        # print(bestmove)
+        # print(ponder)
+        m.add(bestmove)
         super().on_bestmove(bestmove, ponder)
 
-# engine = chess.uci.popen_engine("../engines/stockfish6/stockfish_6_x64")
-# engine.uci()
 
-# handler = Informer()
-# engine.info_handlers.append(handler)
+def think(mover, game):
+    """
+    Starts a new search on the current game.
+    If a move is found in the opening book, fire an event in a few seconds.
+    :return:
+    """
+    book_move = mover.book(reader, game)
+    if book_move:
+        print('Book Result:')
+        print(book_move)
+    else:
+        engine.position(game)
 
-# fen_game = 'r1r3k1/pp1q1pp1/4pn1p/1B1p1n2/3P4/1QN1P2P/PP3PP1/2R1R1K1 b - - 0 1'
-# board = chess.Board(fen_game)
-# engine.position(board)
+        uci_dict = {}
+        uci_dict['searchmoves'] = mover.all(game)
+        uci_dict['wtime'] = 2000
+        uci_dict['btime'] = 2000
+        result = engine.go(**uci_dict)
+        print('Search Result:')
+        print(result)
 
-# futur = engine.go(ponder=True, infinite=True, async_callback=True)
-# print(futur)
-# time.sleep(2)
-# engine.stop()
-# result = futur.result()
-# print(result)
+engine = chess.uci.popen_engine("../engines/stockfish")
+engine.uci()
 
+handler = Informer()
+engine.info_handlers.append(handler)
 
 board = chess.Board()
 board.push_san('f4')
 
-print('Tester:')
 reader = chess.polyglot.open_reader("../books/g-fun.bin")
-t = Tester(reader, board)
-t.setup()
 
-print(t.all())
-print('')
-t.make(random.choice(list(t.all())))
-print(t.all())
-print('')
+print('Mover:')
+m = Mover()
+# print(m.all(board))
+# print('')
+# m.add(random.choice(list(m.all(board))))
+# print(m.all(board))
+# print('')
 
-print(t.book())
+print(m.book(reader, board))
 print('')
-print(t.book())
+print(m.book(reader, board))
 print('')
-print(t.book())
+print(m.book(reader, board))
 print('')
-print(t.book())
+print(m.book(reader, board))
 print('')  # after 1.f4, should result in "None" cause only 4 moves in bin-file
-print(t.book())
+print(m.book(reader, board))
+
+m.reset()
+print('Thinker:')
+think(m, board)
+think(m, board)
+think(m, board)
+think(m, board)
+
+think(m, board)
+think(m, board)
+think(m, board)
+think(m, board)
+print('end')

@@ -28,7 +28,7 @@ The position score will always be displayed in centipawns from White's perspecti
 Choosing skill level
 --------------------
 Put the extra **black** queen on your DGT board to select skill level. Putting it on square A6 will select level 0 (easiest), while B6 selects level 1, C6 selects level 2, etc. If no skill level is selected, PicoChess uses level 20 (the highest level) by default. Level 20 can also be selected by placing the extra black queen on square E4.
-(Remove the extra white queen if it is still on the board.)
+(Remove the extra white queen if it is still on the board). Please notice that not all chess engines support levels.
 
 * Level  0 estimates about 1100 Elo (Absolute beginner)
 * Level 10 estimates about 1750 Elo (Mediate club player )
@@ -86,7 +86,7 @@ Blitz time controls are set with the extra **white** queen.
 
 * **A4** - 1 minute game
 * **B4** - 3 minute game
-* **C4** - 5 minute game
+* **C4** - 5 minute game (Default)
 * **D4** - 10 minute game
 * **E4** - 15 minute game
 * **F4** - 30 minute game
@@ -128,7 +128,7 @@ Clock buttons (in Game menu)
 * First button shows the last move
 * Second button toggles between showing the position value (or "book") and the best/ponder (or book move)
 * Third button will
-    - in **Game mode** switch sides and the computer will make next move (your turn) or stop the search and play out the best move (computer turn)
+    - in **Game mode** switch sides and the computer will make next move (your turn) or stop the search and play out the best move (computer turn). When its your turn but you havent done the displayed computer move from display, it will calculate an alternative move (first trying to play a book move if possible). If no moves left, it starts at beginning again (all legal moves)
     - in **Observe/Remote mode** halt/start the clock
     - in **Analysis/Kibitz mode** no function. An error message is displayed
 * The fourth will toggle between the playing modes (Game, Analysis, Kibitz, Observe, Remote)
