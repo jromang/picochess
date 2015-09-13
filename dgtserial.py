@@ -146,7 +146,7 @@ class DGTSerial(Display):
                 elif any(message[:6]):
                     r_hours = message[0] & 0x0f
                     r_mins = (message[1] >> 4) * 10 + (message[1] & 0x0f)
-                    r_secs = (message[2] >> 4) * 10 + (message[1] & 0x0f)
+                    r_secs = (message[2] >> 4) * 10 + (message[2] & 0x0f)
                     l_hours = message[3] & 0x0f
                     l_mins = (message[4] >> 4) * 10 + (message[4] & 0x0f)
                     l_secs = (message[5] >> 4) * 10 + (message[5] & 0x0f)
