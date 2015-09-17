@@ -615,7 +615,6 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         break
                     if case(Message.DGT_FEN):
                         fen = message.fen
-
                         if self.flip_board:  # Flip the board if needed
                             fen = fen[::-1]
                         if fen == "RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr":  # Check if we have to flip the board

@@ -55,6 +55,7 @@ class Event(AutoNumber):
     DRAWRESIGN = ()  # User declares a resignation or draw
     USER_MOVE = ()  # User sends a move
     KEYBOARD_MOVE = ()  # Keyboard sends a move (to be transfered to a fen)
+    REMOTE_MOVE = ()  # Remote player move
     OPENING_BOOK = ()  # User chooses an opening book
     NEW_ENGINE = () # Change engine
     SET_MODE = ()  # Change interaction mode

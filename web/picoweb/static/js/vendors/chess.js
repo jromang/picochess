@@ -362,7 +362,9 @@ var Chess = function(fen) {
 
     /* do we have an empty castling flag? */
     cflags = cflags || '-';
-    var epflags = (ep_square === EMPTY) ? '-' : algebraic(ep_square);
+
+    /* Mask the ep flags - they come from picochess now */
+    var epflags = '-';
 
     return [fen, turn, cflags, epflags, half_moves, move_number].join(' ');
   }

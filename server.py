@@ -36,13 +36,45 @@ class ChannelHandler(tornado.web.RequestHandler):
     def initialize(self, shared=None):
         self.shared = shared
 
+    def create_game_header(self, game):
+        game.headers["Result"] = "*"
+        game.headers["White"] = "None"
+        game.headers["Black"] = "None"
+        game.headers["Event"] = "PicoChess game"
+        game.headers["Date"] = datetime.datetime.now().date().strftime('%Y-%m-%d')
+        game.headers["Round"] = "?"
+
+        if 'system_info' in self.shared:
+            if "location" in self.shared['system_info']:
+                game.headers["Site"] = self.shared['system_info']['location']
+            if "user_name" in self.shared['system_info']:
+                user_name = self.shared['system_info']['user_name']
+            if "engine_name" in self.shared['system_info']:
+                engine_name = self.shared['system_info']['engine_name']
+        else:
+            game.headers["Site"] = "picochess.org"
+            user_name = "User"
+            engine_name = "Picochess"
+
+        if 'game_info' in self.shared:
+            if "play_mode" in self.shared["game_info"]:
+                if "level" in self.shared["game_info"]:
+                    engine_name += " (Level {0})".format(self.shared["game_info"]["level"])
+                game.headers["Black"] = engine_name if self.shared["game_info"][
+                                                           "play_mode"] == PlayMode.PLAY_WHITE else user_name
+                game.headers["White"] = engine_name if self.shared["game_info"][
+                                                           "play_mode"] == PlayMode.PLAY_BLACK else user_name
+
+                comp_color = "Black" if self.shared["game_info"]["play_mode"] == PlayMode.PLAY_WHITE else "White"
+                user_color = "Black" if self.shared["game_info"]["play_mode"] == PlayMode.PLAY_BLACK else "White"
+                game.headers[comp_color + "Elo"] = "2900"
+                game.headers[user_color + "Elo"] = "-"
+
     def post(self):
         action = self.get_argument("action")
-        # print("action: {0}".format(action))
-        # $.post("/channel", { action: "broadcast", fen: currentPosition.fen, pgn: pgnEl[0].innerText}, function (data) {
+
         if action == 'broadcast':
             fen = self.get_argument("fen")
-            # print("fen: {0}".format(fen))
 
             move_stack = self.get_argument("moveStack")
             move_stack = json.loads(move_stack)
@@ -51,24 +83,14 @@ class ChannelHandler(tornado.web.RequestHandler):
             self.create_game_header(game)
 
             tmp = game
-            # move_stack = message.game.move_stack
             for move in move_stack:
                 tmp = tmp.add_variation(tmp.board().parse_san(move))
-
-            # print (message.game.move_stack)
             exporter = pgn.StringExporter()
             game.export(exporter, headers=True, comments=False, variations=False)
-            # print ("PGN: ")
-            # print (str(exporter))
-            # r = {'move': str(message.move), , 'fen': message.game.fen()}
-
-            # print("pgn: {0}".format(pgn))
-
             r = {'type': 'broadcast', 'msg': 'Received position from Spectators!', 'pgn': str(exporter), 'fen': fen}
             EventHandler.write_to_clients(r)
-
-            # if action == 'pause_cloud_engine':
-
+        elif action == 'move':
+            WebServer.fire(Event.REMOTE_MOVE, move= (self.get_argument("source") + self.get_argument("target")), fen= self.get_argument("fen"))
 
 class EventHandler(WebSocketHandler):
     clients = set()
@@ -209,13 +231,14 @@ class WebDisplay(Display, threading.Thread):
 
     def task(self, message):
         if message == Message.BOOK_MOVE:
-            EventHandler.write_to_clients({'msg': 'Book move'})
+            EventHandler.write_to_clients({'event': 'Message', 'msg': 'Book move'})
 
         elif message == Message.START_NEW_GAME:
-            EventHandler.write_to_clients({'msg': 'New game'})
+            EventHandler.write_to_clients({'event': 'NewGame'})
+            EventHandler.write_to_clients({'event': 'Message', 'msg': 'New game'})
 
         elif message == Message.SEARCH_STARTED:
-            EventHandler.write_to_clients({'msg': 'Thinking..'})
+            EventHandler.write_to_clients({'event': 'Message', 'msg': 'Thinking..'})
 
         elif message == Message.UCI_OPTION_LIST:
             self.shared['uci_options'] = message.options
@@ -266,7 +289,7 @@ class WebDisplay(Display, threading.Thread):
             game.export(exporter, headers=True, comments=False, variations=False)
             fen = message.game.fen()
             pgn_str = str(exporter)
-            r = {'pgn': pgn_str, 'fen': fen}
+            r = {'pgn': pgn_str, 'fen': fen, 'event': "newFEN"}
 
             if message == Message.COMPUTER_MOVE:
                 r['move'] = message.result.bestmove.uci()
