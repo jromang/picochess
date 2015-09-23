@@ -81,42 +81,51 @@ Copying the image to an SD Card on Mac OS X
 Manual installation
 -------------------
 
-1. Requirements
+1. **Prerequisites**
 
-PicoChess is mainly targetted for small devices like the `Raspberry Pi <http://www.raspberrypi.org>`_, however is also
-runs on a desktop computer (Linux, OSX, Windows). You will need to install this first :
-  
-* `Python 3.3 or newer <https://www.python.org/downloads/>`_ (on mac OS X, brew install python3)
-  
-* `pycrypto <https://pypi.python.org/pypi/pycrypto>`_ (on mac OS X, brew install pycrypto)
+  PicoChess is mainly targetted for small devices like the
+  `Raspberry Pi <http://www.raspberrypi.org>`_, however it also
+  runs on a desktop computer (Linux, OSX, Windows). You will need to install this
+  first:
 
-* `tornado <http://www.tornadoweb.org>`_
+  * `Python 3.4 or newer (also comes with pip) <https://www.python.org/downloads/>`_
+    (on mac OS X, ``brew install python3``)
 
-* `flask <https://github.com/mitsuhiko/flask>`_
-  
-* `git <http://git-scm.com/>`_ (the git executable has to be in the system PATH)
+  * `git <http://git-scm.com/>`_ (use git executable has to be in the system PATH)
 
-* `asyncio` (pip3 install asyncio)
+  * An UCI chess engine; `Stockfish <http://stockfishchess.org/>`_ is probably
+    the best choice !
 
-* `enum34` (pip3 install enum34)
+  * `zeroconf` (``apt-get install avahi-daemon avahi-discover libnss-mdns``, included on mac OS X)
 
-* `zeroconf` (apt-get install avahi-daemon avahi-discover libnss-mdns, included on mac OS X)
-  
-* An UCI chess engine ; `Stockfish <http://stockfishchess.org/>`_ is probably the best choice !
+2. **Get a copy of the source code**
 
-2. Clone PicoChess's git repository::
-  
-  git clone https://github.com/jromang/picochess.git
-  
-3. Checkout the stable branch (needed to enable auto-updates):
+  ``git clone --branch stable https://github.com/jromang/picochess.git``
 
-  git checkout stable  
-  
-4. Run picochess from command line ; picochess has a lot of options type::
-  
-  python3 picochess.py -h
-  
-for a list.
+  ``cd picochess``
+
+3. **Recommended step for developers: Install virtualenv**
+
+  Virtualenv provides clean and isolated development environments for your
+  Python projects (``pip3 install virtualenv`` or
+  ``apt-get install python3-virtualenv``).
+
+  Initialize a new environment: ``virtualenv -p python3 venv``
+
+  Activate the environment: ``source venv/bin/activate``
+
+  No need to use sudo to install Python packages now.
+
+  See `The Hitchhiker's Guide to Python <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_
+  for more information about virtual environments.
+
+4. **Install dependencies**
+
+  ``pip install --upgrade -r requirements.txt``
+
+5. **Run picochess from command line**
+
+  Picochess has a lot of options. Type ``python3 picochess.py -h`` for a list.
 
 Bluetooth Connection
 --------------------
