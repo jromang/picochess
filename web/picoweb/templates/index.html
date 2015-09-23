@@ -541,6 +541,7 @@ $(function () {
         var ws = new WebSocket("ws://"+location.host+"/event");
         var el=document.getElementById("DGTClockStatus");
 
+// Process messages from picochess
         ws.onmessage=function(e){
             var j = JSON.parse(e.data);
             el.innerHTML=j.msg;
@@ -553,6 +554,11 @@ $(function () {
                     break;
                 case "Message":
                     updateDGTPosition(j);
+                    break;
+                case "header":
+                    pgnData = [ [j.header] ];
+                    game.load_pgn(pgnData[0].join('\n'), {newline_char:'\n'});
+                    writeGameText(game, pgnEl, false);
                     break;
              };
         };
