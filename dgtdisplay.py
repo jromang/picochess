@@ -170,16 +170,16 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         reboot_thread.start()
 
     def build_time_control_fens(self):
-            # Build the fen map for menu selection - faster to process than full map
-            self.time_control_fen_map = list(time_control_map.keys())
-            fens_dirty = True
-            while fens_dirty:
-                fens_dirty = False
-                for key in self.time_control_fen_map:
-                    if self.time_control_mode != time_control_map[key].mode:
-                        self.time_control_fen_map.remove(key)
-                        fens_dirty = True
-                        break
+        # Build the fen map for menu selection - faster to process than full map
+        self.time_control_fen_map = list(time_control_map.keys())
+        fens_dirty = True
+        while fens_dirty:
+            fens_dirty = False
+            for key in self.time_control_fen_map:
+                if self.time_control_mode != time_control_map[key].mode:
+                    self.time_control_fen_map.remove(key)
+                    fens_dirty = True
+                    break
 
     def reset_hint_and_score(self):
         self.hint_move = chess.Move.null()

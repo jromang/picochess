@@ -409,8 +409,7 @@ def main():
     Display.show(Message.STARTUP_INFO, info={"interaction_mode": interaction_mode, "play_mode": play_mode,
                                              "book": book, "time_control_string": "mov 5"})
 
-    has_levels = ('Skill Level' in engine.get().options) or ('UCI_LimitStrength' in engine.get().options)
-    Display.show(Message.ENGINE_READY, eng=(args.engine, args.engine), has_levels=has_levels)
+    Display.show(Message.ENGINE_READY, eng=(args.engine, args.engine), has_levels=engine.has_levels())
 
     # Event loop
     while True:
@@ -501,7 +500,7 @@ def main():
                         if 'Threads' in engine.get().options:  # Stockfish
                             engine.option("Threads", args.threads)
                         if 'Core Threads' in engine.get().options:  # Hiarcs
-                                engine.option("Core Threads", args.threads)
+                            engine.option("Core Threads", args.threads)
                         if args.uci_option:
                             for uci_option in args.uci_option.strip('"').split(";"):
                                 uci_parameter = uci_option.strip().split('=')
@@ -511,7 +510,7 @@ def main():
                         # Notify other display processes    
                         Display.show(Message.UCI_OPTION_LIST, options=engine.get().options)
                         # This engine supports playing level?
-                        has_levels = ('Skill Level' in engine.get().options) or ('UCI_LimitStrength' in engine.get().options)
+                        has_levels = engine.has_levels()
                         # Send user selected engine level to new engine
                         if engine_level and engine.level(engine_level):
                             engine.send()

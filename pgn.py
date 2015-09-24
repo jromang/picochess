@@ -64,10 +64,10 @@ class PgnDisplay(Display, threading.Thread):
                 if message == Message.LEVEL:
                     self.level = message.level
                 if message == Message.ENGINE_READY:
-                    if message.eng[0] != message.eng[1]:   # Ignore startup
+                    if message.eng[0] != message.eng[1]:  # Ignore startup
                         self.engine_name = message.ename
-                    elif self.network_enabled:          # Just do this once at startup not after every game! Do while user messing around
-                        self.location = get_location()  # with first game / setting options etc
+                    elif self.network_enabled:          # Just do this once at startup not after every game! Do while
+                        self.location = get_location()  # user messing around with first game / setting options etc
                     else:
                         self.location = '?'
                 if message == Message.GAME_ENDS and message.moves:

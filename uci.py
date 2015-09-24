@@ -83,6 +83,7 @@ class Engine(Display):
     def __init__(self, path, hostname=None, username=None, key_file=None, password=None):
         super(Engine, self).__init__()
         try:
+            self.path = None
             if hostname:
                 logging.info("Connecting to [%s]", hostname)
                 if key_file:
@@ -91,7 +92,7 @@ class Engine(Display):
                 else:
                     shell = spur.SshShell(hostname=hostname, username=username, password=password,
                                           missing_host_key=paramiko.AutoAddPolicy())
-                self.engine = chess.uci.spur_spwan_engine(shell, [path])
+                self.engine = chess.uci.spur_spawn_engine(shell, [path])
             else:
                 path = which(path)
                 if not path:
@@ -102,7 +103,7 @@ class Engine(Display):
                     self.engine.uci()
                     handler = Informer()
                     self.engine.info_handlers.append(handler)
-                    self.path = path   # Save changing the engine class in chess lib
+                    self.path = path  # Save changing the engine class in chess lib
             self.options = {}
             self.future = None
 
@@ -143,6 +144,12 @@ class Engine(Display):
             logging.warning("Engine does not support skill levels")
             return False
         return True
+
+    def has_levels(self):
+        return ('Skill Level' in self.engine.options) or ('UCI_LimitStrength' in self.engine.options)
+
+    def is_local(self):
+        return self.path
 
     def position(self, game):
         self.engine.position(game)
