@@ -108,7 +108,7 @@ Manual installation
 
   Virtualenv provides clean and isolated development environments for your
   Python projects (``pip3 install virtualenv`` or
-  ``apt-get install python3-virtualenv``).
+  ``apt-get install virtualenv``).
 
   Initialize a new environment: ``virtualenv -p python3 venv``
 
