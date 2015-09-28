@@ -183,18 +183,22 @@ def main():
         sys.exit(-1)
     logging.debug('Loaded engine [%s]', engine_name)
     logging.debug('Supported options [%s]', engine.get().options)
-    if 'Hash' in engine.get().options:
-        engine.option("Hash", args.hash_size)
-    if 'Threads' in engine.get().options:  # Stockfish
-        engine.option("Threads", args.threads)
-    if 'Core Threads' in engine.get().options:  # Hiarcs
-        engine.option("Core Threads", args.threads)
-    if args.uci_option:
-        for uci_option in args.uci_option.strip('"').split(";"):
-            uci_parameter = uci_option.strip().split('=')
-            engine.option(uci_parameter[0], uci_parameter[1])
-    # send the options to the engine
-    engine.send()
+
+    def engine_startup():
+        if 'Hash' in engine.get().options:
+            engine.option("Hash", args.hash_size)
+        if 'Threads' in engine.get().options:  # Stockfish
+            engine.option("Threads", args.threads)
+        if 'Core Threads' in engine.get().options:  # Hiarcs
+            engine.option("Core Threads", args.threads)
+        if args.uci_option:
+            for uci_option in args.uci_option.strip('"').split(";"):
+                uci_parameter = uci_option.strip().split('=')
+                engine.option(uci_parameter[0], uci_parameter[1])
+        # send the options to the engine
+        engine.send()
+        # Notify other display processes
+        Display.show(Message.UCI_OPTION_LIST, options=engine.get().options)
 
     def display_system_info():
         if args.enable_internet:
@@ -403,12 +407,12 @@ def main():
 
     system_info_thread = threading.Timer(0, display_system_info)
     system_info_thread.start()
+    # send the args options to the engine
+    engine_startup()
 
     # Startup - external
-    Display.show(Message.UCI_OPTION_LIST, options=engine.get().options)
     Display.show(Message.STARTUP_INFO, info={"interaction_mode": interaction_mode, "play_mode": play_mode,
                                              "book": book, "time_control_string": "mov 5"})
-
     Display.show(Message.ENGINE_READY, eng=(args.engine, args.engine), has_levels=engine.has_levels())
 
     # Event loop
@@ -456,9 +460,8 @@ def main():
                     break
 
                 if case(Event.NEW_ENGINE):
-                    engine_shutdown = False
-                    engine_fallback = False
                     old_path = engine.path
+                    engine_shutdown = True
                     # Stop the old engine cleanly
                     engine.stop()
                     # Closeout the engine process and threads
@@ -468,15 +471,11 @@ def main():
                             if engine.kill():  # Right that does it!
                                 logging.error('Serious: Engine shutdown failure')
                                 Display.show(Message.ENGINE_READY, eng=('fail', 'fail'))
-                            else:
-                                engine_shutdown = True
-                        else:
-                            engine_shutdown = True
-                    else:
-                        engine_shutdown = True
+                                engine_shutdown = False
                     if engine_shutdown:
                         # Load the new one and send args.
                         # Local engines only
+                        engine_fallback = False
                         engine = uci.Engine(event.eng[0])
                         try:        
                             engine_name = engine.get().name
@@ -495,22 +494,7 @@ def main():
                         gc.collect()
                         # Restore options -
                         # this doesn't deal with any supplementary uci options sent 'in game', see event.UCI_OPTION_SET
-                        if 'Hash' in engine.get().options:
-                            engine.option("Hash", args.hash_size)
-                        if 'Threads' in engine.get().options:  # Stockfish
-                            engine.option("Threads", args.threads)
-                        if 'Core Threads' in engine.get().options:  # Hiarcs
-                            engine.option("Core Threads", args.threads)
-                        if args.uci_option:
-                            for uci_option in args.uci_option.strip('"').split(";"):
-                                uci_parameter = uci_option.strip().split('=')
-                                engine.option(uci_parameter[0], uci_parameter[1])
-                        # send the options to the engine
-                        engine.send()
-                        # Notify other display processes    
-                        Display.show(Message.UCI_OPTION_LIST, options=engine.get().options)
-                        # This engine supports playing level?
-                        has_levels = engine.has_levels()
+                        engine_startup()
                         # Send user selected engine level to new engine
                         if engine_level and engine.level(engine_level):
                             engine.send()
@@ -522,12 +506,9 @@ def main():
                             observe(game, time_control)
                         # All done - rock'n'roll
                         if not engine_fallback:
-                            Display.show(Message.ENGINE_READY, ename=engine_name, eng=event.eng, has_levels=has_levels)
+                            Display.show(Message.ENGINE_READY, ename=engine_name, eng=event.eng, has_levels=engine.has_levels())
                         else:
                             Display.show(Message.ENGINE_READY, eng=('fail', 'fail'))
-                    else:
-                        logging.error('Serious: Engine failed to stop')
-                        Display.show(Message.ENGINE_READY, eng=('fail', 'fail'))
                     break
 
                 if case(Event.SETUP_POSITION):  # User sets up a position

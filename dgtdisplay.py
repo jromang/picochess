@@ -255,7 +255,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
 
         if self.dgt_clock_menu == Menu.LEVEL_MENU:
             if self.engine_has_levels:
-                self.engine_level_menu = ((self.engine_level_menu-1)%self.n_levels)
+                self.engine_level_menu = ((self.engine_level_menu-1) % self.n_levels)
                 level = str(self.engine_level_menu)
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.CONFIG)
             else:
@@ -581,9 +581,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         if time_right < 0:
                             time_right = 0
                         side = 0x01 if (message.turn == chess.WHITE) != self.flip_board else 0x02
-                        if tc.mode == ClockMode.FIXED_TIME:  # LocutusOfPenguin: does that solve #27?
-                            # side = 0x02
-                            # time_right = tc.seconds_per_move
+                        if tc.mode == ClockMode.FIXED_TIME:
                             time_left = time_right = tc.seconds_per_move
                         if self.flip_board:
                             time_left, time_right = time_right, time_left
@@ -660,6 +658,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                             logging.debug("Map-Fen: shutdown")
                             self.power_off()
                         elif self.drawresign_fen in drawresign_map:
+                            logging.debug("Map-Fen: drawresign")
                             self.fire(Event.DRAWRESIGN, result=drawresign_map[self.drawresign_fen])
                         else:
                             self.fire(Event.FEN, fen=fen)

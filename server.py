@@ -171,6 +171,10 @@ class WebDisplay(Display, threading.Thread):
         game.headers["Date"] = datetime.datetime.now().date().strftime('%Y-%m-%d')
         game.headers["Round"] = "?"
 
+        game.headers["Site"] = "picochess.org"
+        user_name = "User"
+        engine_name = "Picochess"
+
         if 'system_info' in self.shared:
             if "location" in self.shared['system_info']:
                 game.headers["Site"] = self.shared['system_info']['location']
@@ -178,34 +182,32 @@ class WebDisplay(Display, threading.Thread):
                 user_name = self.shared['system_info']['user_name']
             if "engine_name" in self.shared['system_info']:
                 engine_name = self.shared['system_info']['engine_name']
-        else:
-            game.headers["Site"] = "picochess.org"
-            user_name = "User"
-            engine_name = "Picochess"
 
         if 'game_info' in self.shared:
             if "play_mode" in self.shared["game_info"]:
                 if "level" in self.shared["game_info"]:
                     engine_name += " (Level {0})".format(self.shared["game_info"]["level"])
-                game.headers["Black"] = engine_name if self.shared["game_info"][
-                                                           "play_mode"] == PlayMode.PLAY_WHITE else user_name
-                game.headers["White"] = engine_name if self.shared["game_info"][
-                                                           "play_mode"] == PlayMode.PLAY_BLACK else user_name
+                game.headers["Black"] = \
+                    engine_name if self.shared["game_info"]["play_mode"] == PlayMode.PLAY_WHITE else user_name
+                game.headers["White"] = \
+                    engine_name if self.shared["game_info"]["play_mode"] == PlayMode.PLAY_BLACK else user_name
 
                 comp_color = "Black" if self.shared["game_info"]["play_mode"] == PlayMode.PLAY_WHITE else "White"
                 user_color = "Black" if self.shared["game_info"]["play_mode"] == PlayMode.PLAY_BLACK else "White"
                 game.headers[comp_color + "Elo"] = "2900"
                 game.headers[user_color + "Elo"] = "-"
-
                 # http://www6.chessclub.com/help/PGN-spec saying: not valid!
                 # must be set in TimeControl-tag and with other format anyway
                 # if "time_control_string" in self.shared["game_info"]:
                 #    game.headers["Event"] = "Time " + self.shared["game_info"]["time_control_string"]
 
-    # @staticmethod
     def create_game_info(self):
         if 'game_info' not in self.shared:
             self.shared['game_info'] = {}
+
+    def create_system_info(self):
+        if 'system_info' not in self.shared:
+            self.shared['system_info'] = {}
 
     def task(self, message):
         if message == Message.BOOK_MOVE:
@@ -220,11 +222,16 @@ class WebDisplay(Display, threading.Thread):
         elif message == Message.UCI_OPTION_LIST:
             self.shared['uci_options'] = message.options
 
-        elif message == Message.STARTUP_INFO:
-            self.shared['game_info'] = message.info
-
         elif message == Message.SYSTEM_INFO:
             self.shared['system_info'] = message.info
+
+        elif message == Message.ENGINE_READY:
+            # self.create_system_info()
+            if message.eng[0] != message.eng[1]:  # Ignore initial startup
+                self.shared['system_info']['engine_name'] = message.ename
+
+        elif message == Message.STARTUP_INFO:
+            self.shared['game_info'] = message.info
 
         elif message == Message.OPENING_BOOK:  # Process opening book
             self.create_game_info()
@@ -245,10 +252,6 @@ class WebDisplay(Display, threading.Thread):
         elif message == Message.LEVEL:
             self.create_game_info()
             self.shared['game_info']['level'] = message.level
-
-        elif message == Message.ENGINE_READY:
-            if message.eng[0] != message.eng[1]:   # Ignore initial startup
-                self.shared['system_info']['engine_name'] = message.ename
 
         elif message == Message.COMPUTER_MOVE or message == Message.USER_MOVE or message == Message.REVIEW_MODE_MOVE:
             game = pgn.Game()

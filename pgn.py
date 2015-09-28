@@ -36,11 +36,11 @@ class PgnDisplay(Display, threading.Thread):
         self.file_name = pgn_file_name
         self.engine_name = ''
         self.user_name = ''
-        self.network_enabled = net
+        self.location = ''
         self.level = None
-        if email:  # check if email address is provided by picochess.ini
+        if email and net:  # check if email address is provided by picochess.ini and network traffic is allowed
             self.email = email
-        else:  # if no email address is set then set self.email to false so skip later sending the game as via mail
+        else:
             self.email = False
         # store information for SMTP based mail delivery
         self.smtp_server = fromIniSmtp_Server
@@ -61,15 +61,12 @@ class PgnDisplay(Display, threading.Thread):
                 if message == Message.SYSTEM_INFO:
                     self.engine_name = message.info['engine_name']
                     self.user_name = message.info['user_name']
+                    self.location = message.info['location']
                 if message == Message.LEVEL:
                     self.level = message.level
                 if message == Message.ENGINE_READY:
                     if message.eng[0] != message.eng[1]:  # Ignore startup
                         self.engine_name = message.ename
-                    elif self.network_enabled:          # Just do this once at startup not after every game! Do while
-                        self.location = get_location()  # user messing around with first game / setting options etc
-                    else:
-                        self.location = '?'
                 if message == Message.GAME_ENDS and message.moves:
                     logging.debug('Saving game to [' + self.file_name + ']')
                     game = chess.pgn.Game()
@@ -117,7 +114,7 @@ class PgnDisplay(Display, threading.Thread):
                     file.flush()
                     file.close()
                     # section send email
-                    if self.email and self.network_enabled: # check if email adress to send the game to is provided
+                    if self.email:  # check if email adress to send the game to is provided
                         if self.smtp_server: # check if smtp server adress provided
                             # if self.smtp_server is not provided than don't try to send email via smtp service
                             logging.debug("SMTP Mail delivery: Started")
