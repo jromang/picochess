@@ -103,7 +103,7 @@ class Engine(Display):
                     self.engine.uci()
                     handler = Informer()
                     self.engine.info_handlers.append(handler)
-                    self.path = path  # Save changing the engine class in chess lib
+                    self.path = path
             self.options = {}
             self.future = None
 
@@ -149,7 +149,7 @@ class Engine(Display):
         return ('Skill Level' in self.engine.options) or ('UCI_LimitStrength' in self.engine.options)
 
     def is_local(self):
-        return self.path
+        return self.path  # path is only "not none" if its a local engine - see _init__
 
     def position(self, game):
         self.engine.position(game)

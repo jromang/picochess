@@ -491,10 +491,9 @@ def get_location():
     try:
         response = urllib.request.urlopen('http://www.telize.com/geoip/')
         j = json.loads(response.read().decode())
-        country = j['country']
-        city = j['city']
-        country_code = j['country_code']
-
-        return city + ', ' + country + ' ' + country_code
+        country = j['country'] + ' ' if 'country' in j else ''
+        country_code = j['country_code'] + ' ' if 'country_code' in j else ''
+        city = j['city'] + ', ' if 'city' in j else ''
+        return city + country + country_code
     except:
         return '?'
