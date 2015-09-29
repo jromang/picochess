@@ -83,6 +83,7 @@ class Message(AutoNumber):
     REVIEW_MODE_MOVE = ()  # Player is reviewing game
     REMOTE_MODE_MOVE = ()  # DGT Player is playing vs network player
     ENGINE_READY = ()
+    ENGINE_NAME = ()
     LEVEL = ()  # User sets engine level (from 1 to 20).
     TIME_CONTROL = ()
     OPENING_BOOK = ()  # User chooses an opening book

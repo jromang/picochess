@@ -506,7 +506,8 @@ def main():
                             observe(game, time_control)
                         # All done - rock'n'roll
                         if not engine_fallback:
-                            Display.show(Message.ENGINE_READY, ename=engine_name, eng=event.eng, has_levels=engine.has_levels())
+                            Display.show(Message.ENGINE_NAME, ename=engine_name)
+                            Display.show(Message.ENGINE_READY, eng=event.eng, has_levels=engine.has_levels())
                         else:
                             Display.show(Message.ENGINE_READY, eng=('fail', 'fail'))
                     break

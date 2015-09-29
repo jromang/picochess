@@ -225,10 +225,9 @@ class WebDisplay(Display, threading.Thread):
         elif message == Message.SYSTEM_INFO:
             self.shared['system_info'] = message.info
 
-        elif message == Message.ENGINE_READY:
+        elif message == Message.ENGINE_NAME:
             # self.create_system_info()
-            if message.eng[0] != message.eng[1]:  # Ignore initial startup
-                self.shared['system_info']['engine_name'] = message.ename
+            self.shared['system_info']['engine_name'] = message.ename
 
         elif message == Message.STARTUP_INFO:
             self.shared['game_info'] = message.info

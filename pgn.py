@@ -64,9 +64,8 @@ class PgnDisplay(Display, threading.Thread):
                     self.location = message.info['location']
                 if message == Message.LEVEL:
                     self.level = message.level
-                if message == Message.ENGINE_READY:
-                    if message.eng[0] != message.eng[1]:  # Ignore startup
-                        self.engine_name = message.ename
+                if message == Message.ENGINE_NAME:
+                    self.engine_name = message.ename
                 if message == Message.GAME_ENDS and message.moves:
                     logging.debug('Saving game to [' + self.file_name + ']')
                     game = chess.pgn.Game()
