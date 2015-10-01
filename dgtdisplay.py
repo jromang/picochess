@@ -213,11 +213,13 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
             # Display current engine
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=(self.installed_engines[self.engine_index])[1], xl=None, beep=BeepLevel.CONFIG)
+            msg = (self.installed_engines[self.engine_index])[1]
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.BOOK_MENU:
             # Display current book
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=(self.all_books[self.book_index])[0], xl=None, beep=BeepLevel.CONFIG)
+            msg = (self.all_books[self.book_index])[0]
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.TIME_MENU:
             # Select a time control mode
@@ -262,12 +264,17 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no level", xl="no lvl", beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
-            self.engine_menu_index = ((self.engine_menu_index-1) % self.n_engines)
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=(self.installed_engines[self.engine_menu_index])[1], xl=None, beep=BeepLevel.CONFIG)
+            if self.installed_engines:
+                self.engine_menu_index = ((self.engine_menu_index-1) % self.n_engines)
+                msg = (self.installed_engines[self.engine_menu_index])[1]
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.CONFIG)
+            else:
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='error', xl=None, beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.BOOK_MENU:
             self.book_menu_index = ((self.book_menu_index-1) % self.n_books)
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=(self.all_books[self.book_menu_index])[0], xl=None, beep=BeepLevel.CONFIG)
+            msg = (self.all_books[self.book_menu_index])[0]
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.TIME_MENU:
             self.time_control_menu_index -= 1
@@ -331,12 +338,15 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             self.awaiting_confirm = PowerMenu.CONFIRM_PWR
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
-            # Reset level selections
-            self.engine_level_menu = self.engine_level
-            self.engine_has_levels = False
-            # This is a handshake change so index values changed and sync'd in the response below
-            self.fire(Event.NEW_ENGINE, eng=self.installed_engines[self.engine_menu_index])
-            self.engine_restart = True
+            if self.installed_engines:
+                # Reset level selections
+                self.engine_level_menu = self.engine_level
+                self.engine_has_levels = False
+                # This is a handshake change so index values changed and sync'd in the response below
+                self.fire(Event.NEW_ENGINE, eng=self.installed_engines[self.engine_menu_index])
+                self.engine_restart = True
+            else:
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='error', xl=None, beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.BOOK_MENU:
             if self.book_index != self.book_menu_index:
@@ -378,12 +388,17 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no level", xl="no lvl", beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
-            self.engine_menu_index = ((self.engine_menu_index+1) % self.n_engines)
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=(self.installed_engines[self.engine_menu_index])[1], xl=None, beep=BeepLevel.CONFIG)
+            if self.installed_engines:
+                self.engine_menu_index = ((self.engine_menu_index+1) % self.n_engines)
+                msg = (self.installed_engines[self.engine_menu_index])[1]
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.CONFIG)
+            else:
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='error', xl=None, beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.BOOK_MENU:
             self.book_menu_index = ((self.book_menu_index+1) % self.n_books)
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=(self.all_books[self.book_menu_index])[0], xl=None, beep=BeepLevel.CONFIG)
+            msg = (self.all_books[self.book_menu_index])[0]
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.TIME_MENU:
             self.time_control_menu_index += 1
@@ -436,22 +451,23 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 if type(message).__name__ == 'Message':
                     logging.debug("Read message from queue: %s", message)
                 for case in switch(message):
-                    if case(Message.ENGINE_READY):    
-                        if self.engine_restart:
-                            self.engine_index = self.installed_engines.index(message.eng)
-                            self.engine_menu_index = self.engine_index
-                            self.engine_has_levels = message.has_levels
-                            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='ok engin', xl="ok eng", beep=BeepLevel.CONFIG)
-                        else:  # for initial startup, message has a different format from our local book
-                            self.installed_engines = get_installed_engines(message.eng[0])
+                    if case(Message.ENGINE_READY):
+                        self.engine_index = self.installed_engines.index(message.eng)
+                        self.engine_menu_index = self.engine_index
+                        self.engine_has_levels = message.has_levels
+                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='ok engin', xl="ok eng", beep=BeepLevel.CONFIG)
+                        self.engine_restart = False
+                        break
+                    if case(Message.ENGINE_START):
+                        if message.path:
+                            self.installed_engines = get_installed_engines(message.path)
                             self.n_engines = len(self.installed_engines)
                             for index in range(0, self.n_engines):
                                 full_path, short = self.installed_engines[index]
-                                if full_path == message.eng[0]:
+                                if full_path == message.path:
                                     self.engine_index = index
                                     self.engine_menu_index = self.engine_index
                                     self.engine_has_levels = message.has_levels
-                        self.engine_restart = False
                         break
                     if case(Message.ENGINE_FAIL):
                         HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='error', xl=None, beep=BeepLevel.CONFIG)

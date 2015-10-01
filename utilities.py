@@ -30,7 +30,7 @@ except ImportError:
 
 
 # picochess version
-version = '053'
+version = '054'
 
 event_queue = queue.Queue()
 serial_queue = queue.Queue()
@@ -83,6 +83,7 @@ class Message(AutoNumber):
     REVIEW_MODE_MOVE = ()  # Player is reviewing game
     REMOTE_MODE_MOVE = ()  # DGT Player is playing vs network player
     ENGINE_READY = ()
+    ENGINE_START = ()
     ENGINE_FAIL = ()
     ENGINE_NAME = ()
     LEVEL = ()  # User sets engine level (from 1 to 20).
@@ -433,8 +434,8 @@ def which(program):
         if is_exe(program):
             return program
     else:
-        pe = [os.path.dirname(os.path.realpath(__file__)), os.path.dirname(os.path.realpath(__file__)) + os.sep + 'engines']
-        for path in os.environ["PATH"].split(os.pathsep) + pe:
+        pe = os.path.dirname(os.path.realpath(__file__))
+        for path in os.environ["PATH"].split(os.pathsep) + [pe, pe + os.sep + 'engines']:
             path = path.strip('"')
             exe_file = os.path.join(path, program)
             if is_exe(exe_file):

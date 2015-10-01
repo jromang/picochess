@@ -413,7 +413,7 @@ def main():
     # Startup - external
     Display.show(Message.STARTUP_INFO, info={"interaction_mode": interaction_mode, "play_mode": play_mode,
                                              "book": bookreader, "time_control_string": "mov 5"})
-    Display.show(Message.ENGINE_READY, eng=(args.engine, args.engine), has_levels=engine.has_levels())
+    Display.show(Message.ENGINE_START, path=engine.get_path(), has_levels=engine.has_levels())
 
     # Event loop
     while True:
@@ -492,8 +492,8 @@ def main():
                                 sys.exit(-1)
                         # Schedule cleanup of old objects
                         gc.collect()
-                        # Restore options -
-                        # this doesn't deal with any supplementary uci options sent 'in game', see event.UCI_OPTION_SET
+                        # Restore options - this doesn't deal with any
+                        # supplementary uci options sent 'in game', see event.UCI_OPTION_SET
                         engine_startup()
                         # Send user selected engine level to new engine
                         if engine_level and engine.level(engine_level):

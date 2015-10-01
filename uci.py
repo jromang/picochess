@@ -148,7 +148,7 @@ class Engine(Display):
     def has_levels(self):
         return ('Skill Level' in self.engine.options) or ('UCI_LimitStrength' in self.engine.options)
 
-    def is_local(self):
+    def get_path(self):
         return self.path  # path is only "not none" if its a local engine - see _init__
 
     def position(self, game):
