@@ -121,6 +121,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
 
         self.setup_to_move = chess.WHITE
         self.setup_reverse_orientation = False
+        self.setup_uci960 = False
         self.flip_board = False
         self.dgt_fen = None
         self.alternative = False
@@ -327,9 +328,9 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 fen = fen[::-1]
             fen += " {0} KQkq - 0 1".format(to_move)
             fen = complete_dgt_fen(fen)
-            if chess.Board(fen).is_valid():
+            if chess.Board(fen, self.setup_uci960).is_valid():
                 self.flip_board = self.setup_reverse_orientation
-                self.fire(Event.SETUP_POSITION, fen=fen)
+                self.fire(Event.SETUP_POSITION, fen=fen, uci960=self.setup_uci960)
             else:
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="bad pos", xl="badpos", beep=BeepLevel.YES)
 
@@ -374,6 +375,11 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 self.mode_index = 0
             mode_new = mode_list[self.mode_index]
             self.fire(Event.SET_MODE, mode=mode_new)
+
+        if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
+            self.setup_uci960 = not self.setup_uci960
+            text = '960 y' if self.setup_uci960 else '960 n'
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=text, xl=None, beep=BeepLevel.YES)
 
         if self.dgt_clock_menu == Menu.SETTINGS_MENU:
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="reboot ?", xl="-boot-", beep=BeepLevel.YES)

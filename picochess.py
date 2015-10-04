@@ -519,7 +519,7 @@ def main():
                             custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
                             Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack),
                                          color=game.turn, play_mode=play_mode, custom_fen=custom_fen)
-                    game = chess.Board(event.fen)
+                    game = chess.Board(event.fen, event.uci960)
                     game.custom_fen = event.fen
                     legal_fens = compute_legal_fens(game)
                     stop_search_and_clock()
