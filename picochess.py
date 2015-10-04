@@ -514,6 +514,12 @@ def main():
 
                 if case(Event.SETUP_POSITION):  # User sets up a position
                     logging.debug("Setting up custom fen: {0}".format(event.fen))
+                    if engine.has_chess960():
+                        engine.option('UCI_Chess960', event.uci960)
+                        engine.send()
+                    else:  # start normal new game if engine can't handle the user wish
+                        event.uci960 = False
+                        Display.show(Message.ENGINE_FAIL)  # @todo not really true but inform the user about the result
                     if game.move_stack:
                         if game.is_game_over() or game_declared:
                             custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
