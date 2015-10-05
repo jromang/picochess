@@ -378,8 +378,9 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
 
         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
             self.setup_uci960 = not self.setup_uci960
-            text = '960 y' if self.setup_uci960 else '960 n'
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=text, xl=None, beep=BeepLevel.YES)
+            text = '960 yes' if self.setup_uci960 else '960 no'
+            text_xl = '960yes' if self.setup_uci960 else '960 no'
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=text, xl=text_xl, beep=BeepLevel.YES)
 
         if self.dgt_clock_menu == Menu.SETTINGS_MENU:
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="reboot ?", xl="-boot-", beep=BeepLevel.YES)
