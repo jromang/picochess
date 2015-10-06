@@ -333,10 +333,21 @@ def main():
     args = parser.parse_args()
 
     # Enable logging
-    logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
-                        format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s',
-                        datefmt="%Y-%m-%d %H:%M:%S")
+    logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
     logging.getLogger("chess.uci").setLevel(logging.INFO)  # don't want to get so many python-chess uci messages
+
+    formatter = logging.Formatter(
+        fmt="%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S")
+
+    stream_handler = logging.StreamHandler(sys.stdout)
+    stream_handler.setFormatter(formatter)
+    logging.getLogger().addHandler(stream_handler)
+
+    if args.log_file:
+        file_handler = logging.FileHandler(args.log_file)
+        file_handler.setFormatter(formatter)
+        logging.getLogger().addHandler(file_handler)
 
     # Update
     if args.enable_internet:
