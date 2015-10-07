@@ -287,23 +287,27 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
     def process_button2(self):
 
         def complete_dgt_fen(fen):
-            # fen = str(self.setup_chessboard.fen())
-            can_castle = False
             castling_fen = ''
-            bit_board = chess.Board(fen)
-            if bit_board.piece_at(chess.E1) == chess.Piece.from_symbol("K") and bit_board.piece_at(chess.H1) == chess.Piece.from_symbol("R"):
-                can_castle = True
-                castling_fen += 'K'
-            if bit_board.piece_at(chess.E1) == chess.Piece.from_symbol("K") and bit_board.piece_at(chess.A1) == chess.Piece.from_symbol("R"):
-                can_castle = True
-                castling_fen += 'Q'
-            if bit_board.piece_at(chess.E8) == chess.Piece.from_symbol("k") and bit_board.piece_at(chess.H8) == chess.Piece.from_symbol("r"):
-                can_castle = True
-                castling_fen += 'k'
-            if bit_board.piece_at(chess.E8) == chess.Piece.from_symbol("k") and bit_board.piece_at(chess.A8) == chess.Piece.from_symbol("r"):
-                can_castle = True
-                castling_fen += 'q'
-            if not can_castle:
+            bit_board = chess.Board(fen, self.setup_uci960)
+            if self.setup_uci960:
+                if bit_board.has_kingside_castling_rights(chess.WHITE):
+                    castling_fen += 'K'
+                if bit_board.has_queenside_castling_rights(chess.WHITE):
+                    castling_fen += 'Q'
+                if bit_board.has_kingside_castling_rights(chess.BLACK):
+                    castling_fen += 'k'
+                if bit_board.has_queenside_castling_rights(chess.BLACK):
+                    castling_fen += 'q'
+            else:
+                if bit_board.castling_rights & chess.BB_H1:
+                    castling_fen += 'K'
+                if bit_board.castling_rights & chess.BB_A1:
+                    castling_fen += 'Q'
+                if bit_board.castling_rights & chess.BB_H8:
+                    castling_fen += 'k'
+                if bit_board.castling_rights & chess.BB_A8:
+                    castling_fen += 'q'
+            if not castling_fen:
                 castling_fen = '-'
             # TODO: Support fen positions where castling is not possible even if king and rook are on right squares
             return fen.replace("KQkq", castling_fen)
