@@ -53,9 +53,10 @@ class KeyboardInput(Observable, threading.Thread):
                         print(chess.Board(fen))
                     elif cmd.startswith('setup:'):
                         fen = raw.split(':')[1]
-                        uci960 = False  # easy for the moment
-                        if chess.Board(fen, uci960).is_valid():
-                            self.fire(Event.SETUP_POSITION, fen=fen, uci960=uci960)
+                        uci960 = False  # make it easy for the moment
+                        bit_board = chess.Board(fen, uci960)
+                        if bit_board.is_valid():
+                            self.fire(Event.SETUP_POSITION, fen=bit_board.fen(), uci960=uci960)
                         else:
                             raise ValueError(fen)
                     # Here starts the simulation of a dgt-board!

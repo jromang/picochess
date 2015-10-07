@@ -287,30 +287,9 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
     def process_button2(self):
 
         def complete_dgt_fen(fen):
-            castling_fen = ''
             bit_board = chess.Board(fen, self.setup_uci960)
-            if self.setup_uci960:
-                if bit_board.has_kingside_castling_rights(chess.WHITE):
-                    castling_fen += 'K'
-                if bit_board.has_queenside_castling_rights(chess.WHITE):
-                    castling_fen += 'Q'
-                if bit_board.has_kingside_castling_rights(chess.BLACK):
-                    castling_fen += 'k'
-                if bit_board.has_queenside_castling_rights(chess.BLACK):
-                    castling_fen += 'q'
-            else:
-                if bit_board.castling_rights & chess.BB_H1:
-                    castling_fen += 'K'
-                if bit_board.castling_rights & chess.BB_A1:
-                    castling_fen += 'Q'
-                if bit_board.castling_rights & chess.BB_H8:
-                    castling_fen += 'k'
-                if bit_board.castling_rights & chess.BB_A8:
-                    castling_fen += 'q'
-            if not castling_fen:
-                castling_fen = '-'
-            # TODO: Support fen positions where castling is not possible even if king and rook are on right squares
-            return fen.replace("KQkq", castling_fen)
+            # ask python-chess to correct the castling string
+            return bit_board.set_fen(bit_board.fen())
 
         if self.dgt_clock_menu == Menu.GAME_MENU:
             if self.mode == Mode.GAME:
@@ -331,10 +310,10 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 logging.debug('Flipping the board')
                 fen = fen[::-1]
             fen += " {0} KQkq - 0 1".format(to_move)
-            fen = complete_dgt_fen(fen)
-            if chess.Board(fen, self.setup_uci960).is_valid():
+            bit_board = complete_dgt_fen(fen)
+            if bit_board.is_valid():
                 self.flip_board = self.setup_reverse_orientation
-                self.fire(Event.SETUP_POSITION, fen=fen, uci960=self.setup_uci960)
+                self.fire(Event.SETUP_POSITION, fen=bit_board.fen(), uci960=self.setup_uci960)
             else:
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="bad pos", xl="badpos", beep=BeepLevel.YES)
 
