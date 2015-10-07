@@ -289,7 +289,8 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         def complete_dgt_fen(fen):
             bit_board = chess.Board(fen, self.setup_uci960)
             # ask python-chess to correct the castling string
-            return bit_board.set_fen(bit_board.fen())
+            bit_board.set_fen(bit_board.fen())
+            return bit_board
 
         if self.dgt_clock_menu == Menu.GAME_MENU:
             if self.mode == Mode.GAME:
