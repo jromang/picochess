@@ -66,29 +66,29 @@ class PgnDisplay(Display, threading.Thread):
                     self.level = message.level
                 if message == Message.ENGINE_NAME:
                     self.engine_name = message.ename
-                if message == Message.GAME_ENDS and message.moves:
-                    logging.debug('Saving game to [' + self.file_name + ']')
-                    game = chess.pgn.Game()
-                    if message.custom_fen:
-                        b = chess.Board(message.custom_fen)
-                        game.setup(b)
-                    node = game
-                    for move in message.moves:
+
+                if message == Message.GAME_ENDS and message.game.move_stack:
+                    logging.debug('Saving pgn to [' + self.file_name + ']')
+                    pgn = chess.pgn.Game()
+                    if hasattr(message.game, 'custom_fen'):
+                        pgn.setup(message.game)
+                    node = pgn
+                    for move in message.game.move_stack:
                         node = node.add_main_variation(move)
                     # Headers
-                    game.headers["Event"] = "PicoChess game"
-                    game.headers["Site"] = self.location
-                    game.headers["Date"] = datetime.date.today().strftime('%Y.%m.%d')
-                    game.headers["Round"] = "?"
+                    pgn.headers["Event"] = "PicoChess pgn"
+                    pgn.headers["Site"] = self.location
+                    pgn.headers["Date"] = datetime.date.today().strftime('%Y.%m.%d')
+                    pgn.headers["Round"] = "?"
                     if message.result == GameResult.ABORT:
-                        game.headers["Result"] = "*"
+                        pgn.headers["Result"] = "*"
                     elif message.result in (GameResult.DRAW, GameResult.STALEMATE, GameResult.SEVENTYFIVE_MOVES,
                                             GameResult.FIVEFOLD_REPETITION, GameResult.INSUFFICIENT_MATERIAL):
-                        game.headers["Result"] = "1/2-1/2"
+                        pgn.headers["Result"] = "1/2-1/2"
                     elif message.result in (GameResult.RESIGN_WHITE, GameResult.RESIGN_BLACK):
-                        game.headers["Result"] = "1-0" if message.result == GameResult.RESIGN_WHITE else "0-1"
+                        pgn.headers["Result"] = "1-0" if message.result == GameResult.RESIGN_WHITE else "0-1"
                     elif message.result in (GameResult.MATE, GameResult.TIME_CONTROL):
-                        game.headers["Result"] = "0-1" if message.color == chess.WHITE else "1-0"
+                        pgn.headers["Result"] = "0-1" if message.game.turn == chess.WHITE else "1-0"
 
                     if self.level is None:
                         engine_level = ""
@@ -96,24 +96,24 @@ class PgnDisplay(Display, threading.Thread):
                         engine_level = " (Level {0})".format(self.level)
 
                     if message.play_mode == PlayMode.PLAY_WHITE:
-                        game.headers["White"] = self.user_name
-                        game.headers["Black"] = self.engine_name + engine_level
-                        game.headers["WhiteElo"] = "-"
-                        game.headers["BlackElo"] = "2900"
+                        pgn.headers["White"] = self.user_name
+                        pgn.headers["Black"] = self.engine_name + engine_level
+                        pgn.headers["WhiteElo"] = "-"
+                        pgn.headers["BlackElo"] = "2900"
                     if message.play_mode == PlayMode.PLAY_BLACK:
-                        game.headers["White"] = self.engine_name + engine_level
-                        game.headers["Black"] = self.user_name
-                        game.headers["WhiteElo"] = "2900"
-                        game.headers["BlackElo"] = "-"
+                        pgn.headers["White"] = self.engine_name + engine_level
+                        pgn.headers["Black"] = self.user_name
+                        pgn.headers["WhiteElo"] = "2900"
+                        pgn.headers["BlackElo"] = "-"
 
                     # Save to file
                     file = open(self.file_name, "a")
                     exporter = chess.pgn.FileExporter(file)
-                    game.export(exporter)
+                    pgn.export(exporter)
                     file.flush()
                     file.close()
                     # section send email
-                    if self.email:  # check if email adress to send the game to is provided
+                    if self.email:  # check if email adress to send the pgn to is provided
                         if self.smtp_server: # check if smtp server adress provided
                             # if self.smtp_server is not provided than don't try to send email via smtp service
                             logging.debug("SMTP Mail delivery: Started")
@@ -128,7 +128,7 @@ class PgnDisplay(Display, threading.Thread):
                                 logging.debug("SMTP Mail delivery: Import standard SMTP Lib (no SSL encryption)")
                                 from smtplib import SMTP
                             try:
-                                msg = MIMEText(str(game), 'plain')  # pack the game to Email body
+                                msg = MIMEText(str(pgn), 'plain')  # pack the pgn to Email body
                                 msg['Subject'] = "Game PGN"  # put subject to mail
                                 msg['From'] = "Your PicoChess computer <no-reply@picochess.org>"
                                 logging.debug("SMTP Mail delivery: trying to connect to " + self.smtp_server)
@@ -152,13 +152,13 @@ class PgnDisplay(Display, threading.Thread):
                                 logging.error("SMTP Mail delivery: Failed")
                                 logging.error("SMTP Mail delivery: " + str(exec))
                         # smtp based system end
-                        if self.mailgun_key:  # check if we have the mailgun-key available to send the game successful
+                        if self.mailgun_key:  # check if we have the mailgun-key available to send the pgn successful
                             out = requests.post("https://api.mailgun.net/v2/picochess.org/messages",
                                                 auth=("api", self.mailgun_key),
                                                 data={"from": "Your PicoChess computer <no-reply@picochess.org>",
                                                       "to": self.email,
                                                       "subject": "Game PGN",
-                                                      "text": str(game)})
+                                                      "text": str(pgn)})
                             logging.debug(out)
             except queue.Empty:
                 pass

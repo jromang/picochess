@@ -224,7 +224,7 @@ class BeepLevel(AutoNumber):
 
 
 @enum.unique
-class Commands(enum.Enum):
+class DgtCmd(enum.Enum):
     """ COMMAND CODES FROM PC TO BOARD """
     # Commands not resulting in returning messages:
     DGT_SEND_RESET = 0x40  # Puts the board in IDLE mode, cancelling any UPDATE mode
@@ -255,7 +255,7 @@ class Commands(enum.Enum):
     DGT_CLOCK_MESSAGE = 0x2b  # This message contains a command for the clock.
 
 
-class Clock(enum.Enum):
+class DgtClk(enum.Enum):
     DGT_CMD_CLOCK_DISPLAY = 0x01  # This command can control the segments of six 7-segment characters,
     # two dots, two semicolons and the two '1' symbols.
     DGT_CMD_CLOCK_ICONS = 0x02  # Used to control the clock icons like flags etc.
@@ -274,7 +274,7 @@ class Clock(enum.Enum):
     DGT_ACK_CLOCK_BUTTON = 0x88  # Ack of a clock button
 
 
-class Messages(enum.IntEnum):
+class DgtMsg(enum.IntEnum):
     """
     DESCRIPTION OF THE MESSAGES FROM BOARD TO PC
     """

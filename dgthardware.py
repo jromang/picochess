@@ -39,9 +39,9 @@ class DGTHardware(DGTInterface):
                 logging.warning('DGT XL clock message too long [%s]', text)
             logging.debug(text)
             self.write(
-                [Commands.DGT_CLOCK_MESSAGE, 0x0b, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_DISPLAY,
+                [DgtCmd.DGT_CLOCK_MESSAGE, 0x0b, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_DISPLAY,
                  text[2], text[1], text[0], text[5], text[4], text[3], 0x00, 0x03 if beep else 0x01,
-                 Clock.DGT_CMD_CLOCK_END_MESSAGE])
+                 DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
 
     def _display_on_dgt_3000(self, text, beep=False):
         if self.enable_dgt_3000:
@@ -51,9 +51,9 @@ class DGTHardware(DGTInterface):
                 logging.warning('DGT 3000 clock message too long [%s]', text)
             logging.debug(text)
             text = bytes(text, 'utf-8')
-            self.write([Commands.DGT_CLOCK_MESSAGE, 0x0c, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_ASCII,
+            self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0c, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_ASCII,
                         text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], 0x03 if beep else 0x01,
-                        Clock.DGT_CMD_CLOCK_END_MESSAGE])
+                        DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
 
     def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG, force=True):
         beep = self.get_beep_level(beep)
@@ -85,22 +85,22 @@ class DGTHardware(DGTInterface):
             for sq in squares:
                 dgt_square = (8 - int(sq[1])) * 8 + ord(sq[0]) - ord('a')
                 logging.debug("REV2 light on square %s(%i)", sq, dgt_square)
-                self.write([Commands.DGT_SET_LEDS, 0x04, 0x01, dgt_square, dgt_square])
+                self.write([DgtCmd.DGT_SET_LEDS, 0x04, 0x01, dgt_square, dgt_square])
 
     def clear_light_revelation_board(self):
         if self.enable_board_leds:
-            self.write([Commands.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
+            self.write([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
 
     def stop_clock(self):
-        self.write([Commands.DGT_CLOCK_MESSAGE, 0x0a, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_SETNRUN,
+        self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0a, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_SETNRUN,
                     0, 0, 0, 0, 0, 0,
-                    0x04 | 0x01, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+                    0x04 | 0x01, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
 
     def start_clock(self, time_left, time_right, side):
         l_hms = hours_minutes_seconds(time_left)
         r_hms = hours_minutes_seconds(time_right)
-        self.write([Commands.DGT_CLOCK_MESSAGE, 0x0a, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_SETNRUN,
+        self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0a, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_SETNRUN,
                     l_hms[0], l_hms[1], l_hms[2], r_hms[0], r_hms[1], r_hms[2],
-                    side, Clock.DGT_CMD_CLOCK_END_MESSAGE])
-        self.write([Commands.DGT_CLOCK_MESSAGE, 0x03, Clock.DGT_CMD_CLOCK_START_MESSAGE, Clock.DGT_CMD_CLOCK_END,
-                    Clock.DGT_CMD_CLOCK_END_MESSAGE])
+                    side, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_END,
+                    DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
