@@ -68,18 +68,13 @@ class PgnDisplay(Display, threading.Thread):
                     self.engine_name = message.ename
 
                 if message == Message.GAME_ENDS and message.game.move_stack:
-                    logging.debug('Saving pgn to [' + self.file_name + ']')
+                    logging.debug('Saving game to [' + self.file_name + ']')
                     pgn = chess.pgn.Game()
-                    if hasattr(message.game, 'custom_fen'):
-                        pgn.setup(message.game)
-                    node = pgn
-                    for move in message.game.move_stack:
-                        node = node.add_main_variation(move)
+                    pgn.setup(message.game)
                     # Headers
-                    pgn.headers["Event"] = "PicoChess pgn"
+                    pgn.headers["Event"] = "PicoChess game"
                     pgn.headers["Site"] = self.location
                     pgn.headers["Date"] = datetime.date.today().strftime('%Y.%m.%d')
-                    pgn.headers["Round"] = "?"
                     if message.result == GameResult.ABORT:
                         pgn.headers["Result"] = "*"
                     elif message.result in (GameResult.DRAW, GameResult.STALEMATE, GameResult.SEVENTYFIVE_MOVES,
