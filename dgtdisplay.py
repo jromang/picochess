@@ -125,6 +125,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         self.flip_board = False
         self.dgt_fen = None
         self.alternative = False
+        self.ip = '?'  # the last two parts of the IP
 
         self.dgt_clock_menu = Menu.GAME_MENU
         self.last_move = chess.Move.null()
@@ -264,6 +265,9 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             else:
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no level", xl="no lvl", beep=BeepLevel.CONFIG)
 
+        if self.dgt_clock_menu == Menu.SETTINGS_MENU:
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=self.ip, xl=None, beep=BeepLevel.CONFIG)
+
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
             if self.installed_engines:
                 self.engine_menu_index = ((self.engine_menu_index-1) % self.n_engines)
@@ -285,13 +289,6 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg, beep=BeepLevel.CONFIG)
 
     def process_button2(self):
-
-        def complete_dgt_fen(fen):
-            bit_board = chess.Board(fen, self.setup_uci960)
-            # ask python-chess to correct the castling string
-            bit_board.set_fen(bit_board.fen())
-            return bit_board
-
         if self.dgt_clock_menu == Menu.GAME_MENU:
             if self.mode == Mode.GAME:
                 if self.alternative:
@@ -311,12 +308,22 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 logging.debug('Flipping the board')
                 fen = fen[::-1]
             fen += " {0} KQkq - 0 1".format(to_move)
-            bit_board = complete_dgt_fen(fen)
+            bit_board = chess.Board(fen, self.setup_uci960)
+            # ask python-chess to correct the castling string
+            bit_board.set_fen(bit_board.fen())
             if bit_board.is_valid():
                 self.flip_board = self.setup_reverse_orientation
                 self.fire(Event.SETUP_POSITION, fen=bit_board.fen(), uci960=self.setup_uci960)
             else:
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="bad pos", xl="badpos", beep=BeepLevel.YES)
+
+        if self.dgt_clock_menu == Menu.LEVEL_MENU:
+            if self.engine_has_levels:
+                if self.engine_level != self.engine_level_menu:
+                    self.fire(Event.LEVEL, level=self.engine_level_menu)
+                    HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok level", xl="ok lvl", beep=BeepLevel.CONFIG)
+            else:
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no level", xl="no lvl", beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.SETTINGS_MENU:
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="pwroff ?", xl="-off-", beep=BeepLevel.YES)
@@ -336,14 +343,6 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         if self.dgt_clock_menu == Menu.BOOK_MENU:
             if self.book_index != self.book_menu_index:
                 self.fire(Event.OPENING_BOOK, book=self.all_books[self.book_menu_index])
-
-        if self.dgt_clock_menu == Menu.LEVEL_MENU:
-            if self.engine_has_levels:
-                if self.engine_level != self.engine_level_menu:
-                    self.fire(Event.LEVEL, level=self.engine_level_menu)
-                    HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok level", xl="ok lvl", beep=BeepLevel.CONFIG)
-            else:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no level", xl="no lvl", beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.TIME_MENU: 
             if self.time_control_index != self.time_control_menu_index:
@@ -366,10 +365,6 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             text_xl = '960yes' if self.setup_uci960 else '960 no'
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=text, xl=text_xl, beep=BeepLevel.YES)
 
-        if self.dgt_clock_menu == Menu.SETTINGS_MENU:
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="reboot ?", xl="-boot-", beep=BeepLevel.YES)
-            self.awaiting_confirm = PowerMenu.CONFIRM_RBT
-
         if self.dgt_clock_menu == Menu.LEVEL_MENU:
             if self.engine_has_levels:
                 self.engine_level_menu = ((self.engine_level_menu+1) % self.n_levels)
@@ -377,6 +372,10 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.CONFIG)
             else:
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no level", xl="no lvl", beep=BeepLevel.CONFIG)
+
+        if self.dgt_clock_menu == Menu.SETTINGS_MENU:
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="reboot ?", xl="-boot-", beep=BeepLevel.YES)
+            self.awaiting_confirm = PowerMenu.CONFIRM_RBT
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
             if self.installed_engines:
@@ -517,7 +516,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                             self.engine_level = self.engine_level_menu
                         else:
                             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level,
-                                             beep=BeepLevel.CONFIG)
+                                                 beep=BeepLevel.CONFIG)
                         break
                     if case(Message.TIME_CONTROL):
                         HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=message.time_control_string, xl=None,
@@ -572,6 +571,9 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                             HardwareDisplay.show(Dgt.DISPLAY_MOVE, move=self.hint_move, fen=self.hint_fen,
                                                  beep=BeepLevel.NO)
                         break
+                    if case(Message.SYSTEM_INFO):
+                        self.ip = ' '.join(message.ip.split('.')[2:])
+                        break
                     if case(Message.SEARCH_STARTED):
                         logging.debug('Search started')
                         break
@@ -604,7 +606,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                                 self.power_off()
                             if (self.awaiting_confirm == PowerMenu.CONFIRM_RBT) and (button == 3):
                                 self.reboot()
-                            else: # Abort!
+                            else:  # Abort!
                                 self.awaiting_confirm = PowerMenu.CONFIRM_NONE   
                         if not self.engine_restart and (self.awaiting_confirm == PowerMenu.CONFIRM_NONE):
                             if button == 0:
@@ -620,7 +622,6 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         break
                     if case(Message.DGT_FEN):
                         fen = message.fen
-
                         if self.flip_board:  # Flip the board if needed
                             fen = fen[::-1]
                         if fen == "RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr":  # Check if we have to flip the board
