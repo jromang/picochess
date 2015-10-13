@@ -572,7 +572,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                                                  beep=BeepLevel.NO)
                         break
                     if case(Message.SYSTEM_INFO):
-                        self.ip = ' '.join(message.ip.split('.')[2:])
+                        self.ip = ' '.join(message.info["ip"].split('.')[2:])
                         break
                     if case(Message.SEARCH_STARTED):
                         logging.debug('Search started')
