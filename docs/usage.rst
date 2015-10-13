@@ -141,7 +141,7 @@ First setup your position.
 * First button chooses the side to move, Black or White
 * Second button chooses the board orientation, "b" & "w" showing the starting side for each color. So for example white pawns moving from w to b side
 * Third button scans in the position on board. Clock will respond with "scan" and "new game". Now picochess is waiting for your next move. If you want picochess to start press the third button
-* Fouth button chooses between regular chess mode and the chess960 (Fischer-Random-Chess) mode. Please note not all chess engines support chess960 mode.
+* Fouth button chooses between regular chess mode and the chess960 (Fischer-Random-Chess) mode. Please note not all chess engines support chess960 mode
 
 Clock buttons (in Level menu)
 -----------------------------
@@ -185,8 +185,8 @@ Books "a" to "j" are used for setting from the board and contain the existing sy
 Clock Buttons (in System menu)
 ------------------------------
 
-* First button has no function
-* Second button has no function
+* First button shows the picochess version
+* Second button shows the last two parts of your IP-address
 * Third button shutdown the machine. You have to press twice to activate this shutdown (for your safety). Pressing another button cancels it
 * Fourth button reboots the machine. You have to press twice to activate this reboot (for your safety). Pressing another button cancels it
 
