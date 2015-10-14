@@ -83,7 +83,8 @@ class PgnDisplay(Display, threading.Thread):
                 if message == Message.GAME_ENDS and message.game.move_stack:
                     logging.debug('Saving game to [' + self.file_name + ']')
                     pgn = chess.pgn.Game()
-                    pgn.setup(message.game)
+                    if hasattr(message.game, 'custom_fen'):
+                        pgn.setup(message.game.custom_fen)
                     node = pgn
                     for move in message.game.move_stack:
                         node = node.add_main_variation(move)
