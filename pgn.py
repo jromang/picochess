@@ -35,6 +35,7 @@ class PgnDisplay(Display, threading.Thread):
         super(PgnDisplay, self).__init__()
         self.file_name = pgn_file_name
         self.engine_name = ''
+        self.old_engine = ''
         self.user_name = ''
         self.network_enabled = net
         self.level = None
@@ -60,12 +61,20 @@ class PgnDisplay(Display, threading.Thread):
                 message = self.message_queue.get()
                 if message == Message.SYSTEM_INFO:
                     self.engine_name = message.info['engine_name']
+                    self.old_engine = self.engine_name
                     self.user_name = message.info['user_name']
                 if message == Message.LEVEL:
                     self.level = message.level
+                if message == Message.INTERACTION_MODE:
+                    if message.mode == Mode.REMOTE:
+                        self.old_engine = self.engine_name
+                        self.engine_name = "Remote Player"
+                    else:
+                        self.engine_name = self.old_engine
                 if message == Message.ENGINE_READY:
                     if message.eng[0] != message.eng[1]:   # Ignore startup
                         self.engine_name = message.ename
+                        self.old_engine = self.engine_name
                     elif self.network_enabled:          # Just do this once at startup not after every game! Do while user messing around
                         self.location = get_location()  # with first game / setting options etc
                     else:

@@ -572,12 +572,12 @@ def main():
                     break
 
                 if case(Event.STARTSTOP_THINK):
-                    if engine.is_thinking():
+                    if engine.is_thinking() and (interaction_mode != Mode.REMOTE):
                         stop_search_and_clock()
                     else:
                         play_mode = PlayMode.PLAY_WHITE if play_mode == PlayMode.PLAY_BLACK else PlayMode.PLAY_BLACK
                         Display.show(Message.PLAY_MODE, play_mode=play_mode)
-                        if check_game_state(game, play_mode):
+                        if check_game_state(game, play_mode) and (interaction_mode != Mode.REMOTE):
                             think(game, time_control)
                     break
 

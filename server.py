@@ -25,7 +25,6 @@ from multiprocessing.pool import ThreadPool
 from utilities import *
 import queue
 from web.picoweb import picoweb as pw
-import pgnheader
 import chess.pgn as pgn
 import json
 import datetime
@@ -34,12 +33,68 @@ _workers = ThreadPool(5)
 
 client_ips = []
 
+def create_game_header(cls, game):
+    game.headers["Result"] = "*"
+    game.headers["White"] = "None"
+    game.headers["Black"] = "None"
+    game.headers["Event"] = "PicoChess game"
+    game.headers["Date"] = datetime.datetime.now().date().strftime('%Y-%m-%d')
+    game.headers["Round"] = "?"
+
+    if 'system_info' in cls.shared:
+        if "location" in cls.shared['system_info']:
+            game.headers["Site"] = cls.shared['system_info']['location']
+        if "user_name" in cls.shared['system_info']:
+            user_name = cls.shared['system_info']['user_name']
+        if "engine_name" in cls.shared['system_info']:
+            engine_name = cls.shared['system_info']['engine_name']
+    else:
+        game.headers["Site"] = "picochess.org"
+        user_name = "User"
+        engine_name = "Picochess"
+        
+
+    if 'game_info' in cls.shared:
+        if "play_mode" in cls.shared["game_info"]:
+            if "level" in cls.shared["game_info"]:
+                engine_name += " (Level {0})".format(cls.shared["game_info"]["level"])
+            game.headers["Black"] = engine_name if cls.shared["game_info"][
+                                                       "play_mode"] == PlayMode.PLAY_WHITE else user_name
+            game.headers["White"] = engine_name if cls.shared["game_info"][
+                                                       "play_mode"] == PlayMode.PLAY_BLACK else user_name
+
+            comp_color = "Black" if cls.shared["game_info"]["play_mode"] == PlayMode.PLAY_WHITE else "White"
+            user_color = "Black" if cls.shared["game_info"]["play_mode"] == PlayMode.PLAY_BLACK else "White"
+            game.headers[comp_color + "Elo"] = "2900"
+            game.headers[user_color + "Elo"] = "-"
+
+    # http://www6.chessclub.com/help/PGN-spec saying: not valid!
+    # must be set in TimeControl-tag and with other format anyway
+    # if "time_control_string" in self.shared["game_info"]:
+    #    game.headers["Event"] = "Time " + self.shared["game_info"]["time_control_string"]
+
+def update_headers(cls):
+    g = pgn.Game()
+    create_game_header(cls, g)
+    exp = pgn.StringExporter()
+    g.export(exp, headers=True, comments=False, variations=False)
+    pgn_str = str(exp)
+    EventHandler.write_to_clients({'event': 'header', 'header': pgn_str})
+
+
 class ChannelHandler(tornado.web.RequestHandler):
     def initialize(self, shared=None):
         self.shared = shared
 
+    def real_ip(self):
+        x_real_ip = self.request.headers.get("X-Real-IP")
+        real_ip = self.request.remote_ip if not x_real_ip else x_real_ip
+        return real_ip
+
     def post(self):
         action = self.get_argument("action")
+        if self.real_ip() == client_ips[0]:
+            print("Client IP hit!")
 
         if action == 'broadcast':
             fen = self.get_argument("fen")
@@ -48,7 +103,7 @@ class ChannelHandler(tornado.web.RequestHandler):
             move_stack = json.loads(move_stack)
             game = pgn.Game()
 
-            pgnheader.create_game_header(self, game)
+            create_game_header(self, game)
 
             tmp = game
             for move in move_stack:
@@ -75,6 +130,7 @@ class EventHandler(WebSocketHandler):
     def open(self):
         EventHandler.clients.add(self)
         client_ips.append(self.real_ip())
+        update_headers(self)
 
     def on_close(self):
         EventHandler.clients.remove(self)
@@ -166,14 +222,6 @@ class WebDisplay(Display, threading.Thread):
         if 'game_info' not in self.shared:
             self.shared['game_info'] = {}
 
-    def update_headers(self):
-        g = pgn.Game()
-        pgnheader.create_game_header(self, g)
-        exp = pgn.StringExporter()
-        g.export(exp, headers=True, comments=False, variations=False)
-        pgn_str = str(exp)
-        EventHandler.write_to_clients({'event': 'header', 'header': pgn_str})
-
     def task(self, message):
         if message == Message.BOOK_MOVE:
             EventHandler.write_to_clients({'event': 'Message', 'msg': 'Book move'})
@@ -181,7 +229,7 @@ class WebDisplay(Display, threading.Thread):
         elif message == Message.START_NEW_GAME:
             EventHandler.write_to_clients({'event': 'NewGame'})
             EventHandler.write_to_clients({'event': 'Message', 'msg': 'New game'})
-            self.update_headers()
+            update_headers(self)
 
         elif message == Message.SEARCH_STARTED:
             EventHandler.write_to_clients({'event': 'Message', 'msg': 'Thinking..'})
@@ -194,6 +242,8 @@ class WebDisplay(Display, threading.Thread):
 
         elif message == Message.SYSTEM_INFO:
             self.shared['system_info'] = message.info
+            self.shared['system_info']['old_engine'] = self.shared['system_info']['engine_name']
+            update_headers(self)
 
         elif message == Message.OPENING_BOOK:  # Process opening book
             self.create_game_info()
@@ -202,6 +252,11 @@ class WebDisplay(Display, threading.Thread):
         elif message == Message.INTERACTION_MODE:  # Process interaction mode
             self.create_game_info()
             self.shared['game_info']['mode'] = message.mode
+            if self.shared['game_info']['mode'] == Mode.REMOTE:
+                self.shared['system_info']['engine_name'] = "Remote Player"
+            else:
+                self.shared['system_info']['engine_name'] = self.shared['system_info']['old_engine']
+            update_headers(self)
 
         elif message == Message.PLAY_MODE:  # Process play mode
             self.create_game_info()
@@ -213,19 +268,20 @@ class WebDisplay(Display, threading.Thread):
 
         elif message == Message.LEVEL:
             self.shared['game_info']['level'] = message.level
-            self.update_headers()
+            update_headers(self)
 
         elif message == Message.ENGINE_READY:
             if message.eng[0] != message.eng[1]:   # Ignore initial startup
                 self.shared['system_info']['engine_name'] = message.ename
-            self.update_headers()
+                self.shared['system_info']['old_engine'] = message.ename
+            update_headers(self)
 
         elif message == Message.COMPUTER_MOVE or message == Message.USER_MOVE or message == Message.REVIEW_MODE_MOVE:
             game = pgn.Game()
             custom_fen = getattr(message.game, 'custom_fen', None)
             if custom_fen:
                 game.setup(custom_fen)
-            pgnheader.create_game_header(self, game)
+            create_game_header(self, game)
 
             tmp = game
             move_stack = message.game.move_stack
