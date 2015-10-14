@@ -31,7 +31,10 @@ import datetime
 
 _workers = ThreadPool(5)
 
+# This needs to be reworked to be session based (probably by token)
+# Otherwise multiple clients behind a NAT can all play as the 'player'
 client_ips = []
+
 
 def create_game_header(cls, game):
     game.headers["Result"] = "*"
