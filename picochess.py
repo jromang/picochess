@@ -77,124 +77,22 @@ class AlternativeMover:
 
 
 def main():
-  
-    # Enable garbage collection - needed for engine swapping as objects orphaned
-    gc.enable()
 
-    # Command line argument parsing
-    parser = configargparse.ArgParser(default_config_files=[os.path.join(os.path.dirname(__file__), "picochess.ini")])
-    parser.add_argument("-e", "--engine", type=str, help="UCI engine executable path", default='engines/stockfish')
-    parser.add_argument("-d", "--dgt-port", type=str,
-                        help="enable dgt board on the given serial port such as /dev/ttyUSB0")
-    parser.add_argument("-leds", "--enable-dgt-board-leds", action='store_true', help="enable dgt board leds")
-    parser.add_argument("-hs", "--hash-size", type=int, help="hashtable size in MB (default:64)", default=64)
-    parser.add_argument("-t", "--threads", type=int, help="number of engine threads (default:1)", default=1)
-    parser.add_argument("-l", "--log-level", choices=['notset', 'debug', 'info', 'warning', 'error', 'critical'],
-                        default='warning', help="logging level")
-    parser.add_argument("-lf", "--log-file", type=str, help="log to the given file")
-    parser.add_argument("-r", "--remote", type=str, help="remote server running the engine")
-    parser.add_argument("-u", "--user", type=str, help="remote user on server running the engine")
-    parser.add_argument("-p", "--password", type=str, help="password for the remote user")
-    parser.add_argument("-sk", "--server-key", type=str, help="key file used to connect to the remote server")
-    parser.add_argument("-pgn", "--pgn-file", type=str, help="pgn file used to store the games", default='games.pgn')
-    parser.add_argument("-pgn_u", "--pgn-user", type=str, help="user name for the pgn file", default=None)
-    parser.add_argument("-ar", "--auto-reboot", action='store_true', help="reboot system after update")
-    parser.add_argument("-web", "--web-server", dest="web_server_port", nargs="?", const=80, type=int, metavar="PORT",
-                        help="launch web server")
-    parser.add_argument("-mail", "--email", type=str, help="email used to send pgn files", default=None)
-    parser.add_argument("-mail_s", "--smtp_server", type=str, help="Adress of email server", default=None)
-    parser.add_argument("-mail_u", "--smtp_user", type=str, help="Username for email server", default=None)
-    parser.add_argument("-mail_p", "--smtp_pass", type=str, help="Password for email server", default=None)
-    parser.add_argument("-mail_enc", "--smtp_encryption", action='store_true',
-                        help="use ssl encryption connection to smtp-Server")
-    parser.add_argument("-mk", "--mailgun-key", type=str, help="key used to send emails via Mailgun Webservice",
-                        default=None)
-    parser.add_argument("-uci", "--uci-option", type=str, help="pass an UCI option to the engine (name;value)",
-                        default=None)
-    parser.add_argument("-dgt3000", "--dgt-3000-clock", action='store_true', help="use dgt 3000 clock (DEPRECATED!)")
-    parser.add_argument("-nobeep", "--disable-dgt-clock-beep", action='store_true',
-                        help="disable beeps on the dgt clock")
-    parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
-    parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
-    parser.add_argument("-inet", "--enable-internet", action='store_true', help="enable/disable internet lookups")
-    parser.add_argument("-nookmove", "--disable-ok-move", action='store_false', help="enable/disable ok move messages")
-    parser.add_argument("-v", "--version", action='version', version='%(prog)s version {}'.format(version),
-                        help="show current version", default=None)
-
-    args = parser.parse_args()
-
-    # Enable logging
-    logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
-                        format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s',
-                        datefmt="%Y-%m-%d %H:%M:%S")
-    logging.getLogger("chess.uci").setLevel(logging.INFO)  # don't want to get so many python-chess uci messages
-
-    # Update
-    if args.enable_internet:
-        update_picochess(args.auto_reboot)
-
-    # This class talks to DGTHardware or DGTVirtual
-    DGTDisplay(args.disable_ok_move).start()
-
-    if args.dgt_port:
-        # Connect to DGT board
-        logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
-        DGTHardware(args.dgt_port, args.enable_dgt_board_leds, args.disable_dgt_clock_beep).start()
-    else:
-        # Enable keyboard input and terminal display
-        logging.warning("No DGT board port provided")
-        KeyboardInput().start()
-        TerminalDisplay().start()
-        DGTVirtual(args.enable_dgt_board_leds, args.disable_dgt_clock_beep).start()
-
-    # Save to PGN
-    PgnDisplay(
-        args.pgn_file, net=args.enable_internet, email=args.email, fromINIMailGun_Key=args.mailgun_key,
-        fromIniSmtp_Server=args.smtp_server, fromINISmtp_User=args.smtp_user,
-        fromINISmtp_Pass=args.smtp_pass, fromINISmtp_Enc=args.smtp_encryption).start()
-    if args.pgn_user:
-        user_name = args.pgn_user
-    else:
-        if args.email:
-            user_name = args.email.split('@')[0]
-        else:
-            user_name = "Player"
-
-    # Create ChessTalker for speech output
-    talker = None
-    if args.user_voice or args.computer_voice:
-        logging.debug("Initializing ChessTalker [%s, %s]", str(args.user_voice), str(args.computer_voice))
-        talker = chesstalker.chesstalker.ChessTalker(args.user_voice, args.computer_voice)
-        talker.start()
-    else:
-        logging.debug("ChessTalker disabled")
-
-    # Launch web server
-    if args.web_server_port:
-        WebServer(args.web_server_port).start()
-
-    # Gentlemen, start your engines...
-    engine = uci.Engine(args.engine, hostname=args.remote, username=args.user,
-                        key_file=args.server_key, password=args.password)
-    try:        
-        engine_name = engine.get().name
-    except AttributeError:
-        logging.debug("FATAL: no engines started")
-        sys.exit(-1)
-    logging.debug('Loaded engine [%s]', engine_name)
-    logging.debug('Supported options [%s]', engine.get().options)
-    if 'Hash' in engine.get().options:
-        engine.option("Hash", args.hash_size)
-    if 'Threads' in engine.get().options:  # Stockfish
-        engine.option("Threads", args.threads)
-    if 'Core Threads' in engine.get().options:  # Hiarcs
-        engine.option("Core Threads", args.threads)
-    if args.uci_option:
-        for uci_option in args.uci_option.strip('"').split(";"):
-            uci_parameter = uci_option.strip().split('=')
-            engine.option(uci_parameter[0], uci_parameter[1])
-    # send the options to the engine
-    engine.send()
+    def engine_startup():
+        if 'Hash' in engine.get().options:
+            engine.option("Hash", args.hash_size)
+        if 'Threads' in engine.get().options:  # Stockfish
+            engine.option("Threads", args.threads)
+        if 'Core Threads' in engine.get().options:  # Hiarcs
+            engine.option("Core Threads", args.threads)
+        if args.uci_option:
+            for uci_option in args.uci_option.strip('"').split(";"):
+                uci_parameter = uci_option.strip().split('=')
+                engine.option(uci_parameter[0], uci_parameter[1])
+        # send the options to the engine
+        engine.send()
+        # Notify other display processes
+        Display.show(Message.UCI_OPTION_LIST, options=engine.get().options)
 
     def display_system_info():
         if args.enable_internet:
@@ -238,7 +136,7 @@ def main():
         Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time)
         time.run(game.turn)
 
-        book_move = searchmoves.book(book, game)
+        book_move = searchmoves.book(bookreader, game)
         if book_move:
             Observable.fire(Event.BEST_MOVE, result=book_move, inbook=True)
             Observable.fire(Event.SCORE, score='book', mate=None)
@@ -302,9 +200,7 @@ def main():
         if result is None:
             return True
         else:
-            custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
-            Display.show(Message.GAME_ENDS, result=result, moves=list(game.move_stack),
-                         color=game.turn, play_mode=play_mode, custom_fen=custom_fen)
+            Display.show(Message.GAME_ENDS, result=result, play_mode=play_mode, game=copy.deepcopy(game))
             return False
 
     def process_fen(fen, legal_fens):
@@ -409,12 +305,118 @@ def main():
 
         return game
 
+    # Enable garbage collection - needed for engine swapping as objects orphaned
+    gc.enable()
+
+    # Command line argument parsing
+    parser = configargparse.ArgParser(default_config_files=[os.path.join(os.path.dirname(__file__), "picochess.ini")])
+    parser.add_argument("-e", "--engine", type=str, help="UCI engine executable path", default='engines/stockfish')
+    parser.add_argument("-d", "--dgt-port", type=str,
+                        help="enable dgt board on the given serial port such as /dev/ttyUSB0")
+    parser.add_argument("-leds", "--enable-dgt-board-leds", action='store_true', help="enable dgt board leds")
+    parser.add_argument("-hs", "--hash-size", type=int, help="hashtable size in MB (default:64)", default=64)
+    parser.add_argument("-t", "--threads", type=int, help="number of engine threads (default:1)", default=1)
+    parser.add_argument("-l", "--log-level", choices=['notset', 'debug', 'info', 'warning', 'error', 'critical'],
+                        default='warning', help="logging level")
+    parser.add_argument("-lf", "--log-file", type=str, help="log to the given file")
+    parser.add_argument("-r", "--remote", type=str, help="remote server running the engine")
+    parser.add_argument("-u", "--user", type=str, help="remote user on server running the engine")
+    parser.add_argument("-p", "--password", type=str, help="password for the remote user")
+    parser.add_argument("-sk", "--server-key", type=str, help="key file used to connect to the remote server")
+    parser.add_argument("-pgn", "--pgn-file", type=str, help="pgn file used to store the games", default='games.pgn')
+    parser.add_argument("-pgn_u", "--pgn-user", type=str, help="user name for the pgn file", default=None)
+    parser.add_argument("-ar", "--auto-reboot", action='store_true', help="reboot system after update")
+    parser.add_argument("-web", "--web-server", dest="web_server_port", nargs="?", const=80, type=int, metavar="PORT",
+                        help="launch web server")
+    parser.add_argument("-mail", "--email", type=str, help="email used to send pgn files", default=None)
+    parser.add_argument("-mail_s", "--smtp_server", type=str, help="Adress of email server", default=None)
+    parser.add_argument("-mail_u", "--smtp_user", type=str, help="Username for email server", default=None)
+    parser.add_argument("-mail_p", "--smtp_pass", type=str, help="Password for email server", default=None)
+    parser.add_argument("-mail_enc", "--smtp_encryption", action='store_true',
+                        help="use ssl encryption connection to smtp-Server")
+    parser.add_argument("-mk", "--mailgun-key", type=str, help="key used to send emails via Mailgun Webservice",
+                        default=None)
+    parser.add_argument("-uci", "--uci-option", type=str, help="pass an UCI option to the engine (name;value)",
+                        default=None)
+    parser.add_argument("-dgt3000", "--dgt-3000-clock", action='store_true', help="use dgt 3000 clock (DEPRECATED!)")
+    parser.add_argument("-nobeep", "--disable-dgt-clock-beep", action='store_true',
+                        help="disable beeps on the dgt clock")
+    parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
+    parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
+    parser.add_argument("-inet", "--enable-internet", action='store_true', help="enable/disable internet lookups")
+    parser.add_argument("-nookmove", "--disable-ok-move", action='store_false', help="enable/disable ok move messages")
+    parser.add_argument("-v", "--version", action='version', version='%(prog)s version {}'.format(version),
+                        help="show current version", default=None)
+
+    args = parser.parse_args()
+
+    # Enable logging
+    logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
+                        format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s',
+                        datefmt="%Y-%m-%d %H:%M:%S")
+    logging.getLogger("chess.uci").setLevel(logging.INFO)  # don't want to get so many python-chess uci messages
+
+    # Update
+    if args.enable_internet:
+        update_picochess(args.auto_reboot)
+
+    # This class talks to DGTHardware or DGTVirtual
+    DGTDisplay(args.disable_ok_move).start()
+
+    if args.dgt_port:
+        # Connect to DGT board
+        logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
+        DGTHardware(args.dgt_port, args.enable_dgt_board_leds, args.disable_dgt_clock_beep).start()
+    else:
+        # Enable keyboard input and terminal display
+        logging.warning("No DGT board port provided")
+        KeyboardInput().start()
+        TerminalDisplay().start()
+        DGTVirtual(args.enable_dgt_board_leds, args.disable_dgt_clock_beep).start()
+
+    # Save to PGN
+    PgnDisplay(
+        args.pgn_file, net=args.enable_internet, email=args.email, fromINIMailGun_Key=args.mailgun_key,
+        fromIniSmtp_Server=args.smtp_server, fromINISmtp_User=args.smtp_user,
+        fromINISmtp_Pass=args.smtp_pass, fromINISmtp_Enc=args.smtp_encryption).start()
+    if args.pgn_user:
+        user_name = args.pgn_user
+    else:
+        if args.email:
+            user_name = args.email.split('@')[0]
+        else:
+            user_name = "Player"
+
+    # Create ChessTalker for speech output
+    talker = None
+    if args.user_voice or args.computer_voice:
+        logging.debug("Initializing ChessTalker [%s, %s]", str(args.user_voice), str(args.computer_voice))
+        talker = chesstalker.chesstalker.ChessTalker(args.user_voice, args.computer_voice)
+        talker.start()
+    else:
+        logging.debug("ChessTalker disabled")
+
+    # Launch web server
+    if args.web_server_port:
+        WebServer(args.web_server_port).start()
+
+    # Gentlemen, start your engines...
+    engine = uci.Engine(args.engine, hostname=args.remote, username=args.user,
+                        key_file=args.server_key, password=args.password)
+    try:
+        engine_name = engine.get().name
+    except AttributeError:
+        logging.debug("FATAL: no engines started")
+        sys.exit(-1)
+    logging.debug('Loaded engine [%s]', engine_name)
+    logging.debug('Supported options [%s]', engine.get().options)
+
     # Startup - internal
     game = chess.Board()  # Create the current game
     legal_fens = compute_legal_fens(game)  # Compute the legal FENs
-    book = chess.polyglot.open_reader(get_opening_books()[7][1])  # Default opening book (varied)
+    bookreader = chess.polyglot.open_reader(get_opening_books()[7][1])  # Default opening book (varied)
     searchmoves = AlternativeMover()
-    interaction_mode = Mode.GAME  # Interaction mode
+    interaction_mode = Mode.GAME
     play_mode = PlayMode.PLAY_WHITE
     time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=5)
     last_computer_fen = None
@@ -423,14 +425,13 @@ def main():
 
     system_info_thread = threading.Timer(0, display_system_info)
     system_info_thread.start()
+    # send the args options to the engine
+    engine_startup()
 
     # Startup - external
-    Display.show(Message.UCI_OPTION_LIST, options=engine.get().options)
     Display.show(Message.STARTUP_INFO, info={"interaction_mode": interaction_mode, "play_mode": play_mode,
-                                             "book": book, "time_control_string": "mov 5"})
-
-    has_levels = ('Skill Level' in engine.get().options) or ('UCI_LimitStrength' in engine.get().options)
-    Display.show(Message.ENGINE_READY, eng=(args.engine, args.engine), has_levels=has_levels)
+                                             "book": bookreader, "time_control_string": "mov 5"})
+    Display.show(Message.ENGINE_START, path=engine.get_path(), has_levels=engine.has_levels())
 
     # Event loop
     while True:
@@ -477,9 +478,8 @@ def main():
                     break
 
                 if case(Event.NEW_ENGINE):
-                    engine_shutdown = False
-                    engine_fallback = False
                     old_path = engine.path
+                    engine_shutdown = True
                     # Stop the old engine cleanly
                     engine.stop()
                     # Closeout the engine process and threads
@@ -488,16 +488,12 @@ def main():
                         if engine.terminate():  # If you won't go nicely.... 
                             if engine.kill():  # Right that does it!
                                 logging.error('Serious: Engine shutdown failure')
-                                Display.show(Message.ENGINE_READY, eng=('fail', 'fail'))
-                            else:
-                                engine_shutdown = True
-                        else:
-                            engine_shutdown = True
-                    else:
-                        engine_shutdown = True
+                                Display.show(Message.ENGINE_FAIL)
+                                engine_shutdown = False
                     if engine_shutdown:
                         # Load the new one and send args.
                         # Local engines only
+                        engine_fallback = False
                         engine = uci.Engine(event.eng[0])
                         try:        
                             engine_name = engine.get().name
@@ -514,24 +510,9 @@ def main():
                                 sys.exit(-1)
                         # Schedule cleanup of old objects
                         gc.collect()
-                        # Restore options -
-                        # this doesn't deal with any supplementary uci options sent 'in game', see event.UCI_OPTION_SET
-                        if 'Hash' in engine.get().options:
-                            engine.option("Hash", args.hash_size)
-                        if 'Threads' in engine.get().options:  # Stockfish
-                            engine.option("Threads", args.threads)
-                        if 'Core Threads' in engine.get().options:  # Hiarcs
-                                engine.option("Core Threads", args.threads)
-                        if args.uci_option:
-                            for uci_option in args.uci_option.strip('"').split(";"):
-                                uci_parameter = uci_option.strip().split('=')
-                                engine.option(uci_parameter[0], uci_parameter[1])
-                        # send the options to the engine
-                        engine.send()
-                        # Notify other display processes    
-                        Display.show(Message.UCI_OPTION_LIST, options=engine.get().options)
-                        # This engine supports playing level?
-                        has_levels = ('Skill Level' in engine.get().options) or ('UCI_LimitStrength' in engine.get().options)
+                        # Restore options - this doesn't deal with any
+                        # supplementary uci options sent 'in game', see event.UCI_OPTION_SET
+                        engine_startup()
                         # Send user selected engine level to new engine
                         if engine_level and engine.level(engine_level):
                             engine.send()
@@ -543,22 +524,24 @@ def main():
                             observe(game, time_control)
                         # All done - rock'n'roll
                         if not engine_fallback:
-                            Display.show(Message.ENGINE_READY, ename=engine_name, eng=event.eng, has_levels=has_levels)
+                            Display.show(Message.ENGINE_NAME, ename=engine_name)
+                            Display.show(Message.ENGINE_READY, eng=event.eng, has_levels=engine.has_levels())
                         else:
-                            Display.show(Message.ENGINE_READY, eng=('fail', 'fail'))
-                    else:
-                        logging.error('Serious: Engine failed to stop')
-                        Display.show(Message.ENGINE_READY, eng=('fail', 'fail'))
+                            Display.show(Message.ENGINE_FAIL)
                     break
 
                 if case(Event.SETUP_POSITION):  # User sets up a position
                     logging.debug("Setting up custom fen: {0}".format(event.fen))
+                    if engine.has_chess960():
+                        engine.option('UCI_Chess960', event.uci960)
+                        engine.send()
+                    else:  # start normal new game if engine can't handle the user wish
+                        event.uci960 = False
+                        Display.show(Message.ENGINE_FAIL)  # @todo not really true but inform the user about the result
                     if game.move_stack:
                         if game.is_game_over() or game_declared:
-                            custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
-                            Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack),
-                                         color=game.turn, play_mode=play_mode, custom_fen=custom_fen)
-                    game = chess.Board(event.fen)
+                            Display.show(Message.GAME_ENDS, result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game))
+                    game = chess.Board(event.fen, event.uci960)
                     game.custom_fen = event.fen
                     legal_fens = compute_legal_fens(game)
                     stop_search_and_clock()
@@ -599,9 +582,7 @@ def main():
                     if game.move_stack:
                         logging.debug("Starting a new game")
                         if not (game.is_game_over() or game_declared):
-                            custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
-                            Display.show(Message.GAME_ENDS, result=GameResult.ABORT, moves=list(game.move_stack),
-                                         color=game.turn, play_mode=play_mode, custom_fen=custom_fen)
+                            Display.show(Message.GAME_ENDS, result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game))
                         game = chess.Board()
                     legal_fens = compute_legal_fens(game)
                     last_computer_fen = None
@@ -616,14 +597,13 @@ def main():
                 if case(Event.DRAWRESIGN):
                     result = event.result
                     if not game_declared:  # in case user leaves kings in place while moving other pieces
-                        Display.show(Message.GAME_ENDS, result=result, moves=list(game.move_stack), color=game.turn,
-                                     play_mode=play_mode, custom_fen=None)
+                        Display.show(Message.GAME_ENDS, result=result, play_mode=play_mode, game=copy.deepcopy(game))
                         game_declared = True
                     break
 
                 if case(Event.OPENING_BOOK):
                     logging.debug("Changing opening book [%s]", event.book[1])
-                    book = chess.polyglot.open_reader(event.book[1])
+                    bookreader = chess.polyglot.open_reader(event.book[1])
                     Display.show(Message.OPENING_BOOK, book=event.book)
                     break
 
@@ -681,9 +661,7 @@ def main():
 
                 if case(Event.OUT_OF_TIME):
                     stop_search_and_clock()
-                    custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
-                    Display.show(Message.GAME_ENDS, result=GameResult.TIME_CONTROL, moves=list(game.move_stack),
-                                 color=event.color, play_mode=play_mode, custom_fen=custom_fen)
+                    Display.show(Message.GAME_ENDS, result=GameResult.TIME_CONTROL, play_mode=play_mode, game=copy.deepcopy(game))
                     break
 
                 if case(Event.UCI_OPTION_SET):

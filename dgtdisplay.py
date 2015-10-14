@@ -121,9 +121,11 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
 
         self.setup_to_move = chess.WHITE
         self.setup_reverse_orientation = False
+        self.setup_uci960 = False
         self.flip_board = False
         self.dgt_fen = None
         self.alternative = False
+        self.ip = '?'  # the last two parts of the IP
 
         self.dgt_clock_menu = Menu.GAME_MENU
         self.last_move = chess.Move.null()
@@ -170,16 +172,16 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         reboot_thread.start()
 
     def build_time_control_fens(self):
-            # Build the fen map for menu selection - faster to process than full map
-            self.time_control_fen_map = list(time_control_map.keys())
-            fens_dirty = True
-            while fens_dirty:
-                fens_dirty = False
-                for key in self.time_control_fen_map:
-                    if self.time_control_mode != time_control_map[key].mode:
-                        self.time_control_fen_map.remove(key)
-                        fens_dirty = True
-                        break
+        # Build the fen map for menu selection - faster to process than full map
+        self.time_control_fen_map = list(time_control_map.keys())
+        fens_dirty = True
+        while fens_dirty:
+            fens_dirty = False
+            for key in self.time_control_fen_map:
+                if self.time_control_mode != time_control_map[key].mode:
+                    self.time_control_fen_map.remove(key)
+                    fens_dirty = True
+                    break
 
     def reset_hint_and_score(self):
         self.hint_move = chess.Move.null()
@@ -218,14 +220,16 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.CONFIG)
             else:
                 # Display current engine
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=(self.installed_engines[self.engine_index])[1], xl=None, beep=BeepLevel.CONFIG)
+                msg = (self.installed_engines[self.engine_index])[1]
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.BOOK_MENU:
             if self.mode == Mode.REMOTE:
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.CONFIG)
             else:
                 # Display current book
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=(self.all_books[self.book_index])[0], xl=None, beep=BeepLevel.CONFIG)
+                msg = (self.all_books[self.book_index])[0]
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.TIME_MENU:
             # Select a time control mode
@@ -271,19 +275,26 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             else:
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no level", xl="no lvl", beep=BeepLevel.CONFIG)
 
+        if self.dgt_clock_menu == Menu.SETTINGS_MENU:
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=self.ip, xl=None, beep=BeepLevel.CONFIG)
+
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
             if self.mode == Mode.REMOTE:
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.CONFIG)
-            else:
+            elif self.installed_engines:
                 self.engine_menu_index = ((self.engine_menu_index-1) % self.n_engines)
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=(self.installed_engines[self.engine_menu_index])[1], xl=None, beep=BeepLevel.CONFIG)
+                msg = (self.installed_engines[self.engine_menu_index])[1]
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.CONFIG)
+            else:
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='error', xl=None, beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.BOOK_MENU:
             if self.mode == Mode.REMOTE:
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.CONFIG)
             else:
                 self.book_menu_index = ((self.book_menu_index-1) % self.n_books)
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=(self.all_books[self.book_menu_index])[0], xl=None, beep=BeepLevel.CONFIG)
+                msg = (self.all_books[self.book_menu_index])[0]
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.TIME_MENU:
             self.time_control_menu_index -= 1
@@ -293,29 +304,6 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg, beep=BeepLevel.CONFIG)
 
     def process_button2(self):
-
-        def complete_dgt_fen(fen):
-            # fen = str(self.setup_chessboard.fen())
-            can_castle = False
-            castling_fen = ''
-            bit_board = chess.Board(fen)
-            if bit_board.piece_at(chess.E1) == chess.Piece.from_symbol("K") and bit_board.piece_at(chess.H1) == chess.Piece.from_symbol("R"):
-                can_castle = True
-                castling_fen += 'K'
-            if bit_board.piece_at(chess.E1) == chess.Piece.from_symbol("K") and bit_board.piece_at(chess.A1) == chess.Piece.from_symbol("R"):
-                can_castle = True
-                castling_fen += 'Q'
-            if bit_board.piece_at(chess.E8) == chess.Piece.from_symbol("k") and bit_board.piece_at(chess.H8) == chess.Piece.from_symbol("r"):
-                can_castle = True
-                castling_fen += 'k'
-            if bit_board.piece_at(chess.E8) == chess.Piece.from_symbol("k") and bit_board.piece_at(chess.A8) == chess.Piece.from_symbol("r"):
-                can_castle = True
-                castling_fen += 'q'
-            if not can_castle:
-                castling_fen = '-'
-            # TODO: Support fen positions where castling is not possible even if king and rook are on right squares
-            return fen.replace("KQkq", castling_fen)
-
         if self.dgt_clock_menu == Menu.GAME_MENU:
             if self.mode == Mode.GAME:
                 if self.alternative:
@@ -337,12 +325,22 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 logging.debug('Flipping the board')
                 fen = fen[::-1]
             fen += " {0} KQkq - 0 1".format(to_move)
-            fen = complete_dgt_fen(fen)
-            if chess.Board(fen).is_valid():
+            bit_board = chess.Board(fen, self.setup_uci960)
+            # ask python-chess to correct the castling string
+            bit_board.set_fen(bit_board.fen())
+            if bit_board.is_valid():
                 self.flip_board = self.setup_reverse_orientation
-                self.fire(Event.SETUP_POSITION, fen=fen)
+                self.fire(Event.SETUP_POSITION, fen=bit_board.fen(), uci960=self.setup_uci960)
             else:
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="bad pos", xl="badpos", beep=BeepLevel.YES)
+
+        if self.dgt_clock_menu == Menu.LEVEL_MENU:
+            if self.engine_has_levels:
+                if self.engine_level != self.engine_level_menu:
+                    self.fire(Event.LEVEL, level=self.engine_level_menu)
+                    HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok level", xl="ok lvl", beep=BeepLevel.CONFIG)
+            else:
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no level", xl="no lvl", beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.SETTINGS_MENU:
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="pwroff ?", xl="-off-", beep=BeepLevel.YES)
@@ -351,13 +349,15 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
             if self.mode == Mode.REMOTE:
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.CONFIG)
-            else:
+            elif self.installed_engines:
                 # Reset level selections
                 self.engine_level_menu = self.engine_level
                 self.engine_has_levels = False
                 # This is a handshake change so index values changed and sync'd in the response below
                 self.fire(Event.NEW_ENGINE, eng=self.installed_engines[self.engine_menu_index])
                 self.engine_restart = True
+            else:
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='error', xl=None, beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.BOOK_MENU:
             if self.mode == Mode.REMOTE:
@@ -390,9 +390,11 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             mode_new = mode_list[self.mode_index]
             self.fire(Event.SET_MODE, mode=mode_new)
 
-        if self.dgt_clock_menu == Menu.SETTINGS_MENU:
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="reboot ?", xl="-boot-", beep=BeepLevel.YES)
-            self.awaiting_confirm = PowerMenu.CONFIRM_RBT
+        if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
+            self.setup_uci960 = not self.setup_uci960
+            text = '960 yes' if self.setup_uci960 else '960 no'
+            text_xl = '960yes' if self.setup_uci960 else '960 no'
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=text, xl=text_xl, beep=BeepLevel.YES)
 
         if self.dgt_clock_menu == Menu.LEVEL_MENU:
             if self.mode == Mode.REMOTE:
@@ -404,19 +406,27 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             else:
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no level", xl="no lvl", beep=BeepLevel.CONFIG)
 
+        if self.dgt_clock_menu == Menu.SETTINGS_MENU:
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="reboot ?", xl="-boot-", beep=BeepLevel.YES)
+            self.awaiting_confirm = PowerMenu.CONFIRM_RBT
+
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
             if self.mode == Mode.REMOTE:
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.CONFIG)
-            else:
+            elif self.installed_engines:
                 self.engine_menu_index = ((self.engine_menu_index+1) % self.n_engines)
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=(self.installed_engines[self.engine_menu_index])[1], xl=None, beep=BeepLevel.CONFIG)
+                msg = (self.installed_engines[self.engine_menu_index])[1]
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.CONFIG)
+            else:
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='error', xl=None, beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.BOOK_MENU:
             if self.mode == Mode.REMOTE:
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.CONFIG)
             else:
-                self.book_menu_index = ((self.book_menu_index+1)%self.n_books)
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=(self.all_books[self.book_menu_index])[0], xl=None, beep=BeepLevel.CONFIG)
+                self.book_menu_index = ((self.book_menu_index+1) % self.n_books)
+                msg = (self.all_books[self.book_menu_index])[0]
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.TIME_MENU:
             self.time_control_menu_index += 1
@@ -469,25 +479,26 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 if type(message).__name__ == 'Message':
                     logging.debug("Read message from queue: %s", message)
                 for case in switch(message):
-                    if case(Message.ENGINE_READY):    
-                        if self.engine_restart:
-                            if not (message.eng[0] == 'fail'):
-                                self.engine_index = self.installed_engines.index(message.eng)
-                                self.engine_menu_index = self.engine_index
-                                self.engine_has_levels = message.has_levels
-                                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='ok engin', xl="ok eng", beep=BeepLevel.CONFIG)
-                            else:
-                                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='error', xl=None, beep=BeepLevel.CONFIG)
-                        else:  # for initial startup, message has a different format from our local book
-                            self.installed_engines = get_installed_engines(message.eng[0])
+                    if case(Message.ENGINE_READY):
+                        self.engine_index = self.installed_engines.index(message.eng)
+                        self.engine_menu_index = self.engine_index
+                        self.engine_has_levels = message.has_levels
+                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='ok engin', xl="ok eng", beep=BeepLevel.CONFIG)
+                        self.engine_restart = False
+                        break
+                    if case(Message.ENGINE_START):
+                        if message.path:
+                            self.installed_engines = get_installed_engines(message.path)
                             self.n_engines = len(self.installed_engines)
                             for index in range(0, self.n_engines):
                                 full_path, short = self.installed_engines[index]
-                                if full_path == message.eng[0]:
+                                if full_path == message.path:
                                     self.engine_index = index
                                     self.engine_menu_index = self.engine_index
                                     self.engine_has_levels = message.has_levels
-                        self.engine_restart = False
+                        break
+                    if case(Message.ENGINE_FAIL):
+                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='error', xl=None, beep=BeepLevel.CONFIG)
                         break
                     if case(Message.COMPUTER_MOVE):
                         move = message.result.bestmove
@@ -543,7 +554,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                             self.engine_level = self.engine_level_menu
                         else:
                             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level,
-                                             beep=BeepLevel.CONFIG)
+                                                 beep=BeepLevel.CONFIG)
                         break
                     if case(Message.TIME_CONTROL):
                         HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=message.time_control_string, xl=None,
@@ -598,6 +609,9 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                             HardwareDisplay.show(Dgt.DISPLAY_MOVE, move=self.hint_move, fen=self.hint_fen,
                                                  beep=BeepLevel.NO)
                         break
+                    if case(Message.SYSTEM_INFO):
+                        self.ip = ' '.join(message.info["ip"].split('.')[2:])
+                        break
                     if case(Message.SEARCH_STARTED):
                         logging.debug('Search started')
                         break
@@ -614,9 +628,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         if time_right < 0:
                             time_right = 0
                         side = 0x01 if (message.turn == chess.WHITE) != self.flip_board else 0x02
-                        if tc.mode == ClockMode.FIXED_TIME:  # LocutusOfPenguin: does that solve #27?
-                            # side = 0x02
-                            # time_right = tc.seconds_per_move
+                        if tc.mode == ClockMode.FIXED_TIME:
                             time_left = time_right = tc.seconds_per_move
                         if self.flip_board:
                             time_left, time_right = time_right, time_left
@@ -632,7 +644,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                                 self.power_off()
                             if (self.awaiting_confirm == PowerMenu.CONFIRM_RBT) and (button == 3):
                                 self.reboot()
-                            else: # Abort!
+                            else:  # Abort!
                                 self.awaiting_confirm = PowerMenu.CONFIRM_NONE   
                         if not self.engine_restart and (self.awaiting_confirm == PowerMenu.CONFIRM_NONE):
                             if button == 0:
@@ -692,6 +704,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                             logging.debug("Map-Fen: shutdown")
                             self.power_off()
                         elif self.drawresign_fen in drawresign_map:
+                            logging.debug("Map-Fen: drawresign")
                             self.fire(Event.DRAWRESIGN, result=drawresign_map[self.drawresign_fen])
                         else:
                             self.fire(Event.FEN, fen=fen)

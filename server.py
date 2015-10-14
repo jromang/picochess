@@ -217,10 +217,13 @@ class WebDisplay(Display, threading.Thread):
 
         _workers.apply_async(func, args, kwds, _callback)
 
-    # @staticmethod
     def create_game_info(self):
         if 'game_info' not in self.shared:
             self.shared['game_info'] = {}
+
+    def create_system_info(self):
+        if 'system_info' not in self.shared:
+            self.shared['system_info'] = {}
 
     def task(self, message):
         if message == Message.BOOK_MOVE:
@@ -237,13 +240,17 @@ class WebDisplay(Display, threading.Thread):
         elif message == Message.UCI_OPTION_LIST:
             self.shared['uci_options'] = message.options
 
-        elif message == Message.STARTUP_INFO:
-            self.shared['game_info'] = message.info
-
         elif message == Message.SYSTEM_INFO:
             self.shared['system_info'] = message.info
             self.shared['system_info']['old_engine'] = self.shared['system_info']['engine_name']
             update_headers(self)
+
+        elif message == Message.ENGINE_NAME:
+            # self.create_system_info()
+            self.shared['system_info']['engine_name'] = message.ename
+
+        elif message == Message.STARTUP_INFO:
+            self.shared['game_info'] = message.info
 
         elif message == Message.OPENING_BOOK:  # Process opening book
             self.create_game_info()

@@ -28,7 +28,8 @@ class KeyboardInput(Observable, threading.Thread):
 
     def run(self):
         while True:
-            cmd = input('PicoChess v'+version+':>').lower()
+            raw = input('PicoChess v'+version+':>').strip()
+            cmd = raw.lower()
 
             try:
                 # commands like "newgame:<w|b>" or "setup:<legal_fen_string>"
@@ -45,21 +46,23 @@ class KeyboardInput(Observable, threading.Thread):
                     elif side == 'b':
                         self.fire(Event.DGT_FEN, fen='RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr')
                     else:
-                        raise ValueError(cmd)
+                        raise ValueError(raw)
                 else:
                     if cmd.startswith('print:'):
-                        fen = cmd.split(':')[1]
+                        fen = raw.split(':')[1]
                         print(chess.Board(fen))
                     elif cmd.startswith('setup:'):
-                        fen = cmd.split(':')[1]
-                        if chess.Board(fen).is_valid():
-                            self.fire(Event.SETUP_POSITION, fen=fen)
+                        fen = raw.split(':')[1]
+                        uci960 = False  # make it easy for the moment
+                        bit_board = chess.Board(fen, uci960)
+                        if bit_board.is_valid():
+                            self.fire(Event.SETUP_POSITION, fen=bit_board.fen(), uci960=uci960)
                         else:
                             raise ValueError(fen)
                     # Here starts the simulation of a dgt-board!
                     # Let the user send events like the board would do
                     elif cmd.startswith('fen:'):
-                        fen = cmd.split(':')[1]
+                        fen = raw.split(':')[1]
                         # dgt board only sends the basic fen => be sure
                         # it's same no matter what fen the user entered
                         self.fire(Event.DGT_FEN, fen=fen.split(' ')[0])
@@ -73,8 +76,8 @@ class KeyboardInput(Observable, threading.Thread):
                         # move => fen => virtual board sends fen
                         move = chess.Move.from_uci(cmd)
                         self.fire(Event.KEYBOARD_MOVE, move=move)
-            except ValueError:
-                logging.warning('Invalid user input [%s]', cmd)
+            except ValueError as e:
+                logging.warning('Invalid user input [%s]', raw)
 
 
 class TerminalDisplay(Display, threading.Thread):

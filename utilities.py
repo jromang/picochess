@@ -30,7 +30,7 @@ except ImportError:
 
 
 # picochess version
-version = '053'
+version = '054'
 
 event_queue = queue.Queue()
 serial_queue = queue.Queue()
@@ -84,6 +84,9 @@ class Message(AutoNumber):
     REVIEW_MODE_MOVE = ()  # Player is reviewing game
     REMOTE_MODE_MOVE = ()  # DGT Player is playing vs network player
     ENGINE_READY = ()
+    ENGINE_START = ()
+    ENGINE_FAIL = ()
+    ENGINE_NAME = ()
     LEVEL = ()  # User sets engine level (from 1 to 20).
     TIME_CONTROL = ()
     OPENING_BOOK = ()  # User chooses an opening book
@@ -222,7 +225,7 @@ class BeepLevel(AutoNumber):
 
 
 @enum.unique
-class Commands(enum.Enum):
+class DgtCmd(enum.Enum):
     """ COMMAND CODES FROM PC TO BOARD """
     # Commands not resulting in returning messages:
     DGT_SEND_RESET = 0x40  # Puts the board in IDLE mode, cancelling any UPDATE mode
@@ -253,7 +256,7 @@ class Commands(enum.Enum):
     DGT_CLOCK_MESSAGE = 0x2b  # This message contains a command for the clock.
 
 
-class Clock(enum.Enum):
+class DgtClk(enum.Enum):
     DGT_CMD_CLOCK_DISPLAY = 0x01  # This command can control the segments of six 7-segment characters,
     # two dots, two semicolons and the two '1' symbols.
     DGT_CMD_CLOCK_ICONS = 0x02  # Used to control the clock icons like flags etc.
@@ -272,7 +275,7 @@ class Clock(enum.Enum):
     DGT_ACK_CLOCK_BUTTON = 0x88  # Ack of a clock button
 
 
-class Messages(enum.IntEnum):
+class DgtMsg(enum.IntEnum):
     """
     DESCRIPTION OF THE MESSAGES FROM BOARD TO PC
     """
@@ -432,9 +435,8 @@ def which(program):
         if is_exe(program):
             return program
     else:
-        for path in os.environ["PATH"].split(os.pathsep) + [os.path.dirname(os.path.realpath(__file__)),
-                                                            os.path.dirname(
-                                                                os.path.realpath(__file__)) + os.sep + 'engines']:
+        pe = os.path.dirname(os.path.realpath(__file__))
+        for path in os.environ["PATH"].split(os.pathsep) + [pe, pe + os.sep + 'engines']:
             path = path.strip('"')
             exe_file = os.path.join(path, program)
             if is_exe(exe_file):
@@ -492,10 +494,9 @@ def get_location():
     try:
         response = urllib.request.urlopen('http://www.telize.com/geoip/')
         j = json.loads(response.read().decode())
-        country = j['country']
-        city = j['city']
-        country_code = j['country_code']
-
-        return city + ', ' + country + ' ' + country_code
+        country = j['country'] + ' ' if 'country' in j else ''
+        country_code = j['country_code'] + ' ' if 'country_code' in j else ''
+        city = j['city'] + ', ' if 'city' in j else ''
+        return city + country + country_code
     except:
         return '?'

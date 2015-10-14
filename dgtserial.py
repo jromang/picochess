@@ -72,9 +72,9 @@ class DGTSerial(Display):
         serial_queue.put(message)
 
     def send_command(self, message):
-        mes = message[3] if message[0].value == Commands.DGT_CLOCK_MESSAGE.value else message[0]
+        mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
         logging.debug('->DGT [%s], length:%i', mes, len(message))
-        if mes.value == Clock.DGT_CMD_CLOCK_ASCII.value:
+        if mes.value == DgtClk.DGT_CMD_CLOCK_ASCII.value:
             logging.debug(message[4:10])
         array = []
         for v in message:
@@ -91,20 +91,20 @@ class DGTSerial(Display):
             self.serial.write(bytearray(array))
         except ValueError:
             logging.error('Invalid bytes sent {0}'.format(array))
-        if message[0] == Commands.DGT_CLOCK_MESSAGE:
+        if message[0] == DgtCmd.DGT_CLOCK_MESSAGE:
             logging.debug('DGT clock locked')
             self.clock_lock = True
 
     def process_message(self, message_id, message):
         for case in switch(message_id):
-            if case(Messages.DGT_MSG_VERSION):  # Get the DGT board version
+            if case(DgtMsg.DGT_MSG_VERSION):  # Get the DGT board version
                 board_version = float(str(message[0]) + '.' + str(message[1]))
                 logging.debug("DGT board version %0.2f", board_version)
                 break
             # if case():
             #     logging.info("Got clock version number")
             #     break
-            if case(Messages.DGT_MSG_BWTIME):
+            if case(DgtMsg.DGT_MSG_BWTIME):
                 if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
                     # Construct the ack message
                     ack0 = ((message[1]) & 0x7f) | ((message[3] << 3) & 0x80)
@@ -115,7 +115,7 @@ class DGTSerial(Display):
                         logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
                         return
                     else:
-                        logging.debug("Clock ACK [%s]", Clock(ack1))
+                        logging.debug("Clock ACK [%s]", DgtClk(ack1))
                     if ack1 == 0x88:
                         # this are the other (ack2-ack3) codes
                         # 6-49 34-52 18-51 10-50 66-53 | button 0-4 (single)
@@ -159,7 +159,7 @@ class DGTSerial(Display):
                     logging.debug('DGT clock unlocked')
                     self.clock_lock = False
                 break
-            if case(Messages.DGT_MSG_BOARD_DUMP):
+            if case(DgtMsg.DGT_MSG_BOARD_DUMP):
                 board = ''
                 for c in message:
                     board += piece_to_char[c]
@@ -187,11 +187,11 @@ class DGTSerial(Display):
                 logging.debug("Raw-Fen: " + fen)
                 Display.show(Message.DGT_FEN, fen=fen)
                 break
-            if case(Messages.DGT_MSG_FIELD_UPDATE):
-                self.write([Commands.DGT_SEND_BRD])  # Ask for the board when a piece moved
+            if case(DgtMsg.DGT_MSG_FIELD_UPDATE):
+                self.write([DgtCmd.DGT_SEND_BRD])  # Ask for the board when a piece moved
                 break
             if case():  # Default
-                logging.warning("DGT message not handled : [%s]", Messages(message_id))
+                logging.warning("DGT message not handled : [%s]", DgtMsg(message_id))
 
     def read_message(self, head=None):
         header_len = 3
@@ -208,7 +208,7 @@ class DGTSerial(Display):
         message_length = (header[1] << 7) + header[2] - 3
 
         try:
-            logging.debug("<-DGT [%s], length:%i", Messages(message_id), message_length)
+            logging.debug("<-DGT [%s], length:%i", DgtMsg(message_id), message_length)
         except ValueError:
             logging.warning("Unknown message value %i", message_id)
         if message_length:
@@ -218,17 +218,17 @@ class DGTSerial(Display):
 
     def startup(self):
         # Set the board update mode
-        self.write([Commands.DGT_SEND_UPDATE_NICE])
+        self.write([DgtCmd.DGT_SEND_UPDATE_NICE])
         # we sending a beep command, and see if its ack'ed
-        self.write([Commands.DGT_CLOCK_MESSAGE, 0x04, Clock.DGT_CMD_CLOCK_START_MESSAGE,
-                    Clock.DGT_CMD_CLOCK_BEEP, 1, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+        self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x04, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                    DgtClk.DGT_CMD_CLOCK_BEEP, 1, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         # Get clock version
-        self.write([Commands.DGT_CLOCK_MESSAGE, 0x03, Clock.DGT_CMD_CLOCK_START_MESSAGE,
-                    Clock.DGT_CMD_CLOCK_VERSION, Clock.DGT_CMD_CLOCK_END_MESSAGE])
+        self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                    DgtClk.DGT_CMD_CLOCK_VERSION, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         # Get board version
-        self.write([Commands.DGT_SEND_VERSION])
+        self.write([DgtCmd.DGT_SEND_VERSION])
         # Update the board
-        self.write([Commands.DGT_SEND_BRD])
+        self.write([DgtCmd.DGT_SEND_BRD])
 
     def process_incoming_forever(self):
         while True:
