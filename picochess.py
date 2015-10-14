@@ -19,23 +19,23 @@
 import sys
 import os
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "libs"))
 import configargparse
 import chess
 import chess.polyglot
+import chess.uci
 import logging
-
-import uci
-
 import threading
 import copy
 import gc
+
+import uci
+import chesstalker.chesstalker
+
 from timecontrol import TimeControl
 from utilities import *
 from keyboardinput import KeyboardInput, TerminalDisplay
 from pgn import PgnDisplay
 from server import WebServer
-import chesstalker.chesstalker
 from dgthardware import DGTHardware
 from dgtdisplay import DGTDisplay
 from dgtvirtual import DGTVirtual
@@ -124,7 +124,7 @@ def main():
             g.push(move)
             fens.append(g.board_fen())
             g.pop()
-        fens.root = g.board_fen()  # this isnt used anymore
+        fens.root = g.board_fen()
         return fens
 
     def think(game, time):
