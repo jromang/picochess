@@ -124,7 +124,7 @@ def main():
             g.push(move)
             fens.append(g.board_fen())
             g.pop()
-        fens.root = g.board_fen()
+        fens.root = g.board_fen()  # this isnt used anymore
         return fens
 
     def think(game, time):
@@ -318,13 +318,13 @@ def main():
                         default=None)
     parser.add_argument("-uci", "--uci-option", type=str, help="pass an UCI option to the engine (name;value)",
                         default=None)
-    parser.add_argument("-dgt3000", "--dgt-3000-clock", action='store_true', help="use dgt 3000 clock (DEPRECATED!)")
+    parser.add_argument("-dgt3000", "--dgt-3000-clock", action='store_true', help="do NOT use it anymore (DEPRECATED!)")
     parser.add_argument("-nobeep", "--disable-dgt-clock-beep", action='store_true',
                         help="disable beeps on the dgt clock")
     parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
     parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
-    parser.add_argument("-inet", "--enable-internet", action='store_true', help="enable/disable internet lookups")
-    parser.add_argument("-nookmove", "--disable-ok-move", action='store_false', help="enable/disable ok move messages")
+    parser.add_argument("-inet", "--enable-internet", action='store_true', help="enable internet lookups")
+    parser.add_argument("-nookmove", "--disable-ok-move", action='store_false', help="disable ok move messages")
     parser.add_argument("-v", "--version", action='version', version='%(prog)s version {}'.format(version),
                         help="show current version", default=None)
 
@@ -575,9 +575,8 @@ def main():
                     break
 
                 if case(Event.DRAWRESIGN):
-                    result = event.result
                     if not game_declared:  # in case user leaves kings in place while moving other pieces
-                        Display.show(Message.GAME_ENDS, result=result, play_mode=play_mode, game=copy.deepcopy(game))
+                        Display.show(Message.GAME_ENDS, result=event.result, play_mode=play_mode, game=copy.deepcopy(game))
                         game_declared = True
                     break
 
@@ -612,7 +611,6 @@ def main():
                             logging.debug('Could not convert score ' + score)
                     except TypeError:
                         score = 'm {0}'.format(event.mate)
-
                     Display.show(Message.SCORE, score=score, mate=event.mate, mode=interaction_mode)
                     break
 
