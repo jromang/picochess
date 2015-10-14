@@ -62,6 +62,8 @@ book_map = ("rnbqkbnr/pppppppp/8/8/8/q7/PPPPPPPP/RNBQKBNR",
 
 shutdown_map = ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQQBNR", "8/8/8/8/8/8/8/3QQ3", "3QQ3/8/8/8/8/8/8/8")
 
+remote_map = ("rnbqkbnr/pppppppp/8/4Q4/8/8/PPPPPPPP/RNBQKBNR")
+
 mode_map = {"rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR": Mode.GAME,
             "rnbqkbnr/pppppppp/8/1Q6/8/8/PPPPPPPP/RNBQKBNR": Mode.ANALYSIS,
             "rnbqkbnr/pppppppp/8/2Q5/8/8/PPPPPPPP/RNBQKBNR": Mode.KIBITZ,
@@ -685,6 +687,10 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":  # New game
                             logging.debug("Map-Fen: New game")
                             self.fire(Event.NEW_GAME)
+                        elif fen in remote_map:  # Remote play
+                            logging.debug("Map-Fen: Remote")
+                            mode_new = Mode.REMOTE
+                            self.fire(Event.SET_MODE, mode=mode_new)
                         elif fen in book_map:  # Choose opening book
                             self.book_index = book_map.index(fen)
                             logging.debug("Map-Fen: Opening book [%s]", get_opening_books()[self.book_index])

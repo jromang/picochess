@@ -80,10 +80,15 @@ class PgnDisplay(Display, threading.Thread):
                         self.location = get_location()  # with first game / setting options etc
                     else:
                         self.location = '?'
-                if message == Message.GAME_ENDS and message.moves:
+                if message == Message.GAME_ENDS and message.game.move_stack:
                     logging.debug('Saving game to [' + self.file_name + ']')
                     pgn = chess.pgn.Game()
-                    pgn.setup(message.game)
+                    if message.custom_fen:
+                        b = chess.Board(message.custom_fen)
+                        pgn.setup(b)
+                    node = pgn
+                    for move in message.game.move_stack:
+                        node = node.add_main_variation(move)
                     # Headers
                     pgn.headers["Event"] = "PicoChess game"
                     pgn.headers["Site"] = self.location

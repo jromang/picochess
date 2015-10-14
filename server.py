@@ -93,8 +93,6 @@ class ChannelHandler(tornado.web.RequestHandler):
 
     def post(self):
         action = self.get_argument("action")
-        if self.real_ip() == client_ips[0]:
-            print("Client IP hit!")
 
         if action == 'broadcast':
             fen = self.get_argument("fen")

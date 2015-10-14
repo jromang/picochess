@@ -200,7 +200,8 @@ def main():
         if result is None:
             return True
         else:
-            Display.show(Message.GAME_ENDS, result=result, play_mode=play_mode, game=copy.deepcopy(game))
+            custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
+            Display.show(Message.GAME_ENDS, result=result, play_mode=play_mode, game=copy.deepcopy(game), custom_fen=custom_fen)
             return False
 
     def process_fen(fen, legal_fens):
@@ -540,7 +541,9 @@ def main():
                         Display.show(Message.ENGINE_FAIL)  # @todo not really true but inform the user about the result
                     if game.move_stack:
                         if game.is_game_over() or game_declared:
-                            Display.show(Message.GAME_ENDS, result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game))
+                            custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
+                            Display.show(Message.GAME_ENDS, result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game), 
+                                custom_fen=custom_fen)
                     game = chess.Board(event.fen, event.uci960)
                     game.custom_fen = event.fen
                     legal_fens = compute_legal_fens(game)
@@ -582,7 +585,9 @@ def main():
                     if game.move_stack:
                         logging.debug("Starting a new game")
                         if not (game.is_game_over() or game_declared):
-                            Display.show(Message.GAME_ENDS, result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game))
+                            custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
+                            Display.show(Message.GAME_ENDS, result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game),
+                                custom_fen=custom_fen)
                         game = chess.Board()
                     legal_fens = compute_legal_fens(game)
                     last_computer_fen = None
@@ -597,7 +602,8 @@ def main():
                 if case(Event.DRAWRESIGN):
                     result = event.result
                     if not game_declared:  # in case user leaves kings in place while moving other pieces
-                        Display.show(Message.GAME_ENDS, result=result, play_mode=play_mode, game=copy.deepcopy(game))
+                        custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
+                        Display.show(Message.GAME_ENDS, result=result, play_mode=play_mode, game=copy.deepcopy(game), custom_fen=custom_fen)
                         game_declared = True
                     break
 
@@ -661,7 +667,9 @@ def main():
 
                 if case(Event.OUT_OF_TIME):
                     stop_search_and_clock()
-                    Display.show(Message.GAME_ENDS, result=GameResult.TIME_CONTROL, play_mode=play_mode, game=copy.deepcopy(game))
+                    custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
+                    Display.show(Message.GAME_ENDS, result=GameResult.TIME_CONTROL, play_mode=play_mode, game=copy.deepcopy(game),
+                        custom_fen=custom_fen)
                     break
 
                 if case(Event.UCI_OPTION_SET):
