@@ -76,16 +76,14 @@ class PgnDisplay(Display, threading.Thread):
                     if message.eng[0] != message.eng[1]:   # Ignore startup
                         self.engine_name = message.ename
                         self.old_engine = self.engine_name
-                    elif self.network_enabled:          # Just do this once at startup not after every game! Do while user messing around
-                        self.location = get_location()  # with first game / setting options etc
+                    elif self.network_enabled:          # Just do this once at startup not after every game! Do while
+                        self.location = get_location()  # user messing around with first game / setting options etc
                     else:
                         self.location = '?'
                 if message == Message.GAME_ENDS and message.game.move_stack:
                     logging.debug('Saving game to [' + self.file_name + ']')
                     pgn = chess.pgn.Game()
-                    if message.custom_fen:
-                        b = chess.Board(message.custom_fen)
-                        pgn.setup(b)
+                    pgn.setup(message.game)
                     node = pgn
                     for move in message.game.move_stack:
                         node = node.add_main_variation(move)
