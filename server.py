@@ -55,7 +55,6 @@ def create_game_header(cls, game):
         game.headers["Site"] = "picochess.org"
         user_name = "User"
         engine_name = "Picochess"
-        
 
     if 'game_info' in cls.shared:
         if "play_mode" in cls.shared["game_info"]:
@@ -75,6 +74,7 @@ def create_game_header(cls, game):
     # must be set in TimeControl-tag and with other format anyway
     # if "time_control_string" in self.shared["game_info"]:
     #    game.headers["Event"] = "Time " + self.shared["game_info"]["time_control_string"]
+
 
 def update_headers(cls):
     g = pgn.Game()
@@ -200,9 +200,6 @@ class WebServer(Observable, threading.Thread):
         IOLoop.instance().start()
 
 
-
-
-
 class WebDisplay(Display, threading.Thread):
     def __init__(self, shared):
         super(WebDisplay, self).__init__()
@@ -276,12 +273,6 @@ class WebDisplay(Display, threading.Thread):
 
         elif message == Message.LEVEL:
             self.shared['game_info']['level'] = message.level
-            update_headers(self)
-
-        elif message == Message.ENGINE_READY:
-            if message.eng[0] != message.eng[1]:   # Ignore initial startup
-                self.shared['system_info']['engine_name'] = message.ename
-                self.shared['system_info']['old_engine'] = message.ename
             update_headers(self)
 
         elif message == Message.COMPUTER_MOVE or message == Message.USER_MOVE or message == Message.REVIEW_MODE_MOVE:

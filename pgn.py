@@ -72,19 +72,13 @@ class PgnDisplay(Display, threading.Thread):
                         self.engine_name = "Remote Player"
                     else:
                         self.engine_name = self.old_engine
-                if message == Message.ENGINE_READY:
-                    if message.eng[0] != message.eng[1]:   # Ignore startup
-                        self.engine_name = message.ename
-                        self.old_engine = self.engine_name
-                    elif self.network_enabled:          # Just do this once at startup not after every game! Do while
-                        self.location = get_location()  # user messing around with first game / setting options etc
-                    else:
-                        self.location = '?'
                 if message == Message.GAME_ENDS and message.game.move_stack:
                     logging.debug('Saving game to [' + self.file_name + ']')
                     pgn = chess.pgn.Game()
-                    if hasattr(message.game, 'custom_fen'):
-                        pgn.setup(message.game.custom_fen)
+                    custom_fen = getattr(message.game, 'custom_fen', None)
+                    if custom_fen:
+                        pgn.setup(custom_fen)
+
                     node = pgn
                     for move in message.game.move_stack:
                         node = node.add_main_variation(move)
