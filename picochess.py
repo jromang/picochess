@@ -19,23 +19,24 @@
 import sys
 import os
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "libs"))
 import configargparse
 import chess
 import chess.polyglot
+import chess.uci
 import logging
 
 import uci
-
+import chesstalker.chesstalker
 import threading
 import copy
 import gc
+
 from timecontrol import TimeControl
 from utilities import *
 from keyboardinput import KeyboardInput, TerminalDisplay
 from pgn import PgnDisplay
 from server import WebServer
-import chesstalker.chesstalker
+
 from dgthardware import DGTHardware
 from dgtdisplay import DGTDisplay
 from dgtvirtual import DGTVirtual
@@ -597,7 +598,6 @@ def main():
                 if case(Event.DRAWRESIGN):
                     result = event.result
                     if not game_declared:  # in case user leaves kings in place while moving other pieces
-                        custom_fen = game.custom_fen if hasattr(game, 'custom_fen') else None
                         Display.show(Message.GAME_ENDS, result=result, play_mode=play_mode, game=copy.deepcopy(game))
                         game_declared = True
                     break

@@ -44,6 +44,9 @@ def create_game_header(cls, game):
     game.headers["Date"] = datetime.datetime.now().date().strftime('%Y-%m-%d')
     game.headers["Round"] = "?"
 
+    game.headers["Site"] = "picochess.org"
+    user_name = "User"
+    engine_name = "Picochess"
     if 'system_info' in cls.shared:
         if "location" in cls.shared['system_info']:
             game.headers["Site"] = cls.shared['system_info']['location']
@@ -51,10 +54,6 @@ def create_game_header(cls, game):
             user_name = cls.shared['system_info']['user_name']
         if "engine_name" in cls.shared['system_info']:
             engine_name = cls.shared['system_info']['engine_name']
-    else:
-        game.headers["Site"] = "picochess.org"
-        user_name = "User"
-        engine_name = "Picochess"
 
     if 'game_info' in cls.shared:
         if "play_mode" in cls.shared["game_info"]:
@@ -69,7 +68,6 @@ def create_game_header(cls, game):
             user_color = "Black" if cls.shared["game_info"]["play_mode"] == PlayMode.PLAY_BLACK else "White"
             game.headers[comp_color + "Elo"] = "2900"
             game.headers[user_color + "Elo"] = "-"
-
     # http://www6.chessclub.com/help/PGN-spec saying: not valid!
     # must be set in TimeControl-tag and with other format anyway
     # if "time_control_string" in self.shared["game_info"]:
@@ -193,7 +191,6 @@ class WebServer(Observable, threading.Thread):
             (r'/channel', ChannelHandler, dict(shared=shared)),
             (r'.*', tornado.web.FallbackHandler, {'fallback': wsgi_app})
         ])
-
         application.listen(port)
 
     def run(self):
