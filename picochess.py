@@ -24,18 +24,19 @@ import chess
 import chess.polyglot
 import chess.uci
 import logging
-import threading
-import copy
-import gc
 
 import uci
 import chesstalker.chesstalker
+import threading
+import copy
+import gc
 
 from timecontrol import TimeControl
 from utilities import *
 from keyboardinput import KeyboardInput, TerminalDisplay
 from pgn import PgnDisplay
 from server import WebServer
+
 from dgthardware import DGTHardware
 from dgtdisplay import DGTDisplay
 from dgtvirtual import DGTVirtual
@@ -215,7 +216,7 @@ def main():
             legal_moves = list(game.legal_moves)
             Observable.fire(Event.USER_MOVE, move=legal_moves[legal_fens.index(fen)])
         elif fen == last_computer_fen:  # Player had done the computer move on the board
-            if check_game_state(game, play_mode) and interaction_mode == Mode.GAME:
+            if check_game_state(game, play_mode) and ((interaction_mode == Mode.GAME) or (interaction_mode == Mode.REMOTE)):
                 # finally reset all alternative moves see: handle_move()
                 nonlocal searchmoves
                 searchmoves.reset()
@@ -257,12 +258,12 @@ def main():
         fen = game.fen()
         game.push(move)
         nonlocal last_computer_fen
+        nonlocal searchmoves
         last_computer_fen = None
         if interaction_mode == Mode.GAME:
             stop_clock()
             # If UserMove: reset all alternative moves
             # If ComputerMove: disallow this move, and finally reset all if DONE_ON_BOARD event @see: process_fen()
-            nonlocal searchmoves
             if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.WHITE)\
                     or (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.BLACK):
                 last_computer_fen = game.board_fen()
@@ -272,17 +273,36 @@ def main():
                 searchmoves.reset()
                 Display.show(Message.USER_MOVE, move=move, game=game.copy())
                 if check_game_state(game, play_mode):
-                    think(game, time_control)
-        elif interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
+                    if interaction_mode == Mode.GAME:
+                        think(game, time_control)
+
+        elif interaction_mode == Mode.REMOTE:
+            stop_search_and_clock()
+            # If UserMove: reset all alternative moves
+            # If Remote Move: same process as for computer move above
+            if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.WHITE)\
+                    or (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.BLACK):
+                last_computer_fen = game.board_fen()
+                searchmoves.add(move)
+                Display.show(Message.COMPUTER_MOVE, result=result, fen=fen, game=game.copy(), time_control=time_control)
+            else:
+                searchmoves.reset()
+                Display.show(Message.USER_MOVE, move=move, game=game.copy())
+                if check_game_state(game, play_mode):
+                    observe(game, time_control)
+
+        elif interaction_mode == Mode.OBSERVE:
             stop_search_and_clock()
             Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=game.copy(), mode=interaction_mode)
             if check_game_state(game, play_mode):
                 observe(game, time_control)
+
         elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
             stop_search()
             Display.show(Message.REVIEW_MODE_MOVE, move=move, fen=fen, game=game.copy(), mode=interaction_mode)
             if check_game_state(game, play_mode):
                 analyse(game)
+
         return game
 
     # Enable garbage collection - needed for engine swapping as objects orphaned
@@ -535,12 +555,12 @@ def main():
                     break
 
                 if case(Event.STARTSTOP_THINK):
-                    if engine.is_thinking():
+                    if engine.is_thinking() and (interaction_mode != Mode.REMOTE):
                         stop_search_and_clock()
                     else:
                         play_mode = PlayMode.PLAY_WHITE if play_mode == PlayMode.PLAY_BLACK else PlayMode.PLAY_BLACK
                         Display.show(Message.PLAY_MODE, play_mode=play_mode)
-                        if check_game_state(game, play_mode):
+                        if check_game_state(game, play_mode) and (interaction_mode != Mode.REMOTE):
                             think(game, time_control)
                     break
 
@@ -584,6 +604,12 @@ def main():
                     logging.debug("Changing opening book [%s]", event.book[1])
                     bookreader = chess.polyglot.open_reader(event.book[1])
                     Display.show(Message.OPENING_BOOK, book=event.book)
+                    break
+
+                if case(Event.REMOTE_MOVE):
+                    if interaction_mode == Mode.REMOTE:
+                        game = handle_move(chess.uci.BestMove(bestmove=chess.Move.from_uci(event.move), ponder=None), game)
+                        legal_fens = compute_legal_fens(game)
                     break
 
                 if case(Event.BEST_MOVE):

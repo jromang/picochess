@@ -35,6 +35,7 @@ class PgnDisplay(Display, threading.Thread):
         super(PgnDisplay, self).__init__()
         self.file_name = pgn_file_name
         self.engine_name = ''
+        self.old_engine = ''
         self.user_name = ''
         self.location = ''
         self.level = None
@@ -60,17 +61,29 @@ class PgnDisplay(Display, threading.Thread):
                 message = self.message_queue.get()
                 if message == Message.SYSTEM_INFO:
                     self.engine_name = message.info['engine_name']
+                    self.old_engine = self.engine_name
                     self.user_name = message.info['user_name']
                     self.location = message.info['location']
                 if message == Message.LEVEL:
                     self.level = message.level
+                if message == Message.INTERACTION_MODE:
+                    if message.mode == Mode.REMOTE:
+                        self.old_engine = self.engine_name
+                        self.engine_name = "Remote Player"
+                    else:
+                        self.engine_name = self.old_engine
                 if message == Message.ENGINE_NAME:
                     self.engine_name = message.ename
-
                 if message == Message.GAME_ENDS and message.game.move_stack:
                     logging.debug('Saving game to [' + self.file_name + ']')
                     pgn = chess.pgn.Game()
-                    pgn.setup(message.game)
+                    custom_fen = getattr(message.game, 'custom_fen', None)
+                    if custom_fen:
+                        pgn.setup(custom_fen)
+
+                    node = pgn
+                    for move in message.game.move_stack:
+                        node = node.add_main_variation(move)
                     # Headers
                     pgn.headers["Event"] = "PicoChess game"
                     pgn.headers["Site"] = self.location

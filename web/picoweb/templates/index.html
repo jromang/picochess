@@ -407,23 +407,19 @@ function updateDGTPosition(j) {
                 pgnData = [
                     [j.pgn]
                 ];
-                loadGame(0);
+                loadGame(0, true);
                 goToPosition(j.fen);
             }
-
         }
-//                board.position(j.fen, true);
     }
 }
+
 $(function () {
-//    Ladda.bind('#cloudAnalyzeBtn' );
     getSystemInfo();
-//    console.log(window.system_info);
     $(".grid").sortable({
         tolerance: 'pointer',
         revert: 'invalid',
         disabled: 'true',
-//            placeholder: 'span2 well placeholder tile',
         forceHelperSize: true
     });
     window.engine_lines = {};
@@ -433,12 +429,10 @@ $(function () {
             ajax: true,
             ajaxDataType: 'jsonp',
             ajaxUrl: 'http://drshivaji.com:3334/query?callback=js_callback',
-//                 ajaxMethod: 'POST',
             ajaxOnLoad: true,
             ajaxData:    {
                 action: "get_book_moves",
                 fen: game.fen()
-//                cache_buster : (new Date()).getTime()
             },
             records: []
         },
@@ -459,43 +453,25 @@ $(function () {
     }).data('dynatable');
 
     $("#GameStatsTable").delegate('tr', 'click', function() {
-//            alert("You clicked my <tr>!");
-//            var game_num = ($(this).attr('data-game-id'));
-//            ajaxUrl: 'http://localhost:9999/query?callback=js_callback',
         $.ajax({
             dataType: 'jsonp',
             url: "http://drshivaji.com:3334/query?callback=game_callback",
             data: {action: "get_game_content",
                    game_num: $(this).attr('data-game-id')}
-//                   cache_buster : (new Date()).getTime()}
-
         }).done(function (data) {
             pgnData = [data["pgn"]];
-            loadGame(0);
+            loadGame(0, false);
         });
-
-//                "http://localhost:9999/query?callback=js_callback", { action: "get_game_content", game_num: $(this).attr('data-game-id') }, function (data) {
-//            pgnData = [data["pgn"]];
-//            loadGame(0);
-//        });
-
-        //get <td> element values here!!??
     });
 
 
     $("#BookStatsTable").delegate('tr', 'click', function() {
-//            alert("You clicked my <tr>!");
-//            alert($(this).attr('data-move'));
         stop_analysis();
         var tmp_game = create_game_pointer();
         var move = tmp_game.move($(this).attr('data-move'));
         updateCurrentPosition(move, tmp_game);
         board.position(currentPosition.fen);
-//        game.move($(this).attr('data-move'));
-//        board.position(game.fen());
         updateStatus();
-//         console.log($(this).attr('data-group'));
-
     });
 
     window.GameStatsTable = $('#GameStatsTable').dynatable( {
@@ -503,13 +479,10 @@ $(function () {
             ajax: true,
             ajaxDataType: 'jsonp',
             ajaxUrl: 'http://drshivaji.com:3334/query?callback=game_callback',
-//            ajaxUrl: '/query',
-//                 ajaxMethod: 'POST',
             ajaxOnLoad: true,
             ajaxData:    {
                 action: "get_games",
                 fen: game.fen()
-//                cache_buster : (new Date()).getTime()
             },
             records: []
         },
@@ -533,34 +506,6 @@ $(function () {
         }
     }).data('dynatable');
 
-//    $('#playBtn').popover({
-//
-//        placement : 'bottom',
-//        title : 'Play',
-//        container: '#rightColumn',
-//        html : true,
-////                animate: false,
-//        trigger: 'click',
-//        content:        '<form class="form-horizontal">'+'<label for="timeBase" class="control-label pull-left">Base time (min)</label>'+
-//                '<div ><input type="number" class="form-control" id="timeBase" value="5"></div>' +
-//                '</div>'+
-//                '<div>'+'<label for="timeInc" class="control-label pull-left">Increment (sec)</label>'+'<div>'+
-//                '<input type="number"  id="timeInc" value="5">'+'</div>'+'</div>'+
-//                '<div>'+'<label for="timeInc" class="control-label pull-left">Human Bonus(min)</label>'+'<div>'+
-//                '<input type="number"  id="humanBonus" value="25">'+'</div>'+
-//
-//                '<div>'+' <label for="skillLevel" class="control-label pull-left">Skill Level (0-20)</label><div>'+
-//                '<input type="number" class="form-control" id="skillLevel" value="20"></div></div>'+
-//                '</div>'+
-//
-//                '<div>'+'<label for="color" class="control-label pull-left">Human plays</label>'+'<div>'+
-//                '<div class="btn-group" data-toggle="buttons">'+'<label class="btn btn-primary active" id="color-white"><input type="radio" name="color">White</label>'+
-//                '<label class="btn btn-primary" id="color-black"><input type="radio" name="color">Black</label>'+'</div>'+'</div>'+'</div>'+
-//                '<div>'+'<label for="showScore" class="control-label pull-left">Show Score?</label>'+'<div>'+
-//                '<input type="checkbox" class="form-control pull-left" id="showScore">'+'</div></div>'+'<div>'+'<label for="color" class="pull-left control-label"></label>'+
-//                '<div>'+'<button type="button" class="pull-left btn btn-primary" onclick="newGame()">New Game</button>'+'</div>'+'</div>'+'</form>'
-//    });
-
     $(document).keydown(function(e){
         if (e.keyCode == 39) { //right arrow
             if (e.ctrlKey) {
@@ -582,7 +527,6 @@ $(function () {
         }
         return true;
     });
-//        loadGame(1);
     updateStatus();
 
     if (navigator.mimeTypes['application/x-pnacl'] !== undefined) {
@@ -596,20 +540,32 @@ $(function () {
     else {
         var ws = new WebSocket("ws://"+location.host+"/event");
         var el=document.getElementById("DGTClockStatus");
-//        var el = $('#DGTClockStatus');
 
+// Process messages from picochess
         ws.onmessage=function(e){
             var j = JSON.parse(e.data);
             el.innerHTML=j.msg;
-//            console.log(j);
-
-            updateDGTPosition(j);
+            switch(j.event){
+                case "newFEN":
+                    updateDGTPosition(j);
+                    break;
+                case "NewGame":
+                    newBoard()
+                    break;
+                case "Message":
+                    updateDGTPosition(j);
+                    break;
+                case "header":
+                    pgnData = [ [j.header] ];
+                    game.load_pgn(pgnData[0].join('\n'), {newline_char:'\n'});
+                    writeGameText(game, pgnEl, false);
+                    break;
+             };
         };
         ws.onclose=function(){
             el.innerHTML='closed';
         };
     }
-//    console.log(window.system_info);
 });
 
 // do not pick up pieces if the game is over
@@ -642,7 +598,6 @@ function strip_fen(fen) {
 
 function walk_tree_iterative(variation, format) {
     if (variation) {
-//        console.log(history.variations[0].move.san);
         var q = [variation];
         var score = '';
         if (format=="raw") {
@@ -650,13 +605,10 @@ function walk_tree_iterative(variation, format) {
         }
         while (q.length > 0) {
             var n = q.pop();
-//            console.log(n);
             if (n) {
 
                 for (var i = 0; i < n.length; i++) {
-//                var san;
                     var el = n[i];
-//                    console.log(el);
                     if (!is_main_variation(el)) {
                         if (format!="raw") {
                             score += "( ";
@@ -668,10 +620,7 @@ function walk_tree_iterative(variation, format) {
                             score += Math.floor((el.half_move_num + 1) / 2) + ". ";
                         }
                     }
-//                console.log();
                     if (el.move) {
-//                        score += el.move.san+ " ";
-//                        var stripped_fen = el.fen.replace(" ","");
                         var stripped_fen = strip_fen(el.fen);
                         if (format=="raw") {
                             score.push(el.move.san);
@@ -682,13 +631,6 @@ function walk_tree_iterative(variation, format) {
                         }
 
                     }
-//
-//            }
-//            s = m.join(' ');
-//        }
-//        moveArray[i] = s;
-
-//                    console.log(el.variations.length);
                     if (!is_main_line(el) && el.variations.length == 0)
                     {
                         if (format!="raw") {
@@ -735,20 +677,9 @@ function updateCurrentPosition(move, tmp_game) {
 
     }
     if (!found_move) {
-//        console.log(walk_tree_iterative(gameHistory.variations));
         __ret = addNewMove(move, currentPosition, tmp_game);
-//    var node = __ret.node;
         currentPosition = __ret.node;
-//        writeModifiedText(pgnEl, getPreviousMoves(currentPosition, "san"), '', '');
-//        if (game) {
-//            var h = game.header();
-//            var result = h.Result;
-//            var gameHeaderText = getGameHeader(h);
-//        }
-
         writeVariationTree(pgnEl, walk_tree_iterative(gameHistory.variations), gameHistory);
-//        console.log(gameHistory);
-//        console.log(walk_tree_iterative(gameHistory.variations));
     }
 }
 var onSnapEnd = function(source, target) {
@@ -761,21 +692,17 @@ var onSnapEnd = function(source, target) {
         promotion: 'q' // NOTE: always promote to a pawn for example simplicity
     });
 
-        // illegal move
-//    if (move === null) return 'snapback';
+    // illegal move
     updateCurrentPosition(move, tmp_game);
     board.position(currentPosition.fen);
     updateStatus();
-
+    $.post("/channel", { action: "move", fen: currentPosition.fen, source: source, target: target}, function (data) {
+    });
 };
 
 var updateStatus = function() {
-//    console.log("calling updateStatus");
     var status = '';
-//    $('.fen').on('click', goToGameFen);
     $('.fen').unbind('click', goToGameFen).one('click', goToGameFen);
-
-
     var moveColor = 'White';
     var tmp_game;
     var fen;
@@ -788,24 +715,16 @@ var updateStatus = function() {
         tmp_game = new Chess();
         fen = tmp_game.fen();
     }
-    //    fen =  $(this).attr('id');
-//    console.log("adding highlight..");
+
     $("[class^='fen']").removeClass('highlight');
-//    var stripped_fen = fen.replace(/ /g,"");
-//    stripped_fen = stripped_fen.replace("-","");
-//    stripped_fen = stripped_fen.replace("/","");
-//    var stripped_fen = fen.split(" ")[0];
     var stripped_fen = strip_fen(fen);
-//    console.log(stripped_fen);
     $('#'+stripped_fen).addClass('highlight');
-//    console.log($('#'+stripped_fen))
 
     if (tmp_game.turn() === 'b') {
         moveColor = 'Black';
         $('#sidetomove').html("<i class=\"fa fa-square fa-lg \"></i>");
     }
     else {
-//            $('#sidetomove').html("&#9633");
         $('#sidetomove').html("<i class=\"fa fa-square-o fa-lg \"></i>");
 
     }
@@ -831,19 +750,15 @@ var updateStatus = function() {
     }
 
     statusEl.html(status);
-//    fenEl.html(game.fen());
     //highlight the current move
     if (typeof(gameHistory) === 'undefined') {
         writeGameText(game, pgnEl, true);
 
     }
     else {
-//        alert(move);
         // Need to add variation to game if the move played is unique
-//        alert('adding variation');
     }
 
-//        pgnEl.html(game.pgn());
     if (window.analysis) {
         analyze(true);
     }
@@ -854,7 +769,6 @@ var updateStatus = function() {
     };
     window.BookStatsTable.process();
 
-//    window.GameStatsTable.processingIndicator.show();
     window.GameStatsTable.settings.dataset.ajaxData =    {
         action: "get_games",
         fen: fen
@@ -868,17 +782,13 @@ var updateStatus = function() {
 
 var cfg = {
     showNotation: false,
-//          sparePieces: true,
-
-
     draggable: true,
     position: 'start',
     onDragStart: onDragStart,
     onDrop: onDrop,
     onSnapEnd: onSnapEnd
-//    onChange: onChange
-
 };
+
 board = new ChessBoard('board', cfg);
 
 $('#flipOrientationBtn').on('click', board.flip);
@@ -900,7 +810,6 @@ $('#resetSetupBtn').on('click', resetSetupBoard);
 
 
 $('#setupBtn').on('click', setupBoard);
-//$('#cloudAnalyzeBtn').on('click', cloud_analyze_pressed);
 $('#analyzeBtn').on('click', analyze_pressed);
 $('#playBtn').on('click', play);
 
@@ -941,14 +850,12 @@ function clickRowBookReader(rowIndex, rowElement, record) {
 
 function onChange() { //fires when the board position changes
     //highlight the current move
-
     $("[class^='gameMove']").removeClass('highlight');
     $('.gameMove' + currentPly).addClass('highlight');
 
 }
 
 function setupBoard() {
-//        board = null;
     board.destroy();
     var setup_cfg = {};
     setup_cfg.sparePieces = true;
@@ -959,15 +866,12 @@ function setupBoard() {
     board = new ChessBoard('board', setup_cfg);
     $('#gameControls').hide();
     $('#setupBoardControls').show();
-
 }
 
 function clearSetupBoard() {
-//    console.log("Clear setup board called");
-
     board.clear(true);
-
 }
+
 function resetSetupBoard() {
     var curr_fen;
     if (currentPosition.fen) {
@@ -976,15 +880,11 @@ function resetSetupBoard() {
     else {
         curr_fen = START_FEN;
     }
-//    console.log(START_FEN);
     board.position(curr_fen, true);
-//    console.log(curr_fen);
 }
 
 function finishSetupBoard() {
-//    console.log(board.fen());
     var tmp_game = new Chess();
-
     var can_castle = false;
     var castling_fen = '';
     var fen = board.fen();
@@ -1001,9 +901,6 @@ function finishSetupBoard() {
         can_castle = true;
         castling_fen += 'Q';
     }
-
-//    console.log("board");
-//    console.log(board.position());
 
     if (position.e8 == "bK" && position.h8 == "bR")
     {
@@ -1023,18 +920,14 @@ function finishSetupBoard() {
     }
 
     if ($('#whiteToMoveBtn').prop("checked")) {
-//        console.log("white to move");
         fen +=' w';
     }
     else {
-//        console.log("black to move");
         fen +=' b';
     }
     fen += " "+castling_fen+" - 0 1";
 
     var valid = tmp_game.load(fen);
-    console.log(fen);
-
     if (!valid) {
         console.log("Invalid FEN!");
     }
@@ -1048,19 +941,12 @@ function finishSetupBoard() {
         currentPosition = {};
         currentPosition.fen=fen;
         setupBoardFen = fen;
-//        currentPosition.previous = null;
         gameHistory = currentPosition;
         gameHistory.gameHeader = '';
         gameHistory.result = '';
         gameHistory.variations = [];
-//        console.log(currentPosition.fe)
-
         updateStatus();
-
-
     }
-//    console.log(board.position());
-//    game.se
 }
 
 function is_main_variation(variation) {
@@ -1089,33 +975,25 @@ function addNewMove(move, current_position, tmp_game) {
     }
     else {
         node.half_move_num = 1;
-//        gameHistory = current_position; // point to root node
     }
     node.fen = tmp_game.fen();
-//        console.log(node.fen);
     if ($.isEmptyObject(fenHash)) {
-//        console.log("inserting first node");
         fenHash['first'] = node.previous;
         if (!setupBoardFen) {
             node.previous.fen = START_FEN;
         }
-//        node.previous.variations = [node];
     }
     fenHash[node.fen] = node;
-//    console.log(current_position);
     if (current_position) {
         if (!current_position.variations) {
             current_position.variations = [];
         }
         current_position.variations.push(node);
     }
-//    current_position = node;
-
-
     return {node: node, position : current_position};
 }
-function loadGame(i) {
-//    game = new Chess();
+
+function loadGame(i, fromDGT) {
     var curr_fen;
     if (currentPosition) {
         curr_fen = currentPosition.fen;
@@ -1123,13 +1001,10 @@ function loadGame(i) {
     else {
         curr_fen = START_FEN;
     }
-//    console.log(pgnData[i].join('\n'));
     game.load_pgn(pgnData[i].join('\n'), {newline_char:'\n'});
     var game_moves = game.history({verbose: true});
     fenHash = {};
     gameHistory.previous = null;
-//    var gameNode = {};
-//    writeGameText(game, pgnEl);
     currentPosition = {};
     var current_position = currentPosition;
     gameHistory = current_position;
@@ -1137,58 +1012,47 @@ function loadGame(i) {
     var tmp_game = new Chess();
     gameHistory.fen = tmp_game.fen();
     var start_fen = gameHistory.fen;
-//    fenHash['first'] = fenHash[tmp_game.fen()];
-//    console.log(game_moves);
 
     for (var j=0;j<game_moves.length;j++) {
 
         var move = tmp_game.move(game_moves[j]);
 
         var __ret = addNewMove(move, current_position, tmp_game);
-//        console.log(__ret);
         current_position = __ret.node;
     }
-
-    fenHash['last'] = fenHash[tmp_game.fen()];
-
-//    console.log(curr_fen);
+    if (fromDGT){
+        fenHash[dgtFEN] = fenHash[tmp_game.fen()]
+        fenHash[dgtFEN].fen = dgtFEN;
+        fenHash['last'] = fenHash[dgtFEN];
+        curr_fen = dgtFEN;
+    }
+    else {
+        fenHash['last'] = fenHash[tmp_game.fen()];
+    }
     if (curr_fen === undefined) {
         currentPosition = fenHash['first'];
-//        console.log(currentPosition);
-
     }
     else {
         currentPosition = fenHash[curr_fen];
     }
-//    console.log(currentPosition);
-//        console.log(fenHash[curr_fen]);
-//    goToFen(curr_fen);
     currentGame = i;
-//      updateStatus();
     var h = game.header();
     var result = h.Result;
     var gameHeaderText = getGameHeader(h);
     gameHistory.gameHeader = gameHeaderText;
     gameHistory.result = result;
     writeVariationTree(pgnEl, walk_tree_iterative(gameHistory.variations), gameHistory);
-//    $('.fen').on('click', goToGameFen);
     $('.fen').unbind('click', goToGameFen).one('click', goToGameFen);
-
-
-
 }
 
 function writeVariationTree(dom, gameMoves, gameHistoryEl) {
     $(dom).html(gameHistoryEl.gameHeader + '<div class="gameMoves">' + gameMoves + ' <span class="gameResult">' + gameHistoryEl.result + '</span></div>');
-
 }
 
 
 function getGameHeader(h) {
-
     var gameHeaderText = '<h4>' + h.White + ' (' + h.WhiteElo + ') - ' + h.Black + ' (' + h.BlackElo + ')</h4>';
     gameHeaderText += '<h5>' + h.Event + ', ' + h.Site + ' ' + h.Date + '</h5>';
-
     return gameHeaderText;
 }
 
@@ -1207,11 +1071,8 @@ function writeGameText(g, dom, skip_header) {
     }
     var pgn = g.pgn();
     var gameMoves = pgn.replace(/\[(.*?)\]/gm, '').replace(h.Result, '').trim();
-//    console.log(pgn);
-//    console.log(g);
     var game = new Chess();
     //format the moves so each one is individually identified, so it can be highlighted
-//    console.log(gameMoves);
     var moveArray = gameMoves.split(/([0-9]+\.\s)/).filter(function(n) {return n;});
     for (var i = 0, l = moveArray.length; i < l; ++i) {
         var s = $.trim(moveArray[i]);
@@ -1219,28 +1080,21 @@ function writeGameText(g, dom, skip_header) {
             var m = s.split(/\s+/);
             for (var j = 0, ll = m.length; j < ll; ++j) {
                 game.move(m[j]);
-//                m[j] = '<span class="gameMove' + (i + j - 1) + '"><a id="myLink" href="#" onclick="goToMove(' + (i + j - 1) + ');return false;">' + m[j] + '</a></span>';
-//                var stripped_fen = game.fen().replace(" ","");
                 var fen = game.fen();
                 var stripped_fen = strip_fen(fen);
-
                 m[j] = '<span class="gameMove' + (i + j - 1) + '"><a href="#" class="fen" data-fen="'+fen+'" id="'+stripped_fen+'">' + m[j] + '</a></span>';
-
             }
             s = m.join(' ');
         }
         moveArray[i] = s;
     }
-
     $(dom).html(gameHeaderText + '<div class="gameMoves">' + moveArray.join(' ') + ' <span class="gameResult">' + h.Result + '</span></div>');
-
 }
 
 function newGame() {
     var baseTime = parseFloat($('#timeBase').val()) * 60;
     var inc = parseFloat($('#timeInc').val());
     var skill = parseInt($('#skillLevel').val());
-//        console.log($('#skillLevel').val());
     var human_bonus = parseInt($('#humanBonus').val()) * 60;
     var engine_game = engineGame({book: '/static/resources/gm1950.bin', board: board});
 
@@ -1250,7 +1104,6 @@ function newGame() {
 
     var player_color = $('#color-white').hasClass('active') ? 'white' : 'black';
     var bonus = {};
-//    console.log(human_bonus);
     if (human_bonus>0) {
         if (player_color == 'white') {
             bonus.white = human_bonus;
@@ -1263,7 +1116,6 @@ function newGame() {
     engine_game.setTime(baseTime, inc, bonus);
     engine_game.setSkillLevel(skill);
     engine_game.setPlayerColor(player_color);
-//        console.log($('#showScore').is(':checked'));
     engine_game.setDisplayScore($('#showScore').is(':checked'));
     engine_game.start();
 }
@@ -1277,10 +1129,8 @@ function getNextGameMove() {
 
 function fwd() {
     stop_analysis();
-//    console.log(currentPosition);
     if (currentPosition && currentPosition.variations[0]) {
         currentPosition = currentPosition.variations[0];
-//        console.log(currentPosition.variations[0]);
         if (currentPosition) {
             board.position(currentPosition.fen);
         }
@@ -1290,8 +1140,6 @@ function fwd() {
 
 function newBoard() {
     stop_analysis();
-//    currentPosition
-
     currentPosition = {};
     gameHistory = currentPosition;
     gameHistory.gameHeader = '';
@@ -1321,16 +1169,6 @@ function goToStart() {
 function getDGTPGN() {
      $.get("/pgn", { action: "get_pgn_file"}, function (data) {
          console.log(data);
-//         console.log("PGN");
-//        var fen = data["fen"];
-//        if (!goToPosition(fen)) {
-//            updateDGTPosition(data);
-//            if (data['msg']) {
-//                var el = document.getElementById("DGTClockStatus");
-//                el.innerHTML = data['msg'];
-//            }
-//        }
-
     });
 }
 
@@ -1353,17 +1191,13 @@ function goToDGTFen() {
                 el.innerHTML = data['msg'];
             }
         }
-
     });
-
 }
 
 function broadcastPosition() {
     var moveStack = walk_tree_iterative(gameHistory.variations, "raw");
     $.post("/channel", { action: "broadcast", fen: currentPosition.fen, moveStack: JSON.stringify(moveStack)}, function (data) {
-
     });
-
     // Only use FEN and Movestack (no variations) for broadcast at this point
 }
 
@@ -1371,11 +1205,6 @@ function broadcastPosition() {
 function goToGameFen() {
     var fen =  $(this).attr('data-fen');
     goToPosition(fen);
-//    stop_analysis();
-//
-//    currentPosition = fenHash[fen];
-//    board.position(currentPosition.fen);
-//    updateStatus();
 }
 
 function goToPosition(fen) {
@@ -1384,7 +1213,6 @@ function goToPosition(fen) {
     if (!currentPosition) {
         return false;
     }
-//    console.log(currentPosition);
     board.position(currentPosition.fen);
     updateStatus();
     return true;
@@ -1393,7 +1221,6 @@ function goToPosition(fen) {
 
 //used for clickable moves in gametext
 //not used for buttons for efficiency
-
 function goToMove(ply, variation_index, variation_subindex) {
     stop_analysis();
 
@@ -1402,9 +1229,7 @@ function goToMove(ply, variation_index, variation_subindex) {
     for (var i = 0; i <= ply; i++) {
         game.move(gameHistory[i].san);
     }
-//    console.log(variation_index);
     if (!(variation_index === undefined)) {
-//        console.log(variation_subindex);
         for (i=0; i<=variation_subindex; i++) {
             game.move(gameHistory[ply].variations[variation_index][i]);
         }
@@ -1418,16 +1243,12 @@ function goToFen(fen) {
     stop_analysis();
 
     var end = gameHistory.length - 1;
-//        console.log("curr_fen:");
-//        console.log(fen);
     game.reset();
     for (var i = 0; i <= end; i++) {
         if (game.fen() == fen) {
             break;
         }
         game.move(gameHistory[i].san);
-//            console.log(game.fen());
-
     }
     // No point in going to end of game
     if (i==end) {
@@ -1443,41 +1264,29 @@ function goToFen(fen) {
 
 function goToEnd() {
     stop_analysis();
-
     currentPosition = fenHash.last;
-//    console.log(currentPosition);
     board.position(currentPosition.fen);
-
-
-//    board.position(game.fen());
     updateStatus();
 }
 
 function undoMove() {
     stop_analysis();
-
-//        console.log("undo");
     game.undo();
-//        console.log(game.fen());
     board.position(game.fen());
     updateStatus();
 }
 
 function goBack() {
     stop_analysis();
-
     if (currentPosition && currentPosition.previous) {
         currentPosition = currentPosition.previous;
         board.position(currentPosition.fen);
     }
-
     updateStatus();
-
 }
 
 function startGame() {
     stop_analysis();
-
     game = new Chess();
     board.position(game.fen());
     updateStatus();
@@ -1510,15 +1319,12 @@ function startGame() {
 function get_current_fen() {
      var current_fen = 'startpos';
      if (currentPosition && currentPosition.fen) {
-//        analysis_game.load(currentPosition.fen);
-//        start_move_num = getCountPrevMoves(currentPosition) + 1;
         current_fen =  currentPosition.fen;
     }
     return current_fen;
 }
 
 function formatEngineOutput(line) {
-//    console.log(line);
     if (line.search("depth") > 0 && line.search("currmove") < 0) {
         var analysis_game = new Chess();
         var start_move_num = 1;
@@ -1560,26 +1366,17 @@ function formatEngineOutput(line) {
             var from = pv_out[i].slice(0,2);
             var to = pv_out[i].slice(2,4);
             var promotion = '';
-//            console.log("move length: ");
-//            console.log(pv_out[i].length);
-//            console.log(pv_out[i]);
             if (pv_out[i].length==5) {
                 promotion = pv_out[i][4];
             }
-//            console.log("promotion: ");
-//            console.log(promotion);
             if (promotion) {
                 var mv = analysis_game.move(({from: from, to: to, promotion: promotion}));
-//                console.log("promotion output");
-//                console.log(mv);
             } else {
                 analysis_game.move(({from: from, to: to}));
             }
         }
 
         var history = analysis_game.history();
-//        console.log("game_history");
-//        console.log(history);
         var turn_sep = '';
         if (start_move_num % 2 == 0) {
             turn_sep = '..';
@@ -1597,30 +1394,17 @@ function formatEngineOutput(line) {
 
         }
         analysis_game = null;
-
-//        // Store line
-//        if (!window.engine_lines[current_fen]) {
-//            window.engine_lines[current_fen]=[];
-//        }
-//        var depth_int = Number(depth);
-//        if (depth_int>10) {
-//            window.engine_lines[current_fen].push({depth: depth_int, first_move: first_move, score: score, line: output});
-//        }
         return {line: output, pv_index: multipv};
-
     }
     else if (line.search("currmove") < 0 && line.search("time") < 0) {
         return line;
     }
 
     return null;
-//        return output;
-
 }
 
 function play() {
     console.log("Play!");
-
 }
 
 function js_callback(e) {
@@ -1628,7 +1412,6 @@ function js_callback(e) {
 }
 
 function multipv_increase() {
-//    window.stockfish.postMessage('go infinite');
     if (window.stockfish) {
         window.multipv += 1;
 
@@ -1643,19 +1426,9 @@ function multipv_increase() {
             $('#engineMultiPVStatus').html(window.multipv + " line(s)");
 
         }
-//
-//        if (window.cloud_analysis_engine) {
-//        $.post("/cloud", { action: "send_command", command: 'setoption name multipv value ' + window.multipv}, function (data) {});
-//
-//        }
-
         var new_div_str = "<div id=\"pv_" + window.multipv+"\"></div>";
         $("#pv_output").append(new_div_str);
-
-//        console.log(new_div_str);
-
     }
-
 }
 
 function multipv_decrease() {
@@ -1663,7 +1436,6 @@ function multipv_decrease() {
         $("#pv_"+window.multipv).remove();
 
         window.multipv -= 1;
-//    window.stockfish.postMessage('go infinite');
         window.stockfish.postMessage('setoption name multipv value ' + window.multipv);
 
         if (window.analysis) {
@@ -1674,16 +1446,7 @@ function multipv_decrease() {
             $('#engineMultiPVStatus').html(window.multipv + " line(s)");
 
         }
-
-//
-//        if (window.cloud_analysis_engine) {
-//            $.post("/cloud", { action: "send_command", command: 'setoption name multipv value ' + window.multipv}, function (data) {});
-//
-//        }
-
-
     }
-
 }
 
 
@@ -1694,12 +1457,9 @@ function analyze_pressed() {
 function stockfishPNACLModuleDidLoad() {
     window.StockfishModule = document.getElementById('stockfish_module');
     window.StockfishModule.postMessage('uci');
-//    window.StockfishModule.postMessage('setoption name multipv value 4');
 
     $('#analyzeBtn').prop('disabled', false);
     window.stockfish = StockfishModule;
-
-
 }
 
 function handleCrash(event) {
@@ -1709,17 +1469,14 @@ function handleCrash(event) {
 
 function handleMessage(event) {
     var output = formatEngineOutput(event.data);
-//    console.log(output);
     if (output && output.pv_index && output.pv_index>0) {
         $('#pv_'+output.pv_index).html(output.line+" <hr>");
     }
     $('#engineMultiPVStatus').html(window.multipv + " line(s)");
-
 }
 
 function stop_analysis() {
     if (!window.StockfishModule) {
-//        console.log(window.stockfish);
         if (window.stockfish) {
             window.stockfish.terminate();
         }
@@ -1727,7 +1484,6 @@ function stop_analysis() {
     else {
         window.StockfishModule.postMessage("stop");
     }
-
 }
 
 function getCountPrevMoves(node) {
@@ -1744,7 +1500,6 @@ function getPreviousMoves(node, format) {
     if (node.previous) {
         if (format=="san") {
             var san = "";
-//            console.log(node.half_move_num);
             if (node.half_move_num % 2 == 1) {
                 san += Math.floor((node.half_move_num + 1) / 2) + ". "
             }
@@ -1760,8 +1515,6 @@ function getPreviousMoves(node, format) {
 }
 
 function analyze(position_update) {
-//    StockfishModule = null;
-//    console.log('analyze called');
     if (!position_update) {
         if ($('#AnalyzeText').text()=="Analyze") {
             window.analysis = true;
@@ -1773,8 +1526,6 @@ function analyze(position_update) {
             stop_analysis();
             window.analysis = false;
             $('#engineStatus').html('');
-//            $('#engineMultiPVStatus').html(window.multipv + " line(s)");
-
             return;
         }
     }
@@ -1795,18 +1546,10 @@ function analyze(position_update) {
             }
         }
     }
-//    else {
-//        if (!window.stockfish) {
-//            window.stockfish = StockfishModule;
-//        }
-//    }
-//    console.log(moves);
-
     var startpos = 'startpos';
     if (setupBoardFen) {
         startpos = 'fen '+setupBoardFen;
     }
-//    console.log(startpos);
     window.stockfish.postMessage('position '+startpos+' moves ' + moves);
     window.stockfish.postMessage('go infinite');
 }
