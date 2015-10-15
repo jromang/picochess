@@ -416,11 +416,11 @@ def main():
     legal_fens = compute_legal_fens(game)  # Compute the legal FENs
     all_books = get_opening_books()
     try:
-        book_index = [book[1] for book in get_opening_books()].index('books/' + args.book)
+        book_index = [book[1] for book in all_books].index('books/' + args.book)
     except ValueError:
         logging.debug("ERROR: Selected book not present, defaulting to %s", all_books[7][1])
         book_index = 7
-    bookreader = chess.polyglot.open_reader(get_opening_books()[book_index][1])
+    bookreader = chess.polyglot.open_reader(all_books[book_index][1])
     searchmoves = AlternativeMover()
     interaction_mode = Mode.GAME
     play_mode = PlayMode.PLAY_WHITE
