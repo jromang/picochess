@@ -614,6 +614,9 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                     if case(Message.SYSTEM_INFO):
                         self.ip = ' '.join(message.info["ip"].split('.')[2:])
                         break
+                    if case(Message.STARTUP_INFO):
+                        self.book_index = message.info["book_index"]
+                        self.book_menu_index = self.book_index
                     if case(Message.SEARCH_STARTED):
                         logging.debug('Search started')
                         break

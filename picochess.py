@@ -312,6 +312,7 @@ def main():
     parser.add_argument("-e", "--engine", type=str, help="UCI engine executable path", default='engines/stockfish')
     parser.add_argument("-d", "--dgt-port", type=str,
                         help="enable dgt board on the given serial port such as /dev/ttyUSB0")
+    parser.add_argument("-b", "--book", type=str, help="Opeing book - full name of book in 'books' folder", default='h-varied.bin')
     parser.add_argument("-leds", "--enable-dgt-board-leds", action='store_true', help="enable dgt board leds")
     parser.add_argument("-hs", "--hash-size", type=int, help="hashtable size in MB (default:64)", default=64)
     parser.add_argument("-t", "--threads", type=int, help="number of engine threads (default:1)", default=1)
@@ -413,7 +414,13 @@ def main():
     # Startup - internal
     game = chess.Board()  # Create the current game
     legal_fens = compute_legal_fens(game)  # Compute the legal FENs
-    bookreader = chess.polyglot.open_reader(get_opening_books()[7][1])  # Default opening book (varied)
+    all_books = get_opening_books()
+    try:
+        book_index = [book[1] for book in get_opening_books()].index('books/' + args.book)
+    except ValueError:
+        logging.debug("ERROR: Selected book not present, defaulting to %s", all_books[7][1])
+        book_index = 7
+    bookreader = chess.polyglot.open_reader(get_opening_books()[book_index][1])
     searchmoves = AlternativeMover()
     interaction_mode = Mode.GAME
     play_mode = PlayMode.PLAY_WHITE
@@ -429,7 +436,7 @@ def main():
 
     # Startup - external
     Display.show(Message.STARTUP_INFO, info={"interaction_mode": interaction_mode, "play_mode": play_mode,
-                                             "book": bookreader, "time_control_string": "mov 5"})
+                                             "book": all_books[book_index][1], "book_index": book_index, "time_control_string": "mov 5"})
     Display.show(Message.ENGINE_START, path=engine.get_path(), has_levels=engine.has_levels())
 
     # Event loop

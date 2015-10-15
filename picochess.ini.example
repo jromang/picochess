@@ -42,6 +42,14 @@ engine = engines/stockfish
 # uci-option = Threads = 4
 # uci-option = Beginner Mode=true
 
+### ==========================
+### = Opening book selection =
+### ==========================
+### Sets the opening book used at startup - may be changed from the clock buttons
+### Must be the full name of an opening book in the 'books' folder
+### Defaults to book 'h', normally 'h-varied', if not set or not available
+# book = h-varied.bin
+
 ### ================
 ### = Mail Service =
 ### ================
