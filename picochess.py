@@ -24,12 +24,12 @@ import chess
 import chess.polyglot
 import chess.uci
 import logging
-
-import uci
-import chesstalker.chesstalker
 import threading
 import copy
 import gc
+
+import uci
+import chesstalker.chesstalker
 
 from timecontrol import TimeControl
 from utilities import *
@@ -273,8 +273,7 @@ def main():
                 searchmoves.reset()
                 Display.show(Message.USER_MOVE, move=move, game=game.copy())
                 if check_game_state(game, play_mode):
-                    if interaction_mode == Mode.GAME:
-                        think(game, time_control)
+                    think(game, time_control)
 
         elif interaction_mode == Mode.REMOTE:
             stop_search_and_clock()
