@@ -72,6 +72,8 @@ class PgnDisplay(Display, threading.Thread):
                         self.engine_name = "Remote Player"
                     else:
                         self.engine_name = self.old_engine
+                if message == Message.ENGINE_NAME:
+                    self.engine_name = message.ename
                 if message == Message.GAME_ENDS and message.game.move_stack:
                     logging.debug('Saving game to [' + self.file_name + ']')
                     pgn = chess.pgn.Game()
