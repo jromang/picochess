@@ -241,8 +241,8 @@ class WebDisplay(Display, threading.Thread):
             update_headers(self)
 
         elif message == Message.ENGINE_NAME:
-            # self.create_system_info()
             self.shared['system_info']['engine_name'] = message.ename
+            update_headers(self)
 
         elif message == Message.STARTUP_INFO:
             self.shared['game_info'] = message.info
