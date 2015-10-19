@@ -337,7 +337,9 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="bad pos", xl="badpos", beep=BeepLevel.YES)
 
         if self.dgt_clock_menu == Menu.LEVEL_MENU:
-            if self.engine_has_levels:
+            if self.mode == Mode.REMOTE:
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.CONFIG)
+            elif self.engine_has_levels:
                 if self.engine_level != self.engine_level_menu:
                     self.fire(Event.LEVEL, level=self.engine_level_menu)
                     HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok level", xl="ok lvl", beep=BeepLevel.CONFIG)
@@ -366,16 +368,6 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.CONFIG)
             elif self.book_index != self.book_menu_index:
                 self.fire(Event.OPENING_BOOK, book=self.all_books[self.book_menu_index])
-
-        if self.dgt_clock_menu == Menu.LEVEL_MENU:
-            if self.mode == Mode.REMOTE:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.CONFIG)
-            elif self.engine_has_levels:
-                if self.engine_level != self.engine_level_menu:
-                    self.fire(Event.LEVEL, level=self.engine_level_menu)
-                    HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok level", xl="ok lvl", beep=BeepLevel.CONFIG)
-            else:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no level", xl="no lvl", beep=BeepLevel.CONFIG)
 
         if self.dgt_clock_menu == Menu.TIME_MENU: 
             if self.time_control_index != self.time_control_menu_index:
