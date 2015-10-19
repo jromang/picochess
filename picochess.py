@@ -22,7 +22,6 @@ import os
 import configargparse
 import chess
 import chess.polyglot
-import chess.syzygy
 import chess.gaviota
 import chess.uci
 import logging
@@ -131,12 +130,11 @@ def main():
         return fens
 
     def probe_tablebase(game):
-        if not tablebases:
+        if not gaviota:
             return None
-        if isinstance(tablebases, chess.syzygy.Tablebases):
-            score = None  # tablebases.probe_dtz(game)
-        else:
-            score = tablebases.probe_dtm(game)
+        score = gaviota.probe_dtm(game)
+        if score:
+            Observable.fire(Event.SCORE, score='tb', mate=score)
         return score
 
     def think(game, time):
@@ -153,10 +151,7 @@ def main():
             Observable.fire(Event.BEST_MOVE, result=book_move, inbook=True)
             Observable.fire(Event.SCORE, score='book', mate=None)
         else:
-            score = probe_tablebase(game)
-            if score:
-                Observable.fire(Event.SCORE, score='tb', mate=score)
-
+            probe_tablebase(game)
             engine.position(copy.deepcopy(game))
             uci_dict = time.uci()
             uci_dict['searchmoves'] = searchmoves.all(game)
@@ -167,9 +162,7 @@ def main():
         Starts a new ponder search on the current game.
         :return:
         """
-        score = probe_tablebase(game)
-        if score:
-            Observable.fire(Event.SCORE, score='tb', mate=score)
+        probe_tablebase(game)
         engine.position(copy.deepcopy(game))
         engine.ponder()
 
@@ -332,8 +325,7 @@ def main():
                         help="enable dgt board on the given serial port such as /dev/ttyUSB0")
     parser.add_argument("-b", "--book", type=str, help="Opening book - full name of book in 'books' folder",
                         default='h-varied.bin')
-    parser.add_argument("-tb", "--tablebases", type=str,
-                        help="Tablebases - full folder name in 'tablebasess' folder", default=None)
+    parser.add_argument("-g", "--gaviota", action='store_true', help="Gavoita - probe the tablebase")
     parser.add_argument("-leds", "--enable-dgt-board-leds", action='store_true', help="enable dgt board leds")
     parser.add_argument("-hs", "--hash-size", type=int, help="hashtable size in MB (default:64)", default=64)
     parser.add_argument("-t", "--threads", type=int, help="number of engine threads (default:1)", default=1)
@@ -381,20 +373,14 @@ def main():
     if args.enable_internet:
         update_picochess(args.auto_reboot)
 
-    tablebases = None
-    if args.tablebases:
+    gaviota = None
+    if args.gaviota:
         try:
-            if args.tablebases == 'syzygy':
-                tablebases = chess.syzygy.open_tablebases('tablesbases/syzygy')
-                logging.debug('Tablebases syzygy loaded')
-            if args.tablebases == 'gaviota':
-                tablebases = chess.gaviota.open_tablebases('tablebases/gaviota')
-                logging.debug('Tablebases gaviota loaded')
-            if not tablebases:
-                logging.warning('Tablebases unsupported type')
+            gaviota = chess.gaviota.open_tablebases('tablebases/gaviota')
+            logging.debug('Tablebases gaviota loaded')
         except OSError:
-            logging.error('Tablebases directory doesnt exist')
-            tablebases = None
+            logging.error('Tablebases gaviota doesnt exist')
+            gaviota = None
 
     # This class talks to DGTHardware or DGTVirtual
     DGTDisplay(args.disable_ok_move).start()
