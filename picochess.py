@@ -22,6 +22,8 @@ import os
 import configargparse
 import chess
 import chess.polyglot
+import chess.syzygy
+import chess.gaviota
 import chess.uci
 import logging
 import threading
@@ -128,6 +130,15 @@ def main():
         fens.root = g.board_fen()
         return fens
 
+    def probe_tablebase(game):
+        if not tablebases:
+            return None
+        if isinstance(tablebases, chess.syzygy.Tablebases):
+            score = None  # tablebases.probe_dtz(game)
+        else:
+            score = tablebases.probe_dtm(game)
+        return score
+
     def think(game, time):
         """
         Starts a new search on the current game.
@@ -142,6 +153,10 @@ def main():
             Observable.fire(Event.BEST_MOVE, result=book_move, inbook=True)
             Observable.fire(Event.SCORE, score='book', mate=None)
         else:
+            score = probe_tablebase(game)
+            if score:
+                Observable.fire(Event.SCORE, score='tb', mate=score)
+
             engine.position(copy.deepcopy(game))
             uci_dict = time.uci()
             uci_dict['searchmoves'] = searchmoves.all(game)
@@ -152,6 +167,9 @@ def main():
         Starts a new ponder search on the current game.
         :return:
         """
+        score = probe_tablebase(game)
+        if score:
+            Observable.fire(Event.SCORE, score='tb', mate=score)
         engine.position(copy.deepcopy(game))
         engine.ponder()
 
@@ -312,7 +330,10 @@ def main():
     parser.add_argument("-e", "--engine", type=str, help="UCI engine executable path", default='engines/stockfish')
     parser.add_argument("-d", "--dgt-port", type=str,
                         help="enable dgt board on the given serial port such as /dev/ttyUSB0")
-    parser.add_argument("-b", "--book", type=str, help="Opeing book - full name of book in 'books' folder", default='h-varied.bin')
+    parser.add_argument("-b", "--book", type=str, help="Opening book - full name of book in 'books' folder",
+                        default='h-varied.bin')
+    parser.add_argument("-tb", "--tablebases", type=str,
+                        help="Tablebases - full folder name in 'tablebasess' folder", default=None)
     parser.add_argument("-leds", "--enable-dgt-board-leds", action='store_true', help="enable dgt board leds")
     parser.add_argument("-hs", "--hash-size", type=int, help="hashtable size in MB (default:64)", default=64)
     parser.add_argument("-t", "--threads", type=int, help="number of engine threads (default:1)", default=1)
@@ -359,6 +380,21 @@ def main():
     # Update
     if args.enable_internet:
         update_picochess(args.auto_reboot)
+
+    tablebases = None
+    if args.tablebases:
+        try:
+            if args.tablebases == 'syzygy':
+                tablebases = chess.syzygy.open_tablebases('tablesbases/syzygy')
+                logging.debug('Tablebases syzygy loaded')
+            if args.tablebases == 'gaviota':
+                tablebases = chess.gaviota.open_tablebases('tablebases/gaviota')
+                logging.debug('Tablebases gaviota loaded')
+            if not tablebases:
+                logging.warning('Tablebases unsupported type')
+        except OSError:
+            logging.error('Tablebases directory doesnt exist')
+            tablebases = None
 
     # This class talks to DGTHardware or DGTVirtual
     DGTDisplay(args.disable_ok_move).start()
@@ -633,16 +669,20 @@ def main():
                     break
 
                 if case(Event.SCORE):
-                    try:
-                        score = int(event.score)
-                        if game.turn == chess.BLACK:
-                            score *= -1
-                    except ValueError:
-                        score = event.score
-                        if score != 'book':
+                    if event.score == 'book':
+                        score = 'book'
+                    elif event.score == 'tb':
+                        score = 'tb {0}'.format(event.mate)
+                    else:
+                        try:
+                            score = int(event.score)
+                            if game.turn == chess.BLACK:
+                                score *= -1
+                        except ValueError:
+                            score = event.score
                             logging.debug('Could not convert score ' + score)
-                    except TypeError:
-                        score = 'm {0}'.format(event.mate)
+                        except TypeError:
+                            score = 'm {0}'.format(event.mate)
                     Display.show(Message.SCORE, score=score, mate=event.mate, mode=interaction_mode)
                     break
 
