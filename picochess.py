@@ -325,7 +325,7 @@ def main():
                         help="enable dgt board on the given serial port such as /dev/ttyUSB0")
     parser.add_argument("-b", "--book", type=str, help="Opening book - full name of book in 'books' folder",
                         default='h-varied.bin')
-    parser.add_argument("-g", "--gaviota", action='store_true', help="Gavoita - probe the tablebase")
+    parser.add_argument("-g", "--enable-gaviota", action='store_true', help="enable gavoita tablebase probing")
     parser.add_argument("-leds", "--enable-dgt-board-leds", action='store_true', help="enable dgt board leds")
     parser.add_argument("-hs", "--hash-size", type=int, help="hashtable size in MB (default:64)", default=64)
     parser.add_argument("-t", "--threads", type=int, help="number of engine threads (default:1)", default=1)
@@ -458,7 +458,8 @@ def main():
 
     # Startup - external
     Display.show(Message.STARTUP_INFO, info={"interaction_mode": interaction_mode, "play_mode": play_mode,
-                                             "book": all_books[book_index][1], "book_index": book_index, "time_control_string": "mov 5"})
+                                             "book": all_books[book_index][1], "book_index": book_index,
+                                             "time_control_string": "mov 5"})
     Display.show(Message.ENGINE_START, path=engine.get_path(), has_levels=engine.has_levels())
 
     # Event loop
@@ -636,7 +637,8 @@ def main():
 
                 if case(Event.REMOTE_MOVE):
                     if interaction_mode == Mode.REMOTE:
-                        game = handle_move(chess.uci.BestMove(bestmove=chess.Move.from_uci(event.move), ponder=None), game)
+                        bm = chess.uci.BestMove(bestmove=chess.Move.from_uci(event.move), ponder=None)
+                        game = handle_move(bm, game)
                         legal_fens = compute_legal_fens(game)
                     break
 

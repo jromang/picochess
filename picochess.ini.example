@@ -11,17 +11,14 @@
 ### =======================
 ### = DGT related options =
 ### =======================
-## enable-dgt-board-leds turn ON or OFF the LED's on the Revelation II chessbot, values are true or false
-# enable-dgt-board-leds = true
+## enable-dgt-board-leds turn ON or OFF the LED's on the Revelation II chessbot. If so, please uncomment the next line
+# enable-dgt-board-leds
 ## disable-dgt-clock-beep disables the beep of the DGT-clock. To disable the beep remove #, to enable comment the next line with #
 # disable-dgt-clock-beep
-## Should a confirmation message (after moves) be displayed?
-# disable-ok-move = false
+## Should a confirmation message (after moves) be displayed? If not, please active the next line
+# disable-ok-move
 ## Specify the serial port your dgt-board is connected to
 # dgt-port = /dev/ttyACM0
-## This is DEPRECATED since PicoChess V0.5x - Pls don't use it anymore!!
-## The value is not taken into account. It will be deleted soon.
-# dgt-3000-clock = true
 
 ### ========================
 ### = Chess engine options =
@@ -38,6 +35,7 @@ engine = engines/stockfish
 ## The secret server-key for the remote-engine-server
 # server-key = your_secret_key
 ## uci-option stores options that will be passed to the engine
+## This are possible examples - it depends on your search-engine
 # uci-option = Hash = 128
 # uci-option = Threads = 4
 # uci-option = Beginner Mode=true
@@ -70,8 +68,9 @@ engine = engines/stockfish
 # smtp_user = your_username
 ## smtp_pass is necessary if your smtp server requires authentication, sets your password
 # smtp_pass = your_secret_password
-## Should PicoChess SSL-encrypt the communication with your smtp server (Port 465)? If so, uncomment the next line smtp_encryption.
-## Otherwise PicoChess will use the default and unencrypted SMTP Port 21. Some SMTP Server require an SSL encryption (e.g. GMAIL).
+## Should PicoChess SSL-encrypt the communication with your smtp server (Port 465)?
+## Otherwise PicoChess will use the default and unencrypted SMTP Port 21.
+## Some SMTP Server require an SSL encryption (e.g. GMAIL). If so, uncomment the next line.
 # smtp_encryption
 ### ==========================================
 ### = Section for email delivery via Mailgun =
@@ -83,7 +82,8 @@ engine = engines/stockfish
 ### =============================
 ### = PicoChess related options =
 ### =============================
-## log-file points to a file that is used to write the log information. If file exists the text will be appended to the file otherwise a file will be created.
+## log-file points to a file that is used to write the log information.
+## If file exists the text will be appended to the file otherwise a file will be created.
 # log-file = /opt/picochess/picochess.log
 ## What log level should be used 
 ## Loglevel options are [debug, info, warning, error, critical]
@@ -97,10 +97,13 @@ engine = engines/stockfish
 # pgn_file = games.png
 # pgn-user = player
 ## Picochess connects to the internet like ip adr, update of newest software etc.
-## If you have a troublesome internet connection, please deactivate it.
-# enable-internet = false
-## After an update should the machine reboot automatically?
-# auto-reboot = true
+## This is by default not actived. If you want this feature, please uncomment the next line
+# enable-internet
+## After an update should the machine reboot automatically? If so, please uncomment the next line
+# auto-reboot
 ## The port of the webserver
 # web-server = 8080
-
+## Do tablebase probing using gaviota? The database files must be in 'tablebases/gaviota/'
+## This isn't used inside the chess engine. Just show the tb-value at dgt clock (for your info)
+## If so, uncomment the next line
+# enable-gaviota
