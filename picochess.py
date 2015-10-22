@@ -374,7 +374,7 @@ def main():
         update_picochess(args.auto_reboot)
 
     gaviota = None
-    if args.gaviota:
+    if args.enable_gaviota:
         try:
             gaviota = chess.gaviota.open_tablebases('tablebases/gaviota')
             logging.debug('Tablebases gaviota loaded')
