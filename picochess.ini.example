@@ -94,7 +94,7 @@ engine = engines/stockfish
 ## computer-voice for computer moves announcement
 # computer-voice = en:Marvin
 ## PicoChess writes pgn files at end of game.
-# pgn-file = games.png
+# pgn-file = games.pgn
 # pgn-user = player
 ## Picochess connects to the internet like ip adr, update of newest software etc.
 ## This is by default not actived. If you want this feature, please uncomment the next line
