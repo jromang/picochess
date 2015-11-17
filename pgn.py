@@ -117,7 +117,7 @@ class PgnDisplay(Display, threading.Thread):
                     # Save to file
                     file = open(self.file_name, "a")
                     exporter = chess.pgn.FileExporter(file)
-                    pgn.export(exporter)
+                    pgn.accept(exporter)
                     file.flush()
                     file.close()
                     # section send email
