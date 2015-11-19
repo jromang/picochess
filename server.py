@@ -77,9 +77,9 @@ def create_game_header(cls, game):
 def update_headers(cls):
     g = pgn.Game()
     create_game_header(cls, g)
-    exp = pgn.StringExporter()
-    g.export(exp, headers=True, comments=False, variations=False)
-    pgn_str = str(exp)
+    exp = pgn.StringExporter(headers=True, comments=False, variations=False)
+    pgn_str = g.accept(exp)
+    # pgn_str = str(exp)
     EventHandler.write_to_clients({'event': 'header', 'header': pgn_str})
 
 
@@ -107,9 +107,9 @@ class ChannelHandler(tornado.web.RequestHandler):
             tmp = game
             for move in move_stack:
                 tmp = tmp.add_variation(tmp.board().parse_san(move))
-            exporter = pgn.StringExporter()
-            game.export(exporter, headers=True, comments=False, variations=False)
-            r = {'type': 'broadcast', 'msg': 'Received position from Spectators!', 'pgn': str(exporter), 'fen': fen}
+            exporter = pgn.StringExporter(headers=True, comments=False, variations=False)
+            pgn_str = game.accept(exporter)
+            r = {'type': 'broadcast', 'msg': 'Received position from Spectators!', 'pgn': pgn_str, 'fen': fen}
             EventHandler.write_to_clients(r)
         elif action == 'move':
             WebServer.fire(Event.REMOTE_MOVE, move= (self.get_argument("source") + self.get_argument("target")), fen= self.get_argument("fen"))
@@ -283,11 +283,11 @@ class WebDisplay(Display, threading.Thread):
             move_stack = message.game.move_stack
             for move in move_stack:
                 tmp = tmp.add_variation(move)
-            exporter = pgn.StringExporter()
+            exporter = pgn.StringExporter(headers=True, comments=False, variations=False)
 
-            game.export(exporter, headers=True, comments=False, variations=False)
+            pgn_str = game.accept(exporter)
             fen = message.game.fen()
-            pgn_str = str(exporter)
+            # pgn_str = str(exporter)
             r = {'pgn': pgn_str, 'fen': fen, 'event': "newFEN"}
 
             if message == Message.COMPUTER_MOVE:
