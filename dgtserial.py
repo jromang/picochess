@@ -232,9 +232,12 @@ class DGTSerial(Display):
 
     def process_incoming_forever(self):
         while True:
-            c = self.serial.read(1)
-            if c:
-                self.read_message(head=c)
+            try:
+                c = self.serial.read(1)
+                if c:
+                    self.read_message(head=c)
+            except pyserial.SerialException as e:
+                pass
 
     def process_outgoing_forever(self):
         while True:
