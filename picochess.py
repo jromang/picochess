@@ -28,6 +28,7 @@ import logging
 import threading
 import copy
 import gc
+import time
 
 import uci
 import chesstalker.chesstalker
@@ -38,7 +39,8 @@ from keyboardinput import KeyboardInput, TerminalDisplay
 from pgn import PgnDisplay
 from server import WebServer
 
-from dgthardware import DGTHardware
+# from dgthardware import DGTHardware
+from dgtpi import DGTPi
 from dgtdisplay import DGTDisplay
 from dgtvirtual import DGTVirtual
 
@@ -137,23 +139,24 @@ def main():
             Observable.fire(Event.SCORE, score='tb', mate=score)
         return score
 
-    def think(game, time):
+    def think(game, tc):
         """
         Starts a new search on the current game.
         If a move is found in the opening book, fire an event in a few seconds.
         :return:
         """
-        Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time)
-        time.run(game.turn)
+        Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=tc)
+        tc.run(game.turn)
 
         book_move = searchmoves.book(bookreader, game)
         if book_move:
-            Observable.fire(Event.BEST_MOVE, result=book_move, inbook=True)
             Observable.fire(Event.SCORE, score='book', mate=None)
+            # time.sleep(0.5)
+            Observable.fire(Event.BEST_MOVE, result=book_move, inbook=True)
         else:
             probe_tablebase(game)
             engine.position(copy.deepcopy(game))
-            uci_dict = time.uci()
+            uci_dict = tc.uci()
             uci_dict['searchmoves'] = searchmoves.all(game)
             engine.go(uci_dict)
 
@@ -166,13 +169,13 @@ def main():
         engine.position(copy.deepcopy(game))
         engine.ponder()
 
-    def observe(game, time):
+    def observe(game, tc):
         """
         Starts a new ponder search on the current game.
         :return:
         """
-        Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=time)
-        time.run(game.turn)
+        Display.show(Message.RUN_CLOCK, turn=game.turn, time_control=tc)
+        tc.run(game.turn)
         analyse(game)
 
     def stop_search():
@@ -388,7 +391,8 @@ def main():
     if args.dgt_port:
         # Connect to DGT board
         logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
-        DGTHardware(args.dgt_port, args.enable_dgt_board_leds, args.disable_dgt_clock_beep).start()
+        # DGTHardware(args.dgt_port, args.enable_dgt_board_leds, args.disable_dgt_clock_beep).start()
+        DGTPi(args.dgt_port, args.enable_dgt_board_leds, args.disable_dgt_clock_beep).start()
     else:
         # Enable keyboard input and terminal display
         logging.warning("No DGT board port provided")
