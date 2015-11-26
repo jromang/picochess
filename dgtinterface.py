@@ -30,12 +30,11 @@ class DGTInterface(HardwareDisplay, threading.Thread):
         self.clock_found = False
         self.enable_board_leds = enable_board_leds
         self.disable_dgt_clock_beep = disable_dgt_clock_beep
-        self.displayed_text = None  # The current clock display or None if in ClockNRun mode or unknown text
 
-    def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG, force=True):
+    def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG):
         raise NotImplementedError()
 
-    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG, force=True):
+    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):
         raise NotImplementedError()
 
     def light_squares_revelation_board(self, squares):

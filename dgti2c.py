@@ -68,7 +68,7 @@ class DGTi2c(Display):
             logging.error('Invalid bytes sent {0}'.format(message))
 
     def write_text_to_clock(self, message, beep):
-        self.lib.dgt3000Display(message,  0x03 if beep else 0x01, 0, 0)
+        self.lib.dgt3000Display(message, 0x03 if beep else 0x01, 0, 0)
 
     def write_stop_to_clock(self):
         self.lib.dgt3000SetNRun(0, 0, 0, 0, 0, 0, 0, 0)

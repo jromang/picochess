@@ -24,7 +24,6 @@ from utilities import *
 class DGTHardware(DGTInterface):
     def __init__(self, device, enable_board_leds, disable_dgt_clock_beep):
         super(DGTHardware, self).__init__(enable_board_leds, disable_dgt_clock_beep)
-        self.displayed_text = None  # The current clock display or None if in ClockNRun mode or unknown text
         self.dgtserial = DGTSerial(device)
         self.dgtserial.run()
 
@@ -32,7 +31,7 @@ class DGTHardware(DGTInterface):
         self.dgtserial.write(message)
 
     def _display_on_dgt_xl(self, text, beep=False):
-        if self.clock_found and not self.enable_dgt_3000:
+        if self.clock_found:
             while len(text) < 6:
                 text += ' '
             if len(text) > 6:
@@ -44,7 +43,7 @@ class DGTHardware(DGTInterface):
                  DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
 
     def _display_on_dgt_3000(self, text, beep=False):
-        if self.enable_dgt_3000:
+        if self.clock_found:
             while len(text) < 8:
                 text += ' '
             if len(text) > 8:
@@ -55,30 +54,24 @@ class DGTHardware(DGTInterface):
                         text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], 0x03 if beep else 0x01,
                         DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
 
-    def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG, force=True):
+    def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG):
         beep = self.get_beep_level(beep)
         if self.enable_dgt_3000:
-            if force or self.displayed_text != text:
-                self._display_on_dgt_3000(text, beep)
+            self._display_on_dgt_3000(text, beep)
         else:
             if dgt_xl_text:
                 text = dgt_xl_text
-            if force or self.displayed_text != text:
-                self._display_on_dgt_xl(text, beep)
-        self.displayed_text = text
+            self._display_on_dgt_xl(text, beep)
 
-    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG, force=True):
+    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):
         beep = self.get_beep_level(beep)
         if self.enable_dgt_3000:
             bit_board = chess.Board(fen)
             text = bit_board.san(move)
-            if force or self.displayed_text != text:
-                self._display_on_dgt_3000(text, beep)
+            self._display_on_dgt_3000(text, beep)
         else:
             text = ' ' + move.uci()
-            if force or self.displayed_text != text:
-                self._display_on_dgt_xl(text, beep)
-        self.displayed_text = text
+            self._display_on_dgt_xl(text, beep)
 
     def light_squares_revelation_board(self, squares):
         if self.enable_board_leds:

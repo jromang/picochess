@@ -65,30 +65,24 @@ class DGTVirtual(DGTInterface):
             self.time_right = 0
         l_hms = hours_minutes_seconds(self.time_left)
         r_hms = hours_minutes_seconds(self.time_right)
-        self.displayed_text = None  # reset saved text to unknown
-
         HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='{} - {}'.format(l_hms, r_hms), xl=None, beep=BeepLevel.NO)
 
-    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG, force=True):
+    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):
         # beep = self.get_beep_level(beep)
         if self.enable_dgt_3000:
             bit_board = chess.Board(fen)
-            move_string = bit_board.san(move)
+            text = bit_board.san(move)
         else:
-            move_string = str(move)
-        if force or self.displayed_text != move_string:
-            logging.debug(move_string)
-            print('DGT clock move:' + move_string)
-        self.displayed_text = move_string
+            text = str(move)
+        logging.debug(text)
+        print('DGT clock move:' + text)
 
-    def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG, force=True):
+    def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG):
         # beep = self.get_beep_level(beep)
         if dgt_xl_text and not self.enable_dgt_3000:
             text = dgt_xl_text
-        if force or self.displayed_text != text:
-            logging.debug(text)
-            print('DGT clock text:' + text)
-        self.displayed_text = text
+        logging.debug(text)
+        print('DGT clock text:' + text)
 
     def stop_clock(self):
         if self.rt:
