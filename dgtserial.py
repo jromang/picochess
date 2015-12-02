@@ -55,7 +55,7 @@ class DGTSerial(Display):
     def __init__(self, device):
         super(DGTSerial, self).__init__()
         self.device = device
-
+        self.first_clock_msg = True
         self.clock_lock = False
         # Open the serial port
         try:
@@ -154,7 +154,9 @@ class DGTSerial(Display):
                         'DGT clock time received {} : {}'.format((l_hours, l_mins, l_secs), (r_hours, r_mins, r_secs)))
                 else:
                     logging.debug('DGT clock message ignored')
-
+                    if self.first_clock_msg:
+                        Display.show(Message.DGT_CLOCK_VERSION, main_version=1, sub_version=0)
+                        self.first_clock_msg = False
                 if self.clock_lock:
                     logging.debug('DGT clock unlocked')
                     self.clock_lock = False
