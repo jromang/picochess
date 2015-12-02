@@ -62,7 +62,7 @@ book_map = ("rnbqkbnr/pppppppp/8/8/8/q7/PPPPPPPP/RNBQKBNR",
 
 shutdown_map = ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQQBNR", "8/8/8/8/8/8/8/3QQ3", "3QQ3/8/8/8/8/8/8/8")
 
-remote_map = ("rnbqkbnr/pppppppp/8/4Q4/8/8/PPPPPPPP/RNBQKBNR")
+remote_map = ("rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR")
 
 mode_map = {"rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR": Mode.GAME,
             "rnbqkbnr/pppppppp/8/1Q6/8/8/PPPPPPPP/RNBQKBNR": Mode.ANALYSIS,
