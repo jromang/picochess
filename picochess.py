@@ -39,8 +39,8 @@ from keyboardinput import KeyboardInput, TerminalDisplay
 from pgn import PgnDisplay
 from server import WebServer
 
-# from dgthardware import DGTHardware
-from dgtpi import DGTPi
+from dgthardware import DGTHardware
+# from dgtpi import DGTPi
 from dgtdisplay import DGTDisplay
 from dgtvirtual import DGTVirtual
 
@@ -391,8 +391,8 @@ def main():
     if args.dgt_port:
         # Connect to DGT board
         logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
-        # DGTHardware(args.dgt_port, args.enable_dgt_board_leds, args.disable_dgt_clock_beep).start()
-        DGTPi(args.dgt_port, args.enable_dgt_board_leds, args.disable_dgt_clock_beep).start()
+        DGTHardware(args.dgt_port, args.enable_dgt_board_leds, args.disable_dgt_clock_beep).start()
+        # DGTPi(args.dgt_port, args.enable_dgt_board_leds, args.disable_dgt_clock_beep).start()
     else:
         # Enable keyboard input and terminal display
         logging.warning("No DGT board port provided")
@@ -589,7 +589,8 @@ def main():
 
                 if case(Event.STARTSTOP_THINK):
                     if engine.is_thinking() and (interaction_mode != Mode.REMOTE):
-                        stop_search_and_clock()
+                        stop_clock()
+                        engine.stop(show_best=True)
                     else:
                         play_mode = PlayMode.PLAY_WHITE if play_mode == PlayMode.PLAY_BLACK else PlayMode.PLAY_BLACK
                         Display.show(Message.PLAY_MODE, play_mode=play_mode)

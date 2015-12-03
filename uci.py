@@ -106,6 +106,7 @@ class Engine(Display):
                     self.path = path
             self.options = {}
             self.future = None
+            self.show_best = True
 
             self.res = None
             self.status = EngineStatus.WAIT
@@ -172,10 +173,11 @@ class Engine(Display):
     def uci(self):
         self.engine.uci()
 
-    def stop(self):
+    def stop(self, show_best=False):
         if self.status == EngineStatus.WAIT:
             logging.info('Engine already stopped')
             return self.res
+        self.show_best = show_best
         self.engine.stop()
         return self.future.result()
 
@@ -183,6 +185,7 @@ class Engine(Display):
         if self.status != EngineStatus.WAIT:
             logging.warning('Search think still not waiting - strange!')
         self.status = EngineStatus.THINK
+        self.show_best = True
         time_dict['async_callback'] = self.callback
 
         Display.show(Message.SEARCH_STARTED, engine_status=self.status)
@@ -193,6 +196,7 @@ class Engine(Display):
         if self.status != EngineStatus.WAIT:
             logging.warning('Search ponder still not waiting - strange!')
         self.status = EngineStatus.PONDER
+        self.show_best = False
 
         Display.show(Message.SEARCH_STARTED, engine_status=self.status)
         self.future = self.engine.go(ponder=True, infinite=True, async_callback=self.callback)
@@ -201,8 +205,10 @@ class Engine(Display):
     def callback(self, command):
         self.res = command.result()
         Display.show(Message.SEARCH_STOPPED, engine_status=self.status, result=self.res)
-        if self.status != EngineStatus.PONDER:
+        if self.show_best:
             Observable.fire(Event.BEST_MOVE, result=self.res, inbook=False)
+        else:
+            logging.debug('Event Best_Move not fired')
         self.status = EngineStatus.WAIT
 
     def is_thinking(self):
