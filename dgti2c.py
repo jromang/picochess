@@ -37,6 +37,8 @@ class DGTi2c(Display):
     def __init__(self, device):
         super(DGTi2c, self).__init__()
         self.device = device
+        self.time_left = None
+        self.time_right = None
 
         # Open the serial port
         try:
@@ -71,7 +73,9 @@ class DGTi2c(Display):
         self.lib.dgt3000Display(message, 0x03 if beep else 0x01, 0, 0)
 
     def write_stop_to_clock(self):
-        self.lib.dgt3000SetNRun(0, 0, 0, 0, 0, 0, 0, 0)
+        l_hms = self.time_left
+        r_hms = self.time_right
+        self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
 
     def write_start_to_clock(self, l_hms, r_hms, side):
         if side == 0x01:
@@ -169,7 +173,9 @@ class DGTi2c(Display):
     def process_incoming_clock_forever(self):
         but = ctypes.c_byte(0)
         buttime = ctypes.c_byte(0)
+        clktime = ctypes.create_string_buffer(6)
         while True:
+            # get button events
             if self.lib.dgt3000GetButton(ctypes.pointer(but), ctypes.pointer(buttime)) == 1:
                 ack3 = but.value
                 if ack3 == 0x01:
@@ -191,6 +197,12 @@ class DGTi2c(Display):
                     logging.info("Button on/off pressed")
                 if ack3 == 0x40:
                     logging.info("Lever pressed")
+
+            # get clock events
+            self.lib.dgt3000GetTime(clktime)
+            times = list(clktime.raw)
+            self.time_left = times[:3]
+            self.time_right = times[3:]
             time.sleep(0.1)
 
     def run(self):

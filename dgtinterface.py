@@ -30,8 +30,6 @@ class DGTInterface(HardwareDisplay, threading.Thread):
         self.clock_found = False
         self.enable_board_leds = enable_board_leds
         self.disable_dgt_clock_beep = disable_dgt_clock_beep
-        self.time_left = None
-        self.time_right = None
 
     def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG):
         raise NotImplementedError()

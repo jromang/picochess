@@ -26,6 +26,8 @@ class DGTHardware(DGTInterface):
         super(DGTHardware, self).__init__(enable_board_leds, disable_dgt_clock_beep)
         self.dgtserial = DGTSerial(device)
         self.dgtserial.run()
+        self.time_left = None
+        self.time_right = None
 
     def write(self, message):
         self.dgtserial.write(message)
