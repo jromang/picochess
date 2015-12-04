@@ -463,7 +463,7 @@ def main():
     # Startup - external
     Display.show(Message.STARTUP_INFO, info={"interaction_mode": interaction_mode, "play_mode": play_mode,
                                              "book": all_books[book_index][1], "book_index": book_index,
-                                             "time_control_string": "mov 5"})
+                                             "time_control_string": "bl 5"})
     Display.show(Message.ENGINE_START, path=engine.get_path(), has_levels=engine.has_levels())
 
     # Event loop
