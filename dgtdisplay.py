@@ -714,6 +714,9 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         HardwareDisplay.show(Dgt.CLOCK_VERSION, main_version=message.main_version,
                                              sub_version=message.sub_version)
                         break
+                    if case(Message.DGT_CLOCK_TIME):
+                        HardwareDisplay.show(Dgt.CLOCK_TIME, time_left=message.time_left, time_right=message.time_right)
+                        break
                     if case():  # Default
                         # print(message)
                         pass

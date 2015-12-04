@@ -151,7 +151,8 @@ class DGTSerial(Display):
                     l_mins = (message[4] >> 4) * 10 + (message[4] & 0x0f)
                     l_secs = (message[5] >> 4) * 10 + (message[5] & 0x0f)
                     logging.info(
-                        'DGT clock time received {} : {}'.format((l_hours, l_mins, l_secs), (r_hours, r_mins, r_secs)))
+                        'DGT clock time received {} : {}'.format((l_hours, l_mins, l_secs), (r_hours , r_mins , r_secs)))
+                    Display.show(Message.DGT_CLOCK_TIME, time_left=(l_hours , l_mins , l_secs), time_right=(r_hours , r_mins , r_secs))
                 else:
                     logging.debug('DGT clock message ignored')
 

@@ -85,8 +85,10 @@ class DGTHardware(DGTInterface):
             self.write([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
 
     def stop_clock(self):
+        l_hms = self.time_left
+        r_hms = self.time_right
         self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0a, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_SETNRUN,
-                    0, 0, 0, 0, 0, 0,
+                    l_hms[0], l_hms[1], l_hms[2], r_hms[0], r_hms[1], r_hms[2],
                     0x04 | 0x01, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
 
     def start_clock(self, time_left, time_right, side):

@@ -30,6 +30,8 @@ class DGTInterface(HardwareDisplay, threading.Thread):
         self.clock_found = False
         self.enable_board_leds = enable_board_leds
         self.disable_dgt_clock_beep = disable_dgt_clock_beep
+        self.time_left = None
+        self.time_right = None
 
     def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG):
         raise NotImplementedError()
@@ -87,6 +89,11 @@ class DGTInterface(HardwareDisplay, threading.Thread):
                             self.enable_dgt_3000 = True
                         self.display_text_on_clock('pico ' + version, 'pic' + version, beep=BeepLevel.YES)
                         time.sleep(2)
+                        break
+                    if case(Dgt.CLOCK_TIME):
+                        self.time_left = message.time_left
+                        self.time_right = message.time_right
+                        break
                     if case():  # Default
                         pass
             except queue.Empty:

@@ -30,7 +30,7 @@ except ImportError:
 
 
 # picochess version
-version = '055'
+version = '056'
 
 event_queue = queue.Queue()
 serial_queue = queue.Queue()
@@ -93,6 +93,7 @@ class Message(AutoNumber):
     DGT_BUTTON = ()  # Clock button pressed
     DGT_FEN = ()  # DGT Board sends a fen
     DGT_CLOCK_VERSION = ()  # DGT Board sends the clock version
+    DGT_CLOCK_TIME = ()  # DGT Clock time message
 
     INTERACTION_MODE = ()  # Interaction mode
     PLAY_MODE = ()  # Play mode
@@ -122,6 +123,7 @@ class Dgt(AutoNumber):
     CLOCK_STOP = ()
     CLOCK_START = ()
     CLOCK_VERSION = ()  # DGT Board sends the clock version
+    CLOCK_TIME = ()  # DGT Clock sends the time
 
 
 class Menu(AutoNumber):
