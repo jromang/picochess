@@ -37,8 +37,6 @@ class DGTi2c(Display):
     def __init__(self, device):
         super(DGTi2c, self).__init__()
         self.device = device
-        self.time_left = None
-        self.time_right = None
 
         # Open the serial port
         try:
@@ -72,9 +70,7 @@ class DGTi2c(Display):
     def write_text_to_clock(self, message, beep):
         self.lib.dgt3000Display(message, 0x03 if beep else 0x01, 0, 0)
 
-    def write_stop_to_clock(self):
-        l_hms = self.time_left
-        r_hms = self.time_right
+    def write_stop_to_clock(self, l_hms, r_hms):
         self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
 
     def write_start_to_clock(self, l_hms, r_hms, side):
@@ -201,8 +197,7 @@ class DGTi2c(Display):
             # get clock events
             self.lib.dgt3000GetTime(clktime)
             times = list(clktime.raw)
-            self.time_left = times[:3]
-            self.time_right = times[3:]
+            Display.show(Message.DGT_CLOCK_TIME, time_left=times[:3], time_right=times[3:])
             time.sleep(0.1)
 
     def run(self):

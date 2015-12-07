@@ -26,8 +26,6 @@ class DGTHardware(DGTInterface):
         super(DGTHardware, self).__init__(enable_board_leds, disable_dgt_clock_beep)
         self.dgtserial = DGTSerial(device)
         self.dgtserial.run()
-        self.time_left = None
-        self.time_right = None
 
     def write(self, message):
         self.dgtserial.write(message)
@@ -96,6 +94,8 @@ class DGTHardware(DGTInterface):
     def start_clock(self, time_left, time_right, side):
         l_hms = hours_minutes_seconds(time_left)
         r_hms = hours_minutes_seconds(time_right)
+        self.time_left = l_hms
+        self.time_right = r_hms
         self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0a, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_SETNRUN,
                     l_hms[0], l_hms[1], l_hms[2], r_hms[0], r_hms[1], r_hms[2],
                     side, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])

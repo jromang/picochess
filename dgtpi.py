@@ -53,9 +53,11 @@ class DGTPi(DGTInterface):
         pass
 
     def stop_clock(self):
-        self.dgti2c.write_stop_to_clock()
+        self.dgti2c.write_stop_to_clock(self.time_left, self.time_right)
 
     def start_clock(self, time_left, time_right, side):
         l_hms = hours_minutes_seconds(time_left)
         r_hms = hours_minutes_seconds(time_right)
+        self.time_left = l_hms
+        self.time_right = r_hms
         self.dgti2c.write_start_to_clock(l_hms, r_hms, side)
