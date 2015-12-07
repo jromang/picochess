@@ -194,11 +194,11 @@ class DGTi2c(Display):
                 if ack3 == 0x40:
                     logging.info("Lever pressed")
 
-            # get clock events
+            # get time events
             self.lib.dgt3000GetTime(clktime)
             times = list(clktime.raw)
             Display.show(Message.DGT_CLOCK_TIME, time_left=times[:3], time_right=times[3:])
-            time.sleep(0.1)
+            time.sleep(0.2)
 
     def run(self):
         self.startup_board()
