@@ -113,6 +113,7 @@ class DGTSerial(Display):
                     ack3 = ((message[5]) & 0x7f) | ((message[0] << 2) & 0x80)
                     if ack0 != 0x10:
                         logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
+                        self.clock_lock = False  # for issue 142
                         return
                     else:
                         logging.debug("Clock ACK [%s]", DgtClk(ack1))
@@ -157,6 +158,7 @@ class DGTSerial(Display):
                 else:
                     logging.debug('DGT clock message ignored')
                     if self.first_clock_msg:
+                        logging.warning('Force XL clock version')
                         Display.show(Message.DGT_CLOCK_VERSION, main_version=1, sub_version=0)
                         self.first_clock_msg = False
                 if self.clock_lock:
