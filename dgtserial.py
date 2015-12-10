@@ -139,7 +139,7 @@ class DGTSerial(Display):
                         if ack3 == 53:
                             logging.info("Button 4 pressed")
                             Display.show(Message.DGT_BUTTON, button=4)
-                    if ack1 == 0x09:  # we using the beep command, to find out if a clock is there
+                    if ack1 == 0x09:
                         main_version = ack2 >> 4
                         sub_version = ack2 & 0x0f
                         logging.debug("DGT clock version %0.2f", float(str(main_version) + '.' + str(sub_version)))
@@ -155,6 +155,7 @@ class DGTSerial(Display):
                     tl = [l_hours, l_mins, l_secs]
                     logging.info('DGT clock time received {} : {}'.format(tl, tr))
                     Display.show(Message.DGT_CLOCK_TIME, time_left=tl, time_right=tr)
+                    return  # Versuch!
                 else:
                     logging.debug('DGT clock message ignored')
                     if self.first_clock_msg:
@@ -225,9 +226,6 @@ class DGTSerial(Display):
     def startup(self):
         # Set the board update mode
         self.write([DgtCmd.DGT_SEND_UPDATE_NICE])
-        # we sending a beep command, and see if its ack'ed
-        self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x04, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
-                    DgtClk.DGT_CMD_CLOCK_BEEP, 1, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         # Get clock version
         self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
                     DgtClk.DGT_CMD_CLOCK_VERSION, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
