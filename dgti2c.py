@@ -37,6 +37,10 @@ class DGTi2c(Display):
     def __init__(self, device):
         super(DGTi2c, self).__init__()
         self.device = device
+        self.i2c_queue = queue.Queue()
+        self.timer = None
+        self.timer_running = False
+        self.clock_running = False
 
         # Open the serial port
         try:
@@ -51,6 +55,19 @@ class DGTi2c(Display):
 
         # load the dgt3000 so file
         self.lib = ctypes.cdll.LoadLibrary("/home/pi/20151118/dgt3000.so")
+
+    def write(self, message, beep, duration, force):
+        if force:
+            self.i2c_queue = queue.Queue()
+        self.i2c_queue.put((message, beep, duration))
+
+    def send_command(self, comamnd):
+        message, beep, duration = comamnd
+        if duration > 0:
+            self.timer = threading.Timer(duration, self.stopped_timer)
+            self.timer.start()
+            self.timer_running = True
+        self.lib.dgt3000Display(message, 0x03 if beep else 0x01, 0, 0)
 
     def write_to_board(self, message):
         logging.debug('->DGT [%s], length:%i', message[0], len(message))
@@ -67,11 +84,16 @@ class DGTi2c(Display):
         except ValueError:
             logging.error('Invalid bytes sent {0}'.format(message))
 
-    def write_text_to_clock(self, message, beep):
+    def write_text_to_clock(self, message, beep, duration, force):
         self.lib.dgt3000Display(message, 0x03 if beep else 0x01, 0, 0)
 
     def write_stop_to_clock(self, l_hms, r_hms):
         self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
+
+    def stopped_timer(self):
+        self.timer_running = False
+        if self.clock_running:
+            self.lib.dgt3000EndDisplay()
 
     def write_start_to_clock(self, l_hms, r_hms, side):
         if side == 0x01:
@@ -80,6 +102,7 @@ class DGTi2c(Display):
         else:
             lr = 0
             rr = 1
+        self.clock_running = True
         self.lib.dgt3000SetNRun(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
 
     def process_board_message(self, message_id, message):
@@ -200,6 +223,23 @@ class DGTi2c(Display):
             Display.show(Message.DGT_CLOCK_TIME, time_left=times[:3], time_right=times[3:])
             time.sleep(0.2)
 
+    def process_outgoing_clock_forever(self):
+        while True:
+            # Check if we have something to send
+            try:
+                command = self.i2c_queue.get()
+                self.send_command(command)
+            except queue.Empty:
+                pass
+
+            if not self.timer_running:
+                # Check if we have something to send
+                try:
+                    command = self.i2c_queue.get()
+                    self.send_command(command)
+                except queue.Empty:
+                    pass
+
     def run(self):
         self.startup_board()
         self.startup_clock()
@@ -208,3 +248,5 @@ class DGTi2c(Display):
 
         incoming_clock_thread = threading.Timer(0, self.process_incoming_clock_forever)
         incoming_clock_thread.start()
+        outgoing_clock_thread = threading.Timer(0, self.process_outgoing_clock_forever)
+        outgoing_clock_thread.start()

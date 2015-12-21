@@ -27,24 +27,23 @@ class DGTPi(DGTInterface):
         self.dgti2c = DGTi2c(device)
         self.dgti2c.run()
 
-    def _display_on_dgt_3000(self, text, beep=False):
-        while len(text) < 8:
-            text += ' '
-        if len(text) > 8:
+    def _display_on_dgt_3000(self, text, beep=False, duration=0, force=False):
+        if len(text) > 11:
             logging.warning('DGT 3000 clock message too long [%s]', text)
         logging.debug(text)
         text = bytes(text, 'utf-8')
-        self.dgti2c.write_text_to_clock(text, beep)
+        # self.dgti2c.write_text_to_clock(text, beep, duration, force)
+        self.dgti2c.write(text, beep, duration, force)
 
-    def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG):
+    def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG, duration=0, force=False):
         beep = self.get_beep_level(beep)
-        self._display_on_dgt_3000(text, beep)
+        self._display_on_dgt_3000(text, beep, duration, force)
 
-    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):
+    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG, duration=0, force=False):
         beep = self.get_beep_level(beep)
         bit_board = chess.Board(fen)
         text = bit_board.san(move)
-        self._display_on_dgt_3000(text, beep)
+        self._display_on_dgt_3000(text, beep, duration, force)
 
     def light_squares_revelation_board(self, squares):
         pass

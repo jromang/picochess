@@ -33,10 +33,10 @@ class DGTInterface(HardwareDisplay, threading.Thread):
         self.time_left = [0, 0, 0]
         self.time_right = [0, 0, 0]
 
-    def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG):
+    def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG, duration=0, force=False):
         raise NotImplementedError()
 
-    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):
+    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG, duration=0, force=False):
         raise NotImplementedError()
 
     def light_squares_revelation_board(self, squares):

@@ -65,7 +65,7 @@ class DGTVirtual(DGTInterface):
         r_hms = hours_minutes_seconds(self.time_right)
         HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='{} - {}'.format(l_hms, r_hms), xl=None, beep=BeepLevel.NO)
 
-    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):
+    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG, duration=0, force=False):
         # beep = self.get_beep_level(beep)
         if self.enable_dgt_3000:
             bit_board = chess.Board(fen)
@@ -75,7 +75,7 @@ class DGTVirtual(DGTInterface):
         logging.debug(text)
         print('DGT clock move:' + text)
 
-    def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG):
+    def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG, duration=0, force=False):
         # beep = self.get_beep_level(beep)
         if dgt_xl_text and not self.enable_dgt_3000:
             text = dgt_xl_text
