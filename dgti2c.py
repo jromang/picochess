@@ -17,6 +17,7 @@
 import logging
 import ctypes
 import serial as pyserial
+import sys
 
 from timecontrol import *
 from struct import unpack
@@ -37,32 +38,25 @@ class DGTi2c(Display):
     def __init__(self, device):
         super(DGTi2c, self).__init__()
         self.device = device
+        self.serial = None
         self.i2c_queue = queue.Queue()
         self.timer = None
         self.timer_running = False
         self.clock_running = False
 
-        # Open the serial port
-        try:
-            self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE,
-                                          parity=pyserial.PARITY_NONE,
-                                          bytesize=pyserial.EIGHTBITS,
-                                          timeout=2
-                                          )
-        except pyserial.SerialException as e:
-            logging.warning(e)
-            return
-
-        # load the dgt3000 so file
-        self.lib = ctypes.cdll.LoadLibrary("/home/pi/20151118/dgt3000.so")
+        # load the dgt3000 SO-file
+        self.lib = ctypes.cdll.LoadLibrary("/home/pi/20151124/dgt3000.so")
 
     def write(self, message, beep, duration, force):
         if force:
             self.i2c_queue = queue.Queue()
+            if self.timer:
+                self.timer.stop()
+                self.timer_running = False
         self.i2c_queue.put((message, beep, duration))
 
-    def send_command(self, comamnd):
-        message, beep, duration = comamnd
+    def send_command(self, command):
+        message, beep, duration = command
         if duration > 0:
             self.timer = threading.Timer(duration, self.stopped_timer)
             self.timer.start()
@@ -84,7 +78,7 @@ class DGTi2c(Display):
         except ValueError:
             logging.error('Invalid bytes sent {0}'.format(message))
 
-    def write_text_to_clock(self, message, beep, duration, force):
+    def write_text_to_clock(self, message, beep, duration=0, force=False):
         self.lib.dgt3000Display(message, 0x03 if beep else 0x01, 0, 0)
 
     def write_stop_to_clock(self, l_hms, r_hms):
@@ -177,8 +171,11 @@ class DGTi2c(Display):
         self.write_to_board([DgtCmd.DGT_SEND_BRD])
 
     def startup_clock(self):
-        self.lib.dgt3000Init()
-        self.lib.dgt3000Configure()
+        if self.lib.dgt3000Init() < 0:
+            sys.exit(-1)
+        if self.lib.dgt3000Configure() < 0:
+            sys.exit(-1)
+        Display.show(Message.DGT_CLOCK_VERSION, main_version=2, sub_version=2)
 
     def process_incoming_board_forever(self):
         while True:
@@ -241,8 +238,20 @@ class DGTi2c(Display):
                     pass
 
     def run(self):
-        self.startup_board()
         self.startup_clock()
+        # Open the serial port
+        try:
+            self.serial = pyserial.Serial(self.device, stopbits=pyserial.STOPBITS_ONE,
+                                          parity=pyserial.PARITY_NONE,
+                                          bytesize=pyserial.EIGHTBITS,
+                                          timeout=2
+                                          )
+        except pyserial.SerialException as e:
+            logging.error(e)
+            self.write_text_to_clock('board error', True)
+            sys.exit(-1)
+
+        self.startup_board()
         incoming_board_thread = threading.Timer(0, self.process_incoming_board_forever)
         incoming_board_thread.start()
 
