@@ -477,7 +477,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         self.engine_index = self.installed_engines.index(message.eng)
                         self.engine_menu_index = self.engine_index
                         self.engine_has_levels = message.has_levels
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='ok engin', xl="ok eng", beep=BeepLevel.CONFIG)
+                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='ok engin', xl="ok eng", beep=BeepLevel.CONFIG, duration=1)
                         self.engine_restart = False
                         break
                     if case(Message.ENGINE_START):
@@ -492,7 +492,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                                     self.engine_has_levels = message.has_levels
                         break
                     if case(Message.ENGINE_FAIL):
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='error', xl=None, beep=BeepLevel.CONFIG)
+                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='error', xl=None, beep=BeepLevel.CONFIG, duration=1)
                         break
                     if case(Message.COMPUTER_MOVE):
                         move = message.result.bestmove
@@ -509,7 +509,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         HardwareDisplay.show(Dgt.LIGHT_SQUARES, squares=(uci_move[0:2], uci_move[2:4]))
                         break
                     if case(Message.START_NEW_GAME):
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="new game", xl="newgam", beep=BeepLevel.CONFIG)
+                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="new game", xl="newgam", beep=BeepLevel.CONFIG, duration=1)
                         HardwareDisplay.show(Dgt.LIGHT_CLEAR)
                         self.last_move = chess.Move.null()
                         self.reset_hint_and_score()
@@ -519,7 +519,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         break
                     if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
                         if self.ok_moves_messages:
-                            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok pico", xl="okpico", beep=BeepLevel.CONFIG)
+                            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok pico", xl="okpico", beep=BeepLevel.CONFIG, duration=1)
                         HardwareDisplay.show(Dgt.LIGHT_CLEAR)
                         self.display_move = False
                         self.alternative = False
@@ -528,17 +528,17 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         self.display_move = False
                         self.alternative = False
                         if self.ok_moves_messages:
-                            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok user", xl="okuser", beep=BeepLevel.CONFIG)
+                            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok user", xl="okuser", beep=BeepLevel.CONFIG, duration=1)
                         break
                     if case(Message.REVIEW_MODE_MOVE):
                         self.last_move = message.move
                         self.last_fen = message.fen
                         self.display_move = False
                         if self.ok_moves_messages:
-                            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok move", xl="okmove", beep=BeepLevel.CONFIG)
+                            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok move", xl="okmove", beep=BeepLevel.CONFIG, duration=1)
                         break
                     if case(Message.ALTERNATIVE_MOVE):
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="alt move", xl="altmov", beep=BeepLevel.CONFIG)
+                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="alt move", xl="altmov", beep=BeepLevel.CONFIG, duration=1)
                         break
                     if case(Message.LEVEL):
                         level = str(message.level)
@@ -548,22 +548,22 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                             self.engine_level = self.engine_level_menu
                         else:
                             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level,
-                                                 beep=BeepLevel.CONFIG)
+                                                 beep=BeepLevel.CONFIG, duration=1)
                         break
                     if case(Message.TIME_CONTROL):
                         HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=message.time_control_string, xl=None,
-                                             beep=BeepLevel.CONFIG)
+                                             beep=BeepLevel.CONFIG, duration=1)
                         break
                     if case(Message.OPENING_BOOK):
                         book_name = message.book[0]
                         self.alternative = False
                         if self.book_from_fen:
-                            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=book_name, xl=None, beep=BeepLevel.CONFIG)
+                            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=book_name, xl=None, beep=BeepLevel.CONFIG, duration=1)
                             self.book_from_fen = False
                             self.book_menu_index = self.book_index  # Not necessary but cleaner
                         if self.book_index != self.book_menu_index:
                             self.book_index = self.book_menu_index
-                            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok book", xl="okbook", beep=BeepLevel.CONFIG)
+                            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok book", xl="okbook", beep=BeepLevel.CONFIG, duration=1)
                         break
                     if case(Message.USER_TAKE_BACK):
                         self.reset_hint_and_score()
@@ -577,24 +577,24 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                     if case(Message.INTERACTION_MODE):
                         self.mode = message.mode
                         self.alternative = False
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=message.mode.value, xl=None, beep=BeepLevel.CONFIG)
+                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=message.mode.value, xl=None, beep=BeepLevel.CONFIG, duration=1)
                         break
                     if case(Message.PLAY_MODE):
                         pm = message.play_mode.value
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=pm, xl=pm[:6], beep=BeepLevel.CONFIG)
+                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=pm, xl=pm[:6], beep=BeepLevel.CONFIG, duration=1)
                         break
                     if case(Message.SCORE):
                         self.score = message.score
                         self.mate = message.mate
                         if message.mode == Mode.KIBITZ:
                             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=str(self.score).rjust(6), xl=None,
-                                                 beep=BeepLevel.NO)
+                                                 beep=BeepLevel.NO, duration=1)
                         break
                     if case(Message.BOOK_MOVE):
                         self.score = None
                         self.mate = None
                         self.display_move = False
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="book", xl=None, beep=BeepLevel.NO)
+                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="book", xl=None, beep=BeepLevel.NO, duration=1)
                         break
                     if case(Message.NEW_PV):
                         self.hint_move = message.pv[0]

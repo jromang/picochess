@@ -61,6 +61,7 @@ class DGTi2c(Display):
             self.timer = threading.Timer(duration, self.stopped_timer)
             self.timer.start()
             self.timer_running = True
+        logging.debug((message, beep, duration))
         self.lib.dgt3000Display(message, 0x03 if beep else 0x01, 0, 0)
 
     def write_to_board(self, message):
@@ -190,6 +191,7 @@ class DGTi2c(Display):
         but = ctypes.c_byte(0)
         buttime = ctypes.c_byte(0)
         clktime = ctypes.create_string_buffer(6)
+        counter = 0
         while True:
             # get button events
             if self.lib.dgt3000GetButton(ctypes.pointer(but), ctypes.pointer(buttime)) == 1:
@@ -217,17 +219,19 @@ class DGTi2c(Display):
             # get time events
             self.lib.dgt3000GetTime(clktime)
             times = list(clktime.raw)
-            Display.show(Message.DGT_CLOCK_TIME, time_left=times[:3], time_right=times[3:])
+            counter = (counter + 1) % 5
+            if counter == 1:
+                Display.show(Message.DGT_CLOCK_TIME, time_left=times[:3], time_right=times[3:])
             time.sleep(0.2)
 
     def process_outgoing_clock_forever(self):
         while True:
             # Check if we have something to send
-            try:
-                command = self.i2c_queue.get()
-                self.send_command(command)
-            except queue.Empty:
-                pass
+            # try:
+            #     command = self.i2c_queue.get()
+            #     self.send_command(command)
+            # except queue.Empty:
+            #     pass
 
             if not self.timer_running:
                 # Check if we have something to send
