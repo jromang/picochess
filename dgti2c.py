@@ -243,17 +243,21 @@ class DGTi2c(Display):
 
     def run(self):
         self.startup_clock()
-        # Open the serial port
-        try:
-            self.serial = pyserial.Serial(self.device, stopbits=pyserial.STOPBITS_ONE,
-                                          parity=pyserial.PARITY_NONE,
-                                          bytesize=pyserial.EIGHTBITS,
-                                          timeout=2
-                                          )
-        except pyserial.SerialException as e:
-            logging.error(e)
-            self.write_text_to_clock('board error', True)
-            sys.exit(-1)
+        waitchars = [b'/', b'-', b'\\', b'|']
+        wait_counter = 0
+        while not self.serial:
+            # Open the serial port
+            try:
+                self.serial = pyserial.Serial(self.device, stopbits=pyserial.STOPBITS_ONE,
+                                              parity=pyserial.PARITY_NONE,
+                                              bytesize=pyserial.EIGHTBITS,
+                                              timeout=2
+                                              )
+            except pyserial.SerialException as e:
+                logging.error(e)
+                self.lib.dgt3000Display(b'no E-board' + waitchars[wait_counter], 0, 0, 0)
+                wait_counter = (wait_counter + 1) % len(waitchars)
+                time.sleep(0.5)
 
         self.startup_board()
         incoming_board_thread = threading.Timer(0, self.process_incoming_board_forever)
