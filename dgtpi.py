@@ -32,7 +32,6 @@ class DGTPi(DGTInterface):
             logging.warning('DGT 3000 clock message too long [%s]', text)
         logging.debug(text)
         text = bytes(text, 'utf-8')
-        # self.dgti2c.write_text_to_clock(text, beep, duration, force)
         self.dgti2c.write(text, beep, duration, force)
 
     def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG, duration=0, force=False):

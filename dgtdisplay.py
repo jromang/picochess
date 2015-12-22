@@ -195,9 +195,9 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
     def process_button0(self):
         if self.dgt_clock_menu == Menu.GAME_MENU:
             if self.last_move:
-                HardwareDisplay.show(Dgt.DISPLAY_MOVE, move=self.last_move, fen=self.last_fen, beep=BeepLevel.CONFIG)
+                HardwareDisplay.show(Dgt.DISPLAY_MOVE, move=self.last_move, fen=self.last_fen, beep=BeepLevel.CONFIG, duration=1)
             else:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no move", xl="nomove", beep=BeepLevel.CONFIG)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no move", xl="nomove", beep=BeepLevel.CONFIG, duration=1)
 
         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
             self.setup_to_move = chess.WHITE if self.setup_to_move == chess.BLACK else chess.BLACK
@@ -250,15 +250,15 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             if self.display_move:
                 if bool(self.hint_move):
                     HardwareDisplay.show(Dgt.DISPLAY_MOVE, move=self.hint_move, fen=self.hint_fen,
-                                         beep=BeepLevel.CONFIG)
+                                         beep=BeepLevel.CONFIG, duration=1)
                 else:
-                    HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no move", xl="nomove", beep=BeepLevel.NO)
+                    HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no move", xl="nomove", beep=BeepLevel.NO, duration=1)
             else:
                 if self.mate is None:
                     sc = 'no scr' if self.score is None else str(self.score).rjust(6)
                 else:
                     sc = 'm ' + str(self.mate)
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=sc, xl=None, beep=BeepLevel.YES)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=sc, xl=None, beep=BeepLevel.YES, duration=1)
             self.display_move = not self.display_move
 
         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:

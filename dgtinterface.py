@@ -66,10 +66,14 @@ class DGTInterface(HardwareDisplay, threading.Thread):
                 logging.debug("Read dgt from queue: %s", message)
                 for case in switch(message):
                     if case(Dgt.DISPLAY_MOVE):
-                        self.display_move_on_clock(message.move, message.fen, message.beep)
+                        if not hasattr(message, 'duration'):
+                            message.duration = 0
+                        self.display_move_on_clock(message.move, message.fen, message.beep, message.duration)
                         break
                     if case(Dgt.DISPLAY_TEXT):
-                        self.display_text_on_clock(message.text, message.xl, message.beep)
+                        if not hasattr(message, 'duration'):
+                            message.duration = 0
+                        self.display_text_on_clock(message.text, message.xl, message.beep, message.duration)
                         break
                     if case(Dgt.LIGHT_CLEAR):
                         self.clear_light_revelation_board()
