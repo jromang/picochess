@@ -18,6 +18,7 @@ import logging
 import ctypes
 import serial as pyserial
 import sys
+from threading import Timer, Lock
 
 from timecontrol import *
 from struct import unpack
@@ -43,6 +44,7 @@ class DGTi2c(Display):
         self.timer = None
         self.timer_running = False
         self.clock_running = False
+        self.lock = Lock()
 
         # load the dgt3000 SO-file
         self.lib = ctypes.cdll.LoadLibrary("/home/pi/20151124/dgt3000.so")
@@ -57,15 +59,47 @@ class DGTi2c(Display):
         self.i2c_queue.put((message, beep, duration))
 
     def send_command(self, command):
+        self.lock.acquire()
         message, beep, duration = command
         if duration > 0:
-            self.timer = threading.Timer(duration, self.stopped_timer)
+            self.timer = Timer(duration, self.stopped_timer)
             self.timer.start()
             self.timer_running = True
         logging.debug((message, beep, duration))
         res = self.lib.dgt3000Display(message, 0x03 if beep else 0x01, 0, 0)
         if res < 0:
-            logging.warning('dgt so returned error: %i', res)
+            logging.warning('dgt lib returned error: %i', res)
+        self.lock.release()
+
+    def write_stop_to_clock(self, l_hms, r_hms):
+        self.lock.acquire()
+        res = self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
+        if res < 0:
+            logging.warning('dgt lib returned error: %i', res)
+        self.lock.release()
+
+    def stopped_timer(self):
+        self.timer_running = False
+        if self.clock_running:
+            self.lock.acquire()
+            res = self.lib.dgt3000EndDisplay()
+            self.lock.release()
+            if res < 0:
+                logging.warning('dgt lib returned error: %i', res)
+
+    def write_start_to_clock(self, l_hms, r_hms, side):
+        self.lock.acquire()
+        if side == 0x01:
+            lr = 1
+            rr = 0
+        else:
+            lr = 0
+            rr = 1
+        self.clock_running = True
+        res = self.lib.dgt3000SetNRun(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
+        if res < 0:
+            logging.warning('dgt lib returned error: %i', res)
+        self.lock.release()
 
     def write_to_board(self, message):
         logging.debug('->DGT [%s], length:%i', message[0], len(message))
@@ -81,35 +115,6 @@ class DGTi2c(Display):
             self.serial.write(bytearray(array))
         except ValueError:
             logging.error('Invalid bytes sent {0}'.format(message))
-
-    def write_text_to_clock(self, message, beep, duration=0, force=False):
-        res = self.lib.dgt3000Display(message, 0x03 if beep else 0x01, 0, 0)
-        if res < 0:
-            logging.warning('dgt so returned error: %i', res)
-
-    def write_stop_to_clock(self, l_hms, r_hms):
-        res = self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
-        if res < 0:
-            logging.warning('dgt so returned error: %i', res)
-
-    def stopped_timer(self):
-        self.timer_running = False
-        if self.clock_running:
-            res = self.lib.dgt3000EndDisplay()
-            if res < 0:
-                logging.warning('dgt so returned error: %i', res)
-
-    def write_start_to_clock(self, l_hms, r_hms, side):
-        if side == 0x01:
-            lr = 1
-            rr = 0
-        else:
-            lr = 0
-            rr = 1
-        self.clock_running = True
-        res = self.lib.dgt3000SetNRun(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
-        if res < 0:
-            logging.warning('dgt so returned error: %i', res)
 
     def process_board_message(self, message_id, message):
         for case in switch(message_id):
@@ -204,6 +209,7 @@ class DGTi2c(Display):
         clktime = ctypes.create_string_buffer(6)
         counter = 0
         while True:
+            self.lock.acquire()
             # get button events
             if self.lib.dgt3000GetButton(ctypes.pointer(but), ctypes.pointer(buttime)) == 1:
                 ack3 = but.value
@@ -229,6 +235,7 @@ class DGTi2c(Display):
 
             # get time events
             self.lib.dgt3000GetTime(clktime)
+            self.lock.release()
             times = list(clktime.raw)
             counter = (counter + 1) % 5
             if counter == 1:
@@ -268,7 +275,7 @@ class DGTi2c(Display):
                 logging.error(e)
                 res = self.lib.dgt3000Display(b'no E-board' + waitchars[wait_counter], 0, 0, 0)
                 if res < 0:
-                    logging.warning('dgt so returned error: %i', res)
+                    logging.warning('dgt lib returned error: %i', res)
                 wait_counter = (wait_counter + 1) % len(waitchars)
                 time.sleep(0.5)
 
