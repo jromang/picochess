@@ -49,6 +49,7 @@ class DGTi2c(Display):
 
     def write(self, message, beep, duration, force):
         if force:
+            logging.debug('force given')
             self.i2c_queue = queue.Queue()
             if self.timer:
                 self.timer.stop()
@@ -62,7 +63,9 @@ class DGTi2c(Display):
             self.timer.start()
             self.timer_running = True
         logging.debug((message, beep, duration))
-        self.lib.dgt3000Display(message, 0x03 if beep else 0x01, 0, 0)
+        res = self.lib.dgt3000Display(message, 0x03 if beep else 0x01, 0, 0)
+        if res < 0:
+            logging.warning('dgt so returned error: %i', res)
 
     def write_to_board(self, message):
         logging.debug('->DGT [%s], length:%i', message[0], len(message))
@@ -80,15 +83,21 @@ class DGTi2c(Display):
             logging.error('Invalid bytes sent {0}'.format(message))
 
     def write_text_to_clock(self, message, beep, duration=0, force=False):
-        self.lib.dgt3000Display(message, 0x03 if beep else 0x01, 0, 0)
+        res = self.lib.dgt3000Display(message, 0x03 if beep else 0x01, 0, 0)
+        if res < 0:
+            logging.warning('dgt so returned error: %i', res)
 
     def write_stop_to_clock(self, l_hms, r_hms):
-        self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
+        res = self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
+        if res < 0:
+            logging.warning('dgt so returned error: %i', res)
 
     def stopped_timer(self):
         self.timer_running = False
         if self.clock_running:
-            self.lib.dgt3000EndDisplay()
+            res = self.lib.dgt3000EndDisplay()
+            if res < 0:
+                logging.warning('dgt so returned error: %i', res)
 
     def write_start_to_clock(self, l_hms, r_hms, side):
         if side == 0x01:
@@ -98,7 +107,9 @@ class DGTi2c(Display):
             lr = 0
             rr = 1
         self.clock_running = True
-        self.lib.dgt3000SetNRun(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
+        res = self.lib.dgt3000SetNRun(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
+        if res < 0:
+            logging.warning('dgt so returned error: %i', res)
 
     def process_board_message(self, message_id, message):
         for case in switch(message_id):
@@ -255,7 +266,9 @@ class DGTi2c(Display):
                                               )
             except pyserial.SerialException as e:
                 logging.error(e)
-                self.lib.dgt3000Display(b'no E-board' + waitchars[wait_counter], 0, 0, 0)
+                res = self.lib.dgt3000Display(b'no E-board' + waitchars[wait_counter], 0, 0, 0)
+                if res < 0:
+                    logging.warning('dgt so returned error: %i', res)
                 wait_counter = (wait_counter + 1) % len(waitchars)
                 time.sleep(0.5)
 
