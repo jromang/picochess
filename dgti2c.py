@@ -47,7 +47,7 @@ class DGTi2c(Display):
         self.lock = Lock()
 
         # load the dgt3000 SO-file
-        self.lib = ctypes.cdll.LoadLibrary("/home/pi/20151124/dgt3000.so")
+        self.lib = ctypes.cdll.LoadLibrary("/home/pi/20151223/dgt3000.so")
 
     def write(self, message, beep, duration, force):
         if force:
@@ -212,6 +212,8 @@ class DGTi2c(Display):
                 if c:
                     self.read_board_message(head=c)
             except pyserial.SerialException as e:
+                pass
+            except TypeError:
                 pass
 
     def process_incoming_clock_forever(self):
