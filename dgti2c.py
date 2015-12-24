@@ -102,6 +102,8 @@ class DGTi2c(Display):
         self.lock.release()
 
     def write_to_board(self, message):
+        waitchars = [b'/', b'-', b'\\', b'|']
+        wait_counter = 0
         logging.debug('->DGT [%s], length:%i', message[0], len(message))
         array = []
         for v in message:
@@ -111,10 +113,19 @@ class DGTi2c(Display):
                 array.append(v.value)
             else:
                 logging.error('Type not supported : [%s]', type(v))
-        try:
-            self.serial.write(bytearray(array))
-        except ValueError:
-            logging.error('Invalid bytes sent {0}'.format(message))
+        while True:
+            try:
+                self.serial.write(bytearray(array))
+                break
+            except ValueError:
+                logging.error('Invalid bytes sent {0}'.format(message))
+                break
+            except pyserial.SerialException as e:
+                logging.error(e)
+                res = self.lib.dgt3000Display(b'no E-board' + waitchars[wait_counter], 0, 0, 0)
+                if res < 0:
+                    logging.warning('dgt lib returned error: %i', res)
+                wait_counter = (wait_counter + 1) % len(waitchars)
 
     def process_board_message(self, message_id, message):
         for case in switch(message_id):
