@@ -45,6 +45,7 @@ class DGTi2c(Display):
         self.timer_running = False
         self.clock_running = False
         self.lock = Lock()
+        self.waitchars = [b'/', b'-', b'\\', b'|']
 
         # load the dgt3000 SO-file
         self.lib = ctypes.cdll.LoadLibrary("/home/pi/20151223/dgt3000.so")
@@ -102,7 +103,6 @@ class DGTi2c(Display):
         self.lock.release()
 
     def write_to_board(self, message):
-        waitchars = [b'/', b'-', b'\\', b'|']
         wait_counter = 0
         logging.debug('->DGT [%s], length:%i', message[0], len(message))
         array = []
@@ -122,16 +122,26 @@ class DGTi2c(Display):
                 break
             except pyserial.SerialException as e:
                 logging.error(e)
-                res = self.lib.dgt3000Display(b'no E-board' + waitchars[wait_counter], 0, 0, 0)
+                self.lock.acquire()
+                res = self.lib.dgt3000Display(b'no E-board' + self.waitchars[wait_counter], 0, 0, 0)
+                self.lock.release()
                 if res < 0:
                     logging.warning('dgt lib returned error: %i', res)
-                wait_counter = (wait_counter + 1) % len(waitchars)
+                wait_counter = (wait_counter + 1) % len(self.waitchars)
 
     def process_board_message(self, message_id, message):
         for case in switch(message_id):
             if case(DgtMsg.DGT_MSG_VERSION):  # Get the DGT board version
                 board_version = float(str(message[0]) + '.' + str(message[1]))
                 logging.debug("DGT board version %0.2f", board_version)
+                self.lock.acquire()
+                if self.device.find('rfc') == -1:
+                    text = b'USB E-board'
+                else:
+                    text = b'BT E-board'
+                self.lib.dgt3000Display(text, 0, 0, 0)
+                time.sleep(0.5)
+                self.lock.release()
                 break
             if case(DgtMsg.DGT_MSG_BOARD_DUMP):
                 board = ''
@@ -244,7 +254,9 @@ class DGTi2c(Display):
                 if ack3 == 0x20:
                     logging.info("Button on/off pressed")
                 if ack3 == 0x40:
-                    logging.info("Lever pressed")
+                    logging.info("Lever pressed > right side down")
+                if ack3 == 0xc0:
+                    logging.info("Lever pressed > left side down")
 
             # get time events
             self.lib.dgt3000GetTime(clktime)
@@ -257,13 +269,6 @@ class DGTi2c(Display):
 
     def process_outgoing_clock_forever(self):
         while True:
-            # Check if we have something to send
-            # try:
-            #     command = self.i2c_queue.get()
-            #     self.send_command(command)
-            # except queue.Empty:
-            #     pass
-
             if not self.timer_running:
                 # Check if we have something to send
                 try:
@@ -274,7 +279,6 @@ class DGTi2c(Display):
 
     def run(self):
         self.startup_clock()
-        waitchars = [b'/', b'-', b'\\', b'|']
         wait_counter = 0
         while not self.serial:
             # Open the serial port
@@ -286,10 +290,12 @@ class DGTi2c(Display):
                                               )
             except pyserial.SerialException as e:
                 logging.error(e)
-                res = self.lib.dgt3000Display(b'no E-board' + waitchars[wait_counter], 0, 0, 0)
+                self.lock.acquire()
+                res = self.lib.dgt3000Display(b'no E-board' + self.waitchars[wait_counter], 0, 0, 0)
+                self.lock.release()
                 if res < 0:
                     logging.warning('dgt lib returned error: %i', res)
-                wait_counter = (wait_counter + 1) % len(waitchars)
+                wait_counter = (wait_counter + 1) % len(self.waitchars)
                 time.sleep(0.5)
 
         self.startup_board()
