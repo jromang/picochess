@@ -175,6 +175,9 @@ class DGTi2c(Display):
             if case(DgtMsg.DGT_MSG_FIELD_UPDATE):
                 self.write_to_board([DgtCmd.DGT_SEND_BRD])  # Ask for the board when a piece moved
                 break
+            if case(DgtMsg.DGT_MSG_SERIALNR):
+                # logging.debug(message)
+                break
             if case():  # Default
                 logging.warning("DGT message not handled : [%s]", DgtMsg(message_id))
 
@@ -256,7 +259,7 @@ class DGTi2c(Display):
                     logging.info("Button on/off pressed")
                 if ack3 == 0x40:
                     logging.info("Lever pressed > right side down")
-                if ack3 == 0xc0:
+                if ack3 == -0x40:
                     logging.info("Lever pressed > left side down")
 
             # get time events
@@ -266,6 +269,8 @@ class DGTi2c(Display):
             counter = (counter + 1) % 5
             if counter == 1:
                 Display.show(Message.DGT_CLOCK_TIME, time_left=times[:3], time_right=times[3:])
+            if counter == 3:  # issue 150 - force to write something to the board => check for alive connection!
+                self.write_to_board([DgtCmd.DGT_RETURN_SERIALNR])  # the code doesnt really matter ;-)
             time.sleep(0.2)
 
     def process_outgoing_clock_forever(self):
