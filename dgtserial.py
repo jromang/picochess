@@ -57,16 +57,7 @@ class DGTSerial(Display):
         self.device = device
         self.first_clock_msg = True
         self.clock_lock = False
-        # Open the serial port
-        try:
-            self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE,
-                                          parity=pyserial.PARITY_NONE,
-                                          bytesize=pyserial.EIGHTBITS,
-                                          timeout=2
-                                          )
-        except pyserial.SerialException as e:
-            logging.warning(e)
-            return
+        self.serial = None
 
     def write(self, message):
         serial_queue.put(message)
@@ -87,10 +78,15 @@ class DGTSerial(Display):
                     array.append(char_to_DGTXL[c.lower()])
             else:
                 logging.error('Type not supported : [%s]', type(v))
-        try:
-            self.serial.write(bytearray(array))
-        except ValueError:
-            logging.error('Invalid bytes sent {0}'.format(array))
+        while True:
+            try:
+                self.serial.write(bytearray(array))
+                break
+            except ValueError:
+                logging.error('Invalid bytes sent {0}'.format(array))
+                break
+            except pyserial.SerialException as e:
+                logging.error(e)
         if message[0] == DgtCmd.DGT_CLOCK_MESSAGE:
             logging.debug('DGT clock locked')
             self.clock_lock = True
@@ -100,10 +96,12 @@ class DGTSerial(Display):
             if case(DgtMsg.DGT_MSG_VERSION):  # Get the DGT board version
                 board_version = float(str(message[0]) + '.' + str(message[1]))
                 logging.debug("DGT board version %0.2f", board_version)
+                if self.device.find('rfc') == -1:
+                    text = 'USB E-board'
+                else:
+                    text = 'BT E-board'
+                logging.debug(text)  # @todo Should be send to a Display
                 break
-            # if case():
-            #     logging.info("Got clock version number")
-            #     break
             if case(DgtMsg.DGT_MSG_BWTIME):
                 if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
                     # Construct the ack message
@@ -242,6 +240,8 @@ class DGTSerial(Display):
                     self.read_message(head=c)
             except pyserial.SerialException as e:
                 pass
+            except TypeError:
+                pass
 
     def process_outgoing_forever(self):
         while True:
@@ -255,6 +255,18 @@ class DGTSerial(Display):
                     pass
 
     def run(self):
+        while not self.serial:
+            # Open the serial port
+            try:
+                self.serial = pyserial.Serial(self.device, stopbits=pyserial.STOPBITS_ONE,
+                                              parity=pyserial.PARITY_NONE,
+                                              bytesize=pyserial.EIGHTBITS,
+                                              timeout=2
+                                              )
+            except pyserial.SerialException as e:
+                logging.error(e)
+                time.sleep(0.5)
+
         self.startup()
         incoming_thread = threading.Timer(0, self.process_incoming_forever)
         incoming_thread.start()

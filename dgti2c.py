@@ -128,6 +128,7 @@ class DGTi2c(Display):
                 if res < 0:
                     logging.warning('dgt lib returned error: %i', res)
                 wait_counter = (wait_counter + 1) % len(self.waitchars)
+                time.sleep(0.5)
 
     def process_board_message(self, message_id, message):
         for case in switch(message_id):
