@@ -575,7 +575,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         break
                     if case(Message.GAME_ENDS):
                         ge = message.result.value
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=ge, xl=None, beep=BeepLevel.CONFIG, duration=0)
+                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=ge, xl=None, beep=BeepLevel.CONFIG, duration=1)
                         break
                     if case(Message.INTERACTION_MODE):
                         self.mode = message.mode
