@@ -68,3 +68,6 @@ class DGTPi(DGTInterface):
         self.time_right = r_hms
         # self.dgti2c.write_start_to_clock(l_hms, r_hms, side)
         self.dgtclock.write_start_to_clock(l_hms, r_hms, side)
+
+    def serialnr_board(self):
+        self.dgtboard.write_to_board([DgtCmd.DGT_RETURN_SERIALNR])

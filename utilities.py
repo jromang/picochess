@@ -94,6 +94,7 @@ class Message(AutoNumber):
     DGT_FEN = ()  # DGT Board sends a fen
     DGT_CLOCK_VERSION = ()  # DGT Board sends the clock version
     DGT_CLOCK_TIME = ()  # DGT Clock time message
+    DGT_SERIALNR = ()
 
     INTERACTION_MODE = ()  # Interaction mode
     PLAY_MODE = ()  # Play mode
@@ -125,6 +126,7 @@ class Dgt(AutoNumber):
     CLOCK_START = ()
     CLOCK_VERSION = ()  # DGT Board sends the clock version
     CLOCK_TIME = ()  # DGT Clock sends the time
+    SERIALNR = ()
 
 
 class Menu(AutoNumber):
