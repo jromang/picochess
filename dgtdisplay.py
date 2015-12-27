@@ -128,6 +128,8 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         self.dgt_fen = None
         self.alternative = False
         self.ip = '?'  # the last two parts of the IP
+        self.drawresign_fen = None
+        self.draw_setup_pieces = True
 
         self.dgt_clock_menu = Menu.GAME_MENU
         self.last_move = chess.Move.null()
@@ -159,8 +161,6 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         self.time_control_index = 10  # index for selecting new time control
         self.time_control_menu_index = 2  # index for selecting new time control
         self.time_control_fen = list(time_control_map.keys())[self.time_control_index]  # Default time control: Blitz, 5min
-
-        self.drawresign_fen = None
 
     def power_off(self):
         HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="good bye", xl="bye", beep=BeepLevel.CONFIG, duration=0)
@@ -511,9 +511,10 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                     if case(Message.START_NEW_GAME):
                         HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="new game", xl="newgam", beep=BeepLevel.CONFIG, duration=1)
                         HardwareDisplay.show(Dgt.LIGHT_CLEAR)
+                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="you move", xl="you mv", beep=BeepLevel.CONFIG, duration=0)
                         self.last_move = chess.Move.null()
                         self.reset_hint_and_score()
-#                        self.mode = Mode.GAME
+                        self.mode = Mode.GAME
                         self.dgt_clock_menu = Menu.GAME_MENU
                         self.alternative = False
                         break
@@ -681,6 +682,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                             self.fire(Event.LEVEL, level=level)
                         elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":  # New game
                             logging.debug("Map-Fen: New game")
+                            self.draw_setup_pieces = False
                             self.fire(Event.NEW_GAME)
                         elif fen in remote_map:  # Remote play
                             logging.debug("Map-Fen: Remote")
@@ -708,6 +710,9 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                             logging.debug("Map-Fen: drawresign")
                             self.fire(Event.DRAWRESIGN, result=drawresign_map[self.drawresign_fen])
                         else:
+                            if self.draw_setup_pieces:
+                                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="setup piece", xl="setup", beep=BeepLevel.NO, duration=0)
+                                self.draw_setup_pieces = False
                             self.fire(Event.FEN, fen=fen)
                         break
                     if case(Message.DGT_CLOCK_VERSION):
