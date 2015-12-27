@@ -266,6 +266,7 @@ def main():
         if interaction_mode == Mode.GAME:
             nonlocal play_mode
             play_mode = PlayMode.PLAY_WHITE if game.turn == chess.WHITE else PlayMode.PLAY_BLACK
+            Display.show(Message.WAIT_STATE)
 
     def handle_move(result, game):
         move = result.bestmove
@@ -432,7 +433,7 @@ def main():
     try:
         engine_name = engine.get().name
     except AttributeError:
-        logging.debug("FATAL: no engines started")
+        logging.error("no engines started")
         sys.exit(-1)
     logging.debug('Loaded engine [%s]', engine_name)
     logging.debug('Supported options [%s]', engine.get().options)
@@ -444,7 +445,7 @@ def main():
     try:
         book_index = [book[1] for book in all_books].index('books/' + args.book)
     except ValueError:
-        logging.debug("ERROR: Selected book not present, defaulting to %s", all_books[7][1])
+        logging.warning("Selected book not present, defaulting to %s", all_books[7][1])
         book_index = 7
     bookreader = chess.polyglot.open_reader(all_books[book_index][1])
     searchmoves = AlternativeMover()
@@ -622,10 +623,10 @@ def main():
                     last_computer_fen = None
                     stop_search_and_clock()
                     time_control.reset()
-                    set_wait_state()
                     searchmoves.reset()
                     Display.show(Message.START_NEW_GAME)
                     game_declared = False
+                    set_wait_state()
                     break
 
                 if case(Event.DRAWRESIGN):

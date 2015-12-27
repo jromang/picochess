@@ -99,6 +99,7 @@ class Message(AutoNumber):
     PLAY_MODE = ()  # Play mode
     START_NEW_GAME = ()
     COMPUTER_MOVE_DONE_ON_BOARD = ()  # User has done the compute move on board
+    WAIT_STATE = ()  # picochess waits for the user
     SEARCH_STARTED = ()  # Engine has started to search
     SEARCH_STOPPED = ()  # Engine has stopped the search
     USER_TAKE_BACK = ()  # User takes back his move while engine is searching

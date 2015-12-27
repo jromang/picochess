@@ -511,12 +511,14 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                     if case(Message.START_NEW_GAME):
                         HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="new game", xl="newgam", beep=BeepLevel.CONFIG, duration=1)
                         HardwareDisplay.show(Dgt.LIGHT_CLEAR)
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="you move", xl="you mv", beep=BeepLevel.CONFIG, duration=0)
                         self.last_move = chess.Move.null()
                         self.reset_hint_and_score()
                         self.mode = Mode.GAME
                         self.dgt_clock_menu = Menu.GAME_MENU
                         self.alternative = False
+                        break
+                    if case(Message.WAIT_STATE):
+                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="you move", xl="you mv", beep=BeepLevel.CONFIG, duration=0)
                         break
                     if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
                         if self.ok_moves_messages:
