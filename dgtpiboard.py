@@ -38,7 +38,6 @@ class DGTpiboard(Display):
         self.lib = None
 
     def write_to_board(self, message):
-        wait_counter = 0
         logging.debug('->DGT [%s], length:%i', message[0], len(message))
         array = []
         for v in message:
@@ -48,7 +47,11 @@ class DGTpiboard(Display):
                 array.append(v.value)
             else:
                 logging.error('Type not supported : [%s]', type(v))
+
+        serial_error = False
         while True:
+            if serial_error:
+                self.setup_serial()
             try:
                 self.serial.write(bytearray(array))
                 break
@@ -57,20 +60,14 @@ class DGTpiboard(Display):
                 break
             except pyserial.SerialException as e:
                 logging.error(e)
-                self.lock.acquire()
-                res = self.lib.dgt3000Display(b'no E-board' + self.waitchars[wait_counter], 0, 0, 0)
-                self.lock.release()
-                if res < 0:
-                    logging.warning('dgt lib returned error: %i', res)
-                wait_counter = (wait_counter + 1) % len(self.waitchars)
-                time.sleep(0.5)
+                serial_error = True
 
     def process_board_message(self, message_id, message):
         for case in switch(message_id):
             if case(DgtMsg.DGT_MSG_VERSION):  # Get the DGT board version
                 board_version = float(str(message[0]) + '.' + str(message[1]))
                 logging.debug("DGT board version %0.2f", board_version)
-                self.lock.acquire()
+                self.lock.acquire()  # These locks prob. not working - since the split of clock & board
                 if self.device.find('rfc') == -1:
                     text = b'USB E-board'
                 else:
@@ -140,12 +137,9 @@ class DGTpiboard(Display):
             return message_id
 
     def startup_board(self):
-        # Set the board update mode
-        self.write_to_board([DgtCmd.DGT_SEND_UPDATE_NICE])
-        # Get board version
-        self.write_to_board([DgtCmd.DGT_SEND_VERSION])
-        # Update the board
-        self.write_to_board([DgtCmd.DGT_SEND_BRD])
+        self.write_to_board([DgtCmd.DGT_SEND_UPDATE_NICE])  # Set the board update mode
+        self.write_to_board([DgtCmd.DGT_SEND_VERSION])  # Get board version
+        self.write_to_board([DgtCmd.DGT_SEND_BRD])  # Update the board
 
     def process_incoming_board_forever(self):
         while True:
@@ -158,9 +152,8 @@ class DGTpiboard(Display):
             except TypeError:
                 pass
 
-    def run(self, lib):
+    def setup_serial(self):
         wait_counter = 0
-        self.lib = lib
         while not self.serial:
             # Open the serial port
             try:
@@ -171,7 +164,7 @@ class DGTpiboard(Display):
                                               )
             except pyserial.SerialException as e:
                 logging.error(e)
-                self.lock.acquire()
+                self.lock.acquire()  # These locks prob. not working - since the split of clock & board
                 res = self.lib.dgt3000Display(b'no E-board' + self.waitchars[wait_counter], 0, 0, 0)
                 self.lock.release()
                 if res < 0:
@@ -179,6 +172,9 @@ class DGTpiboard(Display):
                 wait_counter = (wait_counter + 1) % len(self.waitchars)
                 time.sleep(0.5)
 
+    def run(self, lib):
+        self.lib = lib
+        self.setup_serial()
         self.startup_board()
         incoming_board_thread = Timer(0, self.process_incoming_board_forever)
         incoming_board_thread.start()

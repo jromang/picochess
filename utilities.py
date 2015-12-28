@@ -162,7 +162,7 @@ class BookMenu(AutoNumber):
 
 class TimeMenu(AutoNumber):
     TIME_FIXED = ()
-    TIME__BLITZ = ()
+    TIME_BLITZ = ()
     TIME_FISCHER = ()
     SPACER = ()
     SWITCH_MENU = ()
