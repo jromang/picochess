@@ -175,10 +175,10 @@ class DGTpiboard(Display):
                 wait_counter = (wait_counter + 1) % len(self.waitchars)
                 time.sleep(0.5)
         self.serial_error = False
+        self.startup_board()
 
     def run(self, lib):
         self.lib = lib
         self.setup_serial()
-        self.startup_board()
         incoming_board_thread = Timer(0, self.process_incoming_board_forever)
         incoming_board_thread.start()
