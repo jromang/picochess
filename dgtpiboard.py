@@ -33,6 +33,7 @@ class DGTpiboard(Display):
         super(DGTpiboard, self).__init__()
         self.device = device
         self.serial = None
+        self.serial_error = False
         self.lock = Lock()
         self.waitchars = [b'/', b'-', b'\\', b'|']
         self.lib = None
@@ -48,9 +49,8 @@ class DGTpiboard(Display):
             else:
                 logging.error('Type not supported : [%s]', type(v))
 
-        serial_error = False
         while True:
-            if serial_error:
+            if self.serial_error:
                 self.setup_serial()
             try:
                 self.serial.write(bytearray(array))
@@ -59,8 +59,10 @@ class DGTpiboard(Display):
                 logging.error('Invalid bytes sent {0}'.format(message))
                 break
             except pyserial.SerialException as e:
+                self.serial_error = True
                 logging.error(e)
-                serial_error = True
+                self.serial.close()
+                self.serial = None
 
     def process_board_message(self, message_id, message):
         for case in switch(message_id):
@@ -144,9 +146,10 @@ class DGTpiboard(Display):
     def process_incoming_board_forever(self):
         while True:
             try:
-                c = self.serial.read(1)
-                if c:
-                    self.read_board_message(head=c)
+                if not self.serial_error:
+                    c = self.serial.read(1)
+                    if c:
+                        self.read_board_message(head=c)
             except pyserial.SerialException as e:
                 pass
             except TypeError:
@@ -171,6 +174,7 @@ class DGTpiboard(Display):
                     logging.warning('dgt lib returned error: %i', res)
                 wait_counter = (wait_counter + 1) % len(self.waitchars)
                 time.sleep(0.5)
+        self.serial_error = False
 
     def run(self, lib):
         self.lib = lib
