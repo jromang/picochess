@@ -125,7 +125,7 @@ class DGTpiclock(Display):
                 if ack3 == 0x20:
                     logging.info("Button on/off pressed")
                     # do more fancy tasks - like save pgn...
-                    os.system('shutdown')
+                    os.system('shutdown now')
                 if ack3 == 0x40:
                     logging.info("Lever pressed > right side down")
                 if ack3 == -0x40:
