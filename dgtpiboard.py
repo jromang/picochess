@@ -169,9 +169,10 @@ class DGTpiboard(Display):
                 logging.error(e)
                 self.lock.acquire()  # These locks prob. not working - since the split of clock & board
                 res = self.lib.dgt3000Display(b'no E-board' + self.waitchars[wait_counter], 0, 0, 0)
-                self.lock.release()
                 if res < 0:
                     logging.warning('dgt lib returned error: %i', res)
+                    self.lib.dgt3000Configure()
+                self.lock.release()
                 wait_counter = (wait_counter + 1) % len(self.waitchars)
                 time.sleep(0.5)
         self.serial_error = False

@@ -53,6 +53,7 @@ class DGTpiclock(Display):
         res = self.lib.dgt3000Display(message, 0x03 if beep else 0x01, 0, 0)
         if res < 0:
             logging.warning('dgt lib returned error: %i', res)
+            self.lib.dgt3000Configure()
         self.lock.release()
 
     def write_stop_to_clock(self, l_hms, r_hms):
@@ -60,6 +61,7 @@ class DGTpiclock(Display):
         res = self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
         if res < 0:
             logging.warning('dgt lib returned error: %i', res)
+            self.lib.dgt3000Configure()
         self.lock.release()
 
     def stopped_timer(self):
@@ -67,9 +69,10 @@ class DGTpiclock(Display):
         if self.clock_running:
             self.lock.acquire()
             res = self.lib.dgt3000EndDisplay()
-            self.lock.release()
             if res < 0:
                 logging.warning('dgt lib returned error: %i', res)
+                self.lib.dgt3000Configure()
+            self.lock.release()
 
     def write_start_to_clock(self, l_hms, r_hms, side):
         self.lock.acquire()
@@ -83,6 +86,7 @@ class DGTpiclock(Display):
         res = self.lib.dgt3000SetNRun(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
         if res < 0:
             logging.warning('dgt lib returned error: %i', res)
+            self.lib.dgt3000Configure()
         self.lock.release()
 
     def startup_clock(self):
