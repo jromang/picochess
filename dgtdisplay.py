@@ -713,7 +713,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                             self.fire(Event.DRAWRESIGN, result=drawresign_map[self.drawresign_fen])
                         else:
                             if self.draw_setup_pieces:
-                                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="setup piece", xl="setup", beep=BeepLevel.NO, duration=0)
+                                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="set pieces", xl="setup", beep=BeepLevel.NO, duration=0)
                                 self.draw_setup_pieces = False
                             self.fire(Event.FEN, fen=fen)
                         break
