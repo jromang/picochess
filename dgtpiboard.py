@@ -63,6 +63,11 @@ class DGTpiboard(Display):
                 logging.error(e)
                 self.serial.close()
                 self.serial = None
+            except IOError as e:
+                self.serial_error = True
+                logging.error(e)
+                self.serial.close()
+                self.serial = None
 
     def process_board_message(self, message_id, message):
         for case in switch(message_id):
