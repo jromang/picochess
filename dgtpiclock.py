@@ -125,8 +125,8 @@ class DGTpiclock(Display):
                 if ack3 == 0x20:
                     logging.info("Button on/off pressed")
                     # do more fancy tasks - like save pgn...
-                    self.lock.release()
-                    self.send_command((b'shutdown', 0, 0))
+                    self.lib.dgt3000Configure()  # restart the clock - cause its OFF
+                    self.lib.dgt3000Display(b'shutdown', 0x01, 0, 0)
                     time.sleep(2)  # no "force" right now :-(
                     os.system('shutdown now')
                 if ack3 == 0x40:
