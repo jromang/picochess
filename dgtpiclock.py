@@ -17,6 +17,7 @@
 import logging
 import ctypes
 import sys
+import os
 import time
 from threading import Timer, Lock
 from utilities import *
@@ -123,6 +124,8 @@ class DGTpiclock(Display):
                     Display.show(Message.DGT_BUTTON, button=4)
                 if ack3 == 0x20:
                     logging.info("Button on/off pressed")
+                    # do more fancy tasks - like save pgn...
+                    os.system('shutdown')
                 if ack3 == 0x40:
                     logging.info("Lever pressed > right side down")
                 if ack3 == -0x40:
