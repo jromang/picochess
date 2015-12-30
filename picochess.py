@@ -689,7 +689,7 @@ def main():
                 if case(Event.SET_OPENING_BOOK):
                     logging.debug("Changing opening book [%s]", event.book[1])
                     bookreader = chess.polyglot.open_reader(event.book[1])
-                    Display.show(Message.OPENING_BOOK, book=event.book, beep=event.beep)
+                    Display.show(Message.OPENING_BOOK, book_control_string=event.book_control_string, beep=event.beep)
                     break
 
                 if case(Event.SET_TIME_CONTROL):

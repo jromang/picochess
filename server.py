@@ -249,7 +249,7 @@ class WebDisplay(Display, threading.Thread):
 
         elif message == Message.OPENING_BOOK:  # Process opening book
             self.create_game_info()
-            self.shared['game_info']['book'] = message.book
+            self.shared['game_info']['book_control_string'] = message.book_control_string
 
         elif message == Message.INTERACTION_MODE:  # Process interaction mode
             self.create_game_info()
