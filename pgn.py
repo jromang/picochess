@@ -95,7 +95,7 @@ class PgnDisplay(Display, threading.Thread):
                         pgn.headers["Result"] = "1/2-1/2"
                     elif message.result in (GameResult.RESIGN_WHITE, GameResult.RESIGN_BLACK):
                         pgn.headers["Result"] = "1-0" if message.result == GameResult.RESIGN_WHITE else "0-1"
-                    elif message.result in (GameResult.MATE, GameResult.TIME_CONTROL):
+                    elif message.result in (GameResult.MATE, GameResult.OUT_OF_TIME):
                         pgn.headers["Result"] = "0-1" if message.game.turn == chess.WHITE else "1-0"
 
                     if self.level is None:

@@ -60,9 +60,9 @@ book_map = ("rnbqkbnr/pppppppp/8/8/8/q7/PPPPPPPP/RNBQKBNR",
             "rnbqkbnr/pppppppp/8/8/6q1/8/PPPPPPPP/RNBQKBNR",
             "rnbqkbnr/pppppppp/8/8/5q2/8/PPPPPPPP/RNBQKBNR")
 
-shutdown_map = ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQQBNR", "8/8/8/8/8/8/8/3QQ3", "3QQ3/8/8/8/8/8/8/8")
-
-remote_map = ("rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR")
+shutdown_map = ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQQBNR",
+                "8/8/8/8/8/8/8/3QQ3",
+                "3QQ3/8/8/8/8/8/8/8")
 
 mode_map = {"rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR": Mode.GAME,
             "rnbqkbnr/pppppppp/8/1Q6/8/8/PPPPPPPP/RNBQKBNR": Mode.ANALYSIS,
@@ -153,7 +153,6 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         self.book_menu_index = 7  # Sync with above
         self.all_books = get_opening_books()
         self.n_books = len(self.all_books)
-        self.book_from_fen = False
 
         self.time_control_mode = ClockMode.BLITZ
         self.time_control_fen_map = None
@@ -163,12 +162,12 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
         self.time_control_fen = list(time_control_map.keys())[self.time_control_index]  # Default time control: Blitz, 5min
 
     def power_off(self):
-        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="good bye", xl="bye", beep=BeepLevel.CONFIG, duration=0)
+        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="good bye", xl="bye", beep=BeepLevel.YES, duration=0)
         self.engine_restart = True
         self.fire(Event.SHUTDOWN)
 
     def reboot(self):
-        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="pls wait", xl="wait", beep=BeepLevel.CONFIG, duration=0)
+        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="pls wait", xl="wait", beep=BeepLevel.YES, duration=0)
         self.engine_restart = True
         reboot_thread = threading.Timer(3, subprocess.Popen(["sudo", "reboot"]))
         reboot_thread.start()
@@ -195,43 +194,43 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
     def process_button0(self):
         if self.dgt_clock_menu == Menu.GAME_MENU:
             if self.last_move:
-                HardwareDisplay.show(Dgt.DISPLAY_MOVE, move=self.last_move, fen=self.last_fen, beep=BeepLevel.CONFIG, duration=1)
+                HardwareDisplay.show(Dgt.DISPLAY_MOVE, move=self.last_move, fen=self.last_fen, beep=BeepLevel.BUTTON, duration=1)
             else:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no move", xl="nomove", beep=BeepLevel.CONFIG, duration=1)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no move", xl="nomove", beep=BeepLevel.YES, duration=1)
 
         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
             self.setup_to_move = chess.WHITE if self.setup_to_move == chess.BLACK else chess.BLACK
             to_move = PlayMode.PLAY_WHITE if self.setup_to_move == chess.WHITE else PlayMode.PLAY_BLACK
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=to_move.value, xl=None, beep=BeepLevel.YES, duration=0)
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=to_move.value, xl=None, beep=BeepLevel.BUTTON, duration=0)
 
         if self.dgt_clock_menu == Menu.LEVEL_MENU:
             if self.mode == Mode.REMOTE:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.YES, duration=0)
             elif self.engine_has_levels:
                 # Display current level
                 level = str(self.engine_level)
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.BUTTON, duration=0)
             else:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no level", xl="no lvl", beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no level", xl="no lvl", beep=BeepLevel.YES, duration=0)
 
         if self.dgt_clock_menu == Menu.SETTINGS_MENU:
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='pico ' + version, xl='pic ' + version, beep=BeepLevel.CONFIG, duration=0)
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='pico ' + version, xl='pic ' + version, beep=BeepLevel.BUTTON, duration=0)
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
             if self.mode == Mode.REMOTE:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.YES, duration=0)
             else:
                 # Display current engine
                 msg = (self.installed_engines[self.engine_index])[1]
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.BUTTON, duration=0)
 
         if self.dgt_clock_menu == Menu.BOOK_MENU:
             if self.mode == Mode.REMOTE:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.YES, duration=0)
             else:
                 # Display current book
                 msg = (self.all_books[self.book_index])[0]
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.BUTTON, duration=0)
 
         if self.dgt_clock_menu == Menu.TIME_MENU:
             # Select a time control mode
@@ -240,7 +239,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             except ValueError:
                 self.time_control_mode = ClockMode(1)
             self.build_time_control_fens()
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=time_controls[self.time_control_mode], xl=None, beep=BeepLevel.CONFIG, duration=0)
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=time_controls[self.time_control_mode], xl=None, beep=BeepLevel.BUTTON, duration=0)
             self.time_control_index = 0
             self.time_control_menu_index = self.time_control_index
             self.time_control_fen = self.time_control_fen_map[self.time_control_index]
@@ -250,60 +249,60 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             if self.display_move:
                 if bool(self.hint_move):
                     HardwareDisplay.show(Dgt.DISPLAY_MOVE, move=self.hint_move, fen=self.hint_fen,
-                                         beep=BeepLevel.CONFIG, duration=1)
+                                         beep=BeepLevel.BUTTON, duration=1)
                 else:
-                    HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no move", xl="nomove", beep=BeepLevel.NO, duration=1)
+                    HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no move", xl="nomove", beep=BeepLevel.YES, duration=1)
             else:
                 if self.mate is None:
                     sc = 'no scr' if self.score is None else str(self.score).rjust(6)
                 else:
                     sc = 'm ' + str(self.mate)
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=sc, xl=None, beep=BeepLevel.YES, duration=1)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=sc, xl=None, beep=BeepLevel.BUTTON, duration=1)
             self.display_move = not self.display_move
 
         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
             self.setup_reverse_orientation = not self.setup_reverse_orientation
             orientation_xl = "b    w" if self.setup_reverse_orientation else "w    b"
             orientation = " b     w" if self.setup_reverse_orientation else " w     b"
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=orientation, xl=orientation_xl, beep=BeepLevel.YES, duration=0)
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=orientation, xl=orientation_xl, beep=BeepLevel.BUTTON, duration=0)
 
         if self.dgt_clock_menu == Menu.LEVEL_MENU:
             if self.mode == Mode.REMOTE:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.BUTTON, duration=0)
             elif self.engine_has_levels:
                 self.engine_level_menu = ((self.engine_level_menu-1)%self.n_levels)
                 level = str(self.engine_level_menu)
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.BUTTON, duration=0)
             else:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no level", xl="no lvl", beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no level", xl="no lvl", beep=BeepLevel.YES, duration=0)
 
         if self.dgt_clock_menu == Menu.SETTINGS_MENU:
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=self.ip, xl=None, beep=BeepLevel.CONFIG, duration=0)
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=self.ip, xl=None, beep=BeepLevel.BUTTON, duration=0)
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
             if self.mode == Mode.REMOTE:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.YES, duration=0)
             elif self.installed_engines:
                 self.engine_menu_index = ((self.engine_menu_index-1) % self.n_engines)
                 msg = (self.installed_engines[self.engine_menu_index])[1]
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.BUTTON, duration=0)
             else:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='error', xl=None, beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='error', xl=None, beep=BeepLevel.YES, duration=0)
 
         if self.dgt_clock_menu == Menu.BOOK_MENU:
             if self.mode == Mode.REMOTE:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.YES, duration=0)
             else:
                 self.book_menu_index = ((self.book_menu_index-1) % self.n_books)
                 msg = (self.all_books[self.book_menu_index])[0]
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.BUTTON, duration=0)
 
         if self.dgt_clock_menu == Menu.TIME_MENU:
             self.time_control_menu_index -= 1
             if self.time_control_menu_index < 0:
                 self.time_control_menu_index = len(self.time_control_fen_map) - 1
             msg = dgt_xl_time_control_list[list(time_control_map.keys()).index(self.time_control_fen_map[self.time_control_menu_index])]
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg, beep=BeepLevel.CONFIG, duration=0)
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg, beep=BeepLevel.BUTTON, duration=0)
 
     def process_button2(self):
         if self.dgt_clock_menu == Menu.GAME_MENU:
@@ -320,7 +319,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="error", xl=None, beep=BeepLevel.YES, duration=0)
 
         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="scan", xl=None, beep=BeepLevel.YES, duration=0)
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="scan", xl=None, beep=BeepLevel.BUTTON, duration=0)
             to_move = 'w' if self.setup_to_move == chess.WHITE else 'b'
             fen = self.dgt_fen
             if self.flip_board != self.setup_reverse_orientation:
@@ -338,13 +337,13 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
 
         if self.dgt_clock_menu == Menu.LEVEL_MENU:
             if self.mode == Mode.REMOTE:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.YES, duration=0)
             elif self.engine_has_levels:
                 if self.engine_level != self.engine_level_menu:
                     self.fire(Event.LEVEL, level=self.engine_level_menu)
-                    HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok level", xl="ok lvl", beep=BeepLevel.CONFIG, duration=0)
+                    HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok level", xl="ok lvl", beep=BeepLevel.BUTTON, duration=0)
             else:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no level", xl="no lvl", beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no level", xl="no lvl", beep=BeepLevel.YES, duration=0)
 
         if self.dgt_clock_menu == Menu.SETTINGS_MENU:
             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="pwroff ?", xl="-off-", beep=BeepLevel.YES, duration=0)
@@ -352,7 +351,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
             if self.mode == Mode.REMOTE:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.YES, duration=0)
             elif self.installed_engines:
                 # Reset level selections
                 self.engine_level_menu = self.engine_level
@@ -361,19 +360,19 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                 self.fire(Event.NEW_ENGINE, eng=self.installed_engines[self.engine_menu_index])
                 self.engine_restart = True
             else:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='error', xl=None, beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='error', xl=None, beep=BeepLevel.YES, duration=0)
 
         if self.dgt_clock_menu == Menu.BOOK_MENU:
             if self.mode == Mode.REMOTE:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.YES, duration=0)
             elif self.book_index != self.book_menu_index:
-                self.fire(Event.OPENING_BOOK, book=self.all_books[self.book_menu_index])
+                self.fire(Event.SET_OPENING_BOOK, book=self.all_books[self.book_menu_index], book_control_string='ok book', beep=BeepLevel.BUTTON)
 
         if self.dgt_clock_menu == Menu.TIME_MENU: 
             if self.time_control_index != self.time_control_menu_index:
                 self.time_control_index = self.time_control_menu_index
                 self.time_control_fen = self.time_control_fen_map[self.time_control_index]
-                self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[self.time_control_fen], time_control_string='ok time')
+                self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[self.time_control_fen], time_control_string='ok time', beep=BeepLevel.BUTTON)
 
     def process_button3(self):
         if self.dgt_clock_menu == Menu.GAME_MENU:
@@ -382,52 +381,52 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             if self.mode_index >= len(mode_list):
                 self.mode_index = 0
             mode_new = mode_list[self.mode_index]
-            self.fire(Event.SET_MODE, mode=mode_new)
+            self.fire(Event.SET_INTERACTION_MODE, mode=mode_new)
 
         if self.dgt_clock_menu == Menu.SETUP_POSITION_MENU:
             self.setup_uci960 = not self.setup_uci960
             text = '960 yes' if self.setup_uci960 else '960 no'
             text_xl = '960yes' if self.setup_uci960 else '960 no'
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=text, xl=text_xl, beep=BeepLevel.YES, duration=0)
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=text, xl=text_xl, beep=BeepLevel.BUTTON, duration=0)
 
         if self.dgt_clock_menu == Menu.LEVEL_MENU:
             if self.mode == Mode.REMOTE:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.YES, duration=0)
             elif self.engine_has_levels:
                 self.engine_level_menu = ((self.engine_level_menu+1) % self.n_levels)
                 level = str(self.engine_level_menu)
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.BUTTON, duration=0)
             else:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no level", xl="no lvl", beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="no level", xl="no lvl", beep=BeepLevel.YES, duration=0)
 
         if self.dgt_clock_menu == Menu.SETTINGS_MENU:
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="reboot ?", xl="-boot-", beep=BeepLevel.YES, duration=0)
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="reboot ?", xl="-boot-", beep=BeepLevel.BUTTON, duration=0)
             self.awaiting_confirm = PowerMenu.CONFIRM_RBT
 
         if self.dgt_clock_menu == Menu.ENGINE_MENU:
             if self.mode == Mode.REMOTE:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.YES, duration=0)
             elif self.installed_engines:
                 self.engine_menu_index = ((self.engine_menu_index+1) % self.n_engines)
                 msg = (self.installed_engines[self.engine_menu_index])[1]
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.BUTTON, duration=0)
             else:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='error', xl=None, beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='error', xl=None, beep=BeepLevel.YES, duration=0)
 
         if self.dgt_clock_menu == Menu.BOOK_MENU:
             if self.mode == Mode.REMOTE:
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.YES, duration=0)
             else:
                 self.book_menu_index = ((self.book_menu_index+1) % self.n_books)
                 msg = (self.all_books[self.book_menu_index])[0]
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.CONFIG, duration=0)
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.BUTTON, duration=0)
 
         if self.dgt_clock_menu == Menu.TIME_MENU:
             self.time_control_menu_index += 1
             if self.time_control_menu_index >= len(self.time_control_fen_map):
                 self.time_control_menu_index = 0
             msg = dgt_xl_time_control_list[list(time_control_map.keys()).index(self.time_control_fen_map[self.time_control_menu_index])]
-            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=None, beep=BeepLevel.CONFIG, duration=0)
+            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=None, beep=BeepLevel.BUTTON, duration=0)
 
     def process_button4(self):
         # self.dgt_clock_menu = Menu.self.dgt_clock_menu.value+1
@@ -453,7 +452,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             msg = "time"
         elif self.dgt_clock_menu == Menu.SETTINGS_MENU:
             msg = 'system'
-        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.YES, duration=0)
+        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=msg, xl=msg[:6], beep=BeepLevel.BUTTON, duration=0)
         # Reset time control fen to match current time control
         self.time_control_mode = time_control_map[self.time_control_fen].mode
         self.time_control_selected_index = 0
@@ -492,7 +491,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                                     self.engine_has_levels = message.has_levels
                         break
                     if case(Message.ENGINE_FAIL):
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='error', xl=None, beep=BeepLevel.CONFIG, duration=1)
+                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='error', xl=None, beep=BeepLevel.YES, duration=1)
                         break
                     if case(Message.COMPUTER_MOVE):
                         move = message.result.bestmove
@@ -509,23 +508,23 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         HardwareDisplay.show(Dgt.LIGHT_SQUARES, squares=(uci_move[0:2], uci_move[2:4]))
                         break
                     if case(Message.START_NEW_GAME):
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="new game", xl="newgam", beep=BeepLevel.CONFIG, duration=1)
                         HardwareDisplay.show(Dgt.LIGHT_CLEAR)
                         self.last_move = chess.Move.null()
                         self.reset_hint_and_score()
                         self.mode = Mode.GAME
                         self.dgt_clock_menu = Menu.GAME_MENU
                         self.alternative = False
+                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="new game", xl="newgam", beep=BeepLevel.CONFIG, duration=1)
                         break
                     if case(Message.WAIT_STATE):
                         HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="you move", xl="you mv", beep=BeepLevel.CONFIG, duration=0)
                         break
                     if case(Message.COMPUTER_MOVE_DONE_ON_BOARD):
-                        if self.ok_moves_messages:
-                            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok pico", xl="okpico", beep=BeepLevel.CONFIG, duration=1)
                         HardwareDisplay.show(Dgt.LIGHT_CLEAR)
                         self.display_move = False
                         self.alternative = False
+                        if self.ok_moves_messages:
+                            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok pico", xl="okpico", beep=BeepLevel.CONFIG, duration=1)
                         break
                     if case(Message.USER_MOVE):
                         self.display_move = False
@@ -551,22 +550,13 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                             self.engine_level = self.engine_level_menu
                         else:
                             HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level,
-                                                 beep=BeepLevel.CONFIG, duration=1)
+                                                 beep=BeepLevel.NO, duration=1)
                         break
                     if case(Message.TIME_CONTROL):
-                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=message.time_control_string, xl=None,
-                                             beep=BeepLevel.CONFIG, duration=1)
+                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=message.time_control_string, xl=None, beep=message.beep, duration=1)
                         break
                     if case(Message.OPENING_BOOK):
-                        book_name = message.book[0]
-                        self.alternative = False
-                        if self.book_from_fen:
-                            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=book_name, xl=None, beep=BeepLevel.CONFIG, duration=1)
-                            self.book_from_fen = False
-                            self.book_menu_index = self.book_index  # Not necessary but cleaner
-                        if self.book_index != self.book_menu_index:
-                            self.book_index = self.book_menu_index
-                            HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="ok book", xl="okbook", beep=BeepLevel.CONFIG, duration=1)
+                        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=message.book_control_string, xl=None, beep=message.beep, duration=1)
                         break
                     if case(Message.USER_TAKE_BACK):
                         self.reset_hint_and_score()
@@ -686,23 +676,19 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                             logging.debug("Map-Fen: New game")
                             self.draw_setup_pieces = False
                             self.fire(Event.NEW_GAME)
-                        elif fen in remote_map:  # Remote play
-                            logging.debug("Map-Fen: Remote")
-                            mode_new = Mode.REMOTE
-                            self.fire(Event.SET_MODE, mode=mode_new)
                         elif fen in book_map:  # Choose opening book
                             self.book_index = book_map.index(fen)
-                            logging.debug("Map-Fen: Opening book [%s]", get_opening_books()[self.book_index])
-                            self.fire(Event.OPENING_BOOK, book=get_opening_books()[self.book_index])
-                            self.book_from_fen = True
+                            b = self.all_books[self.book_index]
+                            logging.debug("Map-Fen: Opening book [%s]", b[1])
+                            self.fire(Event.SET_OPENING_BOOK, book=b, book_control_string=b[0], beep=BeepLevel.CONFIG)
                         elif fen in mode_map:  # Set interaction mode
                             logging.debug("Map-Fen: Interaction mode [%s]", mode_map[fen])
-                            self.fire(Event.SET_MODE, mode=mode_map[fen])
+                            self.fire(Event.SET_INTERACTION_MODE, mode=mode_map[fen])
                         elif fen in time_control_map:
                             logging.debug("Map-Fen: Time control [%s]", time_control_map[fen].mode)
                             self.fire(Event.SET_TIME_CONTROL, time_control=time_control_map[fen],
                                       time_control_string=dgt_xl_time_control_list[
-                                          list(time_control_map.keys()).index(fen)])
+                                          list(time_control_map.keys()).index(fen)], beep=BeepLevel.CONFIG)
                             self.time_control_mode = time_control_map[fen].mode
                             self.time_control_fen = fen
                         elif fen in shutdown_map:

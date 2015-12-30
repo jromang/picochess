@@ -69,7 +69,7 @@ class Informer(chess.uci.InfoHandler, Observable):
 
     def scoreX(self, cp, mate, lowerbound, upperbound):
         if self._allow_fire_score():
-            self.fire(Event.SCORE, score=cp, mate=mate)
+            self.fire(Event.NEW_SCORE, score=cp, mate=mate)
         super().score(cp, mate, lowerbound, upperbound)
 
     def pvX(self, moves):

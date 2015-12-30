@@ -136,7 +136,7 @@ def main():
             return None
         score = gaviota.probe_dtm(game)
         if score:
-            Observable.fire(Event.SCORE, score='tb', mate=score)
+            Observable.fire(Event.NEW_SCORE, score='tb', mate=score)
         return score
 
     def think(game, tc):
@@ -150,7 +150,7 @@ def main():
 
         book_move = searchmoves.book(bookreader, game)
         if book_move:
-            Observable.fire(Event.SCORE, score='book', mate=None)
+            Observable.fire(Event.NEW_SCORE, score='book', mate=None)
             # time.sleep(0.5)
             Observable.fire(Event.BEST_MOVE, result=book_move, inbook=True)
         else:
@@ -635,12 +635,6 @@ def main():
                         game_declared = True
                     break
 
-                if case(Event.OPENING_BOOK):
-                    logging.debug("Changing opening book [%s]", event.book[1])
-                    bookreader = chess.polyglot.open_reader(event.book[1])
-                    Display.show(Message.OPENING_BOOK, book=event.book)
-                    break
-
                 if case(Event.REMOTE_MOVE):
                     if interaction_mode == Mode.REMOTE:
                         bm = chess.uci.BestMove(bestmove=chess.Move.from_uci(event.move), ponder=None)
@@ -662,7 +656,7 @@ def main():
                         Display.show(Message.NEW_PV, pv=event.pv, mode=interaction_mode, fen=game.fen())
                     break
 
-                if case(Event.SCORE):
+                if case(Event.NEW_SCORE):
                     if event.score == 'book':
                         score = 'book'
                     elif event.score == 'tb':
@@ -680,7 +674,7 @@ def main():
                     Display.show(Message.SCORE, score=score, mate=event.mate, mode=interaction_mode)
                     break
 
-                if case(Event.SET_MODE):
+                if case(Event.SET_INTERACTION_MODE):
                     if interaction_mode == Mode.GAME or interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
                         stop_clock()  # only stop, if the clock is really running
                     interaction_mode = event.mode
@@ -692,14 +686,20 @@ def main():
                     Display.show(Message.INTERACTION_MODE, mode=event.mode)
                     break
 
+                if case(Event.SET_OPENING_BOOK):
+                    logging.debug("Changing opening book [%s]", event.book[1])
+                    bookreader = chess.polyglot.open_reader(event.book[1])
+                    Display.show(Message.OPENING_BOOK, book=event.book, beep=event.beep)
+                    break
+
                 if case(Event.SET_TIME_CONTROL):
                     time_control = event.time_control
-                    Display.show(Message.TIME_CONTROL, time_control_string=event.time_control_string)
+                    Display.show(Message.TIME_CONTROL, time_control_string=event.time_control_string, beep=event.beep)
                     break
 
                 if case(Event.OUT_OF_TIME):
                     stop_search_and_clock()
-                    Display.show(Message.GAME_ENDS, result=GameResult.TIME_CONTROL, play_mode=play_mode, game=copy.deepcopy(game))
+                    Display.show(Message.GAME_ENDS, result=GameResult.OUT_OF_TIME, play_mode=play_mode, game=copy.deepcopy(game))
                     break
 
                 if case(Event.UCI_OPTION_SET):

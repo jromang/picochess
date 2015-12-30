@@ -129,7 +129,7 @@ class ChessTalker(Display, threading.Thread):
                             # logging.debug('minutes_per_game: ' + str(minutes_per_game))
                             # logging.debug('fischer_increment: ' + str(fischer_increment))
                             system_voice.say_time_control_fischer(minutes_per_game, fischer_increment)
-                    elif message == Message.GAME_ENDS and message.result == GameResult.TIME_CONTROL:
+                    elif message == Message.GAME_ENDS and message.result == GameResult.OUT_OF_TIME:
                         logging.debug('Announcing GAME_ENDS/TIME_CONTROL')
                         color = ChessTalkerVoice.COLOR_WHITE if message.color == chess.WHITE else ChessTalkerVoice.COLOR_BLACK
                         system_voice.say_out_of_time(color)

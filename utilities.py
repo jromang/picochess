@@ -49,16 +49,16 @@ class AutoNumber(enum.Enum):
 
 class Event(AutoNumber):
     # User events
-    FEN = ()  # User has moved one or more pieces, and we have a new fen position.
-    LEVEL = ()  # User sets engine level (from 1 to 20).
+    FEN = ()  # User has moved one or more pieces, and we have a new fen position
+    LEVEL = ()  # User sets engine level (from 1 to 20)
     NEW_GAME = ()  # User starts a new game
     DRAWRESIGN = ()  # User declares a resignation or draw
     USER_MOVE = ()  # User sends a move
     KEYBOARD_MOVE = ()  # Keyboard sends a move (to be transfered to a fen)
     REMOTE_MOVE = ()  # Remote player move
-    OPENING_BOOK = ()  # User chooses an opening book
+    SET_OPENING_BOOK = ()  # User chooses an opening book
     NEW_ENGINE = () # Change engine
-    SET_MODE = ()  # Change interaction mode
+    SET_INTERACTION_MODE = ()  # Change interaction mode
     SETUP_POSITION = ()  # Setup custom position
     STARTSTOP_THINK = ()  # Engine should start/stop thinking
     STARTSTOP_CLOCK = ()  # Clock should start/stop
@@ -72,7 +72,7 @@ class Event(AutoNumber):
     # Engine events
     BEST_MOVE = ()  # Engine has found a move
     NEW_PV = ()  # Engine sends a new principal variation
-    SCORE = ()  # Engine sends a new score
+    NEW_SCORE = ()  # Engine sends a new score
     OUT_OF_TIME = ()  # Clock flag fallen
 
 
@@ -207,7 +207,7 @@ class ClockMode(AutoNumber):
 class GameResult(enum.Enum):
     MATE = 'mate'
     STALEMATE = 'stalemate'
-    TIME_CONTROL = 'time'
+    OUT_OF_TIME = 'time'
     INSUFFICIENT_MATERIAL = 'material'
     SEVENTYFIVE_MOVES = '75 moves'
     FIVEFOLD_REPETITION = 'repetition'
@@ -227,6 +227,7 @@ class BeepLevel(AutoNumber):
     YES = ()
     NO = ()
     CONFIG = ()
+    BUTTON = ()
 
 
 @enum.unique
