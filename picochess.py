@@ -357,7 +357,9 @@ def main():
                         default=None)
     parser.add_argument("-dgt3000", "--dgt-3000-clock", action='store_true', help="do NOT use it anymore (DEPRECATED!)")
     parser.add_argument("-nobeep", "--disable-dgt-clock-beep", action='store_true',
-                        help="disable beeps on the dgt clock")
+                        help="do NOT use it anymore (DEPRECATED!)")
+    parser.add_argument("-beep", "--beep-level", type=str, help="sets a beep level from 0 (=no beeps) to 15(=all beeps)",
+                        default=0x0f)
     parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
     parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
     parser.add_argument("-inet", "--enable-internet", action='store_true', help="enable internet lookups")
@@ -392,14 +394,14 @@ def main():
     if args.dgt_port:
         # Connect to DGT board
         logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
-        # DGTHardware(args.dgt_port, args.enable_dgt_board_leds, args.disable_dgt_clock_beep).start()
-        DGTPi(args.dgt_port, args.enable_dgt_board_leds, args.disable_dgt_clock_beep).start()
+        # DGTHardware(args.dgt_port, args.enable_dgt_board_leds, args.beep_level).start()
+        DGTPi(args.dgt_port, args.enable_dgt_board_leds, args.beep_level).start()
     else:
         # Enable keyboard input and terminal display
         logging.warning("No DGT board port provided")
         KeyboardInput().start()
         TerminalDisplay().start()
-        DGTVirtual(args.enable_dgt_board_leds, args.disable_dgt_clock_beep).start()
+        DGTVirtual(args.enable_dgt_board_leds, args.beep_level).start()
 
     # Save to PGN
     PgnDisplay(
@@ -508,10 +510,10 @@ def main():
                     logging.debug("Setting engine to level %i", engine_level)
                     if engine.level(engine_level):
                         engine.send()
-                        Display.show(Message.LEVEL, level=engine_level)
+                        Display.show(Message.LEVEL, level=engine_level, beep=event.beep)
                     break
 
-                if case(Event.NEW_ENGINE):
+                if case(Event.NEW_ENGINE):  # User sets a new engine
                     old_path = engine.path
                     engine_shutdown = True
                     # Stop the old engine cleanly
@@ -521,7 +523,7 @@ def main():
                     if engine.quit():   # Ask nicely
                         if engine.terminate():  # If you won't go nicely.... 
                             if engine.kill():  # Right that does it!
-                                logging.error('Serious: Engine shutdown failure')
+                                logging.error('Engine shutdown failure')
                                 Display.show(Message.ENGINE_FAIL)
                                 engine_shutdown = False
                     if engine_shutdown:
@@ -540,7 +542,7 @@ def main():
                                 engine_name = engine.get().name
                             except AttributeError:
                                 # Help - old engine failed to restart. There is no engine
-                                logging.error("FATAL: no engines started")
+                                logging.error("No engines started")
                                 sys.exit(-1)
                         # Schedule cleanup of old objects
                         gc.collect()
@@ -550,7 +552,7 @@ def main():
                         # Send user selected engine level to new engine
                         if engine_level and engine.level(engine_level):
                             engine.send()
-                            Display.show(Message.LEVEL, level=engine_level)
+                            Display.show(Message.LEVEL, level=engine_level, beep=BeepLevel.BUTTON)
                         # Go back to analysing or observing
                         if interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
                             analyse(game)
@@ -558,7 +560,7 @@ def main():
                             observe(game, time_control)
                         # All done - rock'n'roll
                         if not engine_fallback:
-                            Display.show(Message.ENGINE_NAME, ename=engine_name)
+                            Display.show(Message.ENGINE_NAME, engine_name=engine_name)
                             Display.show(Message.ENGINE_READY, eng=event.eng, has_levels=engine.has_levels())
                         else:
                             Display.show(Message.ENGINE_FAIL)
@@ -588,7 +590,7 @@ def main():
                     game_declared = False
                     break
 
-                if case(Event.STARTSTOP_THINK):
+                if case(Event.STARTSTOP_THINK):  # User wants to end or start a new engine search
                     if engine.is_thinking() and (interaction_mode != Mode.REMOTE):
                         stop_clock()
                         engine.stop(show_best=True)
@@ -683,7 +685,7 @@ def main():
                     if engine.is_pondering() and interaction_mode == Mode.GAME:
                         stop_search()  # if change from ponder modes to game, also stops the pondering
                     set_wait_state()
-                    Display.show(Message.INTERACTION_MODE, mode=event.mode)
+                    Display.show(Message.INTERACTION_MODE, mode=event.mode, beep=event.beep)
                     break
 
                 if case(Event.SET_OPENING_BOOK):

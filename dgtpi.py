@@ -24,8 +24,8 @@ from utilities import *
 
 
 class DGTPi(DGTInterface):
-    def __init__(self, device, enable_board_leds, disable_dgt_clock_beep):
-        super(DGTPi, self).__init__(enable_board_leds, disable_dgt_clock_beep)
+    def __init__(self, device, enable_board_leds, beep_level):
+        super(DGTPi, self).__init__(enable_board_leds, beep_level)
         # self.dgti2c = DGTi2c(device)
         # self.dgti2c.run()
         self.dgtclock = DGTpiclock()

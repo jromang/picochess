@@ -73,7 +73,7 @@ class PgnDisplay(Display, threading.Thread):
                     else:
                         self.engine_name = self.old_engine
                 if message == Message.ENGINE_NAME:
-                    self.engine_name = message.ename
+                    self.engine_name = message.engine_name
                 if message == Message.GAME_ENDS and message.game.move_stack:
                     logging.debug('Saving game to [' + self.file_name + ']')
                     pgn = chess.pgn.Game()

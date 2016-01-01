@@ -22,8 +22,8 @@ from utilities import *
 
 
 class DGTHardware(DGTInterface):
-    def __init__(self, device, enable_board_leds, disable_dgt_clock_beep):
-        super(DGTHardware, self).__init__(enable_board_leds, disable_dgt_clock_beep)
+    def __init__(self, device, enable_board_leds, beep_level):
+        super(DGTHardware, self).__init__(enable_board_leds, beep_level)
         self.dgtserial = DGTSerial(device)
         self.dgtserial.run()
 

@@ -51,7 +51,7 @@ class DGTpiclock(Display):
             self.timer = Timer(duration, self.stopped_timer)
             self.timer.start()
             self.timer_running = True
-        res = self.lib.dgt3000Display(message, 0x03 if beep else 0x01, 0, 0)
+        res = self.lib.dgt3000Display(message, 0x03 if beep else 0x00, 0, 0)
         if res < 0:
             logging.warning('dgt lib returned error: %i', res)
             self.lib.dgt3000Configure()

@@ -222,12 +222,14 @@ class EngineStatus(AutoNumber):
     PONDER = ()
     WAIT = ()
 
-
-class BeepLevel(AutoNumber):
-    YES = ()
-    NO = ()
-    CONFIG = ()
-    BUTTON = ()
+@enum.unique
+class BeepLevel(enum.Enum):
+    YES = 0x0f  # Always ON
+    NO = 0x00  # Always OFF
+    CONFIG = 0x01  # Takeback, GameEnd, NewGame and ComputerMove
+    BUTTON = 0x02  # All Events coming from button press
+    MAP = 0x04  # All Events coming from Queen placing at start pos (line3-6)
+    OKAY = 0x08  # All Events from "ok" (confirm) messages incl. "you move"
 
 
 @enum.unique
