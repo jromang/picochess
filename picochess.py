@@ -358,7 +358,7 @@ def main():
     parser.add_argument("-dgt3000", "--dgt-3000-clock", action='store_true', help="do NOT use it anymore (DEPRECATED!)")
     parser.add_argument("-nobeep", "--disable-dgt-clock-beep", action='store_true',
                         help="do NOT use it anymore (DEPRECATED!)")
-    parser.add_argument("-beep", "--beep-level", type=str, help="sets a beep level from 0 (=no beeps) to 15(=all beeps)",
+    parser.add_argument("-beep", "--beep-level", type=int, help="sets a beep level from 0 (=no beeps) to 15(=all beeps)",
                         default=0x0f)
     parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
     parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)

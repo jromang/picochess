@@ -26,7 +26,7 @@ class DGTInterface(HardwareDisplay, threading.Thread):
         self.enable_dgt_3000 = False
         self.clock_found = False
         self.enable_board_leds = enable_board_leds
-        self.beep_level = beep_level & 0x0f
+        self.beep_level = int(beep_level) & 0x0f
         self.time_left = [0, 0, 0]
         self.time_right = [0, 0, 0]
 
