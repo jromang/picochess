@@ -1,6 +1,6 @@
 
 # Pull base image
-FROM resin/rpi-raspbian:jessie
+FROM resin/rpi-raspbian
 MAINTAINER Dieter Reuter <dieter@hypriot.com>
 
 # Install dependencies
@@ -18,10 +18,10 @@ RUN apt-get update && apt-get install -y \
 # Define working directory
 
 #Pull Code
-RUN git clone https://github.com/jromang/picochess
-RUN pip3 install -r picochess/requirements.txt
+ADD . /picochess
+
 WORKDIR /picochess
-CMD git pull && python3 picochess.py
+RUN pip3 install -r requirements.txt
 
 # Define default command
 CMD ["bash"]
