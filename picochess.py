@@ -546,6 +546,8 @@ def main():
                         # Restore options - this doesn't deal with any
                         # supplementary uci options sent 'in game', see event.UCI_OPTION_SET
                         engine_startup()
+                        logging.debug('Loaded engine [%s]', engine_name)
+                        logging.debug('Supported options [%s]', engine.get().options)
                         # Send user selected engine level to new engine
                         if engine_level and engine.level(engine_level):
                             engine.send()
