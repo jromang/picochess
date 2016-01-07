@@ -316,7 +316,7 @@ class DGTi2c(Display):
                 res = self.lib.dgt3000Display(b'no E-board' + self.waitchars[wait_counter], 0, 0, 0)
                 if res < 0:
                     logging.warning('dgt lib returned error: %i', res)
-                    if self.lib.dgt3000Configure():
+                    if self.lib.dgt3000Configure() < 0:
                         logging.warning('configure also failed')
                 self.lock.release()
                 wait_counter = (wait_counter + 1) % len(self.waitchars)
