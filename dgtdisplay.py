@@ -270,7 +270,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
             if self.mode == Mode.REMOTE:
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=Mode.REMOTE.value, xl=None, beep=BeepLevel.BUTTON, duration=0)
             elif self.engine_has_levels:
-                self.engine_level_menu = ((self.engine_level_menu-1)%self.n_levels)
+                self.engine_level_menu = ((self.engine_level_menu-1) % self.n_levels)
                 level = str(self.engine_level_menu)
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text="level " + level, xl="lvl " + level, beep=BeepLevel.BUTTON, duration=0)
             else:
