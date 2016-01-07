@@ -91,10 +91,14 @@ class DGTpiclock(Display):
         self.lock.release()
 
     def startup_clock(self):
-        if self.lib.dgt3000Init() < 0:
-            sys.exit(-1)
-        if self.lib.dgt3000Configure() < 0:
-            sys.exit(-1)
+        logging.debug('startup clock begin')
+        while self.lib.dgt3000Init() < 0:
+            logging.debug('init failed')
+            time.sleep(0.5)  # dont flood the log
+        while self.lib.dgt3000Configure() < 0:
+            logging.debug('configure failed')
+            time.sleep(0.5)  # dont flood the log
+        logging.debug('startup clock end')
         Display.show(Message.DGT_CLOCK_VERSION, main_version=2, sub_version=2)
 
     def process_incoming_clock_forever(self):
