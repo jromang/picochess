@@ -204,6 +204,68 @@ german = { MsgKey.MODE_GAME:                MsgTxt(s='game',    m='game',       
            MsgKey.BOOK_MOVE:                MsgTxt(s='book',    m='buch zug',   l='buch zug')
            }
 
+dutch =   {MsgKey.MODE_GAME:                MsgTxt(s='spel',    m='spel',       l='spel'),
+           MsgKey.MODE_ANALYSIS:            MsgTxt(s='analyse', m='analyse',    l='analyseren'),
+           MsgKey.MODE_KIBITZ:              MsgTxt(s='kibitz',  m='kibitz',     l='kibitz'),
+           MsgKey.MODE_OBSERVE:             MsgTxt(s='bekijk',  m='bekijk', 	l='bekijk'),
+           MsgKey.MODE_REMOTE:              MsgTxt(s='remote',  m='remote',     l='remote'),
+
+           MsgKey.GAMERESULT_MATE:          MsgTxt(s='mat',     m='mat',        l='mat'),
+           MsgKey.GAMERESULT_STALEMATE:     MsgTxt(s='pat',     m='patstlng',   l='patstelling'),
+           MsgKey.GAMERESULT_OUT_OF_TIME:   MsgTxt(s='tijd',    m='tijd',       l='tijd'),
+           MsgKey.GAMERESULT_MATERIAL:      MsgTxt(s='materi',  m='material',   l='materiaal'),
+           MsgKey.GAMERESULT_MOVES:         MsgTxt(s='zet 75',  m='75zetten',   l='75 zetten'),
+           MsgKey.GAMERESULT_REPETITION:    MsgTxt(s='zelfde',  m='dezelfde',   l='zelfde stel'),
+           MsgKey.GAMERESULT_ABORT:         MsgTxt(s='afbrek',  m='afbreken',   l='afbreken'),
+           MsgKey.GAMERESULT_RESIGN_WHITE:  MsgTxt(s='w wint',  m='wit wint',   l='wit wint'),
+           MsgKey.GAMERESULT_RESIGN_BLACK:  MsgTxt(s='z wint',  m='z wint',     l='zwart wint'),
+           MsgKey.GAMERESULT_DRAW:          MsgTxt(s='remise',  m='remise',     l='remise'),
+           MsgKey.CLOCKMODE_FIXED:          MsgTxt(s='fixed',   m='fixed',      l='fixed'),
+           MsgKey.CLOCKMODE_BLITZ:          MsgTxt(s='blitz',   m='blitz',      l='blitz'),
+           MsgKey.CLOCKMODE_FISCHER:        MsgTxt(s='fische',  m='fischer',    l='fischer'),
+
+           MsgKey.POWER_OFF:                MsgTxt(s='dagdag',  m='doeidoei',   l='goedendag'),
+           MsgKey.REBOOT:                   MsgTxt(s='wacht',   m='wachten',    l='wacht even'),
+           MsgKey.NOMOVE:                   MsgTxt(s='gn zet',  m='geen zet',   l='geen zet'),
+           MsgKey.LEVEL:                    MsgTxt(s='lvl ',    m='level ',     l='level '),
+           MsgKey.NOLEVEL:                  MsgTxt(s='gn lvl',  m='gn level',   l='geen level'),
+           MsgKey.PICOCHESS:                MsgTxt(s='pic ',    m='pico ',      l='pico '),
+
+           MsgKey.NOSCORE:                  MsgTxt(s='no scr',  m='no score',   l='no score'),
+           MsgKey.MATE:                     MsgTxt(s='mat ',    m='mat in ',    l='mate in '),
+           MsgKey.ORIENTATION_BW:           MsgTxt(s='z    w',  m=' z     w',   l='z        w'),
+           MsgKey.ORIENTATION_WB:           MsgTxt(s='w    z',  m=' w     z',   l='w        z'),
+           MsgKey.ERROR:                    MsgTxt(s='error',   m='error',      l='error'),
+           MsgKey.SCAN:                     MsgTxt(s='scan',    m='scan',       l='scan bord'),
+
+           MsgKey.BADPOS:                   MsgTxt(s='badpos',  m='bad pos',    l='bad pos'),
+           MsgKey.OK_LEVEL:                 MsgTxt(s='ok lvl',  m='ok level',   l='oke level'),
+           MsgKey.QUESTION_POWEROFF:        MsgTxt(s='-uit-',   m='zetuit ?',   l='uitzetten ?'),
+           MsgKey.QUESTION_REBOOT:          MsgTxt(s='-boot-',  m='reboot ?',   l='reboot ?'),
+           MsgKey.OK_BOOK:                  MsgTxt(s='okboek',  m='ok boek',    l='okay boek'),
+           MsgKey.OK_TIME:                  MsgTxt(s='oktijd',  m='ok tijd',    l='oke tijd'),
+
+           MsgKey.MODE960YES:               MsgTxt(s='960 ja',  m='960 ja',     l='960 ja'),
+           MsgKey.MODE960NO:                MsgTxt(s='960nee',  m='960 nee',    l='960 nee'),
+           MsgKey.MENU_GAME:                MsgTxt(s='spel',    m='spel',       l='spel'),
+           MsgKey.MENU_POSITION:            MsgTxt(s='positi',  m='positie',    l='positie'),
+           MsgKey.MENU_ENGINE:              MsgTxt(s='engine',  m='engine',     l='engine'),
+           MsgKey.MENU_LEVEL:               MsgTxt(s='level',   m='level',      l='level'),
+           MsgKey.MENU_BOOK:                MsgTxt(s='boek',    m='boek',       l='boek'),
+           MsgKey.MENU_TIME:                MsgTxt(s='tijd',    m='tijd',       l='tijd'),
+           MsgKey.MENU_SYSTEM:              MsgTxt(s='system',  m='systeem',    l='systeem'),
+
+           MsgKey.OK_ENGINE:                MsgTxt(s='ok eng',  m='okengine',   l='oke engine'),
+           MsgKey.NEW_GAME:                 MsgTxt(s='newspl',  m='new spel',   l='nieuw spel'),
+           MsgKey.YOU_MOVE:                 MsgTxt(s='uw zet',  m='uw zet',     l='uw zet'),
+           MsgKey.OK_PICO:                  MsgTxt(s='okpico',  m='oke pico',   l='oke pico'),
+           MsgKey.OK_MOVE:                  MsgTxt(s='zet ok',  m='zet oke',    l='zet oke'),
+           MsgKey.ALTERNATIVE_MOVE:         MsgTxt(s='altzet',  m='alt zet',    l='andere zet'),
+
+           MsgKey.TAKEBACK:                 MsgTxt(s='terug',   m='zetterug',   l='zet terug'),
+           MsgKey.BOOK_MOVE:                MsgTxt(s='boek',    m='boek zet',   l='boek zet')
+           }
+
 print(english[MsgKey.NEW_GAME])
 print(english[MsgKey.ERROR].small())
 print(english[MsgKey.ERROR].medium())
