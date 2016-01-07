@@ -40,6 +40,7 @@ class DGTi2c(Display):
         super(DGTi2c, self).__init__()
         self.device = device
         self.serial = None
+        self.serial_error = False
         self.i2c_queue = queue.Queue()
         self.timer = None
         self.timer_running = False
@@ -69,6 +70,10 @@ class DGTi2c(Display):
         res = self.lib.dgt3000Display(message, 0x03 if beep else 0x01, 0, 0)
         if res < 0:
             logging.warning('dgt lib returned error: %i', res)
+            if self.lib.dgt3000Configure() < 0:
+                logging.warning('configure also failed')
+            else:
+                self.lib.dgt3000Display(message, 0x03 if beep else 0x00, 0, 0)
         self.lock.release()
 
     def write_stop_to_clock(self, l_hms, r_hms):
@@ -76,6 +81,10 @@ class DGTi2c(Display):
         res = self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
         if res < 0:
             logging.warning('dgt lib returned error: %i', res)
+            if self.lib.dgt3000Configure() < 0:
+                logging.warning('configure also failed')
+            else:
+                self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
         self.lock.release()
 
     def stopped_timer(self):
@@ -83,9 +92,13 @@ class DGTi2c(Display):
         if self.clock_running:
             self.lock.acquire()
             res = self.lib.dgt3000EndDisplay()
-            self.lock.release()
             if res < 0:
                 logging.warning('dgt lib returned error: %i', res)
+                if self.lib.dgt3000Configure() < 0:
+                    logging.warning('configure also failed')
+                else:
+                    self.lib.dgt3000EndDisplay()
+            self.lock.release()
 
     def write_start_to_clock(self, l_hms, r_hms, side):
         self.lock.acquire()
@@ -99,10 +112,13 @@ class DGTi2c(Display):
         res = self.lib.dgt3000SetNRun(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
         if res < 0:
             logging.warning('dgt lib returned error: %i', res)
+            if self.lib.dgt3000Configure() < 0:
+                logging.warning('configure also failed')
+            else:
+                self.lib.dgt3000SetNRun(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
         self.lock.release()
 
     def write_to_board(self, message):
-        wait_counter = 0
         logging.debug('->DGT [%s], length:%i', message[0], len(message))
         array = []
         for v in message:
@@ -112,7 +128,10 @@ class DGTi2c(Display):
                 array.append(v.value)
             else:
                 logging.error('Type not supported : [%s]', type(v))
+
         while True:
+            if self.serial_error:
+                self.setup_serial()
             try:
                 self.serial.write(bytearray(array))
                 break
@@ -120,14 +139,15 @@ class DGTi2c(Display):
                 logging.error('Invalid bytes sent {0}'.format(message))
                 break
             except pyserial.SerialException as e:
+                self.serial_error = True
                 logging.error(e)
-                self.lock.acquire()
-                res = self.lib.dgt3000Display(b'no E-board' + self.waitchars[wait_counter], 0, 0, 0)
-                self.lock.release()
-                if res < 0:
-                    logging.warning('dgt lib returned error: %i', res)
-                wait_counter = (wait_counter + 1) % len(self.waitchars)
-                time.sleep(0.5)
+                self.serial.close()
+                self.serial = None
+            except IOError as e:
+                self.serial_error = True
+                logging.error(e)
+                self.serial.close()
+                self.serial = None
 
     def process_board_message(self, message_id, message):
         for case in switch(message_id):
@@ -204,18 +224,16 @@ class DGTi2c(Display):
             return message_id
 
     def startup_board(self):
-        # Set the board update mode
-        self.write_to_board([DgtCmd.DGT_SEND_UPDATE_NICE])
-        # Get board version
-        self.write_to_board([DgtCmd.DGT_SEND_VERSION])
-        # Update the board
-        self.write_to_board([DgtCmd.DGT_SEND_BRD])
+        self.write_to_board([DgtCmd.DGT_SEND_UPDATE_NICE])  # Set the board update mode
+        self.write_to_board([DgtCmd.DGT_SEND_VERSION])  # Get board version
+        self.write_to_board([DgtCmd.DGT_SEND_BRD])  # Update the board
 
     def startup_clock(self):
-        if self.lib.dgt3000Init() < 0:
-            sys.exit(-1)
+        while self.lib.dgt3000Init() < 0:
+            logging.warning('init failed')
+            time.sleep(0.5)  # dont flood the log
         if self.lib.dgt3000Configure() < 0:
-            sys.exit(-1)
+            logging.warning('configure failed')
         Display.show(Message.DGT_CLOCK_VERSION, main_version=2, sub_version=2)
 
     def process_incoming_board_forever(self):
@@ -265,12 +283,12 @@ class DGTi2c(Display):
             self.lib.dgt3000GetTime(clktime)
             self.lock.release()
             times = list(clktime.raw)
-            counter = (counter + 1) % 5
+            counter = (counter + 1) % 4
             if counter == 1:
                 Display.show(Message.DGT_CLOCK_TIME, time_left=times[:3], time_right=times[3:])
             if counter == 3:  # issue 150 - force to write something to the board => check for alive connection!
                 self.write_to_board([DgtCmd.DGT_RETURN_SERIALNR])  # the code doesnt really matter ;-)
-            time.sleep(0.2)
+            time.sleep(0.25)
 
     def process_outgoing_clock_forever(self):
         while True:
@@ -282,8 +300,7 @@ class DGTi2c(Display):
                 except queue.Empty:
                     pass
 
-    def run(self):
-        self.startup_clock()
+    def setup_serial(self):
         wait_counter = 0
         while not self.serial:
             # Open the serial port
@@ -297,13 +314,22 @@ class DGTi2c(Display):
                 logging.error(e)
                 self.lock.acquire()
                 res = self.lib.dgt3000Display(b'no E-board' + self.waitchars[wait_counter], 0, 0, 0)
-                self.lock.release()
                 if res < 0:
                     logging.warning('dgt lib returned error: %i', res)
+                    if self.lib.dgt3000Configure():
+                        logging.warning('configure also failed')
+                self.lock.release()
                 wait_counter = (wait_counter + 1) % len(self.waitchars)
                 time.sleep(0.5)
-
+        self.serial_error = False
         self.startup_board()
+
+    def run(self):
+        self.startup_clock()
+
+        self.setup_serial()
+        self.startup_board()
+
         incoming_board_thread = threading.Timer(0, self.process_incoming_board_forever)
         incoming_board_thread.start()
 
