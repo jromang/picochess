@@ -53,22 +53,12 @@ class DGTpiclock(Display):
             self.timer_running = True
         res = self.lib.dgt3000Display(message, 0x03 if beep else 0x00, 0, 0)
         if res < 0:
-            logging.warning('dgt lib returned error: %i', res)
-            if self.lib.dgt3000Configure() < 0:
-                logging.warning('configure also failed')
+            logging.warning('Display returned error: %i', res)
+            res = self.lib.dgt3000Configure()
+            if res < 0:
+                logging.warning('Configure also failed: %i', res)
             else:
                 self.lib.dgt3000Display(message, 0x03 if beep else 0x00, 0, 0)
-        self.lock.release()
-
-    def write_stop_to_clock(self, l_hms, r_hms):
-        self.lock.acquire()
-        res = self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
-        if res < 0:
-            logging.warning('dgt lib returned error: %i', res)
-            if self.lib.dgt3000Configure() < 0:
-                logging.warning('configure also failed')
-            else:
-                self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
         self.lock.release()
 
     def stopped_timer(self):
@@ -77,12 +67,27 @@ class DGTpiclock(Display):
             self.lock.acquire()
             res = self.lib.dgt3000EndDisplay()
             if res < 0:
-                logging.warning('dgt lib returned error: %i', res)
-            if self.lib.dgt3000Configure() < 0:
-                logging.warning('configure also failed')
-            else:
-                self.lib.dgt3000EndDisplay()
+                logging.warning('EndDisplay returned error: %i', res)
+                res = self.lib.dgt3000Configure()
+                if res < 0:
+                    logging.warning('Configure also failed: %i', res)
+                else:
+                    self.lib.dgt3000EndDisplay()
             self.lock.release()
+
+    def write_stop_to_clock(self, l_hms, r_hms):
+        self.lock.acquire()
+        res = self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
+        if res < 0:
+            logging.warning('SetNRun returned error: %i', res)
+            res = self.lib.dgt3000Configure()
+            if res < 0:
+                logging.warning('Configure also failed: %i', res)
+            else:
+                res = self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
+        if res == 0:
+            self.clock_running = False
+        self.lock.release()
 
     def write_start_to_clock(self, l_hms, r_hms, side):
         self.lock.acquire()
@@ -92,22 +97,24 @@ class DGTpiclock(Display):
         else:
             lr = 0
             rr = 1
-        self.clock_running = True
         res = self.lib.dgt3000SetNRun(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
         if res < 0:
-            logging.warning('dgt lib returned error: %i', res)
-            if self.lib.dgt3000Configure() < 0:
-                logging.warning('configure also failed')
+            logging.warning('SetNRun returned error: %i', res)
+            res = self.lib.dgt3000Configure()
+            if res < 0:
+                logging.warning('Configure also failed: %i', res)
             else:
-                self.lib.dgt3000SetNRun(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
+                res = self.lib.dgt3000SetNRun(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
+        if res == 0:
+            self.clock_running = True
         self.lock.release()
 
     def startup_clock(self):
         while self.lib.dgt3000Init() < 0:
-            logging.warning('init failed')
+            logging.warning('Init failed')
             time.sleep(0.5)  # dont flood the log
         if self.lib.dgt3000Configure() < 0:
-            logging.warning('configure failed')
+            logging.warning('Configure failed')
         Display.show(Message.DGT_CLOCK_VERSION, main_version=2, sub_version=2)
 
     def process_incoming_clock_forever(self):
@@ -151,13 +158,13 @@ class DGTpiclock(Display):
             self.lib.dgt3000GetTime(clktime)
             self.lock.release()
             times = list(clktime.raw)
-            counter = (counter + 1) % 5
+            counter = (counter + 1) % 4
             if counter == 1:
                 Display.show(Message.DGT_CLOCK_TIME, time_left=times[:3], time_right=times[3:])
             if counter == 3:  # issue 150 - force to write something to the board => check for alive connection!
                 # self.write_to_board([DgtCmd.DGT_RETURN_SERIALNR])  # the code doesnt really matter ;-)
                 Display.show(Message.DGT_SERIALNR)
-            time.sleep(0.2)
+            time.sleep(0.25)
 
     def process_outgoing_clock_forever(self):
         while True:

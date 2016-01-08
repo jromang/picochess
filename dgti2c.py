@@ -69,24 +69,12 @@ class DGTi2c(Display):
             self.timer_running = True
         res = self.lib.dgt3000Display(message, 0x03 if beep else 0x01, 0, 0)
         if res < 0:
-            logging.warning('dgt3000Display returned error: %i', res)
-            if self.lib.dgt3000Configure() < 0:
-                logging.warning('configure also failed')
+            logging.warning('Display returned error: %i', res)
+            res = self.lib.dgt3000Configure()
+            if res < 0:
+                logging.warning('Configure also failed %i', res)
             else:
-                res = self.lib.dgt3000Display(message, 0x03 if beep else 0x00, 0, 0)
-                logging.debug('result after retry: %i', res)
-        self.lock.release()
-
-    def write_stop_to_clock(self, l_hms, r_hms):
-        self.lock.acquire()
-        res = self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
-        if res < 0:
-            logging.warning('dgt3000SetNRun returned error: %i', res)
-            if self.lib.dgt3000Configure() < 0:
-                logging.warning('configure also failed')
-            else:
-                res = self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
-                logging.debug('result after retry: %i', res)
+                self.lib.dgt3000Display(message, 0x03 if beep else 0x00, 0, 0)
         self.lock.release()
 
     def stopped_timer(self):
@@ -95,13 +83,27 @@ class DGTi2c(Display):
             self.lock.acquire()
             res = self.lib.dgt3000EndDisplay()
             if res < 0:
-                logging.warning('dgt3000EndDisplay returned error: %i', res)
-                if self.lib.dgt3000Configure() < 0:
-                    logging.warning('configure also failed')
+                logging.warning('EndDisplay returned error: %i', res)
+                res = self.lib.dgt3000Configure()
+                if res < 0:
+                    logging.warning('Configure also failed: %i', res)
                 else:
-                    res = self.lib.dgt3000EndDisplay()
-                    logging.debug('result after retry: %i', res)
+                    self.lib.dgt3000EndDisplay()
             self.lock.release()
+
+    def write_stop_to_clock(self, l_hms, r_hms):
+        self.lock.acquire()
+        res = self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
+        if res < 0:
+            logging.warning('SetNRun returned error: %i', res)
+            res = self.lib.dgt3000Configure()
+            if res < 0:
+                logging.warning('Configure also failed: %i', res)
+            else:
+                res = self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
+        if res == 0:
+            self.clock_running = False
+        self.lock.release()
 
     def write_start_to_clock(self, l_hms, r_hms, side):
         self.lock.acquire()
@@ -111,15 +113,16 @@ class DGTi2c(Display):
         else:
             lr = 0
             rr = 1
-        self.clock_running = True
         res = self.lib.dgt3000SetNRun(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
         if res < 0:
-            logging.warning('dgt3000SetNRun returned error: %i', res)
-            if self.lib.dgt3000Configure() < 0:
-                logging.warning('configure also failed')
+            logging.warning('SetNRun returned error: %i', res)
+            res = self.lib.dgt3000Configure()
+            if res < 0:
+                logging.warning('Configure also failed: %i', res)
             else:
                 res = self.lib.dgt3000SetNRun(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
-                logging.debug('result after retry: %i', res)
+        if res == 0:
+            self.clock_running = True
         self.lock.release()
 
     def write_to_board(self, message):
@@ -320,9 +323,10 @@ class DGTi2c(Display):
                 self.lock.acquire()
                 res = self.lib.dgt3000Display(b'no E-board' + self.waitchars[wait_counter], 0, 0, 0)
                 if res < 0:
-                    logging.warning('dgt lib returned error: %i', res)
-                    if self.lib.dgt3000Configure() < 0:
-                        logging.warning('configure also failed')
+                    logging.warning('Display returned error: %i', res)
+                    res = self.lib.dgt3000Configure()
+                    if res < 0:
+                        logging.warning('Configure also failed %i', res)
                 self.lock.release()
                 wait_counter = (wait_counter + 1) % len(self.waitchars)
                 time.sleep(0.5)
