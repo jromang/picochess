@@ -23,13 +23,12 @@ case "$1" in
         # Start bluetooth detection. Call Eric Singer's script that covers both regular DGT and the REV II board.
         # Should we support even more device checks?
         echo "Starting bluetooth detection" 
-        /opt/picochess/scripts/pico_dgt_bt.sh
+        scripts/pico_dgt_bt.sh
         dgt_port="/dev/rfcomm0"
       fi
 
       echo $dgt_port
-      cd /opt/picochess
-      screen -dmUS pc /opt/picochess/picochess.py -d $dgt_port -web -lf picochess.log -l debug -hs 128
+      python3 picochess.py -d $dgt_port -web -lf picochess.log -l debug -hs 128
     ;;
   stop)
     echo "Stopping picochess"
