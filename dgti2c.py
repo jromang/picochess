@@ -49,7 +49,7 @@ class DGTi2c(Display):
         self.waitchars = [b'/', b'-', b'\\', b'|']
 
         # load the dgt3000 SO-file
-        self.lib = ctypes.cdll.LoadLibrary("/home/pi/20151223/dgt3000.so")
+        self.lib = ctypes.cdll.LoadLibrary("/home/pi/20151229/dgt3000.so")
 
     def write(self, message, beep, duration, force):
         if force:
@@ -69,22 +69,24 @@ class DGTi2c(Display):
             self.timer_running = True
         res = self.lib.dgt3000Display(message, 0x03 if beep else 0x01, 0, 0)
         if res < 0:
-            logging.warning('dgt lib returned error: %i', res)
+            logging.warning('dgt3000Display returned error: %i', res)
             if self.lib.dgt3000Configure() < 0:
                 logging.warning('configure also failed')
             else:
-                self.lib.dgt3000Display(message, 0x03 if beep else 0x00, 0, 0)
+                res = self.lib.dgt3000Display(message, 0x03 if beep else 0x00, 0, 0)
+                logging.debug('result after retry: %i', res)
         self.lock.release()
 
     def write_stop_to_clock(self, l_hms, r_hms):
         self.lock.acquire()
         res = self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
         if res < 0:
-            logging.warning('dgt lib returned error: %i', res)
+            logging.warning('dgt3000SetNRun returned error: %i', res)
             if self.lib.dgt3000Configure() < 0:
                 logging.warning('configure also failed')
             else:
-                self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
+                res = self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
+                logging.debug('result after retry: %i', res)
         self.lock.release()
 
     def stopped_timer(self):
@@ -93,11 +95,12 @@ class DGTi2c(Display):
             self.lock.acquire()
             res = self.lib.dgt3000EndDisplay()
             if res < 0:
-                logging.warning('dgt lib returned error: %i', res)
+                logging.warning('dgt3000EndDisplay returned error: %i', res)
                 if self.lib.dgt3000Configure() < 0:
                     logging.warning('configure also failed')
                 else:
-                    self.lib.dgt3000EndDisplay()
+                    res = self.lib.dgt3000EndDisplay()
+                    logging.debug('result after retry: %i', res)
             self.lock.release()
 
     def write_start_to_clock(self, l_hms, r_hms, side):
@@ -111,11 +114,12 @@ class DGTi2c(Display):
         self.clock_running = True
         res = self.lib.dgt3000SetNRun(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
         if res < 0:
-            logging.warning('dgt lib returned error: %i', res)
+            logging.warning('dgt3000SetNRun returned error: %i', res)
             if self.lib.dgt3000Configure() < 0:
                 logging.warning('configure also failed')
             else:
-                self.lib.dgt3000SetNRun(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
+                res = self.lib.dgt3000SetNRun(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
+                logging.debug('result after retry: %i', res)
         self.lock.release()
 
     def write_to_board(self, message):
@@ -239,9 +243,10 @@ class DGTi2c(Display):
     def process_incoming_board_forever(self):
         while True:
             try:
-                c = self.serial.read(1)
-                if c:
-                    self.read_board_message(head=c)
+                if not self.serial_error:
+                    c = self.serial.read(1)
+                    if c:
+                        self.read_board_message(head=c)
             except pyserial.SerialException as e:
                 pass
             except TypeError:

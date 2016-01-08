@@ -33,7 +33,7 @@ class DGTpiclock(Display):
         self.lock = Lock()
 
         # load the dgt3000 SO-file
-        self.lib = ctypes.cdll.LoadLibrary("/home/pi/20151223/dgt3000.so")
+        self.lib = ctypes.cdll.LoadLibrary("/home/pi/20151229/dgt3000.so")
 
     def write(self, message, beep, duration, force):
         if force:
