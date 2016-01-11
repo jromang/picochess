@@ -479,7 +479,7 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                         HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='ok engin', xl="ok eng", beep=BeepLevel.BUTTON, duration=1)
                         self.engine_restart = False
                         break
-                    if case(Message.ENGINE_START):
+                    if case(Message.ENGINE_STARTUP):
                         if message.path:
                             self.installed_engines = get_installed_engines(message.path)
                             self.n_engines = len(self.installed_engines)

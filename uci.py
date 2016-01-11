@@ -100,10 +100,11 @@ class Engine(Display):
                     self.engine = None
                 else:
                     self.engine = chess.uci.popen_engine(path)
-                    self.engine.uci()
-                    handler = Informer()
-                    self.engine.info_handlers.append(handler)
                     self.path = path
+            if self.engine:
+                handler = Informer()
+                self.engine.info_handlers.append(handler)
+                self.engine.uci()
             self.options = {}
             self.future = None
             self.show_best = True

@@ -79,7 +79,6 @@ def update_headers(cls):
     create_game_header(cls, g)
     exp = pgn.StringExporter(headers=True, comments=False, variations=False)
     pgn_str = g.accept(exp)
-    # pgn_str = str(exp)
     EventHandler.write_to_clients({'event': 'header', 'header': pgn_str})
 
 
@@ -240,8 +239,10 @@ class WebDisplay(Display, threading.Thread):
             self.shared['system_info']['old_engine'] = self.shared['system_info']['engine_name']
             update_headers(self)
 
-        elif message == Message.ENGINE_NAME:
+        elif message == Message.ENGINE_READY:
             self.shared['system_info']['engine_name'] = message.engine_name
+            if not message.has_levels and "level" in self.shared["game_info"]:
+                del self.shared['game_info']['level']
             update_headers(self)
 
         elif message == Message.STARTUP_INFO:

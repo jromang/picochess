@@ -95,8 +95,9 @@ def main():
                 engine.option(uci_parameter[0], uci_parameter[1])
         # send the options to the engine
         engine.send()
-        # Notify other display processes
-        Display.show(Message.UCI_OPTION_LIST, options=engine.get().options)
+        # Log the engine info
+        logging.debug('Loaded engine [%s]', engine_name)
+        logging.debug('Supported options [%s]', engine.get().options)
 
     def display_system_info():
         if args.enable_internet:
@@ -435,10 +436,8 @@ def main():
     try:
         engine_name = engine.get().name
     except AttributeError:
-        logging.error("no engines started")
+        logging.error("No engines started")
         sys.exit(-1)
-    logging.debug('Loaded engine [%s]', engine_name)
-    logging.debug('Supported options [%s]', engine.get().options)
 
     # Startup - internal
     game = chess.Board()  # Create the current game
@@ -460,14 +459,14 @@ def main():
 
     system_info_thread = threading.Timer(0, display_system_info)
     system_info_thread.start()
-    # send the args options to the engine
-    engine_startup()
+    engine_startup()  # send the args options to the engine
 
     # Startup - external
     Display.show(Message.STARTUP_INFO, info={"interaction_mode": interaction_mode, "play_mode": play_mode,
                                              "book": all_books[book_index][1], "book_index": book_index,
                                              "time_control_string": "bl   5"})
-    Display.show(Message.ENGINE_START, path=engine.get_path(), has_levels=engine.has_levels())
+    Display.show(Message.UCI_OPTION_LIST, options=engine.options)
+    Display.show(Message.ENGINE_STARTUP, path=engine.get_path(), has_levels=engine.has_levels())
 
     # Event loop
     while True:
@@ -549,23 +548,20 @@ def main():
                         # Restore options - this doesn't deal with any
                         # supplementary uci options sent 'in game', see event.UCI_OPTION_SET
                         engine_startup()
-                        logging.debug('Loaded engine [%s]', engine_name)
-                        logging.debug('Supported options [%s]', engine.get().options)
                         # Send user selected engine level to new engine
                         if engine_level and engine.level(engine_level):
                             engine.send()
                             Display.show(Message.LEVEL, level=engine_level, beep=BeepLevel.BUTTON)
+                        # All done - rock'n'roll
+                        if not engine_fallback:
+                            Display.show(Message.ENGINE_READY, eng=event.eng, engine_name=engine_name, has_levels=engine.has_levels())
+                        else:
+                            Display.show(Message.ENGINE_FAIL)
                         # Go back to analysing or observing
                         if interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
                             analyse(game)
                         if interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
                             observe(game, time_control)
-                        # All done - rock'n'roll
-                        if not engine_fallback:
-                            Display.show(Message.ENGINE_NAME, engine_name=engine_name)
-                            Display.show(Message.ENGINE_READY, eng=event.eng, has_levels=engine.has_levels())
-                        else:
-                            Display.show(Message.ENGINE_FAIL)
                     break
 
                 if case(Event.SETUP_POSITION):  # User sets up a position
