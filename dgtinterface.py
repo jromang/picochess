@@ -17,6 +17,7 @@
 import threading
 from utilities import *
 import time
+from threading import Timer
 
 
 class DGTInterface(HardwareDisplay, threading.Thread):
@@ -30,10 +31,14 @@ class DGTInterface(HardwareDisplay, threading.Thread):
         self.time_left = [0, 0, 0]
         self.time_right = [0, 0, 0]
 
-    def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG, duration=0, force=False):
+        self.timer = None
+        self.timer_running = False
+        self.clock_running = False
+
+    def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG):
         raise NotImplementedError()
 
-    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG, duration=0, force=False):
+    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):
         raise NotImplementedError()
 
     def light_squares_revelation_board(self, squares):
@@ -58,6 +63,13 @@ class DGTInterface(HardwareDisplay, threading.Thread):
             return False
         return self.beep_level & beeplevel.value
 
+    def stopped_timer(self):
+        self.timer_running = False
+        if self.clock_running:
+            pass
+        else:
+            logging.debug('Clock not running. Ignored duration.')
+
     def run(self):
         while True:
             # Check if we have something to display
@@ -66,10 +78,24 @@ class DGTInterface(HardwareDisplay, threading.Thread):
                 logging.debug("Read dgt from queue: %s", message)
                 for case in switch(message):
                     if case(Dgt.DISPLAY_MOVE):
-                        self.display_move_on_clock(message.move, message.fen, message.beep, message.duration)
+                        message.force = False  # TEST!
+                        while self.timer_running and not message.force:
+                            time.sleep(0.1)
+                        if message.duration > 0:
+                            self.timer = Timer(message.duration, self.stopped_timer)
+                            self.timer.start()
+                            self.timer_running = True
+                        self.display_move_on_clock(message.move, message.fen, message.beep)
                         break
                     if case(Dgt.DISPLAY_TEXT):
-                        self.display_text_on_clock(message.text, message.xl, message.beep, message.duration)
+                        message.force = False  # TEST!
+                        while self.timer_running and not message.force:
+                            time.sleep(0.1)
+                        if message.duration > 0:
+                            self.timer = Timer(message.duration, self.stopped_timer)
+                            self.timer.start()
+                            self.timer_running = True
+                        self.display_text_on_clock(message.text, message.xl, message.beep)
                         break
                     if case(Dgt.LIGHT_CLEAR):
                         self.clear_light_revelation_board()
@@ -78,9 +104,11 @@ class DGTInterface(HardwareDisplay, threading.Thread):
                         self.light_squares_revelation_board(message.squares)
                         break
                     if case(Dgt.CLOCK_STOP):
+                        self.clock_running = False
                         self.stop_clock()
                         break
                     if case(Dgt.CLOCK_START):
+                        self.clock_running = True
                         self.start_clock(message.time_left, message.time_right, message.side)
                         break
                     if case(Dgt.CLOCK_VERSION):

@@ -41,102 +41,14 @@ class DGTi2c(Display):
         self.device = device
         self.serial = None
         self.serial_error = False
-        self.i2c_queue = queue.Queue()
-        self.timer = None
-        self.timer_running = False
-        self.clock_running = False
+
         self.lock = Lock()
         self.waitchars = [b'/', b'-', b'\\', b'|']
-
         # load the dgt3000 SO-file
         self.lib = ctypes.cdll.LoadLibrary("/home/pi/20151229/dgt3000.so")
 
-    def write(self, message, beep, duration, force):
-        if force:
-            logging.debug('force given')
-            self.i2c_queue = queue.Queue()
-            if self.timer:
-                self.timer.stop()
-                self.timer_running = False
-        self.i2c_queue.put((message, beep, duration))
-
-    def send_command(self, command):
-        self.lock.acquire()
-        message, beep, duration = command
-        if duration > 0:
-            self.timer = Timer(duration, self.stopped_timer)
-            self.timer.start()
-            self.timer_running = True
-        res = self.lib.dgt3000Display(message, 0x03 if beep else 0x01, 0, 0)
-        if res < 0:
-            logging.warning('Display returned error: %i', res)
-            res = self.lib.dgt3000Configure()
-            if res < 0:
-                logging.warning('Configure also failed %i', res)
-            else:
-                res = self.lib.dgt3000Display(message, 0x03 if beep else 0x00, 0, 0)
-        if res < 0:
-            logging.warning('Finally failed')
-        self.lock.release()
-
-    def stopped_timer(self):
-        self.timer_running = False
-        if self.clock_running:
-            self.lock.acquire()
-            res = self.lib.dgt3000EndDisplay()
-            if res < 0:
-                logging.warning('EndDisplay returned error: %i', res)
-                res = self.lib.dgt3000Configure()
-                if res < 0:
-                    logging.warning('Configure also failed: %i', res)
-                else:
-                    res = self.lib.dgt3000EndDisplay()
-            if res < 0:
-                logging.warning('Finally failed')
-            self.lock.release()
-        else:
-            logging.debug('Clock not running. Ignored duration.')
-
-    def write_stop_to_clock(self, l_hms, r_hms):
-        self.lock.acquire()
-        res = self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
-        if res < 0:
-            logging.warning('SetNRun returned error: %i', res)
-            res = self.lib.dgt3000Configure()
-            if res < 0:
-                logging.warning('Configure also failed: %i', res)
-            else:
-                res = self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
-        if res < 0:
-            logging.warning('Finally failed')
-        else:
-            self.clock_running = False
-        self.lock.release()
-
-    def write_start_to_clock(self, l_hms, r_hms, side):
-        self.lock.acquire()
-        if side == 0x01:
-            lr = 1
-            rr = 0
-        else:
-            lr = 0
-            rr = 1
-        res = self.lib.dgt3000SetNRun(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
-        if res < 0:
-            logging.warning('SetNRun returned error: %i', res)
-            res = self.lib.dgt3000Configure()
-            if res < 0:
-                logging.warning('Configure also failed: %i', res)
-            else:
-                res = self.lib.dgt3000SetNRun(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
-        if res < 0:
-            logging.warning('Finally failed')
-        else:
-            self.clock_running = True
-        self.lock.release()
-
     def write_to_board(self, message):
-        logging.debug('->DGT [%s], length:%i', message[0], len(message))
+        logging.debug('->DGT [%s], length %i', message[0], len(message))
         array = []
         for v in message:
             if type(v) is int:
@@ -144,7 +56,7 @@ class DGTi2c(Display):
             elif isinstance(v, enum.Enum):
                 array.append(v.value)
             else:
-                logging.error('Type not supported : [%s]', type(v))
+                logging.error('Type not supported [%s]', type(v))
 
         while True:
             if self.serial_error:
@@ -169,8 +81,8 @@ class DGTi2c(Display):
     def process_board_message(self, message_id, message):
         for case in switch(message_id):
             if case(DgtMsg.DGT_MSG_VERSION):  # Get the DGT board version
-                board_version = float(str(message[0]) + '.' + str(message[1]))
-                logging.debug("DGT board version %0.2f", board_version)
+                board_version = str(message[0]) + '.' + str(message[1])
+                logging.debug("DGT board version %0.2f", float(board_version))
                 self.lock.acquire()
                 if self.device.find('rfc') == -1:
                     text = b'USB E-board'
@@ -204,8 +116,8 @@ class DGTi2c(Display):
                             fen += "/"
                         empty = 0
 
-                # Attention: This fen is NOT flipped!!
-                logging.debug("Raw-Fen: " + fen)
+                # Attention! This fen is NOT flipped
+                logging.debug("Raw-Fen [%s]", fen)
                 Display.show(Message.DGT_FEN, fen=fen)
                 break
             if case(DgtMsg.DGT_MSG_FIELD_UPDATE):
@@ -215,7 +127,7 @@ class DGTi2c(Display):
                 # logging.debug(message)
                 break
             if case():  # Default
-                logging.warning("DGT message not handled : [%s]", DgtMsg(message_id))
+                logging.warning("DGT message not handled [%s]", DgtMsg(message_id))
 
     def read_board_message(self, head=None):
         header_len = 3
@@ -232,7 +144,7 @@ class DGTi2c(Display):
         message_length = (header[1] << 7) + header[2] - 3
 
         try:
-            logging.debug("<-DGT [%s], length:%i", DgtMsg(message_id), message_length)
+            logging.debug("<-DGT [%s], length %i", DgtMsg(message_id), message_length)
         except ValueError:
             logging.warning("Unknown message value %i", message_id)
         if message_length:
@@ -247,10 +159,10 @@ class DGTi2c(Display):
 
     def startup_clock(self):
         while self.lib.dgt3000Init() < 0:
-            logging.warning('init failed')
+            logging.warning('Init failed')
             time.sleep(0.5)  # dont flood the log
         if self.lib.dgt3000Configure() < 0:
-            logging.warning('configure failed')
+            logging.warning('Configure failed')
         Display.show(Message.DGT_CLOCK_VERSION, main_version=2, sub_version=2)
 
     def process_incoming_board_forever(self):
@@ -308,16 +220,6 @@ class DGTi2c(Display):
                 self.write_to_board([DgtCmd.DGT_RETURN_SERIALNR])  # the code doesnt really matter ;-)
             time.sleep(0.25)
 
-    def process_outgoing_clock_forever(self):
-        while True:
-            if not self.timer_running:
-                # Check if we have something to send
-                try:
-                    command = self.i2c_queue.get()
-                    self.send_command(command)
-                except queue.Empty:
-                    pass
-
     def setup_serial(self):
         wait_counter = 0
         while not self.serial:
@@ -333,7 +235,7 @@ class DGTi2c(Display):
                 self.lock.acquire()
                 res = self.lib.dgt3000Display(b'no E-board' + self.waitchars[wait_counter], 0, 0, 0)
                 if res < 0:
-                    logging.warning('Display returned error: %i', res)
+                    logging.warning('Display returned error %i', res)
                     res = self.lib.dgt3000Configure()
                     if res < 0:
                         logging.warning('Configure also failed %i', res)
@@ -354,5 +256,3 @@ class DGTi2c(Display):
 
         incoming_clock_thread = threading.Timer(0, self.process_incoming_clock_forever)
         incoming_clock_thread.start()
-        outgoing_clock_thread = threading.Timer(0, self.process_outgoing_clock_forever)
-        outgoing_clock_thread.start()
