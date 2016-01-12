@@ -710,8 +710,6 @@ class DGTDisplay(Observable, Display, HardwareDisplay, threading.Thread):
                     if case(Message.DGT_CLOCK_TIME):
                         HardwareDisplay.show(Dgt.CLOCK_TIME, time_left=message.time_left, time_right=message.time_right)
                         break
-                    if case(Message.DGT_SERIALNR):
-                        HardwareDisplay.show(Dgt.SERIALNR)
                     if case():  # Default
                         # print(message)
                         pass

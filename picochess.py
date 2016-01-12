@@ -39,7 +39,7 @@ from keyboardinput import KeyboardInput, TerminalDisplay
 from pgn import PgnDisplay
 from server import WebServer
 
-# from dgthardware import DGTHardware
+from dgthardware import DGTHardware
 from dgtpi import DGTPi
 from dgtdisplay import DGTDisplay
 from dgtvirtual import DGTVirtual
@@ -367,6 +367,7 @@ def main():
     parser.add_argument("-nookmove", "--disable-ok-move", action='store_false', help="disable ok move messages")
     parser.add_argument("-v", "--version", action='version', version='%(prog)s version {}'.format(version),
                         help="show current version", default=None)
+    parser.add_argument("-pi", "--dgtpi", action='store_true', help="use the dgtpi hardware")
 
     args = parser.parse_args()
 
@@ -389,14 +390,16 @@ def main():
             logging.error('Tablebases gaviota doesnt exist')
             gaviota = None
 
-    # This class talks to DGTHardware or DGTVirtual
+    # This class talks to DGTHardware/DGTPi or DGTVirtual
     DGTDisplay(args.disable_ok_move).start()
 
     if args.dgt_port:
         # Connect to DGT board
         logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
-        # DGTHardware(args.dgt_port, args.enable_dgt_board_leds, args.beep_level).start()
-        DGTPi(args.dgt_port, args.enable_dgt_board_leds, args.beep_level).start()
+        if args.dgtpi:
+            DGTPi(args.dgt_port, args.enable_dgt_board_leds, args.beep_level).start()
+        else:
+            DGTHardware(args.dgt_port, args.enable_dgt_board_leds, args.beep_level).start()
     else:
         # Enable keyboard input and terminal display
         logging.warning("No DGT board port provided")

@@ -53,9 +53,6 @@ class DGTInterface(HardwareDisplay, Thread):
     def start_clock(self, time_left, time_right, side):
         raise NotImplementedError()
 
-    def serialnr_board(self):
-        raise NotImplementedError()
-
     def get_beep_level(self, beeplevel):
         if beeplevel == BeepLevel.YES:
             return True
@@ -121,9 +118,6 @@ class DGTInterface(HardwareDisplay, Thread):
                     if case(Dgt.CLOCK_TIME):
                         self.time_left = message.time_left
                         self.time_right = message.time_right
-                        break
-                    if case(Dgt.SERIALNR):
-                        self.serialnr_board()
                         break
                     if case():  # Default
                         pass

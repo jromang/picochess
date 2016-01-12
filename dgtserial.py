@@ -66,7 +66,7 @@ class DGTSerial(Display):
 
     def send_command(self, message):
         mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
-        logging.debug('->DGT [%s], length:%i', mes, len(message))
+        logging.debug('->DGT [%s], length %i', mes, len(message))
         if mes.value == DgtClk.DGT_CMD_CLOCK_ASCII.value:
             logging.debug(message[4:10])
         array = []
@@ -79,7 +79,7 @@ class DGTSerial(Display):
                 for c in v:
                     array.append(char_to_DGTXL[c.lower()])
             else:
-                logging.error('Type not supported : [%s]', type(v))
+                logging.error('Type not supported [%s]', type(v))
         while True:
             try:
                 self.serial.write(bytearray(array))
@@ -157,7 +157,7 @@ class DGTSerial(Display):
                     tl = [l_hours, l_mins, l_secs]
                     logging.info('DGT clock time received {} : {}'.format(tl, tr))
                     Display.show(Message.DGT_CLOCK_TIME, time_left=tl, time_right=tr)
-                    return  # Versuch!
+                    return  # a try!
                 else:
                     logging.debug('DGT clock message ignored')
                     if self.first_clock_msg:
@@ -192,7 +192,7 @@ class DGTSerial(Display):
                             fen += "/"
                         empty = 0
 
-                # Attention: This fen is NOT flipped!!
+                # Attention! This fen is NOT flipped
                 logging.debug("Raw-Fen: " + fen)
                 Display.show(Message.DGT_FEN, fen=fen)
                 break
@@ -203,7 +203,7 @@ class DGTSerial(Display):
                 # logging.debug(message)
                 break
             if case():  # Default
-                logging.warning("DGT message not handled : [%s]", DgtMsg(message_id))
+                logging.warning("DGT message not handled [%s]", DgtMsg(message_id))
 
     def read_board_message(self, head=None):
         header_len = 3
@@ -220,7 +220,7 @@ class DGTSerial(Display):
         message_length = (header[1] << 7) + header[2] - 3
 
         try:
-            logging.debug("<-DGT [%s], length:%i", DgtMsg(message_id), message_length)
+            logging.debug("<-DGT [%s], length %i", DgtMsg(message_id), message_length)
         except ValueError:
             logging.warning("Unknown message value %i", message_id)
         if message_length:

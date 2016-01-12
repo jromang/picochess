@@ -28,7 +28,7 @@ class DGTHardware(DGTInterface):
         self.dgtserial.run()
 
     def write(self, message):
-        self.dgtserial.write(message)
+        self.dgtserial.write_to_board(message)
 
     def _display_on_dgt_xl(self, text, beep=False):
         if self.clock_found:
