@@ -20,7 +20,7 @@ from ctypes import *
 from dgtinterface import *
 from dgti2c import *
 from utilities import *
-from threading import Lock
+from threading import Lock, Timer
 
 
 class DGTPi(DGTInterface):
@@ -34,7 +34,7 @@ class DGTPi(DGTInterface):
         self.lib = cdll.LoadLibrary("/home/pi/20151229/dgt3000.so")
 
         self.startup_clock()
-        incoming_clock_thread = threading.Timer(0, self.process_incoming_clock_forever)
+        incoming_clock_thread = Timer(0, self.process_incoming_clock_forever)
         incoming_clock_thread.start()
 
     def startup_clock(self):

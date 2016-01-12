@@ -58,8 +58,10 @@ class DGTSerial(Display):
         self.first_clock_msg = True
         self.clock_lock = False
         self.serial = None
+        self.serial_error = False
+        self.waitchars = ['/', '-', '\\', '|']
 
-    def write(self, message):
+    def write_to_board(self, message):
         serial_queue.put(message)
 
     def send_command(self, message):
@@ -91,16 +93,18 @@ class DGTSerial(Display):
             logging.debug('DGT clock locked')
             self.clock_lock = True
 
-    def process_message(self, message_id, message):
+    def process_board_message(self, message_id, message):
         for case in switch(message_id):
             if case(DgtMsg.DGT_MSG_VERSION):  # Get the DGT board version
-                board_version = float(str(message[0]) + '.' + str(message[1]))
-                logging.debug("DGT board version %0.2f", board_version)
+                board_version = str(message[0]) + '.' + str(message[1])
+                logging.debug("DGT board version %0.2f", float(board_version))
                 if self.device.find('rfc') == -1:
                     text = 'USB E-board'
+                    text_xl = 'ok usb'
                 else:
                     text = 'BT E-board'
-                logging.debug(text)  # @todo Should be send to a Display
+                    text_xl = 'ok bt'
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=text, xl=text_xl, beep=BeepLevel.NO, duration=0.5)
                 break
             if case(DgtMsg.DGT_MSG_BWTIME):
                 if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
@@ -193,12 +197,15 @@ class DGTSerial(Display):
                 Display.show(Message.DGT_FEN, fen=fen)
                 break
             if case(DgtMsg.DGT_MSG_FIELD_UPDATE):
-                self.write([DgtCmd.DGT_SEND_BRD])  # Ask for the board when a piece moved
+                self.write_to_board([DgtCmd.DGT_SEND_BRD])  # Ask for the board when a piece moved
+                break
+            if case(DgtMsg.DGT_MSG_SERIALNR):
+                # logging.debug(message)
                 break
             if case():  # Default
                 logging.warning("DGT message not handled : [%s]", DgtMsg(message_id))
 
-    def read_message(self, head=None):
+    def read_board_message(self, head=None):
         header_len = 3
         if head:
             header = head + self.serial.read(header_len-1)
@@ -218,26 +225,15 @@ class DGTSerial(Display):
             logging.warning("Unknown message value %i", message_id)
         if message_length:
             message = unpack('>' + str(message_length) + 'B', (self.serial.read(message_length)))
-            self.process_message(message_id, message)
+            self.process_board_message(message_id, message)
             return message_id
 
-    def startup(self):
-        # Set the board update mode
-        self.write([DgtCmd.DGT_SEND_UPDATE_NICE])
-        # Get clock version
-        self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
-                    DgtClk.DGT_CMD_CLOCK_VERSION, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
-        # Get board version
-        self.write([DgtCmd.DGT_SEND_VERSION])
-        # Update the board
-        self.write([DgtCmd.DGT_SEND_BRD])
-
-    def process_incoming_forever(self):
+    def process_incoming_board_forever(self):
         while True:
             try:
                 c = self.serial.read(1)
                 if c:
-                    self.read_message(head=c)
+                    self.read_board_message(head=c)
             except pyserial.SerialException as e:
                 pass
             except TypeError:
@@ -249,12 +245,21 @@ class DGTSerial(Display):
                 # Check if we have something to send
                 try:
                     command = serial_queue.get()
-                    # print ("get without waiting..")
                     self.send_command(command)
                 except queue.Empty:
                     pass
 
-    def run(self):
+    def startup_clock(self):
+        self.write_to_board([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                             DgtClk.DGT_CMD_CLOCK_VERSION, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])  # Get clock version
+
+    def startup_board(self):
+        self.write_to_board([DgtCmd.DGT_SEND_UPDATE_NICE])  # Set the board update mode
+        self.write_to_board([DgtCmd.DGT_SEND_VERSION])  # Get board version
+        self.write_to_board([DgtCmd.DGT_SEND_BRD])  # Update the board
+
+    def setup_serial(self):
+        wait_counter = 0
         while not self.serial:
             # Open the serial port
             try:
@@ -265,10 +270,18 @@ class DGTSerial(Display):
                                               )
             except pyserial.SerialException as e:
                 logging.error(e)
+                w = self.waitchars[wait_counter]
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='E-board' + w, xl='board' + w, beep=BeepLevel.NO, duration=0)
+                wait_counter = (wait_counter + 1) % len(self.waitchars)
                 time.sleep(0.5)
+        self.serial_error = False
+        self.startup_board()
 
-        self.startup()
-        incoming_thread = threading.Timer(0, self.process_incoming_forever)
+    def run(self):
+        self.setup_serial()
+
+        self.startup_clock()
+        incoming_thread = threading.Timer(0, self.process_incoming_board_forever)
         incoming_thread.start()
 
         outgoing_thread = threading.Timer(0, self.process_outgoing_forever)

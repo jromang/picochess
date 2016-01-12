@@ -15,9 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-# import ctypes
 import serial as pyserial
-# from threading import Lock
 
 import time
 from struct import unpack
@@ -41,10 +39,7 @@ class DGTi2c(Display):
         self.device = device
         self.serial = None
         self.serial_error = False
-        # self.lock = Lock()
-        # self.waitchars = [b'/', b'-', b'\\', b'|']
-        # load the dgt3000 SO-file
-        # self.lib = ctypes.cdll.LoadLibrary("/home/pi/20151229/dgt3000.so")
+        self.waitchars = ['/', '-', '\\', '|']
 
     def write_to_board(self, message):
         logging.debug('->DGT [%s], length %i', message[0], len(message))
@@ -82,19 +77,13 @@ class DGTi2c(Display):
             if case(DgtMsg.DGT_MSG_VERSION):  # Get the DGT board version
                 board_version = str(message[0]) + '.' + str(message[1])
                 logging.debug("DGT board version %0.2f", float(board_version))
-                # if self.device.find('rfc') == -1:
-                #     text = b'USB E-board'
-                # else:
-                #     text = b'BT E-board'
-                # self.lock.acquire()
-                # self.lib.dgt3000Display(text, 0, 0, 0)
-                # time.sleep(0.5)
-                # self.lock.release()
                 if self.device.find('rfc') == -1:
                     text = 'USB E-board'
+                    text_xl = 'ok usb'
                 else:
                     text = 'BT E-board'
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=text, xl=None, beep=BeepLevel.NO, duration=0.5)
+                    text_xl = 'ok bt'
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=text, xl=text_xl, beep=BeepLevel.NO, duration=0.5)
                 break
             if case(DgtMsg.DGT_MSG_BOARD_DUMP):
                 board = ''
@@ -174,7 +163,7 @@ class DGTi2c(Display):
                 pass
 
     def setup_serial(self):
-        # wait_counter = 0
+        wait_counter = 0
         while not self.serial:
             # Open the serial port
             try:
@@ -185,19 +174,9 @@ class DGTi2c(Display):
                                               )
             except pyserial.SerialException as e:
                 logging.error(e)
-                # self.lock.acquire()
-                # res = self.lib.dgt3000Display(b'no E-board' + self.waitchars[wait_counter], 0, 0, 0)
-                # if res < 0:
-                #     logging.warning('Display returned error %i', res)
-                #     res = self.lib.dgt3000Configure()
-                #     if res < 0:
-                #         logging.warning('Configure also failed %i', res)
-                # self.lock.release()
-                # wait_counter = (wait_counter + 1) % len(self.waitchars)
-                # time.sleep(0.5)
-
-                # @todo return the waiting char!
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='no E-board', xl=None, beep=BeepLevel.NO, duration=0)
+                w = self.waitchars[wait_counter]
+                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='no E-board' + w, xl='board' + w, beep=BeepLevel.NO, duration=0)
+                wait_counter = (wait_counter + 1) % len(self.waitchars)
                 time.sleep(0.5)
         self.serial_error = False
         self.startup_board()
