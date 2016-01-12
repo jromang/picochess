@@ -17,10 +17,10 @@
 import threading
 from utilities import *
 import time
-from threading import Timer
+from threading import Timer, Thread
 
 
-class DGTInterface(HardwareDisplay, threading.Thread):
+class DGTInterface(HardwareDisplay, Thread):
     def __init__(self, enable_board_leds, beep_level):
         super(DGTInterface, self).__init__()
 
