@@ -41,9 +41,8 @@ class DGTHardware(DGTInterface):
                 [DgtCmd.DGT_CLOCK_MESSAGE, 0x0b, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_DISPLAY,
                  text[2], text[1], text[0], text[5], text[4], text[3], 0x00, 0x03 if beep else 0x01,
                  DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
-
-        self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_END,
-                    DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+            self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_END,
+                        DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
 
     def _display_on_dgt_3000(self, text, beep=False):
         if self.clock_found:
@@ -56,17 +55,16 @@ class DGTHardware(DGTInterface):
             self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0c, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_ASCII,
                         text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], 0x03 if beep else 0x01,
                         DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
-
             self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_END,
                         DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
 
-    def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG, duration=0, force=False):
+    def display_text_on_clock(self, text, text_xl=None, beep=BeepLevel.CONFIG, duration=0, force=False):
         beep = self.get_beep_level(beep)
         if self.enable_dgt_3000:
             self._display_on_dgt_3000(text, beep)
         else:
-            if dgt_xl_text:
-                text = dgt_xl_text
+            if text_xl:
+                text = text_xl
             self._display_on_dgt_xl(text, beep)
 
     def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG, duration=0, force=False):
@@ -108,5 +106,3 @@ class DGTHardware(DGTInterface):
         self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_END,
                     DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
 
-    def serialnr_board(self):
-        pass

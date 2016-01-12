@@ -85,6 +85,62 @@ class DGTi2c(Display):
                     text_xl = 'ok bt'
                 HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=text, xl=text_xl, beep=BeepLevel.NO, duration=0.5)
                 break
+            if case(DgtMsg.DGT_MSG_BWTIME):
+                if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
+                    # Construct the ack message
+                    ack0 = ((message[1]) & 0x7f) | ((message[3] << 3) & 0x80)
+                    ack1 = ((message[2]) & 0x7f) | ((message[3] << 2) & 0x80)
+                    ack2 = ((message[4]) & 0x7f) | ((message[0] << 3) & 0x80)
+                    ack3 = ((message[5]) & 0x7f) | ((message[0] << 2) & 0x80)
+                    if ack0 != 0x10:
+                        logging.warning("Clock ACK error %s", (ack0, ack1, ack2, ack3))
+                        # self.clock_lock = False  # for issue 142
+                        # return
+                        break
+                    else:
+                        logging.debug("Clock ACK [%s]", DgtClk(ack1))
+                    if ack1 == 0x88:
+                        # this are the other (ack2-ack3) codes
+                        # 6-49 34-52 18-51 10-50 66-53 | button 0-4 (single)
+                        #      38-52 22-51 14-50 70-53 | button 0 + 1-4
+                        #            50-51 42-50 98-53 | button 1 + 2-4
+                        #                  26-50 82-53 | button 2 + 3-4
+                        #                        74-53 | button 3 + 4
+                        if ack3 == 49:
+                            logging.info("Button 0 pressed")
+                            Display.show(Message.DGT_BUTTON, button=0)
+                        if ack3 == 52:
+                            logging.info("Button 1 pressed")
+                            Display.show(Message.DGT_BUTTON, button=1)
+                        if ack3 == 51:
+                            logging.info("Button 2 pressed")
+                            Display.show(Message.DGT_BUTTON, button=2)
+                        if ack3 == 50:
+                            logging.info("Button 3 pressed")
+                            Display.show(Message.DGT_BUTTON, button=3)
+                        if ack3 == 53:
+                            logging.info("Button 4 pressed")
+                            Display.show(Message.DGT_BUTTON, button=4)
+                    if ack1 == 0x09:
+                        main_version = ack2 >> 4
+                        sub_version = ack2 & 0x0f
+                        logging.debug("DGT clock version %0.2f", float(str(main_version) + '.' + str(sub_version)))
+                        Display.show(Message.DGT_CLOCK_VERSION, main_version=main_version, sub_version=sub_version)
+                elif any(message[:6]):
+                    r_hours = message[0] & 0x0f
+                    r_mins = (message[1] >> 4) * 10 + (message[1] & 0x0f)
+                    r_secs = (message[2] >> 4) * 10 + (message[2] & 0x0f)
+                    l_hours = message[3] & 0x0f
+                    l_mins = (message[4] >> 4) * 10 + (message[4] & 0x0f)
+                    l_secs = (message[5] >> 4) * 10 + (message[5] & 0x0f)
+                    tr = [r_hours, r_mins, r_secs]
+                    tl = [l_hours, l_mins, l_secs]
+                    logging.info('DGT clock time received {} : {}'.format(tl, tr))
+                    Display.show(Message.DGT_CLOCK_TIME, time_left=tl, time_right=tr)
+                    # return  # a try!
+                else:
+                    logging.debug('DGT clock message ignored')
+                break
             if case(DgtMsg.DGT_MSG_BOARD_DUMP):
                 board = ''
                 for c in message:

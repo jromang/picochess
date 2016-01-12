@@ -88,9 +88,9 @@ class DGTPi(DGTInterface):
                 self.dgti2c.write_to_board([DgtCmd.DGT_RETURN_SERIALNR])  # the code doesnt really matter ;-)
             time.sleep(0.25)
 
-    def _display_on_dgt_3000(self, text, beep=False):
+    def _display_on_dgt_pi(self, text, beep=False):
         if len(text) > 11:
-            logging.warning('DGT 3000 clock message too long [%s]', text)
+            logging.warning('DGT PI clock message too long [%s]', text)
         logging.debug(text)
         text = bytes(text, 'utf-8')
         with self.lock:
@@ -107,13 +107,13 @@ class DGTPi(DGTInterface):
 
     def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG):
         beep = self.get_beep_level(beep)
-        self._display_on_dgt_3000(text, beep)
+        self._display_on_dgt_pi(text, beep)
 
     def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):
         beep = self.get_beep_level(beep)
         bit_board = Board(fen)
         text = bit_board.san(move)
-        self._display_on_dgt_3000(text, beep)
+        self._display_on_dgt_pi(text, beep)
 
     def light_squares_revelation_board(self, squares):
         pass
@@ -141,21 +141,24 @@ class DGTPi(DGTInterface):
     def start_clock(self, time_left, time_right, side):
         l_hms = hours_minutes_seconds(time_left)
         r_hms = hours_minutes_seconds(time_right)
+        if side == 0x01:
+            lr = 1
+            rr = 0
+        else:
+            lr = 0
+            rr = 1
         self.time_left = l_hms
         self.time_right = r_hms
         with self.lock:
-            res = self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
+            res = self.lib.dgt3000SetNRun(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
             if res < 0:
                 logging.warning('SetNRun returned error %i', res)
                 res = self.lib.dgt3000Configure()
                 if res < 0:
                     logging.warning('Configure also failed %i', res)
                 else:
-                    res = self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
+                    res = self.lib.dgt3000SetNRun(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
             if res < 0:
                 logging.warning('Finally failed %i', res)
             else:
                 self.clock_running = False
-
-    def serialnr_board(self):
-        self.dgti2c.write_to_board([DgtCmd.DGT_RETURN_SERIALNR])
