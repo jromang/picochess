@@ -24,6 +24,11 @@ from struct import unpack
 from utilities import *
 from threading import Timer
 
+try:
+    import enum
+except ImportError:
+    import enum34 as enum
+
 piece_to_char = {
     0x01: 'P', 0x02: 'R', 0x03: 'N', 0x04: 'B', 0x05: 'K', 0x06: 'Q',
     0x07: 'p', 0x08: 'r', 0x09: 'n', 0x0a: 'b', 0x0b: 'k', 0x0c: 'q', 0x00: '.'
@@ -36,7 +41,6 @@ class DGTi2c(Display):
         self.device = device
         self.serial = None
         self.serial_error = False
-
         # self.lock = Lock()
         # self.waitchars = [b'/', b'-', b'\\', b'|']
         # load the dgt3000 SO-file
@@ -170,7 +174,7 @@ class DGTi2c(Display):
                 pass
 
     def setup_serial(self):
-        wait_counter = 0
+        # wait_counter = 0
         while not self.serial:
             # Open the serial port
             try:
@@ -200,7 +204,5 @@ class DGTi2c(Display):
 
     def run(self):
         self.setup_serial()
-        self.startup_board()
-
         incoming_board_thread = Timer(0, self.process_incoming_board_forever)
         incoming_board_thread.start()
