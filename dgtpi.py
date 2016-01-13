@@ -161,17 +161,20 @@ class DGTPi(DGTInterface):
             if res < 0:
                 logging.warning('Finally failed %i', res)
             else:
-                self.clock_running = False
+                self.clock_running = True
 
     def end_clock(self):
-        with self.lock:
-            res = self.lib.dgt3000EndDisplay()
-            if res < 0:
-                logging.warning('EndDisplay returned error %i', res)
-                res = self.lib.dgt3000Configure()
+        if self.clock_running:
+            with self.lock:
+                res = self.lib.dgt3000EndDisplay()
                 if res < 0:
-                    logging.warning('Configure also failed %i', res)
-                else:
-                    res = self.lib.dgt3000EndDisplay()
-            if res < 0:
-                logging.warning('Finally failed')
+                    logging.warning('EndDisplay returned error %i', res)
+                    res = self.lib.dgt3000Configure()
+                    if res < 0:
+                        logging.warning('Configure also failed %i', res)
+                    else:
+                        res = self.lib.dgt3000EndDisplay()
+                if res < 0:
+                    logging.warning('Finally failed')
+        else:
+            logging.debug('clock isnt running - no need for stop')

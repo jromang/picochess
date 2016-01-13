@@ -94,6 +94,7 @@ class DGTHardware(DGTInterface):
         self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0a, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_SETNRUN,
                     l_hms[0], l_hms[1], l_hms[2], r_hms[0], r_hms[1], r_hms[2],
                     0x04 | 0x01, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        self.clock_running = False
 
     def start_clock(self, time_left, time_right, side):
         l_hms = hours_minutes_seconds(time_left)
@@ -105,6 +106,11 @@ class DGTHardware(DGTInterface):
                     side, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_END,
                     DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        self.clock_running = True
 
     def end_clock(self):
-        pass
+        if self.clock_running:
+            self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_END,
+                        DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        else:
+            logging.debug('clock isnt running - no need for stop')

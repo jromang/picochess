@@ -103,7 +103,10 @@ class DGThw(DGTInterface):
             if res < 0:
                 logging.warning('Finally failed %i', res)
             else:
-                self.clock_running = False
+                self.clock_running = True
 
     def end_clock(self):
-        self.lib.end_clock()
+        if self.clock_running:
+            self.lib.end_clock()
+        else:
+            logging.debug('clock isnt running - no need for stop')
