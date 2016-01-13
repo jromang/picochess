@@ -273,6 +273,12 @@ class WebDisplay(Display, threading.Thread):
             self.shared['game_info']['level'] = message.level
             update_headers(self)
 
+        elif message == Message.JACK_CONNECTED_ERROR:
+            EventHandler.write_to_clients({'event': 'Message', 'msg': 'Unplug the jack cable please!'})
+
+        elif message == Message.DGT_CLOCK_VERSION:
+            EventHandler.write_to_clients({'event': 'Message', 'msg': 'DGT clock over ' + message.attached + ' connected'})
+
         elif message == Message.COMPUTER_MOVE or message == Message.USER_MOVE or message == Message.REVIEW_MODE_MOVE:
             game = pgn.Game()
             custom_fen = getattr(message.game, 'custom_fen', None)

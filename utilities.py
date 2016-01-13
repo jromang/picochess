@@ -30,7 +30,7 @@ except ImportError:
 
 
 # picochess version
-version = '056'
+version = '057'
 
 event_queue = queue.Queue()
 serial_queue = queue.Queue()
@@ -112,6 +112,7 @@ class Message(AutoNumber):
     STARTUP_INFO = ()  # Information about the startup options
     SCORE = ()  # Score
     ALTERNATIVE_MOVE = ()  # User wants another move to be calculated
+    JACK_CONNECTED_ERROR = ()  # User connected fully|partly the clock via jack => ask him to remove it
 
 
 class Dgt(AutoNumber):
@@ -365,9 +366,9 @@ class Display(object):  # Display devices (DGT XL clock, Piface LCD, pgn file...
             display.message_queue.put(message)
 
 
-class HardwareDisplay(object):  # Display devices (DGT XL clock, Piface LCD, pgn file...)
+class DgtDisplay(object):  # Display devices (DGT XL clock, Piface LCD, pgn file...)
     def __init__(self):
-        super(HardwareDisplay, self).__init__()
+        super(DgtDisplay, self).__init__()
         self.dgt_queue = queue.Queue()
         dgtdisplay_devices.append(self)
 

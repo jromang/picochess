@@ -39,11 +39,13 @@ class DGTPi(DGTInterface):
 
     def startup_clock(self):
         while self.lib.dgt3000Init() < 0:
-            logging.warning('Init failed')
+            logging.warning('Init failed - Jack half connected?')
+            Display.show(Message.JACK_CONNECTED_ERROR)
             time.sleep(0.5)  # dont flood the log
         if self.lib.dgt3000Configure() < 0:
-            logging.warning('Configure failed')
-        Display.show(Message.DGT_CLOCK_VERSION, main_version=2, sub_version=2)
+            logging.warning('Configure failed - Jack connected back?')
+            Display.show(Message.JACK_CONNECTED_ERROR)
+        Display.show(Message.DGT_CLOCK_VERSION, main_version=2, sub_version=2, attached="i2c")
 
     def process_incoming_clock_forever(self):
         but = c_byte(0)
@@ -94,7 +96,7 @@ class DGTPi(DGTInterface):
         logging.debug(text)
         text = bytes(text, 'utf-8')
         with self.lock:
-            res = self.lib.dgt3000Display(text, 0x03 if beep else 0x01, 0, 0)
+            res = self.lib.dgt3000Display(text, 0x03 if beep else 0x00, 0, 0)
             if res < 0:
                 logging.warning('Display returned error %i', res)
                 res = self.lib.dgt3000Configure()
@@ -105,7 +107,7 @@ class DGTPi(DGTInterface):
             if res < 0:
                 logging.warning('Finally failed %i', res)
 
-    def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG):
+    def display_text_on_clock(self, text, text_xl=None, beep=BeepLevel.CONFIG):
         beep = self.get_beep_level(beep)
         self._display_on_dgt_pi(text, beep)
 
@@ -177,4 +179,4 @@ class DGTPi(DGTInterface):
                 if res < 0:
                     logging.warning('Finally failed')
         else:
-            logging.debug('clock isnt running - no need for stop')
+            logging.debug('clock isnt running - no need for endDisplay')

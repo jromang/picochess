@@ -14,17 +14,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import threading
 from utilities import *
 import time
 from threading import Timer, Thread
 
 
-class DGTInterface(HardwareDisplay, Thread):
+class DGTInterface(DgtDisplay, Thread):
     def __init__(self, enable_board_leds, beep_level):
         super(DGTInterface, self).__init__()
 
         self.enable_dgt_3000 = False
+        self.enable_dgt_pi = False
         self.clock_found = False
         self.enable_board_leds = enable_board_leds
         self.beep_level = int(beep_level) & 0x0f
@@ -66,7 +66,7 @@ class DGTInterface(HardwareDisplay, Thread):
     def stopped_timer(self):
         self.timer_running = False
         if self.clock_running:
-            pass
+            self.end_clock()
         else:
             logging.debug('Clock not running. Ignored duration.')
 
@@ -115,8 +115,9 @@ class DGTInterface(HardwareDisplay, Thread):
                         self.clock_found = True
                         if message.main_version == 2:
                             self.enable_dgt_3000 = True
-                        self.display_text_on_clock('pico ' + version, 'pic' + version, beep=BeepLevel.YES)
-                        time.sleep(2)
+                        if message.attached == 'i2c':
+                            self.enable_dgt_pi = True
+                        self.show(Dgt.DISPLAY_TEXT, text='pico ' + version, xl='pic' + version, beep=BeepLevel.YES, duration=2)
                         break
                     if case(Dgt.CLOCK_TIME):
                         self.time_left = message.time_left

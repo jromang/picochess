@@ -52,11 +52,11 @@ class DGThw(DGTInterface):
         logging.debug(text)
         text = bytes(text, 'utf-8')
         with self.lock:
-            res = self.lib.display(text, 0x03 if beep else 0x01, 0, 0)
+            res = self.lib.display(text, 0x03 if beep else 0x00, 0, 0)
             if res < 0:
                 logging.warning('Finally failed %i', res)
 
-    def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG):
+    def display_text_on_clock(self, text, text_xl=None, beep=BeepLevel.CONFIG):
         beep = self.get_beep_level(beep)
         self._display_on_dgt_3000(text, beep)
 
@@ -109,4 +109,4 @@ class DGThw(DGTInterface):
         if self.clock_running:
             self.lib.end_clock()
         else:
-            logging.debug('clock isnt running - no need for stop')
+            logging.debug('clock isnt running - no need for endDisplay')

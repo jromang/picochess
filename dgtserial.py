@@ -104,7 +104,7 @@ class DGTSerial(Display):
                 else:
                     text = 'BT E-board'
                     text_xl = 'ok bt'
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text=text, xl=text_xl, beep=BeepLevel.NO, duration=0.5)
+                DgtDisplay.show(Dgt.DISPLAY_TEXT, text=text, xl=text_xl, beep=BeepLevel.NO, duration=0.5)
                 break
             if case(DgtMsg.DGT_MSG_BWTIME):
                 if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
@@ -145,7 +145,7 @@ class DGTSerial(Display):
                         main_version = ack2 >> 4
                         sub_version = ack2 & 0x0f
                         logging.debug("DGT clock version %0.2f", float(str(main_version) + '.' + str(sub_version)))
-                        Display.show(Message.DGT_CLOCK_VERSION, main_version=main_version, sub_version=sub_version)
+                        Display.show(Message.DGT_CLOCK_VERSION, main_version=main_version, sub_version=sub_version, attached="serial")
                 elif any(message[:6]):
                     r_hours = message[0] & 0x0f
                     r_mins = (message[1] >> 4) * 10 + (message[1] & 0x0f)
@@ -162,7 +162,7 @@ class DGTSerial(Display):
                     logging.debug('DGT clock message ignored')
                     if self.first_clock_msg:
                         logging.warning('Force XL clock version')
-                        Display.show(Message.DGT_CLOCK_VERSION, main_version=1, sub_version=0)
+                        Display.show(Message.DGT_CLOCK_VERSION, main_version=1, sub_version=0, attached="serial")
                         self.first_clock_msg = False
                 if self.clock_lock:
                     logging.debug('DGT clock unlocked')
@@ -271,7 +271,7 @@ class DGTSerial(Display):
             except pyserial.SerialException as e:
                 logging.error(e)
                 w = self.waitchars[wait_counter]
-                HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='E-board' + w, xl='board' + w, beep=BeepLevel.NO, duration=0)
+                DgtDisplay.show(Dgt.DISPLAY_TEXT, text='E-board' + w, xl='board' + w, beep=BeepLevel.NO, duration=0)
                 wait_counter = (wait_counter + 1) % len(self.waitchars)
                 time.sleep(0.5)
         self.serial_error = False

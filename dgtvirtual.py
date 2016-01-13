@@ -63,7 +63,7 @@ class DGTVirtual(DGTInterface):
             self.time_right = 0
         l_hms = hours_minutes_seconds(self.time_left)
         r_hms = hours_minutes_seconds(self.time_right)
-        HardwareDisplay.show(Dgt.DISPLAY_TEXT, text='{} - {}'.format(l_hms, r_hms), xl=None, beep=BeepLevel.NO)
+        DgtDisplay.show(Dgt.DISPLAY_TEXT, text='{} - {}'.format(l_hms, r_hms), xl=None, beep=BeepLevel.NO)
 
     def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG, duration=0, force=False):
         # beep = self.get_beep_level(beep)

@@ -113,4 +113,4 @@ class DGTHardware(DGTInterface):
             self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_END,
                         DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         else:
-            logging.debug('clock isnt running - no need for stop')
+            logging.debug('clock isnt running - no need for endDisplay')
