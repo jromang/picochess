@@ -54,6 +54,7 @@ class DGThelp(object):
                     DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_END,
                     DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        return 0
 
     def setnrun(self, lr, lh, lm, ls, rr, rh, rm, rs):
         side = 0x04
@@ -66,3 +67,9 @@ class DGThelp(object):
                     side, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_END,
                     DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        return 0
+
+    def end_clock(self):
+        self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_END,
+                    DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        return 0

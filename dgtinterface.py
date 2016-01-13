@@ -53,6 +53,9 @@ class DGTInterface(HardwareDisplay, Thread):
     def start_clock(self, time_left, time_right, side):
         raise NotImplementedError()
 
+    def end_clock(self):
+        raise NotImplementedError()
+
     def get_beep_level(self, beeplevel):
         if beeplevel == BeepLevel.YES:
             return True

@@ -122,8 +122,8 @@ class DGTPi(DGTInterface):
         pass
 
     def stop_clock(self):
-        l_hms = hours_minutes_seconds(self.time_left)
-        r_hms = hours_minutes_seconds(self.time_right)
+        l_hms = self.time_left
+        r_hms = self.time_right
         with self.lock:
             res = self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
             if res < 0:
@@ -162,3 +162,16 @@ class DGTPi(DGTInterface):
                 logging.warning('Finally failed %i', res)
             else:
                 self.clock_running = False
+
+    def end_clock(self):
+        with self.lock:
+            res = self.lib.dgt3000EndDisplay()
+            if res < 0:
+                logging.warning('EndDisplay returned error %i', res)
+                res = self.lib.dgt3000Configure()
+                if res < 0:
+                    logging.warning('Configure also failed %i', res)
+                else:
+                    res = self.lib.dgt3000EndDisplay()
+            if res < 0:
+                logging.warning('Finally failed')

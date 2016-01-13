@@ -104,3 +104,6 @@ class DGTVirtual(DGTInterface):
 
     def clear_light_revelation_board(self):
         pass
+
+    def end_clock(self):
+        pass

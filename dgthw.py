@@ -78,8 +78,8 @@ class DGThw(DGTInterface):
             self.lib.write([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
 
     def stop_clock(self):
-        l_hms = hours_minutes_seconds(self.time_left)
-        r_hms = hours_minutes_seconds(self.time_right)
+        l_hms = self.time_left
+        r_hms = self.time_right
         with self.lock:
             res = self.lib.setnrun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
             if res < 0:
@@ -104,3 +104,6 @@ class DGThw(DGTInterface):
                 logging.warning('Finally failed %i', res)
             else:
                 self.clock_running = False
+
+    def end_clock(self):
+        self.lib.end_clock()
