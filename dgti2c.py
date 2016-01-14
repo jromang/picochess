@@ -86,6 +86,7 @@ class DGTi2c(Display):
                     text_xl = 'ok bt'
                     channel = 'BT'
                 Display.show(Message.EBOARD_VERSION, text=text, text_xl=text_xl, channel=channel)
+                Display.show(Message.WAIT_STATE)
                 break
             if case(DgtMsg.DGT_MSG_BWTIME):
                 if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message

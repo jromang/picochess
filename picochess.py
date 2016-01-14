@@ -267,7 +267,6 @@ def main():
         if interaction_mode == Mode.GAME:
             nonlocal play_mode
             play_mode = PlayMode.PLAY_WHITE if game.turn == chess.WHITE else PlayMode.PLAY_BLACK
-            Display.show(Message.WAIT_STATE)
 
     def handle_move(result, game):
         move = result.bestmove
@@ -585,10 +584,11 @@ def main():
                     time_control.reset()
                     interaction_mode = Mode.GAME
                     last_computer_fen = None
-                    set_wait_state()
                     searchmoves.reset()
                     Display.show(Message.START_NEW_GAME)
                     game_declared = False
+                    set_wait_state()
+                    Display.show(Message.WAIT_STATE)
                     break
 
                 if case(Event.STARTSTOP_THINK):  # User wants to end or start a new engine search
@@ -630,6 +630,7 @@ def main():
                     Display.show(Message.START_NEW_GAME)
                     game_declared = False
                     set_wait_state()
+                    Display.show(Message.WAIT_STATE)
                     break
 
                 if case(Event.DRAWRESIGN):
