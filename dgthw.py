@@ -16,12 +16,10 @@
 
 import logging
 from chess import Board
-from ctypes import *
-from dgtinterface import *
-from dgti2c import *
+import dgtinterface
 from dgthelp import *
 from utilities import *
-from threading import Lock, Timer
+from threading import Lock
 
 char_to_DGTXL = {
     '0': 0x01 | 0x02 | 0x20 | 0x08 | 0x04 | 0x10, '1': 0x02 | 0x04, '2': 0x01 | 0x40 | 0x08 | 0x02 | 0x10,
@@ -46,6 +44,17 @@ class DGThw(DGTInterface):
         self.lock = Lock()
         self.lib = DGThelp(device)
 
+    def _display_on_dgt_xl(self, text, beep=False):
+        while len(text) < 6:
+            text += ' '
+        if len(text) > 6:
+            logging.warning('DGT XL clock message too long [%s]', text)
+        logging.debug(text)
+        with self.lock:
+            res = self.lib.display_xl(text, 0x03 if beep else 0x00, 0, 0)
+            if res < 0:
+                logging.warning('Finally failed %i', res)
+
     def _display_on_dgt_3000(self, text, beep=False):
         if len(text) > 8:
             logging.warning('DGT 3000 clock message too long [%s]', text)
@@ -58,7 +67,12 @@ class DGThw(DGTInterface):
 
     def display_text_on_clock(self, text, text_xl=None, beep=BeepLevel.CONFIG):
         beep = self.get_beep_level(beep)
-        self._display_on_dgt_3000(text, beep)
+        if self.enable_dgt_3000:
+            self._display_on_dgt_3000(text, beep)
+        else:
+            if text_xl:
+                text = text_xl
+            self._display_on_dgt_xl(text, beep)
 
     def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):
         beep = self.get_beep_level(beep)

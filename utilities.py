@@ -113,6 +113,8 @@ class Message(AutoNumber):
     SCORE = ()  # Score
     ALTERNATIVE_MOVE = ()  # User wants another move to be calculated
     JACK_CONNECTED_ERROR = ()  # User connected fully|partly the clock via jack => ask him to remove it
+    NO_EBOARD_ERROR = ()  # User hasnt connected an E-Board
+    EBOARD_VERSION = ()  # Startup Message after a successful connection to an E-Board
 
 
 class Dgt(AutoNumber):

@@ -80,10 +80,12 @@ class DGTi2c(Display):
                 if self.device.find('rfc') == -1:
                     text = 'USB E-board'
                     text_xl = 'ok usb'
+                    channel = 'USB'
                 else:
                     text = 'BT E-board'
                     text_xl = 'ok bt'
-                DgtDisplay.show(Dgt.DISPLAY_TEXT, text=text, xl=text_xl, beep=BeepLevel.NO, duration=0.5)
+                    channel = 'BT'
+                Display.show(Message.EBOARD_VERSION, text=text, text_xl=text_xl, channel=channel)
                 break
             if case(DgtMsg.DGT_MSG_BWTIME):
                 if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
@@ -230,7 +232,7 @@ class DGTi2c(Display):
             except pyserial.SerialException as e:
                 logging.error(e)
                 w = self.waitchars[wait_counter]
-                DgtDisplay.show(Dgt.DISPLAY_TEXT, text='no E-board' + w, xl='board' + w, beep=BeepLevel.NO, duration=0)
+                Display.show(Message.NO_EBOARD_ERROR, text='no E-board' + w, text_xl='board' + w)
                 wait_counter = (wait_counter + 1) % len(self.waitchars)
                 time.sleep(0.5)
         self.serial_error = False

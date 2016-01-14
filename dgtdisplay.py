@@ -713,6 +713,11 @@ class DGTDisplay(Observable, Display, DgtDisplay, threading.Thread):
                     if case(Message.JACK_CONNECTED_ERROR):  # this will only work in case of 2 clocks connected!
                         DgtDisplay.show(Dgt.DISPLAY_TEXT, text="err jack", xl="jack", beep=BeepLevel.YES, duration=0)
                         break
+                    if case(Message.NO_EBOARD_ERROR):
+                        DgtDisplay.show(Dgt.DISPLAY_TEXT, text=message.text, xl=message.text_xl, beep=BeepLevel.NO, duration=0)
+                        break
+                    if case(Message.EBOARD_VERSION):
+                        DgtDisplay.show(Dgt.DISPLAY_TEXT, text=message.text, xl=message.text_xl, beep=BeepLevel.NO, duration=0.5)
                     if case():  # Default
                         # print(message)
                         pass

@@ -276,6 +276,12 @@ class WebDisplay(Display, threading.Thread):
         elif message == Message.JACK_CONNECTED_ERROR:
             EventHandler.write_to_clients({'event': 'Message', 'msg': 'Unplug the jack cable please!'})
 
+        elif message == Message.NO_EBOARD_ERROR:
+            EventHandler.write_to_clients({'event': 'Message', 'msg': 'Connect an E-Board please!'})
+
+        elif message == Message.EBOARD_VERSION:
+            EventHandler.write_to_clients({'event': 'Message', 'msg': 'DGT board over ' + message.channel + ' connected'})
+
         elif message == Message.DGT_CLOCK_VERSION:
             EventHandler.write_to_clients({'event': 'Message', 'msg': 'DGT clock over ' + message.attached + ' connected'})
 
