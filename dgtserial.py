@@ -14,14 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import logging
-import queue
 import serial as pyserial
-import chess
-
-from timecontrol import *
 from struct import unpack
 from utilities import *
+import time
+import threading
 
 try:
     import enum

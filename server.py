@@ -280,10 +280,10 @@ class WebDisplay(Display, threading.Thread):
             EventHandler.write_to_clients({'event': 'Message', 'msg': 'Connect an E-Board please!'})
 
         elif message == Message.EBOARD_VERSION:
-            EventHandler.write_to_clients({'event': 'Message', 'msg': 'DGT board over ' + message.channel + ' connected'})
+            EventHandler.write_to_clients({'event': 'Message', 'msg': 'DGT board connected through ' + message.channel})
 
         elif message == Message.DGT_CLOCK_VERSION:
-            EventHandler.write_to_clients({'event': 'Message', 'msg': 'DGT clock over ' + message.attached + ' connected'})
+            EventHandler.write_to_clients({'event': 'Message', 'msg': 'DGT clock connected through ' + message.attached})
 
         elif message == Message.COMPUTER_MOVE or message == Message.USER_MOVE or message == Message.REVIEW_MODE_MOVE:
             game = pgn.Game()

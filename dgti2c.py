@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import logging
 import serial as pyserial
 
 import time
@@ -56,9 +55,14 @@ class DGTi2c(Display):
         self.serial = None
         self.serial_error = False
         self.waitchars = ['/', '-', '\\', '|']
+        self.clock_lock = False  # This is for a clock connected through the board not for the dgtpi!
 
-    def write_to_board(self, message):
-        logging.debug('->DGT [%s], length %i', message[0], len(message))
+    def write_board_command(self, message):
+        mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
+        logging.debug('->DGT board [%s], length %i', mes, len(message))
+        if mes.value == DgtClk.DGT_CMD_CLOCK_ASCII.value:
+            logging.debug([chr(elem) for elem in message[4:10]])
+
         array = []
         for v in message:
             if type(v) is int:
@@ -90,6 +94,9 @@ class DGTi2c(Display):
                 logging.error(e)
                 self.serial.close()
                 self.serial = None
+        if message[0] == DgtCmd.DGT_CLOCK_MESSAGE:
+            logging.debug('DGT clock [ser]: locked')
+            self.clock_lock = True
 
     def process_board_message(self, message_id, message):
         for case in switch(message_id):
@@ -115,12 +122,12 @@ class DGTi2c(Display):
                     ack2 = ((message[4]) & 0x7f) | ((message[0] << 3) & 0x80)
                     ack3 = ((message[5]) & 0x7f) | ((message[0] << 2) & 0x80)
                     if ack0 != 0x10:
-                        logging.warning("DGT clock ACK error %s", (ack0, ack1, ack2, ack3))
+                        logging.warning("DGT clock [ser]: ACK error %s", (ack0, ack1, ack2, ack3))
                         # self.clock_lock = False  # for issue 142
                         # return
                         break
                     else:
-                        logging.debug("DGT clock ACK [%s]", DgtClk(ack1))
+                        logging.debug("DGT clock [ser]: ACK okay [%s]", DgtClk(ack1))
                     if ack1 == 0x88:
                         # this are the other (ack2-ack3) codes
                         # 6-49 34-52 18-51 10-50 66-53 | button 0-4 (single)
@@ -129,24 +136,24 @@ class DGTi2c(Display):
                         #                  26-50 82-53 | button 2 + 3-4
                         #                        74-53 | button 3 + 4
                         if ack3 == 49:
-                            logging.info("Button 0 pressed")
+                            logging.info("DGT clock [ser]: button 0 pressed")
                             Display.show(Message.DGT_BUTTON, button=0)
                         if ack3 == 52:
-                            logging.info("Button 1 pressed")
+                            logging.info("DGT clock [ser]: button 1 pressed")
                             Display.show(Message.DGT_BUTTON, button=1)
                         if ack3 == 51:
-                            logging.info("Button 2 pressed")
+                            logging.info("DGT clock [ser]: button 2 pressed")
                             Display.show(Message.DGT_BUTTON, button=2)
                         if ack3 == 50:
-                            logging.info("Button 3 pressed")
+                            logging.info("DGT clock [ser]: button 3 pressed")
                             Display.show(Message.DGT_BUTTON, button=3)
                         if ack3 == 53:
-                            logging.info("Button 4 pressed")
+                            logging.info("DGT clock [ser]: button 4 pressed")
                             Display.show(Message.DGT_BUTTON, button=4)
                     if ack1 == 0x09:
                         main_version = ack2 >> 4
                         sub_version = ack2 & 0x0f
-                        logging.debug("DGT clock version %0.2f", float(str(main_version) + '.' + str(sub_version)))
+                        logging.debug("DGT clock [ser]: version %0.2f", float(str(main_version) + '.' + str(sub_version)))
                         Display.show(Message.DGT_CLOCK_VERSION, main_version=main_version, sub_version=sub_version, attached="serial")
                 elif any(message[:6]):
                     r_hours = message[0] & 0x0f
@@ -157,10 +164,13 @@ class DGTi2c(Display):
                     l_secs = (message[5] >> 4) * 10 + (message[5] & 0x0f)
                     tr = [r_hours, r_mins, r_secs]
                     tl = [l_hours, l_mins, l_secs]
-                    logging.info('DGT clock time received {} : {}'.format(tl, tr))
+                    logging.info('DGT clock [ser]: time received {} : {}'.format(tl, tr))
                     Display.show(Message.DGT_CLOCK_TIME, time_left=tl, time_right=tr)
                 else:
-                    logging.debug('DGT clock (null) message ignored')
+                    logging.debug('DGT clock [ser]: null message ignored')
+                if self.clock_lock:
+                    logging.debug('DGT clock [ser]: unlocked')
+                    self.clock_lock = False
                 break
             if case(DgtMsg.DGT_MSG_BOARD_DUMP):
                 board = ''
@@ -191,7 +201,7 @@ class DGTi2c(Display):
                 Display.show(Message.DGT_FEN, fen=fen)
                 break
             if case(DgtMsg.DGT_MSG_FIELD_UPDATE):
-                self.write_to_board([DgtCmd.DGT_SEND_BRD])  # Ask for the board when a piece moved
+                self.write_board_command([DgtCmd.DGT_SEND_BRD])  # Ask for the board when a piece moved
                 break
             if case(DgtMsg.DGT_MSG_SERIALNR):
                 # logging.debug(message)
@@ -214,9 +224,9 @@ class DGTi2c(Display):
         message_length = (header[1] << 7) + header[2] - 3
 
         try:
-            logging.debug("<-DGT [%s], length %i", DgtMsg(message_id), message_length)
+            logging.debug("<-DGT board [%s], length %i", DgtMsg(message_id), message_length)
         except ValueError:
-            logging.warning("Unknown message value %i", message_id)
+            logging.warning("Unknown DGT message value %i", message_id)
         if message_length:
             message = unpack('>' + str(message_length) + 'B', self.serial.read(message_length))
             self.process_board_message(message_id, message)
@@ -235,9 +245,9 @@ class DGTi2c(Display):
                 pass
 
     def startup_board(self):
-        self.write_to_board([DgtCmd.DGT_SEND_UPDATE_NICE])  # Set the board update mode
-        self.write_to_board([DgtCmd.DGT_SEND_VERSION])  # Get board version
-        self.write_to_board([DgtCmd.DGT_SEND_BRD])  # Update the board
+        self.write_board_command([DgtCmd.DGT_SEND_UPDATE_NICE])  # Set the board update mode
+        self.write_board_command([DgtCmd.DGT_SEND_VERSION])  # Get board version
+        self.write_board_command([DgtCmd.DGT_SEND_BRD])  # Update the board
 
     def setup_serial(self):
         wait_counter = 0

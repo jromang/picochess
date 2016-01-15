@@ -14,11 +14,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import logging
 from chess import Board
-from ctypes import *
 from dgtinterface import *
 from dgti2c import *
+from ctypes import *
 from utilities import *
 from threading import Lock, Timer
 
@@ -30,7 +29,6 @@ class DGTPi(DGTInterface):
         self.dgti2c.run()
 
         self.lock = Lock()
-        # load the dgt3000 SO-file
         self.lib = cdll.LoadLibrary("/home/pi/20151229/dgt3000.so")
 
         self.startup_clock()
@@ -58,26 +56,26 @@ class DGTPi(DGTInterface):
                 if self.lib.dgt3000GetButton(pointer(but), pointer(buttime)) == 1:
                     ack3 = but.value
                     if ack3 == 0x01:
-                        logging.info("Button 0 pressed")
+                        logging.info("DGT clock [i2c]: button 0 pressed")
                         Display.show(Message.DGT_BUTTON, button=0)
                     if ack3 == 0x02:
-                        logging.info("Button 1 pressed")
+                        logging.info("DGT clock [i2c]: button 1 pressed")
                         Display.show(Message.DGT_BUTTON, button=1)
                     if ack3 == 0x04:
-                        logging.info("Button 2 pressed")
+                        logging.info("DGT clock [i2c]: button 2 pressed")
                         Display.show(Message.DGT_BUTTON, button=2)
                     if ack3 == 0x08:
-                        logging.info("Button 3 pressed")
+                        logging.info("DGT clock [i2c]: button 3 pressed")
                         Display.show(Message.DGT_BUTTON, button=3)
                     if ack3 == 0x10:
-                        logging.info("Button 4 pressed")
+                        logging.info("DGT clock [i2c]: button 4 pressed")
                         Display.show(Message.DGT_BUTTON, button=4)
                     if ack3 == 0x20:
-                        logging.info("Button on/off pressed")
+                        logging.info("DGT clock [i2c]: button on/off pressed")
                     if ack3 == 0x40:
-                        logging.info("Lever pressed > right side down")
+                        logging.info("DGT clock [i2c]: lever pressed > right side down")
                     if ack3 == -0x40:
-                        logging.info("Lever pressed > left side down")
+                        logging.info("DGT clock [i2c]: lever pressed > left side down")
 
                 # get time events
                 self.lib.dgt3000GetTime(clktime)
@@ -87,7 +85,7 @@ class DGTPi(DGTInterface):
             if counter == 1:
                 Display.show(Message.DGT_CLOCK_TIME, time_left=times[:3], time_right=times[3:])
             if counter == 3:  # issue 150 - force to write something to the board => check for alive connection!
-                self.dgti2c.write_to_board([DgtCmd.DGT_RETURN_SERIALNR])  # the code doesnt really matter ;-)
+                self.dgti2c.write_board_command([DgtCmd.DGT_RETURN_SERIALNR])  # the code doesnt really matter ;-)
             time.sleep(0.25)
 
     def _display_on_dgt_pi(self, text, beep=False):
@@ -179,4 +177,4 @@ class DGTPi(DGTInterface):
                 if res < 0:
                     logging.warning('Finally failed')
         else:
-            logging.debug('clock isnt running - no need for endDisplay')
+            logging.debug('DGT clock isnt running - no need for endDisplay')

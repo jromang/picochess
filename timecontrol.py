@@ -17,7 +17,6 @@
 import chess
 import time
 import threading
-import logging
 from utilities import *
 import copy
 

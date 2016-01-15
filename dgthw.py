@@ -14,9 +14,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import logging
 from chess import Board
-import dgtinterface
+from dgtinterface import *
+from dgti2c import *
 from dgthelp import *
 from utilities import *
 from threading import Lock
@@ -25,10 +25,19 @@ from threading import Lock
 class DGThw(DGTInterface):
     def __init__(self, device, enable_board_leds, beep_level):
         super(DGThw, self).__init__(enable_board_leds, beep_level)
-        self.lock = Lock()
-        self.lib = DGThelp(device)
+        self.dgti2c = DGTi2c(device)
+        self.dgti2c.run()
 
+        self.lock = Lock()
+        self.lib = DGThelp(self.dgti2c)
+
+        self.startup_clock()
         self.enable_dgt_3000 = True  # TEST!
+
+    def startup_clock(self):
+        # Get clock version
+        self.dgti2c.write_board_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                                         DgtClk.DGT_CMD_CLOCK_VERSION, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
 
     def _display_on_dgt_xl(self, text, beep=False):
         while len(text) < 6:
@@ -115,4 +124,4 @@ class DGThw(DGTInterface):
         if self.clock_running:
             self.lib.end_clock()
         else:
-            logging.debug('clock isnt running - no need for endDisplay')
+            logging.debug('DGT clock isnt running - no need for endDisplay')

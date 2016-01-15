@@ -14,39 +14,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import logging
-from chess import Board
-from ctypes import *
-from dgtinterface import *
-from dgti2c import *
 from utilities import *
-from threading import Lock, Timer
 
 
 class DGThelp(object):
-    def __init__(self, device):
+    # This file simulates DGT's SO-lib File with similar api
+
+    def __init__(self, dgti2c):
         super(DGThelp, self).__init__()
-        self.dgti2c = DGTi2c(device)
-        self.dgti2c.run()
+        self.dgti2c = dgti2c
 
-        self.clock_lock = False  # from dgtserial.py
-        self.startup_clock()
-
-    def write(self, message):
-        self.send_command(message)
-
-    def send_command(self, message):
-        mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
-        if mes.value == DgtClk.DGT_CMD_CLOCK_ASCII.value:
-            logging.debug(message[4:10])
-        self.dgti2c.write_to_board(message)
-        if message[0] == DgtCmd.DGT_CLOCK_MESSAGE:
-            logging.debug('DGT clock locked')
-            self.clock_lock = True
-
-    def startup_clock(self):
-        self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
-                    DgtClk.DGT_CMD_CLOCK_VERSION, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])  # Get clock version
+    def write(self, command):
+        self.dgti2c.write_board_command(command)
 
     def display(self, text, beep, ld, rd):
         self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0c, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_ASCII,
