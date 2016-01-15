@@ -39,7 +39,8 @@ from keyboardinput import KeyboardInput, TerminalDisplay
 from pgn import PgnDisplay
 from server import WebServer
 
-from dgthardware import DGTHardware
+# from dgthardware import DGTHardware
+from dgthw import DGThw
 from dgtpi import DGTPi
 from dgtdisplay import DGTDisplay
 from dgtvirtual import DGTVirtual
@@ -398,7 +399,8 @@ def main():
         if args.dgtpi:
             DGTPi(args.dgt_port, args.enable_dgt_board_leds, args.beep_level).start()
         else:
-            DGTHardware(args.dgt_port, args.enable_dgt_board_leds, args.beep_level).start()
+            # DGTHardware(args.dgt_port, args.enable_dgt_board_leds, args.beep_level).start()
+            DGThw(args.dgt_port, args.enable_dgt_board_leds, args.beep_level).start()
     else:
         # Enable keyboard input and terminal display
         logging.warning("No DGT board port provided")
