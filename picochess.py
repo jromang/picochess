@@ -24,11 +24,9 @@ import chess
 import chess.polyglot
 import chess.gaviota
 import chess.uci
-import logging
 import threading
 import copy
 import gc
-import time
 
 import uci
 import chesstalker.chesstalker
@@ -39,7 +37,6 @@ from keyboardinput import KeyboardInput, TerminalDisplay
 from pgn import PgnDisplay
 from server import WebServer
 
-# from dgthardware import DGTHardware
 from dgthw import DGThw
 from dgtpi import DGTPi
 from dgtdisplay import DGTDisplay
@@ -359,7 +356,7 @@ def main():
     parser.add_argument("-dgt3000", "--dgt-3000-clock", action='store_true', help="do NOT use it anymore (DEPRECATED!)")
     parser.add_argument("-nobeep", "--disable-dgt-clock-beep", action='store_true',
                         help="do NOT use it anymore (DEPRECATED!)")
-    parser.add_argument("-beep", "--beep-level", type=int, help="sets a beep level from 0 (=no beeps) to 15(=all beeps)",
+    parser.add_argument("-beep", "--beep-level", type=int, help="sets a beep level from 0(=no beeps) to 15(=all beeps)",
                         default=0x0f)
     parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
     parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
@@ -390,7 +387,7 @@ def main():
             logging.error('Tablebases gaviota doesnt exist')
             gaviota = None
 
-    # This class talks to DGTHardware/DGTPi or DGTVirtual
+    # This class talks to DGTHw/DGTPi or DGTVirtual
     DGTDisplay(args.disable_ok_move).start()
 
     if args.dgt_port:
@@ -399,20 +396,19 @@ def main():
         if args.dgtpi:
             DGTPi(args.dgt_port, args.enable_dgt_board_leds, args.beep_level).start()
         else:
-            # DGTHardware(args.dgt_port, args.enable_dgt_board_leds, args.beep_level).start()
             DGThw(args.dgt_port, args.enable_dgt_board_leds, args.beep_level).start()
     else:
         # Enable keyboard input and terminal display
-        logging.warning("No DGT board port provided")
+        logging.warning("Starting picochess with virtual DGT board")
         KeyboardInput().start()
         TerminalDisplay().start()
         DGTVirtual(args.enable_dgt_board_leds, args.beep_level).start()
 
     # Save to PGN
     PgnDisplay(
-        args.pgn_file, net=args.enable_internet, email=args.email, fromINIMailGun_Key=args.mailgun_key,
-        fromIniSmtp_Server=args.smtp_server, fromINISmtp_User=args.smtp_user,
-        fromINISmtp_Pass=args.smtp_pass, fromINISmtp_Enc=args.smtp_encryption).start()
+        args.pgn_file, net=args.enable_internet, email=args.email, mailgun_key=args.mailgun_key,
+        smtp_server=args.smtp_server, smtp_user=args.smtp_user,
+        smtp_pass=args.smtp_pass, smtp_encryption=args.smtp_encryption).start()
     if args.pgn_user:
         user_name = args.pgn_user
     else:
@@ -677,7 +673,7 @@ def main():
                             logging.debug('Could not convert score ' + score)
                         except TypeError:
                             score = 'm {0}'.format(event.mate)
-                    Display.show(Message.SCORE, score=score, mate=event.mate, mode=interaction_mode)
+                    Display.show(Message.NEW_SCORE, score=score, mate=event.mate, mode=interaction_mode)
                     break
 
                 if case(Event.SET_INTERACTION_MODE):

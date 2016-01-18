@@ -67,12 +67,12 @@ class Informer(chess.uci.InfoHandler, Observable):
             logging.debug('pv-lock still active')
             return False
 
-    def scoreX(self, cp, mate, lowerbound, upperbound):
+    def score(self, cp, mate, lowerbound, upperbound):
         if self._allow_fire_score():
             self.fire(Event.NEW_SCORE, score=cp, mate=mate)
         super().score(cp, mate, lowerbound, upperbound)
 
-    def pvX(self, moves):
+    def pv(self, moves):
         if self._allow_fire_pv():
             self.fire(Event.NEW_PV, pv=moves)
         super().pv(moves)

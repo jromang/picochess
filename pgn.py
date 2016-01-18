@@ -29,9 +29,9 @@ from email.mime.text import MIMEText
 
 
 class PgnDisplay(Display, threading.Thread):
-    def __init__(self, pgn_file_name, net, email=None, fromINIMailGun_Key=None,
-                    fromIniSmtp_Server=None, fromINISmtp_User=None,
-                    fromINISmtp_Pass=None, fromINISmtp_Enc=False):
+    def __init__(self, pgn_file_name, net, email=None, mailgun_key=None,
+                 smtp_server=None, smtp_user=None,
+                 smtp_pass=None, smtp_encryption=False):
         super(PgnDisplay, self).__init__()
         self.file_name = pgn_file_name
         self.engine_name = ''
@@ -44,13 +44,13 @@ class PgnDisplay(Display, threading.Thread):
         else:
             self.email = False
         # store information for SMTP based mail delivery
-        self.smtp_server = fromIniSmtp_Server
-        self.smtp_encryption = fromINISmtp_Enc
-        self.smtp_user = fromINISmtp_User
-        self.smtp_pass = fromINISmtp_Pass
+        self.smtp_server = smtp_server
+        self.smtp_encryption = smtp_encryption
+        self.smtp_user = smtp_user
+        self.smtp_pass = smtp_pass
         # store information for mailgun mail delivery
-        if email and fromINIMailGun_Key:
-            self.mailgun_key = base64.b64decode(str.encode(fromINIMailGun_Key)).decode("utf-8")
+        if email and mailgun_key:
+            self.mailgun_key = base64.b64decode(str.encode(mailgun_key)).decode("utf-8")
         else:
             self.mailgun_key = False
 

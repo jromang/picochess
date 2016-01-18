@@ -35,7 +35,7 @@ class DGTInterface(DgtDisplay, Thread):
         self.timer_running = False
         self.clock_running = False
 
-    def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG):
+    def display_text_on_clock(self, text, text_xl=None, beep=BeepLevel.CONFIG):
         raise NotImplementedError()
 
     def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):

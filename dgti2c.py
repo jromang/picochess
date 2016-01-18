@@ -48,14 +48,16 @@ piece_to_char = {
 }
 
 
-class DGTi2c(Display):
+class DGTi2c(object):
     def __init__(self, device):
         super(DGTi2c, self).__init__()
         self.device = device
         self.serial = None
         self.serial_error = False
         self.waitchars = ['/', '-', '\\', '|']
-        self.clock_lock = False  # This is for a clock connected through the board not for the dgtpi!
+        # the next two are only used for "not dgtpi" mode
+        self.clock_lock = False  # serial connected clock is locked
+        self.last_clock_command = []  # Used for resend last (failed) clock command
 
     def write_board_command(self, message):
         mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
@@ -95,8 +97,12 @@ class DGTi2c(Display):
                 self.serial.close()
                 self.serial = None
         if message[0] == DgtCmd.DGT_CLOCK_MESSAGE:
-            logging.debug('DGT clock [ser]: locked')
-            self.clock_lock = True
+            self.last_clock_command = message
+            if self.clock_lock:
+                logging.warning('DGT clock [ser]: already locked - strange!')
+            else:
+                logging.debug('DGT clock [ser]: locked')
+                self.clock_lock = True
 
     def process_board_message(self, message_id, message):
         for case in switch(message_id):
@@ -123,8 +129,9 @@ class DGTi2c(Display):
                     ack3 = ((message[5]) & 0x7f) | ((message[0] << 2) & 0x80)
                     if ack0 != 0x10:
                         logging.warning("DGT clock [ser]: ACK error %s", (ack0, ack1, ack2, ack3))
-                        # self.clock_lock = False  # for issue 142
-                        # return
+                        if self.last_clock_command:
+                            self.write_board_command(self.last_clock_command)
+                            self.last_clock_command = []  # only resend once
                         break
                     else:
                         logging.debug("DGT clock [ser]: ACK okay [%s]", DgtClk(ack1))
@@ -204,7 +211,7 @@ class DGTi2c(Display):
                 self.write_board_command([DgtCmd.DGT_SEND_BRD])  # Ask for the board when a piece moved
                 break
             if case(DgtMsg.DGT_MSG_SERIALNR):
-                # logging.debug(message)
+                logging.debug(message)
                 break
             if case():  # Default
                 logging.warning("DGT message not handled [%s]", DgtMsg(message_id))

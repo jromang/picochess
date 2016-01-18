@@ -18,11 +18,11 @@ from utilities import *
 import time
 
 
-class DGThelp(object):
+class DGTlib(object):
     # This file simulates DGT's SO-lib File with similar api
 
     def __init__(self, dgti2c):
-        super(DGThelp, self).__init__()
+        super(DGTlib, self).__init__()
         self.dgti2c = dgti2c
 
     def write(self, command):

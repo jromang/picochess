@@ -116,7 +116,7 @@ dgt_xl_time_control_list = ["mov  1", "mov  3", "mov  5", "mov 10", "mov 15", "m
                             "f 3  2", "f 4  2", "f 5  3", "f 5  5", "f25  5", "f15  5", "f90 30"]
 
 
-class DGTDisplay(Observable, Display, DgtDisplay, threading.Thread):
+class DGTDisplay(Observable, Display, threading.Thread):
     def __init__(self, ok_move_messages):
         super(DGTDisplay, self).__init__()
         self.ok_moves_messages = ok_move_messages
@@ -576,7 +576,7 @@ class DGTDisplay(Observable, Display, DgtDisplay, threading.Thread):
                         pm = message.play_mode.value
                         DgtDisplay.show(Dgt.DISPLAY_TEXT, text=pm, xl=pm[:6], beep=BeepLevel.BUTTON, duration=1)
                         break
-                    if case(Message.SCORE):
+                    if case(Message.NEW_SCORE):
                         self.score = message.score
                         self.mate = message.mate
                         if message.mode == Mode.KIBITZ:

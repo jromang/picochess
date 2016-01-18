@@ -110,7 +110,7 @@ class Message(AutoNumber):
 
     SYSTEM_INFO = ()  # Information about picochess such as version etc
     STARTUP_INFO = ()  # Information about the startup options
-    SCORE = ()  # Score
+    NEW_SCORE = ()  # Score
     ALTERNATIVE_MOVE = ()  # User wants another move to be calculated
     JACK_CONNECTED_ERROR = ()  # User connected fully|partly the clock via jack => ask him to remove it
     NO_EBOARD_ERROR = ()  # User hasnt connected an E-Board

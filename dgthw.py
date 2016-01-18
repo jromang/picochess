@@ -17,7 +17,7 @@
 from chess import Board
 from dgtinterface import *
 from dgti2c import *
-from dgthelp import *
+from dgtlib import *
 from utilities import *
 from threading import Lock
 
@@ -29,7 +29,7 @@ class DGThw(DGTInterface):
         self.dgti2c.run()
 
         self.lock = Lock()
-        self.lib = DGThelp(self.dgti2c)
+        self.lib = DGTlib(self.dgti2c)
 
         self.startup_clock()
         self.enable_dgt_3000 = True  # TEST!
