@@ -15,6 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from utilities import *
+import time
 
 
 class DGThelp(object):
@@ -25,6 +26,9 @@ class DGThelp(object):
         self.dgti2c = dgti2c
 
     def write(self, command):
+        if command[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value:
+            while self.dgti2c.clock_lock:
+                time.sleep(0.1)
         self.dgti2c.write_board_command(command)
 
     def display(self, text, beep, ld, rd):
