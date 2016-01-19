@@ -35,15 +35,11 @@ class DGTlib(object):
         self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0c, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_ASCII,
                     text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], beep,
                     DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
-        self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_END,
-                    DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         return 0
 
     def display_xl(self, text, beep, ld, rd):
         self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0b, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_DISPLAY,
                     text[2], text[1], text[0], text[5], text[4], text[3], 0x00, beep,
-                    DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
-        self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_END,
                     DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         return 0
 
