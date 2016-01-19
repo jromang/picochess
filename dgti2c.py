@@ -99,7 +99,7 @@ class DGTi2c(object):
         if message[0] == DgtCmd.DGT_CLOCK_MESSAGE:
             self.last_clock_command = message
             if self.clock_lock:
-                logging.warning('DGT clock [ser]: already locked - strange!')
+                logging.warning('DGT clock [ser]: already locked. Maybe a "resend"?')
             else:
                 logging.debug('DGT clock [ser]: locked')
                 self.clock_lock = True
@@ -130,6 +130,7 @@ class DGTi2c(object):
                     if ack0 != 0x10:
                         logging.warning("DGT clock [ser]: ACK error %s", (ack0, ack1, ack2, ack3))
                         if self.last_clock_command:
+                            logging.debug('Resending failed DGT clock message [%s]', self.last_clock_command)
                             self.write_board_command(self.last_clock_command)
                             self.last_clock_command = []  # only resend once
                         break
