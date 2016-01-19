@@ -89,31 +89,37 @@ class ChessTalker(Display, threading.Thread):
                 system_voice = self.system_voice()
 
                 if messageType == "Message":
-                    if message == Message.START_NEW_GAME and system_voice:
+                    if message == MessageApi.START_NEW_GAME and system_voice:
                         logging.debug('Announcing START_NEW_GAME')
                         system_voice.say_new_game()
-                    elif message == Message.COMPUTER_MOVE and message.result.bestmove and message.game \
+
+                    elif message == MessageApi.COMPUTER_MOVE and message.result.bestmove and message.game \
                             and str(message.result.bestmove) != previous_move and self.computer_chesstalker_voice is not None:
                         logging.debug('Announcing COMPUTER_MOVE [%s]', message.result.bestmove)
                         local_game = copy.deepcopy(message.game)
                         self.computer_chesstalker_voice.say_move(message.result.bestmove, local_game)
                         previous_move = str(message.result.bestmove)
-                    elif (message == Message.USER_MOVE or message == Message.REVIEW_MODE_MOVE) and message.move \
+
+                    elif (message == MessageApi.USER_MOVE or message == MessageApi.REVIEW_MODE_MOVE) and message.move \
                             and message.game and str(message.move) != previous_move and self.user_chesstalker_voice is not None:
                         logging.debug('Announcing USER_MOVE [%s]', message.move)
                         local_game = copy.deepcopy(message.game)
                         self.user_chesstalker_voice.say_move(message.move, local_game)
                         previous_move = str(message.move)
-                    elif message == Message.LEVEL:
+
+                    elif message == MessageApi.LEVEL:
                         logging.debug('Announcing LEVEL [%s]', message.level)
                         system_voice.say_level(message.level)
-                    elif message == Message.INTERACTION_MODE:
+
+                    elif message == MessageApi.INTERACTION_MODE:
                         logging.debug('Announcing SET_MODE [%s]', message.mode)
                         system_voice.say_mode(message.mode)
-                    elif message == Message.OPENING_BOOK:
+
+                    elif message == MessageApi.OPENING_BOOK:
                         logging.debug('Announcing OPENING_BOOK')
                         system_voice.say_opening_book(message.book[0])
-                    elif message == Message.TIME_CONTROL:
+
+                    elif message == MessageApi.TIME_CONTROL:
                         logging.debug('Announcing SET_TIME_CONTROL')
                         if message.time_control_string.startswith("mov"):
                             time_control_value = int(message.time_control_string[3:].strip())
@@ -129,31 +135,38 @@ class ChessTalker(Display, threading.Thread):
                             # logging.debug('minutes_per_game: ' + str(minutes_per_game))
                             # logging.debug('fischer_increment: ' + str(fischer_increment))
                             system_voice.say_time_control_fischer(minutes_per_game, fischer_increment)
-                    elif message == Message.GAME_ENDS and message.result == GameResult.OUT_OF_TIME:
+
+                    elif message == MessageApi.GAME_ENDS and message.result == GameResult.OUT_OF_TIME:
                         logging.debug('Announcing GAME_ENDS/TIME_CONTROL')
                         color = ChessTalkerVoice.COLOR_WHITE if message.color == chess.WHITE else ChessTalkerVoice.COLOR_BLACK
                         system_voice.say_out_of_time(color)
-                    elif message == Message.GAME_ENDS and message.result == GameResult.INSUFFICIENT_MATERIAL:
+
+                    elif message == MessageApi.GAME_ENDS and message.result == GameResult.INSUFFICIENT_MATERIAL:
                         pass
                         # logging.debug('Announcing GAME_ENDS/INSUFFICIENT_MATERIAL')
                         # system_voice.say_draw_insufficient_material()
-                    elif message == Message.GAME_ENDS and message.result == GameResult.MATE:
+                    elif message == MessageApi.GAME_ENDS and message.result == GameResult.MATE:
                         pass
                         # logging.debug('Announcing GAME_ENDS/MATE')
-                    elif message == Message.GAME_ENDS and message.result == GameResult.STALEMATE:
+
+                    elif message == MessageApi.GAME_ENDS and message.result == GameResult.STALEMATE:
                         pass
                         # logging.debug('Announcing GAME_ENDS/STALEMATE')
                         # system_voice.say_stalemate()
-                    elif message == Message.GAME_ENDS and message.result == GameResult.ABORT:
+
+                    elif message == MessageApi.GAME_ENDS and message.result == GameResult.ABORT:
                         logging.debug('Announcing GAME_ENDS/ABORT')
                         system_voice.say_game_aborted()
-                    elif message == Message.GAME_ENDS and message.result == GameResult.DRAW:
+
+                    elif message == MessageApi.GAME_ENDS and message.result == GameResult.DRAW:
                         logging.debug('Announcing DRAW')
                         system_voice.say_draw()
-                    elif message == Message.GAME_ENDS and message.result == GameResult.RESIGN_WHITE:
+
+                    elif message == MessageApi.GAME_ENDS and message.result == GameResult.RESIGN_WHITE:
                         logging.debug('Announcing WHITE WIN')
                         system_voice.say_winner(ChessTalkerVoice.COLOR_WHITE)
-                    elif message == Message.GAME_ENDS and message.result == GameResult.RESIGN_BLACK:
+
+                    elif message == MessageApi.GAME_ENDS and message.result == GameResult.RESIGN_BLACK:
                         logging.debug('Announcing BLACK WIN')
                         system_voice.say_winner(ChessTalkerVoice.COLOR_BLACK)
                 elif messageType == "Event":

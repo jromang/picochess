@@ -22,7 +22,7 @@ import chess.uci
 from threading import Timer
 
 
-class Informer(chess.uci.InfoHandler, Observable):
+class Informer(chess.uci.InfoHandler):
     def __init__(self):
         super(Informer, self).__init__()
         self.dep = 0
@@ -69,16 +69,16 @@ class Informer(chess.uci.InfoHandler, Observable):
 
     def score(self, cp, mate, lowerbound, upperbound):
         if self._allow_fire_score():
-            self.fire(Event.NEW_SCORE, score=cp, mate=mate)
+            Observable.fire(Event.NEW_SCORE, score=cp, mate=mate)
         super().score(cp, mate, lowerbound, upperbound)
 
     def pv(self, moves):
         if self._allow_fire_pv():
-            self.fire(Event.NEW_PV, pv=moves)
+            Observable.fire(Event.NEW_PV, pv=moves)
         super().pv(moves)
 
 
-class Engine(Display):
+class Engine(object):
 
     def __init__(self, path, hostname=None, username=None, key_file=None, password=None):
         super(Engine, self).__init__()
@@ -189,7 +189,7 @@ class Engine(Display):
         self.show_best = True
         time_dict['async_callback'] = self.callback
 
-        Display.show(Message.SEARCH_STARTED, engine_status=self.status)
+        Display.show(Message.SEARCH_STARTED(engine_status=self.status))
         self.future = self.engine.go(**time_dict)
         return self.future
 
@@ -199,13 +199,13 @@ class Engine(Display):
         self.status = EngineStatus.PONDER
         self.show_best = False
 
-        Display.show(Message.SEARCH_STARTED, engine_status=self.status)
+        Display.show(Message.SEARCH_STARTED(engine_status=self.status))
         self.future = self.engine.go(ponder=True, infinite=True, async_callback=self.callback)
         return self.future
 
     def callback(self, command):
         self.res = command.result()
-        Display.show(Message.SEARCH_STOPPED, engine_status=self.status, result=self.res)
+        Display.show(Message.SEARCH_STOPPED(engine_status=self.status, result=self.res))
         if self.show_best:
             Observable.fire(Event.BEST_MOVE, result=self.res, inbook=False)
         else:

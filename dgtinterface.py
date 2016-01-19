@@ -77,7 +77,7 @@ class DGTInterface(DgtDisplay, Thread):
                 message = self.dgt_queue.get()
                 logging.debug("Read dgt from queue: %s", message)
                 for case in switch(message):
-                    if case(Dgt.DISPLAY_MOVE):
+                    if case(DgtApi.DISPLAY_MOVE):
                         message.force = False  # TEST!
                         while self.timer_running and not message.force:
                             time.sleep(0.1)
@@ -87,7 +87,7 @@ class DGTInterface(DgtDisplay, Thread):
                             self.timer_running = True
                         self.display_move_on_clock(message.move, message.fen, message.beep)
                         break
-                    if case(Dgt.DISPLAY_TEXT):
+                    if case(DgtApi.DISPLAY_TEXT):
                         message.force = False  # TEST!
                         while self.timer_running and not message.force:
                             time.sleep(0.1)
@@ -97,29 +97,29 @@ class DGTInterface(DgtDisplay, Thread):
                             self.timer_running = True
                         self.display_text_on_clock(message.text, message.xl, message.beep)
                         break
-                    if case(Dgt.LIGHT_CLEAR):
+                    if case(DgtApi.LIGHT_CLEAR):
                         self.clear_light_revelation_board()
                         break
-                    if case(Dgt.LIGHT_SQUARES):
+                    if case(DgtApi.LIGHT_SQUARES):
                         self.light_squares_revelation_board(message.squares)
                         break
-                    if case(Dgt.CLOCK_STOP):
+                    if case(DgtApi.CLOCK_STOP):
                         self.clock_running = False
                         self.stop_clock()
                         break
-                    if case(Dgt.CLOCK_START):
+                    if case(DgtApi.CLOCK_START):
                         self.clock_running = True
                         self.start_clock(message.time_left, message.time_right, message.side)
                         break
-                    if case(Dgt.CLOCK_VERSION):
+                    if case(DgtApi.CLOCK_VERSION):
                         self.clock_found = True
                         if message.main_version == 2:
                             self.enable_dgt_3000 = True
                         if message.attached == 'i2c':
                             self.enable_dgt_pi = True
-                        self.show(Dgt.DISPLAY_TEXT, text='pico ' + version, xl='pic' + version, beep=BeepLevel.YES, duration=2)
+                        self.show(DgtApi.DISPLAY_TEXT, text='pico ' + version, xl='pic' + version, beep=BeepLevel.YES, duration=2)
                         break
-                    if case(Dgt.CLOCK_TIME):
+                    if case(DgtApi.CLOCK_TIME):
                         self.time_left = message.time_left
                         self.time_right = message.time_right
                         break

@@ -38,12 +38,12 @@ class DGTPi(DGTInterface):
     def startup_clock(self):
         while self.lib.dgt3000Init() < 0:
             logging.warning('Init failed - Jack half connected?')
-            Display.show(Message.JACK_CONNECTED_ERROR)
+            Display.show(Message.JACK_CONNECTED_ERROR())
             time.sleep(0.5)  # dont flood the log
         if self.lib.dgt3000Configure() < 0:
             logging.warning('Configure failed - Jack connected back?')
-            Display.show(Message.JACK_CONNECTED_ERROR)
-        Display.show(Message.DGT_CLOCK_VERSION, main_version=2, sub_version=2, attached="i2c")
+            Display.show(Message.JACK_CONNECTED_ERROR())
+        Display.show(Message.DGT_CLOCK_VERSION(main_version=2, sub_version=2, attached="i2c"))
 
     def process_incoming_clock_forever(self):
         but = c_byte(0)
@@ -57,19 +57,19 @@ class DGTPi(DGTInterface):
                     ack3 = but.value
                     if ack3 == 0x01:
                         logging.info("DGT clock [i2c]: button 0 pressed")
-                        Display.show(Message.DGT_BUTTON, button=0)
+                        Display.show(Message.DGT_BUTTON(button=0))
                     if ack3 == 0x02:
                         logging.info("DGT clock [i2c]: button 1 pressed")
-                        Display.show(Message.DGT_BUTTON, button=1)
+                        Display.show(Message.DGT_BUTTON(button=1))
                     if ack3 == 0x04:
                         logging.info("DGT clock [i2c]: button 2 pressed")
-                        Display.show(Message.DGT_BUTTON, button=2)
+                        Display.show(Message.DGT_BUTTON(button=2))
                     if ack3 == 0x08:
                         logging.info("DGT clock [i2c]: button 3 pressed")
-                        Display.show(Message.DGT_BUTTON, button=3)
+                        Display.show(Message.DGT_BUTTON(button=3))
                     if ack3 == 0x10:
                         logging.info("DGT clock [i2c]: button 4 pressed")
-                        Display.show(Message.DGT_BUTTON, button=4)
+                        Display.show(Message.DGT_BUTTON(button=4))
                     if ack3 == 0x20:
                         logging.info("DGT clock [i2c]: button on/off pressed")
                     if ack3 == 0x40:
@@ -83,7 +83,7 @@ class DGTPi(DGTInterface):
             times = list(clktime.raw)
             counter = (counter + 1) % 4
             if counter == 1:
-                Display.show(Message.DGT_CLOCK_TIME, time_left=times[:3], time_right=times[3:])
+                Display.show(Message.DGT_CLOCK_TIME(time_left=times[:3], time_right=times[3:]))
             if counter == 3:  # issue 150 - force to write something to the board => check for alive connection!
                 self.dgti2c.write_board_command([DgtCmd.DGT_RETURN_SERIALNR])  # the code doesnt really matter ;-)
             time.sleep(0.25)

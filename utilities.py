@@ -76,58 +76,58 @@ class Event(AutoNumber):
     OUT_OF_TIME = ()  # Clock flag fallen
 
 
-class Message(AutoNumber):
+class MessageApi(AutoNumber):
     # Messages to display devices
-    COMPUTER_MOVE = ()  # Show computer move
-    BOOK_MOVE = ()  # Show book move
-    NEW_PV = ()  # Show the new Principal Variation
-    REVIEW_MODE_MOVE = ()  # Player is reviewing game
-    REMOTE_MODE_MOVE = ()  # DGT Player is playing vs network player
-    ENGINE_READY = ()
-    ENGINE_STARTUP = ()  # first time a new engine is ready
-    ENGINE_FAIL = ()
-    LEVEL = ()  # User sets engine level (from 1 to 20).
-    TIME_CONTROL = ()
-    OPENING_BOOK = ()  # User chooses an opening book
-    DGT_BUTTON = ()  # Clock button pressed
-    DGT_FEN = ()  # DGT Board sends a fen
-    DGT_CLOCK_VERSION = ()  # DGT Board sends the clock version
-    DGT_CLOCK_TIME = ()  # DGT Clock time message
+    COMPUTER_MOVE = 'computer_move'  # Show computer move
+    BOOK_MOVE = 'book_move'  # Show book move
+    NEW_PV = 'new_pv'  # Show the new Principal Variation
+    REVIEW_MODE_MOVE = 'review_mode_move'  # Player is reviewing game
+    REMOTE_MODE_MOVE = 'remote_mode_move'  # DGT Player is playing vs network player
+    ENGINE_READY = 'engine_ready'
+    ENGINE_STARTUP = 'engine_startup'  # first time a new engine is ready
+    ENGINE_FAIL = 'engine_fail'
+    LEVEL = 'level'  # User sets engine level (from 1 to 20).
+    TIME_CONTROL = 'time_control'
+    OPENING_BOOK = 'opening_book'  # User chooses an opening book
+    DGT_BUTTON = 'dgt_button'  # Clock button pressed
+    DGT_FEN = 'dgt_fen'  # DGT Board sends a fen
+    DGT_CLOCK_VERSION = 'dgt_clock_version'  # DGT Board sends the clock version
+    DGT_CLOCK_TIME = 'dgt_clock_time'  # DGT Clock time message
 
-    INTERACTION_MODE = ()  # Interaction mode
-    PLAY_MODE = ()  # Play mode
-    START_NEW_GAME = ()
-    COMPUTER_MOVE_DONE_ON_BOARD = ()  # User has done the compute move on board
-    WAIT_STATE = ()  # picochess waits for the user
-    SEARCH_STARTED = ()  # Engine has started to search
-    SEARCH_STOPPED = ()  # Engine has stopped the search
-    USER_TAKE_BACK = ()  # User takes back his move while engine is searching
-    RUN_CLOCK = ()  # Say to run autonomous clock, contains time_control
-    STOP_CLOCK = ()  # Stops the clock
-    USER_MOVE = ()  # Player has done a move on board
-    UCI_OPTION_LIST = ()  # Contains 'options', a dict of the current engine's UCI options
-    GAME_ENDS = ()  # The current game has ended, contains a 'result' (GameResult) and list of 'moves'
+    INTERACTION_MODE = 'interaction_mode'  # Interaction mode
+    PLAY_MODE = 'play_mode'  # Play mode
+    START_NEW_GAME = 'start_new_game'
+    COMPUTER_MOVE_DONE_ON_BOARD = 'computer_move_done_on_board'  # User has done the compute move on board
+    WAIT_STATE = 'wait_state'  # picochess waits for the user
+    SEARCH_STARTED = 'search_started'  # Engine has started to search
+    SEARCH_STOPPED = 'search_stopped'  # Engine has stopped the search
+    USER_TAKE_BACK = 'user_take_back'  # User takes back his move while engine is searching
+    RUN_CLOCK = 'run_clock'  # Say to run autonomous clock, contains time_control
+    STOP_CLOCK = 'stop_clock'  # Stops the clock
+    USER_MOVE = 'user_move'  # Player has done a move on board
+    UCI_OPTION_LIST = 'uci_option_list'  # Contains 'options', a dict of the current engine's UCI options
+    GAME_ENDS = 'game_ends'  # The current game has ended, contains a 'result' (GameResult) and list of 'moves'
 
-    SYSTEM_INFO = ()  # Information about picochess such as version etc
-    STARTUP_INFO = ()  # Information about the startup options
-    NEW_SCORE = ()  # Score
-    ALTERNATIVE_MOVE = ()  # User wants another move to be calculated
-    JACK_CONNECTED_ERROR = ()  # User connected fully|partly the clock via jack => ask him to remove it
-    NO_EBOARD_ERROR = ()  # User hasnt connected an E-Board
-    EBOARD_VERSION = ()  # Startup Message after a successful connection to an E-Board
+    SYSTEM_INFO = 'system_info'  # Information about picochess such as version etc
+    STARTUP_INFO = 'startup_info'  # Information about the startup options
+    NEW_SCORE = 'new_score'  # Score
+    ALTERNATIVE_MOVE = 'alternative_move'  # User wants another move to be calculated
+    JACK_CONNECTED_ERROR = 'jack_connected_error'  # User connected fully|partly the clock via jack => remove it
+    NO_EBOARD_ERROR = 'no_eboard_error'  # User hasnt connected an E-Board
+    EBOARD_VERSION = 'eboard_version'  # Startup Message after a successful connection to an E-Board
 
 
-class Dgt(AutoNumber):
-    # Commands to the DGThardware (or the virtual hardware)
-    DISPLAY_MOVE = ()
-    DISPLAY_TEXT = ()
-    LIGHT_CLEAR = ()
-    LIGHT_SQUARES = ()
-    CLOCK_STOP = ()
-    CLOCK_START = ()
-    CLOCK_VERSION = ()  # DGT Board sends the clock version
-    CLOCK_TIME = ()  # DGT Clock sends the time
-    SERIALNR = ()
+class DgtApi():
+    # Commands to the DGThw/pi (or the virtual hardware)
+    DISPLAY_MOVE = 'display_move'
+    DISPLAY_TEXT = 'display_text'
+    LIGHT_CLEAR = 'light_clear'
+    LIGHT_SQUARES = 'light_squares'
+    CLOCK_STOP = 'clock_stop'
+    CLOCK_START = 'clock_start'
+    CLOCK_VERSION = 'clock_version'
+    CLOCK_TIME = 'clock_time'
+    SERIALNR = 'serialnr'
 
 
 class Menu(AutoNumber):
@@ -362,8 +362,6 @@ class Display(object):  # Display devices (DGT XL clock, Piface LCD, pgn file...
 
     @staticmethod
     def show(message, **attrs):  # Sends a message on each display device
-        for k, v in attrs.items():
-            setattr(message, k, v)
         for display in display_devices:
             display.message_queue.put(message)
 
@@ -375,9 +373,7 @@ class DgtDisplay(object):  # Display devices (DGT XL clock, Piface LCD, pgn file
         dgtdisplay_devices.append(self)
 
     @staticmethod
-    def show(message, **attrs):  # Sends a message on each display device
-        for k, v in attrs.items():
-            setattr(message, k, v)
+    def show(message):  # Sends a message on each display device
         for display in dgtdisplay_devices:
             display.dgt_queue.put(message)
 
@@ -402,6 +398,79 @@ class switch(object):
             return True
         else:
             return False
+
+
+class BaseClass(object):
+    def __init__(self, classtype):
+        self._type = classtype
+
+    def __repr__(self):
+        return self._type
+
+
+def ClassFactory(name, argnames, BaseClass=BaseClass):
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            # here, the argnames variable is the one passed to the ClassFactory call
+            if key not in argnames:
+                raise TypeError("Argument %s not valid for %s" % (key, self.__class__.__name__))
+            setattr(self, key, value)
+        BaseClass.__init__(self, name)
+    newclass = type(name, (BaseClass,),{"__init__": __init__})
+    return newclass
+
+
+class Dgt():
+    DISPLAY_MOVE = ClassFactory(DgtApi.DISPLAY_MOVE, ['move', 'fen', 'beep', 'duration', 'force'])
+    DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['text', 'xl', 'beep', 'duration'])
+    LIGHT_CLEAR = ClassFactory(DgtApi.LIGHT_CLEAR, [])
+    LIGHT_SQUARES = ClassFactory(DgtApi.LIGHT_SQUARES, ['squares'])
+    CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, [])
+    CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side'])
+    CLOCK_VERSION = ClassFactory(DgtApi.CLOCK_VERSION, ['main_version', 'sub_version', 'attached'])
+    CLOCK_TIME = ClassFactory(DgtApi.CLOCK_TIME, ['time_left', 'time_right'])
+    SERIALNR = ClassFactory(DgtApi.SERIALNR, [])
+
+
+class Message():
+    # Messages to display devices
+    COMPUTER_MOVE = ClassFactory(MessageApi.COMPUTER_MOVE, ['result', 'fen', 'game', 'time_control'])
+    BOOK_MOVE = ClassFactory(MessageApi.BOOK_MOVE, ['result'])
+    NEW_PV = ClassFactory(MessageApi.NEW_PV, ['pv', 'mode', 'fen'])
+    REVIEW_MODE_MOVE = ClassFactory(MessageApi.REVIEW_MODE_MOVE, ['move', 'fen', 'game', 'mode'])
+    REMOTE_MODE_MOVE = ClassFactory(MessageApi.REMOTE_MODE_MOVE, [])
+    ENGINE_READY = ClassFactory(MessageApi.ENGINE_READY, ['eng', 'engine_name', 'has_levels'])
+    ENGINE_STARTUP = ClassFactory(MessageApi.ENGINE_STARTUP, ['path', 'has_levels'])
+    ENGINE_FAIL = ClassFactory(MessageApi.ENGINE_FAIL, [])
+    LEVEL = ClassFactory(MessageApi.LEVEL, ['level', 'beep'])
+    TIME_CONTROL = ClassFactory(MessageApi.TIME_CONTROL, ['time_control_string', 'beep'])
+    OPENING_BOOK = ClassFactory(MessageApi.OPENING_BOOK, ['book_control_string', 'beep'])
+    DGT_BUTTON = ClassFactory(MessageApi.DGT_BUTTON, ['button'])
+    DGT_FEN = ClassFactory(MessageApi.DGT_FEN, ['fen'])
+    DGT_CLOCK_VERSION = ClassFactory(MessageApi.DGT_CLOCK_VERSION, ['main_version', 'sub_version', 'attached'])
+    DGT_CLOCK_TIME = ClassFactory(MessageApi.DGT_CLOCK_TIME, ['time_left', 'time_right'])
+
+    INTERACTION_MODE = ClassFactory(MessageApi.INTERACTION_MODE, ['mode', 'beep'])
+    PLAY_MODE = ClassFactory(MessageApi.PLAY_MODE, ['play_mode'])
+    START_NEW_GAME = ClassFactory(MessageApi.START_NEW_GAME, [])
+    COMPUTER_MOVE_DONE_ON_BOARD = ClassFactory(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD, [])
+    WAIT_STATE = ClassFactory(MessageApi.WAIT_STATE, [])
+    SEARCH_STARTED = ClassFactory(MessageApi.SEARCH_STARTED, ['engine_status'])
+    SEARCH_STOPPED = ClassFactory(MessageApi.SEARCH_STOPPED, ['engine_status'])
+    USER_TAKE_BACK = ClassFactory(MessageApi.USER_TAKE_BACK, [])
+    RUN_CLOCK = ClassFactory(MessageApi.RUN_CLOCK, ['turn', 'time_control'])
+    STOP_CLOCK = ClassFactory(MessageApi.STOP_CLOCK, [])
+    USER_MOVE = ClassFactory(MessageApi.USER_MOVE, ['move', 'game'])
+    UCI_OPTION_LIST = ClassFactory(MessageApi.UCI_OPTION_LIST, ['options'])
+    GAME_ENDS = ClassFactory(MessageApi.GAME_ENDS, ['result', 'play_mode', 'game'])
+
+    SYSTEM_INFO = ClassFactory(MessageApi.SYSTEM_INFO, ['info'])
+    STARTUP_INFO = ClassFactory(MessageApi.STARTUP_INFO, ['info'])
+    NEW_SCORE = ClassFactory(MessageApi.NEW_SCORE, ['score', 'mate', 'mode'])
+    ALTERNATIVE_MOVE = ClassFactory(MessageApi.ALTERNATIVE_MOVE, [])
+    JACK_CONNECTED_ERROR = ClassFactory(MessageApi.JACK_CONNECTED_ERROR, [])
+    NO_EBOARD_ERROR = ClassFactory(MessageApi.NO_EBOARD_ERROR, ['text', 'text_xl'])
+    EBOARD_VERSION = ClassFactory(MessageApi.EBOARD_VERSION, ['text', 'text_xl', 'channel'])
 
 
 def get_opening_books():

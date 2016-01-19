@@ -89,15 +89,15 @@ class TerminalDisplay(Display, threading.Thread):
             # Check if we have something to display
             message = self.message_queue.get()
             for case in switch(message):
-                if case(Message.COMPUTER_MOVE):
+                if case(MessageApi.COMPUTER_MOVE):
                     print('\n' + str(message.game))
                     print(message.game.fen())
                     print('emulate user to make the computer move...sleeping for one second')
                     time.sleep(1)
                     logging.debug('emulate user now finished doing computer move')
-                    Display.show(Message.DGT_FEN, fen=message.game.board_fen())
+                    Display.show(Message.DGT_FEN(fen=message.game.board_fen()))
                     break
-                if case(Message.SEARCH_STARTED):
+                if case(MessageApi.SEARCH_STARTED):
                     if message.engine_status == EngineStatus.THINK:
                         print('Computer starts thinking')
                     if message.engine_status == EngineStatus.PONDER:
@@ -105,7 +105,7 @@ class TerminalDisplay(Display, threading.Thread):
                     if message.engine_status == EngineStatus.WAIT:
                         print('Computer starts waiting - hmmm')
                     break
-                if case(Message.SEARCH_STOPPED):
+                if case(MessageApi.SEARCH_STOPPED):
                     if message.engine_status == EngineStatus.THINK:
                         print('Computer stops thinking')
                     if message.engine_status == EngineStatus.PONDER:

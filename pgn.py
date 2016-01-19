@@ -59,24 +59,24 @@ class PgnDisplay(Display, threading.Thread):
             # Check if we have something to display
             try:
                 message = self.message_queue.get()
-                if message == Message.SYSTEM_INFO:
+                if message == MessageApi.SYSTEM_INFO:
                     self.engine_name = message.info['engine_name']
                     self.old_engine = self.engine_name
                     self.user_name = message.info['user_name']
                     self.location = message.info['location']
-                if message == Message.LEVEL:
+                if message == MessageApi.LEVEL:
                     self.level = message.level
-                if message == Message.INTERACTION_MODE:
+                if message == MessageApi.INTERACTION_MODE:
                     if message.mode == Mode.REMOTE:
                         self.old_engine = self.engine_name
                         self.engine_name = "Remote Player"
                     else:
                         self.engine_name = self.old_engine
-                if message == Message.ENGINE_READY:
+                if message == MessageApi.ENGINE_READY:
                     self.engine_name = message.engine_name
                     if not message.has_levels:
                         self.level = None
-                if message == Message.GAME_ENDS and message.game.move_stack:
+                if message == MessageApi.GAME_ENDS and message.game.move_stack:
                     logging.debug('Saving game to [' + self.file_name + ']')
                     pgn = chess.pgn.Game()
                     custom_fen = getattr(message.game, 'custom_fen', None)

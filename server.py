@@ -220,39 +220,39 @@ class WebDisplay(Display, threading.Thread):
             self.shared['system_info'] = {}
 
     def task(self, message):
-        if message == Message.BOOK_MOVE:
+        if message == MessageApi.BOOK_MOVE:
             EventHandler.write_to_clients({'event': 'Message', 'msg': 'Book move'})
 
-        elif message == Message.START_NEW_GAME:
+        elif message == MessageApi.START_NEW_GAME:
             EventHandler.write_to_clients({'event': 'NewGame'})
             EventHandler.write_to_clients({'event': 'Message', 'msg': 'New game'})
             update_headers(self)
 
-        elif message == Message.SEARCH_STARTED:
+        elif message == MessageApi.SEARCH_STARTED:
             EventHandler.write_to_clients({'event': 'Message', 'msg': 'Thinking..'})
 
-        elif message == Message.UCI_OPTION_LIST:
+        elif message == MessageApi.UCI_OPTION_LIST:
             self.shared['uci_options'] = message.options
 
-        elif message == Message.SYSTEM_INFO:
+        elif message == MessageApi.SYSTEM_INFO:
             self.shared['system_info'] = message.info
             self.shared['system_info']['old_engine'] = self.shared['system_info']['engine_name']
             update_headers(self)
 
-        elif message == Message.ENGINE_READY:
+        elif message == MessageApi.ENGINE_READY:
             self.shared['system_info']['engine_name'] = message.engine_name
             if not message.has_levels and "level" in self.shared["game_info"]:
                 del self.shared['game_info']['level']
             update_headers(self)
 
-        elif message == Message.STARTUP_INFO:
+        elif message == MessageApi.STARTUP_INFO:
             self.shared['game_info'] = message.info
 
-        elif message == Message.OPENING_BOOK:  # Process opening book
+        elif message == MessageApi.OPENING_BOOK:  # Process opening book
             self.create_game_info()
             self.shared['game_info']['book_control_string'] = message.book_control_string
 
-        elif message == Message.INTERACTION_MODE:  # Process interaction mode
+        elif message == MessageApi.INTERACTION_MODE:  # Process interaction mode
             self.create_game_info()
             self.shared['game_info']['mode'] = message.mode
             if self.shared['game_info']['mode'] == Mode.REMOTE:
@@ -261,31 +261,31 @@ class WebDisplay(Display, threading.Thread):
                 self.shared['system_info']['engine_name'] = self.shared['system_info']['old_engine']
             update_headers(self)
 
-        elif message == Message.PLAY_MODE:  # Process play mode
+        elif message == MessageApi.PLAY_MODE:  # Process play mode
             self.create_game_info()
             self.shared['game_info']['play_mode'] = message.play_mode
 
-        elif message == Message.TIME_CONTROL:
+        elif message == MessageApi.TIME_CONTROL:
             self.create_game_info()
             self.shared['game_info']['time_control_string'] = message.time_control_string
 
-        elif message == Message.LEVEL:
+        elif message == MessageApi.LEVEL:
             self.shared['game_info']['level'] = message.level
             update_headers(self)
 
-        elif message == Message.JACK_CONNECTED_ERROR:
+        elif message == MessageApi.JACK_CONNECTED_ERROR:
             EventHandler.write_to_clients({'event': 'Message', 'msg': 'Unplug the jack cable please!'})
 
-        elif message == Message.NO_EBOARD_ERROR:
+        elif message == MessageApi.NO_EBOARD_ERROR:
             EventHandler.write_to_clients({'event': 'Message', 'msg': 'Connect an E-Board please!'})
 
-        elif message == Message.EBOARD_VERSION:
+        elif message == MessageApi.EBOARD_VERSION:
             EventHandler.write_to_clients({'event': 'Message', 'msg': 'DGT board connected through ' + message.channel})
 
-        elif message == Message.DGT_CLOCK_VERSION:
+        elif message == MessageApi.DGT_CLOCK_VERSION:
             EventHandler.write_to_clients({'event': 'Message', 'msg': 'DGT clock connected through ' + message.attached})
 
-        elif message == Message.COMPUTER_MOVE or message == Message.USER_MOVE or message == Message.REVIEW_MODE_MOVE:
+        elif message == MessageApi.COMPUTER_MOVE or message == MessageApi.USER_MOVE or message == MessageApi.REVIEW_MODE_MOVE:
             game = pgn.Game()
             custom_fen = getattr(message.game, 'custom_fen', None)
             if custom_fen:
@@ -303,14 +303,15 @@ class WebDisplay(Display, threading.Thread):
             # pgn_str = str(exporter)
             r = {'pgn': pgn_str, 'fen': fen, 'event': "newFEN"}
 
-            if message == Message.COMPUTER_MOVE:
+            if message == MessageApi.COMPUTER_MOVE:
                 r['move'] = message.result.bestmove.uci()
                 r['msg'] = 'Computer move: ' + str(message.result.bestmove)
-            elif message == Message.USER_MOVE:
+
+            elif message == MessageApi.USER_MOVE:
                 r['move'] = message.move.uci()
                 r['msg'] = 'User move: ' + str(message.move)
 
-            if message == Message.REMOTE_MODE_MOVE:
+            if message == MessageApi.REMOTE_MODE_MOVE:
                 r['move'] = 'User move: ' + str(message.move)
                 r['remote_play'] = True
 
