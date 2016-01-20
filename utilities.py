@@ -49,85 +49,85 @@ class AutoNumber(enum.Enum):
 
 class EventApi():
     # User events
-    FEN = 'E_fen'  # User has moved one or more pieces, and we have a new fen position
-    LEVEL = 'E_level'  # User sets engine level (from 1 to 20)
-    NEW_GAME = 'E_new_game'  # User starts a new game
-    DRAWRESIGN = 'E_drawresign'  # User declares a resignation or draw
-    USER_MOVE = 'E_user_move'  # User sends a move
-    KEYBOARD_MOVE = 'E_keyboard_move'  # Keyboard sends a move (to be transfered to a fen)
-    REMOTE_MOVE = 'E_remote_move'  # Remote player move
-    SET_OPENING_BOOK = 'E_set_opening_book'  # User chooses an opening book
-    NEW_ENGINE = 'E_new_engine'  # Change engine
-    SET_INTERACTION_MODE = 'E_set_interaction_mode'  # Change interaction mode
-    SETUP_POSITION = 'E_setup_position'  # Setup custom position
-    STARTSTOP_THINK = 'E_startstop_think'  # Engine should start/stop thinking
-    STARTSTOP_CLOCK = 'E_startstop_clock'  # Clock should start/stop
-    SET_TIME_CONTROL = 'E_set_time_control'  # User sets time control
-    UCI_OPTION_SET = 'E_uci_option_set'  # Users sets an UCI option, contains 'name' and 'value' (strings)
-    SHUTDOWN = 'E_shutdown'  # User wants to shutdown the machine
-    ALTERNATIVE_MOVE = 'E_alternative_move'  # User wants engine to recalculate the position
+    FEN = 'EVT_FEN'  # User has moved one or more pieces, and we have a new fen position
+    LEVEL = 'EVT_LEVEL'  # User sets engine level (from 1 to 20)
+    NEW_GAME = 'EVT_NEW_GAME'  # User starts a new game
+    DRAWRESIGN = 'EVT_DRAWRESIGN'  # User declares a resignation or draw
+    USER_MOVE = 'EVT_USER_MOVE'  # User sends a move
+    KEYBOARD_MOVE = 'EVT_KEYBOARD_MOVE'  # Keyboard sends a move (to be transfered to a fen)
+    REMOTE_MOVE = 'EVT_REMOTE_MOVE'  # Remote player move
+    SET_OPENING_BOOK = 'EVT_SET_OPENING_BOOK'  # User chooses an opening book
+    NEW_ENGINE = 'EVT_NEW_ENGINE'  # Change engine
+    SET_INTERACTION_MODE = 'EVT_SET_INTERACTION_MODE'  # Change interaction mode
+    SETUP_POSITION = 'EVT_SETUP_POSITION'  # Setup custom position
+    STARTSTOP_THINK = 'EVT_STARTSTOP_THINK'  # Engine should start/stop thinking
+    STARTSTOP_CLOCK = 'EVT_STARTSTOP_CLOCK'  # Clock should start/stop
+    SET_TIME_CONTROL = 'EVT_SET_TIME_CONTROL'  # User sets time control
+    UCI_OPTION_SET = 'EVT_UCI_OPTION_SET'  # Users sets an UCI option, contains 'name' and 'value' (strings)
+    SHUTDOWN = 'EVT_SHUTDOWN'  # User wants to shutdown the machine
+    ALTERNATIVE_MOVE = 'EVT_ALTERNATIVE_MOVE'  # User wants engine to recalculate the position
     # dgt events
-    DGT_BUTTON = 'E_dgt_button'  # User pressed a button at the dgt clock
-    DGT_FEN = 'E_dgt_fen'  # DGT board sends a fen
+    DGT_BUTTON = 'EVT_DGT_BUTTON'  # User pressed a button at the dgt clock
+    DGT_FEN = 'EVT_DGT_FEN'  # DGT board sends a fen
     # Engine events
-    BEST_MOVE = 'E_best_move'  # Engine has found a move
-    NEW_PV = 'E_new_pv'  # Engine sends a new principal variation
-    NEW_SCORE = 'E_new_score'  # Engine sends a new score
-    OUT_OF_TIME = 'E_out_of_time'  # Clock flag fallen
+    BEST_MOVE = 'EVT_BEST_MOVE'  # Engine has found a move
+    NEW_PV = 'EVT_NEW_PV'  # Engine sends a new principal variation
+    NEW_SCORE = 'EVT_NEW_SCORE'  # Engine sends a new score
+    OUT_OF_TIME = 'EVT_OUT_OF_TIME'  # Clock flag fallen
 
 
 class MessageApi():
     # Messages to display devices
-    COMPUTER_MOVE = 'M_computer_move'  # Show computer move
-    BOOK_MOVE = 'M_book_move'  # Show book move
-    NEW_PV = 'M_new_pv'  # Show the new Principal Variation
-    REVIEW_MODE_MOVE = 'M_review_mode_move'  # Player is reviewing game
-    REMOTE_MODE_MOVE = 'M_remote_mode_move'  # DGT Player is playing vs network player
-    ENGINE_READY = 'M_engine_ready'
-    ENGINE_STARTUP = 'M_engine_startup'  # first time a new engine is ready
-    ENGINE_FAIL = 'M_engine_fail'
-    LEVEL = 'M_level'  # User sets engine level (from 1 to 20).
-    TIME_CONTROL = 'M_time_control'
-    OPENING_BOOK = 'M_opening_book'  # User chooses an opening book
-    DGT_BUTTON = 'M_dgt_button'  # Clock button pressed
-    DGT_FEN = 'M_dgt_fen'  # DGT Board sends a fen
-    DGT_CLOCK_VERSION = 'M_dgt_clock_version'  # DGT Board sends the clock version
-    DGT_CLOCK_TIME = 'M_dgt_clock_time'  # DGT Clock time message
+    COMPUTER_MOVE = 'MSG_COMPUTER_MOVE'  # Show computer move
+    BOOK_MOVE = 'MSG_BOOK_MOVE'  # Show book move
+    NEW_PV = 'MSG_NEW_PV'  # Show the new Principal Variation
+    REVIEW_MODE_MOVE = 'MSG_REVIEW_MODE_MOVE'  # Player is reviewing game
+    REMOTE_MODE_MOVE = 'MSG_REMOTE_XXX'  # DGT Player is playing vs network player
+    ENGINE_READY = 'MSG_ENGINE_READY'
+    ENGINE_STARTUP = 'MSG_ENGINE_STARTUP'  # first time a new engine is ready
+    ENGINE_FAIL = 'MSG_ENGINE_FAIL'
+    LEVEL = 'MSG_LEVEL'  # User sets engine level (from 1 to 20).
+    TIME_CONTROL = 'MSG_TIME_CONTROL'
+    OPENING_BOOK = 'MSG_OPENING_BOOK'  # User chooses an opening book
+    DGT_BUTTON = 'MSG_DGT_BUTTON'  # Clock button pressed
+    DGT_FEN = 'MSG_DGT_FEN'  # DGT Board sends a fen
+    DGT_CLOCK_VERSION = 'MSG_DGT_CLOCK_VERSION'  # DGT Board sends the clock version
+    DGT_CLOCK_TIME = 'MSG_DGT_CLOCK_TIME'  # DGT Clock time message
 
-    INTERACTION_MODE = 'M_interaction_mode'  # Interaction mode
-    PLAY_MODE = 'M_play_mode'  # Play mode
-    START_NEW_GAME = 'M_start_new_game'
-    COMPUTER_MOVE_DONE_ON_BOARD = 'M_computer_move_done_on_board'  # User has done the compute move on board
-    WAIT_STATE = 'M_wait_state'  # picochess waits for the user
-    SEARCH_STARTED = 'M_search_started'  # Engine has started to search
-    SEARCH_STOPPED = 'M_search_stopped'  # Engine has stopped the search
-    USER_TAKE_BACK = 'M_user_take_back'  # User takes back his move while engine is searching
-    RUN_CLOCK = 'M_run_clock'  # Say to run autonomous clock, contains time_control
-    STOP_CLOCK = 'M_stop_clock'  # Stops the clock
-    USER_MOVE = 'M_user_move'  # Player has done a move on board
-    UCI_OPTION_LIST = 'M_uci_option_list'  # Contains 'options', a dict of the current engine's UCI options
-    GAME_ENDS = 'M_game_ends'  # The current game has ended, contains a 'result' (GameResult) and list of 'moves'
+    INTERACTION_MODE = 'MSG_INTERACTON_MODE'  # Interaction mode
+    PLAY_MODE = 'MSG_PLAY_MODE'  # Play mode
+    START_NEW_GAME = 'MSG_START_NEW_GAME'
+    COMPUTER_MOVE_DONE_ON_BOARD = 'MSG_COMPUTER_MOVE_DONE_ON_BOARD'  # User has done the compute move on board
+    WAIT_STATE = 'MSG_WAIT_STATE'  # picochess waits for the user
+    SEARCH_STARTED = 'MSG_SEARCH_STARTED'  # Engine has started to search
+    SEARCH_STOPPED = 'MSG_SEARCH_STOPPED'  # Engine has stopped the search
+    USER_TAKE_BACK = 'MSG_USER_TACK_BACK'  # User takes back his move while engine is searching
+    RUN_CLOCK = 'MSG_RUN_CLOCK'  # Say to run autonomous clock, contains time_control
+    STOP_CLOCK = 'MSG_STOP_CLOCK'  # Stops the clock
+    USER_MOVE = 'MSG_USER_MOVE'  # Player has done a move on board
+    UCI_OPTION_LIST = 'MSG_UCI_OPTION_LIST'  # Contains 'options', a dict of the current engine's UCI options
+    GAME_ENDS = 'MST_GAME_ENDS'  # The current game has ended, contains a 'result' (GameResult) and list of 'moves'
 
-    SYSTEM_INFO = 'M_system_info'  # Information about picochess such as version etc
-    STARTUP_INFO = 'M_startup_info'  # Information about the startup options
-    NEW_SCORE = 'M_new_score'  # Score
-    ALTERNATIVE_MOVE = 'M_alternative_move'  # User wants another move to be calculated
-    JACK_CONNECTED_ERROR = 'M_jack_connected_error'  # User connected fully|partly the clock via jack => remove it
-    NO_EBOARD_ERROR = 'M_no_eboard_error'  # User hasnt connected an E-Board
-    EBOARD_VERSION = 'M_eboard_version'  # Startup Message after a successful connection to an E-Board
+    SYSTEM_INFO = 'MSG_SYSTEM_INFO'  # Information about picochess such as version etc
+    STARTUP_INFO = 'MSG_STARTUP_INFO'  # Information about the startup options
+    NEW_SCORE = 'MSG_NEW_SCORE'  # Score
+    ALTERNATIVE_MOVE = 'MSG_ALTERNATIVE_MOVE'  # User wants another move to be calculated
+    JACK_CONNECTED_ERROR = 'MSG_JACK_CONNECTED_ERROR'  # User connected fully|partly the clock via jack => remove it
+    NO_EBOARD_ERROR = 'MSG_NO_EBOARD_ERROR'  # User hasnt connected an E-Board
+    EBOARD_VERSION = 'MSG_EBOARD_VERSION'  # Startup Message after a successful connection to an E-Board
 
 
 class DgtApi():
     # Commands to the DGThw/pi (or the virtual hardware)
-    DISPLAY_MOVE = 'D_display_move'
-    DISPLAY_TEXT = 'D_display_text'
-    LIGHT_CLEAR = 'D_light_clear'
-    LIGHT_SQUARES = 'D_light_squares'
-    CLOCK_STOP = 'D_clock_stop'
-    CLOCK_START = 'D_clock_start'
-    CLOCK_VERSION = 'D_clock_version'
-    CLOCK_TIME = 'D_clock_time'
-    SERIALNR = 'D_serialnr'
+    DISPLAY_MOVE = 'DGT_DISPLAY_MOVE'
+    DISPLAY_TEXT = 'DGT_DISPLAY_TEXT'
+    LIGHT_CLEAR = 'DGT_LIGHT_CLEAR'
+    LIGHT_SQUARES = 'DGT_LIGHT_SQUARES'
+    CLOCK_STOP = 'DGT_CLOCK_STOP'
+    CLOCK_START = 'DGT_CLOCK_START'
+    CLOCK_VERSION = 'DGT_CLOCK_VERSION'
+    CLOCK_TIME = 'DGT_CLOCK_TIME'
+    SERIALNR = 'DGT_SERIALNR'
 
 
 class Menu(AutoNumber):
@@ -423,7 +423,7 @@ def ClassFactory(name, argnames, BaseClass=BaseClass):
 
 class Dgt():
     DISPLAY_MOVE = ClassFactory(DgtApi.DISPLAY_MOVE, ['move', 'fen', 'beep', 'duration', 'force'])
-    DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['text', 'xl', 'beep', 'duration'])
+    DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['text', 'xl', 'beep', 'duration', 'force'])
     LIGHT_CLEAR = ClassFactory(DgtApi.LIGHT_CLEAR, [])
     LIGHT_SQUARES = ClassFactory(DgtApi.LIGHT_SQUARES, ['squares'])
     CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, [])
@@ -457,7 +457,7 @@ class Message():
     COMPUTER_MOVE_DONE_ON_BOARD = ClassFactory(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD, [])
     WAIT_STATE = ClassFactory(MessageApi.WAIT_STATE, [])
     SEARCH_STARTED = ClassFactory(MessageApi.SEARCH_STARTED, ['engine_status'])
-    SEARCH_STOPPED = ClassFactory(MessageApi.SEARCH_STOPPED, ['engine_status'])
+    SEARCH_STOPPED = ClassFactory(MessageApi.SEARCH_STOPPED, ['engine_status', 'result'])
     USER_TAKE_BACK = ClassFactory(MessageApi.USER_TAKE_BACK, [])
     RUN_CLOCK = ClassFactory(MessageApi.RUN_CLOCK, ['turn', 'time_control'])
     STOP_CLOCK = ClassFactory(MessageApi.STOP_CLOCK, [])

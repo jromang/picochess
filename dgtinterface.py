@@ -81,7 +81,7 @@ class DGTInterface(DgtDisplay, Thread):
                         message.force = False  # TEST!
                         while self.timer_running and not message.force:
                             time.sleep(0.1)
-                        if message.duration > 0:
+                        if hasattr(message, 'duration') and message.duration > 0:
                             self.timer = Timer(message.duration, self.stopped_timer)
                             self.timer.start()
                             self.timer_running = True
@@ -91,7 +91,7 @@ class DGTInterface(DgtDisplay, Thread):
                         message.force = False  # TEST!
                         while self.timer_running and not message.force:
                             time.sleep(0.1)
-                        if message.duration > 0:
+                        if hasattr(message, 'duration') and message.duration > 0:
                             self.timer = Timer(message.duration, self.stopped_timer)
                             self.timer.start()
                             self.timer_running = True
@@ -117,7 +117,7 @@ class DGTInterface(DgtDisplay, Thread):
                             self.enable_dgt_3000 = True
                         if message.attached == 'i2c':
                             self.enable_dgt_pi = True
-                        self.show(DgtApi.DISPLAY_TEXT, text='pico ' + version, xl='pic' + version, beep=BeepLevel.YES, duration=2)
+                        self.show(DgtApi.DISPLAY_TEXT(text='pico ' + version, xl='pic' + version, beep=BeepLevel.YES, duration=2))
                         break
                     if case(DgtApi.CLOCK_TIME):
                         self.time_left = message.time_left
