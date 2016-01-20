@@ -602,6 +602,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
                     if case(MessageApi.STARTUP_INFO):
                         self.book_index = message.info["book_index"]
                         self.book_menu_index = self.book_index
+                        break
                     if case(MessageApi.SEARCH_STARTED):
                         logging.debug('Search started')
                         break

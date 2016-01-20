@@ -399,7 +399,7 @@ def main():
             DGThw(args.dgt_port, args.enable_dgt_board_leds, args.beep_level).start()
     else:
         # Enable keyboard input and terminal display
-        logging.warning("Starting picochess with virtual DGT board")
+        logging.debug("Starting picochess with virtual DGT board")
         KeyboardInput().start()
         TerminalDisplay().start()
         DGTVirtual(args.enable_dgt_board_leds, args.beep_level).start()

@@ -113,5 +113,9 @@ class TerminalDisplay(Display, threading.Thread):
                     if message.engine_status == EngineStatus.WAIT:
                         print('Computer stops waiting - hmmm')
                     break
+                if case(MessageApi.DGT_CLOCK_VERSION):
+                    DgtDisplay.show(Dgt.CLOCK_VERSION(main_version=message.main_version,
+                                    sub_version=message.sub_version, attached=message.attached))
+                    break
                 if case():  # Default
                     pass

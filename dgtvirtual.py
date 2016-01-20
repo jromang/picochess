@@ -22,9 +22,13 @@ from dgtinterface import *
 class DGTVirtual(DGTInterface):
     def __init__(self, enable_board_leds, beep_level):
         super(DGTVirtual, self).__init__(enable_board_leds, beep_level)
+        # virtual lib
         self.rt = None
         self.time_side = None
+        # setup virtual clock
+        Display.show(Message.DGT_CLOCK_VERSION(main_version=0, sub_version=0, attached="virtual"))
 
+    # (START) dgti2c class simulation
     class RepeatedTimer(object):
         def __init__(self, interval, function, *args, **kwargs):
             self._timer = None
@@ -52,52 +56,58 @@ class DGTVirtual(DGTInterface):
 
     def runclock(self):
         if self.time_side == 1:
-            self.time_left -= 1
+            h, m, s = self.time_left
+            time_left = 3600*h + 60*m + s -1
+            if time_left <= 0:
+                print('Clock flag: left')
+                self.rt.stop()
+            self.time_left = hours_minutes_seconds(time_left)
         else:
-            self.time_right -= 1
-        if self.time_left <= 0:
-            print('DGT clock flag: left')
-            self.time_left = 0
-        if self.time_right <= 0:
-            print('DGT clock flag: right')
-            self.time_right = 0
-        l_hms = hours_minutes_seconds(self.time_left)
-        r_hms = hours_minutes_seconds(self.time_right)
-        DgtDisplay.show(Dgt.DISPLAY_TEXT(text='{} - {}'.format(l_hms, r_hms), xl=None, beep=BeepLevel.NO))
+            h, m, s = self.time_right
+            time_right = 3600*h + 60*m + s -1
+            if time_right <= 0:
+                print('Clock flag: right')
+                self.rt.stop()
+            self.time_right = hours_minutes_seconds(time_right)
+        print('Clock time: {} - {}'.format(self.time_left, self.time_right))
+        Display.show(Message.DGT_CLOCK_TIME(time_left=self.time_left, time_right=self.time_right))
+    # (END) dgti2c simulation class
 
-    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG, duration=0, force=False):
-        # beep = self.get_beep_level(beep)
+    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):
+        beep = self.get_beep_level(beep)
         if self.enable_dgt_3000:
             bit_board = chess.Board(fen)
             text = bit_board.san(move)
         else:
             text = str(move)
         logging.debug(text)
-        print('DGT clock move:' + text)
+        print('Clock move:', text, beep)
 
-    def display_text_on_clock(self, text, dgt_xl_text=None, beep=BeepLevel.CONFIG, duration=0, force=False):
-        # beep = self.get_beep_level(beep)
-        if dgt_xl_text and not self.enable_dgt_3000:
-            text = dgt_xl_text
+    def display_text_on_clock(self, text, text_xl=None, beep=BeepLevel.CONFIG):
+        beep = self.get_beep_level(beep)
+        if text_xl and not self.enable_dgt_3000:
+            text = text_xl
         logging.debug(text)
-        print('DGT clock text:' + text)
+        print('Clock text:', text, beep)
 
     def stop_clock(self):
         if self.rt:
-            print('DGT clock time stopped at ', (self.time_left, self.time_right))
+            print('Clock time stopped at ', (self.time_left, self.time_right))
             self.rt.stop()
         else:
             print('Clock not ready')
+        self.clock_running = False
 
     def start_clock(self, time_left, time_right, side):
-        self.time_left = time_left
-        self.time_right = time_right
+        self.time_left = hours_minutes_seconds(time_left)
+        self.time_right = hours_minutes_seconds(time_right)
         self.time_side = side
 
-        print('DGT clock time started at ', (self.time_left, self.time_right))
+        print('Clock time started at ', (self.time_left, self.time_right))
         if self.rt:
             self.rt.stop()
         self.rt = self.RepeatedTimer(1, self.runclock)
+        self.clock_running = True
 
     def light_squares_revelation_board(self, squares):
         pass
@@ -106,4 +116,7 @@ class DGTVirtual(DGTInterface):
         pass
 
     def end_clock(self):
-        pass
+        if self.clock_running:
+            pass
+        else:
+            logging.debug('Virtual clock isnt running - no need for endDisplay')
