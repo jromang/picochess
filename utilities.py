@@ -47,7 +47,7 @@ class AutoNumber(enum.Enum):
         return obj
 
 
-class Event(AutoNumber):
+class EventApi(AutoNumber):
     # User events
     FEN = ()  # User has moved one or more pieces, and we have a new fen position
     LEVEL = ()  # User sets engine level (from 1 to 20)
@@ -471,6 +471,35 @@ class Message():
     JACK_CONNECTED_ERROR = ClassFactory(MessageApi.JACK_CONNECTED_ERROR, [])
     NO_EBOARD_ERROR = ClassFactory(MessageApi.NO_EBOARD_ERROR, ['text', 'text_xl'])
     EBOARD_VERSION = ClassFactory(MessageApi.EBOARD_VERSION, ['text', 'text_xl', 'channel'])
+
+
+class Event():
+    # User events
+    FEN = ClassFactory(EventApi.FEN, ['fen'])
+    LEVEL = ClassFactory(EventApi.LEVEL, ['level', 'beep'])
+    NEW_GAME = ClassFactory(EventApi.NEW_GAME, [])
+    DRAWRESIGN = ClassFactory(EventApi.DRAWRESIGN, ['result'])
+    USER_MOVE = ClassFactory(EventApi.USER_MOVE, ['move'])
+    KEYBOARD_MOVE = ClassFactory(EventApi.KEYBOARD_MOVE, ['move'])
+    REMOTE_MOVE = ClassFactory(EventApi.REMOTE_MOVE, ['move', 'fen'])
+    SET_OPENING_BOOK = ClassFactory(EventApi.SET_OPENING_BOOK, ['book', 'book_control_string', 'beep'])
+    NEW_ENGINE = ClassFactory(EventApi.NEW_ENGINE, ['eng'])
+    SET_INTERACTION_MODE = ClassFactory(EventApi.SET_INTERACTION_MODE, ['mode', 'beep'])
+    SETUP_POSITION = ClassFactory(EventApi.SETUP_POSITION, ['fen', 'uci960'])
+    STARTSTOP_THINK = ClassFactory(EventApi.STARTSTOP_THINK, [])
+    STARTSTOP_CLOCK = ClassFactory(EventApi.STARTSTOP_CLOCK, [])
+    SET_TIME_CONTROL = ClassFactory(EventApi.SET_TIME_CONTROL, ['time_control'])
+    UCI_OPTION_SET = ClassFactory(EventApi.UCI_OPTION_SET, [])
+    SHUTDOWN = ClassFactory(EventApi.SHUTDOWN, [])
+    ALTERNATIVE_MOVE = ClassFactory(EventApi.ALTERNATIVE_MOVE, [])
+    # dgt events
+    DGT_BUTTON = ClassFactory(EventApi.DGT_BUTTON, ['button'])
+    DGT_FEN = ClassFactory(EventApi.DGT_FEN, ['fen'])
+    # Engine events
+    BEST_MOVE = ClassFactory(EventApi.BEST_MOVE, ['result', 'inbook'])
+    NEW_PV = ClassFactory(EventApi.NEW_PV, ['pv'])
+    NEW_SCORE = ClassFactory(EventApi.NEW_SCORE, ['score', 'mate'])
+    OUT_OF_TIME = ClassFactory(EventApi.OUT_OF_TIME, ['color'])
 
 
 def get_opening_books():

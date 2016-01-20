@@ -42,9 +42,9 @@ class KeyboardInput(Observable, threading.Thread):
                 if cmd.startswith('newgame:'):
                     side = cmd.split(':')[1]
                     if side == 'w':
-                        self.fire(Event.DGT_FEN, fen='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR')
+                        self.fire(Event.DGT_FEN(fen='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'))
                     elif side == 'b':
-                        self.fire(Event.DGT_FEN, fen='RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr')
+                        self.fire(Event.DGT_FEN(fen='RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr'))
                     else:
                         raise ValueError(raw)
                 else:
@@ -56,7 +56,7 @@ class KeyboardInput(Observable, threading.Thread):
                         uci960 = False  # make it easy for the moment
                         bit_board = chess.Board(fen, uci960)
                         if bit_board.is_valid():
-                            self.fire(Event.SETUP_POSITION, fen=bit_board.fen(), uci960=uci960)
+                            self.fire(Event.SETUP_POSITION(fen=bit_board.fen(), uci960=uci960))
                         else:
                             raise ValueError(fen)
                     # Here starts the simulation of a dgt-board!
@@ -65,17 +65,17 @@ class KeyboardInput(Observable, threading.Thread):
                         fen = raw.split(':')[1]
                         # dgt board only sends the basic fen => be sure
                         # it's same no matter what fen the user entered
-                        self.fire(Event.DGT_FEN, fen=fen.split(' ')[0])
+                        self.fire(Event.DGT_FEN(fen=fen.split(' ')[0]))
                     elif cmd.startswith('button:'):
                         button = int(cmd.split(':')[1])
                         if button not in range(5):
                             raise ValueError(button)
-                        self.fire(Event.DGT_BUTTON, button=button)
+                        self.fire(Event.DGT_BUTTON(button=button))
                     # end simulation code
                     else:
                         # move => fen => virtual board sends fen
                         move = chess.Move.from_uci(cmd)
-                        self.fire(Event.KEYBOARD_MOVE, move=move)
+                        self.fire(Event.KEYBOARD_MOVE(move=move))
             except ValueError as e:
                 logging.warning('Invalid user input [%s]', raw)
 

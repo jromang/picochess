@@ -69,12 +69,12 @@ class Informer(chess.uci.InfoHandler):
 
     def score(self, cp, mate, lowerbound, upperbound):
         if self._allow_fire_score():
-            Observable.fire(Event.NEW_SCORE, score=cp, mate=mate)
+            Observable.fire(Event.NEW_SCORE(score=cp, mate=mate))
         super().score(cp, mate, lowerbound, upperbound)
 
     def pv(self, moves):
         if self._allow_fire_pv():
-            Observable.fire(Event.NEW_PV, pv=moves)
+            Observable.fire(Event.NEW_PV(pv=moves))
         super().pv(moves)
 
 
@@ -207,7 +207,7 @@ class Engine(object):
         self.res = command.result()
         Display.show(Message.SEARCH_STOPPED(engine_status=self.status, result=self.res))
         if self.show_best:
-            Observable.fire(Event.BEST_MOVE, result=self.res, inbook=False)
+            Observable.fire(Event.BEST_MOVE(result=self.res, inbook=False))
         else:
             logging.debug('Event Best_Move not fired')
         self.status = EngineStatus.WAIT

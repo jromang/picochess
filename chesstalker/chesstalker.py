@@ -170,7 +170,7 @@ class ChessTalker(Display, threading.Thread):
                         logging.debug('Announcing BLACK WIN')
                         system_voice.say_winner(ChessTalkerVoice.COLOR_BLACK)
                 elif messageType == "Event":
-                    if message == Event.SHUTDOWN:
+                    if message == EventApi.SHUTDOWN:
                         logging.debug('Announcing SHUTDOWN')
                         system_voice.say_shutdown()
             except queue.Empty:

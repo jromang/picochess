@@ -135,7 +135,7 @@ def main():
             return None
         score = gaviota.probe_dtm(game)
         if score:
-            Observable.fire(Event.NEW_SCORE, score='tb', mate=score)
+            Observable.fire(Event.NEW_SCORE(score='tb', mate=score))
         return score
 
     def think(game, tc):
@@ -149,9 +149,9 @@ def main():
 
         book_move = searchmoves.book(bookreader, game)
         if book_move:
-            Observable.fire(Event.NEW_SCORE, score='book', mate=None)
+            Observable.fire(Event.NEW_SCORE(score='book', mate=None))
             # time.sleep(0.5)
-            Observable.fire(Event.BEST_MOVE, result=book_move, inbook=True)
+            Observable.fire(Event.BEST_MOVE(result=book_move, inbook=True))
         else:
             probe_tablebase(game)
             engine.position(copy.deepcopy(game))
@@ -227,7 +227,7 @@ def main():
                     if game.move_stack:
                         game.pop()
             legal_moves = list(game.legal_moves)
-            Observable.fire(Event.USER_MOVE, move=legal_moves[legal_fens.index(fen)])
+            Observable.fire(Event.USER_MOVE(move=legal_moves[legal_fens.index(fen)]))
         elif fen == last_computer_fen:  # Player had done the computer move on the board
             if check_game_state(game, play_mode) and ((interaction_mode == Mode.GAME) or (interaction_mode == Mode.REMOTE)):
                 # finally reset all alternative moves see: handle_move()
@@ -477,11 +477,11 @@ def main():
         else:
             logging.debug('Received event in event loop : %s', event)
             for case in switch(event):
-                if case(Event.FEN):  # User sets a new position, convert it to a move if it is legal
+                if case(EventApi.FEN):  # User sets a new position, convert it to a move if it is legal
                     legal_fens = process_fen(event.fen, legal_fens)
                     break
 
-                if case(Event.KEYBOARD_MOVE):
+                if case(EventApi.KEYBOARD_MOVE):
                     move = event.move
                     logging.debug('Keyboard move [%s]', move)
                     if move not in game.legal_moves:
@@ -492,7 +492,7 @@ def main():
                         legal_fens = process_fen(g.board_fen(), legal_fens)
                     break
 
-                if case(Event.USER_MOVE):  # User sends a new move
+                if case(EventApi.USER_MOVE):  # User sends a new move
                     move = event.move
                     logging.debug('User move [%s]', move)
                     if move not in game.legal_moves:
@@ -504,7 +504,7 @@ def main():
                         legal_fens = compute_legal_fens(game)
                     break
 
-                if case(Event.LEVEL):  # User sets a new level
+                if case(EventApi.LEVEL):  # User sets a new level
                     engine_level = event.level
                     logging.debug("Setting engine to level %i", engine_level)
                     if engine.level(engine_level):
@@ -512,7 +512,7 @@ def main():
                         Display.show(Message.LEVEL(level=engine_level, beep=event.beep))
                     break
 
-                if case(Event.NEW_ENGINE):  # User sets a new engine
+                if case(EventApi.NEW_ENGINE):  # User sets a new engine
                     old_path = engine.path
                     engine_shutdown = True
                     # Stop the old engine cleanly
@@ -564,7 +564,7 @@ def main():
                             observe(game, time_control)
                     break
 
-                if case(Event.SETUP_POSITION):  # User sets up a position
+                if case(EventApi.SETUP_POSITION):  # User sets up a position
                     logging.debug("Setting up custom fen: {0}".format(event.fen))
                     if engine.has_chess960():
                         engine.option('UCI_Chess960', event.uci960)
@@ -589,7 +589,7 @@ def main():
                     Display.show(Message.WAIT_STATE())
                     break
 
-                if case(Event.STARTSTOP_THINK):  # User wants to end or start a new engine search
+                if case(EventApi.STARTSTOP_THINK):  # User wants to end or start a new engine search
                     if engine.is_thinking() and (interaction_mode != Mode.REMOTE):
                         stop_clock()
                         engine.stop(show_best=True)
@@ -600,13 +600,13 @@ def main():
                             think(game, time_control)
                     break
 
-                if case(Event.ALTERNATIVE_MOVE):
+                if case(EventApi.ALTERNATIVE_MOVE):
                     game.pop()
                     Display.show(Message.ALTERNATIVE_MOVE())
                     think(game, time_control)
                     break
 
-                if case(Event.STARTSTOP_CLOCK):
+                if case(EventApi.STARTSTOP_CLOCK):
                     if time_control.is_ticking():
                         stop_clock()
                     else:
@@ -614,7 +614,7 @@ def main():
                         time_control.run(game.turn)
                     break
 
-                if case(Event.NEW_GAME):  # User starts a new game
+                if case(EventApi.NEW_GAME):  # User starts a new game
                     if game.move_stack:
                         logging.debug("Starting a new game")
                         if not (game.is_game_over() or game_declared):
@@ -631,34 +631,34 @@ def main():
                     Display.show(Message.WAIT_STATE())
                     break
 
-                if case(Event.DRAWRESIGN):
+                if case(EventApi.DRAWRESIGN):
                     if not game_declared:  # in case user leaves kings in place while moving other pieces
                         Display.show(Message.GAME_ENDS(result=event.result, play_mode=play_mode, game=copy.deepcopy(game)))
                         game_declared = True
                     break
 
-                if case(Event.REMOTE_MOVE):
+                if case(EventApi.REMOTE_MOVE):
                     if interaction_mode == Mode.REMOTE:
                         bm = chess.uci.BestMove(bestmove=chess.Move.from_uci(event.move), ponder=None)
                         game = handle_move(bm, game)
                         legal_fens = compute_legal_fens(game)
                     break
 
-                if case(Event.BEST_MOVE):
+                if case(EventApi.BEST_MOVE):
                     if event.inbook:
                         Display.show(Message.BOOK_MOVE(result=event.result))
                     game = handle_move(event.result, game)
                     legal_fens = compute_legal_fens(game)
                     break
 
-                if case(Event.NEW_PV):
+                if case(EventApi.NEW_PV):
                     if interaction_mode == Mode.GAME:
                         pass
                     else:
                         Display.show(Message.NEW_PV(pv=event.pv, mode=interaction_mode, fen=game.fen()))
                     break
 
-                if case(Event.NEW_SCORE):
+                if case(EventApi.NEW_SCORE):
                     if event.score == 'book':
                         score = 'book'
                     elif event.score == 'tb':
@@ -676,7 +676,7 @@ def main():
                     Display.show(Message.NEW_SCORE(score=score, mate=event.mate, mode=interaction_mode))
                     break
 
-                if case(Event.SET_INTERACTION_MODE):
+                if case(EventApi.SET_INTERACTION_MODE):
                     if interaction_mode == Mode.GAME or interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
                         stop_clock()  # only stop, if the clock is really running
                     interaction_mode = event.mode
@@ -688,38 +688,38 @@ def main():
                     Display.show(Message.INTERACTION_MODE(mode=event.mode, beep=event.beep))
                     break
 
-                if case(Event.SET_OPENING_BOOK):
+                if case(EventApi.SET_OPENING_BOOK):
                     logging.debug("Changing opening book [%s]", event.book[1])
                     bookreader = chess.polyglot.open_reader(event.book[1])
                     Display.show(Message.OPENING_BOOK(book_control_string=event.book_control_string, beep=event.beep))
                     break
 
-                if case(Event.SET_TIME_CONTROL):
+                if case(EventApi.SET_TIME_CONTROL):
                     time_control = event.time_control
                     Display.show(Message.TIME_CONTROL(time_control_string=event.time_control_string, beep=event.beep))
                     break
 
-                if case(Event.OUT_OF_TIME):
+                if case(EventApi.OUT_OF_TIME):
                     stop_search_and_clock()
                     Display.show(Message.GAME_ENDS(result=GameResult.OUT_OF_TIME, play_mode=play_mode, game=copy.deepcopy(game)))
                     break
 
-                if case(Event.UCI_OPTION_SET):
+                if case(EventApi.UCI_OPTION_SET):
                     # Nowhere calls this yet, but they will need to be saved for engine restart
                     engine.option(event.name, event.value)
                     break
 
-                if case(Event.SHUTDOWN):
+                if case(EventApi.SHUTDOWN):
                     if talker:
                         talker.say_event(event)
                     shutdown()
                     break
 
-                if case(Event.DGT_BUTTON):
+                if case(EventApi.DGT_BUTTON):
                     Display.show(Message.DGT_BUTTON(button=event.button))
                     break
 
-                if case(Event.DGT_FEN):
+                if case(EventApi.DGT_FEN):
                     Display.show(Message.DGT_FEN(fen=event.fen))
                     break
 

@@ -50,7 +50,7 @@ class TimeControl(object):
         if self.active_color is not None:
             txt = 'current clock time (before subtracting) is {0} and color is {1}, out of time event started from {2}'
             logging.debug(txt.format(self.clock_time[self.active_color], self.active_color, time_start))
-            Observable.fire(Event.OUT_OF_TIME, color=self.active_color)
+            Observable.fire(Event.OUT_OF_TIME(color=self.active_color))
 
     def run(self, color):
         if self.mode in (ClockMode.BLITZ, ClockMode.FISCHER):
