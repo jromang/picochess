@@ -205,11 +205,11 @@ class Engine(object):
 
     def callback(self, command):
         self.res = command.result()
-        Display.show(Message.SEARCH_STOPPED(engine_status=self.status, result=self.res))
+        Display.show(Message.SEARCH_STOPPED(engine_status=self.status))
         if self.show_best:
             Observable.fire(Event.BEST_MOVE(result=self.res, inbook=False))
         else:
-            logging.debug('Event Best_Move not fired')
+            logging.debug('EVT_BEST_MOVE not fired')
         self.status = EngineStatus.WAIT
 
     def is_thinking(self):

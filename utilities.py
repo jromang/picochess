@@ -223,6 +223,7 @@ class EngineStatus(AutoNumber):
     PONDER = ()
     WAIT = ()
 
+
 @enum.unique
 class BeepLevel(enum.Enum):
     YES = 0x0f  # Always ON
@@ -457,7 +458,7 @@ class Message():
     COMPUTER_MOVE_DONE_ON_BOARD = ClassFactory(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD, [])
     WAIT_STATE = ClassFactory(MessageApi.WAIT_STATE, [])
     SEARCH_STARTED = ClassFactory(MessageApi.SEARCH_STARTED, ['engine_status'])
-    SEARCH_STOPPED = ClassFactory(MessageApi.SEARCH_STOPPED, ['engine_status', 'result'])
+    SEARCH_STOPPED = ClassFactory(MessageApi.SEARCH_STOPPED, ['engine_status'])
     USER_TAKE_BACK = ClassFactory(MessageApi.USER_TAKE_BACK, [])
     RUN_CLOCK = ClassFactory(MessageApi.RUN_CLOCK, ['turn', 'time_control'])
     STOP_CLOCK = ClassFactory(MessageApi.STOP_CLOCK, [])
