@@ -490,7 +490,7 @@ class Event():
     SETUP_POSITION = ClassFactory(EventApi.SETUP_POSITION, ['fen', 'uci960'])
     STARTSTOP_THINK = ClassFactory(EventApi.STARTSTOP_THINK, [])
     STARTSTOP_CLOCK = ClassFactory(EventApi.STARTSTOP_CLOCK, [])
-    SET_TIME_CONTROL = ClassFactory(EventApi.SET_TIME_CONTROL, ['time_control'])
+    SET_TIME_CONTROL = ClassFactory(EventApi.SET_TIME_CONTROL, ['time_control', 'time_control_string', 'beep'])
     UCI_OPTION_SET = ClassFactory(EventApi.UCI_OPTION_SET, [])
     SHUTDOWN = ClassFactory(EventApi.SHUTDOWN, [])
     ALTERNATIVE_MOVE = ClassFactory(EventApi.ALTERNATIVE_MOVE, [])

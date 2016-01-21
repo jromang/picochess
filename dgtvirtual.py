@@ -92,7 +92,7 @@ class DGTVirtual(DGTInterface):
 
     def stop_clock(self):
         if self.rt:
-            print('Clock time stopped at ', (self.time_left, self.time_right))
+            print('Clock time stopped at ', self.time_left, self.time_right)
             self.rt.stop()
         else:
             print('Clock not ready')
@@ -103,7 +103,7 @@ class DGTVirtual(DGTInterface):
         self.time_right = hours_minutes_seconds(time_right)
         self.time_side = side
 
-        print('Clock time started at ', (self.time_left, self.time_right))
+        print('Clock time started at ', self.time_left, self.time_right)
         if self.rt:
             self.rt.stop()
         self.rt = self.RepeatedTimer(1, self.runclock)

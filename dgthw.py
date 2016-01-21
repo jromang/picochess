@@ -32,7 +32,7 @@ class DGThw(DGTInterface):
         self.lib = DGTlib(self.dgti2c)
 
         self.startup_clock()
-        self.enable_dgt_3000 = True  # TEST!
+        # self.enable_dgt_3000 = True  # TEST!
 
     def startup_clock(self):
         # Get clock version
