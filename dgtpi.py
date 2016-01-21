@@ -53,7 +53,8 @@ class DGTPi(DGTInterface):
         while True:
             with self.lock:
                 # get button events
-                if self.lib.dgt3000GetButton(pointer(but), pointer(buttime)) == 1:
+                res = self.lib.dgt3000GetButton(pointer(but), pointer(buttime))
+                if res > 0:
                     ack3 = but.value
                     if ack3 == 0x01:
                         logging.info("DGT clock [i2c]: button 0 pressed")
@@ -76,6 +77,8 @@ class DGTPi(DGTInterface):
                         logging.info("DGT clock [i2c]: lever pressed > right side down")
                     if ack3 == -0x40:
                         logging.info("DGT clock [i2c]: lever pressed > left side down")
+                if res < 0:
+                    logging.warning('GetButton returned error %i', res)
 
                 # get time events
                 self.lib.dgt3000GetTime(clktime)
