@@ -69,7 +69,10 @@ class DGTVirtual(DGTInterface):
                 print('Clock flag: right')
                 self.rt.stop()
             self.time_right = hours_minutes_seconds(time_right)
-        print('Clock time: {} - {}'.format(self.time_left, self.time_right))
+        if self.timer_running:
+            print('Clock duration not run out')
+        else:
+            print('Clock time: {} - {}'.format(self.time_left, self.time_right))
         Display.show(Message.DGT_CLOCK_TIME(time_left=self.time_left, time_right=self.time_right))
     # (END) dgti2c simulation class
 
@@ -81,18 +84,18 @@ class DGTVirtual(DGTInterface):
         else:
             text = str(move)
         logging.debug(text)
-        print('Clock move:', text, beep)
+        print('Clock move: {} Beep: {}'. format(text, beep))
 
     def display_text_on_clock(self, text, text_xl=None, beep=BeepLevel.CONFIG):
         beep = self.get_beep_level(beep)
         if text_xl and not self.enable_dgt_3000:
             text = text_xl
         logging.debug(text)
-        print('Clock text:', text, beep)
+        print('Clock text: {} Beep: {}'. format(text, beep))
 
     def stop_clock(self):
         if self.rt:
-            print('Clock time stopped at ', self.time_left, self.time_right)
+            print('Clock time stopped at {} - {}'. format(self.time_left, self.time_right))
             self.rt.stop()
         else:
             print('Clock not ready')
@@ -103,7 +106,7 @@ class DGTVirtual(DGTInterface):
         self.time_right = hours_minutes_seconds(time_right)
         self.time_side = side
 
-        print('Clock time started at ', self.time_left, self.time_right)
+        print('Clock time started at {} - {}'. format(self.time_left, self.time_right))
         if self.rt:
             self.rt.stop()
         self.rt = self.RepeatedTimer(1, self.runclock)
@@ -119,4 +122,4 @@ class DGTVirtual(DGTInterface):
         if self.clock_running:
             pass
         else:
-            logging.debug('Virtual clock isnt running - no need for endDisplay')
+            logging.debug('Clock isnt running - no need for endDisplay')

@@ -61,7 +61,7 @@ class DGTInterface(DgtDisplay, Thread):
             return True
         if beeplevel == BeepLevel.NO:
             return False
-        return self.beep_level & beeplevel.value
+        return bool(self.beep_level & beeplevel.value)
 
     def stopped_timer(self):
         self.timer_running = False
