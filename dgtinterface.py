@@ -66,9 +66,10 @@ class DGTInterface(DgtDisplay, Thread):
     def stopped_timer(self):
         self.timer_running = False
         if self.clock_running:
+            logging.debug('Showing the running clock again')
             self.end_clock()
         else:
-            logging.debug('Clock not running. Ignored duration.')
+            logging.debug('Clock not running - ignored duration')
 
     def run(self):
         while True:
@@ -84,6 +85,7 @@ class DGTInterface(DgtDisplay, Thread):
                         if hasattr(message, 'duration') and message.duration > 0:
                             self.timer = Timer(message.duration, self.stopped_timer)
                             self.timer.start()
+                            logging.debug('Showing move for {} secs'.format(message.duration))
                             self.timer_running = True
                         self.display_move_on_clock(message.move, message.fen, message.beep)
                         break
@@ -94,6 +96,7 @@ class DGTInterface(DgtDisplay, Thread):
                         if hasattr(message, 'duration') and message.duration > 0:
                             self.timer = Timer(message.duration, self.stopped_timer)
                             self.timer.start()
+                            logging.debug('Showing text for {} secs'.format(message.duration))
                             self.timer_running = True
                         self.display_text_on_clock(message.text, message.xl, message.beep)
                         break
