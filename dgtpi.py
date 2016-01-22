@@ -16,7 +16,7 @@
 
 from chess import Board
 from dgtinterface import *
-from dgti2c import *
+from dgtserial import *
 from ctypes import *
 from utilities import *
 from threading import Lock, Timer
@@ -25,8 +25,8 @@ from threading import Lock, Timer
 class DGTPi(DGTInterface):
     def __init__(self, device, enable_board_leds, beep_level):
         super(DGTPi, self).__init__(enable_board_leds, beep_level)
-        self.dgti2c = DGTi2c(device)
-        self.dgti2c.run()
+        self.dgtserial = DGTserial(device)
+        self.dgtserial.run()
 
         self.lock = Lock()
         self.lib = cdll.LoadLibrary("/home/pi/20151229/dgt3000.so")
@@ -88,7 +88,7 @@ class DGTPi(DGTInterface):
             if counter == 1:
                 Display.show(Message.DGT_CLOCK_TIME(time_left=times[:3], time_right=times[3:]))
             if counter == 3:  # issue 150 - force to write something to the board => check for alive connection!
-                self.dgti2c.write_board_command([DgtCmd.DGT_RETURN_SERIALNR])  # the code doesnt really matter ;-)
+                self.dgtserial.write_board_command([DgtCmd.DGT_RETURN_SERIALNR])  # the code doesnt really matter ;-)
             time.sleep(0.25)
 
     def _display_on_dgt_pi(self, text, beep=False):

@@ -49,9 +49,9 @@ piece_to_char = {
 }
 
 
-class DGTi2c(object):
+class DGTserial(object):
     def __init__(self, device):
-        super(DGTi2c, self).__init__()
+        super(DGTserial, self).__init__()
         self.device = device
         self.serial = None
         self.serial_error = False

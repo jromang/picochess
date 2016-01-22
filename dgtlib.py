@@ -21,15 +21,15 @@ import time
 class DGTlib(object):
     # This file simulates DGT's SO-lib File with similar api
 
-    def __init__(self, dgti2c):
+    def __init__(self, dgtserial):
         super(DGTlib, self).__init__()
-        self.dgti2c = dgti2c
+        self.dgtserial = dgtserial
 
     def write(self, command):
         if command[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value:
-            while self.dgti2c.clock_lock:
+            while self.dgtserial.clock_lock:
                 time.sleep(0.1)
-        self.dgti2c.write_board_command(command)
+        self.dgtserial.write_board_command(command)
 
     def display(self, text, beep, ld, rd):
         self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0c, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_ASCII,

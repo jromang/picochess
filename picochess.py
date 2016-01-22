@@ -39,8 +39,8 @@ from server import WebServer
 
 from dgthw import DGThw
 from dgtpi import DGTPi
+from dgtvr import DGTVr
 from dgtdisplay import DGTDisplay
-from dgtvirtual import DGTVirtual
 
 
 class AlternativeMover:
@@ -402,7 +402,7 @@ def main():
         logging.debug("Starting picochess with virtual DGT board")
         KeyboardInput().start()
         TerminalDisplay().start()
-        DGTVirtual(args.enable_dgt_board_leds, args.beep_level).start()
+        DGTVr(args.enable_dgt_board_leds, args.beep_level).start()
 
     # Save to PGN
     PgnDisplay(

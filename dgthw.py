@@ -16,7 +16,7 @@
 
 from chess import Board
 from dgtinterface import *
-from dgti2c import *
+from dgtserial import *
 from dgtlib import *
 from utilities import *
 from threading import Lock
@@ -25,19 +25,17 @@ from threading import Lock
 class DGThw(DGTInterface):
     def __init__(self, device, enable_board_leds, beep_level):
         super(DGThw, self).__init__(enable_board_leds, beep_level)
-        self.dgti2c = DGTi2c(device)
-        self.dgti2c.run()
+        self.dgtserial = DGTserial(device)
+        self.dgtserial.run()
 
         self.lock = Lock()
-        self.lib = DGTlib(self.dgti2c)
-
+        self.lib = DGTlib(self.dgtserial)
         self.startup_clock()
-        # self.enable_dgt_3000 = True  # TEST!
 
     def startup_clock(self):
         # Get clock version
-        self.dgti2c.write_board_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
-                                         DgtClk.DGT_CMD_CLOCK_VERSION, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        self.dgtserial.write_board_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                                            DgtClk.DGT_CMD_CLOCK_VERSION, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
 
     def _display_on_dgt_xl(self, text, beep=False):
         while len(text) < 6:
