@@ -13,8 +13,8 @@
 ### =======================
 ## enable-dgt-board-leds turn ON or OFF the LED's on the Revelation II chessbot. If so, please uncomment the next line
 # enable-dgt-board-leds
-## disable-dgt-clock-beep disables the beep of the DGT-clock. To disable the beep remove #, to enable comment the next line with #
-# disable-dgt-clock-beep
+## beep-level changes the occurrence of beeps. Minimum value is 0 (no beeps), maximum is 15 (all beeps).
+beep-level = 15
 ## Should a confirmation message (after moves) be displayed? If not, please active the next line
 # disable-ok-move
 ## Specify the serial port your dgt-board is connected to
