@@ -29,18 +29,18 @@ class DGTPi(DGTInterface):
         self.dgtserial.run()
 
         self.lock = Lock()
-        self.lib = cdll.LoadLibrary("/home/pi/20151229/dgt3000.so")
+        self.lib = cdll.LoadLibrary("/home/pi/20160122/dgtpicom.so")
 
         self.startup_clock()
         incoming_clock_thread = Timer(0, self.process_incoming_clock_forever)
         incoming_clock_thread.start()
 
     def startup_clock(self):
-        while self.lib.dgt3000Init() < 0:
+        while self.lib.dgtpicom_init() < 0:
             logging.warning('Init failed - Jack half connected?')
             Display.show(Message.JACK_CONNECTED_ERROR())
             time.sleep(0.5)  # dont flood the log
-        if self.lib.dgt3000Configure() < 0:
+        if self.lib.dgtpicom_configure() < 0:
             logging.warning('Configure failed - Jack connected back?')
             Display.show(Message.JACK_CONNECTED_ERROR())
         Display.show(Message.DGT_CLOCK_VERSION(main_version=2, sub_version=2, attached="i2c"))
@@ -53,7 +53,7 @@ class DGTPi(DGTInterface):
         while True:
             with self.lock:
                 # get button events
-                res = self.lib.dgt3000GetButton(pointer(but), pointer(buttime))
+                res = self.lib.dgtpicom_get_button_message(pointer(but), pointer(buttime))
                 if res > 0:
                     ack3 = but.value
                     if ack3 == 0x01:
@@ -73,6 +73,11 @@ class DGTPi(DGTInterface):
                         Display.show(Message.DGT_BUTTON(button=4))
                     if ack3 == 0x20:
                         logging.info("DGT clock [i2c]: button on/off pressed")
+                        # do more fancy tasks - like save pgn...
+                        self.lib.dgtpicom_configure()  # restart the clock - cause its OFF
+                        self.lib.dgtpicom_set_text(b'shutdown', 0x01, 0, 0)
+                        time.sleep(2)  # no "force" right now :-(
+                        os.system('shutdown now')
                     if ack3 == 0x40:
                         logging.info("DGT clock [i2c]: lever pressed > right side down")
                     if ack3 == -0x40:
@@ -81,7 +86,7 @@ class DGTPi(DGTInterface):
                     logging.warning('GetButton returned error %i', res)
 
                 # get time events
-                self.lib.dgt3000GetTime(clktime)
+                self.lib.dgtpicom_get_time(clktime)
 
             times = list(clktime.raw)
             counter = (counter + 1) % 4
@@ -97,14 +102,14 @@ class DGTPi(DGTInterface):
         logging.debug(text)
         text = bytes(text, 'utf-8')
         with self.lock:
-            res = self.lib.dgt3000Display(text, 0x03 if beep else 0x00, 0, 0)
+            res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, 0, 0)
             if res < 0:
                 logging.warning('Display returned error %i', res)
-                res = self.lib.dgt3000Configure()
+                res = self.lib.dgtpicom_configure()
                 if res < 0:
                     logging.warning('Configure also failed %i', res)
                 else:
-                    res = self.lib.dgt3000Display(text, 0x03 if beep else 0x00, 0, 0)
+                    res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, 0, 0)
             if res < 0:
                 logging.warning('Finally failed %i', res)
 
@@ -128,14 +133,14 @@ class DGTPi(DGTInterface):
         l_hms = self.time_left
         r_hms = self.time_right
         with self.lock:
-            res = self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
+            res = self.lib.dgtpicom_set_and_run(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
             if res < 0:
                 logging.warning('SetNRun returned error %i', res)
-                res = self.lib.dgt3000Configure()
+                res = self.lib.dgtpicom_configure()
                 if res < 0:
                     logging.warning('Configure also failed %i', res)
                 else:
-                    res = self.lib.dgt3000SetNRun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
+                    res = self.lib.dgtpicom_set_and_run(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
             if res < 0:
                 logging.warning('Finally failed %i', res)
             else:
@@ -153,14 +158,14 @@ class DGTPi(DGTInterface):
         self.time_left = l_hms
         self.time_right = r_hms
         with self.lock:
-            res = self.lib.dgt3000SetNRun(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
+            res = self.lib.dgtpicom_set_and_run(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
             if res < 0:
                 logging.warning('SetNRun returned error %i', res)
-                res = self.lib.dgt3000Configure()
+                res = self.lib.dgtpicom_configure()
                 if res < 0:
                     logging.warning('Configure also failed %i', res)
                 else:
-                    res = self.lib.dgt3000SetNRun(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
+                    res = self.lib.dgtpicom_set_and_run(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
             if res < 0:
                 logging.warning('Finally failed %i', res)
             else:
@@ -169,14 +174,14 @@ class DGTPi(DGTInterface):
     def end_clock(self):
         if self.clock_running:
             with self.lock:
-                res = self.lib.dgt3000EndDisplay()
+                res = self.lib.dgtpicom_end_text()
                 if res < 0:
                     logging.warning('EndDisplay returned error %i', res)
-                    res = self.lib.dgt3000Configure()
+                    res = self.lib.dgtpicom_configure()
                     if res < 0:
                         logging.warning('Configure also failed %i', res)
                     else:
-                        res = self.lib.dgt3000EndDisplay()
+                        res = self.lib.dgtpicom_end_text()
                 if res < 0:
                     logging.warning('Finally failed')
         else:
