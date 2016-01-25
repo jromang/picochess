@@ -113,6 +113,7 @@ class MessageApi():
     NEW_SCORE = 'MSG_NEW_SCORE'  # Score
     ALTERNATIVE_MOVE = 'MSG_ALTERNATIVE_MOVE'  # User wants another move to be calculated
     JACK_CONNECTED_ERROR = 'MSG_JACK_CONNECTED_ERROR'  # User connected fully|partly the clock via jack => remove it
+    NO_CLOCK_ERROR = 'MSG_NO_CLOCK_ERROR'  # User hasnt connected a clock over E-Board
     NO_EBOARD_ERROR = 'MSG_NO_EBOARD_ERROR'  # User hasnt connected an E-Board
     EBOARD_VERSION = 'MSG_EBOARD_VERSION'  # Startup Message after a successful connection to an E-Board
 
@@ -471,6 +472,7 @@ class Message():
     NEW_SCORE = ClassFactory(MessageApi.NEW_SCORE, ['score', 'mate', 'mode'])
     ALTERNATIVE_MOVE = ClassFactory(MessageApi.ALTERNATIVE_MOVE, [])
     JACK_CONNECTED_ERROR = ClassFactory(MessageApi.JACK_CONNECTED_ERROR, [])
+    NO_CLOCK_ERROR = ClassFactory(MessageApi.NO_CLOCK_ERROR, ['text', 'text_xl'])
     NO_EBOARD_ERROR = ClassFactory(MessageApi.NO_EBOARD_ERROR, ['text', 'text_xl'])
     EBOARD_VERSION = ClassFactory(MessageApi.EBOARD_VERSION, ['text', 'text_xl', 'channel'])
 
