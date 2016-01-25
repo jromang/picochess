@@ -38,6 +38,9 @@ class DGThw(DGTInterface):
                                             DgtClk.DGT_CMD_CLOCK_VERSION, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
 
     def _display_on_dgt_xl(self, text, beep=False):
+        if not self.clock_found:  # This can only happen on the XL function
+            logging.debug('Clock (still) not found. Ignore [%s]', text)
+            return
         while len(text) < 6:
             text += ' '
         if len(text) > 6:

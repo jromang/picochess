@@ -517,7 +517,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         DgtDisplay.show(Dgt.DISPLAY_TEXT(text="new game", xl="newgam", beep=BeepLevel.CONFIG, duration=1))
                         break
                     if case(MessageApi.WAIT_STATE):
-                        DgtDisplay.show(Dgt.DISPLAY_TEXT(text="you move", xl="you mv", beep=BeepLevel.OKAY, duration=0))
+                        DgtDisplay.show(Dgt.DISPLAY_TEXT(text="you move", xl="youmov", beep=BeepLevel.OKAY, duration=0))
                         break
                     if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
                         DgtDisplay.show(Dgt.LIGHT_CLEAR())
