@@ -54,7 +54,6 @@ class DGTserial(object):
         super(DGTserial, self).__init__()
         self.device = device
         self.serial = None
-        self.serial_error = False
         self.waitchars = ['/', '-', '\\', '|']
         # the next two are only used for "not dgtpi" mode
         self.clock_lock = False  # serial connected clock is locked
@@ -79,7 +78,7 @@ class DGTserial(object):
                 logging.error('Type not supported [%s]', type(v))
 
         while True:
-            if self.serial_error:
+            if not self.serial:
                 self.setup_serial()
             try:
                 self.serial.write(bytearray(array))
@@ -88,12 +87,10 @@ class DGTserial(object):
                 logging.error('Invalid bytes sent {0}'.format(message))
                 break
             except pyserial.SerialException as e:
-                self.serial_error = True
                 logging.error(e)
                 self.serial.close()
                 self.serial = None
             except IOError as e:
-                self.serial_error = True
                 logging.error(e)
                 self.serial.close()
                 self.serial = None
@@ -119,7 +116,7 @@ class DGTserial(object):
                     text_xl = 'ok bt'
                     channel = 'BT'
                 Display.show(Message.EBOARD_VERSION(text=text, text_xl=text_xl, channel=channel))
-                Display.show(Message.WAIT_STATE())
+                # Display.show(Message.WAIT_STATE())
                 break
             if case(DgtMsg.DGT_MSG_BWTIME):
                 if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
@@ -244,11 +241,14 @@ class DGTserial(object):
     def process_incoming_board_forever(self):
         while True:
             try:
-                if not self.serial_error:
+                c = None
+                if self.serial:
                     c = self.serial.read(1)
-                    if c:
-                        self.read_board_message(head=c)
-            except pyserial.SerialException as e:
+                if c:
+                    self.read_board_message(head=c)
+                else:
+                    time.sleep(0.1)
+            except pyserial.SerialException:
                 pass
             except TypeError:
                 pass
@@ -274,10 +274,9 @@ class DGTserial(object):
                 Display.show(Message.NO_EBOARD_ERROR(text='no E-board' + w, text_xl='board' + w))
                 wait_counter = (wait_counter + 1) % len(self.waitchars)
                 time.sleep(0.5)
-        self.serial_error = False
         self.startup_board()
 
     def run(self):
-        self.setup_serial()
         incoming_board_thread = Timer(0, self.process_incoming_board_forever)
         incoming_board_thread.start()
+        self.setup_serial()
