@@ -73,11 +73,9 @@ class DGTPi(DGTInterface):
                         Display.show(Message.DGT_BUTTON(button=4))
                     if ack3 == 0x20:
                         logging.info("DGT clock [i2c]: button on/off pressed")
-                        # do more fancy tasks - like save pgn...
                         self.lib.dgtpicom_configure()  # restart the clock - cause its OFF
                         self.lib.dgtpicom_set_text(b'shutdown', 0x01, 0, 0)
-                        time.sleep(2)  # no "force" right now :-(
-                        os.system('shutdown now')
+                        Observable.fire(Event.SHUTDOWN())
                     if ack3 == 0x40:
                         logging.info("DGT clock [i2c]: lever pressed > right side down")
                     if ack3 == -0x40:

@@ -712,7 +712,15 @@ def main():
                 if case(EventApi.SHUTDOWN):
                     if talker:
                         talker.say_event(event)
+                    Display.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game)))
                     shutdown()
+                    break
+
+                if case(EventApi.REBOOT):
+                    if talker:
+                        talker.say_event(event)
+                    Display.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game)))
+                    reboot()
                     break
 
                 if case(EventApi.DGT_BUTTON):

@@ -22,6 +22,7 @@ import subprocess
 import urllib.request
 import socket
 import json
+import time
 
 try:
     import enum
@@ -65,6 +66,7 @@ class EventApi():
     SET_TIME_CONTROL = 'EVT_SET_TIME_CONTROL'  # User sets time control
     UCI_OPTION_SET = 'EVT_UCI_OPTION_SET'  # Users sets an UCI option, contains 'name' and 'value' (strings)
     SHUTDOWN = 'EVT_SHUTDOWN'  # User wants to shutdown the machine
+    REBOOT = 'EVT_REBOOT'  # User wants to reboot the machine
     ALTERNATIVE_MOVE = 'EVT_ALTERNATIVE_MOVE'  # User wants engine to recalculate the position
     # dgt events
     DGT_BUTTON = 'EVT_DGT_BUTTON'  # User pressed a button at the dgt clock
@@ -495,6 +497,7 @@ class Event():
     SET_TIME_CONTROL = ClassFactory(EventApi.SET_TIME_CONTROL, ['time_control', 'time_control_string', 'beep'])
     UCI_OPTION_SET = ClassFactory(EventApi.UCI_OPTION_SET, [])
     SHUTDOWN = ClassFactory(EventApi.SHUTDOWN, [])
+    REBOOT = ClassFactory(EventApi.REBOOT, [])
     ALTERNATIVE_MOVE = ClassFactory(EventApi.ALTERNATIVE_MOVE, [])
     # dgt events
     DGT_BUTTON = ClassFactory(EventApi.DGT_BUTTON, ['button'])
@@ -572,20 +575,27 @@ def update_picochess(auto_reboot=False):
             logging.debug(output)
             if 'up-to-date' not in output:
                 # Update
-                logging.debug('Updating')
+                logging.debug('Updating picochess')
                 output = subprocess.Popen([git, "pull", "origin", "stable"],
                                           stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
                 logging.debug(output)
                 if auto_reboot:
-                    os.system('reboot')
+                    reboot()
 
 
 def shutdown():
     logging.debug('Shutting down system')
+    time.sleep(1)  # give some time to send out the pgn file
     if platform.system() == 'Windows':
         os.system('shutdown /s')
     else:
         os.system('shutdown -h now')
+
+
+def reboot():
+    logging.debug('Rebooting system')
+    time.sleep(1)  # give some time to send out the pgn file
+    os.system('reboot')
 
 
 def get_ip():
@@ -595,7 +605,7 @@ def get_ip():
         return s.getsockname()[0]
 
     # TODO: Better handling of exceptions of socket connect
-    except socket.error as v:
+    except socket.error:
         logging.error("No Internet Connection!")
     finally:
         s.close()

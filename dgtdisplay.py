@@ -169,8 +169,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
     def reboot(self):
         DgtDisplay.show(Dgt.DISPLAY_TEXT(text="pls wait", xl="wait", beep=BeepLevel.YES, duration=0))
         self.engine_restart = True
-        reboot_thread = threading.Timer(3, subprocess.Popen(["sudo", "reboot"]))
-        reboot_thread.start()
+        self.fire(Event.REBOOT())
 
     def build_time_control_fens(self):
         # Build the fen map for menu selection - faster to process than full map
