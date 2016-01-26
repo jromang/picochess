@@ -220,103 +220,147 @@ class WebDisplay(Display, threading.Thread):
             self.shared['system_info'] = {}
 
     def task(self, message):
-        if message == MessageApi.BOOK_MOVE:
-            EventHandler.write_to_clients({'event': 'Message', 'msg': 'Book move'})
+        for case in switch(message):
+            if case(MessageApi.BOOK_MOVE):
+                EventHandler.write_to_clients({'event': 'Message', 'msg': 'Book move'})
+                break
+            if case(MessageApi.START_NEW_GAME):
+                EventHandler.write_to_clients({'event': 'NewGame'})
+                EventHandler.write_to_clients({'event': 'Message', 'msg': 'New game'})
+                update_headers(self)
+                break
+            if case(MessageApi.SEARCH_STARTED):
+                EventHandler.write_to_clients({'event': 'Message', 'msg': 'Thinking..'})
+                break
+            if case(MessageApi.UCI_OPTION_LIST):
+                self.shared['uci_options'] = message.options
+                break
+            if case(MessageApi.SYSTEM_INFO):
+                self.shared['system_info'] = message.info
+                self.shared['system_info']['old_engine'] = self.shared['system_info']['engine_name']
+                update_headers(self)
+                break
+            if case(MessageApi.ENGINE_READY):
+                self.shared['system_info']['engine_name'] = message.engine_name
+                if not message.has_levels and "level" in self.shared["game_info"]:
+                    del self.shared['game_info']['level']
+                update_headers(self)
+                break
+            if case(MessageApi.STARTUP_INFO):
+                self.shared['game_info'] = message.info
+                break
+            if case(MessageApi.OPENING_BOOK):  # Process opening book
+                self.create_game_info()
+                self.shared['game_info']['book_control_string'] = message.book_control_string
+                break
+            if case(MessageApi.INTERACTION_MODE):  # Process interaction mode
+                self.create_game_info()
+                self.shared['game_info']['mode'] = message.mode
+                if self.shared['game_info']['mode'] == Mode.REMOTE:
+                    self.shared['system_info']['engine_name'] = "Remote Player"
+                else:
+                    self.shared['system_info']['engine_name'] = self.shared['system_info']['old_engine']
+                update_headers(self)
+                break
+            if case(MessageApi.PLAY_MODE):  # Process play mode
+                self.create_game_info()
+                self.shared['game_info']['play_mode'] = message.play_mode
+                break
+            if case(MessageApi.TIME_CONTROL):
+                self.create_game_info()
+                self.shared['game_info']['time_control_string'] = message.time_control_string
+                break
+            if case(MessageApi.LEVEL):
+                self.shared['game_info']['level'] = message.level
+                update_headers(self)
+                break
+            if case(MessageApi.JACK_CONNECTED_ERROR):
+                EventHandler.write_to_clients({'event': 'Message', 'msg': 'Unplug the jack cable please!'})
+                break
+            if case(MessageApi.NO_EBOARD_ERROR):
+                EventHandler.write_to_clients({'event': 'Message', 'msg': 'Connect an E-Board please!'})
+                break
+            if case(MessageApi.EBOARD_VERSION):
+                EventHandler.write_to_clients({'event': 'Message', 'msg': 'DGT board connected through ' + message.channel})
+                break
+            if case(MessageApi.DGT_CLOCK_VERSION):
+                EventHandler.write_to_clients({'event': 'Message', 'msg': 'DGT clock connected through ' + message.attached})
+                break
+            if case(MessageApi.COMPUTER_MOVE):
+                game = pgn.Game()
+                custom_fen = getattr(message.game, 'custom_fen', None)
+                if custom_fen:
+                    game.setup(custom_fen)
+                create_game_header(self, game)
 
-        elif message == MessageApi.START_NEW_GAME:
-            EventHandler.write_to_clients({'event': 'NewGame'})
-            EventHandler.write_to_clients({'event': 'Message', 'msg': 'New game'})
-            update_headers(self)
+                tmp = game
+                move_stack = message.game.move_stack
+                for move in move_stack:
+                    tmp = tmp.add_variation(move)
+                exporter = pgn.StringExporter(headers=True, comments=False, variations=False)
 
-        elif message == MessageApi.SEARCH_STARTED:
-            EventHandler.write_to_clients({'event': 'Message', 'msg': 'Thinking..'})
+                pgn_str = game.accept(exporter)
+                fen = message.game.fen()
+                # pgn_str = str(exporter)
+                r = {'pgn': pgn_str, 'fen': fen, 'event': "newFEN"}
 
-        elif message == MessageApi.UCI_OPTION_LIST:
-            self.shared['uci_options'] = message.options
-
-        elif message == MessageApi.SYSTEM_INFO:
-            self.shared['system_info'] = message.info
-            self.shared['system_info']['old_engine'] = self.shared['system_info']['engine_name']
-            update_headers(self)
-
-        elif message == MessageApi.ENGINE_READY:
-            self.shared['system_info']['engine_name'] = message.engine_name
-            if not message.has_levels and "level" in self.shared["game_info"]:
-                del self.shared['game_info']['level']
-            update_headers(self)
-
-        elif message == MessageApi.STARTUP_INFO:
-            self.shared['game_info'] = message.info
-
-        elif message == MessageApi.OPENING_BOOK:  # Process opening book
-            self.create_game_info()
-            self.shared['game_info']['book_control_string'] = message.book_control_string
-
-        elif message == MessageApi.INTERACTION_MODE:  # Process interaction mode
-            self.create_game_info()
-            self.shared['game_info']['mode'] = message.mode
-            if self.shared['game_info']['mode'] == Mode.REMOTE:
-                self.shared['system_info']['engine_name'] = "Remote Player"
-            else:
-                self.shared['system_info']['engine_name'] = self.shared['system_info']['old_engine']
-            update_headers(self)
-
-        elif message == MessageApi.PLAY_MODE:  # Process play mode
-            self.create_game_info()
-            self.shared['game_info']['play_mode'] = message.play_mode
-
-        elif message == MessageApi.TIME_CONTROL:
-            self.create_game_info()
-            self.shared['game_info']['time_control_string'] = message.time_control_string
-
-        elif message == MessageApi.LEVEL:
-            self.shared['game_info']['level'] = message.level
-            update_headers(self)
-
-        elif message == MessageApi.JACK_CONNECTED_ERROR:
-            EventHandler.write_to_clients({'event': 'Message', 'msg': 'Unplug the jack cable please!'})
-
-        elif message == MessageApi.NO_EBOARD_ERROR:
-            EventHandler.write_to_clients({'event': 'Message', 'msg': 'Connect an E-Board please!'})
-
-        elif message == MessageApi.EBOARD_VERSION:
-            EventHandler.write_to_clients({'event': 'Message', 'msg': 'DGT board connected through ' + message.channel})
-
-        elif message == MessageApi.DGT_CLOCK_VERSION:
-            EventHandler.write_to_clients({'event': 'Message', 'msg': 'DGT clock connected through ' + message.attached})
-
-        elif message == MessageApi.COMPUTER_MOVE or message == MessageApi.USER_MOVE or message == MessageApi.REVIEW_MODE_MOVE:
-            game = pgn.Game()
-            custom_fen = getattr(message.game, 'custom_fen', None)
-            if custom_fen:
-                game.setup(custom_fen)
-            create_game_header(self, game)
-
-            tmp = game
-            move_stack = message.game.move_stack
-            for move in move_stack:
-                tmp = tmp.add_variation(move)
-            exporter = pgn.StringExporter(headers=True, comments=False, variations=False)
-
-            pgn_str = game.accept(exporter)
-            fen = message.game.fen()
-            # pgn_str = str(exporter)
-            r = {'pgn': pgn_str, 'fen': fen, 'event': "newFEN"}
-
-            if message == MessageApi.COMPUTER_MOVE:
                 r['move'] = message.result.bestmove.uci()
                 r['msg'] = 'Computer move: ' + str(message.result.bestmove)
 
-            elif message == MessageApi.USER_MOVE:
+                self.shared['last_dgt_move_msg'] = r
+                EventHandler.write_to_clients(r)
+                break
+            if case(MessageApi.USER_MOVE):
+                game = pgn.Game()
+                custom_fen = getattr(message.game, 'custom_fen', None)
+                if custom_fen:
+                    game.setup(custom_fen)
+                create_game_header(self, game)
+
+                tmp = game
+                move_stack = message.game.move_stack
+                for move in move_stack:
+                    tmp = tmp.add_variation(move)
+                exporter = pgn.StringExporter(headers=True, comments=False, variations=False)
+
+                pgn_str = game.accept(exporter)
+                fen = message.game.fen()
+                # pgn_str = str(exporter)
+                r = {'pgn': pgn_str, 'fen': fen, 'event': "newFEN"}
+
                 r['move'] = message.move.uci()
                 r['msg'] = 'User move: ' + str(message.move)
 
-            if message == MessageApi.REMOTE_MODE_MOVE:
+                self.shared['last_dgt_move_msg'] = r
+                EventHandler.write_to_clients(r)
+                break
+            if case(MessageApi.REVIEW_MODE_MOVE):
+                game = pgn.Game()
+                custom_fen = getattr(message.game, 'custom_fen', None)
+                if custom_fen:
+                    game.setup(custom_fen)
+                create_game_header(self, game)
+
+                tmp = game
+                move_stack = message.game.move_stack
+                for move in move_stack:
+                    tmp = tmp.add_variation(move)
+                exporter = pgn.StringExporter(headers=True, comments=False, variations=False)
+
+                pgn_str = game.accept(exporter)
+                fen = message.game.fen()
+                # pgn_str = str(exporter)
+                r = {'pgn': pgn_str, 'fen': fen, 'event': "newFEN"}
+
                 r['move'] = 'User move: ' + str(message.move)
                 r['remote_play'] = True
 
-            self.shared['last_dgt_move_msg'] = r
-            EventHandler.write_to_clients(r)
+                self.shared['last_dgt_move_msg'] = r
+                EventHandler.write_to_clients(r)
+                break
+            if case():  # Default
+                # print(message)
+                pass
 
     def create_task(self, msg):
         IOLoop.instance().add_callback(callback=lambda: self.task(msg))

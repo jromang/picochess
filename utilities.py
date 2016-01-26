@@ -82,7 +82,7 @@ class MessageApi():
     BOOK_MOVE = 'MSG_BOOK_MOVE'  # Show book move
     NEW_PV = 'MSG_NEW_PV'  # Show the new Principal Variation
     REVIEW_MODE_MOVE = 'MSG_REVIEW_MODE_MOVE'  # Player is reviewing game
-    REMOTE_MODE_MOVE = 'MSG_REMOTE_XXX'  # DGT Player is playing vs network player
+    REMOTE_MODE_MOVE = 'MSG_REMOTE_MODE_MOVE'  # DGT Player is playing vs network player
     ENGINE_READY = 'MSG_ENGINE_READY'
     ENGINE_STARTUP = 'MSG_ENGINE_STARTUP'  # first time a new engine is ready
     ENGINE_FAIL = 'MSG_ENGINE_FAIL'

@@ -84,42 +84,50 @@ class ChessTalker(Display, threading.Thread):
             try:
                 # Check if we have something to say.
                 message = self.message_queue.get()
-                messageType = type(message).__name__
                 logging.debug("Read message from queue: %s", message)
                 system_voice = self.system_voice()
 
-                if messageType == "Message":
-                    if message == MessageApi.START_NEW_GAME and system_voice:
-                        logging.debug('Announcing START_NEW_GAME')
-                        system_voice.say_new_game()
-
-                    elif message == MessageApi.COMPUTER_MOVE and message.result.bestmove and message.game \
-                            and str(message.result.bestmove) != previous_move and self.computer_chesstalker_voice is not None:
-                        logging.debug('Announcing COMPUTER_MOVE [%s]', message.result.bestmove)
-                        local_game = copy.deepcopy(message.game)
-                        self.computer_chesstalker_voice.say_move(message.result.bestmove, local_game)
-                        previous_move = str(message.result.bestmove)
-
-                    elif (message == MessageApi.USER_MOVE or message == MessageApi.REVIEW_MODE_MOVE) and message.move \
-                            and message.game and str(message.move) != previous_move and self.user_chesstalker_voice is not None:
-                        logging.debug('Announcing USER_MOVE [%s]', message.move)
-                        local_game = copy.deepcopy(message.game)
-                        self.user_chesstalker_voice.say_move(message.move, local_game)
-                        previous_move = str(message.move)
-
-                    elif message == MessageApi.LEVEL:
+                for case in switch(message):
+                    if case(MessageApi.START_NEW_GAME):
+                        if system_voice:
+                            logging.debug('Announcing START_NEW_GAME')
+                            system_voice.say_new_game()
+                        break
+                    if case(MessageApi.COMPUTER_MOVE):
+                        if message.result.bestmove and message.game and str(message.result.bestmove) != previous_move \
+                                and self.computer_chesstalker_voice is not None:
+                            logging.debug('Announcing COMPUTER_MOVE [%s]', message.result.bestmove)
+                            local_game = copy.deepcopy(message.game)
+                            self.computer_chesstalker_voice.say_move(message.result.bestmove, local_game)
+                            previous_move = str(message.result.bestmove)
+                        break
+                    if case(MessageApi.USER_MOVE):
+                        if message.move and message.game and str(message.move) != previous_move \
+                                and self.user_chesstalker_voice is not None:
+                            logging.debug('Announcing USER_MOVE [%s]', message.move)
+                            self.user_chesstalker_voice.say_move(message.move, copy.deepcopy(message.game))
+                            previous_move = str(message.move)
+                        break
+                    if case(MessageApi.REVIEW_MODE_MOVE):
+                        if message.move and message.game and str(message.move) != previous_move \
+                                and self.user_chesstalker_voice is not None:
+                            logging.debug('Announcing REVIEW_MOVE [%s]', message.move)
+                            self.user_chesstalker_voice.say_move(message.move, copy.deepcopy(message.game))
+                            previous_move = str(message.move)
+                        break
+                    if case(message == MessageApi.LEVEL):
                         logging.debug('Announcing LEVEL [%s]', message.level)
                         system_voice.say_level(message.level)
-
-                    elif message == MessageApi.INTERACTION_MODE:
+                        break
+                    if case(MessageApi.INTERACTION_MODE):
                         logging.debug('Announcing SET_MODE [%s]', message.mode)
                         system_voice.say_mode(message.mode)
-
-                    elif message == MessageApi.OPENING_BOOK:
+                        break
+                    if case(MessageApi.OPENING_BOOK):
                         logging.debug('Announcing OPENING_BOOK')
                         system_voice.say_opening_book(message.book[0])
-
-                    elif message == MessageApi.TIME_CONTROL:
+                        break
+                    if case(MessageApi.TIME_CONTROL):
                         logging.debug('Announcing SET_TIME_CONTROL')
                         if message.time_control_string.startswith("mov"):
                             time_control_value = int(message.time_control_string[3:].strip())
@@ -135,48 +143,47 @@ class ChessTalker(Display, threading.Thread):
                             # logging.debug('minutes_per_game: ' + str(minutes_per_game))
                             # logging.debug('fischer_increment: ' + str(fischer_increment))
                             system_voice.say_time_control_fischer(minutes_per_game, fischer_increment)
+                        break
+                    if case(MessageApi.GAME_ENDS):
+                        if message.result == GameResult.OUT_OF_TIME:
+                            logging.debug('Announcing GAME_ENDS/TIME_CONTROL')
+                            color = ChessTalkerVoice.COLOR_WHITE if message.color == chess.WHITE else ChessTalkerVoice.COLOR_BLACK
+                            system_voice.say_out_of_time(color)
+                        elif message.result == GameResult.INSUFFICIENT_MATERIAL:
+                            pass
+                            # logging.debug('Announcing GAME_ENDS/INSUFFICIENT_MATERIAL')
+                            # system_voice.say_draw_insufficient_material()
+                        elif message.result == GameResult.MATE:
+                            pass
+                            # logging.debug('Announcing GAME_ENDS/MATE')
+                        elif message.result == GameResult.STALEMATE:
+                            pass
+                            # logging.debug('Announcing GAME_ENDS/STALEMATE')
+                            # system_voice.say_stalemate()
+                        elif message.result == GameResult.ABORT:
+                            logging.debug('Announcing GAME_ENDS/ABORT')
+                            system_voice.say_game_aborted()
+                        elif message.result == GameResult.DRAW:
+                            logging.debug('Announcing DRAW')
+                            system_voice.say_draw()
+                        elif message.result == GameResult.RESIGN_WHITE:
+                            logging.debug('Announcing WHITE WIN')
+                            system_voice.say_winner(ChessTalkerVoice.COLOR_WHITE)
+                        elif message.result == GameResult.RESIGN_BLACK:
+                            logging.debug('Announcing BLACK WIN')
+                            system_voice.say_winner(ChessTalkerVoice.COLOR_BLACK)
+                        break
 
-                    elif message == MessageApi.GAME_ENDS and message.result == GameResult.OUT_OF_TIME:
-                        logging.debug('Announcing GAME_ENDS/TIME_CONTROL')
-                        color = ChessTalkerVoice.COLOR_WHITE if message.color == chess.WHITE else ChessTalkerVoice.COLOR_BLACK
-                        system_voice.say_out_of_time(color)
+                        # elif messageType == "Event":
+                        #     if message == EventApi.SHUTDOWN:
+                        #         logging.debug('Announcing SHUTDOWN')
+                        #         system_voice.say_shutdown()
 
-                    elif message == MessageApi.GAME_ENDS and message.result == GameResult.INSUFFICIENT_MATERIAL:
+                    if case():  # Default
+                        # print(message)
                         pass
-                        # logging.debug('Announcing GAME_ENDS/INSUFFICIENT_MATERIAL')
-                        # system_voice.say_draw_insufficient_material()
-                    elif message == MessageApi.GAME_ENDS and message.result == GameResult.MATE:
-                        pass
-                        # logging.debug('Announcing GAME_ENDS/MATE')
-
-                    elif message == MessageApi.GAME_ENDS and message.result == GameResult.STALEMATE:
-                        pass
-                        # logging.debug('Announcing GAME_ENDS/STALEMATE')
-                        # system_voice.say_stalemate()
-
-                    elif message == MessageApi.GAME_ENDS and message.result == GameResult.ABORT:
-                        logging.debug('Announcing GAME_ENDS/ABORT')
-                        system_voice.say_game_aborted()
-
-                    elif message == MessageApi.GAME_ENDS and message.result == GameResult.DRAW:
-                        logging.debug('Announcing DRAW')
-                        system_voice.say_draw()
-
-                    elif message == MessageApi.GAME_ENDS and message.result == GameResult.RESIGN_WHITE:
-                        logging.debug('Announcing WHITE WIN')
-                        system_voice.say_winner(ChessTalkerVoice.COLOR_WHITE)
-
-                    elif message == MessageApi.GAME_ENDS and message.result == GameResult.RESIGN_BLACK:
-                        logging.debug('Announcing BLACK WIN')
-                        system_voice.say_winner(ChessTalkerVoice.COLOR_BLACK)
-                elif messageType == "Event":
-                    if message == EventApi.SHUTDOWN:
-                        logging.debug('Announcing SHUTDOWN')
-                        system_voice.say_shutdown()
             except queue.Empty:
                 pass
-            except:
-                logging.exception("Unexpected error")
 
     def system_voice(self):
         """
@@ -317,7 +324,7 @@ class ChessTalkerVoice():
                     for voice_json in voices_json:
                         voice_name = voice_json["name"]
                         voice_platforms = voice_json["platforms"]
-                        if voice_name and voice_name==voice and voice_platforms.count(platform.system()) > 0:
+                        if voice_name and voice_name == voice and voice_platforms.count(platform.system()) > 0:
                             self.localisation_id = localisation_id
                             self.voice_name = voice
                             self.voice_description = voice_json["description"]
@@ -372,15 +379,20 @@ class ChessTalkerVoice():
         return self.voice_vocabulary[ChessTalkerVoice.VOCAB_KING]
 
     def say_castles_kingside(self, color):
-        text = self.voice_vocabulary[ChessTalkerVoice.VOCAB_CASTLES_KINGSIDE].replace("$(COLOR)", self.vocabulary_color(color))
+        text = self.voice_vocabulary[ChessTalkerVoice.VOCAB_CASTLES_KINGSIDE].replace("$(COLOR)",
+                                                                                      self.vocabulary_color(color))
         return self.say_text(text)
 
     def say_castles_queenside(self, color):
-        text = self.voice_vocabulary[ChessTalkerVoice.VOCAB_CASTLES_QUEENSIDE].replace("$(COLOR)", self.vocabulary_color(color))
+        text = self.voice_vocabulary[ChessTalkerVoice.VOCAB_CASTLES_QUEENSIDE].replace("$(COLOR)",
+                                                                                       self.vocabulary_color(color))
         return self.say_text(text)
 
     def say_captures(self, attacking_piece, captured_piece):
-        text = self.voice_vocabulary[ChessTalkerVoice.VOCAB_CAPTURES].replace("$(ATTACKING_PIECE)", self.vocabulary_piece(attacking_piece)).replace("$(CAPTURED_PIECE)", self.vocabulary_piece(captured_piece))
+        text = self.voice_vocabulary[ChessTalkerVoice.VOCAB_CAPTURES].replace("$(ATTACKING_PIECE)",
+                                                                              self.vocabulary_piece(
+                                                                                  attacking_piece)).replace(
+            "$(CAPTURED_PIECE)", self.vocabulary_piece(captured_piece))
         return self.say_text(text)
 
     def say_check(self):
@@ -388,7 +400,8 @@ class ChessTalkerVoice():
         return self.say_text(text)
 
     def say_promotion(self, piece):
-        text = self.voice_vocabulary[ChessTalkerVoice.VOCAB_PROMOTION_TO].replace("$(PIECE)", self.vocabulary_piece(piece))
+        text = self.voice_vocabulary[ChessTalkerVoice.VOCAB_PROMOTION_TO].replace("$(PIECE)",
+                                                                                  self.vocabulary_piece(piece))
         return self.say_text(text)
 
     def say_checkmate(self):
@@ -419,23 +432,28 @@ class ChessTalkerVoice():
         return self.say_text(text)
 
     def say_winner(self, color):
-        text = self.voice_vocabulary[ChessTalkerVoice.VOCAB_RESULT_WINNER].replace("$(COLOR)", self.vocabulary_color(color))
+        text = self.voice_vocabulary[ChessTalkerVoice.VOCAB_RESULT_WINNER].replace("$(COLOR)",
+                                                                                   self.vocabulary_color(color))
         return self.say_text(text)
 
     def say_time_control_fixed_time(self, seconds_per_move):
-        text = self.voice_vocabulary[ChessTalkerVoice.VOCAB_TIME_CONTROL_FIXED_TIME].replace("$(SECONDS_PER_MOVE)", str(seconds_per_move))
+        text = self.voice_vocabulary[ChessTalkerVoice.VOCAB_TIME_CONTROL_FIXED_TIME].replace("$(SECONDS_PER_MOVE)",
+                                                                                             str(seconds_per_move))
         return self.say_text(text)
 
     def say_time_control_blitz(self, minutes_per_game):
-        text = self.voice_vocabulary[ChessTalkerVoice.VOCAB_TIME_CONTROL_BLITZ].replace("$(MINUTES_PER_GAME)", str(minutes_per_game))
+        text = self.voice_vocabulary[ChessTalkerVoice.VOCAB_TIME_CONTROL_BLITZ].replace("$(MINUTES_PER_GAME)",
+                                                                                        str(minutes_per_game))
         return self.say_text(text)
 
     def say_time_control_fischer(self, minutes_per_game, fischer_increment):
-        text = self.voice_vocabulary[ChessTalkerVoice.VOCAB_TIME_CONTROL_FISCHER].replace("$(MINUTES_PER_GAME)", str(minutes_per_game)).replace("$(FISCHER_INCREMENT)", str(fischer_increment))
+        text = self.voice_vocabulary[ChessTalkerVoice.VOCAB_TIME_CONTROL_FISCHER].replace("$(MINUTES_PER_GAME)", str(
+            minutes_per_game)).replace("$(FISCHER_INCREMENT)", str(fischer_increment))
         return self.say_text(text)
 
     def say_out_of_time(self, color):
-        text = self.voice_vocabulary[ChessTalkerVoice.VOCAB_RESULT_TIME_CONTROL].replace("$(COLOR)", self.vocabulary_color(color))
+        text = self.voice_vocabulary[ChessTalkerVoice.VOCAB_RESULT_TIME_CONTROL].replace("$(COLOR)",
+                                                                                         self.vocabulary_color(color))
         return self.say_text(text)
 
     def say_new_game(self):
@@ -580,7 +598,7 @@ class ChessTalkerVoice():
             # Disambiguation for piece move
             if 'a' <= moveTextSAN[1] <= 'h' and 'a' <= moveTextSAN[2] <= 'h':
                 spoken_san_tokens = spoken_san.split()
-                spoken_san = spoken_san_tokens[0] + ' ' + from_square + ' ' + ' '. join(spoken_san_tokens[1:])
+                spoken_san = spoken_san_tokens[0] + ' ' + from_square + ' ' + ' '.join(spoken_san_tokens[1:])
 
             self.say_text(spoken_san)
 
