@@ -47,7 +47,7 @@ class DGThw(DGTInterface):
             logging.warning('DGT XL clock message too long [%s]', text)
         logging.debug(text)
         with self.lock:
-            res = self.lib.display_xl(text, 0x03 if beep else 0x00, 0, 0)
+            res = self.lib.set_text_xl(text, 0x03 if beep else 0x00, 0, 0)
             if res < 0:
                 logging.warning('Finally failed %i', res)
 
@@ -59,7 +59,7 @@ class DGThw(DGTInterface):
         logging.debug(text)
         text = bytes(text, 'utf-8')
         with self.lock:
-            res = self.lib.display(text, 0x03 if beep else 0x00, 0, 0)
+            res = self.lib.set_text_3k(text, 0x03 if beep else 0x00, 0, 0)
             if res < 0:
                 logging.warning('Finally failed %i', res)
 
@@ -95,7 +95,7 @@ class DGThw(DGTInterface):
         l_hms = self.time_left
         r_hms = self.time_right
         with self.lock:
-            res = self.lib.setnrun(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
+            res = self.lib.set_and_run(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
             if res < 0:
                 logging.warning('Finally failed %i', res)
             else:
@@ -113,7 +113,7 @@ class DGThw(DGTInterface):
             lr = 0
             rr = 1
         with self.lock:
-            res = self.lib.setnrun(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
+            res = self.lib.set_and_run(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
             if res < 0:
                 logging.warning('Finally failed %i', res)
             else:
@@ -121,6 +121,6 @@ class DGThw(DGTInterface):
 
     def end_clock(self):
         if self.clock_running:
-            self.lib.end_clock()
+            self.lib.end_text()
         else:
-            logging.debug('DGT clock isnt running - no need for endDisplay')
+            logging.debug('DGT clock isnt running - no need for endClock')

@@ -120,4 +120,4 @@ class DGTVr(DGTInterface):
         if self.clock_running:
             pass
         else:
-            logging.debug('Clock isnt running - no need for endDisplay')
+            logging.debug('Clock isnt running - no need for endClock')

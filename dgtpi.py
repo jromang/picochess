@@ -81,7 +81,7 @@ class DGTPi(DGTInterface):
                     if ack3 == -0x40:
                         logging.info("DGT clock [i2c]: lever pressed > left side down")
                 if res < 0:
-                    logging.warning('GetButton returned error %i', res)
+                    logging.warning('GetButtonMessage returned error %i', res)
 
                 # get time events
                 self.lib.dgtpicom_get_time(clktime)
@@ -102,7 +102,7 @@ class DGTPi(DGTInterface):
         with self.lock:
             res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, 0, 0)
             if res < 0:
-                logging.warning('Display returned error %i', res)
+                logging.warning('SetText returned error %i', res)
                 res = self.lib.dgtpicom_configure()
                 if res < 0:
                     logging.warning('Configure also failed %i', res)
@@ -133,7 +133,7 @@ class DGTPi(DGTInterface):
         with self.lock:
             res = self.lib.dgtpicom_set_and_run(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
             if res < 0:
-                logging.warning('SetNRun returned error %i', res)
+                logging.warning('SetAndRun returned error %i', res)
                 res = self.lib.dgtpicom_configure()
                 if res < 0:
                     logging.warning('Configure also failed %i', res)
@@ -158,7 +158,7 @@ class DGTPi(DGTInterface):
         with self.lock:
             res = self.lib.dgtpicom_set_and_run(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
             if res < 0:
-                logging.warning('SetNRun returned error %i', res)
+                logging.warning('SetAndRun returned error %i', res)
                 res = self.lib.dgtpicom_configure()
                 if res < 0:
                     logging.warning('Configure also failed %i', res)
@@ -174,7 +174,7 @@ class DGTPi(DGTInterface):
             with self.lock:
                 res = self.lib.dgtpicom_end_text()
                 if res < 0:
-                    logging.warning('EndDisplay returned error %i', res)
+                    logging.warning('EndText returned error %i', res)
                     res = self.lib.dgtpicom_configure()
                     if res < 0:
                         logging.warning('Configure also failed %i', res)
@@ -183,4 +183,4 @@ class DGTPi(DGTInterface):
                 if res < 0:
                     logging.warning('Finally failed')
         else:
-            logging.debug('DGT clock isnt running - no need for endDisplay')
+            logging.debug('DGT clock isnt running - no need for endClock')
