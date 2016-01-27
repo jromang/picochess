@@ -108,15 +108,14 @@ class DGTserial(object):
                 board_version = str(message[0]) + '.' + str(message[1])
                 logging.debug("DGT board version %0.2f", float(board_version))
                 if self.device.find('rfc') == -1:
-                    text = 'USB E-board'
+                    text_3k = 'USB E-board'
                     text_xl = 'ok usb'
                     channel = 'USB'
                 else:
-                    text = 'BT E-board'
+                    text_3k = 'BT E-board'
                     text_xl = 'ok bt'
                     channel = 'BT'
-                Display.show(Message.EBOARD_VERSION(text=text, text_xl=text_xl, channel=channel))
-                # Display.show(Message.WAIT_STATE())
+                Display.show(Message.EBOARD_VERSION(l=None, m=text_3k, s=text_xl, channel=channel))
                 break
             if case(DgtMsg.DGT_MSG_BWTIME):
                 if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
@@ -271,7 +270,7 @@ class DGTserial(object):
             except pyserial.SerialException as e:
                 logging.error(e)
                 w = self.waitchars[wait_counter]
-                Display.show(Message.NO_EBOARD_ERROR(text='no E-board' + w, text_xl='board' + w))
+                Display.show(Message.NO_EBOARD_ERROR(l='no E-board', m='noboard' + w, s='board' + w))
                 wait_counter = (wait_counter + 1) % len(self.waitchars)
                 time.sleep(0.5)
         self.startup_board()

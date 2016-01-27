@@ -35,7 +35,7 @@ class DGTInterface(DgtDisplay, Thread):
         self.timer_running = False
         self.clock_running = False
 
-    def display_text_on_clock(self, text, text_xl=None, beep=BeepLevel.CONFIG):
+    def display_text_on_clock(self, text, beep=BeepLevel.CONFIG):
         raise NotImplementedError()
 
     def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):
@@ -98,7 +98,13 @@ class DGTInterface(DgtDisplay, Thread):
                             self.timer.start()
                             logging.debug('Showing text for {} secs'.format(message.duration))
                             self.timer_running = True
-                        self.display_text_on_clock(message.text, message.xl, message.beep)
+                        if self.enable_dgt_pi:
+                            text = message.l
+                        else:
+                            text = message.m if self.enable_dgt_3000 else message.s
+                        if text is None:
+                            text = message.m
+                        self.display_text_on_clock(text, message.beep)
                         break
                     if case(DgtApi.LIGHT_CLEAR):
                         self.clear_light_revelation_board()
@@ -120,7 +126,7 @@ class DGTInterface(DgtDisplay, Thread):
                             self.enable_dgt_3000 = True
                         if message.attached == 'i2c':
                             self.enable_dgt_pi = True
-                        self.show(Dgt.DISPLAY_TEXT(text='pico ' + version, xl='pic' + version, beep=BeepLevel.YES, duration=2))
+                        self.show(Dgt.DISPLAY_TEXT(l='picoChs ' + version, m='pico ' + version, s='pic' + version, beep=BeepLevel.YES, duration=2))
                         break
                     if case(DgtApi.CLOCK_TIME):
                         self.time_left = message.time_left

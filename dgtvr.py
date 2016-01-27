@@ -86,10 +86,8 @@ class DGTVr(DGTInterface):
         logging.debug(text)
         print('Clock move: {} Beep: {}'. format(text, beep))
 
-    def display_text_on_clock(self, text, text_xl=None, beep=BeepLevel.CONFIG):
+    def display_text_on_clock(self, text, beep=BeepLevel.CONFIG):
         beep = self.get_beep_level(beep)
-        if text_xl and not self.enable_dgt_3000:
-            text = text_xl
         logging.debug(text)
         print('Clock text: {} Beep: {}'. format(text, beep))
 

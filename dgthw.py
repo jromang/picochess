@@ -63,13 +63,11 @@ class DGThw(DGTInterface):
             if res < 0:
                 logging.warning('Finally failed %i', res)
 
-    def display_text_on_clock(self, text, text_xl=None, beep=BeepLevel.CONFIG):
+    def display_text_on_clock(self, text, beep=BeepLevel.CONFIG):
         beep = self.get_beep_level(beep)
         if self.enable_dgt_3000:
             self._display_on_dgt_3000(text, beep)
         else:
-            if text_xl:
-                text = text_xl
             self._display_on_dgt_xl(text, beep)
 
     def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):

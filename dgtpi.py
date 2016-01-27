@@ -111,7 +111,7 @@ class DGTPi(DGTInterface):
             if res < 0:
                 logging.warning('Finally failed %i', res)
 
-    def display_text_on_clock(self, text, text_xl=None, beep=BeepLevel.CONFIG):
+    def display_text_on_clock(self, text, beep=BeepLevel.CONFIG):
         beep = self.get_beep_level(beep)
         self._display_on_dgt_pi(text, beep)
 

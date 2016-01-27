@@ -427,7 +427,7 @@ def ClassFactory(name, argnames, BaseClass=BaseClass):
 
 class Dgt():
     DISPLAY_MOVE = ClassFactory(DgtApi.DISPLAY_MOVE, ['move', 'fen', 'beep', 'duration', 'force'])
-    DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['text', 'xl', 'beep', 'duration', 'force'])
+    DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['l', 'm', 's', 'beep', 'duration', 'force'])
     LIGHT_CLEAR = ClassFactory(DgtApi.LIGHT_CLEAR, [])
     LIGHT_SQUARES = ClassFactory(DgtApi.LIGHT_SQUARES, ['squares'])
     CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, [])
@@ -474,9 +474,9 @@ class Message():
     NEW_SCORE = ClassFactory(MessageApi.NEW_SCORE, ['score', 'mate', 'mode'])
     ALTERNATIVE_MOVE = ClassFactory(MessageApi.ALTERNATIVE_MOVE, [])
     JACK_CONNECTED_ERROR = ClassFactory(MessageApi.JACK_CONNECTED_ERROR, [])
-    NO_CLOCK_ERROR = ClassFactory(MessageApi.NO_CLOCK_ERROR, ['text', 'text_xl'])
-    NO_EBOARD_ERROR = ClassFactory(MessageApi.NO_EBOARD_ERROR, ['text', 'text_xl'])
-    EBOARD_VERSION = ClassFactory(MessageApi.EBOARD_VERSION, ['text', 'text_xl', 'channel'])
+    NO_CLOCK_ERROR = ClassFactory(MessageApi.NO_CLOCK_ERROR, ['l', 'm', 's'])
+    NO_EBOARD_ERROR = ClassFactory(MessageApi.NO_EBOARD_ERROR, ['l', 'm', 's'])
+    EBOARD_VERSION = ClassFactory(MessageApi.EBOARD_VERSION, ['l', 'm', 's', 'channel'])
 
 
 class Event():
