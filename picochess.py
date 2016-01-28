@@ -18,6 +18,7 @@
 
 import sys
 import os
+import platform
 
 import configargparse
 import chess
@@ -322,7 +323,7 @@ def main():
 
     # Command line argument parsing
     parser = configargparse.ArgParser(default_config_files=[os.path.join(os.path.dirname(__file__), "picochess.ini")])
-    parser.add_argument("-e", "--engine", type=str, help="UCI engine executable path", default='engines/stockfish')
+    parser.add_argument("-e", "--engine", type=str, help="UCI engine executable path", default=None)
     parser.add_argument("-d", "--dgt-port", type=str,
                         help="enable dgt board on the given serial port such as /dev/ttyUSB0")
     parser.add_argument("-b", "--book", type=str, help="Opening book - full name of book in 'books' folder",
@@ -367,6 +368,8 @@ def main():
     parser.add_argument("-pi", "--dgtpi", action='store_true', help="use the dgtpi hardware")
 
     args = parser.parse_args()
+    if args.engine is None:
+        args.engine = 'engine' + os.sep + platform.machine() + os.sep + 'stockfish'
 
     # Enable logging
     logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
