@@ -48,7 +48,7 @@ SPOKEN_PIECE_SOUNDS = {
 }
 
 
-class ChessTalker(Display, threading.Thread):
+class ChessTalker(DisplayMsg, threading.Thread):
     def __init__(self, user_voice, computer_voice):
         """
         Initialize a ChessTalker with voices for the user and/or computer players.
@@ -83,7 +83,7 @@ class ChessTalker(Display, threading.Thread):
         while self.user_chesstalker_voice or self.computer_chesstalker_voice:
             try:
                 # Check if we have something to say.
-                message = self.message_queue.get()
+                message = self.msg_queue.get()
                 logging.debug("Read message from queue: %s", message)
                 system_voice = self.system_voice()
 
@@ -196,7 +196,7 @@ class ChessTalker(Display, threading.Thread):
             return self.user_chesstalker_voice
 
     def say_event(self, event):
-        self.message_queue.put(event)
+        self.msg_queue.put(event)
 
     @staticmethod
     def localisations():
@@ -479,7 +479,7 @@ class ChessTalkerVoice():
     def say_mode(self, mode):
         """Announce an mode setting"""
         modeVocab = None
-        if mode == Mode.GAME:
+        if mode == Mode.NORMAL:
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_GAME]
         elif mode == Mode.ANALYSIS:
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_ANALYSIS]
@@ -707,7 +707,7 @@ if __name__ == "__main__":
                     chesstalker.say_level(20)
                     chesstalker.say_opening_book("fun")
                     chesstalker.say_opening_book("anand")
-                    chesstalker.say_mode(Mode.GAME)
+                    chesstalker.say_mode(Mode.NORMAL)
                     chesstalker.say_mode(Mode.ANALYSIS)
                     chesstalker.say_mode(Mode.OBSERVE)
                     chesstalker.say_mode(Mode.REMOTE)

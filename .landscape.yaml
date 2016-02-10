@@ -1,7 +1,15 @@
+python-targets: 3
 doc-warnings: yes
 test-warnings: no
 strictness: veryhigh
 max-line-length: 120
 ignore-paths:
+    - bin
+    - books
     - docs
-    - libs
+    - engines
+    - include
+    - lib
+    - src
+    - tablebases
+    - test

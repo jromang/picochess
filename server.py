@@ -196,7 +196,7 @@ class WebServer(Observable, threading.Thread):
         IOLoop.instance().start()
 
 
-class WebDisplay(Display, threading.Thread):
+class WebDisplay(DisplayMsg, threading.Thread):
     def __init__(self, shared):
         super(WebDisplay, self).__init__()
         self.shared = shared
@@ -368,5 +368,5 @@ class WebDisplay(Display, threading.Thread):
     def run(self):
         while True:
             # Check if we have something to display
-            message = self.message_queue.get()
+            message = self.msg_queue.get()
             self.create_task(message)

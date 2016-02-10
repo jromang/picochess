@@ -22,9 +22,9 @@ from utilities import *
 from threading import Lock
 
 
-class DGThw(DGTInterface):
+class DgtHw(DgtInterface):
     def __init__(self, device, enable_board_leds, beep_level):
-        super(DGThw, self).__init__(enable_board_leds, beep_level)
+        super(DgtHw, self).__init__(enable_board_leds, beep_level)
         self.dgtserial = DGTserial(device)
         self.dgtserial.run()
 

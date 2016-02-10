@@ -183,7 +183,7 @@ class Engine(object):
         self.show_best = True
         time_dict['async_callback'] = self.callback
 
-        Display.show(Message.SEARCH_STARTED(engine_status=self.status))
+        DisplayMsg.show(Message.SEARCH_STARTED(engine_status=self.status))
         self.future = self.engine.go(**time_dict)
         return self.future
 
@@ -193,13 +193,13 @@ class Engine(object):
         self.status = EngineStatus.PONDER
         self.show_best = False
 
-        Display.show(Message.SEARCH_STARTED(engine_status=self.status))
+        DisplayMsg.show(Message.SEARCH_STARTED(engine_status=self.status))
         self.future = self.engine.go(ponder=True, infinite=True, async_callback=self.callback)
         return self.future
 
     def callback(self, command):
         self.res = command.result()
-        Display.show(Message.SEARCH_STOPPED(engine_status=self.status))
+        DisplayMsg.show(Message.SEARCH_STOPPED(engine_status=self.status))
         if self.show_best:
             Observable.fire(Event.BEST_MOVE(result=self.res, inbook=False))
         else:

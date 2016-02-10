@@ -19,14 +19,14 @@ import chess
 from dgtinterface import *
 
 
-class DGTVr(DGTInterface):
+class DgtVr(DgtInterface):
     def __init__(self, enable_board_leds, beep_level):
-        super(DGTVr, self).__init__(enable_board_leds, beep_level)
+        super(DgtVr, self).__init__(enable_board_leds, beep_level)
         # virtual lib
         self.rt = None
         self.time_side = None
         # setup virtual clock
-        Display.show(Message.DGT_CLOCK_VERSION(main_version=0, sub_version=0, attached="virtual"))
+        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main_version=0, sub_version=0, attached="virtual"))
 
     # (START) dgtserial class simulation
     class RepeatedTimer(object):
@@ -73,7 +73,7 @@ class DGTVr(DGTInterface):
             print('Clock duration not run out')
         else:
             print('Clock time: {} - {}'.format(self.time_left, self.time_right))
-        Display.show(Message.DGT_CLOCK_TIME(time_left=self.time_left, time_right=self.time_right))
+        DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=self.time_left, time_right=self.time_right))
     # (END) dgtserial simulation class
 
     def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):

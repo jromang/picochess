@@ -19,7 +19,6 @@ import chess
 import time
 import logging
 from utilities import *
-from timecontrol import *
 
 
 class KeyboardInput(Observable, threading.Thread):
@@ -80,14 +79,14 @@ class KeyboardInput(Observable, threading.Thread):
                 logging.warning('Invalid user input [%s]', raw)
 
 
-class TerminalDisplay(Display, threading.Thread):
+class TerminalDisplay(DisplayMsg, threading.Thread):
     def __init__(self):
         super(TerminalDisplay, self).__init__()
 
     def run(self):
         while True:
             # Check if we have something to display
-            message = self.message_queue.get()
+            message = self.msg_queue.get()
             for case in switch(message):
                 if case(MessageApi.COMPUTER_MOVE):
                     print('\n' + str(message.game))
@@ -95,7 +94,7 @@ class TerminalDisplay(Display, threading.Thread):
                     print('emulate user to make the computer move...sleeping for one second')
                     time.sleep(1)
                     logging.debug('emulate user now finished doing computer move')
-                    Display.show(Message.DGT_FEN(fen=message.game.board_fen()))
+                    DisplayMsg.show(Message.DGT_FEN(fen=message.game.board_fen()))
                     break
                 if case(MessageApi.SEARCH_STARTED):
                     if message.engine_status == EngineStatus.THINK:

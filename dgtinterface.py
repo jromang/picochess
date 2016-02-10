@@ -19,9 +19,9 @@ import time
 from threading import Timer, Thread
 
 
-class DGTInterface(DgtDisplay, Thread):
+class DgtInterface(DisplayDgt, Thread):
     def __init__(self, enable_board_leds, beep_level):
-        super(DGTInterface, self).__init__()
+        super(DgtInterface, self).__init__()
 
         self.enable_dgt_3000 = False
         self.enable_dgt_pi = False
@@ -76,7 +76,7 @@ class DGTInterface(DgtDisplay, Thread):
             # Check if we have something to display
             try:
                 message = self.dgt_queue.get()
-                logging.debug("Read dgt from queue: %s", message)
+                logging.debug("Received command from dgt queue: %s", message)
                 for case in switch(message):
                     if case(DgtApi.DISPLAY_MOVE):
                         message.force = False  # TEST!

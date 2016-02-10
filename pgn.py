@@ -28,7 +28,7 @@ import re
 from email.mime.text import MIMEText
 
 
-class PgnDisplay(Display, threading.Thread):
+class PgnDisplay(DisplayMsg, threading.Thread):
     def __init__(self, pgn_file_name, net, email=None, mailgun_key=None,
                  smtp_server=None, smtp_user=None,
                  smtp_pass=None, smtp_encryption=False):
@@ -153,7 +153,7 @@ class PgnDisplay(Display, threading.Thread):
         while True:
             # Check if we have something to display
             try:
-                message = self.message_queue.get()
+                message = self.msg_queue.get()
                 for case in switch(message):
                     if case(MessageApi.SYSTEM_INFO):
                         self.engine_name = message.info['engine_name']

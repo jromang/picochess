@@ -115,7 +115,7 @@ class DGTserial(object):
                     text_3k = 'BT E-board'
                     text_xl = 'ok bt'
                     channel = 'BT'
-                Display.show(Message.EBOARD_VERSION(l=None, m=text_3k, s=text_xl, channel=channel))
+                DisplayMsg.show(Message.EBOARD_VERSION(l=None, m=text_3k, s=text_xl, channel=channel))
                 break
             if case(DgtMsg.DGT_MSG_BWTIME):
                 if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
@@ -142,24 +142,24 @@ class DGTserial(object):
                         #                        74-53 | button 3 + 4
                         if ack3 == 49:
                             logging.info("DGT clock [ser]: button 0 pressed")
-                            Display.show(Message.DGT_BUTTON(button=0))
+                            DisplayMsg.show(Message.DGT_BUTTON(button=0))
                         if ack3 == 52:
                             logging.info("DGT clock [ser]: button 1 pressed")
-                            Display.show(Message.DGT_BUTTON(button=1))
+                            DisplayMsg.show(Message.DGT_BUTTON(button=1))
                         if ack3 == 51:
                             logging.info("DGT clock [ser]: button 2 pressed")
-                            Display.show(Message.DGT_BUTTON(button=2))
+                            DisplayMsg.show(Message.DGT_BUTTON(button=2))
                         if ack3 == 50:
                             logging.info("DGT clock [ser]: button 3 pressed")
-                            Display.show(Message.DGT_BUTTON(button=3))
+                            DisplayMsg.show(Message.DGT_BUTTON(button=3))
                         if ack3 == 53:
                             logging.info("DGT clock [ser]: button 4 pressed")
-                            Display.show(Message.DGT_BUTTON(button=4))
+                            DisplayMsg.show(Message.DGT_BUTTON(button=4))
                     if ack1 == 0x09:
                         main_version = ack2 >> 4
                         sub_version = ack2 & 0x0f
                         logging.debug("DGT clock [ser]: version %0.2f", float(str(main_version) + '.' + str(sub_version)))
-                        Display.show(Message.DGT_CLOCK_VERSION(main_version=main_version, sub_version=sub_version, attached="serial"))
+                        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main_version=main_version, sub_version=sub_version, attached="serial"))
                 elif any(message[:6]):
                     r_hours = message[0] & 0x0f
                     r_mins = (message[1] >> 4) * 10 + (message[1] & 0x0f)
@@ -170,7 +170,7 @@ class DGTserial(object):
                     tr = [r_hours, r_mins, r_secs]
                     tl = [l_hours, l_mins, l_secs]
                     logging.info('DGT clock [ser]: time received {} : {}'.format(tl, tr))
-                    Display.show(Message.DGT_CLOCK_TIME(time_left=tl, time_right=tr))
+                    DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=tl, time_right=tr))
                 else:
                     logging.debug('DGT clock [ser]: null message ignored')
                 if self.clock_lock:
@@ -203,7 +203,7 @@ class DGTserial(object):
 
                 # Attention! This fen is NOT flipped
                 logging.debug("Raw-Fen [%s]", fen)
-                Display.show(Message.DGT_FEN(fen=fen))
+                DisplayMsg.show(Message.DGT_FEN(fen=fen))
                 break
             if case(DgtMsg.DGT_MSG_FIELD_UPDATE):
                 self.write_board_command([DgtCmd.DGT_SEND_BRD])  # Ask for the board when a piece moved
@@ -270,7 +270,7 @@ class DGTserial(object):
             except pyserial.SerialException as e:
                 logging.error(e)
                 w = self.waitchars[wait_counter]
-                Display.show(Message.NO_EBOARD_ERROR(l='no E-board', m='noboard' + w, s='board' + w))
+                DisplayMsg.show(Message.NO_EBOARD_ERROR(l='no E-board', m='noboard' + w, s='board' + w))
                 wait_counter = (wait_counter + 1) % len(self.waitchars)
                 time.sleep(0.5)
         self.startup_board()
