@@ -87,7 +87,7 @@ text_errortop = Dgt.DISPLAY_TEXT(l='error top', m='errortop', s='errtop', beep=B
 text_sidewhite = Dgt.DISPLAY_TEXT(l='side move w', m='side w', s='side w', beep=BeepLevel.BUTTON, duration=0)
 text_sideblack = Dgt.DISPLAY_TEXT(l='side move b', m='side b', s='side b', beep=BeepLevel.BUTTON, duration=0)
 text_scanboard = Dgt.DISPLAY_TEXT(l="scan board", m="scan", s=None, beep=BeepLevel.BUTTON, duration=0)
-text_illegalpos = Dgt.DISPLAY_TEXT(l="illegal pos", m="illegal", s="badpos", beep=BeepLevel.YES, duration=0)
+text_illegalpos = Dgt.DISPLAY_TEXT(l="illegal pos", m="illegal", s="badpos", beep=BeepLevel.YES, duration=0.5)
 
 
 class DgtDisplay(Observable, DisplayMsg, threading.Thread):
@@ -562,17 +562,17 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.top_index = None
                         else:
                             DisplayDgt.show(text_illegalpos)
+                            DisplayDgt.show(text_scanboard)
 
         elif self.top_result == Menu.LEVEL_MENU:
             if self.mode_result == Mode.REMOTE:
                 DisplayDgt.show(text_nofunction)
             elif self.engine_has_levels:
-                if self.engine_level_result != self.engine_level_index:
-                    self.engine_level_result = self.engine_level_index
-                    self.fire(Event.LEVEL(level=self.engine_level_result, beep=BeepLevel.BUTTON))
-                    DisplayDgt.show(Dgt.DISPLAY_TEXT(l="okay level", m="ok level", s="ok lvl", beep=BeepLevel.BUTTON, duration=0))
-                    self.top_result = None
-                    self.top_index = None
+                self.engine_level_result = self.engine_level_index
+                self.fire(Event.LEVEL(level=self.engine_level_result, beep=BeepLevel.BUTTON))
+                DisplayDgt.show(Dgt.DISPLAY_TEXT(l="okay level", m="ok level", s="ok lvl", beep=BeepLevel.BUTTON, duration=0))
+                self.top_result = None
+                self.top_index = None
             else:
                 DisplayDgt.show(text_nolevel)
 
@@ -615,7 +615,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         elif self.top_result == Menu.BOOK_MENU:
             if self.mode_result == Mode.REMOTE:
                 DisplayDgt.show(text_nofunction)
-            elif self.book_result != self.book_index:
+            else:
                 self.book_result = self.book_index
                 self.fire(Event.SET_OPENING_BOOK(book=self.all_books[self.book_index], book_control_string='ok book', beep=BeepLevel.BUTTON))
                 self.top_result = None
