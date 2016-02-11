@@ -106,8 +106,8 @@ def main():
             place = "?"
             addr = "?"
         DisplayMsg.show(Message.SYSTEM_INFO(info={"version": version, "location": place,
-                                                "books": get_opening_books(), "ip": addr,
-                                                "engine_name": engine_name, "user_name": user_name
+                                                  "books": get_opening_books(), "ip": addr,
+                                                  "engine_name": engine_name, "user_name": user_name
                                                   }))
 
     def compute_legal_fens(g):
@@ -369,7 +369,7 @@ def main():
 
     args = parser.parse_args()
     if args.engine is None:
-        args.engine = 'engine' + os.sep + platform.machine() + os.sep + 'stockfish'
+        args.engine = 'engines' + os.sep + platform.machine() + os.sep + 'stockfish'
 
     # Enable logging
     logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
