@@ -82,6 +82,7 @@ text_960yes =Dgt.DISPLAY_TEXT(l=None, m='960 yes', s='960yes', beep=BeepLevel.BU
 text_picochess = Dgt.DISPLAY_TEXT(l="picoChs " + version, m='pico ' + version, s='pic ' + version, beep=BeepLevel.BUTTON, duration=0)
 text_nofunction = Dgt.DISPLAY_TEXT(l="no function", m="no funct", s="nofunc", beep=BeepLevel.BUTTON, duration=0)
 text_erroreng = Dgt.DISPLAY_TEXT(l='error eng', m='error', s=None, beep=BeepLevel.YES, duration=0)
+text_okengine = Dgt.DISPLAY_TEXT(l='okay engine', m='ok engin', s="ok eng", beep=BeepLevel.BUTTON, duration=1)
 text_oklevel = Dgt.DISPLAY_TEXT(l="okay level", m="ok level", s="ok lvl", beep=BeepLevel.BUTTON, duration=0)
 text_nolevel = Dgt.DISPLAY_TEXT(l=None, m="no level", s="no lvl", beep=BeepLevel.YES, duration=0)
 text_noipadr = Dgt.DISPLAY_TEXT(l="no ip addr", m="no ipadr", s="no ip", beep=BeepLevel.YES, duration=0)
@@ -708,7 +709,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.engine_result = self.installed_engines.index(message.eng)
                         self.engine_index = self.engine_result
                         self.engine_has_levels = message.has_levels
-                        DisplayDgt.show(Dgt.DISPLAY_TEXT(l='okay engine', m='ok engin', s="ok eng", beep=BeepLevel.BUTTON, duration=1))
+                        DisplayDgt.show(text_okengine)
                         self.engine_restart = False
                         break
                     if case(MessageApi.ENGINE_STARTUP):
