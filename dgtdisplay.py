@@ -104,7 +104,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.ip = '?'  # the last two parts of the IP
         self.drawresign_fen = None
         self.draw_setup_pieces = True
-        self.awaiting_confirm = PowerMenu.CONFIRM_NONE
 
         self.last_move = chess.Move.null()
         self.last_fen = None
@@ -131,8 +130,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.installed_engines = None
         self.n_engines = 0
 
-        self.book_result = 7  # Default book is 7 - book 'h'
-        self.book_index = 7  # Sync with above
+        self.book_index = 7  # Default book is 7 - book 'h'
         self.all_books = get_opening_books()
         self.n_books = len(self.all_books)
 
@@ -521,7 +519,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 else:
                     text = text_sideblack
             elif self.top_index == Menu.TIME_MENU:
-                self.time_mode_index = TimeMode.FIXED
                 msg = self.time_mode_index.value
                 text = Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6], beep=BeepLevel.BUTTON, duration=0)
             elif self.top_index == Menu.BOOK_MENU:
@@ -654,7 +651,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text = text_nofunction
                 DisplayDgt.show(text)
             else:
-                self.book_result = self.book_index
                 self.fire(Event.SET_OPENING_BOOK(book=self.all_books[self.book_index], book_control_string='ok book', beep=BeepLevel.BUTTON))
                 self.reset_menu()
 
@@ -787,7 +783,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m=ge, s=None, beep=BeepLevel.CONFIG, duration=1))
                         break
                     if case(MessageApi.INTERACTION_MODE):
-                        self.mode_result = message.mode
+                        self.mode_index = message.mode
                         self.alternative = False
                         DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m=message.mode.value, s=None, beep=message.beep, duration=1))
                         break
@@ -816,8 +812,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.ip = ' '.join(message.info["ip"].split('.')[2:])
                         break
                     if case(MessageApi.STARTUP_INFO):
-                        self.book_result = message.info["book_index"]
-                        self.book_index = self.book_result
+                        self.book_index = message.info["book_index"]
                         break
                     if case(MessageApi.SEARCH_STARTED):
                         logging.debug('Search started')
@@ -846,14 +841,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         break
                     if case(MessageApi.DGT_BUTTON):
                         button = int(message.button)
-                        if not (self.awaiting_confirm == PowerMenu.CONFIRM_NONE):
-                            if (self.awaiting_confirm == PowerMenu.CONFIRM_PWR) and (button == 2):
-                                self.power_off()
-                            if (self.awaiting_confirm == PowerMenu.CONFIRM_RBT) and (button == 3):
-                                self.reboot()
-                            else:  # Abort!
-                                self.awaiting_confirm = PowerMenu.CONFIRM_NONE   
-                        if not self.engine_restart and (self.awaiting_confirm == PowerMenu.CONFIRM_NONE):
+                        if not self.engine_restart:
                             if button == 0:
                                 self.process_button0()
                             elif button == 1:
@@ -900,35 +888,40 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             book_index = book_map.index(fen)
                             try:
                                 b = self.all_books[book_index]
-                                self.book_result = book_index
+                                self.book_index = book_index
                                 logging.debug("Map-Fen: Opening book [%s]", b[1])
                                 self.fire(Event.SET_OPENING_BOOK(book=b, book_control_string=b[0], beep=BeepLevel.MAP))
+                                self.reset_menu()
                             except IndexError:
                                 pass
                         elif fen in mode_map:  # Set interaction mode
                             logging.debug("Map-Fen: Interaction mode [%s]", mode_map[fen])
                             self.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], beep=BeepLevel.MAP))
+                            self.reset_menu()
                         elif fen in self.time_control_fixed_map:
                             logging.debug("Map-Fen: Time control fixed")
-                            self.time_mode_result = TimeMode.FIXED
+                            self.time_mode_index = TimeMode.FIXED
                             self.time_control_fixed_index = list(self.time_control_fixed_map.keys()).index(fen)
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_fixed_map[fen],
                                                              time_control_string=self.time_control_fixed_list[self.time_control_fixed_index],
                                                              beep=BeepLevel.MAP))
+                            self.reset_menu()
                         elif fen in self.time_control_blitz_map:
                             logging.debug("Map-Fen: Time control blitz")
-                            self.time_mode_result = TimeMode.BLITZ
+                            self.time_mode_index = TimeMode.BLITZ
                             self.time_control_blitz_index = list(self.time_control_blitz_map.keys()).index(fen)
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_blitz_map[fen],
                                                              time_control_string=self.time_control_blitz_list[self.time_control_blitz_index],
                                                              beep=BeepLevel.MAP))
+                            self.reset_menu()
                         elif fen in self.time_control_fisch_map:
                             logging.debug("Map-Fen: Time control fischer")
-                            self.time_mode_result = TimeMode.FISCHER
+                            self.time_mode_index = TimeMode.FISCHER
                             self.time_control_fisch_index = list(self.time_control_fisch_map.keys()).index(fen)
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_fisch_map[fen],
                                                              time_control_string=self.time_control_fisch_list[self.time_control_fisch_index],
                                                              beep=BeepLevel.MAP))
+                            self.reset_menu()
                         elif fen in shutdown_map:
                             logging.debug("Map-Fen: shutdown")
                             self.power_off()
