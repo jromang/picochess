@@ -127,7 +127,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.n_levels = 21  # Default engine (Stockfish) has 21 playing levels
         self.engine_has_levels = False  # Not all engines support levels - assume not
         self.engine_restart = False
-        self.engine_result = 0  # Dummy values .. set later
         self.engine_index = 0
         self.installed_engines = None
         self.n_engines = 0
@@ -176,6 +175,13 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.time_control_blitz_list = ["bl   1", "bl   3", "bl   5", "bl  10", "bl  15", "bl  30", "bl  60", "bl  90"]
         self.time_control_fisch_list = ["f 1  1", "f 3  2", "f 4  2", "f 5  3", "f10  5", "f15 10", "f30 15", "f60 30"]
 
+    def reset_menu(self):
+        self.setup_whitetomove_result = None
+        self.setup_reverse_result = None
+        self.setup_uci960_result = None
+        self.top_result = None
+        self.mode_result = None
+
     def power_off(self):
         DisplayDgt.show(text_goodbye)
         self.engine_restart = True
@@ -201,8 +207,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             DisplayDgt.show(text)
 
         if self.top_result == Menu.TOP_MENU:
-            self.top_result = None
-            self.top_index = None
+            self.reset_menu()
             msg = 'play'
             text = Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6], beep=BeepLevel.BUTTON, duration=0)
             DisplayDgt.show(text)
@@ -551,8 +556,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         elif self.top_result == Menu.MODE_MENU:
             self.mode_result = self.mode_index
             self.fire(Event.SET_INTERACTION_MODE(mode=self.mode_result, beep=BeepLevel.BUTTON))
-            self.top_result = None
-            self.top_index = None
+            self.reset_menu()
 
         elif self.top_result == Menu.POSITION_MENU:
             if self.setup_whitetomove_result is None:
@@ -587,11 +591,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         if bit_board.is_valid():
                             self.flip_board = self.setup_reverse_result
                             self.fire(Event.SETUP_POSITION(fen=bit_board.fen(), uci960=self.setup_uci960_result))
-                            self.setup_whitetomove_result = None
-                            self.setup_reverse_result = None
-                            self.setup_uci960_result = None
-                            self.top_result = None
-                            self.top_index = None
+                            self.reset_menu()
                             return
                         else:
                             DisplayDgt.show(text_illegalpos)
@@ -605,8 +605,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.engine_level_result = self.engine_level_index
                 self.fire(Event.LEVEL(level=self.engine_level_result, beep=BeepLevel.BUTTON))
                 text = text_oklevel
-                self.top_result = None
-                self.top_index = None
+                self.reset_menu()
             else:
                 text = text_nolevel
             DisplayDgt.show(text)
@@ -615,8 +614,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if self.system_index == Settings.VERSION:
                 text = text_picochess
                 DisplayDgt.show(text)
-                self.top_result = None
-                self.top_index = None
+                self.reset_menu()
             elif self.system_index == Settings.IPADR:
                 if len(self.ip):
                     msg = self.ip
@@ -624,8 +622,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 else:
                     text = text_noipadr
                 DisplayDgt.show(text)
-                self.top_result = None
-                self.top_index = None
+                self.reset_menu()
             elif self.system_index == Settings.SHUTDOWN:
                 # self.power_off()
                 pass
@@ -634,8 +631,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 pass
             else:
                 logging.warning('Wrong value for system_index: {0}'.format(self.system_index))
-            self.top_result = None
-            self.top_index = None
+            self.reset_menu()
 
         elif self.top_result == Menu.ENGINE_MENU:
             if self.mode_result == Mode.REMOTE:
@@ -648,8 +644,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 # This is a handshake change so index values changed and sync'd in the response below
                 self.fire(Event.NEW_ENGINE(eng=self.installed_engines[self.engine_index]))
                 self.engine_restart = True
-                self.top_result = None
-                self.top_index = None
+                self.reset_menu()
             else:
                 text = text_erroreng
                 DisplayDgt.show(text)
@@ -661,8 +656,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 self.book_result = self.book_index
                 self.fire(Event.SET_OPENING_BOOK(book=self.all_books[self.book_index], book_control_string='ok book', beep=BeepLevel.BUTTON))
-                self.top_result = None
-                self.top_index = None
+                self.reset_menu()
 
         elif self.top_result == Menu.TIME_MENU:
             if self.time_mode_result is None:
@@ -691,8 +685,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     logging.warning('Wrong value for time_mode_index: {0}'.format(self.time_mode_index))
                     time_control = None
                 self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_control_string='ok time', beep=BeepLevel.BUTTON))
-                self.top_result = None
-                self.top_index = None
+                self.reset_menu()
 
     def drawresign(self):
         rnk_8, rnk_7, rnk_6, rnk_5, rnk_4, rnk_3, rnk_2, rnk_1 = self.dgt_fen.split("/")
@@ -706,8 +699,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 logging.debug("Received message from msg queue: %s", message)
                 for case in switch(message):
                     if case(MessageApi.ENGINE_READY):
-                        self.engine_result = self.installed_engines.index(message.eng)
-                        self.engine_index = self.engine_result
+                        self.engine_index = self.installed_engines.index(message.eng)
                         self.engine_has_levels = message.has_levels
                         DisplayDgt.show(text_okengine)
                         self.engine_restart = False
@@ -719,8 +711,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             for index in range(0, self.n_engines):
                                 full_path, short = self.installed_engines[index]
                                 if full_path == message.path:
-                                    self.engine_result = index
-                                    self.engine_index = self.engine_result
+                                    self.engine_index = index
                                     self.engine_has_levels = message.has_levels
                         break
                     if case(MessageApi.ENGINE_FAIL):
@@ -744,7 +735,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.last_move = chess.Move.null()
                         self.reset_hint_and_score()
                         self.mode_index = Mode.NORMAL
-                        self.top_result = None
+                        self.reset_menu()
                         self.alternative = False
                         DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m="new game", s="newgam", beep=BeepLevel.CONFIG, duration=1))
                         break
