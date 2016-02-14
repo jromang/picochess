@@ -105,6 +105,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.drawresign_fen = None
         self.draw_setup_pieces = True
 
+        self.play_move = chess.Move.null()
         self.last_move = chess.Move.null()
         self.last_fen = None
         self.reset_hint_and_score()
@@ -206,8 +207,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
         if self.top_result == Menu.TOP_MENU:
             self.reset_menu()
-            msg = 'play'
-            text = Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6], beep=BeepLevel.BUTTON, duration=0)
+            if self.play_move:
+                text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen, beep=BeepLevel.BUTTON, duration=1)
+            else:
+                msg = 'play'
+                text = Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6], beep=BeepLevel.BUTTON, duration=0)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.MODE_MENU:
@@ -606,12 +610,14 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 text = text_nolevel
             DisplayDgt.show(text)
+            if self.play_move:
+                text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen, beep=BeepLevel.BUTTON, duration=1)
+                DisplayDgt.show(text)
 
         elif self.top_result == Menu.SYSTEM_MENU:
             if self.system_index == Settings.VERSION:
                 text = text_picochess
                 DisplayDgt.show(text)
-                self.reset_menu()
             elif self.system_index == Settings.IPADR:
                 if len(self.ip):
                     msg = self.ip
@@ -619,7 +625,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 else:
                     text = text_noipadr
                 DisplayDgt.show(text)
-                self.reset_menu()
             elif self.system_index == Settings.SHUTDOWN:
                 # self.power_off()
                 pass
@@ -629,6 +634,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 logging.warning('Wrong value for system_index: {0}'.format(self.system_index))
             self.reset_menu()
+            if self.play_move:
+                text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen, beep=BeepLevel.BUTTON, duration=1)
+                DisplayDgt.show(text)
 
         elif self.top_result == Menu.ENGINE_MENU:
             if self.mode_result == Mode.REMOTE:
@@ -718,6 +726,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         ponder = message.result.ponder
                         self.alternative = True
                         self.last_move = move
+                        self.play_move = move
                         self.hint_move = chess.Move.null() if ponder is None else ponder
                         self.hint_fen = message.game.fen()
                         self.last_fen = message.fen
@@ -740,6 +749,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         break
                     if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
                         DisplayDgt.show(Dgt.LIGHT_CLEAR())
+                        self.play_move = chess.Move.null()
                         self.alternative = False
                         if self.ok_moves_messages:
                             DisplayDgt.show(Dgt.DISPLAY_TEXT(l="okay pico", m="ok pico", s="okpico", beep=BeepLevel.OKAY, duration=0.5))
@@ -751,6 +761,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         break
                     if case(MessageApi.REVIEW_MODE_MOVE):
                         self.last_move = message.move
+                        self.play_move = message.move
                         self.last_fen = message.fen
                         if self.ok_moves_messages:
                             DisplayDgt.show(Dgt.DISPLAY_TEXT(l="okay move", m="ok move", s="okmove", beep=BeepLevel.OKAY, duration=0.5))
@@ -769,9 +780,13 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         break
                     if case(MessageApi.TIME_CONTROL):
                         DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m=message.time_control_string, s=None, beep=message.beep, duration=1))
+                        if self.play_move:
+                            DgtDisplay.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen, beep=BeepLevel.BUTTON, duration=1))
                         break
                     if case(MessageApi.OPENING_BOOK):
                         DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m=message.book_control_string, s=None, beep=message.beep, duration=1))
+                        if self.play_move:
+                            DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen, beep=BeepLevel.BUTTON, duration=1))
                         break
                     if case(MessageApi.USER_TAKE_BACK):
                         self.reset_hint_and_score()
@@ -786,6 +801,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.mode_index = message.mode
                         self.alternative = False
                         DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m=message.mode.value, s=None, beep=message.beep, duration=1))
+                        if self.play_move:
+                            DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen, beep=BeepLevel.BUTTON, duration=1))
                         break
                     if case(MessageApi.PLAY_MODE):
                         pm = message.play_mode.value
@@ -862,7 +879,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             # Flip the board
                             self.flip_board = not self.flip_board
                             # set standard for setup orientation too
-                            # self.setup_reverse_orientation = self.flip_board
                             self.setup_reverse_index = self.flip_board
                             fen = fen[::-1]
                         logging.debug("DGT-Fen: " + fen)
