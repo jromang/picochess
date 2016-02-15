@@ -151,7 +151,6 @@ def main():
         book_move = searchmoves.book(bookreader, game)
         if book_move:
             Observable.fire(Event.NEW_SCORE(score='book', mate=None))
-            # time.sleep(0.5)
             Observable.fire(Event.BEST_MOVE(result=book_move, inbook=True))
         else:
             probe_tablebase(game)
@@ -458,7 +457,6 @@ def main():
     time_control = TimeControl(TimeMode.BLITZ, minutes_per_game=5)
     last_computer_fen = None
     game_declared = False  # User declared resignation or draw
-    engine_level = None
 
     system_info_thread = threading.Timer(0, display_system_info)
     system_info_thread.start()
@@ -469,7 +467,7 @@ def main():
                                              "book": all_books[book_index][1], "book_index": book_index,
                                              "time_control_string": "bl   5"}))
     DisplayMsg.show(Message.UCI_OPTION_LIST(options=engine.options))
-    DisplayMsg.show(Message.ENGINE_STARTUP(path=engine.get_path(), has_levels=engine.has_levels()))
+    DisplayMsg.show(Message.ENGINE_STARTUP(path=engine.get_path(), has_levels=engine.has_levels(), has_960=engine.has_chess960()))
 
     # Event loop
     while True:
@@ -480,7 +478,7 @@ def main():
         else:
             logging.debug('Received event from evt queue: %s', event)
             for case in switch(event):
-                if case(EventApi.FEN):  # User sets a new position, convert it to a move if it is legal
+                if case(EventApi.FEN):
                     legal_fens = process_fen(event.fen, legal_fens)
                     break
 
@@ -495,7 +493,7 @@ def main():
                         legal_fens = process_fen(g.board_fen(), legal_fens)
                     break
 
-                if case(EventApi.USER_MOVE):  # User sends a new move
+                if case(EventApi.USER_MOVE):
                     move = event.move
                     logging.debug('User move [%s]', move)
                     if move not in game.legal_moves:
@@ -507,15 +505,14 @@ def main():
                         legal_fens = compute_legal_fens(game)
                     break
 
-                if case(EventApi.LEVEL):  # User sets a new level
-                    engine_level = event.level
-                    logging.debug("Setting engine to level %i", engine_level)
-                    if engine.level(engine_level):
+                if case(EventApi.LEVEL):
+                    logging.debug("Setting engine to level %i", event.level)
+                    if engine.level(event.level):
                         engine.send()
-                        DisplayMsg.show(Message.LEVEL(level=engine_level, beep=event.beep))
+                        DisplayMsg.show(Message.LEVEL(level=event.level, beep=event.beep))
                     break
 
-                if case(EventApi.NEW_ENGINE):  # User sets a new engine
+                if case(EventApi.NEW_ENGINE):
                     old_path = engine.path
                     engine_shutdown = True
                     # Stop the old engine cleanly
@@ -552,12 +549,13 @@ def main():
                         # supplementary uci options sent 'in game', see event.UCI_OPTION_SET
                         engine_startup()
                         # Send user selected engine level to new engine
-                        if engine_level and engine.level(engine_level):
+                        if engine.level(event.level):
                             engine.send()
-                            DisplayMsg.show(Message.LEVEL(level=engine_level, beep=BeepLevel.BUTTON))
+                            DisplayMsg.show(Message.LEVEL(level=event.level, beep=BeepLevel.BUTTON))
                         # All done - rock'n'roll
                         if not engine_fallback:
-                            DisplayMsg.show(Message.ENGINE_READY(eng=event.eng, engine_name=engine_name, has_levels=engine.has_levels()))
+                            DisplayMsg.show(Message.ENGINE_READY(eng=event.eng, engine_name=engine_name,
+                                                                 has_levels=engine.has_levels(), has_960=engine.has_chess960()))
                         else:
                             DisplayMsg.show(Message.ENGINE_FAIL())
                         # Go back to analysing or observing
@@ -567,14 +565,14 @@ def main():
                             observe(game, time_control)
                     break
 
-                if case(EventApi.SETUP_POSITION):  # User sets up a position
+                if case(EventApi.SETUP_POSITION):
                     logging.debug("Setting up custom fen: {0}".format(event.fen))
                     if engine.has_chess960():
                         engine.option('UCI_Chess960', event.uci960)
                         engine.send()
                     else:  # start normal new game if engine can't handle the user wish
                         event.uci960 = False
-                        DisplayMsg.show(Message.ENGINE_FAIL())  # @todo not really true but inform the user about the result
+                        logging.warning('Engine doesnt support 960 mode')
                     if game.move_stack:
                         if game.is_game_over() or game_declared:
                             DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game)))
@@ -592,7 +590,7 @@ def main():
                     DisplayMsg.show(Message.WAIT_STATE())
                     break
 
-                if case(EventApi.STARTSTOP_THINK):  # User wants to end or start a new engine search
+                if case(EventApi.STARTSTOP_THINK):
                     if engine.is_thinking() and (interaction_mode != Mode.REMOTE):
                         stop_clock()
                         engine.stop(show_best=True)
@@ -617,13 +615,14 @@ def main():
                         time_control.run(game.turn)
                     break
 
-                if case(EventApi.NEW_GAME):  # User starts a new game
+                if case(EventApi.NEW_GAME):
                     if game.move_stack:
                         logging.debug("Starting a new game")
                         if not (game.is_game_over() or game_declared):
                             DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game)))
                         game = chess.Board()
                     legal_fens = compute_legal_fens(game)
+                    # interaction_mode = Mode.NORMAL @todo
                     last_computer_fen = None
                     stop_search_and_clock()
                     time_control.reset()

@@ -14,11 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import logging
-import queue
-import chess
-import time
-
 from timecontrol import *
 from collections import OrderedDict
 
@@ -91,6 +86,7 @@ text_sidewhite = Dgt.DISPLAY_TEXT(l='side move w', m='side w', s='side w', beep=
 text_sideblack = Dgt.DISPLAY_TEXT(l='side move b', m='side b', s='side b', beep=BeepLevel.BUTTON, duration=0)
 text_scanboard = Dgt.DISPLAY_TEXT(l="scan board", m="scan", s=None, beep=BeepLevel.BUTTON, duration=0)
 text_illegalpos = Dgt.DISPLAY_TEXT(l="illegal pos", m="illegal", s="badpos", beep=BeepLevel.YES, duration=0.5)
+text_error960 = Dgt.DISPLAY_TEXT(l='error 960', m='err 960', s="err960", beep=BeepLevel.YES, duration=0)
 
 
 class DgtDisplay(Observable, DisplayMsg, threading.Thread):
@@ -126,6 +122,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.engine_level_index = self.engine_level_result
         self.n_levels = 21  # Default engine (Stockfish) has 21 playing levels
         self.engine_has_levels = False  # Not all engines support levels - assume not
+        self.engine_has_960 = False  # Not all engines support 960 mode - assume not
         self.engine_restart = False
         self.engine_index = 0
         self.installed_engines = None
@@ -229,22 +226,13 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         text = Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6], beep=BeepLevel.BUTTON, duration=0)
                     else:
                         self.setup_whitetomove_result = None
-                        if self.setup_whitetomove_index:
-                            text = text_sidewhite
-                        else:
-                            text = text_sideblack
+                        text = text_sidewhite if self.setup_whitetomove_index else text_sideblack
                 else:
                     self.setup_reverse_result = None
-                    if self.setup_reverse_index:
-                        text = text_bw
-                    else:
-                        text = text_wb
+                    text = text_bw if self.setup_reverse_index else text_wb
             else:
                 self.setup_uci960_result = None
-                if self.setup_uci960_index:
-                    text = text_960yes
-                else:
-                    text = text_960no
+                text = text_960yes if self.setup_uci960_index else text_960no
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.LEVEL_MENU:
@@ -310,22 +298,16 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 if self.setup_reverse_result is None:
                     if self.setup_whitetomove_result is None:
                         self.setup_whitetomove_index = not self.setup_whitetomove_index
-                        if self.setup_whitetomove_index:
-                            text = text_sidewhite
-                        else:
-                            text = text_sideblack
+                        text = text_sidewhite if self.setup_whitetomove_index else text_sideblack
                     else:
                         self.setup_reverse_index = not self.setup_reverse_index
-                        if self.setup_reverse_index:
-                            text = text_bw
-                        else:
-                            text = text_wb
+                        text = text_bw if self.setup_reverse_index else text_wb
                 else:
-                    self.setup_uci960_index = not self.setup_uci960_index
-                    if self.setup_uci960_index:
-                        text = text_960yes
+                    if self.engine_has_960:
+                        self.setup_uci960_index = not self.setup_uci960_index
+                        text = text_960yes if self.setup_uci960_index else text_960no
                     else:
-                        text = text_960no
+                        text = text_error960
                 DisplayDgt.show(text)
 
         elif self.top_result == Menu.LEVEL_MENU:
@@ -426,22 +408,16 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 if self.setup_reverse_result is None:
                     if self.setup_whitetomove_result is None:
                         self.setup_whitetomove_index = not self.setup_whitetomove_index
-                        if self.setup_whitetomove_index:
-                            text = text_sidewhite
-                        else:
-                            text = text_sideblack
+                        text = text_sidewhite if self.setup_whitetomove_index else text_sideblack
                     else:
                         self.setup_reverse_index = not self.setup_reverse_index
-                        if self.setup_reverse_index:
-                            text = text_bw
-                        else:
-                            text = text_wb
+                        text = text_bw if self.setup_reverse_index else text_wb
                 else:
-                    self.setup_uci960_index = not self.setup_uci960_index
-                    if self.setup_uci960_index:
-                        text = text_960yes
+                    if self.engine_has_960:
+                        self.setup_uci960_index = not self.setup_uci960_index
+                        text = text_960yes if self.setup_uci960_index else text_960no
                     else:
-                        text = text_960no
+                        text = text_error960
                 DisplayDgt.show(text)
 
         elif self.top_result == Menu.LEVEL_MENU:
@@ -518,10 +494,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text = Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6], beep=BeepLevel.BUTTON, duration=0)
             elif self.top_index == Menu.POSITION_MENU:
                 self.setup_whitetomove_index = True
-                if self.setup_whitetomove_index:
-                    text = text_sidewhite
-                else:
-                    text = text_sideblack
+                text = text_sidewhite if self.setup_whitetomove_index else text_sideblack
             elif self.top_index == Menu.TIME_MENU:
                 msg = self.time_mode_index.value
                 text = Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6], beep=BeepLevel.BUTTON, duration=0)
@@ -563,18 +536,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if self.setup_whitetomove_result is None:
                 self.setup_whitetomove_result = self.setup_whitetomove_index
                 self.setup_reverse_index = self.flip_board
-                if self.setup_reverse_index:
-                    text = text_bw
-                else:
-                    text = text_wb
+                text = text_bw if self.setup_reverse_index else text_wb
             else:
                 if self.setup_reverse_result is None:
                     self.setup_reverse_result = self.setup_reverse_index
                     self.setup_uci960_index = False
-                    if self.setup_uci960_index:
-                        text = text_960yes
-                    else:
-                        text = text_960no
+                    text = text_960yes if self.setup_uci960_index else text_960no
                 else:
                     if self.setup_uci960_result is None:
                         self.setup_uci960_result = self.setup_uci960_index
@@ -626,11 +593,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     text = text_noipadr
                 DisplayDgt.show(text)
             elif self.system_index == Settings.SHUTDOWN:
-                # self.power_off()
-                pass
+                self.power_off()
             elif self.system_index == Settings.REBOOT:
-                # self.reboot()
-                pass
+                self.reboot()
             else:
                 logging.warning('Wrong value for system_index: {0}'.format(self.system_index))
             self.reset_menu()
@@ -643,11 +608,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text = text_nofunction
                 DisplayDgt.show(text)
             elif self.installed_engines:
-                # Reset level selections
-                self.engine_level_index = self.engine_level_result
-                self.engine_has_levels = False
-                # This is a handshake change so index values changed and sync'd in the response below
-                self.fire(Event.NEW_ENGINE(eng=self.installed_engines[self.engine_index]))
+                self.fire(Event.NEW_ENGINE(eng=self.installed_engines[self.engine_index], level=self.engine_level_result))
                 self.engine_restart = True
                 self.reset_menu()
             else:
@@ -705,6 +666,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if case(MessageApi.ENGINE_READY):
                         self.engine_index = self.installed_engines.index(message.eng)
                         self.engine_has_levels = message.has_levels
+                        self.engine_has_960 = message.has_960
                         DisplayDgt.show(text_okengine)
                         self.engine_restart = False
                         break
@@ -717,6 +679,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 if full_path == message.path:
                                     self.engine_index = index
                                     self.engine_has_levels = message.has_levels
+                                    self.engine_has_960 = message.has_960
                         break
                     if case(MessageApi.ENGINE_FAIL):
                         DisplayDgt.show(Dgt.DISPLAY_TEXT(l='error eng', m='error', s=None, beep=BeepLevel.YES, duration=1))
@@ -888,7 +851,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.dgt_fen = fen
                         self.drawresign()
                         # Fire the appropriate event
-                        if fen in level_map:  # User sets level
+                        if fen in level_map:
                             level = 3 * level_map.index(fen)
                             if level > 20:
                                 level = 20
@@ -896,11 +859,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.engine_level_index = level
                             logging.debug("Map-Fen: New level")
                             self.fire(Event.LEVEL(level=level, beep=BeepLevel.MAP))
-                        elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":  # New game
+                        elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":
                             logging.debug("Map-Fen: New game")
                             self.draw_setup_pieces = False
                             self.fire(Event.NEW_GAME())
-                        elif fen in book_map:  # Choose opening book
+                        elif fen in book_map:
                             book_index = book_map.index(fen)
                             try:
                                 b = self.all_books[book_index]
@@ -910,7 +873,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 self.reset_menu()
                             except IndexError:
                                 pass
-                        elif fen in mode_map:  # Set interaction mode
+                        elif fen in mode_map:
                             logging.debug("Map-Fen: Interaction mode [%s]", mode_map[fen])
                             self.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], beep=BeepLevel.MAP))
                             self.reset_menu()
