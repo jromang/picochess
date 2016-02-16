@@ -528,7 +528,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
         elif self.top_result == Menu.MODE_MENU:
             self.mode_result = self.mode_index
-            self.fire(Event.SET_INTERACTION_MODE(mode=self.mode_result, beep=BeepLevel.BUTTON))
+            self.fire(Event.SET_INTERACTION_MODE(mode=self.mode_result, mode_string='ok mode', beep=BeepLevel.BUTTON))
             self.reset_menu()
 
         elif self.top_result == Menu.POSITION_MENU:
@@ -558,6 +558,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         if bit_board.is_valid():
                             self.flip_board = self.setup_reverse_result
                             self.fire(Event.SETUP_POSITION(fen=bit_board.fen(), uci960=self.setup_uci960_result))
+                            self.play_move = chess.Move.null()
                             self.reset_menu()
                             return
                         else:
@@ -601,6 +602,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if self.play_move:
                 text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen, beep=BeepLevel.BUTTON, duration=1)
                 DisplayDgt.show(text)
+            else:
+                DisplayDgt.show(Dgt.CLOCK_END())
 
         elif self.top_result == Menu.ENGINE_MENU:
             if self.mode_result == Mode.REMOTE:
@@ -619,7 +622,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text = text_nofunction
                 DisplayDgt.show(text)
             else:
-                self.fire(Event.SET_OPENING_BOOK(book=self.all_books[self.book_index], book_control_string='ok book', beep=BeepLevel.BUTTON))
+                self.fire(Event.SET_OPENING_BOOK(book=self.all_books[self.book_index], book_string='ok book', beep=BeepLevel.BUTTON))
                 self.reset_menu()
 
         elif self.top_result == Menu.TIME_MENU:
@@ -648,7 +651,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 else:
                     logging.warning('Wrong value for time_mode_index: {0}'.format(self.time_mode_index))
                     time_control = None
-                self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_control_string='ok time', beep=BeepLevel.BUTTON))
+                self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_string='ok time', beep=BeepLevel.BUTTON))
                 self.reset_menu()
 
     def drawresign(self):
@@ -707,7 +710,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m="new game", s="newgam", beep=BeepLevel.CONFIG, duration=1))
                         break
                     if case(MessageApi.WAIT_STATE):
-                        DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m="you move", s="youmov", beep=BeepLevel.OKAY, duration=0))
+                        DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m="you move", s="youmov", beep=BeepLevel.OKAY, duration=1))
+                        time.sleep(1)  # @todo clock_end doesnt support duration right now :-(
+                        DisplayDgt.show(Dgt.CLOCK_END())
                         break
                     if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
                         DisplayDgt.show(Dgt.LIGHT_CLEAR())
@@ -742,12 +747,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             DisplayDgt.show(Dgt.CLOCK_END())
                         break
                     if case(MessageApi.TIME_CONTROL):
-                        DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m=message.time_control_string, s=None, beep=message.beep, duration=1))
+                        DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m=message.time_string, s=None, beep=message.beep, duration=1))
                         if self.play_move:
                             DgtDisplay.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen, beep=BeepLevel.BUTTON, duration=1))
                         break
                     if case(MessageApi.OPENING_BOOK):
-                        DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m=message.book_control_string, s=None, beep=message.beep, duration=1))
+                        DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m=message.book_string, s=None, beep=message.beep, duration=1))
                         if self.play_move:
                             DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen, beep=BeepLevel.BUTTON, duration=1))
                         break
@@ -763,7 +768,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if case(MessageApi.INTERACTION_MODE):
                         self.mode_index = message.mode
                         self.alternative = False
-                        DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m=message.mode.value, s=None, beep=message.beep, duration=1))
+                        DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m=message.mode_string, s=None, beep=message.beep, duration=1))
                         if self.play_move:
                             DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen, beep=BeepLevel.BUTTON, duration=1))
                         else:
@@ -874,20 +879,20 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 b = self.all_books[book_index]
                                 self.book_index = book_index
                                 logging.debug("Map-Fen: Opening book [%s]", b[1])
-                                self.fire(Event.SET_OPENING_BOOK(book=b, book_control_string=b[0], beep=BeepLevel.MAP))
+                                self.fire(Event.SET_OPENING_BOOK(book=b, book_string=b[0], beep=BeepLevel.MAP))
                                 self.reset_menu()
                             except IndexError:
                                 pass
                         elif fen in mode_map:
                             logging.debug("Map-Fen: Interaction mode [%s]", mode_map[fen])
-                            self.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], beep=BeepLevel.MAP))
+                            self.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], mode_string=mode_map[fen].value, beep=BeepLevel.MAP))
                             self.reset_menu()
                         elif fen in self.time_control_fixed_map:
                             logging.debug("Map-Fen: Time control fixed")
                             self.time_mode_index = TimeMode.FIXED
                             self.time_control_fixed_index = list(self.time_control_fixed_map.keys()).index(fen)
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_fixed_map[fen],
-                                                             time_control_string=self.time_control_fixed_list[self.time_control_fixed_index],
+                                                             time_string=self.time_control_fixed_list[self.time_control_fixed_index],
                                                              beep=BeepLevel.MAP))
                             self.reset_menu()
                         elif fen in self.time_control_blitz_map:
@@ -895,7 +900,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.time_mode_index = TimeMode.BLITZ
                             self.time_control_blitz_index = list(self.time_control_blitz_map.keys()).index(fen)
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_blitz_map[fen],
-                                                             time_control_string=self.time_control_blitz_list[self.time_control_blitz_index],
+                                                             time_string=self.time_control_blitz_list[self.time_control_blitz_index],
                                                              beep=BeepLevel.MAP))
                             self.reset_menu()
                         elif fen in self.time_control_fisch_map:
@@ -903,7 +908,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.time_mode_index = TimeMode.FISCHER
                             self.time_control_fisch_index = list(self.time_control_fisch_map.keys()).index(fen)
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_fisch_map[fen],
-                                                             time_control_string=self.time_control_fisch_list[self.time_control_fisch_index],
+                                                             time_string=self.time_control_fisch_list[self.time_control_fisch_index],
                                                              beep=BeepLevel.MAP))
                             self.reset_menu()
                         elif fen in shutdown_map:

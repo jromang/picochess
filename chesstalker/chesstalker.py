@@ -129,14 +129,14 @@ class ChessTalker(DisplayMsg, threading.Thread):
                         break
                     if case(MessageApi.TIME_CONTROL):
                         logging.debug('Announcing SET_TIME_CONTROL')
-                        if message.time_control_string.startswith("mov"):
-                            time_control_value = int(message.time_control_string[3:].strip())
+                        if message.time_string.startswith("mov"):
+                            time_control_value = int(message.time_string[3:].strip())
                             system_voice.say_time_control_fixed_time(time_control_value)
-                        elif message.time_control_string.startswith("bl"):
-                            time_control_value = int(message.time_control_string[2:].strip())
+                        elif message.time_string.startswith("bl"):
+                            time_control_value = int(message.time_string[2:].strip())
                             system_voice.say_time_control_blitz(time_control_value)
-                        elif message.time_control_string.startswith("f"):
-                            time_control_values = message.time_control_string[1:].strip().split()
+                        elif message.time_string.startswith("f"):
+                            time_control_values = message.time_string[1:].strip().split()
                             # logging.debug('time_control_values: ' + str(time_control_values))
                             minutes_per_game = time_control_values[0]
                             fischer_increment = time_control_values[1]
