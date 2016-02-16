@@ -206,10 +206,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             self.reset_menu()
             if self.play_move:
                 text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen, beep=BeepLevel.BUTTON, duration=1)
+                DisplayDgt.show(text)
             else:
-                msg = 'play'
-                text = Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6], beep=BeepLevel.BUTTON, duration=0)
-            DisplayDgt.show(text)
+                DisplayDgt.show(Dgt.CLOCK_END())
 
         elif self.top_result == Menu.MODE_MENU:
             self.top_result = Menu.TOP_MENU
@@ -736,10 +735,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         level = str(message.level)
                         if self.engine_restart:
                             pass
-                        elif self.engine_level_result != self.engine_level_index:
-                            self.engine_level_result = self.engine_level_index
+                        # elif self.engine_level_result != self.engine_level_index:
+                        #     self.engine_level_result = self.engine_level_index
                         else:
                             DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m="level " + level, s="lvl " + level, beep=message.beep, duration=1))
+                            DisplayDgt.show(Dgt.CLOCK_END())
                         break
                     if case(MessageApi.TIME_CONTROL):
                         DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m=message.time_control_string, s=None, beep=message.beep, duration=1))
@@ -766,6 +766,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m=message.mode.value, s=None, beep=message.beep, duration=1))
                         if self.play_move:
                             DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen, beep=BeepLevel.BUTTON, duration=1))
+                        else:
+                            DisplayDgt.show(Dgt.CLOCK_END())
                         break
                     if case(MessageApi.PLAY_MODE):
                         pm = message.play_mode.value
@@ -818,6 +820,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         break
                     if case(MessageApi.STOP_CLOCK):
                         DisplayDgt.show(Dgt.CLOCK_STOP())
+                        break
+                    if case(MessageApi.END_CLOCK):
+                        DisplayDgt.show(Dgt.CLOCK_END)
                         break
                     if case(MessageApi.DGT_BUTTON):
                         button = int(message.button)

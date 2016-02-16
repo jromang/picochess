@@ -112,12 +112,18 @@ class DgtInterface(DisplayDgt, Thread):
                     if case(DgtApi.LIGHT_SQUARES):
                         self.light_squares_revelation_board(message.squares)
                         break
+                    if case(DgtApi.CLOCK_END):
+                        self.end_clock()
+                        break
                     if case(DgtApi.CLOCK_STOP):
                         self.clock_running = False
                         self.stop_clock()
                         break
                     if case(DgtApi.CLOCK_START):
                         self.clock_running = True
+                        l_hms = hours_minutes_seconds(message.time_left)
+                        r_hms = hours_minutes_seconds(message.time_right)
+                        logging.info('time send {} : {}'.format(l_hms, r_hms))
                         self.start_clock(message.time_left, message.time_right, message.side)
                         break
                     if case(DgtApi.CLOCK_VERSION):
