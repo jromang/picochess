@@ -827,7 +827,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         DisplayDgt.show(Dgt.CLOCK_STOP())
                         break
                     if case(MessageApi.END_CLOCK):
-                        DisplayDgt.show(Dgt.CLOCK_END)
+                        DisplayDgt.show(Dgt.CLOCK_END())
                         break
                     if case(MessageApi.DGT_BUTTON):
                         button = int(message.button)
