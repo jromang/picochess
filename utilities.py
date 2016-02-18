@@ -564,7 +564,7 @@ def update_picochess(auto_reboot=False):
     if git:
         branch = subprocess.Popen([git, "rev-parse", "--abbrev-ref", "HEAD"],
                                   stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8').rstrip()
-        if branch == 'stable':
+        if branch == 'stable' or branch == 'master':
             # Fetch remote repo
             output = subprocess.Popen([git, "remote", "update"],
                                       stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
@@ -576,7 +576,9 @@ def update_picochess(auto_reboot=False):
             if 'up-to-date' not in output:
                 # Update
                 logging.debug('Updating picochess')
-                output = subprocess.Popen([git, "pull", "origin", "stable"],
+                output = subprocess.Popen(["pip3", "install", "-r", "requirements.txt"],
+                                          stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
+                output = subprocess.Popen([git, "pull", "origin", branch],
                                           stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
                 logging.debug(output)
                 if auto_reboot:
