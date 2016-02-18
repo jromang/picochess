@@ -550,7 +550,7 @@ def which(program):
             return program
     else:
         pe = os.path.dirname(os.path.realpath(__file__))
-        for path in os.environ["PATH"].split(os.pathsep) + [pe, pe + os.sep + 'engines']:
+        for path in os.environ["PATH"].split(os.pathsep) + [pe, pe + os.sep + 'engines' + os.sep + platform.machine()]:
             path = path.strip('"')
             exe_file = os.path.join(path, program)
             if is_exe(exe_file):
