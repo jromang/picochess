@@ -29,7 +29,7 @@ class DGTPi(DGTInterface):
         self.dgtserial.run()
 
         self.lock = Lock()
-        self.lib = cdll.LoadLibrary("/home/pi/20160122/dgtpicom.so")
+        self.lib = cdll.LoadLibrary("/opt/picochess/dgtpicom.so")
 
         self.startup_clock()
         incoming_clock_thread = Timer(0, self.process_incoming_clock_forever)
