@@ -372,7 +372,7 @@ def main():
 
     # Enable logging
     logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
-                        format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s',
+                        format='%(asctime)s.%(msecs)3d %(levelname)s %(module)s - %(funcName)s: %(message)s',
                         datefmt="%Y-%m-%d %H:%M:%S")
     logging.getLogger("chess.uci").setLevel(logging.INFO)  # don't want to get so many python-chess uci messages
 
