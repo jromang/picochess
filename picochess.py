@@ -353,7 +353,6 @@ def main():
                         default=None)
     parser.add_argument("-uci", "--uci-option", type=str, help="pass an UCI option to the engine (name;value)",
                         default=None)
-    parser.add_argument("-dgt3000", "--dgt-3000-clock", action='store_true', help="do NOT use it anymore (DEPRECATED!)")
     parser.add_argument("-nobeep", "--disable-dgt-clock-beep", action='store_true',
                         help="do NOT use it anymore (DEPRECATED!)")
     parser.add_argument("-beep", "--beep-level", type=int, help="sets a beep level from 0(=no beeps) to 15(=all beeps)",
