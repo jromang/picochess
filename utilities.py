@@ -525,7 +525,7 @@ class Dgt():
     DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['l', 'm', 's', 'beep', 'duration', 'force'])
     LIGHT_CLEAR = ClassFactory(DgtApi.LIGHT_CLEAR, [])
     LIGHT_SQUARES = ClassFactory(DgtApi.LIGHT_SQUARES, ['squares'])
-    CLOCK_END = ClassFactory(DgtApi.CLOCK_END, [])
+    CLOCK_END = ClassFactory(DgtApi.CLOCK_END, ['force'])
     CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, [])
     CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side'])
     CLOCK_VERSION = ClassFactory(DgtApi.CLOCK_VERSION, ['main_version', 'sub_version', 'attached'])
@@ -543,7 +543,7 @@ class Message():
     ENGINE_READY = ClassFactory(MessageApi.ENGINE_READY, ['eng', 'engine_name', 'has_levels', 'has_960'])
     ENGINE_STARTUP = ClassFactory(MessageApi.ENGINE_STARTUP, ['path', 'has_levels', 'has_960'])
     ENGINE_FAIL = ClassFactory(MessageApi.ENGINE_FAIL, [])
-    LEVEL = ClassFactory(MessageApi.LEVEL, ['level', 'beep'])
+    LEVEL = ClassFactory(MessageApi.LEVEL, ['level', 'level_string', 'beep'])
     TIME_CONTROL = ClassFactory(MessageApi.TIME_CONTROL, ['time_string', 'beep'])
     OPENING_BOOK = ClassFactory(MessageApi.OPENING_BOOK, ['book_string', 'beep'])
     DGT_BUTTON = ClassFactory(MessageApi.DGT_BUTTON, ['button'])
@@ -579,7 +579,7 @@ class Message():
 class Event():
     # User events
     FEN = ClassFactory(EventApi.FEN, ['fen'])
-    LEVEL = ClassFactory(EventApi.LEVEL, ['level', 'beep'])
+    LEVEL = ClassFactory(EventApi.LEVEL, ['level', 'level_string', 'beep'])
     NEW_GAME = ClassFactory(EventApi.NEW_GAME, [])
     DRAWRESIGN = ClassFactory(EventApi.DRAWRESIGN, ['result'])
     USER_MOVE = ClassFactory(EventApi.USER_MOVE, ['move'])

@@ -169,8 +169,8 @@ class DgtPi(DgtInterface):
             else:
                 self.clock_running = True
 
-    def end_clock(self):
-        if self.clock_running:
+    def end_clock(self, force=False):
+        if self.clock_running or force:
             with self.lock:
                 res = self.lib.dgtpicom_end_text()
                 if res < 0:

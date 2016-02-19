@@ -208,7 +208,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen, beep=BeepLevel.BUTTON, duration=1)
                 DisplayDgt.show(text)
             else:
-                DisplayDgt.show(Dgt.CLOCK_END())
+                DisplayDgt.show(Dgt.CLOCK_END(force=True))
 
         elif self.top_result == Menu.MODE_MENU:
             self.top_result = Menu.TOP_MENU
@@ -569,16 +569,13 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         elif self.top_result == Menu.LEVEL_MENU:
             if self.mode_result == Mode.REMOTE:
                 text = text_nofunction
+                DisplayDgt.show(text)
             elif self.engine_has_levels:
                 self.engine_level_result = self.engine_level_index
-                self.fire(Event.LEVEL(level=self.engine_level_result, beep=BeepLevel.BUTTON))
-                text = text_oklevel
+                self.fire(Event.LEVEL(level=self.engine_level_result, level_string='ok lvl', beep=BeepLevel.BUTTON))
                 self.reset_menu()
             else:
                 text = text_nolevel
-            DisplayDgt.show(text)
-            if self.play_move:
-                text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen, beep=BeepLevel.BUTTON, duration=1)
                 DisplayDgt.show(text)
 
         elif self.top_result == Menu.SYSTEM_MENU:
@@ -603,7 +600,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen, beep=BeepLevel.BUTTON, duration=1)
                 DisplayDgt.show(text)
             else:
-                DisplayDgt.show(Dgt.CLOCK_END())
+                DisplayDgt.show(Dgt.CLOCK_END(force=True))
 
         elif self.top_result == Menu.ENGINE_MENU:
             if self.mode_result == Mode.REMOTE:
@@ -712,7 +709,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if case(MessageApi.WAIT_STATE):
                         DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m="you move", s="youmov", beep=BeepLevel.OKAY, duration=1))
                         time.sleep(1)  # @todo clock_end doesnt support duration right now :-(
-                        DisplayDgt.show(Dgt.CLOCK_END())
+                        DisplayDgt.show(Dgt.CLOCK_END(force=True))
                         break
                     if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
                         DisplayDgt.show(Dgt.LIGHT_CLEAR())
@@ -737,24 +734,28 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         DisplayDgt.show(Dgt.DISPLAY_TEXT(l="altn move", m="alt move", s="altmov", beep=BeepLevel.BUTTON, duration=0.5))
                         break
                     if case(MessageApi.LEVEL):
-                        level = str(message.level)
                         if self.engine_restart:
                             pass
-                        # elif self.engine_level_result != self.engine_level_index:
-                        #     self.engine_level_result = self.engine_level_index
                         else:
-                            DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m="level " + level, s="lvl " + level, beep=message.beep, duration=1))
-                            DisplayDgt.show(Dgt.CLOCK_END())
+                            DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m=message.level_string, s=None, beep=message.beep, duration=1))
+                            if self.play_move:
+                                DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen, beep=BeepLevel.BUTTON, duration=1))
+                            else:
+                                DisplayDgt.show(Dgt.CLOCK_END(force=True))
                         break
                     if case(MessageApi.TIME_CONTROL):
                         DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m=message.time_string, s=None, beep=message.beep, duration=1))
                         if self.play_move:
                             DgtDisplay.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen, beep=BeepLevel.BUTTON, duration=1))
+                        else:
+                            DisplayDgt.show(Dgt.CLOCK_END(force=True))
                         break
                     if case(MessageApi.OPENING_BOOK):
                         DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m=message.book_string, s=None, beep=message.beep, duration=1))
                         if self.play_move:
                             DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen, beep=BeepLevel.BUTTON, duration=1))
+                        else:
+                            DisplayDgt.show(Dgt.CLOCK_END(force=True))
                         break
                     if case(MessageApi.USER_TAKE_BACK):
                         self.reset_hint_and_score()
@@ -772,7 +773,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         if self.play_move:
                             DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen, beep=BeepLevel.BUTTON, duration=1))
                         else:
-                            DisplayDgt.show(Dgt.CLOCK_END())
+                            DisplayDgt.show(Dgt.CLOCK_END(force=True))
                         break
                     if case(MessageApi.PLAY_MODE):
                         pm = message.play_mode.value
@@ -781,7 +782,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if case(MessageApi.NEW_SCORE):
                         self.score = message.score
                         self.mate = message.mate
-                        if message.mode == Mode.KIBITZ:
+                        if message.mode == Mode.KIBITZ and self.top_result is None:
                             DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m=str(self.score).rjust(6), s=None, beep=BeepLevel.NO, duration=1))
                         break
                     if case(MessageApi.BOOK_MOVE):
@@ -792,7 +793,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if case(MessageApi.NEW_PV):
                         self.hint_move = message.pv[0]
                         self.hint_fen = message.fen
-                        if message.mode == Mode.ANALYSIS:
+                        if message.mode == Mode.ANALYSIS and self.top_result is None:
                             DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, beep=BeepLevel.NO, duration=0))
                         break
                     if case(MessageApi.SYSTEM_INFO):
@@ -826,8 +827,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if case(MessageApi.STOP_CLOCK):
                         DisplayDgt.show(Dgt.CLOCK_STOP())
                         break
-                    if case(MessageApi.END_CLOCK):
-                        DisplayDgt.show(Dgt.CLOCK_END())
+                    if case(MessageApi.END_CLOCK):  # @todo seems not used!
+                        DisplayDgt.show(Dgt.CLOCK_END(message.force))
                         break
                     if case(MessageApi.DGT_BUTTON):
                         button = int(message.button)
@@ -868,7 +869,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.engine_level_result = level
                             self.engine_level_index = level
                             logging.debug("Map-Fen: New level")
-                            self.fire(Event.LEVEL(level=level, beep=BeepLevel.MAP))
+                            self.fire(Event.LEVEL(level=level, level_string='lvl ' + str(level), beep=BeepLevel.MAP))
                         elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":
                             logging.debug("Map-Fen: New game")
                             self.draw_setup_pieces = False
