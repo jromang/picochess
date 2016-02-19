@@ -67,7 +67,7 @@ class DgtInterface(DisplayDgt, Thread):
         self.timer_running = False
         if self.clock_running:
             logging.debug('Showing the running clock again')
-            self.end_clock()
+            self.end_clock(force=False)
         else:
             logging.debug('Clock not running - ignored duration')
 

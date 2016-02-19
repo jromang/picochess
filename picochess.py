@@ -509,7 +509,7 @@ def main():
                     logging.debug("Setting engine to level %i", event.level)
                     if engine.level(event.level):
                         engine.send()
-                        DisplayMsg.show(Message.LEVEL(level=event.level, beep=event.beep))
+                        DisplayMsg.show(Message.LEVEL(level=event.level, level_string=event.level_string, beep=event.beep))
                     break
 
                 if case(EventApi.NEW_ENGINE):

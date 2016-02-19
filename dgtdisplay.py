@@ -569,16 +569,13 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         elif self.top_result == Menu.LEVEL_MENU:
             if self.mode_result == Mode.REMOTE:
                 text = text_nofunction
+                DisplayDgt.show(text)
             elif self.engine_has_levels:
                 self.engine_level_result = self.engine_level_index
-                self.fire(Event.LEVEL(level=self.engine_level_result, beep=BeepLevel.BUTTON))
-                text = text_oklevel
+                self.fire(Event.LEVEL(level=self.engine_level_result, level_string='ok lvl', beep=BeepLevel.BUTTON))
                 self.reset_menu()
             else:
                 text = text_nolevel
-            DisplayDgt.show(text)
-            if self.play_move:
-                text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen, beep=BeepLevel.BUTTON, duration=1)
                 DisplayDgt.show(text)
 
         elif self.top_result == Menu.SYSTEM_MENU:
@@ -737,19 +734,21 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         DisplayDgt.show(Dgt.DISPLAY_TEXT(l="altn move", m="alt move", s="altmov", beep=BeepLevel.BUTTON, duration=0.5))
                         break
                     if case(MessageApi.LEVEL):
-                        level = str(message.level)
                         if self.engine_restart:
                             pass
-                        # elif self.engine_level_result != self.engine_level_index:
-                        #     self.engine_level_result = self.engine_level_index
                         else:
-                            DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m="level " + level, s="lvl " + level, beep=message.beep, duration=1))
-                            DisplayDgt.show(Dgt.CLOCK_END(force=True))
+                            DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m=message.level_string, s=None, beep=message.beep, duration=1))
+                            if self.play_move:
+                                DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen, beep=BeepLevel.BUTTON, duration=1))
+                            else:
+                                DisplayDgt.show(Dgt.CLOCK_END(force=True))
                         break
                     if case(MessageApi.TIME_CONTROL):
                         DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m=message.time_string, s=None, beep=message.beep, duration=1))
                         if self.play_move:
                             DgtDisplay.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen, beep=BeepLevel.BUTTON, duration=1))
+                        else:
+                            DisplayDgt.show(Dgt.CLOCK_END(force=True))
                         break
                     if case(MessageApi.OPENING_BOOK):
                         DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m=message.book_string, s=None, beep=message.beep, duration=1))
@@ -775,7 +774,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen, beep=BeepLevel.BUTTON, duration=1))
                         else:
                             DisplayDgt.show(Dgt.CLOCK_END(force=True))
-                            # DisplayMsg.show(Message.WAIT_STATE())
                         break
                     if case(MessageApi.PLAY_MODE):
                         pm = message.play_mode.value
@@ -871,7 +869,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.engine_level_result = level
                             self.engine_level_index = level
                             logging.debug("Map-Fen: New level")
-                            self.fire(Event.LEVEL(level=level, beep=BeepLevel.MAP))
+                            self.fire(Event.LEVEL(level=level, level_string='lvl ' + str(level), beep=BeepLevel.MAP))
                         elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":
                             logging.debug("Map-Fen: New game")
                             self.draw_setup_pieces = False
