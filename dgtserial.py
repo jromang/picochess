@@ -49,9 +49,9 @@ piece_to_char = {
 }
 
 
-class DGTserial(object):
+class DgtSerial(object):
     def __init__(self, device):
-        super(DGTserial, self).__init__()
+        super(DgtSerial, self).__init__()
         self.device = device
         self.serial = None
         self.waitchars = ['/', '-', '\\', '|']
