@@ -108,7 +108,7 @@ class ChessTalker(DisplayMsg, threading.Thread):
                             self.user_chesstalker_voice.say_move(message.move, copy.deepcopy(message.game))
                             previous_move = str(message.move)
                         break
-                    if case(MessageApi.REVIEW_MODE_MOVE):
+                    if case(MessageApi.REVIEW_MOVE):
                         if message.move and message.game and str(message.move) != previous_move \
                                 and self.user_chesstalker_voice is not None:
                             logging.debug('Announcing REVIEW_MOVE [%s]', message.move)

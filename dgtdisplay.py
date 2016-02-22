@@ -717,13 +717,14 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.alternative = False
                         if self.ok_moves_messages:
                             DisplayDgt.show(Dgt.DISPLAY_TEXT(l="okay pico", m="ok pico", s="okpico", beep=BeepLevel.OKAY, duration=0.5))
+                        self.reset_menu()
                         break
                     if case(MessageApi.USER_MOVE):
                         self.alternative = False
                         if self.ok_moves_messages:
                             DisplayDgt.show(Dgt.DISPLAY_TEXT(l="okay user", m="ok user", s="okuser", beep=BeepLevel.OKAY, duration=0.5))
                         break
-                    if case(MessageApi.REVIEW_MODE_MOVE):
+                    if case(MessageApi.REVIEW_MOVE):
                         self.last_move = message.move
                         self.play_move = message.move
                         self.last_fen = message.fen

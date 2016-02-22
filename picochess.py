@@ -34,7 +34,7 @@ import chesstalker.chesstalker
 
 from timecontrol import TimeControl
 from utilities import *
-from keyboardinput import KeyboardInput, TerminalDisplay
+from keyboard import KeyboardInput, TerminalDisplay
 from pgn import PgnDisplay
 from server import WebServer
 
@@ -305,13 +305,13 @@ def main():
 
         elif interaction_mode == Mode.OBSERVE:
             stop_search_and_clock()
-            DisplayMsg.show(Message.REVIEW_MODE_MOVE(move=move, fen=fen, game=game.copy(), mode=interaction_mode))
+            DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, game=game.copy(), mode=interaction_mode))
             if check_game_state(game, play_mode):
                 observe(game, time_control)
 
         elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
             stop_search()
-            DisplayMsg.show(Message.REVIEW_MODE_MOVE(move=move, fen=fen, game=game.copy(), mode=interaction_mode))
+            DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, game=game.copy(), mode=interaction_mode))
             if check_game_state(game, play_mode):
                 analyse(game)
 

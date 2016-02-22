@@ -83,12 +83,11 @@ class MessageApi():
     COMPUTER_MOVE = 'MSG_COMPUTER_MOVE'  # Show computer move
     BOOK_MOVE = 'MSG_BOOK_MOVE'  # Show book move
     NEW_PV = 'MSG_NEW_PV'  # Show the new Principal Variation
-    REVIEW_MODE_MOVE = 'MSG_REVIEW_MODE_MOVE'  # Player is reviewing game
-    REMOTE_MODE_MOVE = 'MSG_REMOTE_MODE_MOVE'  # DGT Player is playing vs network player
+    REVIEW_MOVE = 'MSG_REVIEW_MOVE'  # Player is reviewing a game
     ENGINE_READY = 'MSG_ENGINE_READY'
     ENGINE_STARTUP = 'MSG_ENGINE_STARTUP'  # first time a new engine is ready
     ENGINE_FAIL = 'MSG_ENGINE_FAIL'
-    LEVEL = 'MSG_LEVEL'  # User sets engine level (from 1 to 20).
+    LEVEL = 'MSG_LEVEL'  # User sets engine level (from 0 to 20).
     TIME_CONTROL = 'MSG_TIME_CONTROL'
     OPENING_BOOK = 'MSG_OPENING_BOOK'  # User chooses an opening book
     DGT_BUTTON = 'MSG_DGT_BUTTON'  # Clock button pressed
@@ -538,8 +537,7 @@ class Message():
     COMPUTER_MOVE = ClassFactory(MessageApi.COMPUTER_MOVE, ['result', 'fen', 'game', 'time_control'])
     BOOK_MOVE = ClassFactory(MessageApi.BOOK_MOVE, ['result'])
     NEW_PV = ClassFactory(MessageApi.NEW_PV, ['pv', 'mode', 'fen'])
-    REVIEW_MODE_MOVE = ClassFactory(MessageApi.REVIEW_MODE_MOVE, ['move', 'fen', 'game', 'mode'])
-    REMOTE_MODE_MOVE = ClassFactory(MessageApi.REMOTE_MODE_MOVE, [])
+    REVIEW_MOVE = ClassFactory(MessageApi.REVIEW_MOVE, ['move', 'fen', 'game', 'mode'])
     ENGINE_READY = ClassFactory(MessageApi.ENGINE_READY, ['eng', 'engine_name', 'has_levels', 'has_960'])
     ENGINE_STARTUP = ClassFactory(MessageApi.ENGINE_STARTUP, ['path', 'has_levels', 'has_960'])
     ENGINE_FAIL = ClassFactory(MessageApi.ENGINE_FAIL, [])

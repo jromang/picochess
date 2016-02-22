@@ -334,7 +334,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 self.shared['last_dgt_move_msg'] = r
                 EventHandler.write_to_clients(r)
                 break
-            if case(MessageApi.REVIEW_MODE_MOVE):
+            if case(MessageApi.REVIEW_MOVE):
                 game = pgn.Game()
                 custom_fen = getattr(message.game, 'custom_fen', None)
                 if custom_fen:
