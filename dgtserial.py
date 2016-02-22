@@ -115,7 +115,8 @@ class DgtSerial(object):
                     text_3k = 'BT E-board'
                     text_xl = 'ok bt'
                     channel = 'BT'
-                DisplayMsg.show(Message.EBOARD_VERSION(l=None, m=text_3k, s=text_xl, channel=channel))
+                text = Dgt.DISPLAY_TEXT(l=None, m=text_3k, s=text_xl, beep=BeepLevel.NO, duration=0.5)
+                DisplayMsg.show(Message.EBOARD_VERSION(text=text, channel=channel))
                 break
             if case(DgtMsg.DGT_MSG_BWTIME):
                 if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
@@ -270,7 +271,8 @@ class DgtSerial(object):
             except pyserial.SerialException as e:
                 logging.error(e)
                 w = self.waitchars[wait_counter]
-                DisplayMsg.show(Message.NO_EBOARD_ERROR(l='no E-board', m='noboard' + w, s='board' + w))
+                text = Dgt.DISPLAY_TEXT(l='no E-board' + w, m='noboard' + w, s='board' + w, beep=BeepLevel.NO, duration=0)
+                DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text))
                 wait_counter = (wait_counter + 1) % len(self.waitchars)
                 time.sleep(0.5)
         self.startup_board()

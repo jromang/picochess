@@ -462,9 +462,10 @@ def main():
     engine_startup()  # send the args options to the engine
 
     # Startup - external
+    text = Dgt.DISPLAY_TEXT(l=None, m='bl   5', s=None, beep=BeepLevel.NO, duration=0)
     DisplayMsg.show(Message.STARTUP_INFO(info={"interaction_mode": interaction_mode, "play_mode": play_mode,
                                                "book": all_books[book_index][1], "book_index": book_index,
-                                               "time_string": "bl   5"}))
+                                               "time_text": text}))
     DisplayMsg.show(Message.UCI_OPTION_LIST(options=engine.options))
     DisplayMsg.show(Message.ENGINE_STARTUP(path=engine.get_path(), has_levels=engine.has_levels(), has_960=engine.has_chess960()))
 
@@ -508,7 +509,7 @@ def main():
                     logging.debug("Setting engine to level %i", event.level)
                     if engine.level(event.level):
                         engine.send()
-                        DisplayMsg.show(Message.LEVEL(level=event.level, level_string=event.level_string, beep=event.beep))
+                        DisplayMsg.show(Message.LEVEL(level=event.level, level_text=event.level_text))
                     break
 
                 if case(EventApi.NEW_ENGINE):
@@ -688,18 +689,18 @@ def main():
                     if engine.is_pondering() and interaction_mode == Mode.NORMAL:
                         stop_search()  # if change from ponder modes to game, also stops the pondering
                     set_wait_state()
-                    DisplayMsg.show(Message.INTERACTION_MODE(mode=event.mode, mode_string=event.mode_string, beep=event.beep))
+                    DisplayMsg.show(Message.INTERACTION_MODE(mode=event.mode, mode_text=event.mode_text))
                     break
 
                 if case(EventApi.SET_OPENING_BOOK):
                     logging.debug("Changing opening book [%s]", event.book[1])
                     bookreader = chess.polyglot.open_reader(event.book[1])
-                    DisplayMsg.show(Message.OPENING_BOOK(book_string=event.book_string, beep=event.beep))
+                    DisplayMsg.show(Message.OPENING_BOOK(book_text=event.book_text))
                     break
 
                 if case(EventApi.SET_TIME_CONTROL):
                     time_control = event.time_control
-                    DisplayMsg.show(Message.TIME_CONTROL(time_string=event.time_string, beep=event.beep))
+                    DisplayMsg.show(Message.TIME_CONTROL(time_text=event.time_text))
                     break
 
                 if case(EventApi.OUT_OF_TIME):

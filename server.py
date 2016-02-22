@@ -68,10 +68,6 @@ def create_game_header(cls, game):
             user_color = "Black" if cls.shared["game_info"]["play_mode"] == PlayMode.PLAY_BLACK else "White"
             game.headers[comp_color + "Elo"] = "2900"
             game.headers[user_color + "Elo"] = "-"
-    # http://www6.chessclub.com/help/PGN-spec saying: not valid!
-    # must be set in TimeControl-tag and with other format anyway
-    # if "time_string" in self.shared["game_info"]:
-    #    game.headers["Event"] = "Time " + self.shared["game_info"]["time_string"]
 
 
 def update_headers(cls):
@@ -251,7 +247,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 break
             if case(MessageApi.OPENING_BOOK):  # Process opening book
                 self.create_game_info()
-                self.shared['game_info']['book_string'] = message.book_string
+                self.shared['game_info']['book_text'] = message.book_text
                 break
             if case(MessageApi.INTERACTION_MODE):  # Process interaction mode
                 self.create_game_info()
@@ -268,7 +264,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 break
             if case(MessageApi.TIME_CONTROL):
                 self.create_game_info()
-                self.shared['game_info']['time_string'] = message.time_string
+                self.shared['game_info']['time_text'] = message.time_text
                 break
             if case(MessageApi.LEVEL):
                 self.shared['game_info']['level'] = message.level
