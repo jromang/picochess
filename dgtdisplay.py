@@ -908,7 +908,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             logging.debug("Map-Fen: Time control blitz")
                             self.time_mode_index = TimeMode.BLITZ
                             self.time_control_blitz_index = list(self.time_control_blitz_map.keys()).index(fen)
-                            text = Dgt.DISPLAY_TEXT(l=None, m=self.time_control_blitz_list[self.time_control_fixed_index], s=None, beep=BeepLevel.MAP, duration=1)
+                            text = Dgt.DISPLAY_TEXT(l=None, m=self.time_control_blitz_list[self.time_control_blitz_index], s=None, beep=BeepLevel.MAP, duration=1)
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_blitz_map[fen],
                                                              time_text=text))
                             self.reset_menu()
@@ -916,7 +916,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             logging.debug("Map-Fen: Time control fischer")
                             self.time_mode_index = TimeMode.FISCHER
                             self.time_control_fisch_index = list(self.time_control_fisch_map.keys()).index(fen)
-                            text = Dgt.DISPLAY_TEXT(l=None, m=self.time_control_fisch_list[self.time_control_fixed_index], s=None, beep=BeepLevel.MAP, duration=1)
+                            text = Dgt.DISPLAY_TEXT(l=None, m=self.time_control_fisch_list[self.time_control_fisch_index], s=None, beep=BeepLevel.MAP, duration=1)
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_fisch_map[fen],
                                                              time_text=text))
                             self.reset_menu()
