@@ -83,12 +83,11 @@ class MessageApi():
     COMPUTER_MOVE = 'MSG_COMPUTER_MOVE'  # Show computer move
     BOOK_MOVE = 'MSG_BOOK_MOVE'  # Show book move
     NEW_PV = 'MSG_NEW_PV'  # Show the new Principal Variation
-    REVIEW_MODE_MOVE = 'MSG_REVIEW_MODE_MOVE'  # Player is reviewing game
-    REMOTE_MODE_MOVE = 'MSG_REMOTE_MODE_MOVE'  # DGT Player is playing vs network player
+    REVIEW_MOVE = 'MSG_REVIEW_MOVE'  # Player is reviewing a game
     ENGINE_READY = 'MSG_ENGINE_READY'
     ENGINE_STARTUP = 'MSG_ENGINE_STARTUP'  # first time a new engine is ready
     ENGINE_FAIL = 'MSG_ENGINE_FAIL'
-    LEVEL = 'MSG_LEVEL'  # User sets engine level (from 1 to 20).
+    LEVEL = 'MSG_LEVEL'  # User sets engine level (from 0 to 20).
     TIME_CONTROL = 'MSG_TIME_CONTROL'
     OPENING_BOOK = 'MSG_OPENING_BOOK'  # User chooses an opening book
     DGT_BUTTON = 'MSG_DGT_BUTTON'  # Clock button pressed
@@ -525,7 +524,7 @@ class Dgt():
     DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['l', 'm', 's', 'beep', 'duration', 'force'])
     LIGHT_CLEAR = ClassFactory(DgtApi.LIGHT_CLEAR, [])
     LIGHT_SQUARES = ClassFactory(DgtApi.LIGHT_SQUARES, ['squares'])
-    CLOCK_END = ClassFactory(DgtApi.CLOCK_END, [])
+    CLOCK_END = ClassFactory(DgtApi.CLOCK_END, ['force'])
     CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, [])
     CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side'])
     CLOCK_VERSION = ClassFactory(DgtApi.CLOCK_VERSION, ['main_version', 'sub_version', 'attached'])
@@ -538,20 +537,19 @@ class Message():
     COMPUTER_MOVE = ClassFactory(MessageApi.COMPUTER_MOVE, ['result', 'fen', 'game', 'time_control'])
     BOOK_MOVE = ClassFactory(MessageApi.BOOK_MOVE, ['result'])
     NEW_PV = ClassFactory(MessageApi.NEW_PV, ['pv', 'mode', 'fen'])
-    REVIEW_MODE_MOVE = ClassFactory(MessageApi.REVIEW_MODE_MOVE, ['move', 'fen', 'game', 'mode'])
-    REMOTE_MODE_MOVE = ClassFactory(MessageApi.REMOTE_MODE_MOVE, [])
+    REVIEW_MOVE = ClassFactory(MessageApi.REVIEW_MOVE, ['move', 'fen', 'game', 'mode'])
     ENGINE_READY = ClassFactory(MessageApi.ENGINE_READY, ['eng', 'engine_name', 'has_levels', 'has_960'])
     ENGINE_STARTUP = ClassFactory(MessageApi.ENGINE_STARTUP, ['path', 'has_levels', 'has_960'])
     ENGINE_FAIL = ClassFactory(MessageApi.ENGINE_FAIL, [])
-    LEVEL = ClassFactory(MessageApi.LEVEL, ['level', 'beep'])
-    TIME_CONTROL = ClassFactory(MessageApi.TIME_CONTROL, ['time_control_string', 'beep'])
-    OPENING_BOOK = ClassFactory(MessageApi.OPENING_BOOK, ['book_control_string', 'beep'])
+    LEVEL = ClassFactory(MessageApi.LEVEL, ['level', 'level_text'])
+    TIME_CONTROL = ClassFactory(MessageApi.TIME_CONTROL, ['time_text'])
+    OPENING_BOOK = ClassFactory(MessageApi.OPENING_BOOK, ['book_text'])
     DGT_BUTTON = ClassFactory(MessageApi.DGT_BUTTON, ['button'])
     DGT_FEN = ClassFactory(MessageApi.DGT_FEN, ['fen'])
     DGT_CLOCK_VERSION = ClassFactory(MessageApi.DGT_CLOCK_VERSION, ['main_version', 'sub_version', 'attached'])
     DGT_CLOCK_TIME = ClassFactory(MessageApi.DGT_CLOCK_TIME, ['time_left', 'time_right'])
 
-    INTERACTION_MODE = ClassFactory(MessageApi.INTERACTION_MODE, ['mode', 'beep'])
+    INTERACTION_MODE = ClassFactory(MessageApi.INTERACTION_MODE, ['mode', 'mode_text'])
     PLAY_MODE = ClassFactory(MessageApi.PLAY_MODE, ['play_mode'])
     START_NEW_GAME = ClassFactory(MessageApi.START_NEW_GAME, [])
     COMPUTER_MOVE_DONE_ON_BOARD = ClassFactory(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD, [])
@@ -571,27 +569,27 @@ class Message():
     NEW_SCORE = ClassFactory(MessageApi.NEW_SCORE, ['score', 'mate', 'mode'])
     ALTERNATIVE_MOVE = ClassFactory(MessageApi.ALTERNATIVE_MOVE, [])
     JACK_CONNECTED_ERROR = ClassFactory(MessageApi.JACK_CONNECTED_ERROR, [])
-    NO_CLOCK_ERROR = ClassFactory(MessageApi.NO_CLOCK_ERROR, ['l', 'm', 's'])
-    NO_EBOARD_ERROR = ClassFactory(MessageApi.NO_EBOARD_ERROR, ['l', 'm', 's'])
-    EBOARD_VERSION = ClassFactory(MessageApi.EBOARD_VERSION, ['l', 'm', 's', 'channel'])
+    NO_CLOCK_ERROR = ClassFactory(MessageApi.NO_CLOCK_ERROR, ['text'])
+    NO_EBOARD_ERROR = ClassFactory(MessageApi.NO_EBOARD_ERROR, ['text'])
+    EBOARD_VERSION = ClassFactory(MessageApi.EBOARD_VERSION, ['text', 'channel'])
 
 
 class Event():
     # User events
     FEN = ClassFactory(EventApi.FEN, ['fen'])
-    LEVEL = ClassFactory(EventApi.LEVEL, ['level', 'beep'])
+    LEVEL = ClassFactory(EventApi.LEVEL, ['level', 'level_text'])
     NEW_GAME = ClassFactory(EventApi.NEW_GAME, [])
     DRAWRESIGN = ClassFactory(EventApi.DRAWRESIGN, ['result'])
     USER_MOVE = ClassFactory(EventApi.USER_MOVE, ['move'])
     KEYBOARD_MOVE = ClassFactory(EventApi.KEYBOARD_MOVE, ['move'])
     REMOTE_MOVE = ClassFactory(EventApi.REMOTE_MOVE, ['move', 'fen'])
-    SET_OPENING_BOOK = ClassFactory(EventApi.SET_OPENING_BOOK, ['book', 'book_control_string', 'beep'])
+    SET_OPENING_BOOK = ClassFactory(EventApi.SET_OPENING_BOOK, ['book', 'book_text'])
     NEW_ENGINE = ClassFactory(EventApi.NEW_ENGINE, ['eng', 'level'])
-    SET_INTERACTION_MODE = ClassFactory(EventApi.SET_INTERACTION_MODE, ['mode', 'beep'])
+    SET_INTERACTION_MODE = ClassFactory(EventApi.SET_INTERACTION_MODE, ['mode', 'mode_text'])
     SETUP_POSITION = ClassFactory(EventApi.SETUP_POSITION, ['fen', 'uci960'])
     STARTSTOP_THINK = ClassFactory(EventApi.STARTSTOP_THINK, [])
     STARTSTOP_CLOCK = ClassFactory(EventApi.STARTSTOP_CLOCK, [])
-    SET_TIME_CONTROL = ClassFactory(EventApi.SET_TIME_CONTROL, ['time_control', 'time_control_string', 'beep'])
+    SET_TIME_CONTROL = ClassFactory(EventApi.SET_TIME_CONTROL, ['time_control', 'time_text'])
     UCI_OPTION_SET = ClassFactory(EventApi.UCI_OPTION_SET, [])
     SHUTDOWN = ClassFactory(EventApi.SHUTDOWN, [])
     REBOOT = ClassFactory(EventApi.REBOOT, [])

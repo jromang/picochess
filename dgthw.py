@@ -25,7 +25,7 @@ from threading import Lock
 class DgtHw(DgtInterface):
     def __init__(self, device, enable_board_leds, beep_level):
         super(DgtHw, self).__init__(enable_board_leds, beep_level)
-        self.dgtserial = DGTserial(device)
+        self.dgtserial = DgtSerial(device)
         self.dgtserial.run()
 
         self.lock = Lock()
@@ -119,8 +119,8 @@ class DgtHw(DgtInterface):
             else:
                 self.clock_running = True
 
-    def end_clock(self):
-        if self.clock_running:
+    def end_clock(self, force=False):
+        if self.clock_running or force:
             self.lib.end_text()
         else:
             logging.debug('DGT clock isnt running - no need for endClock')

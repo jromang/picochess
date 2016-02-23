@@ -53,7 +53,7 @@ class DgtInterface(DisplayDgt, Thread):
     def start_clock(self, time_left, time_right, side):
         raise NotImplementedError()
 
-    def end_clock(self):
+    def end_clock(self, force=False):
         raise NotImplementedError()
 
     def get_beep_level(self, beeplevel):
@@ -67,7 +67,7 @@ class DgtInterface(DisplayDgt, Thread):
         self.timer_running = False
         if self.clock_running:
             logging.debug('Showing the running clock again')
-            self.end_clock()
+            self.end_clock(force=False)
         else:
             logging.debug('Clock not running - ignored duration')
 
@@ -113,7 +113,7 @@ class DgtInterface(DisplayDgt, Thread):
                         self.light_squares_revelation_board(message.squares)
                         break
                     if case(DgtApi.CLOCK_END):
-                        self.end_clock()
+                        self.end_clock(message.force)
                         break
                     if case(DgtApi.CLOCK_STOP):
                         self.clock_running = False

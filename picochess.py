@@ -34,7 +34,7 @@ import chesstalker.chesstalker
 
 from timecontrol import TimeControl
 from utilities import *
-from keyboardinput import KeyboardInput, TerminalDisplay
+from keyboard import KeyboardInput, TerminalDisplay
 from pgn import PgnDisplay
 from server import WebServer
 
@@ -305,13 +305,13 @@ def main():
 
         elif interaction_mode == Mode.OBSERVE:
             stop_search_and_clock()
-            DisplayMsg.show(Message.REVIEW_MODE_MOVE(move=move, fen=fen, game=game.copy(), mode=interaction_mode))
+            DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, game=game.copy(), mode=interaction_mode))
             if check_game_state(game, play_mode):
                 observe(game, time_control)
 
         elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
             stop_search()
-            DisplayMsg.show(Message.REVIEW_MODE_MOVE(move=move, fen=fen, game=game.copy(), mode=interaction_mode))
+            DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, game=game.copy(), mode=interaction_mode))
             if check_game_state(game, play_mode):
                 analyse(game)
 
@@ -371,7 +371,7 @@ def main():
 
     # Enable logging
     logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
-                        format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s',
+                        format='%(asctime)s.%(msecs)3d %(levelname)s %(module)s - %(funcName)s: %(message)s',
                         datefmt="%Y-%m-%d %H:%M:%S")
     logging.getLogger("chess.uci").setLevel(logging.INFO)  # don't want to get so many python-chess uci messages
 
@@ -462,9 +462,10 @@ def main():
     engine_startup()  # send the args options to the engine
 
     # Startup - external
+    text = Dgt.DISPLAY_TEXT(l=None, m='bl   5', s=None, beep=BeepLevel.NO, duration=0)
     DisplayMsg.show(Message.STARTUP_INFO(info={"interaction_mode": interaction_mode, "play_mode": play_mode,
-                                             "book": all_books[book_index][1], "book_index": book_index,
-                                             "time_control_string": "bl   5"}))
+                                               "book": all_books[book_index][1], "book_index": book_index,
+                                               "time_text": text}))
     DisplayMsg.show(Message.UCI_OPTION_LIST(options=engine.options))
     DisplayMsg.show(Message.ENGINE_STARTUP(path=engine.get_path(), has_levels=engine.has_levels(), has_960=engine.has_chess960()))
 
@@ -508,7 +509,7 @@ def main():
                     logging.debug("Setting engine to level %i", event.level)
                     if engine.level(event.level):
                         engine.send()
-                        DisplayMsg.show(Message.LEVEL(level=event.level, beep=event.beep))
+                        DisplayMsg.show(Message.LEVEL(level=event.level, level_text=event.level_text))
                     break
 
                 if case(EventApi.NEW_ENGINE):
@@ -557,6 +558,8 @@ def main():
                                                                  has_levels=engine.has_levels(), has_960=engine.has_chess960()))
                         else:
                             DisplayMsg.show(Message.ENGINE_FAIL())
+                        set_wait_state()
+                        DisplayMsg.show(Message.WAIT_STATE())
                         # Go back to analysing or observing
                         if interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
                             analyse(game)
@@ -686,18 +689,18 @@ def main():
                     if engine.is_pondering() and interaction_mode == Mode.NORMAL:
                         stop_search()  # if change from ponder modes to game, also stops the pondering
                     set_wait_state()
-                    DisplayMsg.show(Message.INTERACTION_MODE(mode=event.mode, beep=event.beep))
+                    DisplayMsg.show(Message.INTERACTION_MODE(mode=event.mode, mode_text=event.mode_text))
                     break
 
                 if case(EventApi.SET_OPENING_BOOK):
                     logging.debug("Changing opening book [%s]", event.book[1])
                     bookreader = chess.polyglot.open_reader(event.book[1])
-                    DisplayMsg.show(Message.OPENING_BOOK(book_control_string=event.book_control_string, beep=event.beep))
+                    DisplayMsg.show(Message.OPENING_BOOK(book_text=event.book_text))
                     break
 
                 if case(EventApi.SET_TIME_CONTROL):
                     time_control = event.time_control
-                    DisplayMsg.show(Message.TIME_CONTROL(time_control_string=event.time_control_string, beep=event.beep))
+                    DisplayMsg.show(Message.TIME_CONTROL(time_text=event.time_text))
                     break
 
                 if case(EventApi.OUT_OF_TIME):
