@@ -108,7 +108,7 @@ class MessageApi():
     STOP_CLOCK = 'MSG_STOP_CLOCK'  # Stops the clock
     USER_MOVE = 'MSG_USER_MOVE'  # Player has done a move on board
     UCI_OPTION_LIST = 'MSG_UCI_OPTION_LIST'  # Contains 'options', a dict of the current engine's UCI options
-    GAME_ENDS = 'MST_GAME_ENDS'  # The current game has ended, contains a 'result' (GameResult) and list of 'moves'
+    GAME_ENDS = 'MSG_GAME_ENDS'  # The current game has ended, contains a 'result' (GameResult) and list of 'moves'
 
     SYSTEM_INFO = 'MSG_SYSTEM_INFO'  # Information about picochess such as version etc
     STARTUP_INFO = 'MSG_STARTUP_INFO'  # Information about the startup options
