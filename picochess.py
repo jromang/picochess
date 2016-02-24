@@ -553,7 +553,7 @@ def main():
                         # Send user selected engine level to new engine
                         if engine.level(event.level):
                             engine.send()
-                            DisplayMsg.show(Message.LEVEL(level=event.level, beep=BeepLevel.BUTTON))
+                            DisplayMsg.show(Message.LEVEL(level=event.level, level_text=event.level_text))
                         # All done - rock'n'roll
                         if not engine_fallback:
                             DisplayMsg.show(Message.ENGINE_READY(eng=event.eng, engine_name=engine_name,

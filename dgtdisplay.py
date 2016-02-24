@@ -619,7 +619,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text = text_nofunction
                 DisplayDgt.show(text)
             elif self.installed_engines:
-                self.fire(Event.NEW_ENGINE(eng=self.installed_engines[self.engine_index], level=self.engine_level_result))
+                level = self.engine_level_result
+                text = Dgt.DISPLAY_TEXT(l='level ' + str(level), m=' level ' + str(level), s='lvl ' + str(level), beep=BeepLevel.BUTTON, duration=1)
+                self.fire(Event.NEW_ENGINE(eng=self.installed_engines[self.engine_index], level=level, level_text=text))
                 self.engine_restart = True
                 self.reset_menu()
             else:
@@ -907,7 +909,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 self.engine_index = engine_index
                                 logging.debug("Map-Fen: Engine index [%s]", engine_index)  # @todo correct name of engine
                                 level = self.engine_level_index if self.engine_level_result is None else self.engine_level_result
-                                self.fire(Event.NEW_ENGINE(eng=self.installed_engines[self.engine_index], level=level))
+                                text = Dgt.DISPLAY_TEXT(l='level ' + str(level), m=' level ' + str(level), s='lvl ' + str(level), beep=BeepLevel.BUTTON, duration=1)
+                                self.fire(Event.NEW_ENGINE(eng=self.installed_engines[self.engine_index], level=level, level_text=text))
                                 self.engine_restart = True
                                 self.reset_menu()
                             else:

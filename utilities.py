@@ -585,7 +585,7 @@ class Event():
     KEYBOARD_MOVE = ClassFactory(EventApi.KEYBOARD_MOVE, ['move'])
     REMOTE_MOVE = ClassFactory(EventApi.REMOTE_MOVE, ['move', 'fen'])
     SET_OPENING_BOOK = ClassFactory(EventApi.SET_OPENING_BOOK, ['book', 'book_text'])
-    NEW_ENGINE = ClassFactory(EventApi.NEW_ENGINE, ['eng', 'level'])
+    NEW_ENGINE = ClassFactory(EventApi.NEW_ENGINE, ['eng', 'level', 'level_text'])
     SET_INTERACTION_MODE = ClassFactory(EventApi.SET_INTERACTION_MODE, ['mode', 'mode_text'])
     SETUP_POSITION = ClassFactory(EventApi.SETUP_POSITION, ['fen', 'uci960'])
     STARTSTOP_THINK = ClassFactory(EventApi.STARTSTOP_THINK, [])
