@@ -25,6 +25,9 @@ import socket
 import json
 import time
 
+import uci
+import configparser
+
 try:
     import enum
 except ImportError:
@@ -616,14 +619,55 @@ def get_opening_books():
     return library
 
 
-def get_installed_engines(engine):
-    engine_path = (engine.rsplit(os.sep, 1))[0]
-    engine_list = sorted(os.listdir(engine_path), key=str.lower)
+def get_installed_engines(engine_path):
+    return read_engine_ini((engine_path.rsplit(os.sep, 1))[0])
+    # engine_path = (engine_path.rsplit(os.sep, 1))[0]
+    # engine_list = sorted(os.listdir(engine_path), key=str.lower)
+    # library = []
+    # for engine_file in engine_list:
+    #     # Can't use isfile() as that doesn't count links
+    #     if not (('.' in engine_file) or os.path.isdir(engine_path + os.sep + engine_file)):
+    #         library.append((engine_path + os.sep + engine_file, engine_file))
+    # return library
+
+
+def write_engine_ini(engine_path=None):
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+    if not engine_path:
+        program_path = os.path.dirname(os.path.realpath(__file__)) + os.sep
+        engine_path = program_path + 'engines' + os.sep + platform.machine()
+    engine_list = sorted(os.listdir(engine_path))
+    config = configparser.ConfigParser()
+    for engine_file_name in engine_list:
+        if is_exe(engine_path + os.sep + engine_file_name):
+            engine = uci.Engine(engine_path + os.sep + engine_file_name)
+            if engine:
+                try:
+                    config[engine_file_name[2:]] = {
+                        'file': engine_file_name,
+                        'name': engine.get().name,
+                        'has_levels': engine.has_levels(),
+                        'has_chess960': engine.has_chess960()
+                    }
+                except AttributeError:
+                    pass
+                engine.quit()
+    with open(engine_path + os.sep + 'engines.ini', 'w') as configfile:
+        config.write(configfile)
+
+
+def read_engine_ini(engine_path=None):
+    if not engine_path:
+        program_path = os.path.dirname(os.path.realpath(__file__)) + os.sep
+        engine_path = program_path + 'engines' + os.sep + platform.machine()
+    config = configparser.ConfigParser()
+    config.read(engine_path + os.sep + 'engines.ini')
     library = []
-    for engine in engine_list:
-        # Can't use isfile() as that doesn't count links
-        if not (('.' in engine) or os.path.isdir(engine_path + os.sep + engine)):
-            library.append((engine_path + os.sep + engine, engine))
+    for section in config.sections():
+        library.append((engine_path + os.sep + config[section]['file'], section))
+        # print(config[section].getboolean('has_levels'))
     return library
 
 
