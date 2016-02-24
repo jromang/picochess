@@ -58,9 +58,8 @@ class PgnDisplay(DisplayMsg, threading.Thread):
     def save_and_email_pgn(self, message):
         logging.debug('Saving game to [' + self.file_name + ']')
         pgn = chess.pgn.Game()
-        custom_fen = getattr(message.game, 'custom_fen', None)
-        if custom_fen:
-            pgn.setup(custom_fen)
+        if message.custom_fen:
+            pgn.setup(message.custom_fen)
 
         node = pgn
         for move in message.game.move_stack:

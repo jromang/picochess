@@ -215,7 +215,8 @@ def main():
         if result is None:
             return True
         else:
-            DisplayMsg.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=copy.deepcopy(game)))
+            custom_fen = getattr(game, 'custom_fen', None)
+            DisplayMsg.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=copy.deepcopy(game), custom_fen=custom_fen))
             return False
 
     def process_fen(fen, legal_fens):
@@ -579,7 +580,8 @@ def main():
                         logging.warning('Engine doesnt support 960 mode')
                     if game.move_stack:
                         if game.is_game_over() or game_declared:
-                            DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game)))
+                            custom_fen = getattr(game, 'custom_fen', None)
+                            DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game), custom_fen=custom_fen))
                     game = chess.Board(event.fen, event.uci960)
                     game.custom_fen = event.fen
                     legal_fens = compute_legal_fens(game)
@@ -623,7 +625,8 @@ def main():
                     if game.move_stack:
                         logging.debug("Starting a new game")
                         if not (game.is_game_over() or game_declared):
-                            DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game)))
+                            custom_fen = getattr(game, 'custom_fen', None)
+                            DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game), custom_fen=custom_fen))
                         game = chess.Board()
                     legal_fens = compute_legal_fens(game)
                     # interaction_mode = Mode.NORMAL @todo
@@ -639,7 +642,8 @@ def main():
 
                 if case(EventApi.DRAWRESIGN):
                     if not game_declared:  # in case user leaves kings in place while moving other pieces
-                        DisplayMsg.show(Message.GAME_ENDS(result=event.result, play_mode=play_mode, game=copy.deepcopy(game)))
+                        custom_fen = getattr(game, 'custom_fen', None)
+                        DisplayMsg.show(Message.GAME_ENDS(result=event.result, play_mode=play_mode, game=copy.deepcopy(game), custom_fen=custom_fen))
                         game_declared = True
                     break
 
@@ -707,7 +711,8 @@ def main():
 
                 if case(EventApi.OUT_OF_TIME):
                     stop_search_and_clock()
-                    DisplayMsg.show(Message.GAME_ENDS(result=GameResult.OUT_OF_TIME, play_mode=play_mode, game=copy.deepcopy(game)))
+                    custom_fen = getattr(game, 'custom_fen', None)
+                    DisplayMsg.show(Message.GAME_ENDS(result=GameResult.OUT_OF_TIME, play_mode=play_mode, game=copy.deepcopy(game), custom_fen=custom_fen))
                     break
 
                 if case(EventApi.UCI_OPTION_SET):
@@ -718,14 +723,16 @@ def main():
                 if case(EventApi.SHUTDOWN):
                     if talker:
                         talker.say_event(event)
-                    DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game)))
+                    custom_fen = getattr(game, 'custom_fen', None)
+                    DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game), custom_fen=custom_fen))
                     shutdown()
                     break
 
                 if case(EventApi.REBOOT):
                     if talker:
                         talker.say_event(event)
-                    DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game)))
+                    custom_fen = getattr(game, 'custom_fen', None)
+                    DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game), custom_fen=custom_fen))
                     reboot()
                     break
 
