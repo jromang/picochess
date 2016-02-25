@@ -557,6 +557,7 @@ def main():
                         # All done - rock'n'roll
                         if not engine_fallback:
                             DisplayMsg.show(Message.ENGINE_READY(eng=event.eng, engine_name=engine_name,
+                                                                 eng_text=event.eng_text,
                                                                  has_levels=engine.has_levels(),
                                                                  has_960=engine.has_chess960()))
                         else:

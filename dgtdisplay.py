@@ -620,8 +620,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 DisplayDgt.show(text)
             elif self.installed_engines:
                 level = self.engine_level_result
+                eng = self.installed_engines[self.engine_index]
+                eng_text = Dgt.DISPLAY_TEXT(l=None, m=eng[1], s=None, beep=BeepLevel.BUTTON, duration=1)
                 text = Dgt.DISPLAY_TEXT(l='level ' + str(level), m=' level ' + str(level), s='lvl ' + str(level), beep=BeepLevel.BUTTON, duration=1)
-                self.fire(Event.NEW_ENGINE(eng=self.installed_engines[self.engine_index], level=level, level_text=text))
+                self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, level=level, level_text=text))
                 self.engine_restart = True
                 self.reset_menu()
             else:
@@ -682,7 +684,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.engine_index = self.installed_engines.index(message.eng)
                         self.engine_has_levels = message.has_levels
                         self.engine_has_960 = message.has_960
-                        DisplayDgt.show(text_okengine)
+                        DisplayDgt.show(message.eng_text)
                         self.engine_restart = False
                         break
                     if case(MessageApi.ENGINE_STARTUP):
@@ -906,13 +908,18 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         elif fen in engine_map:
                             if self.installed_engines:
                                 engine_index = engine_map.index(fen)
-                                self.engine_index = engine_index
-                                logging.debug("Map-Fen: Engine index [%s]", engine_index)  # @todo correct name of engine
-                                level = self.engine_level_index if self.engine_level_result is None else self.engine_level_result
-                                text = Dgt.DISPLAY_TEXT(l='level ' + str(level), m=' level ' + str(level), s='lvl ' + str(level), beep=BeepLevel.BUTTON, duration=1)
-                                self.fire(Event.NEW_ENGINE(eng=self.installed_engines[self.engine_index], level=level, level_text=text))
-                                self.engine_restart = True
-                                self.reset_menu()
+                                try:
+                                    self.engine_index = engine_index
+                                    logging.debug("Map-Fen: Engine index [%s]", engine_index)  # @todo correct name of engine
+                                    eng = self.installed_engines[self.engine_index]
+                                    eng_text = Dgt.DISPLAY_TEXT(l=None, m=eng[1], s=None, beep=BeepLevel.MAP, duration=0)
+                                    level = self.engine_level_index if self.engine_level_result is None else self.engine_level_result
+                                    text = Dgt.DISPLAY_TEXT(l='level ' + str(level), m=' level ' + str(level), s='lvl ' + str(level), beep=BeepLevel.MAP, duration=1)
+                                    self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, level=level, level_text=text))
+                                    self.engine_restart = True
+                                    self.reset_menu()
+                                except IndexError:
+                                    pass
                             else:
                                 DisplayDgt.show(text_erroreng)
                         elif fen in mode_map:
