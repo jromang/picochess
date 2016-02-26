@@ -621,9 +621,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             elif self.installed_engines:
                 level = self.engine_level_result
                 eng = self.installed_engines[self.engine_index]
-                eng_text = Dgt.DISPLAY_TEXT(l=None, m=eng[1], s=None, beep=BeepLevel.BUTTON, duration=1)
                 text = Dgt.DISPLAY_TEXT(l='level ' + str(level), m=' level ' + str(level), s='lvl ' + str(level), beep=BeepLevel.BUTTON, duration=1)
-                self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, level=level, level_text=text))
+                self.fire(Event.NEW_ENGINE(eng=eng, eng_text=text_okengine, level=level, level_text=text))
                 self.engine_restart = True
                 self.reset_menu()
             else:
