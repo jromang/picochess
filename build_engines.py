@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Copyright (C) 2013-2016 Jean-Francois Romang (jromang@posteo.de)
 #                         Shivkumar Shivaji ()
 #                         Jürgen Précour (LocutusOfPenguin@posteo.de)
@@ -15,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import uci  # needed!
 from utilities import *
 
 write_engine_ini()
