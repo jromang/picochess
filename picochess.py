@@ -369,7 +369,10 @@ def main():
 
     args = parser.parse_args()
     if args.engine is None:
-        args.engine = 'engines' + os.sep + platform.machine() + os.sep + 'stockfish'
+        el = read_engine_ini()
+        args.engine = el[0][0]  # read the first engine path and use it as standard
+    else:
+        args.engine = which(args.engine)
 
     # Enable logging
     logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),

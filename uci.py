@@ -89,17 +89,14 @@ class Engine(object):
                                           missing_host_key=paramiko.AutoAddPolicy())
                 self.engine = chess.uci.spur_spawn_engine(shell, [path])
             else:
-                real_path = which(path)
-                if not real_path:
-                    logging.error("Engine executable [%s] not found", path)
-                    self.engine = None
-                else:
-                    self.engine = chess.uci.popen_engine(real_path)
-                    self.path = real_path
+                self.engine = chess.uci.popen_engine(path)
+                self.path = path
             if self.engine:
                 handler = Informer()
                 self.engine.info_handlers.append(handler)
                 self.engine.uci()
+            else:
+                logging.error("Engine executable [%s] not found", path)
             self.options = {}
             self.future = None
             self.show_best = True
