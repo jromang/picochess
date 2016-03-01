@@ -77,26 +77,29 @@ drawresign_map = OrderedDict([
     ("8/8/8/8/3Kk3/8/8/8", GameResult.DRAW)
 ])
 
-text_goodbye = Dgt.DISPLAY_TEXT(l=None, m="good bye", s="bye", beep=BeepLevel.YES, duration=0)
-text_pleasewait = Dgt.DISPLAY_TEXT(l="please wait", m="pls wait", s="wait", beep=BeepLevel.YES, duration=0)
-text_nomove = Dgt.DISPLAY_TEXT(l=None, m="no move", s="nomove", beep=BeepLevel.BUTTON, duration=1)
-text_wb = Dgt.DISPLAY_TEXT(l=None, m=" w     b", s="w    b", beep=BeepLevel.BUTTON, duration=0)
-text_bw = Dgt.DISPLAY_TEXT(l=None, m=" b     w", s="b    w", beep=BeepLevel.BUTTON, duration=0)
+text_goodbye = Dgt.DISPLAY_TEXT(l=None, m='good bye', s='bye', beep=BeepLevel.YES, duration=0)
+text_pleasewait = Dgt.DISPLAY_TEXT(l='please wait', m='pls wait', s='wait', beep=BeepLevel.YES, duration=0)
+text_nomove = Dgt.DISPLAY_TEXT(l=None, m='no move', s='nomove', beep=BeepLevel.BUTTON, duration=1)
+text_wb = Dgt.DISPLAY_TEXT(l=None, m=' w     b', s='w    b', beep=BeepLevel.BUTTON, duration=0)
+text_bw = Dgt.DISPLAY_TEXT(l=None, m=' b     w', s='b    w', beep=BeepLevel.BUTTON, duration=0)
 text_960no = Dgt.DISPLAY_TEXT(l=None, m='960 no', s='960 no', beep=BeepLevel.BUTTON, duration=0)
 text_960yes =Dgt.DISPLAY_TEXT(l=None, m='960 yes', s='960yes', beep=BeepLevel.BUTTON, duration=0)
-text_picochess = Dgt.DISPLAY_TEXT(l="picoChs " + version, m='pico ' + version, s='pic ' + version, beep=BeepLevel.BUTTON, duration=0)
-text_nofunction = Dgt.DISPLAY_TEXT(l="no function", m="no funct", s="nofunc", beep=BeepLevel.BUTTON, duration=0)
+text_picochess = Dgt.DISPLAY_TEXT(l='picoChs ' + version, m='pico ' + version, s='pic ' + version, beep=BeepLevel.BUTTON, duration=0)
+text_nofunction = Dgt.DISPLAY_TEXT(l='no function', m='no funct', s='nofunc', beep=BeepLevel.BUTTON, duration=0)
 text_erroreng = Dgt.DISPLAY_TEXT(l='error eng', m='error', s=None, beep=BeepLevel.YES, duration=0)
-text_okengine = Dgt.DISPLAY_TEXT(l='okay engine', m='ok engin', s="ok eng", beep=BeepLevel.BUTTON, duration=1)
-text_oklevel = Dgt.DISPLAY_TEXT(l="okay level", m="ok level", s="ok lvl", beep=BeepLevel.BUTTON, duration=0)
-text_nolevel = Dgt.DISPLAY_TEXT(l=None, m="no level", s="no lvl", beep=BeepLevel.BUTTON, duration=0)
-text_noipadr = Dgt.DISPLAY_TEXT(l="no ip addr", m="no ipadr", s="no ip", beep=BeepLevel.BUTTON, duration=1)
+text_okengine = Dgt.DISPLAY_TEXT(l='okay engine', m='ok engin', s='ok eng', beep=BeepLevel.BUTTON, duration=1)
+text_okmode = Dgt.DISPLAY_TEXT(l='okay mode', m='ok mode', s='okmode', beep=BeepLevel.BUTTON, duration=1)
+text_oklevel = Dgt.DISPLAY_TEXT(l='okay level', m='ok level', s='ok lvl', beep=BeepLevel.BUTTON, duration=1)
+text_nolevel = Dgt.DISPLAY_TEXT(l=None, m='no level', s='no lvl', beep=BeepLevel.BUTTON, duration=0)
+text_okbook = Dgt.DISPLAY_TEXT(l='okay book', m='ok book', s='okbook', beep=BeepLevel.BUTTON, duration=1)
+text_noipadr = Dgt.DISPLAY_TEXT(l='no ip addr', m='no ipadr', s='no ip', beep=BeepLevel.BUTTON, duration=1)
 text_errormenu = Dgt.DISPLAY_TEXT(l='error menu', m='err menu', s='errmen', beep=BeepLevel.YES, duration=0)
 text_sidewhite = Dgt.DISPLAY_TEXT(l='side move w', m='side w', s='side w', beep=BeepLevel.BUTTON, duration=0)
 text_sideblack = Dgt.DISPLAY_TEXT(l='side move b', m='side b', s='side b', beep=BeepLevel.BUTTON, duration=0)
-text_scanboard = Dgt.DISPLAY_TEXT(l="scan board", m="scan", s=None, beep=BeepLevel.BUTTON, duration=0)
-text_illegalpos = Dgt.DISPLAY_TEXT(l="illegal pos", m="illegal", s="badpos", beep=BeepLevel.YES, duration=0.5)
+text_scanboard = Dgt.DISPLAY_TEXT(l='scan board', m='scan', s=None, beep=BeepLevel.BUTTON, duration=0)
+text_illegalpos = Dgt.DISPLAY_TEXT(l='illegal pos', m='illegal', s='badpos', beep=BeepLevel.YES, duration=0.5)
 text_error960 = Dgt.DISPLAY_TEXT(l='error 960', m='err 960', s="err960", beep=BeepLevel.YES, duration=0)
+text_oktime = Dgt.DISPLAY_TEXT(l='okay time', m='ok time', s='oktime', beep=BeepLevel.BUTTON, duration=1)
 
 
 class DgtDisplay(Observable, DisplayMsg, threading.Thread):
@@ -282,12 +285,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
     def process_button1(self):
         if self.top_result is None:
             if self.mate is None:
-                sc_xl = 'no scr' if self.score is None else str(self.score).rjust(6)
-                sc_3k = 'no score' if self.score is None else str(self.score).rjust(8)
+                text_s = 'no scr' if self.score is None else str(self.score).rjust(6)
+                text_m = 'no score' if self.score is None else str(self.score).rjust(8)
             else:
-                sc_xl = 'm ' + str(self.mate)
-                sc_3k = 'mate ' + str(self.mate)
-            text = Dgt.DISPLAY_TEXT(l=None, m=sc_3k, s=sc_xl, beep=BeepLevel.BUTTON, duration=1)
+                text_s = 'm ' + str(self.mate)
+                text_m = 'mate ' + str(self.mate)
+            text = Dgt.DISPLAY_TEXT(l=None, m=text_m, s=text_s, beep=BeepLevel.BUTTON, duration=1)
             DisplayDgt.show(text)
 
         if self.top_result == Menu.TOP_MENU:
@@ -325,7 +328,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             elif self.engine_has_levels:
                 self.engine_level_index = (self.engine_level_index - 1) % self.n_levels
                 level = str(self.engine_level_index)
-                text = Dgt.DISPLAY_TEXT(l=None, m="level " + level, s="lvl " + level, beep=BeepLevel.BUTTON, duration=0)
+                text = Dgt.DISPLAY_TEXT(l=None, m='level ' + level, s='lvl ' + level, beep=BeepLevel.BUTTON, duration=0)
             else:
                 text = text_nolevel
             DisplayDgt.show(text)
@@ -435,7 +438,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             elif self.engine_has_levels:
                 self.engine_level_index = (self.engine_level_index + 1) % self.n_levels
                 level = str(self.engine_level_index)
-                text = Dgt.DISPLAY_TEXT(l=None, m="level " + level, s="lvl " + level, beep=BeepLevel.BUTTON, duration=0)
+                text = Dgt.DISPLAY_TEXT(l=None, m='level ' + level, s='lvl ' + level, beep=BeepLevel.BUTTON, duration=0)
             else:
                 text = text_nolevel
             DisplayDgt.show(text)
@@ -515,7 +518,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     text = text_nofunction
                 elif self.engine_has_levels:
                     level = str(self.engine_level_index)
-                    text = Dgt.DISPLAY_TEXT(l=None, m="level " + level, s="lvl " + level, beep=BeepLevel.BUTTON, duration=0)
+                    text = Dgt.DISPLAY_TEXT(l=None, m='level ' + level, s='lvl ' + level, beep=BeepLevel.BUTTON, duration=0)
                 else:
                     text = text_nolevel
             elif self.top_index == Menu.ENGINE_MENU:
@@ -538,7 +541,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
         elif self.top_result == Menu.MODE_MENU:
             self.mode_result = self.mode_index
-            text = Dgt.DISPLAY_TEXT(l='okay mode', m='ok mode', s='okmode', beep=BeepLevel.BUTTON, duration=1)
+            text = text_okmode
             self.fire(Event.SET_INTERACTION_MODE(mode=self.mode_result, mode_text=text))
             self.reset_menu()
 
@@ -583,7 +586,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 DisplayDgt.show(text)
             elif self.engine_has_levels:
                 self.engine_level_result = self.engine_level_index
-                text = Dgt.DISPLAY_TEXT(l='okay level', m='ok level', s='ok lvl', beep=BeepLevel.BUTTON, duration=1)
+                text = text_oklevel
                 self.fire(Event.LEVEL(level=self.engine_level_result, level_text=text))
                 self.reset_menu()
             else:
@@ -620,8 +623,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 DisplayDgt.show(text)
             elif self.installed_engines:
                 level = self.engine_level_result
+                text = Dgt.DISPLAY_TEXT(l=None, m='level ' + str(level), s='lvl ' + str(level), beep=BeepLevel.BUTTON, duration=1)
                 eng = self.installed_engines[self.engine_index]
-                text = Dgt.DISPLAY_TEXT(l='level ' + str(level), m=' level ' + str(level), s='lvl ' + str(level), beep=BeepLevel.BUTTON, duration=1)
                 self.fire(Event.NEW_ENGINE(eng=eng, eng_text=text_okengine, level=level, level_text=text))
                 self.engine_restart = True
                 self.reset_menu()
@@ -634,7 +637,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text = text_nofunction
                 DisplayDgt.show(text)
             else:
-                text = Dgt.DISPLAY_TEXT(l='okay book', m='ok book', s='okbook', beep=BeepLevel.BUTTON, duration=1)
+                text = text_okbook
                 self.fire(Event.SET_OPENING_BOOK(book=self.all_books[self.book_index], book_text=text))
                 self.reset_menu()
 
@@ -664,7 +667,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 else:
                     logging.warning('Wrong value for time_mode_index: {0}'.format(self.time_mode_index))
                     time_control = None
-                text = Dgt.DISPLAY_TEXT(l='okay time', m='ok time', s='oktime', beep=BeepLevel.BUTTON, duration=1)
+                text = text_oktime
                 self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=text))
                 self.reset_menu()
 
@@ -909,8 +912,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 engine_index = engine_map.index(fen)
                                 try:
                                     self.engine_index = engine_index
-                                    logging.debug("Map-Fen: Engine index [%s]", engine_index)  # @todo correct name of engine
                                     eng = self.installed_engines[self.engine_index]
+                                    logging.debug("Map-Fen: Engine name [%s]", eng[1])
                                     eng_text = Dgt.DISPLAY_TEXT(l=None, m=eng[1], s=None, beep=BeepLevel.MAP, duration=0)
                                     level = self.engine_level_index if self.engine_level_result is None else self.engine_level_result
                                     text = Dgt.DISPLAY_TEXT(l='level ' + str(level), m=' level ' + str(level), s='lvl ' + str(level), beep=BeepLevel.MAP, duration=1)

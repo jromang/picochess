@@ -101,7 +101,7 @@ class DgtSerial(object):
                 logging.warning('DGT clock [ser]: already locked. Maybe a "resend"?')
             else:
                 logging.debug('DGT clock [ser]: locked')
-                self.clock_lock = True
+                self.clock_lock = time.time()
 
     def process_board_message(self, message_id, message):
         for case in switch(message_id):
@@ -109,14 +109,14 @@ class DgtSerial(object):
                 board_version = str(message[0]) + '.' + str(message[1])
                 logging.debug("DGT board version %0.2f", float(board_version))
                 if self.device.find('rfc') == -1:
-                    text_3k = 'USB E-board'
-                    text_xl = 'ok usb'
+                    text_m = 'USB E-board'
+                    text_s = 'ok usb'
                     channel = 'USB'
                 else:
-                    text_3k = 'BT E-board'
-                    text_xl = 'ok bt'
+                    text_m = 'BT E-board'
+                    text_s = 'ok bt'
                     channel = 'BT'
-                text = Dgt.DISPLAY_TEXT(l=None, m=text_3k, s=text_xl, beep=BeepLevel.NO, duration=0.5)
+                text = Dgt.DISPLAY_TEXT(l=None, m=text_m, s=text_s, beep=BeepLevel.NO, duration=0.5)
                 DisplayMsg.show(Message.EBOARD_VERSION(text=text, channel=channel))
                 break
             if case(DgtMsg.DGT_MSG_BWTIME):
@@ -176,7 +176,7 @@ class DgtSerial(object):
                 else:
                     logging.debug('DGT clock [ser]: null message ignored')
                 if self.clock_lock:
-                    logging.debug('DGT clock [ser]: unlocked')
+                    logging.debug('DGT clock [ser]: unlocked after {0:.3f} msecs'.format(time.time() - self.clock_lock))
                     self.clock_lock = False
                 break
             if case(DgtMsg.DGT_MSG_BOARD_DUMP):

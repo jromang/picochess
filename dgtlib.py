@@ -19,11 +19,11 @@ from utilities import *
 import time
 
 
-class DGTlib(object):
+class DgtLib(object):
     # This file simulates DGT's SO-lib File with similar api
 
     def __init__(self, dgtserial):
-        super(DGTlib, self).__init__()
+        super(DgtLib, self).__init__()
         self.dgtserial = dgtserial
 
     def write(self, command):

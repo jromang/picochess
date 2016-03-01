@@ -621,14 +621,6 @@ def get_opening_books():
 
 def get_installed_engines(engine_path):
     return read_engine_ini((engine_path.rsplit(os.sep, 1))[0])
-    # engine_path = (engine_path.rsplit(os.sep, 1))[0]
-    # engine_list = sorted(os.listdir(engine_path), key=str.lower)
-    # library = []
-    # for engine_file in engine_list:
-    #     # Can't use isfile() as that doesn't count links
-    #     if not (('.' in engine_file) or os.path.isdir(engine_path + os.sep + engine_file)):
-    #         library.append((engine_path + os.sep + engine_file, engine_file))
-    # return library
 
 
 def write_engine_ini(engine_path=None):
@@ -765,6 +757,7 @@ def update_picochess(auto_reboot=False):
                 logging.debug('Updating picochess')
                 output = subprocess.Popen(["pip3", "install", "-r", "requirements.txt"],
                                           stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
+                logging.debug(output)
                 output = subprocess.Popen([git, "pull", "origin", branch],
                                           stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
                 logging.debug(output)
