@@ -106,6 +106,8 @@ class Engine(object):
 
         except OSError:
             logging.exception("OS error in starting engine")
+        except TypeError:
+            logging.exception("Engine executable not found")
 
     def get(self):
         return self.engine
