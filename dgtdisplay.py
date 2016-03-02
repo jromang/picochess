@@ -719,6 +719,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         break
                     if case(MessageApi.START_NEW_GAME):
                         DisplayDgt.show(Dgt.LIGHT_CLEAR())
+                        self.play_move = chess.Move.null()
                         self.last_move = chess.Move.null()
                         self.reset_hint_and_score()
                         # self.mode_index = Mode.NORMAL  # @todo

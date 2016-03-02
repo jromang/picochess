@@ -176,7 +176,7 @@ class DgtSerial(object):
                 else:
                     logging.debug('DGT clock [ser]: null message ignored')
                 if self.clock_lock:
-                    logging.debug('DGT clock [ser]: unlocked after {0:.3f} msecs'.format(time.time() - self.clock_lock))
+                    logging.debug('DGT clock [ser]: unlocked after {0:.3f} secs'.format(time.time() - self.clock_lock))
                     self.clock_lock = False
                 break
             if case(DgtMsg.DGT_MSG_BOARD_DUMP):
