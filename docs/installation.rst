@@ -134,7 +134,7 @@ Manual installation
 
 4. **Install dependencies**
 
-  ``pip install --upgrade -r requirements.txt``
+  ``pip3 install --upgrade -r requirements.txt``
 
 5. **Run PicoChess from the command line**
 
@@ -185,12 +185,12 @@ At start PicoChess looks at the file
 * uci-option = Threads = 4
 * user-voice = en:Elsie
 * computer-voice = en:Marvin
-* disable-dgt-clock-beep
+* disable-ok-move
 
 To set a particular setting, simply include the appropriate line in the picochess.ini file.
-For example, to the disable default beep on a move, include this line in picochess.ini:
+For example, to the disable default confirmation message on a move, include this line in picochess.ini:
 
-disable-dgt-clock-beep
+disable-ok-move
 
 To remove a setting, delete the appropriate line or comment it out using the hash character (#) or set the option to false.
 For example, to turn OFF the LED's on the Revelation II chessbot, this line will do:
