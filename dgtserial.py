@@ -211,7 +211,7 @@ class DgtSerial(object):
                 self.write_board_command([DgtCmd.DGT_SEND_BRD])  # Ask for the board when a piece moved
                 break
             if case(DgtMsg.DGT_MSG_SERIALNR):
-                logging.debug(message)
+                logging.debug(''.join([chr(x) for x in message]))
                 break
             if case():  # Default
                 logging.warning("DGT message not handled [%s]", DgtMsg(message_id))
