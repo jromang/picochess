@@ -64,7 +64,7 @@ class DgtSerial(object):
         mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
         logging.debug('->DGT board [%s], length %i', mes, len(message))
         if mes.value == DgtClk.DGT_CMD_CLOCK_ASCII.value:
-            logging.debug([chr(elem) for elem in message[4:10]])
+            logging.debug(''.join([chr(elem) for elem in message[4:10]]))
 
         array = []
         for v in message:
@@ -211,7 +211,7 @@ class DgtSerial(object):
                 self.write_board_command([DgtCmd.DGT_SEND_BRD])  # Ask for the board when a piece moved
                 break
             if case(DgtMsg.DGT_MSG_SERIALNR):
-                logging.debug(''.join([chr(x) for x in message]))
+                # logging.debug(''.join([chr(elem) for elem in message]))
                 break
             if case():  # Default
                 logging.warning("DGT message not handled [%s]", DgtMsg(message_id))
