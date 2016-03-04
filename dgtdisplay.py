@@ -918,7 +918,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                     logging.debug("Map-Fen: Engine name [%s]", eng[1])
                                     eng_text = Dgt.DISPLAY_TEXT(l=None, m=eng[1], s=None, beep=BeepLevel.MAP, duration=0)
                                     level = self.engine_level_index if self.engine_level_result is None else self.engine_level_result
-                                    text = Dgt.DISPLAY_TEXT(l='level ' + str(level), m=' level ' + str(level), s='lvl ' + str(level), beep=BeepLevel.MAP, duration=1)
+                                    text = Dgt.DISPLAY_TEXT(l=None, m=' level ' + str(level), s='lvl ' + str(level), beep=BeepLevel.MAP, duration=1)
                                     self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, level=level, level_text=text))
                                     self.engine_restart = True
                                     self.reset_menu()
