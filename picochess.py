@@ -138,7 +138,7 @@ def main():
         if not gaviota:
             return None
         score = gaviota.probe_dtm(game)
-        if score:
+        if score is not None:
             Observable.fire(Event.NEW_SCORE(score='tb', mate=score))
         return score
 
@@ -680,6 +680,7 @@ def main():
                         score = 'book'
                     elif event.score == 'tb':
                         score = 'tb {0}'.format(event.mate)
+                        print(score)
                     else:
                         try:
                             score = int(event.score)
