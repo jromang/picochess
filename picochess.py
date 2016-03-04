@@ -680,7 +680,6 @@ def main():
                         score = 'book'
                     elif event.score == 'tb':
                         score = 'tb {0}'.format(event.mate)
-                        print(score)
                     else:
                         try:
                             score = int(event.score)
