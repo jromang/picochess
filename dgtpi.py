@@ -30,7 +30,7 @@ class DgtPi(DgtInterface):
         self.dgtserial.run()
 
         self.lock = Lock()
-        self.lib = cdll.LoadLibrary("/home/pi/20160122/dgtpicom.so")
+        self.lib = cdll.LoadLibrary("dgt/dgtpicom.so")
 
         self.startup_clock()
         incoming_clock_thread = Timer(0, self.process_incoming_clock_forever)
