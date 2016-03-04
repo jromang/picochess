@@ -189,7 +189,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.setup_reverse_result = None
         self.setup_uci960_result = None
         self.top_result = None
-        self.mode_result = None
+        # self.mode_result = None
 
     def power_off(self):
         DisplayDgt.show(text_goodbye)
@@ -822,7 +822,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.ip = ' '.join(message.info["ip"].split('.')[2:])
                         break
                     if case(MessageApi.STARTUP_INFO):
-                        self.book_index = message.info["book_index"]
+                        self.mode_result = message.info['interaction_mode']
+                        self.book_index = message.info['book_index']
                         break
                     if case(MessageApi.SEARCH_STARTED):
                         logging.debug('Search started')
