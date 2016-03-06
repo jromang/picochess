@@ -22,7 +22,7 @@ from threading import Timer, Thread
 class DGTInterface(DgtDisplay, Thread):
     def __init__(self, enable_board_leds, beep_level):
         super(DGTInterface, self).__init__()
-
+        DgtDisplay.aaa = 1
         self.enable_dgt_3000 = False
         self.enable_dgt_pi = True
         self.clock_found = False
@@ -34,7 +34,7 @@ class DGTInterface(DgtDisplay, Thread):
         self.timer = None
         self.timer_running = False
         self.clock_running = False
-
+        
     def display_text_on_clock(self, text, text_xl=None, beep=BeepLevel.CONFIG):
         raise NotImplementedError()
 
