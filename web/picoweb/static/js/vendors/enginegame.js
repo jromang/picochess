@@ -64,6 +64,7 @@ function engineGame(options) {
     }
 
     function updateClock() {
+        print('tick ' + str(time.wtime)
         displayClock('white', time.wtime);
         displayClock('black', time.btime);
     }

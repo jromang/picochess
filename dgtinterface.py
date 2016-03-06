@@ -24,7 +24,7 @@ class DGTInterface(DgtDisplay, Thread):
         super(DGTInterface, self).__init__()
 
         self.enable_dgt_3000 = False
-        self.enable_dgt_pi = False
+        self.enable_dgt_pi = True
         self.clock_found = False
         self.enable_board_leds = enable_board_leds
         self.beep_level = int(beep_level) & 0x0f

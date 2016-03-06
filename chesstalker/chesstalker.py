@@ -125,7 +125,7 @@ class ChessTalker(Display, threading.Thread):
                         break
                     if case(MessageApi.OPENING_BOOK):
                         logging.debug('Announcing OPENING_BOOK')
-                        system_voice.say_opening_book(message.book[0])
+                        #system_voice.say_opening_book(message.book))
                         break
                     if case(MessageApi.TIME_CONTROL):
                         logging.debug('Announcing SET_TIME_CONTROL')
@@ -147,7 +147,7 @@ class ChessTalker(Display, threading.Thread):
                     if case(MessageApi.GAME_ENDS):
                         if message.result == GameResult.OUT_OF_TIME:
                             logging.debug('Announcing GAME_ENDS/TIME_CONTROL')
-                            color = ChessTalkerVoice.COLOR_WHITE if message.color == chess.WHITE else ChessTalkerVoice.COLOR_BLACK
+                            color = ChessTalkerVoice.COLOR_WHITE #if message.color == chess.WHITE else ChessTalkerVoice.COLOR_BLACK
                             system_voice.say_out_of_time(color)
                         elif message.result == GameResult.INSUFFICIENT_MATERIAL:
                             pass

@@ -18,6 +18,7 @@ import logging
 import queue
 import chess
 import time
+import pifacecad
 
 from timecontrol import *
 from collections import OrderedDict
@@ -115,12 +116,12 @@ dgt_xl_time_control_list = ["mov  1", "mov  3", "mov  5", "mov 10", "mov 15", "m
                             "bl   1", "bl   3", "bl   5", "bl  10", "bl  15", "bl  30", "bl  60", "bl  90",
                             "f 3  2", "f 4  2", "f 5  3", "f 5  5", "f25  5", "f15  5", "f90 30"]
 
-
+        
 class DGTDisplay(Observable, Display, threading.Thread):
     def __init__(self, ok_move_messages):
         super(DGTDisplay, self).__init__()
         self.ok_moves_messages = ok_move_messages
-
+        self.cad = pifacecad.PiFaceCAD()
         self.setup_to_move = chess.WHITE
         self.setup_reverse_orientation = False
         self.setup_uci960 = False
@@ -161,13 +162,33 @@ class DGTDisplay(Observable, Display, threading.Thread):
         self.time_control_menu_index = 2  # index for selecting new time control
         self.time_control_fen = list(time_control_map.keys())[self.time_control_index]  # Default time control: Blitz, 5min
 
+    def show_pifi(self, text_line1 = None, text_line2 = ""):
+        self.cad.lcd.blink_off()
+        self.cad.lcd.cursor_off()
+        if ((text_line1 != None) or (text_line2 != None)):
+            if ((text_line1 != None) and (text_line2 != None)):
+                self.cad.lcd.clear()
+            self.cad.lcd.backlight_on()
+
+            if (text_line1 != None):
+                self.cad.lcd.set_cursor(0, 0)
+                self.cad.lcd.write("                  ")
+                self.cad.lcd.set_cursor(0, 0)
+                self.cad.lcd.write(text_line1)
+
+            if (text_line2 != None):
+                self.cad.lcd.set_cursor(0, 1)
+                self.cad.lcd.write(text_line2)
+  
     def power_off(self):
         DgtDisplay.show(Dgt.DISPLAY_TEXT(text="good bye", xl="bye", beep=BeepLevel.YES, duration=0))
+        self.show_pifi("good bye")
         self.engine_restart = True
         self.fire(Event.SHUTDOWN())
 
     def reboot(self):
         DgtDisplay.show(Dgt.DISPLAY_TEXT(text="pls wait", xl="wait", beep=BeepLevel.YES, duration=0))
+        self.show_pifi("please wait")
         self.engine_restart = True
         self.fire(Event.REBOOT())
 
@@ -462,11 +483,12 @@ class DGTDisplay(Observable, Display, threading.Thread):
     def drawresign(self):
         rnk_8, rnk_7, rnk_6, rnk_5, rnk_4, rnk_3, rnk_2, rnk_1 = self.dgt_fen.split("/")
         self.drawresign_fen = "8/8/8/" + rnk_5 + "/" + rnk_4 + "/8/8/8"
-
+        #self.show_pifi(rnk_5 + "  " + rnk_4)
     def run(self):
         while True:
             # Check if we have something to display
             try:
+                #print(timecontrol.)
                 message = self.message_queue.get()
                 if type(message).__name__ == 'Message':
                     logging.debug("Read message from queue: %s", message)
@@ -491,6 +513,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         break
                     if case(MessageApi.ENGINE_FAIL):
                         DgtDisplay.show(Dgt.DISPLAY_TEXT(text='error', xl=None, beep=BeepLevel.YES, duration=1))
+                        self.show_pifi("Error : Engine Faild")
                         break
                     if case(MessageApi.COMPUTER_MOVE):
                         move = message.result.bestmove
@@ -504,7 +527,10 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         # Display the move
                         uci_move = move.uci()
                         DgtDisplay.show(Dgt.DISPLAY_MOVE(move=move, fen=message.fen, beep=BeepLevel.CONFIG, duration=0))
+                        print()
                         DgtDisplay.show(Dgt.LIGHT_SQUARES(squares=(uci_move[0:2], uci_move[2:4])))
+                        self.show_pifi("Com : "+ uci_move[0:2] + "-" + uci_move[2:4])
+                        #self.show_pifi("Com : "+ uci_move[0:2] + "-" + uci_move[2:4], "" if str(ponder) is None else " => " + str(ponder))
                         break
                     if case(MessageApi.START_NEW_GAME):
                         DgtDisplay.show(Dgt.LIGHT_CLEAR())
@@ -514,9 +540,11 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         self.dgt_clock_menu = Menu.GAME_MENU
                         self.alternative = False
                         DgtDisplay.show(Dgt.DISPLAY_TEXT(text="new game", xl="newgam", beep=BeepLevel.CONFIG, duration=1))
+                        self.show_pifi("New Game")
                         break
                     if case(MessageApi.WAIT_STATE):
                         DgtDisplay.show(Dgt.DISPLAY_TEXT(text="you move", xl="youmov", beep=BeepLevel.OKAY, duration=0))
+                        self.show_pifi("New Game")
                         break
                     if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
                         DgtDisplay.show(Dgt.LIGHT_CLEAR())
@@ -524,12 +552,14 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         self.alternative = False
                         if self.ok_moves_messages:
                             DgtDisplay.show(Dgt.DISPLAY_TEXT(text="ok pico", xl="okpico", beep=BeepLevel.OKAY, duration=0.5))
+                            self.show_pifi("OK. You Move")
                         break
                     if case(MessageApi.USER_MOVE):
                         self.display_move = False
                         self.alternative = False
                         if self.ok_moves_messages:
                             DgtDisplay.show(Dgt.DISPLAY_TEXT(text="ok user", xl="okuser", beep=BeepLevel.OKAY, duration=0.5))
+                            self.show_pifi("OK")
                         break
                     if case(MessageApi.REVIEW_MODE_MOVE):
                         self.last_move = message.move
@@ -550,30 +580,37 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         else:
                             DgtDisplay.show(Dgt.DISPLAY_TEXT(text="level " + level, xl="lvl " + level,
                                             beep=message.beep, duration=1))
+                            self.show_pifi("Level : " + str(level))
                         break
                     if case(MessageApi.TIME_CONTROL):
                         DgtDisplay.show(Dgt.DISPLAY_TEXT(text=message.time_control_string, xl=None, beep=message.beep, duration=1))
+                        self.show_pifi(message.time_control_string)
                         break
                     if case(MessageApi.OPENING_BOOK):
                         DgtDisplay.show(Dgt.DISPLAY_TEXT(text=message.book_control_string, xl=None, beep=message.beep, duration=1))
+                        self.show_pifi(message.book_control_string)
                         break
                     if case(MessageApi.USER_TAKE_BACK):
                         self.reset_hint_and_score()
                         self.alternative = False
                         DgtDisplay.show(Dgt.DISPLAY_TEXT(text="takeback", xl="takbak", beep=BeepLevel.CONFIG, duration=0))
+                        self.show_pifi("takeback")
                         break
                     if case(MessageApi.GAME_ENDS):
                         ge = message.result.value
                         DgtDisplay.show(Dgt.DISPLAY_TEXT(text=ge, xl=None, beep=BeepLevel.CONFIG, duration=1))
+                        self.show_pifi("chack mate","")
                         break
                     if case(MessageApi.INTERACTION_MODE):
                         self.mode = message.mode
                         self.alternative = False
                         DgtDisplay.show(Dgt.DISPLAY_TEXT(text=message.mode.value, xl=None, beep=message.beep, duration=1))
+                        self.show_pifi(None,"=>"+str(message.mode.value))
                         break
                     if case(MessageApi.PLAY_MODE):
                         pm = message.play_mode.value
                         DgtDisplay.show(Dgt.DISPLAY_TEXT(text=pm, xl=pm[:6], beep=BeepLevel.BUTTON, duration=1))
+                        self.show_pifi(None,"=>"+str(xl=pm[:6]))
                         break
                     if case(MessageApi.NEW_SCORE):
                         self.score = message.score
@@ -581,12 +618,16 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         if message.mode == Mode.KIBITZ:
                             DgtDisplay.show(Dgt.DISPLAY_TEXT(text=str(self.score).rjust(6), xl=None,
                                             beep=BeepLevel.NO, duration=1))
+                            self.show_pifi("Thinking: "+str(self.score).rjust(6))
+                        else:
+                            self.show_pifi("Thinking")
                         break
                     if case(MessageApi.BOOK_MOVE):
                         self.score = None
                         self.mate = None
                         self.display_move = False
                         DgtDisplay.show(Dgt.DISPLAY_TEXT(text="book", xl=None, beep=BeepLevel.NO, duration=1))
+                        self.show_pifi("book")
                         break
                     if case(MessageApi.NEW_PV):
                         self.hint_move = message.pv[0]
@@ -594,9 +635,11 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         if message.mode == Mode.ANALYSIS:
                             DgtDisplay.show(Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen,
                                             beep=BeepLevel.NO, duration=0))
+                        self.show_pifi(None,"=>"+ str(self.hint_move) + " => " + str(self.hint_fen))
                         break
                     if case(MessageApi.SYSTEM_INFO):
                         self.ip = ' '.join(message.info["ip"].split('.')[2:])
+                        #self.show_pifi('ip : ' + str(self.ip))
                         break
                     if case(MessageApi.STARTUP_INFO):
                         self.book_index = message.info["book_index"]
@@ -612,6 +655,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         # @todo Make this code independent from DGT Hex codes => more abstract
                         tc = message.time_control
                         time_left = int(tc.clock_time[chess.WHITE])
+                        
                         if time_left < 0:
                             time_left = 0
                         time_right = int(tc.clock_time[chess.BLACK])
@@ -654,12 +698,14 @@ class DGTDisplay(Observable, Display, threading.Thread):
                             fen = fen[::-1]
                         if fen == "RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr":  # Check if we have to flip the board
                             logging.debug('Flipping the board')
+                            self.show_pifi('flipping the board')
                             # Flip the board
                             self.flip_board = not self.flip_board
                             # set standard for setup orientation too
                             self.setup_reverse_orientation = self.flip_board
                             fen = fen[::-1]
                         logging.debug("DGT-Fen: " + fen)
+                        #self.show_pifi(fen)
                         if fen == self.dgt_fen:
                             logging.debug('Ignore same fen')
                             break
@@ -671,21 +717,26 @@ class DGTDisplay(Observable, Display, threading.Thread):
                             self.engine_level = level
                             self.engine_level_menu = level
                             logging.debug("Map-Fen: New level")
+                            self.show_pifi('Level : ' , str(level))
                             self.fire(Event.LEVEL(level=level, beep=BeepLevel.MAP))
                         elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":  # New game
                             logging.debug("Map-Fen: New game")
+                            self.show_pifi("New Game")
                             self.draw_setup_pieces = False
                             self.fire(Event.NEW_GAME())
                         elif fen in book_map:  # Choose opening book
                             self.book_index = book_map.index(fen)
                             b = self.all_books[self.book_index]
                             logging.debug("Map-Fen: Opening book [%s]", b[1])
+                            self.show_pifi('Opening book ', str(b[1])[str(b[1]).find('/')+1:] )
                             self.fire(Event.SET_OPENING_BOOK(book=b, book_control_string=b[0], beep=BeepLevel.MAP))
                         elif fen in mode_map:  # Set interaction mode
                             logging.debug("Map-Fen: Interaction mode [%s]", mode_map[fen])
+                            self.show_pifi("Interaction mode " , str(mode_map[fen]))
                             self.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], beep=BeepLevel.MAP))
                         elif fen in time_control_map:
                             logging.debug("Map-Fen: Time control [%s]", time_control_map[fen].mode)
+                            self.show_pifi("Time control " , dgt_xl_time_control_list[ list(time_control_map.keys()).index(fen)] )
                             self.fire(Event.SET_TIME_CONTROL(time_control=time_control_map[fen],
                                       time_control_string=dgt_xl_time_control_list[
                                           list(time_control_map.keys()).index(fen)], beep=BeepLevel.MAP))
@@ -693,13 +744,16 @@ class DGTDisplay(Observable, Display, threading.Thread):
                             self.time_control_fen = fen
                         elif fen in shutdown_map:
                             logging.debug("Map-Fen: shutdown")
+                            self.show_pifi("shutdown")
                             self.power_off()
                         elif self.drawresign_fen in drawresign_map:
                             logging.debug("Map-Fen: drawresign")
+                            self.show_pifi("drawresign")
                             self.fire(Event.DRAWRESIGN(result=drawresign_map[self.drawresign_fen]))
                         else:
                             if self.draw_setup_pieces:
                                 DgtDisplay.show(Dgt.DISPLAY_TEXT(text="set pieces", xl="setup", beep=BeepLevel.NO, duration=0))
+                                self.show_pifi("set pieces")
                                 self.draw_setup_pieces = False
                             self.fire(Event.FEN(fen=fen))
                         break
@@ -708,6 +762,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
                                         sub_version=message.sub_version, attached=message.attached))
                         break
                     if case(MessageApi.DGT_CLOCK_TIME):
+                        print("clock_time: " + message.time_left + "  " + message.time_right)
                         DgtDisplay.show(Dgt.CLOCK_TIME(time_left=message.time_left, time_right=message.time_right))
                         break
                     if case(MessageApi.JACK_CONNECTED_ERROR):  # this will only work in case of 2 clocks connected!
@@ -715,9 +770,11 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         break
                     if case(MessageApi.NO_EBOARD_ERROR):
                         DgtDisplay.show(Dgt.DISPLAY_TEXT(text=message.text, xl=message.text_xl, beep=BeepLevel.NO, duration=0))
+                        self.show_pifi("NO EBoard")
                         break
                     if case(MessageApi.EBOARD_VERSION):
                         DgtDisplay.show(Dgt.DISPLAY_TEXT(text=message.text, xl=message.text_xl, beep=BeepLevel.NO, duration=0.5))
+                        self.show_pifi("EBoard Version", message.text)
                     if case():  # Default
                         # print(message)
                         pass

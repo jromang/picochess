@@ -74,6 +74,7 @@ class DGTVr(DGTInterface):
         else:
             print('Clock time: {} - {}'.format(self.time_left, self.time_right))
         Display.show(Message.DGT_CLOCK_TIME(time_left=self.time_left, time_right=self.time_right))
+        print(str(time_left) + "  " + str(time_right))
     # (END) dgtserial simulation class
 
     def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):
