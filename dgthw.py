@@ -31,7 +31,7 @@ class DgtHw(DgtInterface):
 
         self.lock = Lock()
         self.lib = DgtLib(self.dgtserial)
-        self.startup_clock()
+        # self.startup_clock()
 
     def startup_clock(self):
         # Get clock version

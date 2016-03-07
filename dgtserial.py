@@ -118,6 +118,11 @@ class DgtSerial(object):
                     channel = 'BT'
                 text = Dgt.DISPLAY_TEXT(l=None, m=text_m, s=text_s, beep=BeepLevel.NO, duration=0.5)
                 DisplayMsg.show(Message.EBOARD_VERSION(text=text, channel=channel))
+
+                # Get clock version
+                command = [DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                           DgtClk.DGT_CMD_CLOCK_VERSION, DgtClk.DGT_CMD_CLOCK_END_MESSAGE]
+                self.write_board_command(command)
                 break
             if case(DgtMsg.DGT_MSG_BWTIME):
                 if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
