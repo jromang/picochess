@@ -27,6 +27,10 @@ from utilities import *
 from dgtinterface import *
 import threading
 
+piface_testpath = "/dev/spidev0.0"
+
+piface_icons = [0x1f,0x11,0xa,0x4,0xa,0x11,0x1f,0x0],[0x1f,0x11,0xa,0x4,0xa,0x1f,0x1f,0x0], [0x1f,0x11,0xa,0x4,0xe,0x1f,0x1f,0x0]
+
 level_map = ("rnbqkbnr/pppppppp/q7/8/8/8/PPPPPPPP/RNBQKBNR",
              "rnbqkbnr/pppppppp/1q6/8/8/8/PPPPPPPP/RNBQKBNR",
              "rnbqkbnr/pppppppp/2q5/8/8/8/PPPPPPPP/RNBQKBNR",
@@ -122,10 +126,16 @@ class DGTDisplay(Observable, Display, threading.Thread):
         super(DGTDisplay, self).__init__()
         self.ok_moves_messages = ok_move_messages
         
-        self.aaa = 0
-        self.cad = pifacecad.PiFaceCAD()
+        if (os.path.exists(piface_testpath)):
+            self.cad = pifacecad.PiFaceCAD()
+            self.cad.lcd.clear()
+        self.PiFaceExists = os.path.exists(piface_testpath)
         self.pifaceUpdate = False
-        self.side = 0x01
+        self.side = 0x00
+        self.thinkerboll = 0
+        self.piface_toptext = ""
+        self.piface_buttomtext = ""
+            
         self.dgtintf = DGTInterface
         
         self.setup_to_move = chess.WHITE
@@ -173,9 +183,10 @@ class DGTDisplay(Observable, Display, threading.Thread):
         thread_input = threading.Thread(target=self.pifi_timertick)
         thread_input.start()
 
-    def show_pifi(self, text_line1 = None, text_line2 = ""):
-        #unicodedata.normalize('NFKD', text_line2).encode('ascii','ignore')
-        #logging.debug(str(text_line1) + " .. " + str(text_line2))
+    def show_pifi(self, text_line1 = None, text_line2 = None, icon = None):
+        if (self.PiFaceExists is False):
+            return
+        logging.debug('show_pifi %s , %s ' % (text_line1, text_line2))
         
         while(self.pifaceUpdate is True):
             time.sleep(0.05)
@@ -188,13 +199,32 @@ class DGTDisplay(Observable, Display, threading.Thread):
                 self.cad.lcd.clear()
             self.cad.lcd.backlight_on()
 
-            if (text_line1 != None):
-                self.cad.lcd.set_cursor(0, 0)
-                self.cad.lcd.write(text_line1)
 
-            if (text_line2 != None):
-                self.cad.lcd.set_cursor(0, 1)
-                self.cad.lcd.write(text_line2)
+            if (text_line1 is not None):
+                logging.debug('show_pifi : headline = %s ' % text_line1)
+                newtext = text_line1.ljust(14,' ')
+                if (newtext is not self.piface_toptext):
+                    self.cad.lcd.set_cursor(0, 0)
+                    self.cad.lcd.write(newtext)
+                    self.piface_toptext = newtext
+
+            if (text_line2 is not None):
+                logging.debug('show_pifi : buttomline = %s ' % text_line2)
+                newtext = text_line2.ljust(14,' ')
+                if (newtext is not self.piface_buttomtext):
+                    self.cad.lcd.set_cursor(0, 1)
+                    self.cad.lcd.write(newtext)
+                    self.piface_buttomtext = newtext
+
+        if (icon is not None):
+            logging.debug('show_pifi : icon  line=%i  pos=%i  icon=%i ' % (icon[0],icon[1],icon[2]))
+            self.cad.lcd.set_cursor(icon[0],icon[1])
+            if (icon[2] < 0):
+                icon[2] = 0
+            if (icon[2] > 14):
+                icon[2] = 14                
+            self.cad.lcd.write_custom_bitmap(icon[2])
+
         self.pifaceUpdate = False
         
     def getTimeString(self, timestring):
@@ -213,21 +243,35 @@ class DGTDisplay(Observable, Display, threading.Thread):
             return ("%s:%s" % (m,s))
         else:
             return ("%s:%s:%s" % (h,m,s))
-        #print("%s:%s:%s" % (h,m,s))
-
         
         
     def pifi_timertick(self):
+        if (self.PiFaceExists is False):
+            return
+ 
         bLasClear = True
+ 
+        # init PiFace Icons
+        #logging.debug('init PiFace Icons')
+        #i = 0
+        
+        #for piface_icon in piface_icons:
+        #    logging.debug('add Icon %i' % i)
+        #    quaver = pifacecad.LCDBitmap(piface_icon)
+        #    self.cad.lcd.store_custom_bitmap(i, quaver)
+        #    self.cad.lcd.write_custom_bitmap(i)
+        #    i += 1
+        
+        logging.debug('init PiFace Timer')
         while True:
-            if (self.side == 0x1):
+            if (self.side == 0x1 and self.pifi_lefttime >= 0):
                 self.pifi_lefttime = self.pifi_lefttime -1
-            if (self.side == 0x2):
+            if (self.side == 0x2 and self.pifi_righttime >= 0):
                 self.pifi_righttime = self.pifi_righttime -1
 
             time.sleep(1)
             
-            if (self.side != 0x0):
+            if (self.side != 0x3):
                 bLasClear = False
                 if (self.pifaceUpdate is False):
                     self.pifaceUpdate = True
@@ -587,7 +631,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         DgtDisplay.show(Dgt.DISPLAY_MOVE(move=move, fen=message.fen, beep=BeepLevel.CONFIG, duration=0))
                         DgtDisplay.show(Dgt.LIGHT_SQUARES(squares=(uci_move[0:2], uci_move[2:4])))
                         self.show_pifi("Com : "+ uci_move[0:2] + "-" + uci_move[2:4])
-                        self.side = 0x1
+                        self.side = 0x0
                         #self.show_pifi("Com : "+ uci_move[0:2] + "-" + uci_move[2:4], "" if str(ponder) is None else " => " + str(ponder))
                         break
                     if case(MessageApi.START_NEW_GAME):
@@ -603,16 +647,17 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         break
                     if case(MessageApi.WAIT_STATE):
                         DgtDisplay.show(Dgt.DISPLAY_TEXT(text="you move", xl="youmov", beep=BeepLevel.OKAY, duration=0))
-                        self.show_pifi("New Game")
+                        self.show_pifi("you move")
+                        self.side = 0x0
                         break
                     if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
-                        self.onMove = "human"
                         DgtDisplay.show(Dgt.LIGHT_CLEAR())
                         self.display_move = False
                         self.alternative = False
                         if self.ok_moves_messages:
                             DgtDisplay.show(Dgt.DISPLAY_TEXT(text="ok pico", xl="okpico", beep=BeepLevel.OKAY, duration=0.5))
-                            self.show_pifi("OK. You Move")
+                            self.show_pifi("you move")
+                            self.side= 0x2
                         break
                     if case(MessageApi.USER_MOVE):
                         self.display_move = False
@@ -620,6 +665,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         if self.ok_moves_messages:
                             DgtDisplay.show(Dgt.DISPLAY_TEXT(text="ok user", xl="okuser", beep=BeepLevel.OKAY, duration=0.5))
                             self.show_pifi("OK")
+                            self.side = 0x1
                         break
                     if case(MessageApi.REVIEW_MODE_MOVE):
                         self.last_move = message.move
@@ -659,7 +705,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
                     if case(MessageApi.GAME_ENDS):
                         ge = message.result.value
                         DgtDisplay.show(Dgt.DISPLAY_TEXT(text=ge, xl=None, beep=BeepLevel.CONFIG, duration=1))
-                        self.show_pifi("check mate","")
+                        self.show_pifi("check mate")
                         break
                     if case(MessageApi.INTERACTION_MODE):
                         self.mode = message.mode
@@ -673,15 +719,17 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         self.show_pifi(None,"=>"+str(xl=pm[:6]))
                         break
                     if case(MessageApi.NEW_SCORE):
-                        self.onMove = "computer"
                         self.score = message.score
                         self.mate = message.mate
                         if message.mode == Mode.KIBITZ:
                             DgtDisplay.show(Dgt.DISPLAY_TEXT(text=str(self.score).rjust(6), xl=None,
                                             beep=BeepLevel.NO, duration=1))
-                            self.show_pifi("Thinking: "+str(self.score).rjust(6))
+                            # thinking 
+                            self.show_pifi(str(self.score).rjust(6),None, 1)
                         else:
-                            self.show_pifi("Thinking")
+                            # thinking
+                            self.show_pifi("thinking")
+                            self.thinkerboll = 0 if self.thinkerboll is 2 else self.thinkerboll + 1
                         break
                     if case(MessageApi.BOOK_MOVE):
                         self.score = None
@@ -806,6 +854,9 @@ class DGTDisplay(Observable, Display, threading.Thread):
                                           list(time_control_map.keys()).index(fen)], beep=BeepLevel.MAP))
                             self.time_control_mode = time_control_map[fen].mode
                             self.time_control_fen = fen
+                        
+                            self.pifi_lefttime = int(time_control_map[fen].clock_time[chess.WHITE])
+                            self.pifi_righttime = time_right = int(time_control_map[fen].clock_time[chess.BLACK])
                         elif fen in shutdown_map:
                             logging.debug("Map-Fen: shutdown")
                             self.show_pifi("shutdown")
@@ -838,7 +889,7 @@ class DGTDisplay(Observable, Display, threading.Thread):
                         break
                     if case(MessageApi.EBOARD_VERSION):
                         DgtDisplay.show(Dgt.DISPLAY_TEXT(text=message.text, xl=message.text_xl, beep=BeepLevel.NO, duration=0.5))
-                        self.show_pifi("EBoard Version", message.text)
+                        #self.show_pifi("EBoard Version", message.text)
                     if case():  # Default
                         # print(message)
                         pass
