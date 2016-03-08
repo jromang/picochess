@@ -264,9 +264,9 @@ class DGTDisplay(Observable, Display, threading.Thread):
         
         logging.debug('init PiFace Timer')
         while True:
-            if (self.side == 0x1 and self.pifi_lefttime >= 0):
+            if (self.side == 0x1 and self.pifi_lefttime > 0):
                 self.pifi_lefttime = self.pifi_lefttime -1
-            if (self.side == 0x2 and self.pifi_righttime >= 0):
+            if (self.side == 0x2 and self.pifi_righttime > 0):
                 self.pifi_righttime = self.pifi_righttime -1
 
             time.sleep(1)
