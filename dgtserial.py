@@ -80,6 +80,7 @@ class DGTserial(object):
         while True:
             if not self.serial:
                 self.setup_serial()
+                self.startup_board()
             try:
                 self.serial.write(bytearray(array))
                 break
@@ -274,7 +275,7 @@ class DGTserial(object):
                 Display.show(Message.NO_EBOARD_ERROR(text='no E-board' + w, text_xl='board' + w))
                 wait_counter = (wait_counter + 1) % len(self.waitchars)
                 time.sleep(0.5)
-        self.startup_board()
+        # self.startup_board()
 
     def run(self):
         incoming_board_thread = Timer(0, self.process_incoming_board_forever)
