@@ -81,6 +81,7 @@ class DgtSerial(object):
         while True:
             if not self.serial:
                 self.setup_serial()
+                self.startup_board()
             try:
                 self.serial.write(bytearray(array))
                 break

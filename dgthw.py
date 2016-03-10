@@ -44,6 +44,7 @@ class DgtHw(DgtInterface):
     def _display_on_dgt_xl(self, text, beep=False):
         if not self.clock_found:  # This can only happen on the XL function
             logging.debug('Clock (still) not found. Ignore [%s]', text)
+            self.startup_clock()
             return
         while len(text) < 6:
             text += ' '
