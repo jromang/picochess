@@ -31,6 +31,7 @@ class DGThw(DGTInterface):
         self.lock = Lock()
         self.lib = DGTlib(self.dgtserial)
         self.startup_clock()
+        self.dgtserial.startup_board()
 
     def startup_clock(self):
         # Get clock version
@@ -40,6 +41,7 @@ class DGThw(DGTInterface):
     def _display_on_dgt_xl(self, text, beep=False):
         if not self.clock_found:  # This can only happen on the XL function
             logging.debug('Clock (still) not found. Ignore [%s]', text)
+            self.startup_clock()
             return
         while len(text) < 6:
             text += ' '
