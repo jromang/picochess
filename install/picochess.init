@@ -15,12 +15,12 @@ echo "This part always gets executed"
 # The following part carries out specific functions depending on arguments.
 case "$1" in
   start)
-    python3 /opt/piface/mess.py "Start picochess"
-    python3 /opt/picochess/picochess.py
+    python3 /opt/picofacechess/install/mess.py "Start picochess"
+    python3 /opt/picofacechess/picochess.py
     ;;
   stop)
-    python3 /opt/piface/mess.py "Stop picochess"
-    processid=`pidof python3 /opt/picochess/picochess.py`
+    python3 /opt/picofacechess/install/mess.py "Stop picochess"
+    processid=`pidof python3 /opt/picofacechess/picochess.py`
     echo "kill -9  $processid"
     kill -9 $processid
     ;;
