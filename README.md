@@ -30,7 +30,7 @@ sudo raspi-config
 
  -> step 1 ( "Expanding FileSystem")
 
- ( reboot -> relogin )
+ ( reboot "sudo reboot" -> relogin "ssh pi@Raspianip ")
  
 
 # update OS
@@ -49,8 +49,8 @@ sudo raspi-config
 
    -> A6 SPI ( set on enable )
 
- ( reboot -> relogin )
-
+ ( reboot "sudo reboot" -> relogin "ssh pi@Raspianip ")
+ 
 
 # install ClientSoftware
 ---------
