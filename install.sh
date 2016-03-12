@@ -19,11 +19,11 @@ sudo cp /opt/picofacechess/install/picochess.ini /opt/picofacechess/picochess.in
 
 cd /opt
 
-sudo git clone https://github.com/marianled/dgtnix.git
+sudo git clone https://github.com/LaMaRiaN/dgtnix.git
 sudo chown -R  pi:pi dgtnix
-sudo git clone https://github.com/marianled/dgtdrv.git
+sudo git clone https://github.com/LaMaRiaN/dgtdrv.git
 sudo chown -R  pi:pi dgtdrv
-#sudo git clone https://github.com/marianled/picofacechess.git
+#sudo git clone https://github.com/LaMaRiaN/picofacechess.git
 sudo chown -R  pi:pi picofacechess
 
 echo "install board driver"
