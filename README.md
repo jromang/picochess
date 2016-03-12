@@ -12,7 +12,9 @@ With PiFace Support
 Installation 
 ==========
 
-1.) download and Install  Raspbian
+ 1.) download and Install  Raspbian
+--------
+
 https://www.raspberrypi.org
 
 https://www.raspberrypi.org/downloads/raspbian/
@@ -21,12 +23,12 @@ show Installation Guide -> https://www.raspberrypi.org/documentation/installatio
 
 ---------
 
-2.) Login 
+ 2.) Login 
 ------
 
 ssh pi@Rapbianip
 
-3.)  expand SSD
+ 3.)  expand SSD
 ------
 
 sudo raspi-config
@@ -36,7 +38,7 @@ sudo raspi-config
  ( reboot "sudo reboot" -> relogin "ssh pi@Raspianip ")
  
 
-4.) update OS
+ 4.) update OS
 -------
 sudo apt-get update
 
@@ -44,7 +46,7 @@ sudo apt-get upgrade
 
 
 
-5.) enable SPI
+ 5.) enable SPI
 --------
 sudo raspi-config
 
@@ -55,7 +57,7 @@ sudo raspi-config
  ( reboot "sudo reboot" -> relogin "ssh pi@Raspianip ")
  
 
-6.) install ClientSoftware
+ 6.) install ClientSoftware
 ---------
 
 cd /opt
