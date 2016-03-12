@@ -15,6 +15,8 @@ sudo pip3 install --upgrade -r requirements.txt
 
 echo "get source from repositories"
 
+sudo cp /opt/picofacechess/install/picochess.ini /opt/picofacechess/picochess.ini
+
 cd /opt
 
 sudo git clone https://github.com/marianled/dgtnix.git
@@ -23,7 +25,6 @@ sudo git clone https://github.com/marianled/dgtdrv.git
 sudo chown -R  pi:pi dgtdrv
 #sudo git clone https://github.com/marianled/picofacechess.git
 sudo chown -R  pi:pi picofacechess
-
 
 echo "install board driver"
 
