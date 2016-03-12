@@ -57,7 +57,7 @@ sudo raspi-config
 
 cd /opt
 
-sudo git clone https://github.com/marianled/picofacechess.git
+sudo git clone https://github.com/LaMaRiaN/picofacechess.git
 
 
 sudo /opt/picofacechess/install.sh
