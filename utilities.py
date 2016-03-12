@@ -574,6 +574,7 @@ def update_picochess(auto_reboot=False):
                                       stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
             logging.debug(output)
             if 'up-to-date' not in output:
+                subprocess.Popen(['python3', "install/mess.py", "start Update"])
                 # Update
                 logging.debug('Updating picochess')
                 output = subprocess.Popen(["pip3", "install", "-r", "requirements.txt"],
