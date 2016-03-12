@@ -16,7 +16,8 @@ echo "This part always gets executed"
 case "$1" in
   start)
     python3 /opt/picofacechess/install/mess.py "Start picochess"
-    python3 /opt/picofacechess/picochess.py
+    cd /opt/picofacechess
+    python3 picochess.py
     ;;
   stop)
     python3 /opt/picofacechess/install/mess.py "Stop picochess"
@@ -24,8 +25,12 @@ case "$1" in
     echo "kill -9  $processid"
     kill -9 $processid
     ;;
+  restart)
+    /etc/init.d/picochess stop
+    /etc/init.d/picochess start
+    ;;
   *)
-    echo "Usage: /etc/init.d/picochess {start|stop}"
+    echo "Usage: /etc/init.d/picochess {start|stop|restart}"
     exit 1
     ;;
 esac
