@@ -17,6 +17,8 @@ https://www.raspberrypi.org
 
 https://www.raspberrypi.org/downloads/raspbian/
 
+show Installation Guide -> https://www.raspberrypi.org/documentation/installation/installing-images/README.md
+
 ---------
 
 ssh pi@Rapbianip
