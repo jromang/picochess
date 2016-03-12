@@ -21,6 +21,7 @@ https://www.raspberrypi.org/downloads/raspbian/
 ssh pi@Rapbianip
 
 cd /opt
+
 sudo git clone https://github.com/marianled/picofacechess.git
 
 
