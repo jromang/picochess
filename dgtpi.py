@@ -35,6 +35,7 @@ class DgtPi(DgtInterface):
         self.startup_clock()
         incoming_clock_thread = Timer(0, self.process_incoming_clock_forever)
         incoming_clock_thread.start()
+        self.dgtserial.startup_board()
 
     def startup_clock(self):
         while self.lib.dgtpicom_init() < 0:
