@@ -222,6 +222,7 @@ def main():
             return False
 
     def process_fen(fen, legal_fens):
+        nonlocal last_computer_fen
         if fen in legal_fens:
             # Check if we have to undo a previous move (sliding)
             if interaction_mode == Mode.NORMAL:
@@ -233,6 +234,7 @@ def main():
             legal_moves = list(game.legal_moves)
             Observable.fire(Event.USER_MOVE(move=legal_moves[legal_fens.index(fen)]))
         elif fen == last_computer_fen:  # Player had done the computer move on the board
+            last_computer_fen = None
             if check_game_state(game, play_mode) and ((interaction_mode == Mode.NORMAL) or (interaction_mode == Mode.REMOTE)):
                 # finally reset all alternative moves see: handle_move()
                 nonlocal searchmoves
