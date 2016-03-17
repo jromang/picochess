@@ -219,6 +219,7 @@ def main():
             return False
 
     def process_fen(fen, legal_fens):
+        nonlocal last_computer_fen
         if fen in legal_fens:
             # Check if we have to undo a previous move (sliding)
             if interaction_mode == Mode.GAME:
@@ -230,6 +231,7 @@ def main():
             legal_moves = list(game.legal_moves)
             Observable.fire(Event.USER_MOVE(move=legal_moves[legal_fens.index(fen)]))
         elif fen == last_computer_fen:  # Player had done the computer move on the board
+            last_computer_fen = None
             if check_game_state(game, play_mode) and ((interaction_mode == Mode.GAME) or (interaction_mode == Mode.REMOTE)):
                 # finally reset all alternative moves see: handle_move()
                 nonlocal searchmoves
@@ -371,9 +373,10 @@ def main():
         args.engine = 'engines' + os.sep + platform.machine() + os.sep + 'stockfish'
 
     # Enable logging
-    logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
-                        format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s',
-                        datefmt="%Y-%m-%d %H:%M:%S")
+    if args.log_file:
+        logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
+                            format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s',
+                            datefmt="%Y-%m-%d %H:%M:%S")
     logging.getLogger("chess.uci").setLevel(logging.INFO)  # don't want to get so many python-chess uci messages
 
     # Update
