@@ -541,7 +541,7 @@ def main():
                         # Local engines only
                         engine_fallback = False
                         engine = uci.Engine(event.eng[0])
-                        try:        
+                        try:
                             engine_name = engine.get().name
                         except AttributeError:
                             # New engine failed to start, restart old engine
