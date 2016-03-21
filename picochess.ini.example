@@ -56,7 +56,7 @@ beep-level = 15
 ### standard SMTP email or Mailgun Webservice
 ### Mail general
 ### if email is not set, PicoChess won't attempt to send the game at all
-### You also have to enable internet access for picochess. This option can be enbaled with 
+### You also have to enable internet access for picochess. This option can be enabled with 
 ### enable-internet (section PicoChess related options" below). 
 ## email tells PicoChess to which email address the game should be send to, it should be your email address :-)
 # email = your.mailbox@your-domain.com 
