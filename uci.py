@@ -78,7 +78,7 @@ class Engine(object):
     def __init__(self, path, hostname=None, username=None, key_file=None, password=None):
         super(Engine, self).__init__()
         try:
-            self.path = None
+            self.shell = None
             if hostname:
                 logging.info("Connecting to [%s]", hostname)
                 if key_file:
@@ -87,10 +87,12 @@ class Engine(object):
                 else:
                     shell = spur.SshShell(hostname=hostname, username=username, password=password,
                                           missing_host_key=paramiko.AutoAddPolicy())
+                self.shell = shell
                 self.engine = chess.uci.spur_spawn_engine(shell, [path])
             else:
                 self.engine = chess.uci.popen_engine(path)
-                self.path = path
+
+            self.path = path
             if self.engine:
                 handler = Informer()
                 self.engine.info_handlers.append(handler)
@@ -148,7 +150,10 @@ class Engine(object):
         return 'UCI_Chess960' in self.engine.options
 
     def get_path(self):
-        return self.path  # path is only "not none" if its a local engine - see __init__
+        return self.path
+
+    def get_shell(self):
+        return self.shell # shell is only "not none" if its a local engine - see __init__
 
     def position(self, game):
         self.engine.position(game)

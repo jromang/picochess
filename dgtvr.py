@@ -21,8 +21,8 @@ from dgtinterface import *
 
 
 class DgtVr(DgtInterface):
-    def __init__(self, enable_board_leds, beep_level):
-        super(DgtVr, self).__init__(enable_board_leds, beep_level)
+    def __init__(self, enable_revelation_leds, beep_level):
+        super(DgtVr, self).__init__(enable_revelation_leds, beep_level)
         # virtual lib
         self.rt = None
         self.time_side = None

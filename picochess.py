@@ -334,7 +334,7 @@ def main():
     parser.add_argument("-b", "--book", type=str, help="Opening book - full name of book in 'books' folder",
                         default='h-varied.bin')
     parser.add_argument("-g", "--enable-gaviota", action='store_true', help="enable gavoita tablebase probing")
-    parser.add_argument("-leds", "--enable-dgt-board-leds", action='store_true', help="enable dgt board leds")
+    parser.add_argument("-leds", "--enable-revelation-leds", action='store_true', help="enable Revelation leds")
     parser.add_argument("-hs", "--hash-size", type=int, help="hashtable size in MB (default:64)", default=64)
     parser.add_argument("-t", "--threads", type=int, help="number of engine threads (default:1)", default=1)
     parser.add_argument("-l", "--log-level", choices=['notset', 'debug', 'info', 'warning', 'error', 'critical'],
@@ -359,8 +359,6 @@ def main():
                         default=None)
     parser.add_argument("-uci", "--uci-option", type=str, help="pass an UCI option to the engine (name;value)",
                         default=None)
-    parser.add_argument("-nobeep", "--disable-dgt-clock-beep", action='store_true',
-                        help="do NOT use it anymore (DEPRECATED!)")
     parser.add_argument("-beep", "--beep-level", type=int, help="sets a beep level from 0(=no beeps) to 15(=all beeps)",
                         default=0x0f)
     parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
@@ -399,22 +397,22 @@ def main():
             logging.error('Tablebases gaviota doesnt exist')
             gaviota = None
 
-    # This class talks to DGTHw/DGTPi or DGTVirtual
+    # This class talks to DgtHw/DgtPi or DgtVr
     DgtDisplay(args.disable_ok_move).start()
 
     if args.dgt_port:
         # Connect to DGT board
         logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
         if args.dgtpi:
-            DgtPi(args.dgt_port, args.enable_dgt_board_leds, args.beep_level).start()
+            DgtPi(args.dgt_port, args.enable_revelation_leds, args.beep_level).start()
         else:
-            DgtHw(args.dgt_port, args.enable_dgt_board_leds, args.beep_level).start()
+            DgtHw(args.dgt_port, args.enable_revelation_leds, args.beep_level).start()
     else:
         # Enable keyboard input and terminal display
         logging.debug("Starting picochess with virtual DGT board")
         KeyboardInput().start()
         TerminalDisplay().start()
-        DgtVr(args.enable_dgt_board_leds, args.beep_level).start()
+        DgtVr(args.enable_revelation_leds, args.beep_level).start()
 
     # Save to PGN
     PgnDisplay(
@@ -478,7 +476,8 @@ def main():
                                                "book": all_books[book_index][1], "book_index": book_index,
                                                "time_text": text}))
     DisplayMsg.show(Message.UCI_OPTION_LIST(options=engine.options))
-    DisplayMsg.show(Message.ENGINE_STARTUP(path=engine.get_path(), has_levels=engine.has_levels(), has_960=engine.has_chess960()))
+    DisplayMsg.show(Message.ENGINE_STARTUP(shell=engine.get_shell(), path=engine.get_path(),
+                                           has_levels=engine.has_levels(), has_960=engine.has_chess960()))
 
     # Event loop
     while True:
@@ -560,7 +559,7 @@ def main():
                         # supplementary uci options sent 'in game', see event.UCI_OPTION_SET
                         engine_startup()
                         # Send user selected engine level to new engine
-                        if engine.level(event.level):
+                        if event.level and engine.level(event.level):
                             engine.send()
                             DisplayMsg.show(Message.LEVEL(level=event.level, level_text=event.level_text))
                         # All done - rock'n'roll
@@ -591,7 +590,8 @@ def main():
                     if game.move_stack:
                         if game.is_game_over() or game_declared:
                             custom_fen = getattr(game, 'custom_fen', None)
-                            DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game), custom_fen=custom_fen))
+                            DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode,
+                                                              game=copy.deepcopy(game), custom_fen=custom_fen))
                     game = chess.Board(event.fen, event.uci960)
                     game.custom_fen = event.fen
                     legal_fens = compute_legal_fens(game)
@@ -636,7 +636,8 @@ def main():
                         logging.debug("Starting a new game")
                         if not (game.is_game_over() or game_declared):
                             custom_fen = getattr(game, 'custom_fen', None)
-                            DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game), custom_fen=custom_fen))
+                            DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode,
+                                                              game=copy.deepcopy(game), custom_fen=custom_fen))
                         game = chess.Board()
                     legal_fens = compute_legal_fens(game)
                     # interaction_mode = Mode.NORMAL @todo
@@ -653,7 +654,8 @@ def main():
                 if case(EventApi.DRAWRESIGN):
                     if not game_declared:  # in case user leaves kings in place while moving other pieces
                         custom_fen = getattr(game, 'custom_fen', None)
-                        DisplayMsg.show(Message.GAME_ENDS(result=event.result, play_mode=play_mode, game=copy.deepcopy(game), custom_fen=custom_fen))
+                        DisplayMsg.show(Message.GAME_ENDS(result=event.result, play_mode=play_mode,
+                                                          game=copy.deepcopy(game), custom_fen=custom_fen))
                         game_declared = True
                     break
 

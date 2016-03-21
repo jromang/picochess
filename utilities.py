@@ -35,7 +35,7 @@ except ImportError:
 
 
 # picochess version
-version = '059'
+version = '060'
 
 evt_queue = queue.Queue()
 serial_queue = queue.Queue()
@@ -145,7 +145,6 @@ class Menu(enum.Enum):
     POSITION_MENU = 'position'  # Setup position menu
     TIME_MENU = 'time' # Time controls menu
     BOOK_MENU = 'book'  # Book menu
-    LEVEL_MENU = 'level'  # Playing strength
     ENGINE_MENU = 'engine'  # Engine menu
     SYSTEM_MENU = 'system'  # Settings menu
 
@@ -163,8 +162,6 @@ class MenuLoop(object):
         elif m == Menu.TIME_MENU:
             return Menu.BOOK_MENU
         elif m == Menu.BOOK_MENU:
-            return Menu.LEVEL_MENU
-        elif m == Menu.LEVEL_MENU:
             return Menu.ENGINE_MENU
         elif m == Menu.ENGINE_MENU:
             return Menu.SYSTEM_MENU
@@ -182,10 +179,8 @@ class MenuLoop(object):
             return Menu.POSITION_MENU
         elif m == Menu.BOOK_MENU:
             return Menu.TIME_MENU
-        elif m == Menu.LEVEL_MENU:
-            return Menu.BOOK_MENU
         elif m == Menu.ENGINE_MENU:
-            return Menu.LEVEL_MENU
+            return Menu.BOOK_MENU
         elif m == Menu.SYSTEM_MENU:
             return Menu.ENGINE_MENU
         return Menu.TOP_MENU
@@ -543,7 +538,7 @@ class Message():
     NEW_PV = ClassFactory(MessageApi.NEW_PV, ['pv', 'mode', 'fen'])
     REVIEW_MOVE = ClassFactory(MessageApi.REVIEW_MOVE, ['move', 'fen', 'game', 'mode'])
     ENGINE_READY = ClassFactory(MessageApi.ENGINE_READY, ['eng', 'eng_text', 'engine_name', 'has_levels', 'has_960'])
-    ENGINE_STARTUP = ClassFactory(MessageApi.ENGINE_STARTUP, ['path', 'has_levels', 'has_960'])
+    ENGINE_STARTUP = ClassFactory(MessageApi.ENGINE_STARTUP, ['shell', 'path', 'has_levels', 'has_960'])
     ENGINE_FAIL = ClassFactory(MessageApi.ENGINE_FAIL, [])
     LEVEL = ClassFactory(MessageApi.LEVEL, ['level', 'level_text'])
     TIME_CONTROL = ClassFactory(MessageApi.TIME_CONTROL, ['time_text'])
@@ -619,8 +614,8 @@ def get_opening_books():
     return library
 
 
-def get_installed_engines(engine_path):
-    return read_engine_ini((engine_path.rsplit(os.sep, 1))[0])
+def get_installed_engines(engine_shell, engine_path):
+    return read_engine_ini(engine_shell, (engine_path.rsplit(os.sep, 1))[0])
 
 
 def write_engine_ini(engine_path=None):
@@ -651,16 +646,23 @@ def write_engine_ini(engine_path=None):
         config.write(configfile)
 
 
-def read_engine_ini(engine_path=None):
-    if not engine_path:
-        program_path = os.path.dirname(os.path.realpath(__file__)) + os.sep
-        engine_path = program_path + 'engines' + os.sep + platform.machine()
+def read_engine_ini(engine_shell=None, engine_path=None):
     config = configparser.ConfigParser()
-    config.read(engine_path + os.sep + 'engines.ini')
+    try:
+        if engine_shell is None:
+            if not engine_path:
+                program_path = os.path.dirname(os.path.realpath(__file__)) + os.sep
+                engine_path = program_path + 'engines' + os.sep + platform.machine()
+            config.read(engine_path + os.sep + 'engines.ini')
+        else:
+            with engine_shell.open(engine_path + os.sep + 'engines.ini', 'r') as file:
+                config.read_file(file)
+    except FileNotFoundError:
+        pass
+
     library = []
     for section in config.sections():
-        library.append((engine_path + os.sep + config[section]['file'], section))
-        # print(config[section].getboolean('has_levels'))
+        library.append((engine_path + os.sep + config[section]['file'], section, config[section].getboolean('has_levels')))
     return library
 
 

@@ -21,13 +21,13 @@ from threading import Timer, Thread
 
 
 class DgtInterface(DisplayDgt, Thread):
-    def __init__(self, enable_board_leds, beep_level):
+    def __init__(self, enable_revelation_leds, beep_level):
         super(DgtInterface, self).__init__()
 
         self.enable_dgt_3000 = False
         self.enable_dgt_pi = False
         self.clock_found = False
-        self.enable_board_leds = enable_board_leds
+        self.enable_revelation_leds = enable_revelation_leds
         self.beep_level = int(beep_level) & 0x0f
         self.time_left = [0, 0, 0]
         self.time_right = [0, 0, 0]

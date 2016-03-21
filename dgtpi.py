@@ -24,8 +24,8 @@ from threading import Lock, Timer
 
 
 class DgtPi(DgtInterface):
-    def __init__(self, device, enable_board_leds, beep_level):
-        super(DgtPi, self).__init__(enable_board_leds, beep_level)
+    def __init__(self, device, enable_revelation_leds, beep_level):
+        super(DgtPi, self).__init__(enable_revelation_leds, beep_level)
         self.dgtserial = DgtSerial(device)
         self.dgtserial.run()
 
