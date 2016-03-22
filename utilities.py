@@ -107,7 +107,6 @@ class MessageApi():
     SEARCH_STARTED = 'MSG_SEARCH_STARTED'  # Engine has started to search
     SEARCH_STOPPED = 'MSG_SEARCH_STOPPED'  # Engine has stopped the search
     USER_TAKE_BACK = 'MSG_USER_TACK_BACK'  # User takes back his move while engine is searching
-    END_CLOCK = 'MSG_END_CLOCK'  # Return to running clock
     RUN_CLOCK = 'MSG_RUN_CLOCK'  # Say to run autonomous clock, contains time_control
     STOP_CLOCK = 'MSG_STOP_CLOCK'  # Stops the clock
     USER_MOVE = 'MSG_USER_MOVE'  # Player has done a move on board
@@ -125,7 +124,7 @@ class MessageApi():
 
 
 class DgtApi():
-    # Commands to the DGThw/pi (or the virtual hardware)
+    # Commands to the DgtHw/Pi (or the virtual hardware)
     DISPLAY_MOVE = 'DGT_DISPLAY_MOVE'
     DISPLAY_TEXT = 'DGT_DISPLAY_TEXT'
     LIGHT_CLEAR = 'DGT_LIGHT_CLEAR'
@@ -519,11 +518,11 @@ def ClassFactory(name, argnames, BaseClass=BaseClass):
 
 
 class Dgt():
-    DISPLAY_MOVE = ClassFactory(DgtApi.DISPLAY_MOVE, ['move', 'fen', 'beep', 'duration', 'force'])
-    DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['l', 'm', 's', 'beep', 'duration', 'force'])
+    DISPLAY_MOVE = ClassFactory(DgtApi.DISPLAY_MOVE, ['move', 'fen', 'beep', 'duration', 'wait'])
+    DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['l', 'm', 's', 'beep', 'duration', 'wait'])
     LIGHT_CLEAR = ClassFactory(DgtApi.LIGHT_CLEAR, [])
     LIGHT_SQUARES = ClassFactory(DgtApi.LIGHT_SQUARES, ['squares'])
-    CLOCK_END = ClassFactory(DgtApi.CLOCK_END, ['force'])
+    CLOCK_END = ClassFactory(DgtApi.CLOCK_END, ['wait', 'force'])
     CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, [])
     CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side'])
     CLOCK_VERSION = ClassFactory(DgtApi.CLOCK_VERSION, ['main_version', 'sub_version', 'attached'])
@@ -556,7 +555,6 @@ class Message():
     SEARCH_STARTED = ClassFactory(MessageApi.SEARCH_STARTED, ['engine_status'])
     SEARCH_STOPPED = ClassFactory(MessageApi.SEARCH_STOPPED, ['engine_status'])
     USER_TAKE_BACK = ClassFactory(MessageApi.USER_TAKE_BACK, [])
-    END_CLOCK = ClassFactory(MessageApi.END_CLOCK, [])
     RUN_CLOCK = ClassFactory(MessageApi.RUN_CLOCK, ['turn', 'time_control'])
     STOP_CLOCK = ClassFactory(MessageApi.STOP_CLOCK, [])
     USER_MOVE = ClassFactory(MessageApi.USER_MOVE, ['move', 'game'])

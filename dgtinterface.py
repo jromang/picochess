@@ -80,8 +80,8 @@ class DgtInterface(DisplayDgt, Thread):
                 logging.debug("Received command from dgt queue: %s", message)
                 for case in switch(message):
                     if case(DgtApi.DISPLAY_MOVE):
-                        message.force = False  # TEST!
-                        while self.timer_running and not message.force:
+                        message.wait = True  # TEST!
+                        while self.timer_running and message.wait:
                             time.sleep(0.1)
                         if hasattr(message, 'duration') and message.duration > 0:
                             self.timer = Timer(message.duration, self.stopped_timer)
@@ -91,8 +91,8 @@ class DgtInterface(DisplayDgt, Thread):
                         self.display_move_on_clock(message.move, message.fen, message.beep)
                         break
                     if case(DgtApi.DISPLAY_TEXT):
-                        message.force = False  # TEST!
-                        while self.timer_running and not message.force:
+                        message.wait = True  # TEST!
+                        while self.timer_running and message.wait:
                             time.sleep(0.1)
                         if hasattr(message, 'duration') and message.duration > 0:
                             self.timer = Timer(message.duration, self.stopped_timer)
@@ -114,6 +114,8 @@ class DgtInterface(DisplayDgt, Thread):
                         self.light_squares_revelation_board(message.squares)
                         break
                     if case(DgtApi.CLOCK_END):
+                        while self.timer_running and message.wait:
+                            time.sleep(0.1)
                         self.end_clock(message.force)
                         break
                     if case(DgtApi.CLOCK_STOP):
