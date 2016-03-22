@@ -12,4 +12,5 @@ ignore-paths:
     - lib
     - src
     - tablebases
-    - test
+    - logs
+    - dgt

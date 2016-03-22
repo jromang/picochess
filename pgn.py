@@ -1,5 +1,6 @@
-# Copyright (C) 2013-2014 Jean-Francois Romang (jromang@posteo.de)
+# Copyright (C) 2013-2016 Jean-Francois Romang (jromang@posteo.de)
 #                         Shivkumar Shivaji ()
+#                         Jürgen Précour (LocutusOfPenguin@posteo.de)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,7 +29,7 @@ import re
 from email.mime.text import MIMEText
 
 
-class PgnDisplay(Display, threading.Thread):
+class PgnDisplay(DisplayMsg, threading.Thread):
     def __init__(self, pgn_file_name, net, email=None, mailgun_key=None,
                  smtp_server=None, smtp_user=None,
                  smtp_pass=None, smtp_encryption=False):
@@ -57,9 +58,8 @@ class PgnDisplay(Display, threading.Thread):
     def save_and_email_pgn(self, message):
         logging.debug('Saving game to [' + self.file_name + ']')
         pgn = chess.pgn.Game()
-        custom_fen = getattr(message.game, 'custom_fen', None)
-        if custom_fen:
-            pgn.setup(custom_fen)
+        if message.custom_fen:
+            pgn.setup(message.custom_fen)
 
         node = pgn
         for move in message.game.move_stack:
@@ -153,7 +153,7 @@ class PgnDisplay(Display, threading.Thread):
         while True:
             # Check if we have something to display
             try:
-                message = self.message_queue.get()
+                message = self.msg_queue.get()
                 for case in switch(message):
                     if case(MessageApi.SYSTEM_INFO):
                         self.engine_name = message.info['engine_name']

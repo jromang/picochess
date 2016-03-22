@@ -48,7 +48,7 @@ SPOKEN_PIECE_SOUNDS = {
 }
 
 
-class ChessTalker(Display, threading.Thread):
+class ChessTalker(DisplayMsg, threading.Thread):
     def __init__(self, user_voice, computer_voice):
         """
         Initialize a ChessTalker with voices for the user and/or computer players.
@@ -83,7 +83,7 @@ class ChessTalker(Display, threading.Thread):
         while self.user_chesstalker_voice or self.computer_chesstalker_voice:
             try:
                 # Check if we have something to say.
-                message = self.message_queue.get()
+                message = self.msg_queue.get()
                 logging.debug("Read message from queue: %s", message)
                 system_voice = self.system_voice()
 
@@ -108,7 +108,7 @@ class ChessTalker(Display, threading.Thread):
                             self.user_chesstalker_voice.say_move(message.move, copy.deepcopy(message.game))
                             previous_move = str(message.move)
                         break
-                    if case(MessageApi.REVIEW_MODE_MOVE):
+                    if case(MessageApi.REVIEW_MOVE):
                         if message.move and message.game and str(message.move) != previous_move \
                                 and self.user_chesstalker_voice is not None:
                             logging.debug('Announcing REVIEW_MOVE [%s]', message.move)
@@ -129,14 +129,15 @@ class ChessTalker(Display, threading.Thread):
                         break
                     if case(MessageApi.TIME_CONTROL):
                         logging.debug('Announcing SET_TIME_CONTROL')
-                        if message.time_control_string.startswith("mov"):
-                            time_control_value = int(message.time_control_string[3:].strip())
+                        time_text = message.time_text.m
+                        if time_text.startswith("mov"):
+                            time_control_value = int(time_text[3:].strip())
                             system_voice.say_time_control_fixed_time(time_control_value)
-                        elif message.time_control_string.startswith("bl"):
-                            time_control_value = int(message.time_control_string[2:].strip())
+                        elif time_text.startswith("bl"):
+                            time_control_value = int(time_text[2:].strip())
                             system_voice.say_time_control_blitz(time_control_value)
-                        elif message.time_control_string.startswith("f"):
-                            time_control_values = message.time_control_string[1:].strip().split()
+                        elif time_text.startswith("f"):
+                            time_control_values = time_text[1:].strip().split()
                             # logging.debug('time_control_values: ' + str(time_control_values))
                             minutes_per_game = time_control_values[0]
                             fischer_increment = time_control_values[1]
@@ -196,7 +197,7 @@ class ChessTalker(Display, threading.Thread):
             return self.user_chesstalker_voice
 
     def say_event(self, event):
-        self.message_queue.put(event)
+        self.msg_queue.put(event)
 
     @staticmethod
     def localisations():
@@ -479,7 +480,7 @@ class ChessTalkerVoice():
     def say_mode(self, mode):
         """Announce an mode setting"""
         modeVocab = None
-        if mode == Mode.GAME:
+        if mode == Mode.NORMAL:
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_GAME]
         elif mode == Mode.ANALYSIS:
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_ANALYSIS]
@@ -707,7 +708,7 @@ if __name__ == "__main__":
                     chesstalker.say_level(20)
                     chesstalker.say_opening_book("fun")
                     chesstalker.say_opening_book("anand")
-                    chesstalker.say_mode(Mode.GAME)
+                    chesstalker.say_mode(Mode.NORMAL)
                     chesstalker.say_mode(Mode.ANALYSIS)
                     chesstalker.say_mode(Mode.OBSERVE)
                     chesstalker.say_mode(Mode.REMOTE)
