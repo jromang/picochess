@@ -1,5 +1,6 @@
-# Copyright (C) 2013-2014 Jean-Francois Romang (jromang@posteo.de)
+# Copyright (C) 2013-2016 Jean-Francois Romang (jromang@posteo.de)
 #                         Shivkumar Shivaji ()
+#                         Jürgen Précour (LocutusOfPenguin@posteo.de)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,11 +19,11 @@ from utilities import *
 import time
 
 
-class DGTlib(object):
+class DgtLib(object):
     # This file simulates DGT's SO-lib File with similar api
 
     def __init__(self, dgtserial):
-        super(DGTlib, self).__init__()
+        super(DgtLib, self).__init__()
         self.dgtserial = dgtserial
 
     def write(self, command):
@@ -31,19 +32,19 @@ class DGTlib(object):
                 time.sleep(0.1)
         self.dgtserial.write_board_command(command)
 
-    def display(self, text, beep, ld, rd):
+    def set_text_3k(self, text, beep, ld, rd):
         self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0c, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_ASCII,
                     text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], beep,
                     DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         return 0
 
-    def display_xl(self, text, beep, ld, rd):
+    def set_text_xl(self, text, beep, ld, rd):
         self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0b, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_DISPLAY,
                     text[2], text[1], text[0], text[5], text[4], text[3], 0x00, beep,
                     DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         return 0
 
-    def setnrun(self, lr, lh, lm, ls, rr, rh, rm, rs):
+    def set_and_run(self, lr, lh, lm, ls, rr, rh, rm, rs):
         side = 0x04
         if lr == 1 and rr == 0:
             side = 0x01
@@ -56,7 +57,7 @@ class DGTlib(object):
                     DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         return 0
 
-    def end_clock(self):
+    def end_text(self):
         self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_END,
                     DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         return 0

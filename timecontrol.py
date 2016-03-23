@@ -1,5 +1,6 @@
-# Copyright (C) 2013-2014 Jean-Francois Romang (jromang@posteo.de)
+# Copyright (C) 2013-2016 Jean-Francois Romang (jromang@posteo.de)
 #                         Shivkumar Shivaji ()
+#                         Jürgen Précour (LocutusOfPenguin@posteo.de)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +23,7 @@ import copy
 
 
 class TimeControl(object):
-    def __init__(self, mode=ClockMode.FIXED_TIME, seconds_per_move=0, minutes_per_game=0, fischer_increment=0):
+    def __init__(self, mode=TimeMode.FIXED, seconds_per_move=0, minutes_per_game=0, fischer_increment=0):
         super(TimeControl, self).__init__()
         self.mode = mode
         self.seconds_per_move = seconds_per_move
@@ -37,10 +38,10 @@ class TimeControl(object):
 
     def reset(self):
         """Resets the clock's times for both players"""
-        if self.mode in (ClockMode.BLITZ, ClockMode.FISCHER):
+        if self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
             self.clock_time = {chess.WHITE: float(self.minutes_per_game * 60),
                                chess.BLACK: float(self.minutes_per_game * 60)}
-        elif self.mode == ClockMode.FIXED_TIME:
+        elif self.mode == TimeMode.FIXED:
             self.clock_time = {chess.WHITE: float(self.seconds_per_move),
                                chess.BLACK: float(self.seconds_per_move)}
         self.active_color = None
@@ -53,11 +54,11 @@ class TimeControl(object):
             Observable.fire(Event.OUT_OF_TIME(color=self.active_color))
 
     def run(self, color):
-        if self.mode in (ClockMode.BLITZ, ClockMode.FISCHER):
+        if self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
             self.active_color = color
             self.start_time = time.time()
 
-            if self.mode == ClockMode.FISCHER:
+            if self.mode == TimeMode.FISCHER:
                 self.clock_time[color] += self.fischer_increment
 
             # Only start thread if not already started for same color, and the player has not already lost on time
@@ -69,7 +70,7 @@ class TimeControl(object):
 
     def stop(self):
         """Stop the clocks"""
-        if self.active_color is not None and self.mode in (ClockMode.BLITZ, ClockMode.FISCHER):
+        if self.active_color is not None and self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
             self.timer.cancel()
             self.timer.join()
             self.clock_time[self.active_color] -= time.time() - self.start_time
@@ -81,14 +82,14 @@ class TimeControl(object):
     def uci(self):
         """Returns remaining time for both players in an UCI dict"""
         uci_dict = {}
-        if self.mode in (ClockMode.BLITZ, ClockMode.FISCHER):
+        if self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
             uci_dict['wtime'] = str(int(self.clock_time[chess.WHITE] * 1000))
             uci_dict['btime'] = str(int(self.clock_time[chess.BLACK] * 1000))
 
-            if self.mode == ClockMode.FISCHER:
+            if self.mode == TimeMode.FISCHER:
                 uci_dict['winc'] = str(self.fischer_increment * 1000)
                 uci_dict['binc'] = str(self.fischer_increment * 1000)
-        elif self.mode == ClockMode.FIXED_TIME:
+        elif self.mode == TimeMode.FIXED:
             uci_dict['movetime'] = str(self.seconds_per_move * 1000)
 
         return uci_dict

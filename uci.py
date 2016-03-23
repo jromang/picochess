@@ -1,5 +1,6 @@
-# Copyright (C) 2013-2014 Jean-Francois Romang (jromang@posteo.de)
+# Copyright (C) 2013-2016 Jean-Francois Romang (jromang@posteo.de)
 #                         Shivkumar Shivaji ()
+#                         Jürgen Précour (LocutusOfPenguin@posteo.de)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -77,7 +78,7 @@ class Engine(object):
     def __init__(self, path, hostname=None, username=None, key_file=None, password=None):
         super(Engine, self).__init__()
         try:
-            self.path = None
+            self.shell = None
             if hostname:
                 logging.info("Connecting to [%s]", hostname)
                 if key_file:
@@ -86,19 +87,18 @@ class Engine(object):
                 else:
                     shell = spur.SshShell(hostname=hostname, username=username, password=password,
                                           missing_host_key=paramiko.AutoAddPolicy())
+                self.shell = shell
                 self.engine = chess.uci.spur_spawn_engine(shell, [path])
             else:
-                path = which(path)
-                if not path:
-                    logging.error("Engine not found")
-                    self.engine = None
-                else:
-                    self.engine = chess.uci.popen_engine(path)
-                    self.path = path
+                self.engine = chess.uci.popen_engine(path)
+
+            self.path = path
             if self.engine:
                 handler = Informer()
                 self.engine.info_handlers.append(handler)
                 self.engine.uci()
+            else:
+                logging.error("Engine executable [%s] not found", path)
             self.options = {}
             self.future = None
             self.show_best = True
@@ -108,6 +108,8 @@ class Engine(object):
 
         except OSError:
             logging.exception("OS error in starting engine")
+        except TypeError:
+            logging.exception("Engine executable not found")
 
     def get(self):
         return self.engine
@@ -148,7 +150,10 @@ class Engine(object):
         return 'UCI_Chess960' in self.engine.options
 
     def get_path(self):
-        return self.path  # path is only "not none" if its a local engine - see __init__
+        return self.path
+
+    def get_shell(self):
+        return self.shell # shell is only "not none" if its a local engine - see __init__
 
     def position(self, game):
         self.engine.position(game)
@@ -183,7 +188,7 @@ class Engine(object):
         self.show_best = True
         time_dict['async_callback'] = self.callback
 
-        Display.show(Message.SEARCH_STARTED(engine_status=self.status))
+        DisplayMsg.show(Message.SEARCH_STARTED(engine_status=self.status))
         self.future = self.engine.go(**time_dict)
         return self.future
 
@@ -193,13 +198,13 @@ class Engine(object):
         self.status = EngineStatus.PONDER
         self.show_best = False
 
-        Display.show(Message.SEARCH_STARTED(engine_status=self.status))
+        DisplayMsg.show(Message.SEARCH_STARTED(engine_status=self.status))
         self.future = self.engine.go(ponder=True, infinite=True, async_callback=self.callback)
         return self.future
 
     def callback(self, command):
         self.res = command.result()
-        Display.show(Message.SEARCH_STOPPED(engine_status=self.status))
+        DisplayMsg.show(Message.SEARCH_STOPPED(engine_status=self.status))
         if self.show_best:
             Observable.fire(Event.BEST_MOVE(result=self.res, inbook=False))
         else:

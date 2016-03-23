@@ -1,5 +1,6 @@
-# Copyright (C) 2013-2014 Jean-Francois Romang (jromang@posteo.de)
+# Copyright (C) 2013-2016 Jean-Francois Romang (jromang@posteo.de)
 #                         Shivkumar Shivaji ()
+#                         Jürgen Précour (LocutusOfPenguin@posteo.de)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,9 +50,9 @@ piece_to_char = {
 }
 
 
-class DGTserial(object):
+class DgtSerial(object):
     def __init__(self, device):
-        super(DGTserial, self).__init__()
+        super(DgtSerial, self).__init__()
         self.device = device
         self.serial = None
         self.waitchars = ['/', '-', '\\', '|']
@@ -63,7 +64,7 @@ class DGTserial(object):
         mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
         logging.debug('->DGT board [%s], length %i', mes, len(message))
         if mes.value == DgtClk.DGT_CMD_CLOCK_ASCII.value:
-            logging.debug([chr(elem) for elem in message[4:10]])
+            logging.debug(''.join([chr(elem) for elem in message[4:10]]))
 
         array = []
         for v in message:
@@ -101,7 +102,7 @@ class DGTserial(object):
                 logging.warning('DGT clock [ser]: already locked. Maybe a "resend"?')
             else:
                 logging.debug('DGT clock [ser]: locked')
-                self.clock_lock = True
+                self.clock_lock = time.time()
 
     def process_board_message(self, message_id, message):
         for case in switch(message_id):
@@ -109,15 +110,15 @@ class DGTserial(object):
                 board_version = str(message[0]) + '.' + str(message[1])
                 logging.debug("DGT board version %0.2f", float(board_version))
                 if self.device.find('rfc') == -1:
-                    text = 'USB E-board'
-                    text_xl = 'ok usb'
+                    text_m = 'USB E-board'
+                    text_s = 'ok usb'
                     channel = 'USB'
                 else:
-                    text = 'BT E-board'
-                    text_xl = 'ok bt'
+                    text_m = 'BT E-board'
+                    text_s = 'ok bt'
                     channel = 'BT'
-                Display.show(Message.EBOARD_VERSION(text=text, text_xl=text_xl, channel=channel))
-                # Display.show(Message.WAIT_STATE())
+                text = Dgt.DISPLAY_TEXT(l=None, m=text_m, s=text_s, beep=BeepLevel.NO, duration=0.5)
+                DisplayMsg.show(Message.EBOARD_VERSION(text=text, channel=channel))
                 break
             if case(DgtMsg.DGT_MSG_BWTIME):
                 if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
@@ -144,24 +145,24 @@ class DGTserial(object):
                         #                        74-53 | button 3 + 4
                         if ack3 == 49:
                             logging.info("DGT clock [ser]: button 0 pressed")
-                            Display.show(Message.DGT_BUTTON(button=0))
+                            DisplayMsg.show(Message.DGT_BUTTON(button=0))
                         if ack3 == 52:
                             logging.info("DGT clock [ser]: button 1 pressed")
-                            Display.show(Message.DGT_BUTTON(button=1))
+                            DisplayMsg.show(Message.DGT_BUTTON(button=1))
                         if ack3 == 51:
                             logging.info("DGT clock [ser]: button 2 pressed")
-                            Display.show(Message.DGT_BUTTON(button=2))
+                            DisplayMsg.show(Message.DGT_BUTTON(button=2))
                         if ack3 == 50:
                             logging.info("DGT clock [ser]: button 3 pressed")
-                            Display.show(Message.DGT_BUTTON(button=3))
+                            DisplayMsg.show(Message.DGT_BUTTON(button=3))
                         if ack3 == 53:
                             logging.info("DGT clock [ser]: button 4 pressed")
-                            Display.show(Message.DGT_BUTTON(button=4))
+                            DisplayMsg.show(Message.DGT_BUTTON(button=4))
                     if ack1 == 0x09:
                         main_version = ack2 >> 4
                         sub_version = ack2 & 0x0f
                         logging.debug("DGT clock [ser]: version %0.2f", float(str(main_version) + '.' + str(sub_version)))
-                        Display.show(Message.DGT_CLOCK_VERSION(main_version=main_version, sub_version=sub_version, attached="serial"))
+                        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main_version=main_version, sub_version=sub_version, attached="serial"))
                 elif any(message[:6]):
                     r_hours = message[0] & 0x0f
                     r_mins = (message[1] >> 4) * 10 + (message[1] & 0x0f)
@@ -172,11 +173,11 @@ class DGTserial(object):
                     tr = [r_hours, r_mins, r_secs]
                     tl = [l_hours, l_mins, l_secs]
                     logging.info('DGT clock [ser]: time received {} : {}'.format(tl, tr))
-                    Display.show(Message.DGT_CLOCK_TIME(time_left=tl, time_right=tr))
+                    DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=tl, time_right=tr))
                 else:
                     logging.debug('DGT clock [ser]: null message ignored')
                 if self.clock_lock:
-                    logging.debug('DGT clock [ser]: unlocked')
+                    logging.debug('DGT clock [ser]: unlocked after {0:.3f} secs'.format(time.time() - self.clock_lock))
                     self.clock_lock = False
                 break
             if case(DgtMsg.DGT_MSG_BOARD_DUMP):
@@ -205,13 +206,13 @@ class DGTserial(object):
 
                 # Attention! This fen is NOT flipped
                 logging.debug("Raw-Fen [%s]", fen)
-                Display.show(Message.DGT_FEN(fen=fen))
+                DisplayMsg.show(Message.DGT_FEN(fen=fen))
                 break
             if case(DgtMsg.DGT_MSG_FIELD_UPDATE):
                 self.write_board_command([DgtCmd.DGT_SEND_BRD])  # Ask for the board when a piece moved
                 break
             if case(DgtMsg.DGT_MSG_SERIALNR):
-                logging.debug(message)
+                # logging.debug(''.join([chr(elem) for elem in message]))
                 break
             if case():  # Default
                 logging.warning("DGT message not handled [%s]", DgtMsg(message_id))
@@ -272,7 +273,8 @@ class DGTserial(object):
             except pyserial.SerialException as e:
                 logging.error(e)
                 w = self.waitchars[wait_counter]
-                Display.show(Message.NO_EBOARD_ERROR(text='no E-board' + w, text_xl='board' + w))
+                text = Dgt.DISPLAY_TEXT(l='no E-board' + w, m='noboard' + w, s='board' + w, beep=BeepLevel.NO, duration=0)
+                DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text))
                 wait_counter = (wait_counter + 1) % len(self.waitchars)
                 time.sleep(0.5)
         # self.startup_board()

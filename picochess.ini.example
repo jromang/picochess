@@ -1,5 +1,5 @@
 ### ===============================
-### = picochess.ini.example v0.58 =
+### = picochess.ini.example v0.60 =
 ### ===============================
 ### Example and description how to configure PicoChess
 ### To use this file, simply copy this file to picochess.ini and edit the appropriate settings
@@ -11,8 +11,8 @@
 ### =======================
 ### = DGT related options =
 ### =======================
-## enable-dgt-board-leds turn ON or OFF the LED's on the Revelation II chessbot. If so, please uncomment the next line
-# enable-dgt-board-leds
+## enable-dgt-revelation-leds turn ON or OFF the LED's on the Revelation II board. If so, please uncomment the next line
+# enable-dgt-revelation-leds
 ## beep-level changes the occurrence of beeps. Minimum value is 0 (no beeps), maximum is 15 (all beeps).
 beep-level = 15
 ## Should a confirmation message (after moves) be displayed? If not, please active the next line
@@ -25,7 +25,7 @@ beep-level = 15
 ### ========================
 ### Options for the UCI-Chess engine
 ## What engine should play. Path to a (startup) UCI engine
-# engine = engines/stockfish
+# engine = engines/armv7l/a-stockf
 ## Where is the server with the engine
 # remote = engine.remote-domain.com
 ## What user to use for connect to the remote-engine server
@@ -85,8 +85,8 @@ beep-level = 15
 ### = PicoChess related options =
 ### =============================
 ## log-file points to a file that is used to write the log information.
-## If file exists the text will be appended to the file otherwise a file will be created.
-# log-file = /opt/picochess/picochess.log
+## This file is created in the log folder. Alltogether there are 10 log files kept (rotating logs)
+# log-file = picochess.log
 ## What log level should be used 
 ## Loglevel options are [debug, info, warning, error, critical]
 # log-level = debug

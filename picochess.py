@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2013-2014 Jean-Francois Romang (jromang@posteo.de)
+# Copyright (C) 2013-2016 Jean-Francois Romang (jromang@posteo.de)
 #                         Shivkumar Shivaji ()
+#                         Jürgen Précour (LocutusOfPenguin@posteo.de)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,14 +35,16 @@ import chesstalker.chesstalker
 
 from timecontrol import TimeControl
 from utilities import *
-from keyboardinput import KeyboardInput, TerminalDisplay
+from keyboard import KeyboardInput, TerminalDisplay
 from pgn import PgnDisplay
 from server import WebServer
 
-from dgthw import DGThw
-from dgtpi import DGTPi
-from dgtvr import DGTVr
-from dgtdisplay import DGTDisplay
+from dgthw import DgtHw
+from dgtpi import DgtPi
+from dgtvr import DgtVr
+from dgtdisplay import DgtDisplay
+
+from logging.handlers import RotatingFileHandler
 
 
 class AlternativeMover:
@@ -105,10 +108,10 @@ def main():
         else:
             place = "?"
             addr = "?"
-        Display.show(Message.SYSTEM_INFO(info={"version": version, "location": place,
-                                                "books": get_opening_books(), "ip": addr,
-                                                "engine_name": engine_name, "user_name": user_name
-                                                }))
+        DisplayMsg.show(Message.SYSTEM_INFO(info={"version": version, "location": place,
+                                                  "books": get_opening_books(), "ip": addr,
+                                                  "engine_name": engine_name, "user_name": user_name
+                                                  }))
 
     def compute_legal_fens(g):
         """
@@ -135,7 +138,7 @@ def main():
         if not gaviota:
             return None
         score = gaviota.probe_dtm(game)
-        if score:
+        if score is not None:
             Observable.fire(Event.NEW_SCORE(score='tb', mate=score))
         return score
 
@@ -145,13 +148,12 @@ def main():
         If a move is found in the opening book, fire an event in a few seconds.
         :return:
         """
-        Display.show(Message.RUN_CLOCK(turn=game.turn, time_control=tc))
+        DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=tc))
         tc.run(game.turn)
 
         book_move = searchmoves.book(bookreader, game)
         if book_move:
             Observable.fire(Event.NEW_SCORE(score='book', mate=None))
-            # time.sleep(0.5)
             Observable.fire(Event.BEST_MOVE(result=book_move, inbook=True))
         else:
             probe_tablebase(game)
@@ -174,7 +176,7 @@ def main():
         Starts a new ponder search on the current game.
         :return:
         """
-        Display.show(Message.RUN_CLOCK(turn=game.turn, time_control=tc))
+        DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=tc))
         tc.run(game.turn)
         analyse(game)
 
@@ -188,7 +190,7 @@ def main():
     def stop_clock():
         nonlocal time_control
         time_control.stop()
-        Display.show(Message.STOP_CLOCK())
+        DisplayMsg.show(Message.STOP_CLOCK())
 
     def stop_search_and_clock():
         stop_clock()
@@ -215,14 +217,15 @@ def main():
         if result is None:
             return True
         else:
-            Display.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=copy.deepcopy(game)))
+            custom_fen = getattr(game, 'custom_fen', None)
+            DisplayMsg.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=copy.deepcopy(game), custom_fen=custom_fen))
             return False
 
     def process_fen(fen, legal_fens):
         nonlocal last_computer_fen
         if fen in legal_fens:
             # Check if we have to undo a previous move (sliding)
-            if interaction_mode == Mode.GAME:
+            if interaction_mode == Mode.NORMAL:
                 if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
                         (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):
                     stop_search()
@@ -232,13 +235,13 @@ def main():
             Observable.fire(Event.USER_MOVE(move=legal_moves[legal_fens.index(fen)]))
         elif fen == last_computer_fen:  # Player had done the computer move on the board
             last_computer_fen = None
-            if check_game_state(game, play_mode) and ((interaction_mode == Mode.GAME) or (interaction_mode == Mode.REMOTE)):
+            if check_game_state(game, play_mode) and ((interaction_mode == Mode.NORMAL) or (interaction_mode == Mode.REMOTE)):
                 # finally reset all alternative moves see: handle_move()
                 nonlocal searchmoves
                 searchmoves.reset()
-                Display.show(Message.COMPUTER_MOVE_DONE_ON_BOARD())
-                if time_control.mode != ClockMode.FIXED_TIME:
-                    Display.show(Message.RUN_CLOCK(turn=game.turn, time_control=time_control))
+                DisplayMsg.show(Message.COMPUTER_MOVE_DONE_ON_BOARD())
+                if time_control.mode != TimeMode.FIXED:
+                    DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=time_control))
                     time_control.run(game.turn)
         else:  # Check if this a a previous legal position and allow user to restart from this position
             game_history = copy.deepcopy(game)
@@ -259,13 +262,13 @@ def main():
                             analyse(game)
                         if interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
                             observe(game, time_control)
-                        Display.show(Message.USER_TAKE_BACK())
+                        DisplayMsg.show(Message.USER_TAKE_BACK())
                         legal_fens = compute_legal_fens(game)
                         break
         return legal_fens
 
     def set_wait_state():
-        if interaction_mode == Mode.GAME:
+        if interaction_mode == Mode.NORMAL:
             nonlocal play_mode
             play_mode = PlayMode.PLAY_WHITE if game.turn == chess.WHITE else PlayMode.PLAY_BLACK
 
@@ -276,7 +279,7 @@ def main():
         nonlocal last_computer_fen
         nonlocal searchmoves
         last_computer_fen = None
-        if interaction_mode == Mode.GAME:
+        if interaction_mode == Mode.NORMAL:
             stop_clock()
             # If UserMove: reset all alternative moves
             # If ComputerMove: disallow this move, and finally reset all if DONE_ON_BOARD event @see: process_fen()
@@ -284,10 +287,10 @@ def main():
                     or (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.BLACK):
                 last_computer_fen = game.board_fen()
                 searchmoves.add(move)
-                Display.show(Message.COMPUTER_MOVE(result=result, fen=fen, game=game.copy(), time_control=time_control))
+                DisplayMsg.show(Message.COMPUTER_MOVE(result=result, fen=fen, game=game.copy(), time_control=time_control))
             else:
                 searchmoves.reset()
-                Display.show(Message.USER_MOVE(move=move, game=game.copy()))
+                DisplayMsg.show(Message.USER_MOVE(move=move, game=game.copy()))
                 if check_game_state(game, play_mode):
                     think(game, time_control)
 
@@ -299,22 +302,22 @@ def main():
                     or (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.BLACK):
                 last_computer_fen = game.board_fen()
                 searchmoves.add(move)
-                Display.show(Message.COMPUTER_MOVE(result=result, fen=fen, game=game.copy(), time_control=time_control))
+                DisplayMsg.show(Message.COMPUTER_MOVE(result=result, fen=fen, game=game.copy(), time_control=time_control))
             else:
                 searchmoves.reset()
-                Display.show(Message.USER_MOVE(move=move, game=game.copy()))
+                DisplayMsg.show(Message.USER_MOVE(move=move, game=game.copy()))
                 if check_game_state(game, play_mode):
                     observe(game, time_control)
 
         elif interaction_mode == Mode.OBSERVE:
             stop_search_and_clock()
-            Display.show(Message.REVIEW_MODE_MOVE(move=move, fen=fen, game=game.copy(), mode=interaction_mode))
+            DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, game=game.copy(), mode=interaction_mode))
             if check_game_state(game, play_mode):
                 observe(game, time_control)
 
         elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
             stop_search()
-            Display.show(Message.REVIEW_MODE_MOVE(move=move, fen=fen, game=game.copy(), mode=interaction_mode))
+            DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, game=game.copy(), mode=interaction_mode))
             if check_game_state(game, play_mode):
                 analyse(game)
 
@@ -331,7 +334,7 @@ def main():
     parser.add_argument("-b", "--book", type=str, help="Opening book - full name of book in 'books' folder",
                         default='h-varied.bin')
     parser.add_argument("-g", "--enable-gaviota", action='store_true', help="enable gavoita tablebase probing")
-    parser.add_argument("-leds", "--enable-dgt-board-leds", action='store_true', help="enable dgt board leds")
+    parser.add_argument("-leds", "--enable-revelation-leds", action='store_true', help="enable Revelation leds")
     parser.add_argument("-hs", "--hash-size", type=int, help="hashtable size in MB (default:64)", default=64)
     parser.add_argument("-t", "--threads", type=int, help="number of engine threads (default:1)", default=1)
     parser.add_argument("-l", "--log-level", choices=['notset', 'debug', 'info', 'warning', 'error', 'critical'],
@@ -356,8 +359,6 @@ def main():
                         default=None)
     parser.add_argument("-uci", "--uci-option", type=str, help="pass an UCI option to the engine (name;value)",
                         default=None)
-    parser.add_argument("-nobeep", "--disable-dgt-clock-beep", action='store_true',
-                        help="do NOT use it anymore (DEPRECATED!)")
     parser.add_argument("-beep", "--beep-level", type=int, help="sets a beep level from 0(=no beeps) to 15(=all beeps)",
                         default=0x0f)
     parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
@@ -370,13 +371,17 @@ def main():
 
     args = parser.parse_args()
     if args.engine is None:
-        args.engine = 'engines' + os.sep + platform.machine() + os.sep + 'stockfish'
+        el = read_engine_ini()
+        args.engine = el[0][0]  # read the first engine path and use it as standard
+    else:
+        args.engine = which(args.engine)
 
     # Enable logging
     if args.log_file:
-        logging.basicConfig(filename=args.log_file, level=getattr(logging, args.log_level.upper()),
-                            format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s',
-                            datefmt="%Y-%m-%d %H:%M:%S")
+        handler = RotatingFileHandler('logs' + os.sep + args.log_file, maxBytes=1024*1024, backupCount=9)
+        logging.basicConfig(level=getattr(logging, args.log_level.upper()),
+                            format='%(asctime)s.%(msecs)3d %(levelname)s %(module)s - %(funcName)s: %(message)s',
+                            datefmt="%Y-%m-%d %H:%M:%S", handlers=[handler])
     logging.getLogger("chess.uci").setLevel(logging.INFO)  # don't want to get so many python-chess uci messages
 
     # Update
@@ -392,22 +397,22 @@ def main():
             logging.error('Tablebases gaviota doesnt exist')
             gaviota = None
 
-    # This class talks to DGTHw/DGTPi or DGTVirtual
-    DGTDisplay(args.disable_ok_move).start()
+    # This class talks to DgtHw/DgtPi or DgtVr
+    DgtDisplay(args.disable_ok_move).start()
 
     if args.dgt_port:
         # Connect to DGT board
         logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
         if args.dgtpi:
-            DGTPi(args.dgt_port, args.enable_dgt_board_leds, args.beep_level).start()
+            DgtPi(args.dgt_port, args.enable_revelation_leds, args.beep_level).start()
         else:
-            DGThw(args.dgt_port, args.enable_dgt_board_leds, args.beep_level).start()
+            DgtHw(args.dgt_port, args.enable_revelation_leds, args.beep_level).start()
     else:
         # Enable keyboard input and terminal display
         logging.debug("Starting picochess with virtual DGT board")
         KeyboardInput().start()
         TerminalDisplay().start()
-        DGTVr(args.enable_dgt_board_leds, args.beep_level).start()
+        DgtVr(args.enable_revelation_leds, args.beep_level).start()
 
     # Save to PGN
     PgnDisplay(
@@ -455,34 +460,35 @@ def main():
         book_index = 7
     bookreader = chess.polyglot.open_reader(all_books[book_index][1])
     searchmoves = AlternativeMover()
-    interaction_mode = Mode.GAME
+    interaction_mode = Mode.NORMAL
     play_mode = PlayMode.PLAY_WHITE
-    time_control = TimeControl(ClockMode.BLITZ, minutes_per_game=5)
+    time_control = TimeControl(TimeMode.BLITZ, minutes_per_game=5)
     last_computer_fen = None
     game_declared = False  # User declared resignation or draw
-    engine_level = None
 
     system_info_thread = threading.Timer(0, display_system_info)
     system_info_thread.start()
     engine_startup()  # send the args options to the engine
 
     # Startup - external
-    Display.show(Message.STARTUP_INFO(info={"interaction_mode": interaction_mode, "play_mode": play_mode,
-                                             "book": all_books[book_index][1], "book_index": book_index,
-                                             "time_control_string": "bl   5"}))
-    Display.show(Message.UCI_OPTION_LIST(options=engine.options))
-    Display.show(Message.ENGINE_STARTUP(path=engine.get_path(), has_levels=engine.has_levels()))
+    text = Dgt.DISPLAY_TEXT(l=None, m='bl   5', s=None, beep=BeepLevel.NO, duration=0)
+    DisplayMsg.show(Message.STARTUP_INFO(info={"interaction_mode": interaction_mode, "play_mode": play_mode,
+                                               "book": all_books[book_index][1], "book_index": book_index,
+                                               "time_text": text}))
+    DisplayMsg.show(Message.UCI_OPTION_LIST(options=engine.options))
+    DisplayMsg.show(Message.ENGINE_STARTUP(shell=engine.get_shell(), path=engine.get_path(),
+                                           has_levels=engine.has_levels(), has_960=engine.has_chess960()))
 
     # Event loop
     while True:
         try:
-            event = event_queue.get()
+            event = evt_queue.get()
         except queue.Empty:
             pass
         else:
-            logging.debug('Received event in event loop : %s', event)
+            logging.debug('Received event from evt queue: %s', event)
             for case in switch(event):
-                if case(EventApi.FEN):  # User sets a new position, convert it to a move if it is legal
+                if case(EventApi.FEN):
                     legal_fens = process_fen(event.fen, legal_fens)
                     break
 
@@ -497,7 +503,7 @@ def main():
                         legal_fens = process_fen(g.board_fen(), legal_fens)
                     break
 
-                if case(EventApi.USER_MOVE):  # User sends a new move
+                if case(EventApi.USER_MOVE):
                     move = event.move
                     logging.debug('User move [%s]', move)
                     if move not in game.legal_moves:
@@ -509,15 +515,14 @@ def main():
                         legal_fens = compute_legal_fens(game)
                     break
 
-                if case(EventApi.LEVEL):  # User sets a new level
-                    engine_level = event.level
-                    logging.debug("Setting engine to level %i", engine_level)
-                    if engine.level(engine_level):
+                if case(EventApi.LEVEL):
+                    logging.debug("Setting engine to level %i", event.level)
+                    if engine.level(event.level):
                         engine.send()
-                        Display.show(Message.LEVEL(level=engine_level, beep=event.beep))
+                        DisplayMsg.show(Message.LEVEL(level=event.level, level_text=event.level_text))
                     break
 
-                if case(EventApi.NEW_ENGINE):  # User sets a new engine
+                if case(EventApi.NEW_ENGINE):
                     old_path = engine.path
                     engine_shutdown = True
                     # Stop the old engine cleanly
@@ -528,7 +533,7 @@ def main():
                         if engine.terminate():  # If you won't go nicely.... 
                             if engine.kill():  # Right that does it!
                                 logging.error('Engine shutdown failure')
-                                Display.show(Message.ENGINE_FAIL())
+                                DisplayMsg.show(Message.ENGINE_FAIL())
                                 engine_shutdown = False
                     if engine_shutdown:
                         # Load the new one and send args.
@@ -554,14 +559,19 @@ def main():
                         # supplementary uci options sent 'in game', see event.UCI_OPTION_SET
                         engine_startup()
                         # Send user selected engine level to new engine
-                        if engine_level and engine.level(engine_level):
+                        if event.level and engine.level(event.level):
                             engine.send()
-                            Display.show(Message.LEVEL(level=engine_level, beep=BeepLevel.BUTTON))
+                            DisplayMsg.show(Message.LEVEL(level=event.level, level_text=event.level_text))
                         # All done - rock'n'roll
                         if not engine_fallback:
-                            Display.show(Message.ENGINE_READY(eng=event.eng, engine_name=engine_name, has_levels=engine.has_levels()))
+                            DisplayMsg.show(Message.ENGINE_READY(eng=event.eng, engine_name=engine_name,
+                                                                 eng_text=event.eng_text,
+                                                                 has_levels=engine.has_levels(),
+                                                                 has_960=engine.has_chess960()))
                         else:
-                            Display.show(Message.ENGINE_FAIL())
+                            DisplayMsg.show(Message.ENGINE_FAIL())
+                        set_wait_state()
+                        DisplayMsg.show(Message.WAIT_STATE())
                         # Go back to analysing or observing
                         if interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
                             analyse(game)
@@ -569,45 +579,47 @@ def main():
                             observe(game, time_control)
                     break
 
-                if case(EventApi.SETUP_POSITION):  # User sets up a position
+                if case(EventApi.SETUP_POSITION):
                     logging.debug("Setting up custom fen: {0}".format(event.fen))
                     if engine.has_chess960():
                         engine.option('UCI_Chess960', event.uci960)
                         engine.send()
                     else:  # start normal new game if engine can't handle the user wish
                         event.uci960 = False
-                        Display.show(Message.ENGINE_FAIL())  # @todo not really true but inform the user about the result
+                        logging.warning('Engine doesnt support 960 mode')
                     if game.move_stack:
                         if game.is_game_over() or game_declared:
-                            Display.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game)))
+                            custom_fen = getattr(game, 'custom_fen', None)
+                            DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode,
+                                                              game=copy.deepcopy(game), custom_fen=custom_fen))
                     game = chess.Board(event.fen, event.uci960)
                     game.custom_fen = event.fen
                     legal_fens = compute_legal_fens(game)
                     stop_search_and_clock()
                     time_control.reset()
-                    interaction_mode = Mode.GAME
+                    interaction_mode = Mode.NORMAL
                     last_computer_fen = None
                     searchmoves.reset()
-                    Display.show(Message.START_NEW_GAME())
+                    DisplayMsg.show(Message.START_NEW_GAME())
                     game_declared = False
                     set_wait_state()
-                    Display.show(Message.WAIT_STATE())
+                    DisplayMsg.show(Message.WAIT_STATE())
                     break
 
-                if case(EventApi.STARTSTOP_THINK):  # User wants to end or start a new engine search
+                if case(EventApi.STARTSTOP_THINK):
                     if engine.is_thinking() and (interaction_mode != Mode.REMOTE):
                         stop_clock()
                         engine.stop(show_best=True)
                     else:
                         play_mode = PlayMode.PLAY_WHITE if play_mode == PlayMode.PLAY_BLACK else PlayMode.PLAY_BLACK
-                        Display.show(Message.PLAY_MODE(play_mode=play_mode))
+                        DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode))
                         if check_game_state(game, play_mode) and (interaction_mode != Mode.REMOTE):
                             think(game, time_control)
                     break
 
                 if case(EventApi.ALTERNATIVE_MOVE):
                     game.pop()
-                    Display.show(Message.ALTERNATIVE_MOVE())
+                    DisplayMsg.show(Message.ALTERNATIVE_MOVE())
                     think(game, time_control)
                     break
 
@@ -615,30 +627,35 @@ def main():
                     if time_control.is_ticking():
                         stop_clock()
                     else:
-                        Display.show(Message.RUN_CLOCK(turn=game.turn, time_control=time_control))
+                        DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=time_control))
                         time_control.run(game.turn)
                     break
 
-                if case(EventApi.NEW_GAME):  # User starts a new game
+                if case(EventApi.NEW_GAME):
                     if game.move_stack:
                         logging.debug("Starting a new game")
                         if not (game.is_game_over() or game_declared):
-                            Display.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game)))
+                            custom_fen = getattr(game, 'custom_fen', None)
+                            DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode,
+                                                              game=copy.deepcopy(game), custom_fen=custom_fen))
                         game = chess.Board()
                     legal_fens = compute_legal_fens(game)
+                    # interaction_mode = Mode.NORMAL @todo
                     last_computer_fen = None
                     stop_search_and_clock()
                     time_control.reset()
                     searchmoves.reset()
-                    Display.show(Message.START_NEW_GAME())
+                    DisplayMsg.show(Message.START_NEW_GAME())
                     game_declared = False
                     set_wait_state()
-                    Display.show(Message.WAIT_STATE())
+                    DisplayMsg.show(Message.WAIT_STATE())
                     break
 
                 if case(EventApi.DRAWRESIGN):
                     if not game_declared:  # in case user leaves kings in place while moving other pieces
-                        Display.show(Message.GAME_ENDS(result=event.result, play_mode=play_mode, game=copy.deepcopy(game)))
+                        custom_fen = getattr(game, 'custom_fen', None)
+                        DisplayMsg.show(Message.GAME_ENDS(result=event.result, play_mode=play_mode,
+                                                          game=copy.deepcopy(game), custom_fen=custom_fen))
                         game_declared = True
                     break
 
@@ -651,16 +668,16 @@ def main():
 
                 if case(EventApi.BEST_MOVE):
                     if event.inbook:
-                        Display.show(Message.BOOK_MOVE(result=event.result))
+                        DisplayMsg.show(Message.BOOK_MOVE(result=event.result))
                     game = handle_move(event.result, game)
                     legal_fens = compute_legal_fens(game)
                     break
 
                 if case(EventApi.NEW_PV):
-                    if interaction_mode == Mode.GAME:
+                    if interaction_mode == Mode.NORMAL:
                         pass
                     else:
-                        Display.show(Message.NEW_PV(pv=event.pv, mode=interaction_mode, fen=game.fen()))
+                        DisplayMsg.show(Message.NEW_PV(pv=event.pv, mode=interaction_mode, fen=game.fen()))
                     break
 
                 if case(EventApi.NEW_SCORE):
@@ -678,35 +695,36 @@ def main():
                             logging.debug('Could not convert score ' + score)
                         except TypeError:
                             score = 'm {0}'.format(event.mate)
-                    Display.show(Message.NEW_SCORE(score=score, mate=event.mate, mode=interaction_mode))
+                    DisplayMsg.show(Message.NEW_SCORE(score=score, mate=event.mate, mode=interaction_mode))
                     break
 
                 if case(EventApi.SET_INTERACTION_MODE):
-                    if interaction_mode == Mode.GAME or interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
+                    if interaction_mode == Mode.NORMAL or interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
                         stop_clock()  # only stop, if the clock is really running
                     interaction_mode = event.mode
                     if engine.is_thinking():
                         stop_search()  # dont need to stop, if pondering
-                    if engine.is_pondering() and interaction_mode == Mode.GAME:
+                    if engine.is_pondering() and interaction_mode == Mode.NORMAL:
                         stop_search()  # if change from ponder modes to game, also stops the pondering
                     set_wait_state()
-                    Display.show(Message.INTERACTION_MODE(mode=event.mode, beep=event.beep))
+                    DisplayMsg.show(Message.INTERACTION_MODE(mode=event.mode, mode_text=event.mode_text))
                     break
 
                 if case(EventApi.SET_OPENING_BOOK):
                     logging.debug("Changing opening book [%s]", event.book[1])
                     bookreader = chess.polyglot.open_reader(event.book[1])
-                    Display.show(Message.OPENING_BOOK(book_control_string=event.book_control_string, beep=event.beep))
+                    DisplayMsg.show(Message.OPENING_BOOK(book_text=event.book_text))
                     break
 
                 if case(EventApi.SET_TIME_CONTROL):
                     time_control = event.time_control
-                    Display.show(Message.TIME_CONTROL(time_control_string=event.time_control_string, beep=event.beep))
+                    DisplayMsg.show(Message.TIME_CONTROL(time_text=event.time_text))
                     break
 
                 if case(EventApi.OUT_OF_TIME):
                     stop_search_and_clock()
-                    Display.show(Message.GAME_ENDS(result=GameResult.OUT_OF_TIME, play_mode=play_mode, game=copy.deepcopy(game)))
+                    custom_fen = getattr(game, 'custom_fen', None)
+                    DisplayMsg.show(Message.GAME_ENDS(result=GameResult.OUT_OF_TIME, play_mode=play_mode, game=copy.deepcopy(game), custom_fen=custom_fen))
                     break
 
                 if case(EventApi.UCI_OPTION_SET):
@@ -717,29 +735,31 @@ def main():
                 if case(EventApi.SHUTDOWN):
                     if talker:
                         talker.say_event(event)
-                    Display.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game)))
+                    custom_fen = getattr(game, 'custom_fen', None)
+                    DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game), custom_fen=custom_fen))
                     shutdown()
                     break
 
                 if case(EventApi.REBOOT):
                     if talker:
                         talker.say_event(event)
-                    Display.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game)))
+                    custom_fen = getattr(game, 'custom_fen', None)
+                    DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game), custom_fen=custom_fen))
                     reboot()
                     break
 
                 if case(EventApi.DGT_BUTTON):
-                    Display.show(Message.DGT_BUTTON(button=event.button))
+                    DisplayMsg.show(Message.DGT_BUTTON(button=event.button))
                     break
 
                 if case(EventApi.DGT_FEN):
-                    Display.show(Message.DGT_FEN(fen=event.fen))
+                    DisplayMsg.show(Message.DGT_FEN(fen=event.fen))
                     break
 
                 if case():  # Default
                     logging.warning("Event not handled : [%s]", event)
 
-            event_queue.task_done()
+            evt_queue.task_done()
 
 
 if __name__ == '__main__':

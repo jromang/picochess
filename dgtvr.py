@@ -1,5 +1,6 @@
-# Copyright (C) 2013-2014 Jean-Francois Romang (jromang@posteo.de)
+# Copyright (C) 2013-2016 Jean-Francois Romang (jromang@posteo.de)
 #                         Shivkumar Shivaji ()
+#                         Jürgen Précour (LocutusOfPenguin@posteo.de)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,14 +20,14 @@ import chess
 from dgtinterface import *
 
 
-class DGTVr(DGTInterface):
-    def __init__(self, enable_board_leds, beep_level):
-        super(DGTVr, self).__init__(enable_board_leds, beep_level)
+class DgtVr(DgtInterface):
+    def __init__(self, enable_revelation_leds, beep_level):
+        super(DgtVr, self).__init__(enable_revelation_leds, beep_level)
         # virtual lib
         self.rt = None
         self.time_side = None
         # setup virtual clock
-        Display.show(Message.DGT_CLOCK_VERSION(main_version=0, sub_version=0, attached="virtual"))
+        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main_version=0, sub_version=0, attached="virtual"))
 
     # (START) dgtserial class simulation
     class RepeatedTimer(object):
@@ -73,7 +74,7 @@ class DGTVr(DGTInterface):
             print('Clock duration not run out')
         else:
             print('Clock time: {} - {}'.format(self.time_left, self.time_right))
-        Display.show(Message.DGT_CLOCK_TIME(time_left=self.time_left, time_right=self.time_right))
+        DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=self.time_left, time_right=self.time_right))
     # (END) dgtserial simulation class
 
     def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):
@@ -86,10 +87,8 @@ class DGTVr(DGTInterface):
         logging.debug(text)
         print('Clock move: {} Beep: {}'. format(text, beep))
 
-    def display_text_on_clock(self, text, text_xl=None, beep=BeepLevel.CONFIG):
+    def display_text_on_clock(self, text, beep=BeepLevel.CONFIG):
         beep = self.get_beep_level(beep)
-        if text_xl and not self.enable_dgt_3000:
-            text = text_xl
         logging.debug(text)
         print('Clock text: {} Beep: {}'. format(text, beep))
 
@@ -118,8 +117,8 @@ class DGTVr(DGTInterface):
     def clear_light_revelation_board(self):
         pass
 
-    def end_clock(self):
-        if self.clock_running:
+    def end_clock(self, force=False):
+        if self.clock_running or force:
             pass
         else:
-            logging.debug('Clock isnt running - no need for endDisplay')
+            logging.debug('Clock isnt running - no need for endClock')

@@ -1,5 +1,6 @@
-# Copyright (C) 2013-2014 Jean-Francois Romang (jromang@posteo.de)
+# Copyright (C) 2013-2016 Jean-Francois Romang (jromang@posteo.de)
 #                         Shivkumar Shivaji ()
+#                         Jürgen Précour (LocutusOfPenguin@posteo.de)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,6 +25,9 @@ import socket
 import json
 import time
 
+import uci
+import configparser
+
 try:
     import enum
 except ImportError:
@@ -31,12 +35,12 @@ except ImportError:
 
 
 # picochess version
-version = '059'
+version = '060'
 
-event_queue = queue.Queue()
+evt_queue = queue.Queue()
 serial_queue = queue.Queue()
 
-display_devices = []
+msgdisplay_devices = []
 dgtdisplay_devices = []
 
 
@@ -83,12 +87,11 @@ class MessageApi():
     COMPUTER_MOVE = 'MSG_COMPUTER_MOVE'  # Show computer move
     BOOK_MOVE = 'MSG_BOOK_MOVE'  # Show book move
     NEW_PV = 'MSG_NEW_PV'  # Show the new Principal Variation
-    REVIEW_MODE_MOVE = 'MSG_REVIEW_MODE_MOVE'  # Player is reviewing game
-    REMOTE_MODE_MOVE = 'MSG_REMOTE_MODE_MOVE'  # DGT Player is playing vs network player
+    REVIEW_MOVE = 'MSG_REVIEW_MOVE'  # Player is reviewing a game
     ENGINE_READY = 'MSG_ENGINE_READY'
     ENGINE_STARTUP = 'MSG_ENGINE_STARTUP'  # first time a new engine is ready
     ENGINE_FAIL = 'MSG_ENGINE_FAIL'
-    LEVEL = 'MSG_LEVEL'  # User sets engine level (from 1 to 20).
+    LEVEL = 'MSG_LEVEL'  # User sets engine level (from 0 to 20).
     TIME_CONTROL = 'MSG_TIME_CONTROL'
     OPENING_BOOK = 'MSG_OPENING_BOOK'  # User chooses an opening book
     DGT_BUTTON = 'MSG_DGT_BUTTON'  # Clock button pressed
@@ -121,78 +124,107 @@ class MessageApi():
 
 
 class DgtApi():
-    # Commands to the DGThw/pi (or the virtual hardware)
+    # Commands to the DgtHw/Pi (or the virtual hardware)
     DISPLAY_MOVE = 'DGT_DISPLAY_MOVE'
     DISPLAY_TEXT = 'DGT_DISPLAY_TEXT'
     LIGHT_CLEAR = 'DGT_LIGHT_CLEAR'
     LIGHT_SQUARES = 'DGT_LIGHT_SQUARES'
     CLOCK_STOP = 'DGT_CLOCK_STOP'
     CLOCK_START = 'DGT_CLOCK_START'
+    CLOCK_END = 'DGT_END_CLOCK'
     CLOCK_VERSION = 'DGT_CLOCK_VERSION'
     CLOCK_TIME = 'DGT_CLOCK_TIME'
     SERIALNR = 'DGT_SERIALNR'
 
 
-class Menu(AutoNumber):
-    GAME_MENU = ()  # Default Menu
-    SETUP_POSITION_MENU = ()  # Setup position menu
-    LEVEL_MENU = ()  # Playing strength
-    TIME_MENU = () # Time controls menu
-    ENGINE_MENU = ()  # Engine menu
-    BOOK_MENU = ()  # Book menu
-    SETTINGS_MENU = ()  # Settings menu
+@enum.unique
+class Menu(enum.Enum):
+    TOP_MENU = 'top'  # Top Level Menu
+    MODE_MENU = 'mode'  # Default Menu
+    POSITION_MENU = 'position'  # Setup position menu
+    TIME_MENU = 'time' # Time controls menu
+    BOOK_MENU = 'book'  # Book menu
+    ENGINE_MENU = 'engine'  # Engine menu
+    SYSTEM_MENU = 'system'  # Settings menu
 
 
-class SetupPositionMenu(AutoNumber):
-    TO_MOVE_TOGGLE = ()
-    REVERSE_ORIENTATION = ()
-    SCAN_POSITION = ()
-    SPACER = ()
-    SWITCH_MENU = ()  # Switch Menu
+class MenuLoop(object):
+    def __init__(self):
+        super(MenuLoop, self).__init__()
 
+    @staticmethod
+    def next(m):
+        if m == Menu.MODE_MENU:
+            return Menu.POSITION_MENU
+        elif m == Menu.POSITION_MENU:
+            return Menu.TIME_MENU
+        elif m == Menu.TIME_MENU:
+            return Menu.BOOK_MENU
+        elif m == Menu.BOOK_MENU:
+            return Menu.ENGINE_MENU
+        elif m == Menu.ENGINE_MENU:
+            return Menu.SYSTEM_MENU
+        elif m == Menu.SYSTEM_MENU:
+            return Menu.MODE_MENU
+        return Menu.TOP_MENU
 
-class EngineMenu(AutoNumber):
-    LEVEL = ()
-    ENGINE = ()
-    ENG_INFO = ()
-    SWITCH_MENU = ()  # Switch Menu
-
-
-class BookMenu(AutoNumber):
-    BOOK = ()
-    BOOK_INFO = ()
-    SWITCH_MENU = ()  # Switch Menu
-
-
-class TimeMenu(AutoNumber):
-    TIME_FIXED = ()
-    TIME_BLITZ = ()
-    TIME_FISCHER = ()
-    SPACER = ()
-    SWITCH_MENU = ()
-
-
-class GameMenu(AutoNumber):
-    LAST_MOVE = ()  # Show last move
-    HINT_EVAL = ()  # Show hint/evaluation
-    START_STOP = ()  # Starts/Stops the calculation
-    CHANGE_MODE = ()  # Change Modes
-    SWITCH_MENU = ()  # Switch Menu
-
-
-class PowerMenu(AutoNumber):
-    CONFIRM_NONE = ()  # Nothing to confirm from power menu
-    CONFIRM_PWR = ()  # Confirm the PowerOff request
-    CONFIRM_RBT = ()  # Confirm the Reboot request
+    @staticmethod
+    def prev(m):
+        if m == Menu.MODE_MENU:
+            return Menu.SYSTEM_MENU
+        elif m == Menu.POSITION_MENU:
+            return Menu.MODE_MENU
+        elif m == Menu.TIME_MENU:
+            return Menu.POSITION_MENU
+        elif m == Menu.BOOK_MENU:
+            return Menu.TIME_MENU
+        elif m == Menu.ENGINE_MENU:
+            return Menu.BOOK_MENU
+        elif m == Menu.SYSTEM_MENU:
+            return Menu.ENGINE_MENU
+        return Menu.TOP_MENU
 
 
 @enum.unique
 class Mode(enum.Enum):
-    GAME = 'game'
-    ANALYSIS = 'analyse'
+    NORMAL = 'normal'
+    ANALYSIS = 'analysis'
     KIBITZ = 'kibitz'
     OBSERVE = 'observe'
     REMOTE = 'remote'
+
+
+class ModeLoop(object):
+    def __init__(self):
+        super(ModeLoop, self).__init__()
+
+    @staticmethod
+    def next(m):
+        if m == Mode.NORMAL:
+            return Mode.ANALYSIS
+        elif m == Mode.ANALYSIS:
+            return Mode.KIBITZ
+        elif m == Mode.KIBITZ:
+            return Mode.OBSERVE
+        elif m == Mode.OBSERVE:
+            return Mode.REMOTE
+        elif m == Mode.REMOTE:
+            return Mode.NORMAL
+        return 'error'
+
+    @staticmethod
+    def prev(m):
+        if m == Mode.NORMAL:
+            return Mode.REMOTE
+        elif m == Mode.ANALYSIS:
+            return Mode.NORMAL
+        elif m == Mode.KIBITZ:
+            return Mode.ANALYSIS
+        elif m == Mode.OBSERVE:
+            return Mode.KIBITZ
+        elif m == Mode.REMOTE:
+            return Mode.OBSERVE
+        return 'error'
 
 
 @enum.unique
@@ -201,10 +233,70 @@ class PlayMode(enum.Enum):
     PLAY_BLACK = 'black'
 
 
-class ClockMode(AutoNumber):
-    FIXED_TIME = ()  # Fixed seconds per move
-    BLITZ = ()  # Fixed time per game
-    FISCHER = ()  # Fischer increment
+class TimeMode(enum.Enum):
+    FIXED = 'fixed'  # Fixed seconds per move
+    BLITZ = 'blitz'  # Fixed time per game
+    FISCHER = 'fischer'  # Fischer increment
+
+
+class TimeModeLoop(object):
+    def __init__(self):
+        super(TimeModeLoop, self).__init__()
+
+    @staticmethod
+    def next(m):
+        if m == TimeMode.FIXED:
+            return TimeMode.BLITZ
+        elif m == TimeMode.BLITZ:
+            return TimeMode.FISCHER
+        elif m == TimeMode.FISCHER:
+            return TimeMode.FIXED
+        return 'error'
+
+    @staticmethod
+    def prev(m):
+        if m == TimeMode.FIXED:
+            return TimeMode.FISCHER
+        elif m == TimeMode.BLITZ:
+            return TimeMode.FIXED
+        elif m == TimeMode.FISCHER:
+            return TimeMode.BLITZ
+        return 'error'
+
+
+class Settings(enum.Enum):
+    VERSION = 'version'
+    IPADR = 'ip adr'
+    SHUTDOWN = 'shutdown'
+    REBOOT = 'reboot'
+
+
+class SettingsLoop(object):
+    def __init__(self):
+        super(SettingsLoop, self).__init__()
+
+    @staticmethod
+    def next(m):
+        if m == Settings.VERSION:
+            return Settings.IPADR
+        elif m == Settings.IPADR:
+            return Settings.SHUTDOWN
+        elif m == Settings.SHUTDOWN:
+            return Settings.REBOOT
+        elif m == Settings.REBOOT:
+            return Settings.VERSION
+        return 'error'
+
+    @staticmethod
+    def prev(m):
+        if m == Settings.VERSION:
+            return Settings.REBOOT
+        elif m == Settings.IPADR:
+            return Settings.VERSION
+        elif m == Settings.SHUTDOWN:
+            return Settings.IPADR
+        elif m == Settings.REBOOT:
+            return Settings.SHUTDOWN
 
 
 @enum.unique
@@ -353,24 +445,24 @@ class Observable(object):  # Input devices are observable
 
     @staticmethod
     def fire(event):
-        event_queue.put(event)
+        evt_queue.put(event)
 
 
-class Display(object):  # Display devices (DGT XL clock, Piface LCD, pgn file...)
+class DisplayMsg(object):  # Display devices (DGT XL clock, Piface LCD, pgn file...)
     def __init__(self):
-        super(Display, self).__init__()
-        self.message_queue = queue.Queue()
-        display_devices.append(self)
+        super(DisplayMsg, self).__init__()
+        self.msg_queue = queue.Queue()
+        msgdisplay_devices.append(self)
 
     @staticmethod
     def show(message):  # Sends a message on each display device
-        for display in display_devices:
-            display.message_queue.put(message)
+        for display in msgdisplay_devices:
+            display.msg_queue.put(message)
 
 
-class DgtDisplay(object):  # Display devices (DGT XL clock, Piface LCD, pgn file...)
+class DisplayDgt(object):  # Display devices (DGT XL clock, Piface LCD, pgn file...)
     def __init__(self):
-        super(DgtDisplay, self).__init__()
+        super(DisplayDgt, self).__init__()
         self.dgt_queue = queue.Queue()
         dgtdisplay_devices.append(self)
 
@@ -426,10 +518,11 @@ def ClassFactory(name, argnames, BaseClass=BaseClass):
 
 
 class Dgt():
-    DISPLAY_MOVE = ClassFactory(DgtApi.DISPLAY_MOVE, ['move', 'fen', 'beep', 'duration', 'force'])
-    DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['text', 'xl', 'beep', 'duration', 'force'])
+    DISPLAY_MOVE = ClassFactory(DgtApi.DISPLAY_MOVE, ['move', 'fen', 'beep', 'duration', 'wait'])
+    DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['l', 'm', 's', 'beep', 'duration', 'wait'])
     LIGHT_CLEAR = ClassFactory(DgtApi.LIGHT_CLEAR, [])
     LIGHT_SQUARES = ClassFactory(DgtApi.LIGHT_SQUARES, ['squares'])
+    CLOCK_END = ClassFactory(DgtApi.CLOCK_END, ['wait', 'force'])
     CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, [])
     CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side'])
     CLOCK_VERSION = ClassFactory(DgtApi.CLOCK_VERSION, ['main_version', 'sub_version', 'attached'])
@@ -442,20 +535,19 @@ class Message():
     COMPUTER_MOVE = ClassFactory(MessageApi.COMPUTER_MOVE, ['result', 'fen', 'game', 'time_control'])
     BOOK_MOVE = ClassFactory(MessageApi.BOOK_MOVE, ['result'])
     NEW_PV = ClassFactory(MessageApi.NEW_PV, ['pv', 'mode', 'fen'])
-    REVIEW_MODE_MOVE = ClassFactory(MessageApi.REVIEW_MODE_MOVE, ['move', 'fen', 'game', 'mode'])
-    REMOTE_MODE_MOVE = ClassFactory(MessageApi.REMOTE_MODE_MOVE, [])
-    ENGINE_READY = ClassFactory(MessageApi.ENGINE_READY, ['eng', 'engine_name', 'has_levels'])
-    ENGINE_STARTUP = ClassFactory(MessageApi.ENGINE_STARTUP, ['path', 'has_levels'])
+    REVIEW_MOVE = ClassFactory(MessageApi.REVIEW_MOVE, ['move', 'fen', 'game', 'mode'])
+    ENGINE_READY = ClassFactory(MessageApi.ENGINE_READY, ['eng', 'eng_text', 'engine_name', 'has_levels', 'has_960'])
+    ENGINE_STARTUP = ClassFactory(MessageApi.ENGINE_STARTUP, ['shell', 'path', 'has_levels', 'has_960'])
     ENGINE_FAIL = ClassFactory(MessageApi.ENGINE_FAIL, [])
-    LEVEL = ClassFactory(MessageApi.LEVEL, ['level', 'beep'])
-    TIME_CONTROL = ClassFactory(MessageApi.TIME_CONTROL, ['time_control_string', 'beep'])
-    OPENING_BOOK = ClassFactory(MessageApi.OPENING_BOOK, ['book_control_string', 'beep'])
+    LEVEL = ClassFactory(MessageApi.LEVEL, ['level', 'level_text'])
+    TIME_CONTROL = ClassFactory(MessageApi.TIME_CONTROL, ['time_text'])
+    OPENING_BOOK = ClassFactory(MessageApi.OPENING_BOOK, ['book_text'])
     DGT_BUTTON = ClassFactory(MessageApi.DGT_BUTTON, ['button'])
     DGT_FEN = ClassFactory(MessageApi.DGT_FEN, ['fen'])
     DGT_CLOCK_VERSION = ClassFactory(MessageApi.DGT_CLOCK_VERSION, ['main_version', 'sub_version', 'attached'])
     DGT_CLOCK_TIME = ClassFactory(MessageApi.DGT_CLOCK_TIME, ['time_left', 'time_right'])
 
-    INTERACTION_MODE = ClassFactory(MessageApi.INTERACTION_MODE, ['mode', 'beep'])
+    INTERACTION_MODE = ClassFactory(MessageApi.INTERACTION_MODE, ['mode', 'mode_text'])
     PLAY_MODE = ClassFactory(MessageApi.PLAY_MODE, ['play_mode'])
     START_NEW_GAME = ClassFactory(MessageApi.START_NEW_GAME, [])
     COMPUTER_MOVE_DONE_ON_BOARD = ClassFactory(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD, [])
@@ -467,34 +559,34 @@ class Message():
     STOP_CLOCK = ClassFactory(MessageApi.STOP_CLOCK, [])
     USER_MOVE = ClassFactory(MessageApi.USER_MOVE, ['move', 'game'])
     UCI_OPTION_LIST = ClassFactory(MessageApi.UCI_OPTION_LIST, ['options'])
-    GAME_ENDS = ClassFactory(MessageApi.GAME_ENDS, ['result', 'play_mode', 'game'])
+    GAME_ENDS = ClassFactory(MessageApi.GAME_ENDS, ['result', 'play_mode', 'game', 'custom_fen'])
 
     SYSTEM_INFO = ClassFactory(MessageApi.SYSTEM_INFO, ['info'])
     STARTUP_INFO = ClassFactory(MessageApi.STARTUP_INFO, ['info'])
     NEW_SCORE = ClassFactory(MessageApi.NEW_SCORE, ['score', 'mate', 'mode'])
     ALTERNATIVE_MOVE = ClassFactory(MessageApi.ALTERNATIVE_MOVE, [])
     JACK_CONNECTED_ERROR = ClassFactory(MessageApi.JACK_CONNECTED_ERROR, [])
-    NO_CLOCK_ERROR = ClassFactory(MessageApi.NO_CLOCK_ERROR, ['text', 'text_xl'])
-    NO_EBOARD_ERROR = ClassFactory(MessageApi.NO_EBOARD_ERROR, ['text', 'text_xl'])
-    EBOARD_VERSION = ClassFactory(MessageApi.EBOARD_VERSION, ['text', 'text_xl', 'channel'])
+    NO_CLOCK_ERROR = ClassFactory(MessageApi.NO_CLOCK_ERROR, ['text'])
+    NO_EBOARD_ERROR = ClassFactory(MessageApi.NO_EBOARD_ERROR, ['text'])
+    EBOARD_VERSION = ClassFactory(MessageApi.EBOARD_VERSION, ['text', 'channel'])
 
 
 class Event():
     # User events
     FEN = ClassFactory(EventApi.FEN, ['fen'])
-    LEVEL = ClassFactory(EventApi.LEVEL, ['level', 'beep'])
+    LEVEL = ClassFactory(EventApi.LEVEL, ['level', 'level_text'])
     NEW_GAME = ClassFactory(EventApi.NEW_GAME, [])
     DRAWRESIGN = ClassFactory(EventApi.DRAWRESIGN, ['result'])
     USER_MOVE = ClassFactory(EventApi.USER_MOVE, ['move'])
     KEYBOARD_MOVE = ClassFactory(EventApi.KEYBOARD_MOVE, ['move'])
     REMOTE_MOVE = ClassFactory(EventApi.REMOTE_MOVE, ['move', 'fen'])
-    SET_OPENING_BOOK = ClassFactory(EventApi.SET_OPENING_BOOK, ['book', 'book_control_string', 'beep'])
-    NEW_ENGINE = ClassFactory(EventApi.NEW_ENGINE, ['eng'])
-    SET_INTERACTION_MODE = ClassFactory(EventApi.SET_INTERACTION_MODE, ['mode', 'beep'])
+    SET_OPENING_BOOK = ClassFactory(EventApi.SET_OPENING_BOOK, ['book', 'book_text'])
+    NEW_ENGINE = ClassFactory(EventApi.NEW_ENGINE, ['eng', 'eng_text', 'level', 'level_text'])
+    SET_INTERACTION_MODE = ClassFactory(EventApi.SET_INTERACTION_MODE, ['mode', 'mode_text'])
     SETUP_POSITION = ClassFactory(EventApi.SETUP_POSITION, ['fen', 'uci960'])
     STARTSTOP_THINK = ClassFactory(EventApi.STARTSTOP_THINK, [])
     STARTSTOP_CLOCK = ClassFactory(EventApi.STARTSTOP_CLOCK, [])
-    SET_TIME_CONTROL = ClassFactory(EventApi.SET_TIME_CONTROL, ['time_control', 'time_control_string', 'beep'])
+    SET_TIME_CONTROL = ClassFactory(EventApi.SET_TIME_CONTROL, ['time_control', 'time_text'])
     UCI_OPTION_SET = ClassFactory(EventApi.UCI_OPTION_SET, [])
     SHUTDOWN = ClassFactory(EventApi.SHUTDOWN, [])
     REBOOT = ClassFactory(EventApi.REBOOT, [])
@@ -514,18 +606,61 @@ def get_opening_books():
     book_list = sorted(os.listdir(program_path + 'books'))
     library = []
     for book in book_list:
-        if not os.path.isdir('books' + os.sep + book):  # Can't use isfile() as that doesn't count links
+        # Can't use isfile() as that doesn't count links
+        if not os.path.isdir('books' + os.sep + book):
             library.append((book[2:book.index('.')], 'books' + os.sep + book))
     return library
 
 
-def get_installed_engines(engine):
-    engine_path = (engine.rsplit(os.sep, 1))[0]
-    engine_list = sorted(os.listdir(engine_path), key=str.lower)
+def get_installed_engines(engine_shell, engine_path):
+    return read_engine_ini(engine_shell, (engine_path.rsplit(os.sep, 1))[0])
+
+
+def write_engine_ini(engine_path=None):
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+    if not engine_path:
+        program_path = os.path.dirname(os.path.realpath(__file__)) + os.sep
+        engine_path = program_path + 'engines' + os.sep + platform.machine()
+    engine_list = sorted(os.listdir(engine_path))
+    config = configparser.ConfigParser()
+    for engine_file_name in engine_list:
+        print(engine_file_name)
+        if is_exe(engine_path + os.sep + engine_file_name):
+            engine = uci.Engine(engine_path + os.sep + engine_file_name)
+            if engine:
+                try:
+                    config[engine_file_name[2:]] = {
+                        'file': engine_file_name,
+                        'name': engine.get().name,
+                        'has_levels': engine.has_levels(),
+                        'has_chess960': engine.has_chess960()
+                    }
+                except AttributeError:
+                    pass
+                engine.quit()
+    with open(engine_path + os.sep + 'engines.ini', 'w') as configfile:
+        config.write(configfile)
+
+
+def read_engine_ini(engine_shell=None, engine_path=None):
+    config = configparser.ConfigParser()
+    try:
+        if engine_shell is None:
+            if not engine_path:
+                program_path = os.path.dirname(os.path.realpath(__file__)) + os.sep
+                engine_path = program_path + 'engines' + os.sep + platform.machine()
+            config.read(engine_path + os.sep + 'engines.ini')
+        else:
+            with engine_shell.open(engine_path + os.sep + 'engines.ini', 'r') as file:
+                config.read_file(file)
+    except FileNotFoundError:
+        pass
+
     library = []
-    for engine in engine_list:
-        if not (('.' in engine) or os.path.isdir(engine_path + os.sep + engine)):  # Can't use isfile() as that doesn't count links
-            library.append((engine_path + os.sep + engine, engine))
+    for section in config.sections():
+        library.append((engine_path + os.sep + config[section]['file'], section, config[section].getboolean('has_levels')))
     return library
 
 
@@ -534,29 +669,73 @@ def hours_minutes_seconds(seconds):
     h, m = divmod(m, 60)
     return h, m, s
 
+try:
+    from shutil import which
+except ImportError:  # pragma: no cover
+    # Implementation from Python 3.3
+    import sys
 
-def which(program):
-    """ Find an executable file on the system path.
-    :param program: Name or full path of the executable file
-    :return: Full path of the executable file, or None if it was not found
-    """
+    def which(cmd, mode=os.F_OK | os.X_OK, path=None):
+        """Given a command, mode, and a PATH string, return the path which
+        conforms to the given mode on the PATH, or None if there is no such
+        file.
 
-    def is_exe(fpath):
-        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+        `mode` defaults to os.F_OK | os.X_OK. `path` defaults to the result
+        of os.environ.get("PATH"), or can be overridden with a custom search
+        path.
 
-    fpath, fname = os.path.split(program)
-    if fpath:
-        if is_exe(program):
-            return program
-    else:
-        pe = os.path.dirname(os.path.realpath(__file__))
-        for path in os.environ["PATH"].split(os.pathsep) + [pe, pe + os.sep + 'engines' + os.sep + platform.machine()]:
-            path = path.strip('"')
-            exe_file = os.path.join(path, program)
-            if is_exe(exe_file):
-                return exe_file
-    logging.warning("Engine executable [%s] not found", program)
-    return None
+        """
+        # Check that a given file can be accessed with the correct mode.
+        # Additionally check that `file` is not a directory, as on Windows
+        # directories pass the os.access check.
+        def _access_check(fn, mode):
+            return (os.path.exists(fn) and os.access(fn, mode)
+                    and not os.path.isdir(fn))
+
+        # If we're given a path with a directory part, look it up directly rather
+        # than referring to PATH directories. This includes checking relative to the
+        # current directory, e.g. ./script
+        if os.path.dirname(cmd):
+            if _access_check(cmd, mode):
+                return cmd
+            return None
+
+        if path is None:
+            path = os.environ.get("PATH", os.defpath)
+        if not path:
+            return None
+        path = path.split(os.pathsep)
+
+        if sys.platform == "win32":
+            # The current directory takes precedence on Windows.
+            if not os.curdir in path:
+                path.insert(0, os.curdir)
+
+            # PATHEXT is necessary to check on Windows.
+            pathext = os.environ.get("PATHEXT", "").split(os.pathsep)
+            # See if the given file matches any of the expected path extensions.
+            # This will allow us to short circuit when given "python.exe".
+            # If it does match, only test that one, otherwise we have to try
+            # others.
+            if any(cmd.lower().endswith(ext.lower()) for ext in pathext):
+                files = [cmd]
+            else:
+                files = [cmd + ext for ext in pathext]
+        else:
+            # On other platforms you don't have things like PATHEXT to tell you
+            # what file suffixes are executable, so just pass on cmd as-is.
+            files = [cmd]
+
+        seen = set()
+        for dir in path:
+            normdir = os.path.normcase(dir)
+            if not normdir in seen:
+                seen.add(normdir)
+                for thefile in files:
+                    name = os.path.join(dir, thefile)
+                    if _access_check(name, mode):
+                        return name
+        return None
 
 
 def update_picochess(auto_reboot=False):
@@ -578,6 +757,7 @@ def update_picochess(auto_reboot=False):
                 logging.debug('Updating picochess')
                 output = subprocess.Popen(["pip3", "install", "-r", "requirements.txt"],
                                           stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
+                logging.debug(output)
                 output = subprocess.Popen([git, "pull", "origin", branch],
                                           stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
                 logging.debug(output)
