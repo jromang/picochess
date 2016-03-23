@@ -11,8 +11,8 @@
 ### =======================
 ### = DGT related options =
 ### =======================
-## enable-dgt-revelation-leds turn ON or OFF the LED's on the Revelation II board. If so, please uncomment the next line
-# enable-dgt-revelation-leds
+## enable-revelation-leds turn ON or OFF the LED's on the Revelation II board. If so, please uncomment the next line
+# enable-revelation-leds
 ## beep-level changes the occurrence of beeps. Minimum value is 0 (no beeps), maximum is 15 (all beeps).
 beep-level = 15
 ## Should a confirmation message (after moves) be displayed? If not, please active the next line
