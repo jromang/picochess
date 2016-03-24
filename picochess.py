@@ -400,19 +400,25 @@ def main():
     # This class talks to DgtHw/DgtPi or DgtVr
     DgtDisplay(args.disable_ok_move).start()
 
+    # Launch web server
+    if args.web_server_port:
+        WebServer(args.web_server_port).start()
+
     if args.dgt_port:
         # Connect to DGT board
         logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
         if args.dgtpi:
-            DgtPi(args.dgt_port, args.enable_revelation_leds, args.beep_level).start()
+            dgthardware = DgtPi(args.dgt_port, args.enable_revelation_leds, args.beep_level)
         else:
-            DgtHw(args.dgt_port, args.enable_revelation_leds, args.beep_level).start()
+            dgthardware = DgtHw(args.dgt_port, args.enable_revelation_leds, args.beep_level)
     else:
         # Enable keyboard input and terminal display
         logging.debug("Starting picochess with virtual DGT board")
         KeyboardInput().start()
         TerminalDisplay().start()
-        DgtVr(args.enable_revelation_leds, args.beep_level).start()
+        dgthardware = DgtVr(args.enable_revelation_leds, args.beep_level)
+    # Start the show
+    dgthardware.start()
 
     # Save to PGN
     PgnDisplay(
@@ -435,10 +441,6 @@ def main():
         talker.start()
     else:
         logging.debug("ChessTalker disabled")
-
-    # Launch web server
-    if args.web_server_port:
-        WebServer(args.web_server_port).start()
 
     # Gentlemen, start your engines...
     engine = uci.Engine(args.engine, hostname=args.remote, username=args.user,
