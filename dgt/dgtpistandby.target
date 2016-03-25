@@ -1,0 +1,7 @@
+# use with sudo systemctl isolate dgtpistandby.target
+
+[Unit]
+Description=Standby mode for DGT PI
+Requires=dgtpistandby.service
+After=dgtpistandby.service
+AllowIsolate=yes
