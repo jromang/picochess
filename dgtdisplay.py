@@ -946,7 +946,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         DisplayDgt.show(Dgt.DISPLAY_TEXT(l="error jack", m="err jack", s="jack", beep=BeepLevel.YES, duration=0))
                         break
                     if case(MessageApi.NO_EBOARD_ERROR):
-                        DisplayDgt.show(message.text)
+                        # DisplayDgt.show(message.text)
                         break
                     if case(MessageApi.EBOARD_VERSION):
                         DisplayDgt.show(message.text)

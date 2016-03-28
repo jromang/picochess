@@ -17,10 +17,9 @@
 
 import serial as pyserial
 
-import time
-from struct import unpack
+import struct
 from utilities import *
-from threading import Timer
+from threading import Timer, Lock
 
 try:
     import enum
@@ -56,6 +55,7 @@ class DgtSerial(object):
         self.device = device
         self.serial = None
         self.waitchars = ['/', '-', '\\', '|']
+        self.lock = Lock()  # inside setup_serial()
         # the next two are only used for "not dgtpi" mode
         self.clock_lock = False  # serial connected clock is locked
         self.last_clock_command = []  # Used for resend last (failed) clock command
@@ -110,14 +110,16 @@ class DgtSerial(object):
                 board_version = str(message[0]) + '.' + str(message[1])
                 logging.debug("DGT board version %0.2f", float(board_version))
                 if self.device.find('rfc') == -1:
-                    text_m = 'USB E-board'
+                    text_l = 'USB E-board'
+                    text_m = 'USBboard'
                     text_s = 'ok usb'
                     channel = 'USB'
                 else:
-                    text_m = 'BT E-board'
+                    text_l = 'BT E-board'
+                    text_m = 'BT board'
                     text_s = 'ok bt'
                     channel = 'BT'
-                text = Dgt.DISPLAY_TEXT(l=None, m=text_m, s=text_s, beep=BeepLevel.NO, duration=0.5)
+                text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, beep=BeepLevel.NO, duration=0.5)
                 DisplayMsg.show(Message.EBOARD_VERSION(text=text, channel=channel))
                 break
             if case(DgtMsg.DGT_MSG_BWTIME):
@@ -225,20 +227,18 @@ class DgtSerial(object):
             header = self.serial.read(header_len)
 
         pattern = '>'+'B'*header_len
-        header = unpack(pattern, header)
-
-        # header = unpack('>BBB', (self.serial.read(3)))
+        header = struct.unpack(pattern, header)
+        # header = struct.unpack('>BBB', (self.serial.read(3)))
         message_id = header[0]
         message_length = (header[1] << 7) + header[2] - 3
 
         try:
             logging.debug("<-DGT board [%s], length %i", DgtMsg(message_id), message_length)
-        except ValueError:
-            logging.warning("Unknown DGT message value %i", message_id)
-        if message_length:
-            message = unpack('>' + str(message_length) + 'B', self.serial.read(message_length))
+            message = struct.unpack('>' + str(message_length) + 'B', self.serial.read(message_length))
             self.process_board_message(message_id, message)
-            return message_id
+        except ValueError:
+            logging.warning("Unknown DGT message value %i length %i", message_id, message_length)
+        return message_id
 
     def process_incoming_board_forever(self):
         while True:
@@ -254,6 +254,8 @@ class DgtSerial(object):
                 pass
             except TypeError:
                 pass
+            except struct.error:  # can happen, when plugin board-cable again
+                pass
 
     def startup_board(self):
         self.write_board_command([DgtCmd.DGT_SEND_UPDATE_NICE])  # Set the board update mode
@@ -261,23 +263,23 @@ class DgtSerial(object):
         self.write_board_command([DgtCmd.DGT_SEND_BRD])  # Update the board
 
     def setup_serial(self):
-        wait_counter = 0
-        while not self.serial:
-            # Open the serial port
-            try:
-                self.serial = pyserial.Serial(self.device, stopbits=pyserial.STOPBITS_ONE,
-                                              parity=pyserial.PARITY_NONE,
-                                              bytesize=pyserial.EIGHTBITS,
-                                              timeout=2
-                                              )
-            except pyserial.SerialException as e:
-                logging.error(e)
-                w = self.waitchars[wait_counter]
-                text = Dgt.DISPLAY_TEXT(l='no E-board' + w, m='noboard' + w, s='board' + w, beep=BeepLevel.NO, duration=0)
-                DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text))
-                wait_counter = (wait_counter + 1) % len(self.waitchars)
-                time.sleep(0.5)
-        # self.startup_board()
+        with self.lock:
+            wait_counter = 0
+            while not self.serial:
+                # Open the serial port
+                try:
+                    self.serial = pyserial.Serial(self.device, stopbits=pyserial.STOPBITS_ONE,
+                                                  parity=pyserial.PARITY_NONE,
+                                                  bytesize=pyserial.EIGHTBITS,
+                                                  timeout=2
+                                                  )
+                except pyserial.SerialException as e:
+                    logging.error(e)
+                    s = 'board' + self.waitchars[wait_counter]
+                    text = Dgt.DISPLAY_TEXT(l='no E-' + s, m='no' + s, s=s, beep=BeepLevel.NO, duration=0)
+                    DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text))
+                    wait_counter = (wait_counter + 1) % len(self.waitchars)
+                    time.sleep(0.5)
 
     def run(self):
         incoming_board_thread = Timer(0, self.process_incoming_board_forever)

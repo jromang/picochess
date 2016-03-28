@@ -43,6 +43,7 @@ from dgthw import DgtHw
 from dgtpi import DgtPi
 from dgtvr import DgtVr
 from dgtdisplay import DgtDisplay
+from dgtserial import DgtSerial
 
 from logging.handlers import RotatingFileHandler
 
@@ -407,10 +408,11 @@ def main():
     if args.dgt_port:
         # Connect to DGT board
         logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
+        dgtserial = DgtSerial(args.dgt_port)
         if args.dgtpi:
-            dgthardware = DgtPi(args.dgt_port, args.enable_revelation_leds, args.beep_level)
+            dgthardware = DgtPi(dgtserial, args.enable_revelation_leds, args.beep_level)
         else:
-            dgthardware = DgtHw(args.dgt_port, args.enable_revelation_leds, args.beep_level)
+            dgthardware = DgtHw(dgtserial, args.enable_revelation_leds, args.beep_level)
     else:
         # Enable keyboard input and terminal display
         logging.debug("Starting picochess with virtual DGT board")
