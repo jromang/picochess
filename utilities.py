@@ -541,7 +541,7 @@ class Message():
     ENGINE_FAIL = ClassFactory(MessageApi.ENGINE_FAIL, [])
     LEVEL = ClassFactory(MessageApi.LEVEL, ['level', 'level_text'])
     TIME_CONTROL = ClassFactory(MessageApi.TIME_CONTROL, ['time_text'])
-    OPENING_BOOK = ClassFactory(MessageApi.OPENING_BOOK, ['book_text'])
+    OPENING_BOOK = ClassFactory(MessageApi.OPENING_BOOK, ['book_name', 'book_text'])
     DGT_BUTTON = ClassFactory(MessageApi.DGT_BUTTON, ['button'])
     DGT_FEN = ClassFactory(MessageApi.DGT_FEN, ['fen'])
     DGT_CLOCK_VERSION = ClassFactory(MessageApi.DGT_CLOCK_VERSION, ['main_version', 'sub_version', 'attached'])
