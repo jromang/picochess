@@ -648,7 +648,7 @@ def main():
                     stop_search_and_clock()
                     time_control.reset()
                     searchmoves.reset()
-                    DisplayMsg.show(Message.START_NEW_GAME())
+                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control))
                     game_declared = False
                     set_wait_state()
                     DisplayMsg.show(Message.WAIT_STATE())
