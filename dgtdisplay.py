@@ -694,6 +694,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         # self.mode_index = Mode.NORMAL  # @todo
                         self.reset_menu()
                         self.alternative = False
+                        tc = message.time_control.clock_time
+                        time_left = int(tc[chess.WHITE])
+                        time_right = int(tc[chess.BLACK])
+                        if self.flip_board:
+                            time_left, time_right = time_right, time_left
+                        DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=0x04))
                         DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m="new game", s="newgam", beep=BeepLevel.CONFIG, duration=1))
                         break
                     if case(MessageApi.WAIT_STATE):

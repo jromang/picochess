@@ -111,11 +111,10 @@ class DgtHw(DgtInterface):
         r_hms = hours_minutes_seconds(time_right)
         self.time_left = l_hms
         self.time_right = r_hms
+        lr = rr = 0
         if side == 0x01:
             lr = 1
-            rr = 0
-        else:
-            lr = 0
+        if side == 0x02:
             rr = 1
         with self.lock:
             res = self.lib.set_and_run(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
