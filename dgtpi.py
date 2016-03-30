@@ -124,10 +124,15 @@ class DgtPi(DgtInterface):
         self._display_on_dgt_pi(text, beep)
 
     def light_squares_revelation_board(self, squares):
-        pass
+        if self.enable_revelation_leds:
+            for sq in squares:
+                dgt_square = (8 - int(sq[1])) * 8 + ord(sq[0]) - ord('a')
+                logging.debug("REV2 light on square %s", sq)
+                self.dgtserial.write_board_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x01, dgt_square, dgt_square])
 
     def clear_light_revelation_board(self):
-        pass
+        if self.enable_revelation_leds:
+            self.dgtserial.write_board_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
 
     def stop_clock(self):
         l_hms = self.time_left

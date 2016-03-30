@@ -110,14 +110,10 @@ class DgtSerial(object):
                 board_version = str(message[0]) + '.' + str(message[1])
                 logging.debug("DGT board version %0.2f", float(board_version))
                 if self.device.find('rfc') == -1:
-                    text_l = 'USB E-board'
-                    text_m = 'USBboard'
-                    text_s = 'ok usb'
+                    text_l, text_m, text_s = 'USB E-board', 'USBboard', 'ok usb'
                     channel = 'USB'
                 else:
-                    text_l = 'BT E-board'
-                    text_m = 'BT board'
-                    text_s = 'ok bt'
+                    text_l, text_m, text_s = 'BT E-board', 'BT board', 'ok bt'
                     channel = 'BT'
                 text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, beep=BeepLevel.NO, duration=0.5)
                 DisplayMsg.show(Message.EBOARD_VERSION(text=text, channel=channel))

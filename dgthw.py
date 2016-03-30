@@ -46,8 +46,7 @@ class DgtHw(DgtInterface):
             logging.debug('Clock (still) not found. Ignore [%s]', text)
             self.startup_clock()
             return
-        while len(text) < 6:
-            text += ' '
+        text = text.ljust(6)
         if len(text) > 6:
             logging.warning('DGT XL clock message too long [%s]', text)
         logging.debug(text)
@@ -57,8 +56,7 @@ class DgtHw(DgtInterface):
                 logging.warning('Finally failed %i', res)
 
     def _display_on_dgt_3000(self, text, beep=False):
-        while len(text) < 8:
-            text += ' '
+        text = text.ljust(8)
         if len(text) > 8:
             logging.warning('DGT 3000 clock message too long [%s]', text)
         logging.debug(text)
@@ -89,7 +87,7 @@ class DgtHw(DgtInterface):
         if self.enable_revelation_leds:
             for sq in squares:
                 dgt_square = (8 - int(sq[1])) * 8 + ord(sq[0]) - ord('a')
-                logging.debug("REV2 light on square %s(%i)", sq, dgt_square)
+                logging.debug("REV2 light on square %s", sq)
                 self.lib.write([DgtCmd.DGT_SET_LEDS, 0x04, 0x01, dgt_square, dgt_square])
 
     def clear_light_revelation_board(self):
