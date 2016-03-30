@@ -699,11 +699,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         time_right = int(tc[chess.BLACK])
                         if self.flip_board:
                             time_left, time_right = time_right, time_left
-                        DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=0x04))
                         DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m="new game", s="newgam", beep=BeepLevel.CONFIG, duration=1))
+                        DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=0x04, wait=True))
                         break
                     if case(MessageApi.WAIT_STATE):
-                        DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m="you move", s="youmov", beep=BeepLevel.OKAY, duration=1))
                         DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
                         break
                     if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
@@ -819,7 +818,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             time_left = time_right = tc.seconds_per_move
                         if self.flip_board:
                             time_left, time_right = time_right, time_left
-                        DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side))
+                        DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side, wait=False))
                         break
                     if case(MessageApi.STOP_CLOCK):
                         DisplayDgt.show(Dgt.CLOCK_STOP())
@@ -863,7 +862,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.engine_level_result = level
                             self.engine_level_index = level
                             logging.debug("Map-Fen: New level")
-                            text = Dgt.DISPLAY_TEXT(l=None, m='level ' + str(level), s='lvl ' + str(level), beep=BeepLevel.MAP, duration=1)
+                            text = Dgt.DISPLAY_TEXT(l=None, m='level ' + str(level), s='lvl ' + str(level),
+                                                    beep=BeepLevel.MAP, duration=1)
                             self.fire(Event.LEVEL(level=level, level_text=text))
                         elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":
                             logging.debug("Map-Fen: New game")
@@ -889,7 +889,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                     logging.debug("Map-Fen: Engine name [%s]", eng[1])
                                     eng_text = Dgt.DISPLAY_TEXT(l=None, m=eng[1], s=None, beep=BeepLevel.MAP, duration=1)
                                     level = self.engine_level_index if self.engine_level_result is None else self.engine_level_result
-                                    text = Dgt.DISPLAY_TEXT(l=None, m='level ' + str(level), s='lvl ' + str(level), beep=BeepLevel.MAP, duration=1)
+                                    text = Dgt.DISPLAY_TEXT(l=None, m='level ' + str(level), s='lvl ' + str(level),
+                                                            beep=BeepLevel.MAP, duration=1)
                                     self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, level=level, level_text=text))
                                     self.engine_restart = True
                                     self.reset_menu()
@@ -937,7 +938,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.fire(Event.DRAWRESIGN(result=drawresign_map[self.drawresign_fen]))
                         else:
                             if self.draw_setup_pieces:
-                                DisplayDgt.show(Dgt.DISPLAY_TEXT(l="set pieces", m="set pcs", s="setup", beep=BeepLevel.NO, duration=0))
+                                DisplayDgt.show(Dgt.DISPLAY_TEXT(l="set pieces", m="set pcs", s="setup",
+                                                                 beep=BeepLevel.NO, duration=0))
                                 self.draw_setup_pieces = False
                             self.fire(Event.FEN(fen=fen))
                         break
@@ -949,10 +951,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         DisplayDgt.show(Dgt.CLOCK_TIME(time_left=message.time_left, time_right=message.time_right))
                         break
                     if case(MessageApi.JACK_CONNECTED_ERROR):  # this will only work in case of 2 clocks connected!
-                        DisplayDgt.show(Dgt.DISPLAY_TEXT(l="error jack", m="err jack", s="jack", beep=BeepLevel.YES, duration=0))
-                        break
-                    if case(MessageApi.NO_EBOARD_ERROR):
-                        # DisplayDgt.show(message.text)
+                        DisplayDgt.show(Dgt.DISPLAY_TEXT(l="error jack", m="err jack", s="jack",
+                                                         beep=BeepLevel.YES, duration=0))
                         break
                     if case(MessageApi.EBOARD_VERSION):
                         DisplayDgt.show(message.text)

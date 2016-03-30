@@ -35,7 +35,7 @@ except ImportError:
 
 
 # picochess version
-version = '060'
+version = '061'
 
 evt_queue = queue.Queue()
 serial_queue = queue.Queue()
@@ -524,7 +524,7 @@ class Dgt():
     LIGHT_SQUARES = ClassFactory(DgtApi.LIGHT_SQUARES, ['squares'])
     CLOCK_END = ClassFactory(DgtApi.CLOCK_END, ['wait', 'force'])
     CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, [])
-    CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side'])
+    CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side', 'wait'])
     CLOCK_VERSION = ClassFactory(DgtApi.CLOCK_VERSION, ['main_version', 'sub_version', 'attached'])
     CLOCK_TIME = ClassFactory(DgtApi.CLOCK_TIME, ['time_left', 'time_right'])
     SERIALNR = ClassFactory(DgtApi.SERIALNR, [])

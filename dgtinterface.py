@@ -123,10 +123,12 @@ class DgtInterface(DisplayDgt, Thread):
                         self.stop_clock()
                         break
                     if case(DgtApi.CLOCK_START):
+                        while self.timer_running and message.wait:
+                            time.sleep(0.1)
                         self.clock_running = (message.side != 0x04)
                         l_hms = hours_minutes_seconds(message.time_left)
                         r_hms = hours_minutes_seconds(message.time_right)
-                        logging.info('time send {} : {}'.format(l_hms, r_hms))
+                        logging.info('sending time {} : {}'.format(l_hms, r_hms))
                         self.start_clock(message.time_left, message.time_right, message.side)
                         break
                     if case(DgtApi.CLOCK_VERSION):
