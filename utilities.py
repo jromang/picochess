@@ -771,7 +771,7 @@ def shutdown():
     if platform.system() == 'Windows':
         os.system('shutdown /s')
     else:
-        os.system('shutdown -h now')
+        os.system('systemctl isolate dgtpistandby.target')
 
 
 def reboot():
