@@ -23,9 +23,6 @@ import datetime
 import logging
 import requests
 from utilities import *
-import sys
-import os
-import re
 from email.mime.text import MIMEText
 
 
@@ -130,15 +127,15 @@ class PgnDisplay(DisplayMsg, threading.Thread):
                         logging.debug("SMTP Mail delivery: trying to send email")
                         conn.sendmail('no-reply@picochess.org', self.email, msg.as_string())
                         logging.debug("SMTP Mail delivery: successfuly delivered message to SMTP server")
-                    except Exception as exec:
+                    except Exception as e:
                         logging.error("SMTP Mail delivery: Failed")
-                        logging.error("SMTP Mail delivery: " + str(exec))
+                        logging.error("SMTP Mail delivery: " + str(e))
                     finally:
                         conn.close()
                         logging.debug("SMTP Mail delivery: Ended")
-                except Exception as exec:
+                except Exception as e:
                     logging.error("SMTP Mail delivery: Failed")
-                    logging.error("SMTP Mail delivery: " + str(exec))
+                    logging.error("SMTP Mail delivery: " + str(e))
             # smtp based system end
             if self.mailgun_key:  # check if we have mailgun-key available to send the pgn successful
                 out = requests.post("https://api.mailgun.net/v2/picochess.org/messages",

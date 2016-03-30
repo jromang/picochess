@@ -541,7 +541,7 @@ class Message():
     ENGINE_FAIL = ClassFactory(MessageApi.ENGINE_FAIL, [])
     LEVEL = ClassFactory(MessageApi.LEVEL, ['level', 'level_text'])
     TIME_CONTROL = ClassFactory(MessageApi.TIME_CONTROL, ['time_text'])
-    OPENING_BOOK = ClassFactory(MessageApi.OPENING_BOOK, ['book_text'])
+    OPENING_BOOK = ClassFactory(MessageApi.OPENING_BOOK, ['book_name', 'book_text'])
     DGT_BUTTON = ClassFactory(MessageApi.DGT_BUTTON, ['button'])
     DGT_FEN = ClassFactory(MessageApi.DGT_FEN, ['fen'])
     DGT_CLOCK_VERSION = ClassFactory(MessageApi.DGT_CLOCK_VERSION, ['main_version', 'sub_version', 'attached'])
@@ -549,7 +549,7 @@ class Message():
 
     INTERACTION_MODE = ClassFactory(MessageApi.INTERACTION_MODE, ['mode', 'mode_text'])
     PLAY_MODE = ClassFactory(MessageApi.PLAY_MODE, ['play_mode'])
-    START_NEW_GAME = ClassFactory(MessageApi.START_NEW_GAME, [])
+    START_NEW_GAME = ClassFactory(MessageApi.START_NEW_GAME, ['time_control'])
     COMPUTER_MOVE_DONE_ON_BOARD = ClassFactory(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD, [])
     WAIT_STATE = ClassFactory(MessageApi.WAIT_STATE, [])
     SEARCH_STARTED = ClassFactory(MessageApi.SEARCH_STARTED, ['engine_status'])

@@ -149,11 +149,10 @@ class DgtPi(DgtInterface):
     def start_clock(self, time_left, time_right, side):
         l_hms = hours_minutes_seconds(time_left)
         r_hms = hours_minutes_seconds(time_right)
+        lr = rr = 0
         if side == 0x01:
             lr = 1
-            rr = 0
-        else:
-            lr = 0
+        if side == 0x02:
             rr = 1
         self.time_left = l_hms
         self.time_right = r_hms

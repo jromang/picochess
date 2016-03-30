@@ -19,7 +19,6 @@
 
 import sys
 import os
-import platform
 
 import configargparse
 import chess
@@ -288,7 +287,8 @@ def main():
                     or (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.BLACK):
                 last_computer_fen = game.board_fen()
                 searchmoves.add(move)
-                DisplayMsg.show(Message.COMPUTER_MOVE(result=result, fen=fen, game=game.copy(), time_control=time_control))
+                text = Message.COMPUTER_MOVE(result=result, fen=fen, game=game.copy(), time_control=time_control)
+                DisplayMsg.show(text)
             else:
                 searchmoves.reset()
                 DisplayMsg.show(Message.USER_MOVE(move=move, game=game.copy()))
@@ -303,7 +303,8 @@ def main():
                     or (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.BLACK):
                 last_computer_fen = game.board_fen()
                 searchmoves.add(move)
-                DisplayMsg.show(Message.COMPUTER_MOVE(result=result, fen=fen, game=game.copy(), time_control=time_control))
+                text = Message.COMPUTER_MOVE(result=result, fen=fen, game=game.copy(), time_control=time_control)
+                DisplayMsg.show(text)
             else:
                 searchmoves.reset()
                 DisplayMsg.show(Message.USER_MOVE(move=move, game=game.copy()))
@@ -533,7 +534,7 @@ def main():
                     engine.stop()
                     # Closeout the engine process and threads
                     # The all return non-zero error codes, 0=success
-                    if engine.quit():   # Ask nicely
+                    if engine.quit():  # Ask nicely
                         if engine.terminate():  # If you won't go nicely.... 
                             if engine.kill():  # Right that does it!
                                 logging.error('Engine shutdown failure')
@@ -544,7 +545,7 @@ def main():
                         # Local engines only
                         engine_fallback = False
                         engine = uci.Engine(event.eng[0])
-                        try:        
+                        try:
                             engine_name = engine.get().name
                         except AttributeError:
                             # New engine failed to start, restart old engine
@@ -649,7 +650,7 @@ def main():
                     stop_search_and_clock()
                     time_control.reset()
                     searchmoves.reset()
-                    DisplayMsg.show(Message.START_NEW_GAME())
+                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control))
                     game_declared = False
                     set_wait_state()
                     DisplayMsg.show(Message.WAIT_STATE())
@@ -717,7 +718,7 @@ def main():
                 if case(EventApi.SET_OPENING_BOOK):
                     logging.debug("Changing opening book [%s]", event.book[1])
                     bookreader = chess.polyglot.open_reader(event.book[1])
-                    DisplayMsg.show(Message.OPENING_BOOK(book_text=event.book_text))
+                    DisplayMsg.show(Message.OPENING_BOOK(book_name=event.book[0], book_text=event.book_text))
                     break
 
                 if case(EventApi.SET_TIME_CONTROL):
@@ -728,7 +729,8 @@ def main():
                 if case(EventApi.OUT_OF_TIME):
                     stop_search_and_clock()
                     custom_fen = getattr(game, 'custom_fen', None)
-                    DisplayMsg.show(Message.GAME_ENDS(result=GameResult.OUT_OF_TIME, play_mode=play_mode, game=copy.deepcopy(game), custom_fen=custom_fen))
+                    DisplayMsg.show(Message.GAME_ENDS(result=GameResult.OUT_OF_TIME, play_mode=play_mode,
+                                                      game=copy.deepcopy(game), custom_fen=custom_fen))
                     break
 
                 if case(EventApi.UCI_OPTION_SET):
@@ -740,7 +742,8 @@ def main():
                     if talker:
                         talker.say_event(event)
                     custom_fen = getattr(game, 'custom_fen', None)
-                    DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game), custom_fen=custom_fen))
+                    DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode,
+                                                      game=copy.deepcopy(game), custom_fen=custom_fen))
                     shutdown()
                     break
 
@@ -748,7 +751,8 @@ def main():
                     if talker:
                         talker.say_event(event)
                     custom_fen = getattr(game, 'custom_fen', None)
-                    DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=copy.deepcopy(game), custom_fen=custom_fen))
+                    DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode,
+                                                      game=copy.deepcopy(game), custom_fen=custom_fen))
                     reboot()
                     break
 

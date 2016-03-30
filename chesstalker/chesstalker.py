@@ -125,7 +125,7 @@ class ChessTalker(DisplayMsg, threading.Thread):
                         break
                     if case(MessageApi.OPENING_BOOK):
                         logging.debug('Announcing OPENING_BOOK')
-                        system_voice.say_opening_book(message.book[0])
+                        system_voice.say_opening_book(message.book_name)
                         break
                     if case(MessageApi.TIME_CONTROL):
                         logging.debug('Announcing SET_TIME_CONTROL')
