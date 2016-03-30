@@ -80,7 +80,7 @@ class Engine(object):
         try:
             self.shell = None
             if hostname:
-                logging.info("Connecting to [%s]", hostname)
+                logging.info("connecting to [%s]", hostname)
                 if key_file:
                     shell = spur.SshShell(hostname=hostname, username=username, private_key_file=key_file,
                                           missing_host_key=paramiko.AutoAddPolicy())
@@ -98,7 +98,7 @@ class Engine(object):
                 self.engine.info_handlers.append(handler)
                 self.engine.uci()
             else:
-                logging.error("Engine executable [%s] not found", path)
+                logging.error("engine executable [%s] not found", path)
             self.options = {}
             self.future = None
             self.show_best = True
@@ -109,7 +109,7 @@ class Engine(object):
         except OSError:
             logging.exception("OS error in starting engine")
         except TypeError:
-            logging.exception("Engine executable not found")
+            logging.exception("engine executable not found")
 
     def get(self):
         return self.engine
@@ -123,7 +123,7 @@ class Engine(object):
     def level(self, level):
         """ Sets the engine playing strength, between 0 and 20. """
         if level < 0 or level > 20:
-            logging.error('Level not in range (0,20) :[%i]', level)
+            logging.error('level not in range (0,20): [%i]', level)
             return False
         if 'Skill Level' in self.engine.options:  # Stockfish uses 'Skill Level' option
             self.option("Skill Level", level)
@@ -139,7 +139,7 @@ class Engine(object):
                 self.option('UCI_Elo', str(set_elo))
             pass
         else:
-            logging.warning("Engine does not support skill levels")
+            logging.warning("engine does not support skill levels")
             return False
         return True
 
@@ -175,7 +175,7 @@ class Engine(object):
 
     def stop(self, show_best=False):
         if self.status == EngineStatus.WAIT:
-            logging.info('Engine already stopped')
+            logging.info('engine already stopped')
             return self.res
         self.show_best = show_best
         self.engine.stop()
@@ -183,7 +183,7 @@ class Engine(object):
 
     def go(self, time_dict):
         if self.status != EngineStatus.WAIT:
-            logging.warning('Search think still not waiting - strange!')
+            logging.warning('search think still not waiting - strange!')
         self.status = EngineStatus.THINK
         self.show_best = True
         time_dict['async_callback'] = self.callback
@@ -194,7 +194,7 @@ class Engine(object):
 
     def ponder(self):
         if self.status != EngineStatus.WAIT:
-            logging.warning('Search ponder still not waiting - strange!')
+            logging.warning('search ponder still not waiting - strange!')
         self.status = EngineStatus.PONDER
         self.show_best = False
 

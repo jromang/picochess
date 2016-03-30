@@ -62,9 +62,9 @@ class DgtSerial(object):
 
     def write_board_command(self, message):
         mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
-        logging.debug('->DGT board [%s], length %i', mes, len(message))
+        logging.debug('->DGT board [%s], length: %i', mes, len(message))
         if mes.value == DgtClk.DGT_CMD_CLOCK_ASCII.value:
-            logging.debug(''.join([chr(elem) for elem in message[4:10]]))
+            logging.debug('sending text [{}] to clock'. format(''.join([chr(elem) for elem in message[4:10]])))
 
         array = []
         for v in message:
@@ -76,7 +76,7 @@ class DgtSerial(object):
                 for c in v:
                     array.append(char_to_DGTXL[c.lower()])
             else:
-                logging.error('Type not supported [%s]', type(v))
+                logging.error('type not supported [%s]', type(v))
 
         while True:
             if not self.serial:
@@ -86,7 +86,7 @@ class DgtSerial(object):
                 self.serial.write(bytearray(array))
                 break
             except ValueError:
-                logging.error('Invalid bytes sent {0}'.format(message))
+                logging.error('invalid bytes sent {0}'.format(message))
                 break
             except pyserial.SerialException as e:
                 logging.error(e)
@@ -128,7 +128,7 @@ class DgtSerial(object):
                     if ack0 != 0x10:
                         logging.warning("DGT clock [ser]: ACK error %s", (ack0, ack1, ack2, ack3))
                         if self.last_clock_command:
-                            logging.debug('Resending failed DGT clock message [%s]', self.last_clock_command)
+                            logging.debug('resending failed DGT clock message [%s]', self.last_clock_command)
                             self.write_board_command(self.last_clock_command)
                             self.last_clock_command = []  # only resend once
                         break
@@ -170,7 +170,7 @@ class DgtSerial(object):
                     l_secs = (message[5] >> 4) * 10 + (message[5] & 0x0f)
                     tr = [r_hours, r_mins, r_secs]
                     tl = [l_hours, l_mins, l_secs]
-                    logging.info('DGT clock [ser]: time received {} : {}'.format(tl, tr))
+                    logging.info('DGT clock [ser]: received time from clock {} : {}'.format(tl, tr))
                     DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=tl, time_right=tr))
                 else:
                     logging.debug('DGT clock [ser]: null message ignored')
@@ -229,11 +229,11 @@ class DgtSerial(object):
         message_length = (header[1] << 7) + header[2] - 3
 
         try:
-            logging.debug("<-DGT board [%s], length %i", DgtMsg(message_id), message_length)
+            logging.debug("<-DGT board [%s], length: %i", DgtMsg(message_id), message_length)
             message = struct.unpack('>' + str(message_length) + 'B', self.serial.read(message_length))
             self.process_board_message(message_id, message)
         except ValueError:
-            logging.warning("Unknown DGT message value %i length %i", message_id, message_length)
+            logging.warning("unknown DGT message value: %i length: %i", message_id, message_length)
         return message_id
 
     def process_incoming_board_forever(self):

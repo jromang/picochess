@@ -16,14 +16,14 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from chess import Board
-from dgtinterface import *
+from dgtiface import *
 from dgtserial import *
 from dgtlib import *
 from utilities import *
 from threading import Lock
 
 
-class DgtHw(DgtInterface):
+class DgtHw(DgtIface):
     def __init__(self, dgtserial, enable_revelation_leds, beep_level):
         super(DgtHw, self).__init__(enable_revelation_leds, beep_level)
         self.dgtserial = dgtserial
@@ -43,7 +43,7 @@ class DgtHw(DgtInterface):
 
     def _display_on_dgt_xl(self, text, beep=False):
         if not self.clock_found:  # This can only happen on the XL function
-            logging.debug('Clock (still) not found. Ignore [%s]', text)
+            logging.debug('DGT clock (still) not found. Ignore [%s]', text)
             self.startup_clock()
             return
         text = text.ljust(6)

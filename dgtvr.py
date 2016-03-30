@@ -17,10 +17,10 @@
 
 from threading import Timer
 import chess
-from dgtinterface import *
+from dgtiface import *
 
 
-class DgtVr(DgtInterface):
+class DgtVr(DgtIface):
     def __init__(self, enable_revelation_leds, beep_level):
         super(DgtVr, self).__init__(enable_revelation_leds, beep_level)
         # virtual lib

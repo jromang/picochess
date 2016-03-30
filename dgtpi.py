@@ -16,14 +16,14 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from chess import Board
-from dgtinterface import *
+from dgtiface import *
 from dgtserial import *
 from ctypes import *
 from utilities import *
 from threading import Lock, Timer
 
 
-class DgtPi(DgtInterface):
+class DgtPi(DgtIface):
     def __init__(self, dgtserial, enable_revelation_leds, beep_level):
         super(DgtPi, self).__init__(enable_revelation_leds, beep_level)
         self.dgtserial = dgtserial

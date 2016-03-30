@@ -18,7 +18,7 @@
 from timecontrol import *
 from collections import OrderedDict
 
-from dgtinterface import *
+from dgtiface import *
 import threading
 
 level_map = ("rnbqkbnr/pppppppp/8/q7/8/8/PPPPPPPP/RNBQKBNR",
@@ -650,7 +650,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             # Check if we have something to display
             try:
                 message = self.msg_queue.get()
-                logging.debug("Received message from msg queue: %s", message)
+                logging.debug("received message from msg_queue: %s", message)
                 for case in switch(message):
                     if case(MessageApi.ENGINE_READY):
                         self.engine_index = self.installed_engines.index(message.eng)
