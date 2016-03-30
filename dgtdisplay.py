@@ -192,6 +192,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.setup_uci960_result = None
         self.top_result = None
         # self.mode_result = None
+        self.engine_result = None
         self.engine_level_result = None
 
     def power_off(self):
