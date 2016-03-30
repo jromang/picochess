@@ -137,6 +137,9 @@ class DgtPi(DgtIface):
     def stop_clock(self):
         l_hms = self.time_left
         r_hms = self.time_right
+        if l_hms is None and r_hms is None:
+            logging.debug('time values not set - no need to stop the clock')
+            return
         with self.lock:
             res = self.lib.dgtpicom_set_and_run(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
             if res < 0:

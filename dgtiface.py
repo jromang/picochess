@@ -29,8 +29,8 @@ class DgtIface(DisplayDgt, Thread):
         self.clock_found = False
         self.enable_revelation_leds = enable_revelation_leds
         self.beep_level = int(beep_level) & 0x0f
-        self.time_left = [0, 0, 0]
-        self.time_right = [0, 0, 0]
+        self.time_left = None  # [0, 0, 0]
+        self.time_right = None  # [0, 0, 0]
 
         self.timer = None
         self.timer_running = False
