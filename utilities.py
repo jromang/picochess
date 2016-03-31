@@ -267,7 +267,6 @@ class TimeModeLoop(object):
 class Settings(enum.Enum):
     VERSION = 'version'
     IPADR = 'ip adr'
-    SHUTDOWN = 'shutdown'
     REBOOT = 'reboot'
 
 
@@ -280,8 +279,6 @@ class SettingsLoop(object):
         if m == Settings.VERSION:
             return Settings.IPADR
         elif m == Settings.IPADR:
-            return Settings.SHUTDOWN
-        elif m == Settings.SHUTDOWN:
             return Settings.REBOOT
         elif m == Settings.REBOOT:
             return Settings.VERSION
@@ -291,12 +288,10 @@ class SettingsLoop(object):
     def prev(m):
         if m == Settings.VERSION:
             return Settings.REBOOT
+        elif m == Settings.REBOOT:
+            return Settings.IPADR
         elif m == Settings.IPADR:
             return Settings.VERSION
-        elif m == Settings.SHUTDOWN:
-            return Settings.IPADR
-        elif m == Settings.REBOOT:
-            return Settings.SHUTDOWN
 
 
 @enum.unique
@@ -766,7 +761,7 @@ def update_picochess(auto_reboot=False):
 
 
 def shutdown():
-    logging.debug('Shutting down system')
+    logging.debug('shutting down system')
     time.sleep(1)  # give some time to send out the pgn file
     if platform.system() == 'Windows':
         os.system('shutdown /s')
@@ -775,7 +770,7 @@ def shutdown():
 
 
 def reboot():
-    logging.debug('Rebooting system')
+    logging.debug('rebooting system')
     time.sleep(1)  # give some time to send out the pgn file
     os.system('reboot')
 
@@ -788,7 +783,7 @@ def get_ip():
 
     # TODO: Better handling of exceptions of socket connect
     except socket.error:
-        logging.error("No Internet Connection!")
+        logging.error("no internet connection!")
     finally:
         s.close()
 

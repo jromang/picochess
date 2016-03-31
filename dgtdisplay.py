@@ -567,8 +567,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 else:
                     text = text_noipadr
                 DisplayDgt.show(text)
-            elif self.system_index == Settings.SHUTDOWN:
-                self.power_off()
             elif self.system_index == Settings.REBOOT:
                 self.reboot()
             else:
@@ -837,6 +835,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 self.process_button3()
                             elif button == 4:
                                 self.process_button4()
+                            elif button == 40:
+                                self.power_off()
                         break
                     if case(MessageApi.DGT_FEN):
                         fen = message.fen

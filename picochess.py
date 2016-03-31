@@ -386,6 +386,11 @@ def main():
                             datefmt="%Y-%m-%d %H:%M:%S", handlers=[handler])
     logging.getLogger("chess.uci").setLevel(logging.INFO)  # don't want to get so many python-chess uci messages
 
+    # log the startup parameters but hide the password fields
+    p = vars(args)
+    p['mailgun_key'] = p['server_key'] = p['password'] = p['smtp_pass'] = '*****'
+    logging.debug('startup parameters: {}'.format(p))
+
     # Update
     if args.enable_internet:
         update_picochess(args.auto_reboot)

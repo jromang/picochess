@@ -136,26 +136,30 @@ class DgtSerial(object):
                         logging.debug("DGT clock [ser]: ACK okay [%s]", DgtClk(ack1))
                     if ack1 == 0x88:
                         # this are the other (ack2-ack3) codes
-                        # 6-49 34-52 18-51 10-50 66-53 | button 0-4 (single)
-                        #      38-52 22-51 14-50 70-53 | button 0 + 1-4
-                        #            50-51 42-50 98-53 | button 1 + 2-4
-                        #                  26-50 82-53 | button 2 + 3-4
-                        #                        74-53 | button 3 + 4
+                        # 05-49 33-52 17-51 09-50 65-53 | button 0-4 (single)
+                        #       37-52 21-51 13-50 69-53 | button 0 + 1-4
+                        #             49-51 41-50 97-53 | button 1 + 2-4
+                        #                   25-50 81-53 | button 2 + 3-4
+                        #                         73-53 | button 3 + 4
                         if ack3 == 49:
-                            logging.info("DGT clock [ser]: button 0 pressed")
+                            logging.info("DGT clock [ser]: button 0 pressed - ack2: %i", ack2)
                             DisplayMsg.show(Message.DGT_BUTTON(button=0))
                         if ack3 == 52:
-                            logging.info("DGT clock [ser]: button 1 pressed")
+                            logging.info("DGT clock [ser]: button 1 pressed - ack2: %i", ack2)
                             DisplayMsg.show(Message.DGT_BUTTON(button=1))
                         if ack3 == 51:
-                            logging.info("DGT clock [ser]: button 2 pressed")
+                            logging.info("DGT clock [ser]: button 2 pressed - ack2: %i", ack2)
                             DisplayMsg.show(Message.DGT_BUTTON(button=2))
                         if ack3 == 50:
-                            logging.info("DGT clock [ser]: button 3 pressed")
+                            logging.info("DGT clock [ser]: button 3 pressed - ack2: %i", ack2)
                             DisplayMsg.show(Message.DGT_BUTTON(button=3))
                         if ack3 == 53:
-                            logging.info("DGT clock [ser]: button 4 pressed")
-                            DisplayMsg.show(Message.DGT_BUTTON(button=4))
+                            if ack2 == 69:
+                                logging.info("DGT clock [ser]: button 0+4 pressed - ack2: %i", ack2)
+                                DisplayMsg.show(Message.DGT_BUTTON(button=40))
+                            else:
+                                logging.info("DGT clock [ser]: button 4 pressed - ack2: %i", ack2)
+                                DisplayMsg.show(Message.DGT_BUTTON(button=4))
                     if ack1 == 0x09:
                         main_version = ack2 >> 4
                         sub_version = ack2 & 0x0f
