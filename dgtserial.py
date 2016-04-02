@@ -115,7 +115,7 @@ class DgtSerial(object):
                 else:
                     text_l, text_m, text_s = 'BT E-board', 'BT board', 'ok bt'
                     channel = 'BT'
-                text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, beep=BeepLevel.NO, duration=0.5)
+                text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, beep=False, duration=0.5)
                 DisplayMsg.show(Message.EBOARD_VERSION(text=text, channel=channel))
                 break
             if case(DgtMsg.DGT_MSG_BWTIME):
@@ -276,7 +276,7 @@ class DgtSerial(object):
                 except pyserial.SerialException as e:
                     logging.error(e)
                     s = 'board' + self.waitchars[wait_counter]
-                    text = Dgt.DISPLAY_TEXT(l='no E-' + s, m='no' + s, s=s, beep=BeepLevel.NO, duration=0)
+                    text = Dgt.DISPLAY_TEXT(l='no E-' + s, m='no' + s, s=s, beep=False, duration=0)
                     DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text))
                     wait_counter = (wait_counter + 1) % len(self.waitchars)
                     time.sleep(0.5)

@@ -416,15 +416,15 @@ def main():
         logging.debug("starting picochess with DGT board on [%s]", args.dgt_port)
         dgtserial = DgtSerial(args.dgt_port)
         if args.dgtpi:
-            dgthardware = DgtPi(dgtserial, args.enable_revelation_leds, args.beep_level)
+            dgthardware = DgtPi(dgtserial, args.enable_revelation_leds)
         else:
-            dgthardware = DgtHw(dgtserial, args.enable_revelation_leds, args.beep_level)
+            dgthardware = DgtHw(dgtserial, args.enable_revelation_leds)
     else:
         # Enable keyboard input and terminal display
         logging.debug("starting picochess with virtual DGT board")
         KeyboardInput().start()
         TerminalDisplay().start()
-        dgthardware = DgtVr(args.enable_revelation_leds, args.beep_level)
+        dgthardware = DgtVr(args.enable_revelation_leds)
     # Start the show
     dgthardware.start()
 
@@ -481,7 +481,7 @@ def main():
     engine_startup()  # send the args options to the engine
 
     # Startup - external
-    text = Dgt.DISPLAY_TEXT(l=None, m='bl   5', s=None, beep=BeepLevel.NO, duration=0)
+    text = Dgt.DISPLAY_TEXT(l=None, m='bl   5', s=None, beep=False, duration=0)
     DisplayMsg.show(Message.STARTUP_INFO(info={"interaction_mode": interaction_mode, "play_mode": play_mode,
                                                "book": all_books[book_index][1], "book_index": book_index,
                                                "time_text": text}))

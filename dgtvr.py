@@ -21,8 +21,8 @@ from dgtiface import *
 
 
 class DgtVr(DgtIface):
-    def __init__(self, enable_revelation_leds, beep_level):
-        super(DgtVr, self).__init__(enable_revelation_leds, beep_level)
+    def __init__(self, enable_revelation_leds):
+        super(DgtVr, self).__init__(enable_revelation_leds)
         # virtual lib
         self.rt = None
         self.time_side = None
@@ -77,8 +77,7 @@ class DgtVr(DgtIface):
         DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=self.time_left, time_right=self.time_right))
     # (END) dgtserial simulation class
 
-    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):
-        beep = self.get_beep_level(beep)
+    def display_move_on_clock(self, move, fen, beep=False):
         if self.enable_dgt_3000:
             bit_board = chess.Board(fen)
             text = bit_board.san(move)
@@ -87,8 +86,7 @@ class DgtVr(DgtIface):
         logging.debug(text)
         print('Clock move: {} Beep: {}'. format(text, beep))
 
-    def display_text_on_clock(self, text, beep=BeepLevel.CONFIG):
-        beep = self.get_beep_level(beep)
+    def display_text_on_clock(self, text, beep=False):
         logging.debug(text)
         print('Clock text: {} Beep: {}'. format(text, beep))
 

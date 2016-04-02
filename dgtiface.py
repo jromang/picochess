@@ -21,14 +21,13 @@ from threading import Timer, Thread
 
 
 class DgtIface(DisplayDgt, Thread):
-    def __init__(self, enable_revelation_leds, beep_level):
+    def __init__(self, enable_revelation_leds):
         super(DgtIface, self).__init__()
 
         self.enable_dgt_3000 = False
         self.enable_dgt_pi = False
         self.clock_found = False
         self.enable_revelation_leds = enable_revelation_leds
-        self.beep_level = int(beep_level) & 0x0f
         self.time_left = None  # [0, 0, 0]
         self.time_right = None  # [0, 0, 0]
 
@@ -36,10 +35,10 @@ class DgtIface(DisplayDgt, Thread):
         self.timer_running = False
         self.clock_running = False
 
-    def display_text_on_clock(self, text, beep=BeepLevel.CONFIG):
+    def display_text_on_clock(self, text, beep=False):
         raise NotImplementedError()
 
-    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):
+    def display_move_on_clock(self, move, fen, beep=False):
         raise NotImplementedError()
 
     def light_squares_revelation_board(self, squares):
@@ -56,13 +55,6 @@ class DgtIface(DisplayDgt, Thread):
 
     def end_clock(self, force=False):
         raise NotImplementedError()
-
-    def get_beep_level(self, beeplevel):
-        if beeplevel == BeepLevel.YES:
-            return True
-        if beeplevel == BeepLevel.NO:
-            return False
-        return bool(self.beep_level & beeplevel.value)
 
     def stopped_timer(self):
         self.timer_running = False
@@ -137,7 +129,7 @@ class DgtIface(DisplayDgt, Thread):
                             self.enable_dgt_3000 = True
                         if message.attached == 'i2c':
                             self.enable_dgt_pi = True
-                        self.show(Dgt.DISPLAY_TEXT(l='picoChs ' + version, m='pico ' + version, s='pic' + version, beep=BeepLevel.YES, duration=2))
+                        self.show(Dgt.DISPLAY_TEXT(l='picoChs ' + version, m='pico ' + version, s='pic' + version, beep=True, duration=2))
                         break
                     if case(DgtApi.CLOCK_TIME):
                         self.time_left = message.time_left

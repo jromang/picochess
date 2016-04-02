@@ -24,8 +24,8 @@ from threading import Lock
 
 
 class DgtHw(DgtIface):
-    def __init__(self, dgtserial, enable_revelation_leds, beep_level):
-        super(DgtHw, self).__init__(enable_revelation_leds, beep_level)
+    def __init__(self, dgtserial, enable_revelation_leds):
+        super(DgtHw, self).__init__(enable_revelation_leds)
         self.dgtserial = dgtserial
         self.dgtserial.run()
 
@@ -66,15 +66,13 @@ class DgtHw(DgtIface):
             if res < 0:
                 logging.warning('Finally failed %i', res)
 
-    def display_text_on_clock(self, text, beep=BeepLevel.CONFIG):
-        beep = self.get_beep_level(beep)
+    def display_text_on_clock(self, text, beep=False):
         if self.enable_dgt_3000:
             self._display_on_dgt_3000(text, beep)
         else:
             self._display_on_dgt_xl(text, beep)
 
-    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):
-        beep = self.get_beep_level(beep)
+    def display_move_on_clock(self, move, fen, beep=False):
         if self.enable_dgt_3000:
             bit_board = Board(fen)
             text = bit_board.san(move)
