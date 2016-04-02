@@ -267,7 +267,7 @@ class TimeModeLoop(object):
 class Settings(enum.Enum):
     VERSION = 'version'
     IPADR = 'ip adr'
-    REBOOT = 'reboot'
+    SOUND = 'sound'
 
 
 class SettingsLoop(object):
@@ -279,16 +279,16 @@ class SettingsLoop(object):
         if m == Settings.VERSION:
             return Settings.IPADR
         elif m == Settings.IPADR:
-            return Settings.REBOOT
-        elif m == Settings.REBOOT:
+            return Settings.SOUND
+        elif m == Settings.SOUND:
             return Settings.VERSION
         return 'error'
 
     @staticmethod
     def prev(m):
         if m == Settings.VERSION:
-            return Settings.REBOOT
-        elif m == Settings.REBOOT:
+            return Settings.SOUND
+        elif m == Settings.SOUND:
             return Settings.IPADR
         elif m == Settings.IPADR:
             return Settings.VERSION

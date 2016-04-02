@@ -405,7 +405,7 @@ def main():
             gaviota = None
 
     # This class talks to DgtHw/DgtPi or DgtVr
-    DgtDisplay(args.disable_ok_move).start()
+    DgtDisplay(args.disable_ok_move, args.beep_level).start()
 
     # Launch web server
     if args.web_server_port:
