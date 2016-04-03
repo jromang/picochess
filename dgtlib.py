@@ -20,7 +20,8 @@ import time
 
 
 class DgtLib(object):
-    """This class simulates DGT's SO-lib File with similar api"""
+
+    """This class simulates DGT's SO-lib File with similar API."""
 
     def __init__(self, dgtserial):
         super(DgtLib, self).__init__()

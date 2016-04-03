@@ -178,57 +178,103 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         return bool(self.beep_level & beeplevel.value)
 
     def dgt_text(self, text_id, msg=''):
-        if text_id == 'text_default00':
-            return Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6], beep=self.bl(BeepLevel.BUTTON), duration=0)
-        if text_id == 'text_goodbye':
-            return Dgt.DISPLAY_TEXT(l=None, m='good bye', s='bye', beep=self.bl(BeepLevel.YES), duration=0)
-        if text_id == 'text_pleasewait':
-            return Dgt.DISPLAY_TEXT(l='please wait', m='pls wait', s='wait', beep=self.bl(BeepLevel.YES), duration=0)
-        if text_id == 'text_nomove':
-            return Dgt.DISPLAY_TEXT(l=None, m='no move', s='nomove', beep=self.bl(BeepLevel.BUTTON), duration=1)
-        if text_id == 'text_wb':
-            return Dgt.DISPLAY_TEXT(l=None, m=' w     b', s='w    b', beep=self.bl(BeepLevel.BUTTON), duration=0)
-        if text_id == 'text_bw':
-            return Dgt.DISPLAY_TEXT(l=None, m=' b     w', s='b    w', beep=self.bl(BeepLevel.BUTTON), duration=0)
-        if text_id == 'text_960no':
-            return Dgt.DISPLAY_TEXT(l=None, m='960 no', s='960 no', beep=self.bl(BeepLevel.BUTTON), duration=0)
-        if text_id == 'text_960yes':
-            return Dgt.DISPLAY_TEXT(l=None, m='960 yes', s='960yes', beep=self.bl(BeepLevel.BUTTON), duration=0)
-        if text_id == 'text_picochess':
-            return Dgt.DISPLAY_TEXT(l='picoChs ' + version, m='pico ' + version, s='pic ' + version,
+        dt = None  # error case
+        if text_id == 'B00_default':
+            dt = Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6], beep=self.bl(BeepLevel.BUTTON), duration=0)
+        if text_id == 'B10_default':
+            dt = Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6], beep=self.bl(BeepLevel.BUTTON), duration=1)
+        if text_id == 'M10_default':
+            dt = Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6], beep=self.bl(BeepLevel.MAP), duration=1)
+        if text_id == 'C10_default':
+            dt = Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6], beep=self.bl(BeepLevel.CONFIG), duration=1)
+        if text_id == 'N10_default':
+            dt = Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6], beep=self.bl(BeepLevel.NO), duration=1)
+        if text_id == 'Y10_goodbye':
+            dt = Dgt.DISPLAY_TEXT(l=None, m='good bye', s='bye', beep=self.bl(BeepLevel.YES), duration=0)
+        if text_id == 'Y10_pleasewait':
+            dt = Dgt.DISPLAY_TEXT(l='please wait', m='pls wait', s='wait', beep=self.bl(BeepLevel.YES), duration=0)
+        if text_id == 'B10_nomove':
+            dt = Dgt.DISPLAY_TEXT(l=None, m='no move', s='nomove', beep=self.bl(BeepLevel.BUTTON), duration=1)
+        if text_id == 'B00_wb':
+            dt = Dgt.DISPLAY_TEXT(l=None, m=' w     b', s='w    b', beep=self.bl(BeepLevel.BUTTON), duration=0)
+        if text_id == 'B00_bw':
+            dt = Dgt.DISPLAY_TEXT(l=None, m=' b     w', s='b    w', beep=self.bl(BeepLevel.BUTTON), duration=0)
+        if text_id == 'B00_960no':
+            dt = Dgt.DISPLAY_TEXT(l=None, m='960 no', s='960 no', beep=self.bl(BeepLevel.BUTTON), duration=0)
+        if text_id == 'B00_960yes':
+            dt = Dgt.DISPLAY_TEXT(l=None, m='960 yes', s='960yes', beep=self.bl(BeepLevel.BUTTON), duration=0)
+        if text_id == 'B10_picochess':
+            dt = Dgt.DISPLAY_TEXT(l='picoChs ' + version, m='pico ' + version, s='pic ' + version,
                                     beep=self.bl(BeepLevel.BUTTON), duration=1)
-        if text_id == 'text_nofunction':
-            return Dgt.DISPLAY_TEXT(l='no function', m='no funct', s='nofunc', beep=self.bl(BeepLevel.BUTTON), duration=0)
-        if text_id == 'text_erroreng':
-            return Dgt.DISPLAY_TEXT(l='error eng', m='error', s=None, beep=self.bl(BeepLevel.YES), duration=0)
-        if text_id == 'text_okengine':
-            return Dgt.DISPLAY_TEXT(l='okay engine', m='ok engin', s='ok eng', beep=self.bl(BeepLevel.BUTTON), duration=1)
-        if text_id == 'text_okmode':
-            return Dgt.DISPLAY_TEXT(l='okay mode', m='ok mode', s='okmode', beep=self.bl(BeepLevel.BUTTON), duration=1)
-        if text_id == 'text_oklevel':
-            return Dgt.DISPLAY_TEXT(l='okay level', m='ok level', s='ok lvl', beep=self.bl(BeepLevel.BUTTON), duration=1)
-        if text_id == 'text_nolevel':
-            return Dgt.DISPLAY_TEXT(l=None, m='no level', s='no lvl', beep=self.bl(BeepLevel.BUTTON), duration=0)
-        if text_id == 'text_okbook':
-            return Dgt.DISPLAY_TEXT(l='okay book', m='ok book', s='okbook', beep=self.bl(BeepLevel.BUTTON), duration=1)
-        if text_id == 'text_noipadr':
-            return Dgt.DISPLAY_TEXT(l='no ip addr', m='no ipadr', s='no ip', beep=self.bl(BeepLevel.BUTTON), duration=1)
-        if text_id == 'text_errormenu':
-            return Dgt.DISPLAY_TEXT(l='error menu', m='err menu', s='errmen', beep=self.bl(BeepLevel.YES), duration=0)
-        if text_id == 'text_sidewhite':
-            return Dgt.DISPLAY_TEXT(l='side move w', m='side w', s='side w', beep=self.bl(BeepLevel.BUTTON), duration=0)
-        if text_id == 'text_sideblack':
-            return Dgt.DISPLAY_TEXT(l='side move b', m='side b', s='side b', beep=self.bl(BeepLevel.BUTTON), duration=0)
-        if text_id == 'text_scanboard':
-            return Dgt.DISPLAY_TEXT(l='scan board', m='scan', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
-        if text_id == 'text_illegalpos':
-            return Dgt.DISPLAY_TEXT(l='illegal pos', m='illegal', s='badpos', beep=self.bl(BeepLevel.YES), duration=0.5)
-        if text_id == 'text_error960':
-            return Dgt.DISPLAY_TEXT(l='error 960', m='err 960', s="err960", beep=self.bl(BeepLevel.YES), duration=0)
-        if text_id == 'text_oktime':
-            return Dgt.DISPLAY_TEXT(l='okay time', m='ok time', s='oktime', beep=self.bl(BeepLevel.BUTTON), duration=1)
-        if text_id == 'text_okbeep':
-            return Dgt.DISPLAY_TEXT(l='okay beep', m='ok beep', s='okbeep', beep=self.bl(BeepLevel.BUTTON), duration=1)
+        if text_id == 'B00_nofunction':
+            dt = Dgt.DISPLAY_TEXT(l='no function', m='no funct', s='nofunc', beep=self.bl(BeepLevel.BUTTON), duration=0)
+        if text_id == 'Y00_erroreng':
+            dt = Dgt.DISPLAY_TEXT(l='error eng', m='error', s=None, beep=self.bl(BeepLevel.YES), duration=0)
+        if text_id == 'B10_okengine':
+            dt = Dgt.DISPLAY_TEXT(l='okay engine', m='ok engin', s='ok eng', beep=self.bl(BeepLevel.BUTTON), duration=1)
+        if text_id == 'B10_okmode':
+            dt = Dgt.DISPLAY_TEXT(l='okay mode', m='ok mode', s='okmode', beep=self.bl(BeepLevel.BUTTON), duration=1)
+        if text_id == 'B10_oklevel':
+            dt = Dgt.DISPLAY_TEXT(l='okay level', m='ok level', s='ok lvl', beep=self.bl(BeepLevel.BUTTON), duration=1)
+        if text_id == 'B00_nolevel':
+            dt = Dgt.DISPLAY_TEXT(l=None, m='no level', s='no lvl', beep=self.bl(BeepLevel.BUTTON), duration=0)
+        if text_id == 'B10_okbook':
+            dt = Dgt.DISPLAY_TEXT(l='okay book', m='ok book', s='okbook', beep=self.bl(BeepLevel.BUTTON), duration=1)
+        if text_id == 'B10_noipadr':
+            dt = Dgt.DISPLAY_TEXT(l='no ip addr', m='no ipadr', s='no ip', beep=self.bl(BeepLevel.BUTTON), duration=1)
+        if text_id == 'Y00_errormenu':
+            dt = Dgt.DISPLAY_TEXT(l='error menu', m='err menu', s='errmen', beep=self.bl(BeepLevel.YES), duration=0)
+        if text_id == 'B00_sidewhite':
+            dt = Dgt.DISPLAY_TEXT(l='side move w', m='side w', s='side w', beep=self.bl(BeepLevel.BUTTON), duration=0)
+        if text_id == 'B00_sideblack':
+            dt = Dgt.DISPLAY_TEXT(l='side move b', m='side b', s='side b', beep=self.bl(BeepLevel.BUTTON), duration=0)
+        if text_id == 'B00_scanboard':
+            dt = Dgt.DISPLAY_TEXT(l='scan board', m='scan', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
+        if text_id == 'Y05_illegalpos':
+            dt = Dgt.DISPLAY_TEXT(l='illegal pos', m='illegal', s='badpos', beep=self.bl(BeepLevel.YES), duration=0.5)
+        if text_id == 'Y00_error960':
+            dt = Dgt.DISPLAY_TEXT(l='error 960', m='err 960', s="err960", beep=self.bl(BeepLevel.YES), duration=0)
+        if text_id == 'B10_oktime':
+            dt = Dgt.DISPLAY_TEXT(l='okay time', m='ok time', s='oktime', beep=self.bl(BeepLevel.BUTTON), duration=1)
+        if text_id == 'B10_okbeep':
+            dt = Dgt.DISPLAY_TEXT(l='okay beep', m='ok beep', s='okbeep', beep=self.bl(BeepLevel.BUTTON), duration=1)
+        if text_id == 'C10_newgame':
+            dt = Dgt.DISPLAY_TEXT(l=None, m="new game", s="newgam", beep=self.bl(BeepLevel.CONFIG), duration=1)
+        if text_id == 'K05_okpico':
+            dt = Dgt.DISPLAY_TEXT(l="okay pico", m="ok pico", s="okpico", beep=self.bl(BeepLevel.OKAY), duration=0.5)
+        if text_id == 'K05_okuser':
+            dt = Dgt.DISPLAY_TEXT(l="okay user", m="ok user", s="okuser", beep=self.bl(BeepLevel.OKAY), duration=0.5)
+        if text_id == 'K05_okmove':
+            dt = Dgt.DISPLAY_TEXT(l="okay move", m="ok move", s="okmove", beep=self.bl(BeepLevel.OKAY), duration=0.5)
+        if text_id == 'B05_altmove':
+            dt = Dgt.DISPLAY_TEXT(l="altn move", m="alt move", s="altmov", beep=self.bl(BeepLevel.BUTTON), duration=0.5)
+        if text_id == 'C00_takeback':
+            dt = Dgt.DISPLAY_TEXT(l=None, m="takeback", s="takbak", beep=self.bl(BeepLevel.CONFIG), duration=0)
+        if text_id == 'N10_bookmove':
+            dt = Dgt.DISPLAY_TEXT(l="book move", m="book mov", s="book", beep=self.bl(BeepLevel.NO), duration=1)
+        if text_id == 'N00_setpieces':
+            dt = Dgt.DISPLAY_TEXT(l="set pieces", m="set pcs", s="setpcs", beep=self.bl(BeepLevel.NO), duration=0)
+        if text_id == 'Y00_errorjack':
+            dt = Dgt.DISPLAY_TEXT(l="error jack", m="err jack", s="jack", beep=self.bl(BeepLevel.YES), duration=0)
+        if text_id == 'B00_beep':
+            dt = Dgt.DISPLAY_TEXT(l=None, m='beep ' + msg, s='bp ' + msg, beep=self.bl(BeepLevel.BUTTON), duration=0)
+        if text_id == 'B00_level':
+            dt = Dgt.DISPLAY_TEXT(l=None, m='level ' + msg, s='lvl ' + msg, beep=self.bl(BeepLevel.BUTTON), duration=0)
+        if text_id == 'B10_level':
+            dt = Dgt.DISPLAY_TEXT(l=None, m='level ' + msg, s='lvl ' + msg, beep=self.bl(BeepLevel.BUTTON), duration=1)
+        if text_id == 'M10_level':
+            dt = Dgt.DISPLAY_TEXT(l=None, m='level ' + msg, s='lvl ' + msg, beep=self.bl(BeepLevel.MAP), duration=1)
+        if text_id == 'B10_mate':
+            dt = Dgt.DISPLAY_TEXT(l=None, m='mate ' + msg, s='m ' + msg, beep=self.bl(BeepLevel.BUTTON), duration=1)
+        if text_id == 'B10_score':
+            text_s = 'no scr' if msg is None else str(msg).rjust(6)
+            text_m = 'no score' if msg is None else str(msg).rjust(8)
+            dt = Dgt.DISPLAY_TEXT(l=None, m=text_m, s=text_s, beep=self.bl(BeepLevel.BUTTON), duration=1)
+
+        if dt is None:
+            dt = Dgt.DISPLAY_TEXT(l=None, m=text_id, s=None, beep=self.bl(BeepLevel.YES), duration=0)
+            logging.warning('unknown text_id {}'.format(text_id))
+        return dt
 
     def reset_menu(self):
         self.time_mode_result = None
@@ -242,12 +288,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.system_sound_result = None
 
     def power_off(self):
-        DisplayDgt.show(self.dgt_text('text_goodbye'))
+        DisplayDgt.show(self.dgt_text('Y10_goodbye'))
         self.engine_restart = True
         self.fire(Event.SHUTDOWN())
 
     def reboot(self):
-        DisplayDgt.show(self.dgt_text('text_pleasewait'))
+        DisplayDgt.show(self.dgt_text('Y10_pleasewait'))
         self.engine_restart = True
         self.fire(Event.REBOOT())
 
@@ -263,7 +309,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen,
                                         beep=self.bl(BeepLevel.BUTTON), duration=1)
             else:
-                text = self.dgt_text('text_nomove')
+                text = self.dgt_text('B10_nomove')
             DisplayDgt.show(text)
 
         if self.top_result == Menu.TOP_MENU:
@@ -278,7 +324,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         elif self.top_result == Menu.MODE_MENU:
             self.top_result = Menu.TOP_MENU
             msg = self.top_index.value
-            text = self.dgt_text('text_default00', msg)
+            text = self.dgt_text('B00_default', msg)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.POSITION_MENU:
@@ -287,78 +333,75 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if self.setup_whitetomove_result is None:
                         self.top_result = Menu.TOP_MENU
                         msg = self.top_index.value
-                        text = self.dgt_text('text_default00', msg)
+                        text = self.dgt_text('B00_default', msg)
                     else:
                         self.setup_whitetomove_result = None
-                        text = self.dgt_text('text_sidewhite' if self.setup_whitetomove_index else 'text_sideblack')
+                        text = self.dgt_text('B00_sidewhite' if self.setup_whitetomove_index else 'B00_sideblack')
                 else:
                     self.setup_reverse_result = None
-                    text = self.dgt_text('text_bw' if self.setup_reverse_index else 'text_wb')
+                    text = self.dgt_text('B00_bw' if self.setup_reverse_index else 'B00_wb')
             else:
                 self.setup_uci960_result = None
-                text = self.dgt_text('text_960yes' if self.setup_uci960_index else 'text_960no')
+                text = self.dgt_text('B00_960yes' if self.setup_uci960_index else 'B00_960no')
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.SYSTEM_MENU:
             if self.system_sound_result is None:
                 self.top_result = Menu.TOP_MENU
                 msg = self.top_index.value
-                text = self.dgt_text('text_default00', msg)
+                text = self.dgt_text('B00_default', msg)
             else:
                 self.system_sound_result = None
                 msg = self.system_index.value
-                text = self.dgt_text('text_default00', msg)
+                text = self.dgt_text('B00_default', msg)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.ENGINE_MENU:
             if self.engine_result is None:
                 self.top_result = Menu.TOP_MENU
                 msg = self.top_index.value
-                text = self.dgt_text('text_default00', msg)
+                text = self.dgt_text('B00_default', msg)
             else:
                 msg = (self.installed_engines[self.engine_result])[1]
-                text = self.dgt_text('text_default00', msg)
+                text = self.dgt_text('B00_default', msg)
                 self.engine_result = None
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.BOOK_MENU:
             self.top_result = Menu.TOP_MENU
             msg = self.top_index.value
-            text = self.dgt_text('text_default00', msg)
+            text = self.dgt_text('B00_default', msg)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.TIME_MENU:
             if self.time_mode_result is None:
                 self.top_result = Menu.TOP_MENU
                 msg = self.top_index.value
-                text = self.dgt_text('text_default00', msg)
+                text = self.dgt_text('B00_default', msg)
             else:
                 msg = self.time_mode_result.value
-                text = self.dgt_text('text_default00', msg)
+                text = self.dgt_text('B00_default', msg)
                 self.time_mode_result = None
             DisplayDgt.show(text)
 
     def process_button1(self):
         if self.top_result is None:
             if self.mate is None:
-                text_s = 'no scr' if self.score is None else str(self.score).rjust(6)
-                text_m = 'no score' if self.score is None else str(self.score).rjust(8)
+                text = self.dgt_text('B10_score', self.score)
             else:
-                text_s = 'm '+str(self.mate)
-                text_m = 'mate '+str(self.mate)
-            text = Dgt.DISPLAY_TEXT(l=None, m=text_m, s=text_s, beep=self.bl(BeepLevel.BUTTON), duration=1)
+                text = self.dgt_text('B10_mate', str(self.mate))
             DisplayDgt.show(text)
 
         if self.top_result == Menu.TOP_MENU:
             self.top_index = MenuLoop.prev(self.top_index)
             msg = self.top_index.value
-            text = self.dgt_text('text_default00', msg)
+            text = self.dgt_text('B00_default', msg)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.MODE_MENU:
             self.mode_index = ModeLoop.prev(self.mode_index)
             msg = self.mode_index.value
-            text = self.dgt_text('text_default00', msg)
+            text = self.dgt_text('B00_default', msg)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.POSITION_MENU:
@@ -366,59 +409,57 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 if self.setup_reverse_result is None:
                     if self.setup_whitetomove_result is None:
                         self.setup_whitetomove_index = not self.setup_whitetomove_index
-                        text = self.dgt_text('text_sidewhite' if self.setup_whitetomove_index else 'text_sideblack')
+                        text = self.dgt_text('B00_sidewhite' if self.setup_whitetomove_index else 'B00_sideblack')
                     else:
                         self.setup_reverse_index = not self.setup_reverse_index
-                        text = self.dgt_text('text_bw' if self.setup_reverse_index else 'text_wb')
+                        text = self.dgt_text('B00_bw' if self.setup_reverse_index else 'B00_wb')
                 else:
                     if self.engine_has_960:
                         self.setup_uci960_index = not self.setup_uci960_index
-                        text = self.dgt_text('text_960yes' if self.setup_uci960_index else 'text_960no')
+                        text = self.dgt_text('B00_960yes' if self.setup_uci960_index else 'B00_960no')
                     else:
-                        text = self.dgt_text('text_error960')
+                        text = self.dgt_text('Y00_error960')
                 DisplayDgt.show(text)
 
         elif self.top_result == Menu.SYSTEM_MENU:
             if self.system_sound_result is None:
                 self.system_index = SettingsLoop.prev(self.system_index)
                 msg = self.system_index.value
-                text = self.dgt_text('text_default00', msg)
+                text = self.dgt_text('B00_default', msg)
             else:
                 self.system_sound_index = (self.system_sound_index-1) & 0x0f
-                beep = str(self.system_sound_index)
-                text = Dgt.DISPLAY_TEXT(l=None, m='beep '+beep, s='bp '+beep,
-                                        beep=self.bl(BeepLevel.BUTTON), duration=0)
+                msg = str(self.system_sound_index)
+                text = self.dgt_text('B00_beep', msg)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.ENGINE_MENU:
             if self.mode_result == Mode.REMOTE:
-                text = self.dgt_text('text_nofunction')
+                text = self.dgt_text('B00_nofunction')
             else:
                 if self.engine_result is None:
                     self.engine_index = (self.engine_index-1) % self.n_engines
                     msg = (self.installed_engines[self.engine_index])[1]
-                    text = self.dgt_text('text_default00', msg)
+                    text = self.dgt_text('B00_default', msg)
                 else:
                     self.engine_level_index = (self.engine_level_index-1) % self.n_levels
-                    level = str(self.engine_level_index)
-                    text = Dgt.DISPLAY_TEXT(l=None, m='level '+level, s='lvl '+level,
-                                            beep=self.bl(BeepLevel.BUTTON), duration=0)
+                    msg = str(self.engine_level_index)
+                    text = self.dgt_text('B00_level', msg)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.BOOK_MENU:
             if self.mode_result == Mode.REMOTE:
-                text = self.dgt_text('text_nofunction')
+                text = self.dgt_text('B00_nofunction')
             else:
                 self.book_index = (self.book_index-1) % self.n_books
                 msg = (self.all_books[self.book_index])[0]
-                text = self.dgt_text('text_default00', msg)
+                text = self.dgt_text('B00_default', msg)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.TIME_MENU:
             if self.time_mode_result is None:
                 self.time_mode_index = TimeModeLoop.prev(self.time_mode_index)
                 msg = self.time_mode_index.value
-                text = self.dgt_text('text_default00', msg)
+                text = self.dgt_text('B00_default', msg)
             else:
                 if self.time_mode_index == TimeMode.FIXED:
                     self.time_control_fixed_index = (self.time_control_fixed_index-1) % len(self.time_control_fixed_map)
@@ -432,7 +473,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 else:
                     logging.warning('wrong value for time_mode_index: {0}'.format(self.time_mode_index))
                     msg = 'error'
-                text = self.dgt_text('text_default00', msg)
+                text = self.dgt_text('B00_default', msg)
             DisplayDgt.show(text)
 
     def process_button2(self):
@@ -447,7 +488,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if self.mode_result == Mode.OBSERVE:
                 self.fire(Event.STARTSTOP_CLOCK())
             if self.mode_result == Mode.ANALYSIS or self.mode_result == Mode.KIBITZ:
-                text = self.dgt_text('text_nofunction')
+                text = self.dgt_text('B00_nofunction')
                 DisplayDgt.show(text)
 
     def process_button3(self):
@@ -456,19 +497,19 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text = Dgt.DISPLAY_MOVE(move=self.last_move, fen=self.last_fen,
                                         beep=self.bl(BeepLevel.BUTTON), duration=1)
             else:
-                text = self.dgt_text('text_nomove')
+                text = self.dgt_text('B10_nomove')
             DisplayDgt.show(text)
 
         if self.top_result == Menu.TOP_MENU:
             self.top_index = MenuLoop.next(self.top_index)
             msg = self.top_index.value
-            text = self.dgt_text('text_default00', msg)
+            text = self.dgt_text('B00_default', msg)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.MODE_MENU:
             self.mode_index = ModeLoop.next(self.mode_index)
             msg = self.mode_index.value
-            text = self.dgt_text('text_default00', msg)
+            text = self.dgt_text('B00_default', msg)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.POSITION_MENU:
@@ -476,58 +517,57 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 if self.setup_reverse_result is None:
                     if self.setup_whitetomove_result is None:
                         self.setup_whitetomove_index = not self.setup_whitetomove_index
-                        text = self.dgt_text('text_sidewhite' if self.setup_whitetomove_index else 'text_sideblack')
+                        text = self.dgt_text('B00_sidewhite' if self.setup_whitetomove_index else 'B00_sideblack')
                     else:
                         self.setup_reverse_index = not self.setup_reverse_index
-                        text = self.dgt_text('text_bw' if self.setup_reverse_index else 'text_wb')
+                        text = self.dgt_text('B00_bw' if self.setup_reverse_index else 'B00_wb')
                 else:
                     if self.engine_has_960:
                         self.setup_uci960_index = not self.setup_uci960_index
-                        text = self.dgt_text('text_960yes' if self.setup_uci960_index else 'text_960no')
+                        text = self.dgt_text('B00_960yes' if self.setup_uci960_index else 'B00_960no')
                     else:
-                        text = self.dgt_text('text_error960')
+                        text = self.dgt_text('Y00_error960')
                 DisplayDgt.show(text)
 
         elif self.top_result == Menu.SYSTEM_MENU:
             if self.system_sound_result is None:
                 self.system_index = SettingsLoop.next(self.system_index)
                 msg = self.system_index.value
-                text = self.dgt_text('text_default00', msg)
+                text = self.dgt_text('B00_default', msg)
             else:
                 self.system_sound_index = (self.system_sound_index+1) & 0x0f
-                beep = str(self.system_sound_index)
-                text = Dgt.DISPLAY_TEXT(l=None, m='beep '+beep, s='bp '+beep, beep=self.bl(BeepLevel.BUTTON), duration=0)
+                msg = str(self.system_sound_index)
+                text = self.dgt_text('B00_beep', msg)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.ENGINE_MENU:
             if self.mode_result == Mode.REMOTE:
-                text = self.dgt_text('text_nofunction')
+                text = self.dgt_text('B00_nofunction')
             else:
                 if self.engine_result is None:
                     self.engine_index = (self.engine_index+1) % self.n_engines
                     msg = (self.installed_engines[self.engine_index])[1]
-                    text = self.dgt_text('text_default00', msg)
+                    text = self.dgt_text('B00_default', msg)
                 else:
                     self.engine_level_index = (self.engine_level_index+1) % self.n_levels
-                    level = str(self.engine_level_index)
-                    text = Dgt.DISPLAY_TEXT(l=None, m='level '+level, s='lvl '+level,
-                                            beep=self.bl(BeepLevel.BUTTON), duration=0)
+                    msg = str(self.engine_level_index)
+                    text = self.dgt_text('B00_level', msg)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.BOOK_MENU:
             if self.mode_result == Mode.REMOTE:
-                text = self.dgt_text('text_nofunction')
+                text = self.dgt_text('B00_nofunction')
             else:
                 self.book_index = (self.book_index+1) % self.n_books
                 msg = (self.all_books[self.book_index])[0]
-                text = self.dgt_text('text_default00', msg)
+                text = self.dgt_text('B00_default', msg)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.TIME_MENU:
             if self.time_mode_result is None:
                 self.time_mode_index = TimeModeLoop.next(self.time_mode_index)
                 msg = self.time_mode_index.value
-                text = self.dgt_text('text_default00', msg)
+                text = self.dgt_text('B00_default', msg)
             else:
                 if self.time_mode_index == TimeMode.FIXED:
                     self.time_control_fixed_index = (self.time_control_fixed_index+1) % len(self.time_control_fixed_map)
@@ -541,7 +581,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 else:
                     logging.warning('wrong value for time_mode_index: {0}'.format(self.time_mode_index))
                     msg = 'error'
-                text = self.dgt_text('text_default00', msg)
+                text = self.dgt_text('B00_default', msg)
             DisplayDgt.show(text)
 
     def process_button4(self):
@@ -549,7 +589,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             self.top_result = Menu.TOP_MENU
             self.top_index = Menu.MODE_MENU
             msg = self.top_index.value
-            text = self.dgt_text('text_default00', msg)
+            text = self.dgt_text('B00_default', msg)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.TOP_MENU:
@@ -557,33 +597,33 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             # display first entry of the submenu "top"
             if self.top_index == Menu.MODE_MENU:
                 msg = self.mode_index.value
-                text = self.dgt_text('text_default00', msg)
+                text = self.dgt_text('B00_default', msg)
             elif self.top_index == Menu.POSITION_MENU:
                 self.setup_whitetomove_index = True
-                text = self.dgt_text('text_sidewhite' if self.setup_whitetomove_index else 'text_sideblack')
+                text = self.dgt_text('B00_sidewhite' if self.setup_whitetomove_index else 'B00_sideblack')
             elif self.top_index == Menu.TIME_MENU:
                 msg = self.time_mode_index.value
-                text = self.dgt_text('text_default00', msg)
+                text = self.dgt_text('B00_default', msg)
             elif self.top_index == Menu.BOOK_MENU:
                 msg = (self.all_books[self.book_index])[0]
-                text = self.dgt_text('text_default00', msg)
+                text = self.dgt_text('B00_default', msg)
             elif self.top_index == Menu.ENGINE_MENU:
                 if self.mode_result == Mode.REMOTE:
-                    text = self.dgt_text('text_nofunction')
+                    text = self.dgt_text('B00_nofunction')
                 else:
                     msg = (self.installed_engines[self.engine_index])[1]
-                    text = self.dgt_text('text_default00', msg)
+                    text = self.dgt_text('B00_default', msg)
             elif self.top_index == Menu.SYSTEM_MENU:
                 msg = self.system_index.value
-                text = self.dgt_text('text_default00', msg)
+                text = self.dgt_text('B00_default', msg)
             else:
                 logging.warning('wrong value for topindex: {0}'.format(self.top_index))
-                text = self.dgt_text('text_errormenu')
+                text = self.dgt_text('Y00_errormenu')
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.MODE_MENU:
             self.mode_result = self.mode_index
-            text = self.dgt_text('text_okmode')
+            text = self.dgt_text('B10_okmode')
             self.fire(Event.SET_INTERACTION_MODE(mode=self.mode_result, mode_text=text))
             self.reset_menu()
 
@@ -591,16 +631,16 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if self.setup_whitetomove_result is None:
                 self.setup_whitetomove_result = self.setup_whitetomove_index
                 self.setup_reverse_index = self.flip_board
-                text = self.dgt_text('text_bw' if self.setup_reverse_index else 'text_wb')
+                text = self.dgt_text('B00_bw' if self.setup_reverse_index else 'B00_wb')
             else:
                 if self.setup_reverse_result is None:
                     self.setup_reverse_result = self.setup_reverse_index
                     self.setup_uci960_index = False
-                    text = self.dgt_text('text_960yes' if self.setup_uci960_index else 'text_960no')
+                    text = self.dgt_text('B00_960yes' if self.setup_uci960_index else 'B00_960no')
                 else:
                     if self.setup_uci960_result is None:
                         self.setup_uci960_result = self.setup_uci960_index
-                        text = self.dgt_text('text_scanboard')
+                        text = self.dgt_text('B00_scanboard')
                     else:
                         to_move = 'w' if self.setup_whitetomove_index else 'b'
                         fen = self.dgt_fen
@@ -618,32 +658,31 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.reset_menu()
                             return
                         else:
-                            DisplayDgt.show(self.dgt_text('text_illegalpos'))
-                            text = self.dgt_text('text_scanboard')
+                            DisplayDgt.show(self.dgt_text('Y05_illegalpos'))
+                            text = self.dgt_text('B00_scanboard')
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.SYSTEM_MENU:
             exit_menu = True
             if self.system_index == Settings.VERSION:
-                text = self.dgt_text('text_picochess')
+                text = self.dgt_text('B10_picochess')
                 DisplayDgt.show(text)
             elif self.system_index == Settings.IPADR:
                 if len(self.ip):
                     msg = self.ip
-                    text = self.dgt_text('text_default00', msg)
+                    text = self.dgt_text('B00_default', msg)
                 else:
-                    text = self.dgt_text('text_noipadr')
+                    text = self.dgt_text('B10_noipadr')
                 DisplayDgt.show(text)
             elif self.system_index == Settings.SOUND:
                 if self.system_sound_result is None:
                     self.system_sound_result = self.system_sound_index
-                    beep = str(self.system_sound_index)
-                    text = Dgt.DISPLAY_TEXT(l=None, m='beep ' + beep, s='bp ' + beep,
-                                            beep=self.bl(BeepLevel.BUTTON), duration=0)
+                    msg = str(self.system_sound_index)
+                    text = self.dgt_text('B00_beep', msg)
                     exit_menu = False
                 else:
                     self.beep_level = self.system_sound_index
-                    text = self.dgt_text('text_okbeep')
+                    text = self.dgt_text('B10_okbeep')
                 DisplayDgt.show(text)
             else:
                 logging.warning('wrong value for system_index: {0}'.format(self.system_index))
@@ -658,38 +697,36 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
         elif self.top_result == Menu.ENGINE_MENU:
             if self.mode_result == Mode.REMOTE:
-                text = self.dgt_text('text_nofunction')
+                text = self.dgt_text('B00_nofunction')
                 DisplayDgt.show(text)
             else:
                 if self.engine_result is None:
                     eng = self.installed_engines[self.engine_index]
                     if eng[2]:  # 2=has_levels
                         self.engine_result = self.engine_index
-                        level = str(self.engine_level_index)
-                        text = Dgt.DISPLAY_TEXT(l=None, m='level '+level, s='lvl '+level,
-                                                beep=self.bl(BeepLevel.BUTTON), duration=0)
+                        msg = str(self.engine_level_index)
+                        text = self.dgt_text('B00_level', msg)
                         DisplayDgt.show(text)
                     else:
-                        self.fire(Event.NEW_ENGINE(eng=eng, eng_text=self.dgt_text('text_okengine'),
-                                                   level=None, level_text=self.dgt_text('text_nolevel')))
+                        self.fire(Event.NEW_ENGINE(eng=eng, eng_text=self.dgt_text('B10_okengine'),
+                                                   level=None, level_text=self.dgt_text('B00_nolevel')))
                         self.engine_restart = True
                         self.reset_menu()
                 else:
                     level = self.engine_level_index
-                    text = Dgt.DISPLAY_TEXT(l=None, m='level '+str(level), s='lvl '+str(level),
-                                            beep=self.bl(BeepLevel.BUTTON), duration=1)
+                    text = self.dgt_text('B10_level', str(level))
                     eng = self.installed_engines[self.engine_result]
-                    self.fire(Event.NEW_ENGINE(eng=eng, eng_text=self.dgt_text('text_okengine'),
+                    self.fire(Event.NEW_ENGINE(eng=eng, eng_text=self.dgt_text('B10_okengine'),
                                                level=level, level_text=text))
                     self.engine_restart = True
                     self.reset_menu()
 
         elif self.top_result == Menu.BOOK_MENU:
             if self.mode_result == Mode.REMOTE:
-                text = self.dgt_text('text_nofunction')
+                text = self.dgt_text('B00_nofunction')
                 DisplayDgt.show(text)
             else:
-                text = self.dgt_text('text_okbook')
+                text = self.dgt_text('B10_okbook')
                 self.fire(Event.SET_OPENING_BOOK(book=self.all_books[self.book_index], book_text=text))
                 self.reset_menu()
 
@@ -706,7 +743,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 else:
                     logging.warning('wrong value for time_mode_index: {0}'.format(self.time_mode_index))
                     msg = 'error'
-                text = self.dgt_text('text_default00', msg)
+                text = self.dgt_text('B00_default', msg)
                 DisplayDgt.show(text)
             else:
                 if self.time_mode_index == TimeMode.FIXED:
@@ -718,7 +755,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 else:
                     logging.warning('wrong value for time_mode_index: {0}'.format(self.time_mode_index))
                     time_control = None
-                text = self.dgt_text('text_oktime')
+                text = self.dgt_text('B10_oktime')
                 self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=text))
                 self.reset_menu()
 
@@ -751,7 +788,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 self.engine_has_960 = message.has_960
                         break
                     if case(MessageApi.ENGINE_FAIL):
-                        DisplayDgt.show(self.dgt_text('text_erroreng'))
+                        DisplayDgt.show(self.dgt_text('Y00_erroreng'))
                         break
                     if case(MessageApi.COMPUTER_MOVE):
                         move = message.result.bestmove
@@ -781,8 +818,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         time_right = int(tc[chess.BLACK])
                         if self.flip_board:
                             time_left, time_right = time_right, time_left
-                        DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m="new game", s="newgam",
-                                                         beep=self.bl(BeepLevel.CONFIG), duration=1))
+                        DisplayDgt.show(self.dgt_text('C10_newgame'))
                         DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=0x04, wait=True))
                         break
                     if case(MessageApi.WAIT_STATE):
@@ -793,27 +829,23 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.play_move = chess.Move.null()
                         self.alternative = False
                         if self.ok_moves_messages:
-                            DisplayDgt.show(Dgt.DISPLAY_TEXT(l="okay pico", m="ok pico", s="okpico",
-                                                             beep=self.bl(BeepLevel.OKAY), duration=0.5))
+                            DisplayDgt.show(self.dgt_text('K05_okpico'))
                         self.reset_menu()
                         break
                     if case(MessageApi.USER_MOVE):
                         self.alternative = False
                         if self.ok_moves_messages:
-                            DisplayDgt.show(Dgt.DISPLAY_TEXT(l="okay user", m="ok user", s="okuser",
-                                                             beep=self.bl(BeepLevel.OKAY), duration=0.5))
+                            DisplayDgt.show(self.dgt_text('K05_okuser'))
                         break
                     if case(MessageApi.REVIEW_MOVE):
                         self.last_move = message.move
                         self.play_move = message.move
                         self.last_fen = message.fen
                         if self.ok_moves_messages:
-                            DisplayDgt.show(Dgt.DISPLAY_TEXT(l="okay move", m="ok move", s="okmove",
-                                                             beep=self.bl(BeepLevel.OKAY), duration=0.5))
+                            DisplayDgt.show(self.dgt_text('K05_okmove'))
                         break
                     if case(MessageApi.ALTERNATIVE_MOVE):
-                        DisplayDgt.show(Dgt.DISPLAY_TEXT(l="altn move", m="alt move", s="altmov",
-                                                         beep=self.bl(BeepLevel.BUTTON), duration=0.5))
+                        DisplayDgt.show(self.dgt_text('B05_altmove'))
                         break
                     if case(MessageApi.LEVEL):
                         if self.engine_restart:
@@ -845,13 +877,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if case(MessageApi.USER_TAKE_BACK):
                         self.reset_hint_and_score()
                         self.alternative = False
-                        DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m="takeback", s="takbak",
-                                                         beep=self.bl(BeepLevel.CONFIG), duration=0))
+                        DisplayDgt.show(self.dgt_text('C00_takeback'))
                         break
                     if case(MessageApi.GAME_ENDS):
                         ge = message.result.value
-                        DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m=ge, s=None,
-                                                         beep=self.bl(BeepLevel.CONFIG), duration=1))
+                        DisplayDgt.show(self.dgt_text('C10_default', ge))
                         break
                     if case(MessageApi.INTERACTION_MODE):
                         self.mode_index = message.mode
@@ -865,21 +895,18 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         break
                     if case(MessageApi.PLAY_MODE):
                         pm = message.play_mode.value
-                        DisplayDgt.show(Dgt.DISPLAY_TEXT(l=pm, m=pm[:8], s=pm[:6],
-                                                         beep=self.bl(BeepLevel.BUTTON), duration=1))
+                        DisplayDgt.show(self.dgt_text('B10_default', pm))
                         break
                     if case(MessageApi.NEW_SCORE):
                         self.score = message.score
                         self.mate = message.mate
                         if message.mode == Mode.KIBITZ and self.top_result is None:
-                            DisplayDgt.show(Dgt.DISPLAY_TEXT(l=None, m=str(self.score).rjust(6), s=None,
-                                                             beep=self.bl(BeepLevel.NO), duration=1))
+                            DisplayDgt.show(self.dgt_text('N10_default', str(self.score).rjust(6)))
                         break
                     if case(MessageApi.BOOK_MOVE):
                         self.score = None
                         self.mate = None
-                        DisplayDgt.show(Dgt.DISPLAY_TEXT(l="book move", m="book mov", s="book",
-                                                         beep=self.bl(BeepLevel.NO), duration=1))
+                        DisplayDgt.show(self.dgt_text('N10_bookmove'))
                         break
                     if case(MessageApi.NEW_PV):
                         self.hint_move = message.pv[0]
@@ -961,8 +988,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.engine_level_result = level
                             self.engine_level_index = level
                             logging.debug("Map-Fen: New level")
-                            text = Dgt.DISPLAY_TEXT(l=None, m='level '+str(level), s='lvl '+str(level),
-                                                    beep=self.bl(BeepLevel.MAP), duration=1)
+                            text = self.dgt_text('M10_level', str(level))
                             self.fire(Event.LEVEL(level=level, level_text=text))
                         elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":
                             logging.debug("Map-Fen: New game")
@@ -974,7 +1000,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 b = self.all_books[book_index]
                                 self.book_index = book_index
                                 logging.debug("Map-Fen: Opening book [%s]", b[1])
-                                text = Dgt.DISPLAY_TEXT(l=None, m=b[0], s=None, beep=self.bl(BeepLevel.MAP), duration=1)
+                                text = self.dgt_text('M10_default', b[0])
                                 self.fire(Event.SET_OPENING_BOOK(book=b, book_text=text))
                                 self.reset_menu()
                             except IndexError:
@@ -986,30 +1012,26 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                     self.engine_index = engine_index
                                     eng = self.installed_engines[self.engine_index]
                                     logging.debug("Map-Fen: Engine name [%s]", eng[1])
-                                    eng_text = Dgt.DISPLAY_TEXT(l=None, m=eng[1], s=None,
-                                                                beep=self.bl(BeepLevel.MAP), duration=1)
+                                    eng_text = self.dgt_text('M10_default', eng[1])
                                     level = self.engine_level_index if self.engine_level_result is None else self.engine_level_result
-                                    text = Dgt.DISPLAY_TEXT(l=None, m='level '+str(level), s='lvl '+str(level),
-                                                            beep=self.bl(BeepLevel.MAP), duration=1)
+                                    text = self.dgt_text('M10_level', str(level))
                                     self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, level=level, level_text=text))
                                     self.engine_restart = True
                                     self.reset_menu()
                                 except IndexError:
                                     pass
                             else:
-                                DisplayDgt.show(self.dgt_text('text_erroreng'))
+                                DisplayDgt.show(self.dgt_text('Y00_erroreng'))
                         elif fen in mode_map:
                             logging.debug("Map-Fen: Interaction mode [%s]", mode_map[fen])
-                            text = Dgt.DISPLAY_TEXT(l=None, m=mode_map[fen].value, s=None,
-                                                    beep=self.bl(BeepLevel.MAP), duration=1)
+                            text = self.dgt_text('M10_default', mode_map[fen].value)
                             self.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], mode_text=text))
                             self.reset_menu()
                         elif fen in self.time_control_fixed_map:
                             logging.debug("Map-Fen: Time control fixed")
                             self.time_mode_index = TimeMode.FIXED
                             self.time_control_fixed_index = list(self.time_control_fixed_map.keys()).index(fen)
-                            text = Dgt.DISPLAY_TEXT(l=None, m=self.time_control_fixed_list[self.time_control_fixed_index],
-                                                    s=None, beep=self.bl(BeepLevel.MAP), duration=1)
+                            text = self.dgt_text('M10_default', self.time_control_fixed_list[self.time_control_fixed_index])
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_fixed_map[fen],
                                                              time_text=text))
                             self.reset_menu()
@@ -1017,8 +1039,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             logging.debug("Map-Fen: Time control blitz")
                             self.time_mode_index = TimeMode.BLITZ
                             self.time_control_blitz_index = list(self.time_control_blitz_map.keys()).index(fen)
-                            text = Dgt.DISPLAY_TEXT(l=None, m=self.time_control_blitz_list[self.time_control_blitz_index],
-                                                    s=None, beep=self.bl(BeepLevel.MAP), duration=1)
+                            text = self.dgt_text('M10_default', self.time_control_blitz_list[self.time_control_blitz_index])
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_blitz_map[fen],
                                                              time_text=text))
                             self.reset_menu()
@@ -1026,8 +1047,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             logging.debug("Map-Fen: Time control fischer")
                             self.time_mode_index = TimeMode.FISCHER
                             self.time_control_fisch_index = list(self.time_control_fisch_map.keys()).index(fen)
-                            text = Dgt.DISPLAY_TEXT(l=None, m=self.time_control_fisch_list[self.time_control_fisch_index],
-                                                    s=None, beep=self.bl(BeepLevel.MAP), duration=1)
+                            text = self.dgt_text('M10_default', self.time_control_fisch_list[self.time_control_fisch_index])
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_fisch_map[fen],
                                                              time_text=text))
                             self.reset_menu()
@@ -1042,8 +1062,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.fire(Event.DRAWRESIGN(result=drawresign_map[self.drawresign_fen]))
                         else:
                             if self.draw_setup_pieces:
-                                DisplayDgt.show(Dgt.DISPLAY_TEXT(l="set pieces", m="set pcs", s="setup",
-                                                                 beep=False, duration=0))
+                                DisplayDgt.show(self.dgt_text('N00_setpieces'))
                                 self.draw_setup_pieces = False
                             self.fire(Event.FEN(fen=fen))
                         break
@@ -1055,8 +1074,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         DisplayDgt.show(Dgt.CLOCK_TIME(time_left=message.time_left, time_right=message.time_right))
                         break
                     if case(MessageApi.JACK_CONNECTED_ERROR):  # this will only work in case of 2 clocks connected!
-                        DisplayDgt.show(Dgt.DISPLAY_TEXT(l="error jack", m="err jack", s="jack",
-                                                         beep=True, duration=0))
+                        DisplayDgt.show(self.dgt_text('Y00_errorjack'))
                         break
                     if case(MessageApi.EBOARD_VERSION):
                         DisplayDgt.show(message.text)
