@@ -56,9 +56,11 @@ class DgtSerial(object):
         self.serial = None
         self.waitchars = ['/', '-', '\\', '|']
         self.lock = Lock()  # inside setup_serial()
-        # the next two are only used for "not dgtpi" mode
+        self.incoming_board_thread = None
+        # the next three are only used for "not dgtpi" mode
         self.clock_lock = False  # serial connected clock is locked
         self.last_clock_command = []  # Used for resend last (failed) clock command
+        self.rt = RepeatedTimer(1, self.watchdog)
 
     def write_board_command(self, message):
         mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
@@ -117,6 +119,10 @@ class DgtSerial(object):
                     channel = 'BT'
                 text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, beep=False, duration=0.5)
                 DisplayMsg.show(Message.EBOARD_VERSION(text=text, channel=channel))
+                if self.rt.is_running():
+                    logging.warning('watchdog timer is already running')
+                else:
+                    self.rt.start()
                 break
             if case(DgtMsg.DGT_MSG_BWTIME):
                 if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
@@ -262,7 +268,12 @@ class DgtSerial(object):
         self.write_board_command([DgtCmd.DGT_SEND_VERSION])  # Get board version
         self.write_board_command([DgtCmd.DGT_SEND_BRD])  # Update the board
 
+    def watchdog(self):
+        self.write_board_command([DgtCmd.DGT_RETURN_SERIALNR])  # the code doesnt really matter ;-)
+
     def setup_serial(self):
+        if self.rt.is_running():
+            self.rt.stop()
         with self.lock:
             wait_counter = 0
             while not self.serial:
@@ -275,13 +286,13 @@ class DgtSerial(object):
                                                   )
                 except pyserial.SerialException as e:
                     logging.error(e)
-                    s = 'board' + self.waitchars[wait_counter]
-                    text = Dgt.DISPLAY_TEXT(l='no E-' + s, m='no' + s, s=s, beep=False, duration=0)
+                    s = 'Board' + self.waitchars[wait_counter]
+                    text = Dgt.DISPLAY_TEXT(l='no e-' + s, m='no' + s, s=s, beep=False, duration=0)
                     DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text))
                     wait_counter = (wait_counter + 1) % len(self.waitchars)
                     time.sleep(0.5)
 
     def run(self):
-        incoming_board_thread = Timer(0, self.process_incoming_board_forever)
-        incoming_board_thread.start()
+        self.incoming_board_thread = Timer(0, self.process_incoming_board_forever)
+        self.incoming_board_thread.start()
         self.setup_serial()

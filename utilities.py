@@ -24,6 +24,7 @@ import urllib.request
 import socket
 import json
 import time
+from threading import Timer
 
 import uci
 import configparser
@@ -510,6 +511,34 @@ def ClassFactory(name, argnames, BaseClass=BaseClass):
         BaseClass.__init__(self, name)
     newclass = type(name, (BaseClass,),{"__init__": __init__})
     return newclass
+
+
+class RepeatedTimer(object):
+    def __init__(self, interval, function, *args, **kwargs):
+        self._timer = None
+        self.interval = interval
+        self.function = function
+        self.args = args
+        self.kwargs = kwargs
+        self.timer_running = False
+
+    def _run(self):
+        self.timer_running = False
+        self.start()
+        self.function(*self.args, **self.kwargs)
+
+    def is_running(self):
+        return self.timer_running
+
+    def start(self):
+        if not self.timer_running:
+            self._timer = Timer(self.interval, self._run)
+            self._timer.start()
+            self.timer_running = True
+
+    def stop(self):
+        self._timer.cancel()
+        self.timer_running = False
 
 
 class Dgt():

@@ -813,11 +813,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         # self.mode_index = Mode.NORMAL  # @todo
                         self.reset_menu()
                         self.alternative = False
-                        tc = message.time_control.clock_time
-                        time_left = int(tc[chess.WHITE])
-                        time_right = int(tc[chess.BLACK])
-                        if self.flip_board:
-                            time_left, time_right = time_right, time_left
+                        time_left, time_right = message.time_control.begin_time(self.flip_board)
                         DisplayDgt.show(self.dgt_text('C10_newgame'))
                         DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=0x04, wait=True))
                         break
@@ -1064,7 +1060,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             if self.draw_setup_pieces:
                                 DisplayDgt.show(self.dgt_text('N00_setpieces'))
                                 self.draw_setup_pieces = False
-                            self.fire(Event.FEN(fen=fen))
+                            if self.top_result is None:
+                                self.fire(Event.FEN(fen=fen))
+                            else:
+                                logging.debug('inside the menu. fen "{}" ignored'.format(fen))
                         break
                     if case(MessageApi.DGT_CLOCK_VERSION):
                         DisplayDgt.show(Dgt.CLOCK_VERSION(main_version=message.main_version,

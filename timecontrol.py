@@ -37,7 +37,7 @@ class TimeControl(object):
         self.reset()
 
     def reset(self):
-        """Resets the clock's times for both players"""
+        """Resets the clock's times for both players."""
         if self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
             self.clock_time = {chess.WHITE: float(self.minutes_per_game * 60),
                                chess.BLACK: float(self.minutes_per_game * 60)}
@@ -46,8 +46,15 @@ class TimeControl(object):
                                chess.BLACK: float(self.seconds_per_move)}
         self.active_color = None
 
+    def begin_time(self, flip_board):
+        """Returns the startup time for setting the clock at beginning."""
+        ct = self.clock_time
+        if flip_board:
+            ct[chess.WHITE], ct[chess.BLACK] = ct[chess.BLACK], ct[chess.WHITE]
+        return int(ct[chess.WHITE]), int(ct[chess.BLACK])
+
     def out_of_time(self, time_start):
-        """Fires an OUT_OF_TIME event"""
+        """Fires an OUT_OF_TIME event."""
         if self.active_color is not None:
             txt = 'current clock time (before subtracting) is {0} and color is {1}, out of time event started from {2}'
             logging.debug(txt.format(self.clock_time[self.active_color], self.active_color, time_start))
@@ -69,7 +76,7 @@ class TimeControl(object):
                 self.run_color = self.active_color
 
     def stop(self):
-        """Stop the clocks"""
+        """Stop the clocks."""
         if self.active_color is not None and self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
             self.timer.cancel()
             self.timer.join()
@@ -80,7 +87,7 @@ class TimeControl(object):
         return self.active_color is not None
 
     def uci(self):
-        """Returns remaining time for both players in an UCI dict"""
+        """Returns remaining time for both players in an UCI dict."""
         uci_dict = {}
         if self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
             uci_dict['wtime'] = str(int(self.clock_time[chess.WHITE] * 1000))
