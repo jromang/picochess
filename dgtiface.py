@@ -20,26 +20,25 @@ import time
 from threading import Timer, Thread
 
 
-class DgtInterface(DisplayDgt, Thread):
-    def __init__(self, enable_revelation_leds, beep_level):
-        super(DgtInterface, self).__init__()
+class DgtIface(DisplayDgt, Thread):
+    def __init__(self, enable_revelation_leds):
+        super(DgtIface, self).__init__()
 
         self.enable_dgt_3000 = False
         self.enable_dgt_pi = False
         self.clock_found = False
         self.enable_revelation_leds = enable_revelation_leds
-        self.beep_level = int(beep_level) & 0x0f
-        self.time_left = [0, 0, 0]
-        self.time_right = [0, 0, 0]
+        self.time_left = None  # [0, 0, 0]
+        self.time_right = None  # [0, 0, 0]
 
         self.timer = None
         self.timer_running = False
         self.clock_running = False
 
-    def display_text_on_clock(self, text, beep=BeepLevel.CONFIG):
+    def display_text_on_clock(self, text, beep=False):
         raise NotImplementedError()
 
-    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):
+    def display_move_on_clock(self, move, fen, beep=False):
         raise NotImplementedError()
 
     def light_squares_revelation_board(self, squares):
@@ -57,27 +56,20 @@ class DgtInterface(DisplayDgt, Thread):
     def end_clock(self, force=False):
         raise NotImplementedError()
 
-    def get_beep_level(self, beeplevel):
-        if beeplevel == BeepLevel.YES:
-            return True
-        if beeplevel == BeepLevel.NO:
-            return False
-        return bool(self.beep_level & beeplevel.value)
-
     def stopped_timer(self):
         self.timer_running = False
         if self.clock_running:
-            logging.debug('Showing the running clock again')
+            logging.debug('showing the running clock again')
             self.end_clock(force=False)
         else:
-            logging.debug('Clock not running - ignored duration')
+            logging.debug('clock not running - ignored duration')
 
     def run(self):
         while True:
             # Check if we have something to display
             try:
                 message = self.dgt_queue.get()
-                logging.debug("Received command from dgt queue: %s", message)
+                logging.debug("received command from dgt_queue: %s", message)
                 for case in switch(message):
                     if case(DgtApi.DISPLAY_MOVE):
                         message.wait = True  # TEST!
@@ -86,7 +78,7 @@ class DgtInterface(DisplayDgt, Thread):
                         if hasattr(message, 'duration') and message.duration > 0:
                             self.timer = Timer(message.duration, self.stopped_timer)
                             self.timer.start()
-                            logging.debug('Showing move for {} secs'.format(message.duration))
+                            logging.debug('showing move for {} secs'.format(message.duration))
                             self.timer_running = True
                         self.display_move_on_clock(message.move, message.fen, message.beep)
                         break
@@ -94,17 +86,17 @@ class DgtInterface(DisplayDgt, Thread):
                         message.wait = True  # TEST!
                         while self.timer_running and message.wait:
                             time.sleep(0.1)
-                        if hasattr(message, 'duration') and message.duration > 0:
-                            self.timer = Timer(message.duration, self.stopped_timer)
-                            self.timer.start()
-                            logging.debug('Showing text for {} secs'.format(message.duration))
-                            self.timer_running = True
                         if self.enable_dgt_pi:
                             text = message.l
                         else:
                             text = message.m if self.enable_dgt_3000 else message.s
                         if text is None:
                             text = message.m
+                        if hasattr(message, 'duration') and message.duration > 0:
+                            self.timer = Timer(message.duration, self.stopped_timer)
+                            self.timer.start()
+                            logging.debug('showing text for {} secs'.format(message.duration))
+                            self.timer_running = True
                         self.display_text_on_clock(text, message.beep)
                         break
                     if case(DgtApi.LIGHT_CLEAR):
@@ -123,10 +115,12 @@ class DgtInterface(DisplayDgt, Thread):
                         self.stop_clock()
                         break
                     if case(DgtApi.CLOCK_START):
+                        while self.timer_running and message.wait:
+                            time.sleep(0.1)
                         self.clock_running = (message.side != 0x04)
                         l_hms = hours_minutes_seconds(message.time_left)
                         r_hms = hours_minutes_seconds(message.time_right)
-                        logging.info('time send {} : {}'.format(l_hms, r_hms))
+                        logging.info('sending time to clock {} : {}'.format(l_hms, r_hms))
                         self.start_clock(message.time_left, message.time_right, message.side)
                         break
                     if case(DgtApi.CLOCK_VERSION):
@@ -135,7 +129,7 @@ class DgtInterface(DisplayDgt, Thread):
                             self.enable_dgt_3000 = True
                         if message.attached == 'i2c':
                             self.enable_dgt_pi = True
-                        self.show(Dgt.DISPLAY_TEXT(l='picoChs ' + version, m='pico ' + version, s='pic' + version, beep=BeepLevel.YES, duration=2))
+                        self.show(Dgt.DISPLAY_TEXT(l='picoChs ' + version, m='pico ' + version, s='pic' + version, beep=True, duration=2))
                         break
                     if case(DgtApi.CLOCK_TIME):
                         self.time_left = message.time_left

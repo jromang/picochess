@@ -42,6 +42,7 @@ from dgthw import DgtHw
 from dgtpi import DgtPi
 from dgtvr import DgtVr
 from dgtdisplay import DgtDisplay
+from dgtserial import DgtSerial
 
 from logging.handlers import RotatingFileHandler
 
@@ -381,9 +382,14 @@ def main():
     if args.log_file:
         handler = RotatingFileHandler('logs' + os.sep + args.log_file, maxBytes=1024*1024, backupCount=9)
         logging.basicConfig(level=getattr(logging, args.log_level.upper()),
-                            format='%(asctime)s.%(msecs)3d %(levelname)s %(module)s - %(funcName)s: %(message)s',
+                            format='%(asctime)s.%(msecs)03d %(levelname)5s %(module)10s - %(funcName)s: %(message)s',
                             datefmt="%Y-%m-%d %H:%M:%S", handlers=[handler])
     logging.getLogger("chess.uci").setLevel(logging.INFO)  # don't want to get so many python-chess uci messages
+
+    # log the startup parameters but hide the password fields
+    p = vars(args)
+    p['mailgun_key'] = p['server_key'] = p['password'] = p['smtp_pass'] = '*****'
+    logging.debug('startup parameters: {}'.format(p))
 
     # Update
     if args.enable_internet:
@@ -399,7 +405,7 @@ def main():
             gaviota = None
 
     # This class talks to DgtHw/DgtPi or DgtVr
-    DgtDisplay(args.disable_ok_move).start()
+    DgtDisplay(args.disable_ok_move, args.beep_level).start()
 
     # Launch web server
     if args.web_server_port:
@@ -407,17 +413,18 @@ def main():
 
     if args.dgt_port:
         # Connect to DGT board
-        logging.debug("Starting picochess with DGT board on [%s]", args.dgt_port)
+        logging.debug("starting picochess with DGT board on [%s]", args.dgt_port)
+        dgtserial = DgtSerial(args.dgt_port)
         if args.dgtpi:
-            dgthardware = DgtPi(args.dgt_port, args.enable_revelation_leds, args.beep_level)
+            dgthardware = DgtPi(dgtserial, args.enable_revelation_leds)
         else:
-            dgthardware = DgtHw(args.dgt_port, args.enable_revelation_leds, args.beep_level)
+            dgthardware = DgtHw(dgtserial, args.enable_revelation_leds)
     else:
         # Enable keyboard input and terminal display
-        logging.debug("Starting picochess with virtual DGT board")
+        logging.debug("starting picochess with virtual DGT board")
         KeyboardInput().start()
         TerminalDisplay().start()
-        dgthardware = DgtVr(args.enable_revelation_leds, args.beep_level)
+        dgthardware = DgtVr(args.enable_revelation_leds)
     # Start the show
     dgthardware.start()
 
@@ -437,7 +444,7 @@ def main():
     # Create ChessTalker for speech output
     talker = None
     if args.user_voice or args.computer_voice:
-        logging.debug("Initializing ChessTalker [%s, %s]", str(args.user_voice), str(args.computer_voice))
+        logging.debug("initializing ChessTalker [%s, %s]", str(args.user_voice), str(args.computer_voice))
         talker = chesstalker.chesstalker.ChessTalker(args.user_voice, args.computer_voice)
         talker.start()
     else:
@@ -449,7 +456,7 @@ def main():
     try:
         engine_name = engine.get().name
     except AttributeError:
-        logging.error("No engines started")
+        logging.error("no engines started")
         sys.exit(-1)
 
     # Startup - internal
@@ -459,7 +466,7 @@ def main():
     try:
         book_index = [book[1] for book in all_books].index('books/' + args.book)
     except ValueError:
-        logging.warning("Selected book not present, defaulting to %s", all_books[7][1])
+        logging.warning("selected book not present, defaulting to %s", all_books[7][1])
         book_index = 7
     bookreader = chess.polyglot.open_reader(all_books[book_index][1])
     searchmoves = AlternativeMover()
@@ -474,7 +481,7 @@ def main():
     engine_startup()  # send the args options to the engine
 
     # Startup - external
-    text = Dgt.DISPLAY_TEXT(l=None, m='bl   5', s=None, beep=BeepLevel.NO, duration=0)
+    text = Dgt.DISPLAY_TEXT(l=None, m='bl   5', s=None, beep=False, duration=0)
     DisplayMsg.show(Message.STARTUP_INFO(info={"interaction_mode": interaction_mode, "play_mode": play_mode,
                                                "book": all_books[book_index][1], "book_index": book_index,
                                                "time_text": text}))
@@ -489,7 +496,7 @@ def main():
         except queue.Empty:
             pass
         else:
-            logging.debug('Received event from evt queue: %s', event)
+            logging.debug('received event from evt_queue: %s', event)
             for case in switch(event):
                 if case(EventApi.FEN):
                     legal_fens = process_fen(event.fen, legal_fens)
@@ -497,9 +504,9 @@ def main():
 
                 if case(EventApi.KEYBOARD_MOVE):
                     move = event.move
-                    logging.debug('Keyboard move [%s]', move)
+                    logging.debug('keyboard move [%s]', move)
                     if move not in game.legal_moves:
-                        logging.warning('Illegal move [%s]', move)
+                        logging.warning('illegal move [%s]', move)
                     else:
                         g = copy.deepcopy(game)
                         g.push(move)
@@ -508,7 +515,7 @@ def main():
 
                 if case(EventApi.USER_MOVE):
                     move = event.move
-                    logging.debug('User move [%s]', move)
+                    logging.debug('user move [%s]', move)
                     if move not in game.legal_moves:
                         logging.warning('Illegal move [%s]', move)
                     else:
@@ -519,7 +526,7 @@ def main():
                     break
 
                 if case(EventApi.LEVEL):
-                    logging.debug("Setting engine to level %i", event.level)
+                    logging.debug("setting engine to level %i", event.level)
                     if engine.level(event.level):
                         engine.send()
                         DisplayMsg.show(Message.LEVEL(level=event.level, level_text=event.level_text))
@@ -535,7 +542,7 @@ def main():
                     if engine.quit():  # Ask nicely
                         if engine.terminate():  # If you won't go nicely.... 
                             if engine.kill():  # Right that does it!
-                                logging.error('Engine shutdown failure')
+                                logging.error('engine shutdown failure')
                                 DisplayMsg.show(Message.ENGINE_FAIL())
                                 engine_shutdown = False
                     if engine_shutdown:
@@ -547,14 +554,14 @@ def main():
                             engine_name = engine.get().name
                         except AttributeError:
                             # New engine failed to start, restart old engine
-                            logging.error("New engine failed to start, reverting to %s", old_path)
+                            logging.error("new engine failed to start, reverting to %s", old_path)
                             engine_fallback = True
                             engine = uci.Engine(old_path)
                             try:
                                 engine_name = engine.get().name
                             except AttributeError:
                                 # Help - old engine failed to restart. There is no engine
-                                logging.error("No engines started")
+                                logging.error("no engines started")
                                 sys.exit(-1)
                         # Schedule cleanup of old objects
                         gc.collect()
@@ -583,13 +590,13 @@ def main():
                     break
 
                 if case(EventApi.SETUP_POSITION):
-                    logging.debug("Setting up custom fen: {0}".format(event.fen))
+                    logging.debug("setting up custom fen: {0}".format(event.fen))
                     if engine.has_chess960():
                         engine.option('UCI_Chess960', event.uci960)
                         engine.send()
                     else:  # start normal new game if engine can't handle the user wish
                         event.uci960 = False
-                        logging.warning('Engine doesnt support 960 mode')
+                        logging.warning('engine doesnt support 960 mode')
                     if game.move_stack:
                         if game.is_game_over() or game_declared:
                             custom_fen = getattr(game, 'custom_fen', None)
@@ -603,7 +610,7 @@ def main():
                     interaction_mode = Mode.NORMAL
                     last_computer_fen = None
                     searchmoves.reset()
-                    DisplayMsg.show(Message.START_NEW_GAME())
+                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control))
                     game_declared = False
                     set_wait_state()
                     DisplayMsg.show(Message.WAIT_STATE())
@@ -636,7 +643,7 @@ def main():
 
                 if case(EventApi.NEW_GAME):
                     if game.move_stack:
-                        logging.debug("Starting a new game")
+                        logging.debug("starting a new game")
                         if not (game.is_game_over() or game_declared):
                             custom_fen = getattr(game, 'custom_fen', None)
                             DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode,
@@ -695,7 +702,7 @@ def main():
                                 score *= -1
                         except ValueError:
                             score = event.score
-                            logging.debug('Could not convert score ' + score)
+                            logging.debug('could not convert score ' + score)
                         except TypeError:
                             score = 'm {0}'.format(event.mate)
                     DisplayMsg.show(Message.NEW_SCORE(score=score, mate=event.mate, mode=interaction_mode))
@@ -714,7 +721,7 @@ def main():
                     break
 
                 if case(EventApi.SET_OPENING_BOOK):
-                    logging.debug("Changing opening book [%s]", event.book[1])
+                    logging.debug("changing opening book [%s]", event.book[1])
                     bookreader = chess.polyglot.open_reader(event.book[1])
                     DisplayMsg.show(Message.OPENING_BOOK(book_name=event.book[0], book_text=event.book_text))
                     break
@@ -763,7 +770,7 @@ def main():
                     break
 
                 if case():  # Default
-                    logging.warning("Event not handled : [%s]", event)
+                    logging.warning("event not handled : [%s]", event)
 
             evt_queue.task_done()
 

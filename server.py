@@ -108,7 +108,7 @@ class ChannelHandler(tornado.web.RequestHandler):
             r = {'type': 'broadcast', 'msg': 'Received position from Spectators!', 'pgn': pgn_str, 'fen': fen}
             EventHandler.write_to_clients(r)
         elif action == 'move':
-            WebServer.fire(Event.REMOTE_MOVE(move=self.get_argument("source") + self.get_argument("target"), fen= self.get_argument("fen")))
+            WebServer.fire(Event.REMOTE_MOVE(move=self.get_argument("source") + self.get_argument("target"), fen=self.get_argument("fen")))
 
 
 class EventHandler(WebSocketHandler):

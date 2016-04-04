@@ -16,17 +16,17 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from chess import Board
-from dgtinterface import *
+from dgtiface import *
 from dgtserial import *
 from ctypes import *
 from utilities import *
 from threading import Lock, Timer
 
 
-class DgtPi(DgtInterface):
-    def __init__(self, device, enable_revelation_leds, beep_level):
-        super(DgtPi, self).__init__(enable_revelation_leds, beep_level)
-        self.dgtserial = DgtSerial(device)
+class DgtPi(DgtIface):
+    def __init__(self, dgtserial, enable_revelation_leds):
+        super(DgtPi, self).__init__(enable_revelation_leds)
+        self.dgtserial = dgtserial
         self.dgtserial.run()
 
         self.lock = Lock()
@@ -78,6 +78,10 @@ class DgtPi(DgtInterface):
                         self.lib.dgtpicom_configure()  # restart the clock - cause its OFF
                         self.lib.dgtpicom_set_text(b'shutdown', 0x01, 0, 0)
                         Observable.fire(Event.SHUTDOWN())
+                    if ack3 == 0x11:
+                        logging.info("DGT clock [i2c]: button left/right pressed")
+                        self.lib.dgtpicom_set_text(b'shutdown', 0x01, 0, 0)
+                        Observable.fire(Event.SHUTDOWN())
                     if ack3 == 0x40:
                         logging.info("DGT clock [i2c]: lever pressed > right side down")
                     if ack3 == -0x40:
@@ -113,25 +117,31 @@ class DgtPi(DgtInterface):
             if res < 0:
                 logging.warning('Finally failed %i', res)
 
-    def display_text_on_clock(self, text, beep=BeepLevel.CONFIG):
-        beep = self.get_beep_level(beep)
+    def display_text_on_clock(self, text, beep=False):
         self._display_on_dgt_pi(text, beep)
 
-    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):
-        beep = self.get_beep_level(beep)
+    def display_move_on_clock(self, move, fen, beep=False):
         bit_board = Board(fen)
         text = bit_board.san(move)
         self._display_on_dgt_pi(text, beep)
 
     def light_squares_revelation_board(self, squares):
-        pass
+        if self.enable_revelation_leds:
+            for sq in squares:
+                dgt_square = (8 - int(sq[1])) * 8 + ord(sq[0]) - ord('a')
+                logging.debug("REV2 light on square %s", sq)
+                self.dgtserial.write_board_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x01, dgt_square, dgt_square])
 
     def clear_light_revelation_board(self):
-        pass
+        if self.enable_revelation_leds:
+            self.dgtserial.write_board_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
 
     def stop_clock(self):
         l_hms = self.time_left
         r_hms = self.time_right
+        if l_hms is None and r_hms is None:
+            logging.debug('time values not set - no need to stop the clock')
+            return
         with self.lock:
             res = self.lib.dgtpicom_set_and_run(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
             if res < 0:

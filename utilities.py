@@ -35,7 +35,7 @@ except ImportError:
 
 
 # picochess version
-version = '060'
+version = '061'
 
 evt_queue = queue.Queue()
 serial_queue = queue.Queue()
@@ -267,8 +267,7 @@ class TimeModeLoop(object):
 class Settings(enum.Enum):
     VERSION = 'version'
     IPADR = 'ip adr'
-    SHUTDOWN = 'shutdown'
-    REBOOT = 'reboot'
+    SOUND = 'sound'
 
 
 class SettingsLoop(object):
@@ -280,23 +279,19 @@ class SettingsLoop(object):
         if m == Settings.VERSION:
             return Settings.IPADR
         elif m == Settings.IPADR:
-            return Settings.SHUTDOWN
-        elif m == Settings.SHUTDOWN:
-            return Settings.REBOOT
-        elif m == Settings.REBOOT:
+            return Settings.SOUND
+        elif m == Settings.SOUND:
             return Settings.VERSION
         return 'error'
 
     @staticmethod
     def prev(m):
         if m == Settings.VERSION:
-            return Settings.REBOOT
+            return Settings.SOUND
+        elif m == Settings.SOUND:
+            return Settings.IPADR
         elif m == Settings.IPADR:
             return Settings.VERSION
-        elif m == Settings.SHUTDOWN:
-            return Settings.IPADR
-        elif m == Settings.REBOOT:
-            return Settings.SHUTDOWN
 
 
 @enum.unique
@@ -524,7 +519,7 @@ class Dgt():
     LIGHT_SQUARES = ClassFactory(DgtApi.LIGHT_SQUARES, ['squares'])
     CLOCK_END = ClassFactory(DgtApi.CLOCK_END, ['wait', 'force'])
     CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, [])
-    CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side'])
+    CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side', 'wait'])
     CLOCK_VERSION = ClassFactory(DgtApi.CLOCK_VERSION, ['main_version', 'sub_version', 'attached'])
     CLOCK_TIME = ClassFactory(DgtApi.CLOCK_TIME, ['time_left', 'time_right'])
     SERIALNR = ClassFactory(DgtApi.SERIALNR, [])
@@ -766,7 +761,7 @@ def update_picochess(auto_reboot=False):
 
 
 def shutdown():
-    logging.debug('Shutting down system')
+    logging.debug('shutting down system')
     time.sleep(1)  # give some time to send out the pgn file
     if platform.system() == 'Windows':
         os.system('shutdown /s')
@@ -775,7 +770,7 @@ def shutdown():
 
 
 def reboot():
-    logging.debug('Rebooting system')
+    logging.debug('rebooting system')
     time.sleep(1)  # give some time to send out the pgn file
     os.system('reboot')
 
@@ -788,7 +783,7 @@ def get_ip():
 
     # TODO: Better handling of exceptions of socket connect
     except socket.error:
-        logging.error("No Internet Connection!")
+        logging.error("no internet connection!")
     finally:
         s.close()
 
