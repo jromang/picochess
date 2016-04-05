@@ -41,7 +41,7 @@ class TimeControl(object):
         if self.mode == TimeMode.BLITZ:
             self.clock_time = {chess.WHITE: float(self.minutes_per_game * 60),
                                chess.BLACK: float(self.minutes_per_game * 60)}
-        if self.mode == TimeMode.FISCHER:
+        elif self.mode == TimeMode.FISCHER:
             self.clock_time = {chess.WHITE: float(self.minutes_per_game * 60 + self.fischer_increment),
                                chess.BLACK: float(self.minutes_per_game * 60 + self.fischer_increment)}                
         elif self.mode == TimeMode.FIXED:
