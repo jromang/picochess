@@ -749,7 +749,7 @@ def main():
                     custom_fen = getattr(game, 'custom_fen', None)
                     DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode,
                                                       game=copy.deepcopy(game), custom_fen=custom_fen))
-                    shutdown()
+                    shutdown(args.dgtpi)
                     break
 
                 if case(EventApi.REBOOT):
