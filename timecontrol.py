@@ -69,10 +69,11 @@ class TimeControl(object):
             self.start_time = time.time()
 
             if self.mode == TimeMode.FISCHER:
-                if color == chess.WHITE:
-                    self.clock_time[chess.BLACK] += self.fischer_increment
-                else:
-                    self.clock_time[chess.WHITE] += self.fischer_increment
+                self.clock_time[not color] += self.fischer_increment
+                # if color == chess.WHITE:
+                #     self.clock_time[chess.BLACK] += self.fischer_increment
+                # else:
+                #     self.clock_time[chess.WHITE] += self.fischer_increment
 
             # Only start thread if not already started for same color, and the player has not already lost on time
             if self.clock_time[color] > 0 and self.active_color is not None and self.run_color != self.active_color:

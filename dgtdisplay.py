@@ -756,10 +756,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     logging.warning('wrong value for time_mode_index: {0}'.format(self.time_mode_index))
                     time_control = None
                 tc = time_control.clock_time
-                time_left = int(tc[chess.WHITE])
-                time_right = int(tc[chess.BLACK])
-                if self.flip_board:
-                    time_left, time_right = time_right, time_left
+                time_left, time_right = tc.begin_time(self.flip_board)
+                # time_left = int(tc[chess.WHITE])
+                # time_right = int(tc[chess.BLACK])
+                # if self.flip_board:
+                #     time_left, time_right = time_right, time_left
                 text = self.dgt_text('B10_oktime')
                 self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=text))
                 DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=0x04, wait=True))
