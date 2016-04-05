@@ -143,7 +143,7 @@ class Menu(enum.Enum):
     TOP_MENU = 'top'  # Top Level Menu
     MODE_MENU = 'mode'  # Default Menu
     POSITION_MENU = 'position'  # Setup position menu
-    TIME_MENU = 'time' # Time controls menu
+    TIME_MENU = 'time'  # Time controls menu
     BOOK_MENU = 'book'  # Book menu
     ENGINE_MENU = 'engine'  # Engine menu
     SYSTEM_MENU = 'system'  # Settings menu
@@ -506,7 +506,7 @@ def ClassFactory(name, argnames, BaseClass=BaseClass):
         for key, value in kwargs.items():
             # here, the argnames variable is the one passed to the ClassFactory call
             if key not in argnames:
-                raise TypeError("Argument %s not valid for %s" % (key, self.__class__.__name__))
+                raise TypeError("argument %s not valid for %s" % (key, self.__class__.__name__))
             setattr(self, key, value)
         BaseClass.__init__(self, name)
     newclass = type(name, (BaseClass,),{"__init__": __init__})
@@ -778,7 +778,7 @@ def update_picochess(auto_reboot=False):
             logging.debug(output)
             if 'up-to-date' not in output:
                 # Update
-                logging.debug('Updating picochess')
+                logging.debug('updating picochess')
                 output = subprocess.Popen(["pip3", "install", "-r", "requirements.txt"],
                                           stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
                 logging.debug(output)

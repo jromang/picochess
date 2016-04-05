@@ -120,7 +120,8 @@ class DgtIface(DisplayDgt, Thread):
                         self.clock_running = (message.side != 0x04)
                         l_hms = hours_minutes_seconds(message.time_left)
                         r_hms = hours_minutes_seconds(message.time_right)
-                        logging.info('sending time to clock {} : {}'.format(l_hms, r_hms))
+                        logging.debug('last time received from clock {} : {}'.format(self.time_left, self.time_right))
+                        logging.debug('sending time to clock {} : {}'.format(l_hms, r_hms))
                         self.start_clock(message.time_left, message.time_right, message.side)
                         break
                     if case(DgtApi.CLOCK_VERSION):

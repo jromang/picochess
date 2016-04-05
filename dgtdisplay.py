@@ -760,8 +760,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.reset_menu()
 
     def drawresign(self):
-        rnk_8, rnk_7, rnk_6, rnk_5, rnk_4, rnk_3, rnk_2, rnk_1 = self.dgt_fen.split("/")
-        self.drawresign_fen = "8/8/8/" + rnk_5 + "/" + rnk_4 + "/8/8/8"
+        _, _, _, rnk_5, rnk_4, _, _, _ = self.dgt_fen.split("/")
+        return "8/8/8/" + rnk_5 + "/" + rnk_4 + "/8/8/8"
 
     def run(self):
         while True:
@@ -975,7 +975,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             logging.debug('ignore same fen')
                             break
                         self.dgt_fen = fen
-                        self.drawresign()
+                        self.drawresign_fen = self.drawresign()
                         # Fire the appropriate event
                         if fen in level_map:
                             level = 3 * level_map.index(fen)
@@ -1054,8 +1054,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             logging.debug("Map-Fen: reboot")
                             self.reboot()
                         elif self.drawresign_fen in drawresign_map:
-                            logging.debug("Map-Fen: drawresign")
-                            self.fire(Event.DRAWRESIGN(result=drawresign_map[self.drawresign_fen]))
+                            if self.top_result is None:
+                                logging.debug("Map-Fen: drawresign")
+                                self.fire(Event.DRAWRESIGN(result=drawresign_map[self.drawresign_fen]))
                         else:
                             if self.draw_setup_pieces:
                                 DisplayDgt.show(self.dgt_text('N00_setpieces'))
