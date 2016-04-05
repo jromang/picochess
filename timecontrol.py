@@ -37,10 +37,13 @@ class TimeControl(object):
         self.reset()
 
     def reset(self):
-        """Resets the clock's times for both players."""
-        if self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
+        """Resets the clock's times for both players"""
+        if self.mode == TimeMode.BLITZ:
             self.clock_time = {chess.WHITE: float(self.minutes_per_game * 60),
                                chess.BLACK: float(self.minutes_per_game * 60)}
+        elif self.mode == TimeMode.FISCHER:
+            self.clock_time = {chess.WHITE: float(self.minutes_per_game * 60 + self.fischer_increment),
+                               chess.BLACK: float(self.minutes_per_game * 60 + self.fischer_increment)}
         elif self.mode == TimeMode.FIXED:
             self.clock_time = {chess.WHITE: float(self.seconds_per_move),
                                chess.BLACK: float(self.seconds_per_move)}
@@ -66,7 +69,10 @@ class TimeControl(object):
             self.start_time = time.time()
 
             if self.mode == TimeMode.FISCHER:
-                self.clock_time[color] += self.fischer_increment
+                if color == chess.WHITE:
+                    self.clock_time[chess.BLACK] += self.fischer_increment
+                else:
+                    self.clock_time[chess.WHITE] += self.fischer_increment
 
             # Only start thread if not already started for same color, and the player has not already lost on time
             if self.clock_time[color] > 0 and self.active_color is not None and self.run_color != self.active_color:
