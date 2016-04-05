@@ -549,7 +549,7 @@ class Dgt():
     LIGHT_SQUARES = ClassFactory(DgtApi.LIGHT_SQUARES, ['squares'])
     CLOCK_END = ClassFactory(DgtApi.CLOCK_END, ['wait', 'force'])
     CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, [])
-    CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side', 'wait'])
+    CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side', 'wait', 'callback'])
     CLOCK_VERSION = ClassFactory(DgtApi.CLOCK_VERSION, ['main_version', 'sub_version', 'attached'])
     CLOCK_TIME = ClassFactory(DgtApi.CLOCK_TIME, ['time_left', 'time_right'])
     SERIALNR = ClassFactory(DgtApi.SERIALNR, [])
@@ -580,7 +580,7 @@ class Message():
     SEARCH_STARTED = ClassFactory(MessageApi.SEARCH_STARTED, ['engine_status'])
     SEARCH_STOPPED = ClassFactory(MessageApi.SEARCH_STOPPED, ['engine_status'])
     USER_TAKE_BACK = ClassFactory(MessageApi.USER_TAKE_BACK, [])
-    RUN_CLOCK = ClassFactory(MessageApi.RUN_CLOCK, ['turn', 'time_control'])
+    RUN_CLOCK = ClassFactory(MessageApi.RUN_CLOCK, ['turn', 'time_control', 'callback'])
     STOP_CLOCK = ClassFactory(MessageApi.STOP_CLOCK, [])
     USER_MOVE = ClassFactory(MessageApi.USER_MOVE, ['move', 'game'])
     UCI_OPTION_LIST = ClassFactory(MessageApi.UCI_OPTION_LIST, ['options'])
@@ -624,7 +624,7 @@ class Event():
     NEW_PV = ClassFactory(EventApi.NEW_PV, ['pv'])
     NEW_SCORE = ClassFactory(EventApi.NEW_SCORE, ['score', 'mate'])
     OUT_OF_TIME = ClassFactory(EventApi.OUT_OF_TIME, ['color'])
-    DGT_CLOCK_STARTED = ClassFactory(EventApi.DGT_CLOCK_STARTED, [])
+    DGT_CLOCK_STARTED = ClassFactory(EventApi.DGT_CLOCK_STARTED, ['callback'])
 
 
 def get_opening_books():

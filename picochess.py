@@ -142,13 +142,8 @@ def main():
             Observable.fire(Event.NEW_SCORE(score='tb', mate=score))
         return score
 
-    def think(game, tc):
-        """
-        Starts a new search on the current game.
-        If a move is found in the opening book, fire an event in a few seconds.
-        :return:
-        """
-        DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=tc))
+    def think_callback():
+        tc = time_control
         tc.start(game.turn)
 
         book_move = searchmoves.book(bookreader, game)
@@ -162,6 +157,26 @@ def main():
             uci_dict['searchmoves'] = searchmoves.all(game)
             engine.go(uci_dict)
 
+    def think(game, tc):
+        """
+        Starts a new search on the current game.
+        If a move is found in the opening book, fire an event in a few seconds.
+        :return:
+        """
+        DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=tc, callback=think_callback))
+        # tc.start(game.turn)
+        #
+        # book_move = searchmoves.book(bookreader, game)
+        # if book_move:
+        #     Observable.fire(Event.NEW_SCORE(score='book', mate=None))
+        #     Observable.fire(Event.BEST_MOVE(result=book_move, inbook=True))
+        # else:
+        #     probe_tablebase(game)
+        #     engine.position(copy.deepcopy(game))
+        #     uci_dict = tc.uci()
+        #     uci_dict['searchmoves'] = searchmoves.all(game)
+        #     engine.go(uci_dict)
+
     def analyse(game):
         """
         Starts a new ponder search on the current game.
@@ -171,14 +186,19 @@ def main():
         engine.position(copy.deepcopy(game))
         engine.ponder()
 
+    def observe_callback():
+        tc = time_control
+        tc.start(game.turn)
+        analyse(game)
+
     def observe(game, tc):
         """
         Starts a new ponder search on the current game.
         :return:
         """
-        DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=tc))
-        tc.start(game.turn)
-        analyse(game)
+        DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=tc, callback=observe_callback))
+        # tc.start(game.turn)
+        # analyse(game)
 
     def stop_search():
         """
@@ -221,6 +241,9 @@ def main():
             DisplayMsg.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=copy.deepcopy(game), custom_fen=custom_fen))
             return False
 
+    def timecontrol_callback():
+        time_control.start(game.turn)
+
     def process_fen(fen, legal_fens):
         nonlocal last_computer_fen
         if fen in legal_fens:
@@ -241,8 +264,8 @@ def main():
                 searchmoves.reset()
                 DisplayMsg.show(Message.COMPUTER_MOVE_DONE_ON_BOARD())
                 if time_control.mode != TimeMode.FIXED:
-                    DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=time_control))
-                    time_control.start(game.turn)
+                    DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=time_control, callback=timecontrol_callback))
+                    # time_control.start(game.turn)
         else:  # Check if this a a previous legal position and allow user to restart from this position
             game_history = copy.deepcopy(game)
             while game_history.move_stack:
@@ -637,8 +660,8 @@ def main():
                     if time_control.is_ticking():
                         stop_clock()
                     else:
-                        DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=time_control))
-                        time_control.start(game.turn)
+                        DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=time_control, callback=timecontrol_callback))
+                        # time_control.start(game.turn)
                     break
 
                 if case(EventApi.NEW_GAME):
@@ -770,7 +793,12 @@ def main():
                     break
 
                 if case(EventApi.DGT_CLOCK_STARTED):
-                    logging.info('DGT_CLOCK_STARTED called')
+                    # logging.info('DGT_CLOCK_STARTED called')
+                    if event.callback:
+                        logging.debug('callback started')
+                        event.callback()
+                    else:
+                        logging.debug('callback NOT started')
                     break
 
                 if case():  # Default

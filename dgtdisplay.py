@@ -815,7 +815,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.alternative = False
                         time_left, time_right = message.time_control.current_clock_time(self.flip_board)
                         DisplayDgt.show(self.dgt_text('C10_newgame'))
-                        DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=0x04, wait=True))
+                        DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=0x04, wait=True, callback=None))
                         break
                     if case(MessageApi.WAIT_STATE):
                         DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
@@ -936,7 +936,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 time_right = 0
                         # @todo Make this independent from side DGT Hex codes
                         side = 0x01 if (message.turn == chess.WHITE) != self.flip_board else 0x02
-                        DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side, wait=False))
+                        DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right,
+                                                        side=side, wait=False, callback=message.callback))
                         break
                     if case(MessageApi.STOP_CLOCK):
                         DisplayDgt.show(Dgt.CLOCK_STOP())
