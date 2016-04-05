@@ -813,7 +813,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         # self.mode_index = Mode.NORMAL  # @todo
                         self.reset_menu()
                         self.alternative = False
-                        time_left, time_right = message.time_control.begin_time(self.flip_board)
+                        time_left, time_right = message.time_control.current_clock_time(self.flip_board)
                         DisplayDgt.show(self.dgt_text('C10_newgame'))
                         DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=0x04, wait=True))
                         break
@@ -925,19 +925,17 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         logging.debug('Search stopped')
                         break
                     if case(MessageApi.RUN_CLOCK):
-                        # @todo Make this code independent from DGT Hex codes => more abstract
                         tc = message.time_control
-                        time_left = int(tc.clock_time[chess.WHITE])
-                        if time_left < 0:
-                            time_left = 0
-                        time_right = int(tc.clock_time[chess.BLACK])
-                        if time_right < 0:
-                            time_right = 0
-                        side = 0x01 if (message.turn == chess.WHITE) != self.flip_board else 0x02
                         if tc.mode == TimeMode.FIXED:
                             time_left = time_right = tc.seconds_per_move
-                        if self.flip_board:
-                            time_left, time_right = time_right, time_left
+                        else:
+                            time_left, time_right = tc.current_clock_time(self.flip_board)
+                            if time_left < 0:
+                                time_left = 0
+                            if time_right < 0:
+                                time_right = 0
+                        # @todo Make this independent from side DGT Hex codes
+                        side = 0x01 if (message.turn == chess.WHITE) != self.flip_board else 0x02
                         DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side, wait=False))
                         break
                     if case(MessageApi.STOP_CLOCK):

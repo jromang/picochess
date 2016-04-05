@@ -81,6 +81,7 @@ class EventApi():
     NEW_PV = 'EVT_NEW_PV'  # Engine sends a new principal variation
     NEW_SCORE = 'EVT_NEW_SCORE'  # Engine sends a new score
     OUT_OF_TIME = 'EVT_OUT_OF_TIME'  # Clock flag fallen
+    DGT_CLOCK_STARTED = 'EVT_DGT_CLOCK_STARTED'  # DGT Clock is running
 
 
 class MessageApi():
@@ -623,6 +624,7 @@ class Event():
     NEW_PV = ClassFactory(EventApi.NEW_PV, ['pv'])
     NEW_SCORE = ClassFactory(EventApi.NEW_SCORE, ['score', 'mate'])
     OUT_OF_TIME = ClassFactory(EventApi.OUT_OF_TIME, ['color'])
+    DGT_CLOCK_STARTED = ClassFactory(EventApi.DGT_CLOCK_STARTED, [])
 
 
 def get_opening_books():

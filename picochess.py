@@ -149,7 +149,7 @@ def main():
         :return:
         """
         DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=tc))
-        tc.run(game.turn)
+        tc.start(game.turn)
 
         book_move = searchmoves.book(bookreader, game)
         if book_move:
@@ -177,7 +177,7 @@ def main():
         :return:
         """
         DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=tc))
-        tc.run(game.turn)
+        tc.start(game.turn)
         analyse(game)
 
     def stop_search():
@@ -242,7 +242,7 @@ def main():
                 DisplayMsg.show(Message.COMPUTER_MOVE_DONE_ON_BOARD())
                 if time_control.mode != TimeMode.FIXED:
                     DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=time_control))
-                    time_control.run(game.turn)
+                    time_control.start(game.turn)
         else:  # Check if this a a previous legal position and allow user to restart from this position
             game_history = copy.deepcopy(game)
             while game_history.move_stack:
@@ -638,7 +638,7 @@ def main():
                         stop_clock()
                     else:
                         DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=time_control))
-                        time_control.run(game.turn)
+                        time_control.start(game.turn)
                     break
 
                 if case(EventApi.NEW_GAME):
@@ -767,6 +767,10 @@ def main():
 
                 if case(EventApi.DGT_FEN):
                     DisplayMsg.show(Message.DGT_FEN(fen=event.fen))
+                    break
+
+                if case(EventApi.DGT_CLOCK_STARTED):
+                    logging.info('DGT_CLOCK_STARTED called')
                     break
 
                 if case():  # Default

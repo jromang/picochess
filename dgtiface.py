@@ -123,6 +123,7 @@ class DgtIface(DisplayDgt, Thread):
                         logging.debug('last time received from clock {} : {}'.format(self.time_left, self.time_right))
                         logging.debug('sending time to clock {} : {}'.format(l_hms, r_hms))
                         self.start_clock(message.time_left, message.time_right, message.side)
+                        Observable.fire(Event.DGT_CLOCK_STARTED())
                         break
                     if case(DgtApi.CLOCK_VERSION):
                         self.clock_found = True

@@ -46,7 +46,7 @@ class TimeControl(object):
                                chess.BLACK: float(self.seconds_per_move)}
         self.active_color = None
 
-    def begin_time(self, flip_board):
+    def current_clock_time(self, flip_board=False):
         """Returns the startup time for setting the clock at beginning."""
         ct = self.clock_time
         if flip_board:
@@ -60,30 +60,51 @@ class TimeControl(object):
             logging.debug(txt.format(self.clock_time[self.active_color], self.active_color, time_start))
             Observable.fire(Event.OUT_OF_TIME(color=self.active_color))
 
-    def run(self, color):
-        if self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
-            self.active_color = color
-            self.start_time = time.time()
+    def start(self, color):
+        """Starts the internal clock."""
+        if self.active_color is None:
+            if self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
+                self.active_color = color
+                self.start_time = time.time()
 
-            if self.mode == TimeMode.FISCHER:
-                self.clock_time[color] += self.fischer_increment
+                if self.mode == TimeMode.FISCHER:
+                    self.clock_time[color] += self.fischer_increment
 
-            # Only start thread if not already started for same color, and the player has not already lost on time
-            if self.clock_time[color] > 0 and self.active_color is not None and self.run_color != self.active_color:
-                self.timer = threading.Timer(copy.copy(self.clock_time[color]), self.out_of_time,
-                                             [copy.copy(self.clock_time[color])])
-                self.timer.start()
-                self.run_color = self.active_color
+                # log times
+                time_w, time_b = self.current_clock_time()
+                w_hms = hours_minutes_seconds(time_w)
+                b_hms = hours_minutes_seconds(time_b)
+                logging.info('new internal time: {} : {}'.format(w_hms, b_hms))
+
+                # Only start thread if not already started for same color, and the player has not already lost on time
+                if self.clock_time[color] > 0 and self.active_color is not None and self.run_color != self.active_color:
+                    self.timer = threading.Timer(copy.copy(self.clock_time[color]), self.out_of_time,
+                                                 [copy.copy(self.clock_time[color])])
+                    self.timer.start()
+                    self.run_color = self.active_color
+        else:
+            logging.warning('active color is {}'.format(self.active_color))
 
     def stop(self):
-        """Stop the clocks."""
-        if self.active_color is not None and self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
-            self.timer.cancel()
-            self.timer.join()
-            self.clock_time[self.active_color] -= time.time() - self.start_time
-            self.active_color = None
+        """Stop the internal clock."""
+        if self.active_color is not None:
+            if self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
+                self.timer.cancel()
+                self.timer.join()
+                self.clock_time[self.active_color] -= time.time() - self.start_time
+
+                # log times
+                time_w, time_b = self.current_clock_time()
+                w_hms = hours_minutes_seconds(time_w)
+                b_hms = hours_minutes_seconds(time_b)
+                logging.info('new internal time: {} : {}'.format(w_hms, b_hms))
+
+                self.active_color = None
+        else:
+            logging.warning('active color is None')
 
     def is_ticking(self):
+        """Is the internal clock running?"""
         return self.active_color is not None
 
     def uci(self):
