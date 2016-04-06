@@ -36,7 +36,7 @@ except ImportError:
 
 
 # picochess version
-version = '061'
+version = '062'
 
 evt_queue = queue.Queue()
 serial_queue = queue.Queue()
@@ -141,13 +141,13 @@ class DgtApi():
 
 @enum.unique
 class Menu(enum.Enum):
-    TOP_MENU = 'top'  # Top Level Menu
-    MODE_MENU = 'mode'  # Default Menu
-    POSITION_MENU = 'position'  # Setup position menu
-    TIME_MENU = 'time'  # Time controls menu
-    BOOK_MENU = 'book'  # Book menu
-    ENGINE_MENU = 'engine'  # Engine menu
-    SYSTEM_MENU = 'system'  # Settings menu
+    TOP_MENU = 'B00_menu_top_menu'  # Top Level Menu
+    MODE_MENU = 'B00_menu_mode_menu'  # Default Menu
+    POSITION_MENU = 'B00_menu_position_menu'  # Setup position menu
+    TIME_MENU = 'B00_menu_time_menu'  # Time controls menu
+    BOOK_MENU = 'B00_menu_book_menu'  # Book menu
+    ENGINE_MENU = 'B00_menu_engine_menu'  # Engine menu
+    SYSTEM_MENU = 'B00_menu_system_menu'  # Settings menu
 
 
 class MenuLoop(object):
@@ -189,11 +189,11 @@ class MenuLoop(object):
 
 @enum.unique
 class Mode(enum.Enum):
-    NORMAL = 'normal'
-    ANALYSIS = 'analysis'
-    KIBITZ = 'kibitz'
-    OBSERVE = 'observe'
-    REMOTE = 'remote'
+    NORMAL = 'B00_mode_normal_menu'
+    ANALYSIS = 'B00_mode_analysis_menu'
+    KIBITZ = 'B00_mode_kibitz_menu'
+    OBSERVE = 'B00_mode_observe_menu'
+    REMOTE = 'B00_mode_remote_menu'
 
 
 class ModeLoop(object):
@@ -236,9 +236,9 @@ class PlayMode(enum.Enum):
 
 
 class TimeMode(enum.Enum):
-    FIXED = 'fixed'  # Fixed seconds per move
-    BLITZ = 'blitz'  # Fixed time per game
-    FISCHER = 'fischer'  # Fischer increment
+    FIXED = 'B00_timemode_fixed_menu'  # Fixed seconds per move
+    BLITZ = 'B00_timemode_blitz_menu'  # Fixed time per game
+    FISCHER = 'B00_timemode_fischer_menu'  # Fischer increment
 
 
 class TimeModeLoop(object):
@@ -267,9 +267,9 @@ class TimeModeLoop(object):
 
 
 class Settings(enum.Enum):
-    VERSION = 'version'
-    IPADR = 'ip adr'
-    SOUND = 'sound'
+    VERSION = 'B00_settings_version_menu'
+    IPADR = 'B00_settings_ipadr_menu'
+    SOUND = 'B00_settings_sound_menu'
 
 
 class SettingsLoop(object):
@@ -298,16 +298,16 @@ class SettingsLoop(object):
 
 @enum.unique
 class GameResult(enum.Enum):
-    MATE = 'mate'
-    STALEMATE = 'stalemate'
-    OUT_OF_TIME = 'time'
-    INSUFFICIENT_MATERIAL = 'material'
-    SEVENTYFIVE_MOVES = '75 moves'
-    FIVEFOLD_REPETITION = 'repetition'
-    ABORT = 'abort'
-    RESIGN_WHITE = 'W wins'
-    RESIGN_BLACK = 'B wins'
-    DRAW = 'draw'
+    MATE = 'B00_gameresult_mate_menu'
+    STALEMATE = 'B00_gameresult_stalemate_menu'
+    OUT_OF_TIME = 'B00_gameresult_time_menu'
+    INSUFFICIENT_MATERIAL = 'B00_gameresult_material_menu'
+    SEVENTYFIVE_MOVES = 'B00_gameresult_moves_menu'
+    FIVEFOLD_REPETITION = 'B00_gameresult_repetition_menu'
+    ABORT = 'B00_gameresult_abort_menu'
+    RESIGN_WHITE = 'B00_gameresult_white_menu'
+    RESIGN_BLACK = 'B00_gameresult_black_menu'
+    DRAW = 'B00_gameresult_draw_menu'
 
 
 class EngineStatus(AutoNumber):
