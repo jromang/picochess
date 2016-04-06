@@ -72,23 +72,19 @@ class TimeControl(object):
 
             if self.mode == TimeMode.FISCHER:
                 self.clock_time[not color] += self.fischer_increment
-                # if color == chess.WHITE:
-                #     self.clock_time[chess.BLACK] += self.fischer_increment
-                # else:
-                #     self.clock_time[chess.WHITE] += self.fischer_increment
 
-                # log times
-                time_w, time_b = self.current_clock_time()
-                w_hms = hours_minutes_seconds(time_w)
-                b_hms = hours_minutes_seconds(time_b)
-                logging.info('new internal time: {} : {}'.format(w_hms, b_hms))
+            # log times
+            time_w, time_b = self.current_clock_time()
+            w_hms = hours_minutes_seconds(time_w)
+            b_hms = hours_minutes_seconds(time_b)
+            logging.info('new internal time: {} : {}'.format(w_hms, b_hms))
 
-                # Only start thread if not already started for same color, and the player has not already lost on time
-                if self.clock_time[color] > 0 and self.active_color is not None and self.run_color != self.active_color:
-                    self.timer = threading.Timer(copy.copy(self.clock_time[color]), self.out_of_time,
-                                                 [copy.copy(self.clock_time[color])])
-                    self.timer.start()
-                    self.run_color = self.active_color
+            # Only start thread if not already started for same color, and the player has not already lost on time
+            if self.clock_time[color] > 0 and self.active_color is not None and self.run_color != self.active_color:
+                self.timer = threading.Timer(copy.copy(self.clock_time[color]), self.out_of_time,
+                                             [copy.copy(self.clock_time[color])])
+                self.timer.start()
+                self.run_color = self.active_color
         else:
             logging.warning('active color is {}'.format(self.active_color))
 
