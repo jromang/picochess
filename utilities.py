@@ -791,11 +791,13 @@ def update_picochess(auto_reboot=False):
                     reboot()
 
 
-def shutdown():
+def shutdown(dgtpi):
     logging.debug('shutting down system')
     time.sleep(1)  # give some time to send out the pgn file
     if platform.system() == 'Windows':
         os.system('shutdown /s')
+    elif dgtpi:
+        os.system('systemctl isolate dgtpistandby.target')
     else:
         os.system('shutdown -h now')
 
