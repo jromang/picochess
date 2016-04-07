@@ -164,18 +164,6 @@ def main():
         :return:
         """
         DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=tc, callback=think_callback))
-        # tc.start(game.turn)
-        #
-        # book_move = searchmoves.book(bookreader, game)
-        # if book_move:
-        #     Observable.fire(Event.NEW_SCORE(score='book', mate=None))
-        #     Observable.fire(Event.BEST_MOVE(result=book_move, inbook=True))
-        # else:
-        #     probe_tablebase(game)
-        #     engine.position(copy.deepcopy(game))
-        #     uci_dict = tc.uci()
-        #     uci_dict['searchmoves'] = searchmoves.all(game)
-        #     engine.go(uci_dict)
 
     def analyse(game):
         """
@@ -253,6 +241,7 @@ def main():
                     if game.move_stack:
                         game.pop()
             legal_moves = list(game.legal_moves)
+            time_control.add_inc(game.turn)
             Observable.fire(Event.USER_MOVE(move=legal_moves[legal_fens.index(fen)]))
         elif fen == last_computer_fen:  # Player had done the computer move on the board
             last_computer_fen = None
@@ -260,6 +249,7 @@ def main():
                 # finally reset all alternative moves see: handle_move()
                 nonlocal searchmoves
                 searchmoves.reset()
+                time_control.add_inc(not game.turn)
                 DisplayMsg.show(Message.COMPUTER_MOVE_DONE_ON_BOARD())
                 if time_control.mode != TimeMode.FIXED:
                     DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=time_control, callback=timecontrol_callback))
@@ -391,6 +381,7 @@ def main():
     parser.add_argument("-v", "--version", action='version', version='%(prog)s version {}'.format(version),
                         help="show current version", default=None)
     parser.add_argument("-pi", "--dgtpi", action='store_true', help="use the dgtpi hardware")
+    parser.add_argument("-lang", "--language", choices=['en', 'de', 'nl'], default='en', help="picochess language")
 
     args = parser.parse_args()
     if args.engine is None:
@@ -426,7 +417,7 @@ def main():
             gaviota = None
 
     # This class talks to DgtHw/DgtPi or DgtVr
-    DgtDisplay(args.disable_ok_move, args.beep_level).start()
+    DgtDisplay(args.disable_ok_move, args.beep_level, args.language).start()
 
     # Launch web server
     if args.web_server_port:
@@ -658,6 +649,7 @@ def main():
                     if time_control.is_ticking():
                         stop_clock()
                     else:
+                        time_control.add_inc(game.turn)
                         DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=time_control, callback=timecontrol_callback))
                         # time_control.start(game.turn)
                     break

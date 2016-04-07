@@ -63,15 +63,16 @@ class TimeControl(object):
             logging.debug(txt.format(self.clock_time[self.active_color], self.active_color, time_start))
             Observable.fire(Event.OUT_OF_TIME(color=self.active_color))
 
+    def add_inc(self, color):
+        if self.mode == TimeMode.FISCHER:
+            self.clock_time[color] += self.fischer_increment
+
     def start(self, color):
         """Starts the internal clock."""
         if self.active_color is None:
             if self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
                 self.active_color = color
                 self.start_time = time.time()
-
-            if self.mode == TimeMode.FISCHER:
-                self.clock_time[not color] += self.fischer_increment
 
             # log times
             time_w, time_b = self.current_clock_time()

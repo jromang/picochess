@@ -86,10 +86,10 @@ drawresign_map = OrderedDict([
 
 
 class DgtDisplay(Observable, DisplayMsg, threading.Thread):
-    def __init__(self, ok_move_messages, beep_level):
+    def __init__(self, ok_move_messages, beep_level, language):
         super(DgtDisplay, self).__init__()
         self.ok_moves_messages = ok_move_messages
-        self.dgtmsg = DgtMessage(beep_level)
+        self.dgtmsg = DgtMessage(beep_level, language)
 
         self.flip_board = False
         self.dgt_fen = None

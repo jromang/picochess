@@ -19,8 +19,9 @@ from utilities import *
 
 
 class DgtMessage(object):
-    def __init__(self, beep_level):
+    def __init__(self, beep_level, language):
         self.beep_level = beep_level
+        self.language = language
 
     def bl(self, beeplevel):
         if beeplevel == BeepLevel.YES:
@@ -341,4 +342,8 @@ class DgtMessage(object):
         if en is None:
             en = Dgt.DISPLAY_TEXT(l=None, m=text_id, s=None, beep=self.bl(BeepLevel.YES), duration=0)
             logging.warning('unknown text_id {}'.format(text_id))
+        if self.language == 'de':
+            return de
+        if self.language == 'nl':
+            return nl
         return en
