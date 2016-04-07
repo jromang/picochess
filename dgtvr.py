@@ -83,7 +83,7 @@ class DgtVr(DgtIface):
             self.rt.stop()
         self.rt = RepeatedTimer(1, self.runclock)
         self.rt.start()
-        self.clock_running = True
+        self.clock_running = (side != 0x04)
 
     def light_squares_revelation_board(self, squares):
         pass

@@ -329,6 +329,14 @@ class DgtMessage(object):
             en = Dgt.DISPLAY_TEXT(l=None, m='draw', s=None, beep=self.bl(BeepLevel.CONFIG), duration=1)
             de = Dgt.DISPLAY_TEXT(l='unentschied', m='unendsch', s='draw', beep=self.bl(BeepLevel.CONFIG), duration=1)
             nl = Dgt.DISPLAY_TEXT(l=None, m='remise', s=None, beep=self.bl(BeepLevel.CONFIG), duration=1)
+        if text_id == 'B10_playmode_white_user':
+            en = Dgt.DISPLAY_TEXT(l=None, m='white', s=None, beep=self.bl(BeepLevel.CONFIG), duration=1)
+            de = Dgt.DISPLAY_TEXT(l='Spieler W', m='Spielr W', s='splr w', beep=self.bl(BeepLevel.CONFIG), duration=1)
+            nl = Dgt.DISPLAY_TEXT(l=None, m='speler w', s='splr w', beep=self.bl(BeepLevel.CONFIG), duration=1)
+        if text_id == 'B10_playmode_black_user':
+            en = Dgt.DISPLAY_TEXT(l=None, m='black', s=None, beep=self.bl(BeepLevel.CONFIG), duration=1)
+            de = Dgt.DISPLAY_TEXT(l='Spieler S', m='Spielr S', s='splr s', beep=self.bl(BeepLevel.CONFIG), duration=1)
+            nl = Dgt.DISPLAY_TEXT(l=None, m='speler z', s='splr z', beep=self.bl(BeepLevel.CONFIG), duration=1)
         # en = de  # Test german!
         if en is None:
             en = Dgt.DISPLAY_TEXT(l=None, m=text_id, s=None, beep=self.bl(BeepLevel.YES), duration=0)

@@ -490,9 +490,9 @@ class ChessTalkerVoice():
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_OBSERVE]
         elif mode == Mode.REMOTE:
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_REMOTE]
-        elif mode == PlayMode.PLAY_BLACK:
+        elif mode == PlayMode.USER_BLACK:
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_PLAY_BLACK]
-        elif mode == PlayMode.PLAY_WHITE:
+        elif mode == PlayMode.USER_WHITE:
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_PLAY_WHITE]
 
         if modeVocab:
@@ -708,13 +708,13 @@ if __name__ == "__main__":
                     chesstalker.say_level(20)
                     chesstalker.say_opening_book("fun")
                     chesstalker.say_opening_book("anand")
-                    chesstalker.say_mode(Mode.NORMAL)
-                    chesstalker.say_mode(Mode.ANALYSIS)
-                    chesstalker.say_mode(Mode.OBSERVE)
-                    chesstalker.say_mode(Mode.REMOTE)
-                    chesstalker.say_mode(Mode.KIBITZ)
-                    chesstalker.say_mode(PlayMode.PLAY_WHITE)
-                    chesstalker.say_mode(PlayMode.PLAY_BLACK)
+                    chesstalker.say_mode("normal")
+                    chesstalker.say_mode("analysis")
+                    chesstalker.say_mode("kibitz")
+                    chesstalker.say_mode("observe")
+                    chesstalker.say_mode("remote")
+                    chesstalker.say_mode("White")
+                    chesstalker.say_mode("Black")
                     chesstalker.say_time_control_fixed_time(1)
                     chesstalker.say_time_control_fixed_time(3)
                     chesstalker.say_time_control_blitz(1)

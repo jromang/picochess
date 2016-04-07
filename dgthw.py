@@ -120,7 +120,7 @@ class DgtHw(DgtIface):
             if res < 0:
                 logging.warning('Finally failed %i', res)
             else:
-                self.clock_running = True
+                self.clock_running = (side != 0x04)
 
     def end_clock(self, force=False):
         if self.clock_running or force:

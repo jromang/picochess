@@ -219,8 +219,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
         elif self.top_result == Menu.MODE_MENU:
             self.top_result = Menu.TOP_MENU
-            val = self.top_index.value
-            text = self.dgtmsg.text(val)
+            text = self.dgtmsg.text(self.top_index.value)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.POSITION_MENU:
@@ -228,8 +227,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 if self.setup_reverse_result is None:
                     if self.setup_whitetomove_result is None:
                         self.top_result = Menu.TOP_MENU
-                        val = self.top_index.value
-                        text = self.dgtmsg.text(val)
+                        text = self.dgtmsg.text(self.top_index.value)
                     else:
                         self.setup_whitetomove_result = None
                         text = self.dgtmsg.text('B00_sidewhite' if self.setup_whitetomove_index else 'B00_sideblack')
@@ -244,19 +242,16 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         elif self.top_result == Menu.SYSTEM_MENU:
             if self.system_sound_result is None:
                 self.top_result = Menu.TOP_MENU
-                val = self.top_index.value
-                text = self.dgtmsg.text(val)
+                text = self.dgtmsg.text(self.top_index.value)
             else:
                 self.system_sound_result = None
-                val = self.system_index.value
-                text = self.dgtmsg.text(val)
+                text = self.dgtmsg.text(self.system_index.value)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.ENGINE_MENU:
             if self.engine_result is None:
                 self.top_result = Menu.TOP_MENU
-                val = self.top_index.value
-                text = self.dgtmsg.text(val)
+                text = self.dgtmsg.text(self.top_index.value)
             else:
                 msg = (self.installed_engines[self.engine_result])[1]
                 text = self.dgtmsg.text('B00_default', msg)
@@ -265,18 +260,15 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
         elif self.top_result == Menu.BOOK_MENU:
             self.top_result = Menu.TOP_MENU
-            val = self.top_index.value
-            text = self.dgtmsg.text(val)
+            text = self.dgtmsg.text(self.top_index.value)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.TIME_MENU:
             if self.time_mode_result is None:
                 self.top_result = Menu.TOP_MENU
-                val = self.top_index.value
-                text = self.dgtmsg.text(val)
+                text = self.dgtmsg.text(self.top_index.value)
             else:
-                val = self.time_mode_result.value
-                text = self.dgtmsg.text(val)
+                text = self.dgtmsg.text(self.time_mode_result.value)
                 self.time_mode_result = None
             DisplayDgt.show(text)
 
@@ -290,14 +282,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
         if self.top_result == Menu.TOP_MENU:
             self.top_index = MenuLoop.prev(self.top_index)
-            val = self.top_index.value
-            text = self.dgtmsg.text(val)
+            text = self.dgtmsg.text(self.top_index.value)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.MODE_MENU:
             self.mode_index = ModeLoop.prev(self.mode_index)
-            val = self.mode_index.value
-            text = self.dgtmsg.text(val)
+            text = self.dgtmsg.text(self.mode_index.value)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.POSITION_MENU:
@@ -320,8 +310,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         elif self.top_result == Menu.SYSTEM_MENU:
             if self.system_sound_result is None:
                 self.system_index = SettingsLoop.prev(self.system_index)
-                val = self.system_index.value
-                text = self.dgtmsg.text(val)
+                text = self.dgtmsg.text(self.system_index.value)
             else:
                 self.system_sound_index = (self.system_sound_index-1) & 0x0f
                 msg = str(self.system_sound_index)
@@ -354,8 +343,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         elif self.top_result == Menu.TIME_MENU:
             if self.time_mode_result is None:
                 self.time_mode_index = TimeModeLoop.prev(self.time_mode_index)
-                val = self.time_mode_index.value
-                text = self.dgtmsg.text(val)
+                text = self.dgtmsg.text(self.time_mode_index.value)
             else:
                 if self.time_mode_index == TimeMode.FIXED:
                     self.time_control_fixed_index = (self.time_control_fixed_index-1) % len(self.time_control_fixed_map)
@@ -398,14 +386,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
         if self.top_result == Menu.TOP_MENU:
             self.top_index = MenuLoop.next(self.top_index)
-            val = self.top_index.value
-            text = self.dgtmsg.text(val)
+            text = self.dgtmsg.text(self.top_index.value)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.MODE_MENU:
             self.mode_index = ModeLoop.next(self.mode_index)
-            val = self.mode_index.value
-            text = self.dgtmsg.text(val)
+            text = self.dgtmsg.text(self.mode_index.value)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.POSITION_MENU:
@@ -428,8 +414,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         elif self.top_result == Menu.SYSTEM_MENU:
             if self.system_sound_result is None:
                 self.system_index = SettingsLoop.next(self.system_index)
-                val = self.system_index.value
-                text = self.dgtmsg.text(val)
+                text = self.dgtmsg.text(self.system_index.value)
             else:
                 self.system_sound_index = (self.system_sound_index+1) & 0x0f
                 msg = str(self.system_sound_index)
@@ -462,8 +447,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         elif self.top_result == Menu.TIME_MENU:
             if self.time_mode_result is None:
                 self.time_mode_index = TimeModeLoop.next(self.time_mode_index)
-                val = self.time_mode_index.value
-                text = self.dgtmsg.text(val)
+                text = self.dgtmsg.text(self.time_mode_index.value)
             else:
                 if self.time_mode_index == TimeMode.FIXED:
                     self.time_control_fixed_index = (self.time_control_fixed_index+1) % len(self.time_control_fixed_map)
@@ -484,22 +468,19 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         if self.top_result is None:
             self.top_result = Menu.TOP_MENU
             self.top_index = Menu.MODE_MENU
-            val = self.top_index.value
-            text = self.dgtmsg.text(val)
+            text = self.dgtmsg.text(self.top_index.value)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.TOP_MENU:
             self.top_result = self.top_index
             # display first entry of the submenu "top"
             if self.top_index == Menu.MODE_MENU:
-                val = self.mode_index.value
-                text = self.dgtmsg.text(val)
+                text = self.dgtmsg.text(self.mode_index.value)
             elif self.top_index == Menu.POSITION_MENU:
                 self.setup_whitetomove_index = True
                 text = self.dgtmsg.text('B00_sidewhite' if self.setup_whitetomove_index else 'B00_sideblack')
             elif self.top_index == Menu.TIME_MENU:
-                val = self.time_mode_index.value
-                text = self.dgtmsg.text(val)
+                text = self.dgtmsg.text(self.time_mode_index.value)
             elif self.top_index == Menu.BOOK_MENU:
                 msg = (self.all_books[self.book_index])[0]
                 text = self.dgtmsg.text('B00_default', msg)
@@ -510,8 +491,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     msg = (self.installed_engines[self.engine_index])[1]
                     text = self.dgtmsg.text('B00_default', msg)
             elif self.top_index == Menu.SYSTEM_MENU:
-                val = self.system_index.value
-                text = self.dgtmsg.text(val)
+                text = self.dgtmsg.text(self.system_index.value)
             else:
                 logging.warning('wrong value for topindex: {0}'.format(self.top_index))
                 text = self.dgtmsg.text('Y00_errormenu')
@@ -788,8 +768,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
                         break
                     if case(MessageApi.PLAY_MODE):
-                        pm = message.play_mode.value
-                        DisplayDgt.show(self.dgtmsg.text('B10_default', pm))
+                        DisplayDgt.show(self.dgtmsg.text(message.play_mode.value))
                         break
                     if case(MessageApi.NEW_SCORE):
                         self.score = message.score
@@ -918,8 +897,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 DisplayDgt.show(self.dgtmsg.text('Y00_erroreng'))
                         elif fen in mode_map:
                             logging.debug("Map-Fen: Interaction mode [%s]", mode_map[fen])
-                            val = mode_map[fen].value
-                            text = self.dgtmsg.text(val)
+                            text = self.dgtmsg.text(mode_map[fen].value)
                             text.beep = map_bl  # BeepLevel is Map not Button
                             self.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], mode_text=text))
                             self.reset_menu()

@@ -80,12 +80,12 @@ class PgnDisplay(DisplayMsg, threading.Thread):
         else:
             engine_level = " (Level {0})".format(self.level)
 
-        if message.play_mode == PlayMode.PLAY_WHITE:
+        if message.play_mode == PlayMode.USER_WHITE:
             pgn.headers["White"] = self.user_name
             pgn.headers["Black"] = self.engine_name + engine_level
             pgn.headers["WhiteElo"] = "-"
             pgn.headers["BlackElo"] = "2900"
-        if message.play_mode == PlayMode.PLAY_BLACK:
+        if message.play_mode == PlayMode.USER_BLACK:
             pgn.headers["White"] = self.engine_name + engine_level
             pgn.headers["Black"] = self.user_name
             pgn.headers["WhiteElo"] = "2900"

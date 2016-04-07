@@ -197,8 +197,6 @@ def main():
         :return:
         """
         DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=tc, callback=observe_callback))
-        # tc.start(game.turn)
-        # analyse(game)
 
     def stop_search():
         """
@@ -249,8 +247,8 @@ def main():
         if fen in legal_fens:
             # Check if we have to undo a previous move (sliding)
             if interaction_mode == Mode.NORMAL:
-                if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.BLACK) or \
-                        (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.WHITE):
+                if (play_mode == PlayMode.USER_WHITE and game.turn == chess.BLACK) or \
+                        (play_mode == PlayMode.USER_BLACK and game.turn == chess.WHITE):
                     stop_search()
                     if game.move_stack:
                         game.pop()
@@ -270,8 +268,8 @@ def main():
             game_history = copy.deepcopy(game)
             while game_history.move_stack:
                 game_history.pop()
-                if (play_mode == PlayMode.PLAY_WHITE and game_history.turn == chess.WHITE) \
-                        or (play_mode == PlayMode.PLAY_BLACK and game_history.turn == chess.BLACK) \
+                if (play_mode == PlayMode.USER_WHITE and game_history.turn == chess.WHITE) \
+                        or (play_mode == PlayMode.USER_BLACK and game_history.turn == chess.BLACK) \
                         or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.KIBITZ) \
                         or (interaction_mode == Mode.REMOTE) or (interaction_mode == Mode.ANALYSIS):
                     if game_history.board_fen() == fen:
@@ -293,7 +291,7 @@ def main():
     def set_wait_state():
         if interaction_mode == Mode.NORMAL:
             nonlocal play_mode
-            play_mode = PlayMode.PLAY_WHITE if game.turn == chess.WHITE else PlayMode.PLAY_BLACK
+            play_mode = PlayMode.USER_WHITE if game.turn == chess.WHITE else PlayMode.USER_BLACK
 
     def handle_move(result, game):
         move = result.bestmove
@@ -306,8 +304,8 @@ def main():
             stop_clock()
             # If UserMove: reset all alternative moves
             # If ComputerMove: disallow this move, and finally reset all if DONE_ON_BOARD event @see: process_fen()
-            if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.WHITE)\
-                    or (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.BLACK):
+            if (play_mode == PlayMode.USER_WHITE and game.turn == chess.WHITE)\
+                    or (play_mode == PlayMode.USER_BLACK and game.turn == chess.BLACK):
                 last_computer_fen = game.board_fen()
                 searchmoves.add(move)
                 text = Message.COMPUTER_MOVE(result=result, fen=fen, game=game.copy(), time_control=time_control)
@@ -322,8 +320,8 @@ def main():
             stop_search_and_clock()
             # If UserMove: reset all alternative moves
             # If Remote Move: same process as for computer move above
-            if (play_mode == PlayMode.PLAY_WHITE and game.turn == chess.WHITE)\
-                    or (play_mode == PlayMode.PLAY_BLACK and game.turn == chess.BLACK):
+            if (play_mode == PlayMode.USER_WHITE and game.turn == chess.WHITE)\
+                    or (play_mode == PlayMode.USER_BLACK and game.turn == chess.BLACK):
                 last_computer_fen = game.board_fen()
                 searchmoves.add(move)
                 text = Message.COMPUTER_MOVE(result=result, fen=fen, game=game.copy(), time_control=time_control)
@@ -494,7 +492,7 @@ def main():
     bookreader = chess.polyglot.open_reader(all_books[book_index][1])
     searchmoves = AlternativeMover()
     interaction_mode = Mode.NORMAL
-    play_mode = PlayMode.PLAY_WHITE
+    play_mode = PlayMode.USER_WHITE
     time_control = TimeControl(TimeMode.BLITZ, minutes_per_game=5)
     last_computer_fen = None
     game_declared = False  # User declared resignation or draw
@@ -644,7 +642,7 @@ def main():
                         stop_clock()
                         engine.stop(show_best=True)
                     else:
-                        play_mode = PlayMode.PLAY_WHITE if play_mode == PlayMode.PLAY_BLACK else PlayMode.PLAY_BLACK
+                        play_mode = PlayMode.USER_WHITE if play_mode == PlayMode.USER_BLACK else PlayMode.USER_BLACK
                         DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode))
                         if check_game_state(game, play_mode) and (interaction_mode != Mode.REMOTE):
                             think(game, time_control)

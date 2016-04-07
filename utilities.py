@@ -212,7 +212,7 @@ class ModeLoop(object):
             return Mode.REMOTE
         elif m == Mode.REMOTE:
             return Mode.NORMAL
-        return 'error'
+        return 'error ModeLoop next'
 
     @staticmethod
     def prev(m):
@@ -226,13 +226,13 @@ class ModeLoop(object):
             return Mode.KIBITZ
         elif m == Mode.REMOTE:
             return Mode.OBSERVE
-        return 'error'
+        return 'error ModeLoop prev'
 
 
 @enum.unique
 class PlayMode(enum.Enum):
-    PLAY_WHITE = 'white'
-    PLAY_BLACK = 'black'
+    USER_WHITE = 'B10_playmode_white_user'
+    USER_BLACK = 'B10_playmode_black_user'
 
 
 class TimeMode(enum.Enum):
@@ -253,7 +253,7 @@ class TimeModeLoop(object):
             return TimeMode.FISCHER
         elif m == TimeMode.FISCHER:
             return TimeMode.FIXED
-        return 'error'
+        return 'error TimeMode next'
 
     @staticmethod
     def prev(m):
@@ -263,7 +263,7 @@ class TimeModeLoop(object):
             return TimeMode.FIXED
         elif m == TimeMode.FISCHER:
             return TimeMode.BLITZ
-        return 'error'
+        return 'error TimeMode prev'
 
 
 class Settings(enum.Enum):
@@ -284,7 +284,7 @@ class SettingsLoop(object):
             return Settings.SOUND
         elif m == Settings.SOUND:
             return Settings.VERSION
-        return 'error'
+        return 'error Setting next'
 
     @staticmethod
     def prev(m):
@@ -294,6 +294,7 @@ class SettingsLoop(object):
             return Settings.IPADR
         elif m == Settings.IPADR:
             return Settings.VERSION
+        return 'error Setting prev'
 
 
 @enum.unique
