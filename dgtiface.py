@@ -28,8 +28,8 @@ class DgtIface(DisplayDgt, Thread):
         self.enable_dgt_pi = False
         self.clock_found = False
         self.enable_revelation_leds = enable_revelation_leds
-        self.time_left = None  # [0, 0, 0]
-        self.time_right = None  # [0, 0, 0]
+        self.time_left = None
+        self.time_right = None
 
         self.timer = None
         self.timer_running = False
@@ -118,10 +118,13 @@ class DgtIface(DisplayDgt, Thread):
                         while self.timer_running and message.wait:
                             time.sleep(0.1)
                         self.clock_running = (message.side != 0x04)
+
+                        # log times
                         l_hms = hours_minutes_seconds(message.time_left)
                         r_hms = hours_minutes_seconds(message.time_right)
-                        logging.debug('last time received from clock {} : {}'.format(self.time_left, self.time_right))
-                        logging.debug('sending time to clock {} : {}'.format(l_hms, r_hms))
+                        logging.debug('last time received from clock l:{} r:{}'.format(self.time_left, self.time_right))
+                        logging.debug('sending time to clock l:{} r:{}'.format(l_hms, r_hms))
+
                         self.start_clock(message.time_left, message.time_right, message.side)
                         Observable.fire(Event.DGT_CLOCK_STARTED(callback=message.callback))
                         break

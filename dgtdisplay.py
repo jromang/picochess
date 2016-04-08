@@ -691,7 +691,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         # self.mode_index = Mode.NORMAL  # @todo
                         self.reset_menu()
                         self.alternative = False
-                        time_left, time_right = message.time_control.current_clock_time(self.flip_board)
+                        time_left, time_right = message.time_control.current_clock_time(flip_board=self.flip_board)
                         DisplayDgt.show(self.dgtmsg.text('C10_newgame'))
                         DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=0x04, wait=True, callback=None))
                         break
@@ -806,7 +806,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         if tc.mode == TimeMode.FIXED:
                             time_left = time_right = tc.seconds_per_move
                         else:
-                            time_left, time_right = tc.current_clock_time(self.flip_board)
+                            time_left, time_right = tc.current_clock_time(flip_board=self.flip_board)
                             if time_left < 0:
                                 time_left = 0
                             if time_right < 0:

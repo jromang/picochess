@@ -127,11 +127,11 @@ class DgtMessage(object):
         if text_id == 'B00_sidewhite':
             en = Dgt.DISPLAY_TEXT(l='side move w', m='side w', s='side w', beep=self.bl(BeepLevel.BUTTON), duration=0)
             de = Dgt.DISPLAY_TEXT(l='W am Zug', m='W am Zug', s='side w', beep=self.bl(BeepLevel.BUTTON), duration=0)
-            nl = Dgt.DISPLAY_TEXT(l='w aan beurt', m='w beurt', s='w brt', beep=self.bl(BeepLevel.BUTTON), duration=0)
+            nl = Dgt.DISPLAY_TEXT(l='w aan zet', m='w zet', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
         if text_id == 'B00_sideblack':
             en = Dgt.DISPLAY_TEXT(l='side move b', m='side b', s='side b', beep=self.bl(BeepLevel.BUTTON), duration=0)
             de = Dgt.DISPLAY_TEXT(l='S am Zug', m='S am Zug', s='side b', beep=self.bl(BeepLevel.BUTTON), duration=0)
-            nl = Dgt.DISPLAY_TEXT(l='z aan beurt', m='z beurt', s='z brt', beep=self.bl(BeepLevel.BUTTON), duration=0)
+            nl = Dgt.DISPLAY_TEXT(l='z aan zet', m='z zet', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
         if text_id == 'B00_scanboard':
             en = Dgt.DISPLAY_TEXT(l='scan board', m='scan', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
             de = Dgt.DISPLAY_TEXT(l='lese Stellg', m='lese Stl', s='scan', beep=self.bl(BeepLevel.BUTTON), duration=0)
@@ -281,7 +281,7 @@ class DgtMessage(object):
         if text_id == 'B00_settings_version_menu':
             en = Dgt.DISPLAY_TEXT(l=None, m='version', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
             de = Dgt.DISPLAY_TEXT(l=None, m='Version', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
-            nl = Dgt.DISPLAY_TEXT(l=None, m='version', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
+            nl = Dgt.DISPLAY_TEXT(l=None, m='verzie', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
         if text_id == 'B00_settings_ipadr_menu':
             en = Dgt.DISPLAY_TEXT(l=None, m='IP adr', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
             de = Dgt.DISPLAY_TEXT(l=None, m='IP adr', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
@@ -289,7 +289,7 @@ class DgtMessage(object):
         if text_id == 'B00_settings_sound_menu':
             en = Dgt.DISPLAY_TEXT(l=None, m='sound', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
             de = Dgt.DISPLAY_TEXT(l=None, m='Sound', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
-            nl = Dgt.DISPLAY_TEXT(l=None, m='sound', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
+            nl = Dgt.DISPLAY_TEXT(l=None, m='geluid', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
         if text_id == 'B00_gameresult_mate_menu':
             en = Dgt.DISPLAY_TEXT(l=None, m='mate', s=None, beep=self.bl(BeepLevel.CONFIG), duration=1)
             de = Dgt.DISPLAY_TEXT(l=None, m='Matt', s=None, beep=self.bl(BeepLevel.CONFIG), duration=1)

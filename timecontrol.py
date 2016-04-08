@@ -51,7 +51,7 @@ class TimeControl(object):
 
     def current_clock_time(self, flip_board=False):
         """Returns the startup time for setting the clock at beginning."""
-        ct = self.clock_time
+        ct = copy.copy(self.clock_time)
         if flip_board:
             ct[chess.WHITE], ct[chess.BLACK] = ct[chess.BLACK], ct[chess.WHITE]
         return int(ct[chess.WHITE]), int(ct[chess.BLACK])
@@ -75,10 +75,10 @@ class TimeControl(object):
                 self.start_time = time.time()
 
             # log times
-            time_w, time_b = self.current_clock_time()
+            time_w, time_b = self.current_clock_time(flip_board=False)
             w_hms = hours_minutes_seconds(time_w)
             b_hms = hours_minutes_seconds(time_b)
-            logging.info('new internal time: {} : {}'.format(w_hms, b_hms))
+            logging.info('start internal time w:{} - b:{}'.format(w_hms, b_hms))
 
             # Only start thread if not already started for same color, and the player has not already lost on time
             if self.clock_time[color] > 0 and self.active_color is not None and self.run_color != self.active_color:
@@ -86,22 +86,26 @@ class TimeControl(object):
                                              [copy.copy(self.clock_time[color])])
                 self.timer.start()
                 self.run_color = self.active_color
-        else:
-            logging.warning('active color is {}'.format(self.active_color))
 
     def stop(self):
         """Stop the internal clock."""
         if self.active_color is not None:
             if self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
+                # log times
+                time_w, time_b = self.current_clock_time(flip_board=False)
+                w_hms = hours_minutes_seconds(time_w)
+                b_hms = hours_minutes_seconds(time_b)
+                logging.info('old internal time w:{} b:{}'.format(w_hms, b_hms))
+
                 self.timer.cancel()
                 self.timer.join()
                 self.clock_time[self.active_color] -= time.time() - self.start_time
 
                 # log times
-                time_w, time_b = self.current_clock_time()
+                time_w, time_b = self.current_clock_time(flip_board=False)
                 w_hms = hours_minutes_seconds(time_w)
                 b_hms = hours_minutes_seconds(time_b)
-                logging.info('new internal time: {} : {}'.format(w_hms, b_hms))
+                logging.info('new internal time w:{} b:{}'.format(w_hms, b_hms))
 
                 self.active_color = None
         else:

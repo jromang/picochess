@@ -783,12 +783,12 @@ def main():
                     break
 
                 if case(EventApi.DGT_CLOCK_STARTED):
-                    # logging.info('DGT_CLOCK_STARTED called')
                     if event.callback:
-                        logging.debug('callback started')
+                        logging.debug('callback started {}'.format(event.callback))
                         event.callback()
+                        logging.debug('callback ended {}'.format(event.callback))
                     else:
-                        logging.debug('callback NOT started')
+                        logging.debug('callback is not set')
                     break
 
                 if case():  # Default

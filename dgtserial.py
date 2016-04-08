@@ -180,7 +180,7 @@ class DgtSerial(object):
                     l_secs = (message[5] >> 4) * 10 + (message[5] & 0x0f)
                     tr = [r_hours, r_mins, r_secs]
                     tl = [l_hours, l_mins, l_secs]
-                    logging.info('DGT clock [ser]: received time from clock {} : {}'.format(tl, tr))
+                    logging.info('DGT clock [ser]: received time from clock l:{} r:{}'.format(tl, tr))
                     DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=tl, time_right=tr))
                 else:
                     logging.debug('DGT clock [ser]: null message ignored')
