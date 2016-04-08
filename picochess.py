@@ -636,6 +636,7 @@ def main():
                         play_mode = PlayMode.USER_WHITE if play_mode == PlayMode.USER_BLACK else PlayMode.USER_BLACK
                         DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode))
                         if check_game_state(game, play_mode) and (interaction_mode != Mode.REMOTE):
+                            time_control.reset_start_time()
                             think(game, time_control)
                     break
 

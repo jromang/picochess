@@ -56,6 +56,9 @@ class TimeControl(object):
             ct[chess.WHITE], ct[chess.BLACK] = ct[chess.BLACK], ct[chess.WHITE]
         return int(ct[chess.WHITE]), int(ct[chess.BLACK])
 
+    def reset_start_time(self):
+        self.start_time = time.time()
+
     def out_of_time(self, time_start):
         """Fires an OUT_OF_TIME event."""
         if self.active_color is not None:
