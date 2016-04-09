@@ -28,7 +28,6 @@ class DgtPi(DgtIface):
         super(DgtPi, self).__init__(enable_revelation_leds)
         self.dgtserial = dgtserial
         self.dgtserial.enable_pi()
-        self.dgtserial.run()
 
         self.lock = Lock()
         self.lib = cdll.LoadLibrary("dgt/dgtpicom.so")
@@ -36,6 +35,8 @@ class DgtPi(DgtIface):
         self.startup_clock()
         incoming_clock_thread = Timer(0, self.process_incoming_clock_forever)
         incoming_clock_thread.start()
+
+        self.dgtserial.run()
         self.dgtserial.startup_board()
 
     def startup_clock(self):

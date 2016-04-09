@@ -27,10 +27,11 @@ class DgtHw(DgtIface):
     def __init__(self, dgtserial, enable_revelation_leds):
         super(DgtHw, self).__init__(enable_revelation_leds)
         self.dgtserial = dgtserial
-        self.dgtserial.run()
 
         self.lock = Lock()
         self.lib = DgtLib(self.dgtserial)
+
+        self.dgtserial.run()
         self.startup_clock()
         self.dgtserial.startup_board()
 
