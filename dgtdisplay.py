@@ -642,6 +642,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         return "8/8/8/" + rnk_5 + "/" + rnk_4 + "/8/8/8"
 
     def run(self):
+        logging.info('msg_queue ready')
         while True:
             # Check if we have something to display
             try:

@@ -440,6 +440,7 @@ def main():
         dgthardware = DgtVr(args.enable_revelation_leds)
     # Start the show
     dgthardware.start()
+    dgthardware.startup()
 
     # Save to PGN
     PgnDisplay(

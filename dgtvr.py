@@ -29,6 +29,9 @@ class DgtVr(DgtIface):
         # setup virtual clock
         DisplayMsg.show(Message.DGT_CLOCK_VERSION(main_version=0, sub_version=0, attached="virtual"))
 
+    def startup(self):
+        pass
+
     # (START) dgtserial class simulation
     def runclock(self):
         if self.time_side == 1:

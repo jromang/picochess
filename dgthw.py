@@ -30,22 +30,17 @@ class DgtHw(DgtIface):
 
         self.lock = Lock()
         self.lib = DgtLib(self.dgtserial)
-
         self.dgtserial.run()
-        self.startup_clock()
-        self.dgtserial.startup_board()
 
-    def startup_clock(self):
-        # Get clock version
-        command = [DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
-                   DgtClk.DGT_CMD_CLOCK_VERSION, DgtClk.DGT_CMD_CLOCK_END_MESSAGE]
-        self.dgtserial.write_board_command(command)
-        # self.lib.write(command)
+    def startup(self):
+        self.dgtserial.setup_serial()
+        self.dgtserial.startup_clock()
+        self.dgtserial.startup_board()
 
     def _display_on_dgt_xl(self, text, beep=False):
         if not self.clock_found:  # This can only happen on the XL function
             logging.debug('DGT clock (still) not found. Ignore [%s]', text)
-            self.startup_clock()
+            self.dgtserial.startup_clock()
             return
         text = text.ljust(6)
         if len(text) > 6:

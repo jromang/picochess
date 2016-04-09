@@ -65,6 +65,7 @@ class DgtIface(DisplayDgt, Thread):
             logging.debug('clock not running - ignored duration')
 
     def run(self):
+        logging.info('dgt_queue ready')
         while True:
             # Check if we have something to display
             try:

@@ -264,6 +264,12 @@ class DgtSerial(object):
             except struct.error:  # can happen, when plugin board-cable again
                 pass
 
+    def startup_clock(self):
+        # Get clock version
+        command = [DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                   DgtClk.DGT_CMD_CLOCK_VERSION, DgtClk.DGT_CMD_CLOCK_END_MESSAGE]
+        self.write_board_command(command)
+
     def startup_board(self):
         self.write_board_command([DgtCmd.DGT_SEND_UPDATE_NICE])  # Set the board update mode
         self.write_board_command([DgtCmd.DGT_SEND_VERSION])  # Get board version
@@ -286,7 +292,7 @@ class DgtSerial(object):
                                                   timeout=2
                                                   )
                 except pyserial.SerialException as e:
-                    logging.error(e)
+                    # logging.warning(e)
                     s = 'Board' + self.waitchars[wait_counter]
                     text = Dgt.DISPLAY_TEXT(l='no e-' + s, m='no' + s, s=s, beep=False, duration=0)
                     DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text, is_pi=self.is_pi))
@@ -299,4 +305,4 @@ class DgtSerial(object):
     def run(self):
         self.incoming_board_thread = Timer(0, self.process_incoming_board_forever)
         self.incoming_board_thread.start()
-        self.setup_serial()
+        # self.setup_serial()
