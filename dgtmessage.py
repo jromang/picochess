@@ -33,6 +33,9 @@ class DgtMessage(object):
     def set_beep_level(self, beep_level):
         self.beep_level = beep_level
 
+    def set_language(self, language):
+        self.language  = language
+
     def text(self, text_id, msg=''):
         en = de = nl = None  # error case
         if text_id == 'B00_default':
@@ -177,7 +180,7 @@ class DgtMessage(object):
             de = Dgt.DISPLAY_TEXT(l="Ruecknahme", m="Ruecknah", s="rueckn", beep=self.bl(BeepLevel.CONFIG), duration=0)
             nl = Dgt.DISPLAY_TEXT(l="zet terug", m="zetterug", s="terug", beep=self.bl(BeepLevel.CONFIG), duration=0)
         if text_id == 'N10_bookmove':
-            en = Dgt.DISPLAY_TEXT(l="book move", m="book mov", s="book", beep=self.bl(BeepLevel.NO), duration=1)
+            en = Dgt.DISPLAY_TEXT(l="book", m="book", s="book", beep=self.bl(BeepLevel.NO), duration=1)
             de = Dgt.DISPLAY_TEXT(l="Buch", m="Buch", s="buch", beep=self.bl(BeepLevel.NO), duration=1)
             nl = Dgt.DISPLAY_TEXT(l=None, m="boek", s=None, beep=self.bl(BeepLevel.NO), duration=1)
         if text_id == 'N00_setpieces':
@@ -290,6 +293,10 @@ class DgtMessage(object):
             en = Dgt.DISPLAY_TEXT(l=None, m='sound', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
             de = Dgt.DISPLAY_TEXT(l=None, m='Sound', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
             nl = Dgt.DISPLAY_TEXT(l=None, m='geluid', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
+        if text_id == 'B00_settings_language_menu':
+            en = Dgt.DISPLAY_TEXT(l=None, m='language', s='lang', beep=self.bl(BeepLevel.BUTTON), duration=0)
+            de = Dgt.DISPLAY_TEXT(l=None, m='Sprache', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
+            nl = Dgt.DISPLAY_TEXT(l=None, m='taal', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
         if text_id == 'B00_gameresult_mate_menu':
             en = Dgt.DISPLAY_TEXT(l=None, m='mate', s=None, beep=self.bl(BeepLevel.CONFIG), duration=1)
             de = Dgt.DISPLAY_TEXT(l=None, m='Matt', s=None, beep=self.bl(BeepLevel.CONFIG), duration=1)
@@ -338,7 +345,22 @@ class DgtMessage(object):
             en = Dgt.DISPLAY_TEXT(l=None, m='black', s=None, beep=self.bl(BeepLevel.CONFIG), duration=1)
             de = Dgt.DISPLAY_TEXT(l='Spieler S', m='Spielr S', s='splr s', beep=self.bl(BeepLevel.CONFIG), duration=1)
             nl = Dgt.DISPLAY_TEXT(l=None, m='speler z', s='splr z', beep=self.bl(BeepLevel.CONFIG), duration=1)
-        # en = de  # Test german!
+        if text_id == 'B00_language_en_menu':
+            en = Dgt.DISPLAY_TEXT(l=None, m='english', s='engl', beep=self.bl(BeepLevel.BUTTON), duration=0)
+            de = Dgt.DISPLAY_TEXT(l='Englisch', m='Engl', s='en', beep=self.bl(BeepLevel.BUTTON), duration=0)
+            nl = Dgt.DISPLAY_TEXT(l=None, m='Engels', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
+        if text_id == 'B00_language_de_menu':
+            en = Dgt.DISPLAY_TEXT(l=None, m='german', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
+            de = Dgt.DISPLAY_TEXT(l=None, m='Deutsch', s='de', beep=self.bl(BeepLevel.BUTTON), duration=0)
+            nl = Dgt.DISPLAY_TEXT(l=None, m='Duitse', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
+        if text_id == 'B00_language_nl_menu':
+            en = Dgt.DISPLAY_TEXT(l=None, m='dutch', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
+            de = Dgt.DISPLAY_TEXT(l='Niederlaend', m='Niederl', s='nl', beep=self.bl(BeepLevel.BUTTON), duration=0)
+            nl = Dgt.DISPLAY_TEXT(l='nederlands', m='nederl', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
+        if text_id == 'B10_oklang':
+            en = Dgt.DISPLAY_TEXT(l='okay lang', m='ok lang', s='oklang', beep=self.bl(BeepLevel.BUTTON), duration=1)
+            de = Dgt.DISPLAY_TEXT(l='okay Sprache', m='okSprache', s='oklang', beep=self.bl(BeepLevel.BUTTON), duration=1)
+            nl = Dgt.DISPLAY_TEXT(l='oke taal', m='ok taal', s='oktaal', beep=self.bl(BeepLevel.BUTTON), duration=1)
         if en is None:
             en = Dgt.DISPLAY_TEXT(l=None, m=text_id, s=None, beep=self.bl(BeepLevel.YES), duration=0)
             logging.warning('unknown text_id {}'.format(text_id))

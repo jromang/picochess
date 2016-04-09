@@ -270,6 +270,7 @@ class Settings(enum.Enum):
     VERSION = 'B00_settings_version_menu'
     IPADR = 'B00_settings_ipadr_menu'
     SOUND = 'B00_settings_sound_menu'
+    LANGUAGE = 'B00_settings_language_menu'
 
 
 class SettingsLoop(object):
@@ -283,18 +284,53 @@ class SettingsLoop(object):
         elif m == Settings.IPADR:
             return Settings.SOUND
         elif m == Settings.SOUND:
+            return Settings.LANGUAGE
+        elif m == Settings.LANGUAGE:
             return Settings.VERSION
         return 'error Setting next'
 
     @staticmethod
     def prev(m):
         if m == Settings.VERSION:
+            return Settings.LANGUAGE
+        if m == Settings.LANGUAGE:
             return Settings.SOUND
         elif m == Settings.SOUND:
             return Settings.IPADR
         elif m == Settings.IPADR:
             return Settings.VERSION
         return 'error Setting prev'
+
+
+class Language(enum.Enum):
+    EN = 'B00_language_en_menu'
+    DE = 'B00_language_de_menu'
+    NL = 'B00_language_nl_menu'
+
+
+class LanguageLoop(object):
+    def __init__(self):
+        super(LanguageLoop, self).__init__()
+
+    @staticmethod
+    def next(m):
+        if m == Language.EN:
+            return Language.DE
+        elif m == Language.DE:
+            return Language.NL
+        elif m == Language.NL:
+            return Language.EN
+        return 'error Language next'
+
+    @staticmethod
+    def prev(m):
+        if m == Language.EN:
+            return Language.NL
+        elif m == Language.NL:
+            return Language.DE
+        elif m == Language.DE:
+            return Language.EN
+        return 'error Language prev'
 
 
 @enum.unique
