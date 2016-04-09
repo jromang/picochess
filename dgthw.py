@@ -24,9 +24,10 @@ from threading import Lock
 
 
 class DgtHw(DgtIface):
-    def __init__(self, dgtserial, enable_revelation_leds):
+    def __init__(self, dgtserial, dgttranslate, enable_revelation_leds):
         super(DgtHw, self).__init__(enable_revelation_leds)
         self.dgtserial = dgtserial
+        self.dgttranslate = dgttranslate
 
         self.lock = Lock()
         self.lib = DgtLib(self.dgtserial)
@@ -71,7 +72,7 @@ class DgtHw(DgtIface):
     def display_move_on_clock(self, move, fen, beep=False):
         if self.enable_dgt_3000:
             bit_board = Board(fen)
-            text = bit_board.san(move)
+            text = self.dgttranslate.move(bit_board.san(move))
             self._display_on_dgt_3000(text, beep)
         else:
             text = ' ' + move.uci()

@@ -18,7 +18,7 @@
 from utilities import *
 
 
-class DgtMessage(object):
+class DgtTranslate(object):
     def __init__(self, beep_level, language):
         self.beep_level = beep_level
         self.language = language
@@ -35,6 +35,19 @@ class DgtMessage(object):
 
     def set_language(self, language):
         self.language  = language
+
+    def move(self, text):
+        def replace_all(text, dict):
+            for i, j in dict.items():
+                text = text.replace(i, j)
+            return text
+
+        dict = {}
+        if self.language == 'de':
+            dict = {'R' : 'T', 'N' : 'S', 'B' : 'L', 'Q' : 'D' }
+        if self.language == 'nl':
+            dict = {'R' : 'T', 'N' : 'P', 'B' : 'L', 'Q' : 'D' }
+        return replace_all(text, dict)
 
     def text(self, text_id, msg=''):
         en = de = nl = None  # error case

@@ -109,3 +109,7 @@ beep-level = 15
 ## This isn't used inside the chess engine. Just show the tb-value at dgt clock (for your info)
 ## If so, uncomment the next line
 # enable-gaviota
+## PicoChess messages can be displayed in English, German or Dutch.
+## You can set the language with the "language" option. Default is English.
+## en = English; de = German; nl = Dutch
+# language = en

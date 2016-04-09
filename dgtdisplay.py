@@ -16,7 +16,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from timecontrol import *
-from dgtmessage import DgtMessage
 from collections import OrderedDict
 
 from dgtiface import *
@@ -86,10 +85,10 @@ drawresign_map = OrderedDict([
 
 
 class DgtDisplay(Observable, DisplayMsg, threading.Thread):
-    def __init__(self, disable_ok_move, beep_level, language):
+    def __init__(self, disable_ok_move, dgttranslate):
         super(DgtDisplay, self).__init__()
         self.ok_moves_messages = not disable_ok_move
-        self.dgtmsg = DgtMessage(beep_level, language)
+        self.dgttranslate = dgttranslate
 
         self.flip_board = False
         self.dgt_fen = None
@@ -132,9 +131,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
         self.system_index = Settings.VERSION
         self.system_sound_result = None
-        self.system_sound_index = beep_level
+        self.system_sound_index = self.dgttranslate.beep_level
         self.system_language_result = None
-        self.system_language_index = {'en': Language.EN, 'de': Language.DE, 'nl': Language.NL}[language]
+        self.system_language_index = {'en': Language.EN, 'de': Language.DE, 'nl': Language.NL}[self.dgttranslate.language]
 
         self.time_mode_result = None
         self.time_mode_index = TimeMode.BLITZ
@@ -186,12 +185,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.system_language_result = None
 
     def power_off(self):
-        DisplayDgt.show(self.dgtmsg.text('Y10_goodbye'))
+        DisplayDgt.show(self.dgttranslate.text('Y10_goodbye'))
         self.engine_restart = True
         self.fire(Event.SHUTDOWN())
 
     def reboot(self):
-        DisplayDgt.show(self.dgtmsg.text('Y10_pleasewait'))
+        DisplayDgt.show(self.dgttranslate.text('Y10_pleasewait'))
         self.engine_restart = True
         self.fire(Event.REBOOT())
 
@@ -205,16 +204,16 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         if self.top_result is None:
             if bool(self.hint_move):
                 text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen,
-                                        beep=self.dgtmsg.bl(BeepLevel.BUTTON), duration=1)
+                                        beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
             else:
-                text = self.dgtmsg.text('B10_nomove')
+                text = self.dgttranslate.text('B10_nomove')
             DisplayDgt.show(text)
 
         if self.top_result == Menu.TOP_MENU:
             self.reset_menu()
             if self.play_move:
                 text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen,
-                                        beep=self.dgtmsg.bl(BeepLevel.BUTTON), duration=1)
+                                        beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
                 DisplayDgt.show(text)
             else:
                 # @todo here a button beep missing
@@ -222,7 +221,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
         elif self.top_result == Menu.MODE_MENU:
             self.top_result = Menu.TOP_MENU
-            text = self.dgtmsg.text(self.top_index.value)
+            text = self.dgttranslate.text(self.top_index.value)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.POSITION_MENU:
@@ -230,71 +229,70 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 if self.setup_reverse_result is None:
                     if self.setup_whitetomove_result is None:
                         self.top_result = Menu.TOP_MENU
-                        text = self.dgtmsg.text(self.top_index.value)
+                        text = self.dgttranslate.text(self.top_index.value)
                     else:
                         self.setup_whitetomove_result = None
-                        text = self.dgtmsg.text('B00_sidewhite' if self.setup_whitetomove_index else 'B00_sideblack')
+                        text = self.dgttranslate.text('B00_sidewhite' if self.setup_whitetomove_index else 'B00_sideblack')
                 else:
                     self.setup_reverse_result = None
-                    text = self.dgtmsg.text('B00_bw' if self.setup_reverse_index else 'B00_wb')
+                    text = self.dgttranslate.text('B00_bw' if self.setup_reverse_index else 'B00_wb')
             else:
                 self.setup_uci960_result = None
-                text = self.dgtmsg.text('B00_960yes' if self.setup_uci960_index else 'B00_960no')
+                text = self.dgttranslate.text('B00_960yes' if self.setup_uci960_index else 'B00_960no')
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.SYSTEM_MENU:
             if self.system_sound_result is None and self.system_language_result is None:
                 self.top_result = Menu.TOP_MENU
-                text = self.dgtmsg.text(self.top_index.value)
+                text = self.dgttranslate.text(self.top_index.value)
             else:
                 if self.system_language_result is None:
                     self.system_sound_result = None
-                    # text = self.dgtmsg.text(self.system_index.value)
                 else:
                     self.system_language_result = None
-                text = self.dgtmsg.text(self.system_index.value)
+                text = self.dgttranslate.text(self.system_index.value)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.ENGINE_MENU:
             if self.engine_result is None:
                 self.top_result = Menu.TOP_MENU
-                text = self.dgtmsg.text(self.top_index.value)
+                text = self.dgttranslate.text(self.top_index.value)
             else:
                 msg = (self.installed_engines[self.engine_result])[1]
-                text = self.dgtmsg.text('B00_default', msg)
+                text = self.dgttranslate.text('B00_default', msg)
                 self.engine_result = None
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.BOOK_MENU:
             self.top_result = Menu.TOP_MENU
-            text = self.dgtmsg.text(self.top_index.value)
+            text = self.dgttranslate.text(self.top_index.value)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.TIME_MENU:
             if self.time_mode_result is None:
                 self.top_result = Menu.TOP_MENU
-                text = self.dgtmsg.text(self.top_index.value)
+                text = self.dgttranslate.text(self.top_index.value)
             else:
-                text = self.dgtmsg.text(self.time_mode_result.value)
+                text = self.dgttranslate.text(self.time_mode_result.value)
                 self.time_mode_result = None
             DisplayDgt.show(text)
 
     def process_button1(self):
         if self.top_result is None:
             if self.mate is None:
-                text = self.dgtmsg.text('B10_score', self.score)
+                text = self.dgttranslate.text('B10_score', self.score)
             else:
-                text = self.dgtmsg.text('B10_mate', str(self.mate))
+                text = self.dgttranslate.text('B10_mate', str(self.mate))
             DisplayDgt.show(text)
 
         if self.top_result == Menu.TOP_MENU:
             self.top_index = MenuLoop.prev(self.top_index)
-            text = self.dgtmsg.text(self.top_index.value)
+            text = self.dgttranslate.text(self.top_index.value)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.MODE_MENU:
             self.mode_index = ModeLoop.prev(self.mode_index)
-            text = self.dgtmsg.text(self.mode_index.value)
+            text = self.dgttranslate.text(self.mode_index.value)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.POSITION_MENU:
@@ -302,59 +300,59 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 if self.setup_reverse_result is None:
                     if self.setup_whitetomove_result is None:
                         self.setup_whitetomove_index = not self.setup_whitetomove_index
-                        text = self.dgtmsg.text('B00_sidewhite' if self.setup_whitetomove_index else 'B00_sideblack')
+                        text = self.dgttranslate.text('B00_sidewhite' if self.setup_whitetomove_index else 'B00_sideblack')
                     else:
                         self.setup_reverse_index = not self.setup_reverse_index
-                        text = self.dgtmsg.text('B00_bw' if self.setup_reverse_index else 'B00_wb')
+                        text = self.dgttranslate.text('B00_bw' if self.setup_reverse_index else 'B00_wb')
                 else:
                     if self.engine_has_960:
                         self.setup_uci960_index = not self.setup_uci960_index
-                        text = self.dgtmsg.text('B00_960yes' if self.setup_uci960_index else 'B00_960no')
+                        text = self.dgttranslate.text('B00_960yes' if self.setup_uci960_index else 'B00_960no')
                     else:
-                        text = self.dgtmsg.text('Y00_error960')
+                        text = self.dgttranslate.text('Y00_error960')
                 DisplayDgt.show(text)
 
         elif self.top_result == Menu.SYSTEM_MENU:
             if self.system_sound_result is None and self.system_language_result is None:
                 self.system_index = SettingsLoop.prev(self.system_index)
-                text = self.dgtmsg.text(self.system_index.value)
+                text = self.dgttranslate.text(self.system_index.value)
             else:
                 if self.system_language_result is None:
                     self.system_sound_index = (self.system_sound_index-1) & 0x0f
                     msg = str(self.system_sound_index)
-                    text = self.dgtmsg.text('B00_beep', msg)
+                    text = self.dgttranslate.text('B00_beep', msg)
                 else:
                     self.system_language_index = LanguageLoop.prev(self.system_language_index)
-                    text = self.dgtmsg.text(self.system_language_index.value)
+                    text = self.dgttranslate.text(self.system_language_index.value)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.ENGINE_MENU:
             if self.mode_result == Mode.REMOTE:
-                text = self.dgtmsg.text('B00_nofunction')
+                text = self.dgttranslate.text('B00_nofunction')
             else:
                 if self.engine_result is None:
                     self.engine_index = (self.engine_index-1) % self.n_engines
                     msg = (self.installed_engines[self.engine_index])[1]
-                    text = self.dgtmsg.text('B00_default', msg)
+                    text = self.dgttranslate.text('B00_default', msg)
                 else:
                     self.engine_level_index = (self.engine_level_index-1) % self.n_levels
                     msg = str(self.engine_level_index)
-                    text = self.dgtmsg.text('B00_level', msg)
+                    text = self.dgttranslate.text('B00_level', msg)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.BOOK_MENU:
             if self.mode_result == Mode.REMOTE:
-                text = self.dgtmsg.text('B00_nofunction')
+                text = self.dgttranslate.text('B00_nofunction')
             else:
                 self.book_index = (self.book_index-1) % self.n_books
                 msg = (self.all_books[self.book_index])[0]
-                text = self.dgtmsg.text('B00_default', msg)
+                text = self.dgttranslate.text('B00_default', msg)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.TIME_MENU:
             if self.time_mode_result is None:
                 self.time_mode_index = TimeModeLoop.prev(self.time_mode_index)
-                text = self.dgtmsg.text(self.time_mode_index.value)
+                text = self.dgttranslate.text(self.time_mode_index.value)
             else:
                 if self.time_mode_index == TimeMode.FIXED:
                     self.time_control_fixed_index = (self.time_control_fixed_index-1) % len(self.time_control_fixed_map)
@@ -368,7 +366,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 else:
                     logging.warning('wrong value for time_mode_index: {0}'.format(self.time_mode_index))
                     msg = 'error'
-                text = self.dgtmsg.text('B00_default', msg)
+                text = self.dgttranslate.text('B00_default', msg)
             DisplayDgt.show(text)
 
     def process_button2(self):
@@ -383,26 +381,26 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if self.mode_result == Mode.OBSERVE:
                 self.fire(Event.STARTSTOP_CLOCK())
             if self.mode_result == Mode.ANALYSIS or self.mode_result == Mode.KIBITZ:
-                text = self.dgtmsg.text('B00_nofunction')
+                text = self.dgttranslate.text('B00_nofunction')
                 DisplayDgt.show(text)
 
     def process_button3(self):
         if self.top_result is None:
             if self.last_move:
                 text = Dgt.DISPLAY_MOVE(move=self.last_move, fen=self.last_fen,
-                                        beep=self.dgtmsg.bl(BeepLevel.BUTTON), duration=1)
+                                        beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
             else:
-                text = self.dgtmsg.text('B10_nomove')
+                text = self.dgttranslate.text('B10_nomove')
             DisplayDgt.show(text)
 
         if self.top_result == Menu.TOP_MENU:
             self.top_index = MenuLoop.next(self.top_index)
-            text = self.dgtmsg.text(self.top_index.value)
+            text = self.dgttranslate.text(self.top_index.value)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.MODE_MENU:
             self.mode_index = ModeLoop.next(self.mode_index)
-            text = self.dgtmsg.text(self.mode_index.value)
+            text = self.dgttranslate.text(self.mode_index.value)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.POSITION_MENU:
@@ -410,59 +408,59 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 if self.setup_reverse_result is None:
                     if self.setup_whitetomove_result is None:
                         self.setup_whitetomove_index = not self.setup_whitetomove_index
-                        text = self.dgtmsg.text('B00_sidewhite' if self.setup_whitetomove_index else 'B00_sideblack')
+                        text = self.dgttranslate.text('B00_sidewhite' if self.setup_whitetomove_index else 'B00_sideblack')
                     else:
                         self.setup_reverse_index = not self.setup_reverse_index
-                        text = self.dgtmsg.text('B00_bw' if self.setup_reverse_index else 'B00_wb')
+                        text = self.dgttranslate.text('B00_bw' if self.setup_reverse_index else 'B00_wb')
                 else:
                     if self.engine_has_960:
                         self.setup_uci960_index = not self.setup_uci960_index
-                        text = self.dgtmsg.text('B00_960yes' if self.setup_uci960_index else 'B00_960no')
+                        text = self.dgttranslate.text('B00_960yes' if self.setup_uci960_index else 'B00_960no')
                     else:
-                        text = self.dgtmsg.text('Y00_error960')
+                        text = self.dgttranslate.text('Y00_error960')
                 DisplayDgt.show(text)
 
         elif self.top_result == Menu.SYSTEM_MENU:
             if self.system_sound_result is None and self.system_language_result is None:
                 self.system_index = SettingsLoop.next(self.system_index)
-                text = self.dgtmsg.text(self.system_index.value)
+                text = self.dgttranslate.text(self.system_index.value)
             else:
                 if self.system_language_result is None:
                     self.system_sound_index = (self.system_sound_index+1) & 0x0f
                     msg = str(self.system_sound_index)
-                    text = self.dgtmsg.text('B00_beep', msg)
+                    text = self.dgttranslate.text('B00_beep', msg)
                 else:
                     self.system_language_index = LanguageLoop.next(self.system_language_index)
-                    text = self.dgtmsg.text(self.system_language_index.value)
+                    text = self.dgttranslate.text(self.system_language_index.value)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.ENGINE_MENU:
             if self.mode_result == Mode.REMOTE:
-                text = self.dgtmsg.text('B00_nofunction')
+                text = self.dgttranslate.text('B00_nofunction')
             else:
                 if self.engine_result is None:
                     self.engine_index = (self.engine_index+1) % self.n_engines
                     msg = (self.installed_engines[self.engine_index])[1]
-                    text = self.dgtmsg.text('B00_default', msg)
+                    text = self.dgttranslate.text('B00_default', msg)
                 else:
                     self.engine_level_index = (self.engine_level_index+1) % self.n_levels
                     msg = str(self.engine_level_index)
-                    text = self.dgtmsg.text('B00_level', msg)
+                    text = self.dgttranslate.text('B00_level', msg)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.BOOK_MENU:
             if self.mode_result == Mode.REMOTE:
-                text = self.dgtmsg.text('B00_nofunction')
+                text = self.dgttranslate.text('B00_nofunction')
             else:
                 self.book_index = (self.book_index+1) % self.n_books
                 msg = (self.all_books[self.book_index])[0]
-                text = self.dgtmsg.text('B00_default', msg)
+                text = self.dgttranslate.text('B00_default', msg)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.TIME_MENU:
             if self.time_mode_result is None:
                 self.time_mode_index = TimeModeLoop.next(self.time_mode_index)
-                text = self.dgtmsg.text(self.time_mode_index.value)
+                text = self.dgttranslate.text(self.time_mode_index.value)
             else:
                 if self.time_mode_index == TimeMode.FIXED:
                     self.time_control_fixed_index = (self.time_control_fixed_index+1) % len(self.time_control_fixed_map)
@@ -476,45 +474,45 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 else:
                     logging.warning('wrong value for time_mode_index: {0}'.format(self.time_mode_index))
                     msg = 'error'
-                text = self.dgtmsg.text('B00_default', msg)
+                text = self.dgttranslate.text('B00_default', msg)
             DisplayDgt.show(text)
 
     def process_button4(self):
         if self.top_result is None:
             self.top_result = Menu.TOP_MENU
             self.top_index = Menu.MODE_MENU
-            text = self.dgtmsg.text(self.top_index.value)
+            text = self.dgttranslate.text(self.top_index.value)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.TOP_MENU:
             self.top_result = self.top_index
             # display first entry of the submenu "top"
             if self.top_index == Menu.MODE_MENU:
-                text = self.dgtmsg.text(self.mode_index.value)
+                text = self.dgttranslate.text(self.mode_index.value)
             elif self.top_index == Menu.POSITION_MENU:
                 self.setup_whitetomove_index = True
-                text = self.dgtmsg.text('B00_sidewhite' if self.setup_whitetomove_index else 'B00_sideblack')
+                text = self.dgttranslate.text('B00_sidewhite' if self.setup_whitetomove_index else 'B00_sideblack')
             elif self.top_index == Menu.TIME_MENU:
-                text = self.dgtmsg.text(self.time_mode_index.value)
+                text = self.dgttranslate.text(self.time_mode_index.value)
             elif self.top_index == Menu.BOOK_MENU:
                 msg = (self.all_books[self.book_index])[0]
-                text = self.dgtmsg.text('B00_default', msg)
+                text = self.dgttranslate.text('B00_default', msg)
             elif self.top_index == Menu.ENGINE_MENU:
                 if self.mode_result == Mode.REMOTE:
-                    text = self.dgtmsg.text('B00_nofunction')
+                    text = self.dgttranslate.text('B00_nofunction')
                 else:
                     msg = (self.installed_engines[self.engine_index])[1]
-                    text = self.dgtmsg.text('B00_default', msg)
+                    text = self.dgttranslate.text('B00_default', msg)
             elif self.top_index == Menu.SYSTEM_MENU:
-                text = self.dgtmsg.text(self.system_index.value)
+                text = self.dgttranslate.text(self.system_index.value)
             else:
                 logging.warning('wrong value for topindex: {0}'.format(self.top_index))
-                text = self.dgtmsg.text('Y00_errormenu')
+                text = self.dgttranslate.text('Y00_errormenu')
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.MODE_MENU:
             self.mode_result = self.mode_index
-            text = self.dgtmsg.text('B10_okmode')
+            text = self.dgttranslate.text('B10_okmode')
             self.fire(Event.SET_INTERACTION_MODE(mode=self.mode_result, mode_text=text))
             self.reset_menu()
 
@@ -522,16 +520,16 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if self.setup_whitetomove_result is None:
                 self.setup_whitetomove_result = self.setup_whitetomove_index
                 self.setup_reverse_index = self.flip_board
-                text = self.dgtmsg.text('B00_bw' if self.setup_reverse_index else 'B00_wb')
+                text = self.dgttranslate.text('B00_bw' if self.setup_reverse_index else 'B00_wb')
             else:
                 if self.setup_reverse_result is None:
                     self.setup_reverse_result = self.setup_reverse_index
                     self.setup_uci960_index = False
-                    text = self.dgtmsg.text('B00_960yes' if self.setup_uci960_index else 'B00_960no')
+                    text = self.dgttranslate.text('B00_960yes' if self.setup_uci960_index else 'B00_960no')
                 else:
                     if self.setup_uci960_result is None:
                         self.setup_uci960_result = self.setup_uci960_index
-                        text = self.dgtmsg.text('B00_scanboard')
+                        text = self.dgttranslate.text('B00_scanboard')
                     else:
                         to_move = 'w' if self.setup_whitetomove_index else 'b'
                         fen = self.dgt_fen
@@ -549,41 +547,41 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.reset_menu()
                             return
                         else:
-                            DisplayDgt.show(self.dgtmsg.text('Y05_illegalpos'))
-                            text = self.dgtmsg.text('B00_scanboard')
+                            DisplayDgt.show(self.dgttranslate.text('Y05_illegalpos'))
+                            text = self.dgttranslate.text('B00_scanboard')
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.SYSTEM_MENU:
             exit_menu = True
             if self.system_index == Settings.VERSION:
-                text = self.dgtmsg.text('B10_picochess')
+                text = self.dgttranslate.text('B10_picochess')
                 DisplayDgt.show(text)
             elif self.system_index == Settings.IPADR:
                 if len(self.ip):
                     msg = self.ip
-                    text = self.dgtmsg.text('B00_default', msg)
+                    text = self.dgttranslate.text('B00_default', msg)
                 else:
-                    text = self.dgtmsg.text('B10_noipadr')
+                    text = self.dgttranslate.text('B10_noipadr')
                 DisplayDgt.show(text)
             elif self.system_index == Settings.SOUND:
                 if self.system_sound_result is None:
                     self.system_sound_result = self.system_sound_index
                     msg = str(self.system_sound_index)
-                    text = self.dgtmsg.text('B00_beep', msg)
+                    text = self.dgttranslate.text('B00_beep', msg)
                     exit_menu = False
                 else:
-                    self.dgtmsg.set_beep_level(self.system_sound_index)
-                    text = self.dgtmsg.text('B10_okbeep')
+                    self.dgttranslate.set_beep_level(self.system_sound_index)
+                    text = self.dgttranslate.text('B10_okbeep')
                 DisplayDgt.show(text)
             elif self.system_index == Settings.LANGUAGE:
                 if self.system_language_result is None:
                     self.system_language_result = self.system_language_index
-                    text = self.dgtmsg.text(self.system_language_result.value)
+                    text = self.dgttranslate.text(self.system_language_result.value)
                     exit_menu = False
                 else:
                     language = {Language.EN: 'en', Language.DE: 'de', Language.NL: 'nl'}[self.system_language_index]
-                    self.dgtmsg.set_language(language)
-                    text = self.dgtmsg.text('B10_oklang')
+                    self.dgttranslate.set_language(language)
+                    text = self.dgttranslate.text('B10_oklang')
                 DisplayDgt.show(text)
             else:
                 logging.warning('wrong value for system_index: {0}'.format(self.system_index))
@@ -591,14 +589,14 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.reset_menu()
                 if self.play_move:
                     text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen,
-                                            beep=self.dgtmsg.bl(BeepLevel.BUTTON), duration=1)
+                                            beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
                     DisplayDgt.show(text)
                 else:
                     DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
 
         elif self.top_result == Menu.ENGINE_MENU:
             if self.mode_result == Mode.REMOTE:
-                text = self.dgtmsg.text('B00_nofunction')
+                text = self.dgttranslate.text('B00_nofunction')
                 DisplayDgt.show(text)
             else:
                 if self.engine_result is None:
@@ -606,28 +604,28 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if eng[2]:  # 2=has_levels
                         self.engine_result = self.engine_index
                         msg = str(self.engine_level_index)
-                        text = self.dgtmsg.text('B00_level', msg)
+                        text = self.dgttranslate.text('B00_level', msg)
                         DisplayDgt.show(text)
                     else:
-                        self.fire(Event.NEW_ENGINE(eng=eng, eng_text=self.dgtmsg.text('B10_okengine'),
-                                                   level=None, level_text=self.dgtmsg.text('B00_nolevel')))
+                        self.fire(Event.NEW_ENGINE(eng=eng, eng_text=self.dgttranslate.text('B10_okengine'),
+                                                   level=None, level_text=self.dgttranslate.text('B00_nolevel')))
                         self.engine_restart = True
                         self.reset_menu()
                 else:
                     level = self.engine_level_index
-                    text = self.dgtmsg.text('B10_level', str(level))
+                    text = self.dgttranslate.text('B10_level', str(level))
                     eng = self.installed_engines[self.engine_result]
-                    self.fire(Event.NEW_ENGINE(eng=eng, eng_text=self.dgtmsg.text('B10_okengine'),
+                    self.fire(Event.NEW_ENGINE(eng=eng, eng_text=self.dgttranslate.text('B10_okengine'),
                                                level=level, level_text=text))
                     self.engine_restart = True
                     self.reset_menu()
 
         elif self.top_result == Menu.BOOK_MENU:
             if self.mode_result == Mode.REMOTE:
-                text = self.dgtmsg.text('B00_nofunction')
+                text = self.dgttranslate.text('B00_nofunction')
                 DisplayDgt.show(text)
             else:
-                text = self.dgtmsg.text('B10_okbook')
+                text = self.dgttranslate.text('B10_okbook')
                 self.fire(Event.SET_OPENING_BOOK(book=self.all_books[self.book_index], book_text=text))
                 self.reset_menu()
 
@@ -644,7 +642,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 else:
                     logging.warning('wrong value for time_mode_index: {0}'.format(self.time_mode_index))
                     msg = 'error'
-                text = self.dgtmsg.text('B00_default', msg)
+                text = self.dgttranslate.text('B00_default', msg)
                 DisplayDgt.show(text)
             else:
                 if self.time_mode_index == TimeMode.FIXED:
@@ -657,7 +655,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     logging.warning('wrong value for time_mode_index: {0}'.format(self.time_mode_index))
                     time_control = None
                 time_left, time_right = time_control.current_clock_time(self.flip_board)
-                text = self.dgtmsg.text('B10_oktime')
+                text = self.dgttranslate.text('B10_oktime')
                 self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=text))
                 DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=0x04, wait=True, callback=None))
                 self.reset_menu()
@@ -692,7 +690,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 self.engine_has_960 = message.has_960
                         break
                     if case(MessageApi.ENGINE_FAIL):
-                        DisplayDgt.show(self.dgtmsg.text('Y00_erroreng'))
+                        DisplayDgt.show(self.dgttranslate.text('Y00_erroreng'))
                         break
                     if case(MessageApi.COMPUTER_MOVE):
                         move = message.result.bestmove
@@ -706,7 +704,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         # Display the move
                         uci_move = move.uci()
                         DisplayDgt.show(Dgt.DISPLAY_MOVE(move=move, fen=message.fen,
-                                                         beep=self.dgtmsg.bl(BeepLevel.CONFIG), duration=0))
+                                                         beep=self.dgttranslate.bl(BeepLevel.CONFIG), duration=0))
                         DisplayDgt.show(Dgt.LIGHT_SQUARES(squares=(uci_move[0:2], uci_move[2:4])))
                         break
                     if case(MessageApi.START_NEW_GAME):
@@ -718,7 +716,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.reset_menu()
                         self.alternative = False
                         time_left, time_right = message.time_control.current_clock_time(flip_board=self.flip_board)
-                        DisplayDgt.show(self.dgtmsg.text('C10_newgame'))
+                        DisplayDgt.show(self.dgttranslate.text('C10_newgame'))
                         DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=0x04, wait=True, callback=None))
                         break
                     if case(MessageApi.WAIT_STATE):
@@ -729,23 +727,23 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.play_move = chess.Move.null()
                         self.alternative = False
                         if self.ok_moves_messages:
-                            DisplayDgt.show(self.dgtmsg.text('K05_okpico'))
+                            DisplayDgt.show(self.dgttranslate.text('K05_okpico'))
                         self.reset_menu()
                         break
                     if case(MessageApi.USER_MOVE):
                         self.alternative = False
                         if self.ok_moves_messages:
-                            DisplayDgt.show(self.dgtmsg.text('K05_okuser'))
+                            DisplayDgt.show(self.dgttranslate.text('K05_okuser'))
                         break
                     if case(MessageApi.REVIEW_MOVE):
                         self.last_move = message.move
                         self.play_move = message.move
                         self.last_fen = message.fen
                         if self.ok_moves_messages:
-                            DisplayDgt.show(self.dgtmsg.text('K05_okmove'))
+                            DisplayDgt.show(self.dgttranslate.text('K05_okmove'))
                         break
                     if case(MessageApi.ALTERNATIVE_MOVE):
-                        DisplayDgt.show(self.dgtmsg.text('B05_altmove'))
+                        DisplayDgt.show(self.dgttranslate.text('B05_altmove'))
                         break
                     if case(MessageApi.LEVEL):
                         if self.engine_restart:
@@ -754,7 +752,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             DisplayDgt.show(message.level_text)
                             if self.play_move:
                                 DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen,
-                                                                 beep=self.dgtmsg.bl(BeepLevel.BUTTON), duration=1))
+                                                                 beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1))
                             else:
                                 DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
                         break
@@ -762,7 +760,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         DisplayDgt.show(message.time_text)
                         if self.play_move:
                             DgtDisplay.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen,
-                                                             beep=self.dgtmsg.bl(BeepLevel.BUTTON), duration=1))
+                                                             beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1))
                         else:
                             DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
                         break
@@ -770,18 +768,18 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         DisplayDgt.show(message.book_text)
                         if self.play_move:
                             DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen,
-                                                             beep=self.dgtmsg.bl(BeepLevel.BUTTON), duration=1))
+                                                             beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1))
                         else:
                             DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
                         break
                     if case(MessageApi.USER_TAKE_BACK):
                         self.reset_hint_and_score()
                         self.alternative = False
-                        DisplayDgt.show(self.dgtmsg.text('C00_takeback'))
+                        DisplayDgt.show(self.dgttranslate.text('C00_takeback'))
                         break
                     if case(MessageApi.GAME_ENDS):
                         ge = message.result.value
-                        DisplayDgt.show(self.dgtmsg.text(ge))
+                        DisplayDgt.show(self.dgttranslate.text(ge))
                         break
                     if case(MessageApi.INTERACTION_MODE):
                         self.mode_index = message.mode
@@ -789,30 +787,30 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         DisplayDgt.show(message.mode_text)
                         if self.play_move:
                             DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen,
-                                                             beep=self.dgtmsg.bl(BeepLevel.BUTTON), duration=1))
+                                                             beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1))
                         else:
                             DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
                         break
                     if case(MessageApi.PLAY_MODE):
-                        DisplayDgt.show(self.dgtmsg.text(message.play_mode.value))
+                        DisplayDgt.show(self.dgttranslate.text(message.play_mode.value))
                         break
                     if case(MessageApi.NEW_SCORE):
                         self.score = message.score
                         self.mate = message.mate
                         if message.mode == Mode.KIBITZ and self.top_result is None:
-                            DisplayDgt.show(self.dgtmsg.text('N10_default', str(self.score).rjust(6)))
+                            DisplayDgt.show(self.dgttranslate.text('N10_default', str(self.score).rjust(6)))
                         break
                     if case(MessageApi.BOOK_MOVE):
                         self.score = None
                         self.mate = None
-                        DisplayDgt.show(self.dgtmsg.text('N10_bookmove'))
+                        DisplayDgt.show(self.dgttranslate.text('N10_bookmove'))
                         break
                     if case(MessageApi.NEW_PV):
                         self.hint_move = message.pv[0]
                         self.hint_fen = message.fen
                         if message.mode == Mode.ANALYSIS and self.top_result is None:
                             DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen,
-                                                             beep=self.dgtmsg.bl(BeepLevel.NO), duration=0))
+                                                             beep=self.dgttranslate.bl(BeepLevel.NO), duration=0))
                         break
                     if case(MessageApi.SYSTEM_INFO):
                         self.ip = ' '.join(message.info["ip"].split('.')[2:])
@@ -878,7 +876,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             break
                         self.dgt_fen = fen
                         self.drawresign_fen = self.drawresign()
-                        map_bl = self.dgtmsg.bl(BeepLevel.MAP)
+                        map_bl = self.dgttranslate.bl(BeepLevel.MAP)
                         # Fire the appropriate event
                         if fen in level_map:
                             level = 3 * level_map.index(fen)
@@ -887,7 +885,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.engine_level_result = level
                             self.engine_level_index = level
                             logging.debug("Map-Fen: New level")
-                            text = self.dgtmsg.text('M10_level', str(level))
+                            text = self.dgttranslate.text('M10_level', str(level))
                             self.fire(Event.LEVEL(level=level, level_text=text))
                         elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":
                             logging.debug("Map-Fen: New game")
@@ -899,7 +897,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 b = self.all_books[book_index]
                                 self.book_index = book_index
                                 logging.debug("Map-Fen: Opening book [%s]", b[1])
-                                text = self.dgtmsg.text('M10_default', b[0])
+                                text = self.dgttranslate.text('M10_default', b[0])
                                 self.fire(Event.SET_OPENING_BOOK(book=b, book_text=text))
                                 self.reset_menu()
                             except IndexError:
@@ -911,19 +909,19 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                     self.engine_index = engine_index
                                     eng = self.installed_engines[self.engine_index]
                                     logging.debug("Map-Fen: Engine name [%s]", eng[1])
-                                    eng_text = self.dgtmsg.text('M10_default', eng[1])
+                                    eng_text = self.dgttranslate.text('M10_default', eng[1])
                                     level = self.engine_level_index if self.engine_level_result is None else self.engine_level_result
-                                    text = self.dgtmsg.text('M10_level', str(level))
+                                    text = self.dgttranslate.text('M10_level', str(level))
                                     self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, level=level, level_text=text))
                                     self.engine_restart = True
                                     self.reset_menu()
                                 except IndexError:
                                     pass
                             else:
-                                DisplayDgt.show(self.dgtmsg.text('Y00_erroreng'))
+                                DisplayDgt.show(self.dgttranslate.text('Y00_erroreng'))
                         elif fen in mode_map:
                             logging.debug("Map-Fen: Interaction mode [%s]", mode_map[fen])
-                            text = self.dgtmsg.text(mode_map[fen].value)
+                            text = self.dgttranslate.text(mode_map[fen].value)
                             text.beep = map_bl  # BeepLevel is Map not Button
                             self.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], mode_text=text))
                             self.reset_menu()
@@ -931,7 +929,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             logging.debug("Map-Fen: Time control fixed")
                             self.time_mode_index = TimeMode.FIXED
                             self.time_control_fixed_index = list(self.time_control_fixed_map.keys()).index(fen)
-                            text = self.dgtmsg.text('M10_default', self.time_control_fixed_list[self.time_control_fixed_index])
+                            text = self.dgttranslate.text('M10_default', self.time_control_fixed_list[self.time_control_fixed_index])
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_fixed_map[fen],
                                                              time_text=text))
                             self.reset_menu()
@@ -939,7 +937,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             logging.debug("Map-Fen: Time control blitz")
                             self.time_mode_index = TimeMode.BLITZ
                             self.time_control_blitz_index = list(self.time_control_blitz_map.keys()).index(fen)
-                            text = self.dgtmsg.text('M10_default', self.time_control_blitz_list[self.time_control_blitz_index])
+                            text = self.dgttranslate.text('M10_default', self.time_control_blitz_list[self.time_control_blitz_index])
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_blitz_map[fen],
                                                              time_text=text))
                             self.reset_menu()
@@ -947,7 +945,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             logging.debug("Map-Fen: Time control fischer")
                             self.time_mode_index = TimeMode.FISCHER
                             self.time_control_fisch_index = list(self.time_control_fisch_map.keys()).index(fen)
-                            text = self.dgtmsg.text('M10_default', self.time_control_fisch_list[self.time_control_fisch_index])
+                            text = self.dgttranslate.text('M10_default', self.time_control_fisch_list[self.time_control_fisch_index])
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_fisch_map[fen],
                                                              time_text=text))
                             self.reset_menu()
@@ -963,7 +961,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 self.fire(Event.DRAWRESIGN(result=drawresign_map[self.drawresign_fen]))
                         else:
                             if self.draw_setup_pieces:
-                                DisplayDgt.show(self.dgtmsg.text('N00_setpieces'))
+                                DisplayDgt.show(self.dgttranslate.text('N00_setpieces'))
                                 self.draw_setup_pieces = False
                             if self.top_result is None:
                                 self.fire(Event.FEN(fen=fen))
@@ -978,7 +976,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         DisplayDgt.show(Dgt.CLOCK_TIME(time_left=message.time_left, time_right=message.time_right))
                         break
                     if case(MessageApi.JACK_CONNECTED_ERROR):  # this will only work in case of 2 clocks connected!
-                        DisplayDgt.show(self.dgtmsg.text('Y00_errorjack'))
+                        DisplayDgt.show(self.dgttranslate.text('Y00_errorjack'))
                         break
                     if case(MessageApi.EBOARD_VERSION):
                         DisplayDgt.show(message.text)

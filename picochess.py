@@ -43,6 +43,7 @@ from dgtpi import DgtPi
 from dgtvr import DgtVr
 from dgtdisplay import DgtDisplay
 from dgtserial import DgtSerial
+from dgttranslate import DgtTranslate
 
 from logging.handlers import RotatingFileHandler
 
@@ -418,7 +419,8 @@ def main():
             gaviota = None
 
     # This class talks to DgtHw/DgtPi or DgtVr
-    DgtDisplay(args.disable_ok_move, args.beep_level, args.language).start()
+    dgttranslate = DgtTranslate(args.beep_level, args.language)
+    DgtDisplay(args.disable_ok_move, dgttranslate).start()
 
     # Launch web server
     if args.web_server_port:
@@ -429,9 +431,9 @@ def main():
         logging.debug("starting picochess with DGT board on [%s]", args.dgt_port)
         dgtserial = DgtSerial(args.dgt_port)
         if args.dgtpi:
-            dgthardware = DgtPi(dgtserial, args.enable_revelation_leds)
+            dgthardware = DgtPi(dgtserial, dgttranslate, args.enable_revelation_leds)
         else:
-            dgthardware = DgtHw(dgtserial, args.enable_revelation_leds)
+            dgthardware = DgtHw(dgtserial, dgttranslate, args.enable_revelation_leds)
     else:
         # Enable keyboard input and terminal display
         logging.debug("starting picochess with virtual DGT board")
