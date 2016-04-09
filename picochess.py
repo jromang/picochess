@@ -377,7 +377,7 @@ def main():
     parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
     parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
     parser.add_argument("-inet", "--enable-internet", action='store_true', help="enable internet lookups")
-    parser.add_argument("-nookmove", "--disable-ok-move", action='store_false', help="disable ok move messages")
+    parser.add_argument("-nookmove", "--disable-ok-move", action='store_true', help="disable ok move messages")
     parser.add_argument("-v", "--version", action='version', version='%(prog)s version {}'.format(version),
                         help="show current version", default=None)
     parser.add_argument("-pi", "--dgtpi", action='store_true', help="use the dgtpi hardware")
@@ -398,6 +398,7 @@ def main():
                             datefmt="%Y-%m-%d %H:%M:%S", handlers=[handler])
     logging.getLogger("chess.uci").setLevel(logging.INFO)  # don't want to get so many python-chess uci messages
 
+    logging.debug('#'*20 + ' PicoChess v' + version + ' ' + '#'*20)
     # log the startup parameters but hide the password fields
     p = vars(args)
     p['mailgun_key'] = p['server_key'] = p['password'] = p['smtp_pass'] = '*****'

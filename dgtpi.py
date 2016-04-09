@@ -27,6 +27,7 @@ class DgtPi(DgtIface):
     def __init__(self, dgtserial, enable_revelation_leds):
         super(DgtPi, self).__init__(enable_revelation_leds)
         self.dgtserial = dgtserial
+        self.dgtserial.enable_pi()
         self.dgtserial.run()
 
         self.lock = Lock()

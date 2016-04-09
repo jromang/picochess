@@ -57,6 +57,7 @@ class DgtSerial(object):
         self.waitchars = ['/', '-', '\\', '|']
         self.lock = Lock()  # inside setup_serial()
         self.incoming_board_thread = None
+        self.is_pi = False
         # the next three are only used for "not dgtpi" mode
         self.clock_lock = False  # serial connected clock is locked
         self.last_clock_command = []  # Used for resend last (failed) clock command
@@ -288,9 +289,12 @@ class DgtSerial(object):
                     logging.error(e)
                     s = 'Board' + self.waitchars[wait_counter]
                     text = Dgt.DISPLAY_TEXT(l='no e-' + s, m='no' + s, s=s, beep=False, duration=0)
-                    DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text))
+                    DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text, is_pi=self.is_pi))
                     wait_counter = (wait_counter + 1) % len(self.waitchars)
                     time.sleep(0.5)
+
+    def enable_pi(self):
+        self.is_pi = True
 
     def run(self):
         self.incoming_board_thread = Timer(0, self.process_incoming_board_forever)

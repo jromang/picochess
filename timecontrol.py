@@ -109,10 +109,7 @@ class TimeControl(object):
                 w_hms = hours_minutes_seconds(time_w)
                 b_hms = hours_minutes_seconds(time_b)
                 logging.info('new internal time w:{} b:{}'.format(w_hms, b_hms))
-
                 self.active_color = None
-        else:
-            logging.warning('active color is None')
 
     def is_ticking(self):
         """Is the internal clock running?"""
