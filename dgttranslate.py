@@ -372,7 +372,7 @@ class DgtTranslate(object):
             nl = Dgt.DISPLAY_TEXT(l='nederlands', m='nederl', s='nlands', beep=self.bl(BeepLevel.BUTTON), duration=0)
         if text_id == 'B10_oklang':
             en = Dgt.DISPLAY_TEXT(l='okay lang', m='ok lang', s='oklang', beep=self.bl(BeepLevel.BUTTON), duration=1)
-            de = Dgt.DISPLAY_TEXT(l='okay Sprache', m='okSprache', s='oklang', beep=self.bl(BeepLevel.BUTTON), duration=1)
+            de = Dgt.DISPLAY_TEXT(l='okay Sprache', m='okSprache', s='ok spr', beep=self.bl(BeepLevel.BUTTON), duration=1)
             nl = Dgt.DISPLAY_TEXT(l='oke taal', m='ok taal', s='oktaal', beep=self.bl(BeepLevel.BUTTON), duration=1)
         if en is None:
             en = Dgt.DISPLAY_TEXT(l=None, m=text_id, s=None, beep=self.bl(BeepLevel.YES), duration=0)
