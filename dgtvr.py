@@ -15,57 +15,35 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from threading import Timer
 import chess
-from dgtinterface import *
+from dgtiface import *
+from utilities import RepeatedTimer
 
 
-class DgtVr(DgtInterface):
-    def __init__(self, enable_board_leds, beep_level):
-        super(DgtVr, self).__init__(enable_board_leds, beep_level)
+class DgtVr(DgtIface):
+    def __init__(self, enable_revelation_leds):
+        super(DgtVr, self).__init__(enable_revelation_leds)
         # virtual lib
         self.rt = None
         self.time_side = None
         # setup virtual clock
         DisplayMsg.show(Message.DGT_CLOCK_VERSION(main_version=0, sub_version=0, attached="virtual"))
 
+    def startup(self):
+        pass
+
     # (START) dgtserial class simulation
-    class RepeatedTimer(object):
-        def __init__(self, interval, function, *args, **kwargs):
-            self._timer = None
-            self.interval = interval
-            self.function = function
-            self.args = args
-            self.kwargs = kwargs
-            self.is_running = False
-            self.start()
-
-        def _run(self):
-            self.is_running = False
-            self.start()
-            self.function(*self.args, **self.kwargs)
-
-        def start(self):
-            if not self.is_running:
-                self._timer = Timer(self.interval, self._run)
-                self._timer.start()
-                self.is_running = True
-
-        def stop(self):
-            self._timer.cancel()
-            self.is_running = False
-
     def runclock(self):
         if self.time_side == 1:
             h, m, s = self.time_left
-            time_left = 3600*h + 60*m + s -1
+            time_left = 3600*h + 60*m + s - 1
             if time_left <= 0:
                 print('Clock flag: left')
                 self.rt.stop()
             self.time_left = hours_minutes_seconds(time_left)
         else:
             h, m, s = self.time_right
-            time_right = 3600*h + 60*m + s -1
+            time_right = 3600*h + 60*m + s - 1
             if time_right <= 0:
                 print('Clock flag: right')
                 self.rt.stop()
@@ -77,8 +55,7 @@ class DgtVr(DgtInterface):
         DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=self.time_left, time_right=self.time_right))
     # (END) dgtserial simulation class
 
-    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):
-        beep = self.get_beep_level(beep)
+    def display_move_on_clock(self, move, fen, beep=False):
         if self.enable_dgt_3000:
             bit_board = chess.Board(fen)
             text = bit_board.san(move)
@@ -87,8 +64,7 @@ class DgtVr(DgtInterface):
         logging.debug(text)
         print('Clock move: {} Beep: {}'. format(text, beep))
 
-    def display_text_on_clock(self, text, beep=BeepLevel.CONFIG):
-        beep = self.get_beep_level(beep)
+    def display_text_on_clock(self, text, beep=False):
         logging.debug(text)
         print('Clock text: {} Beep: {}'. format(text, beep))
 
@@ -108,8 +84,9 @@ class DgtVr(DgtInterface):
         print('Clock time started at {} - {}'. format(self.time_left, self.time_right))
         if self.rt:
             self.rt.stop()
-        self.rt = self.RepeatedTimer(1, self.runclock)
-        self.clock_running = True
+        self.rt = RepeatedTimer(1, self.runclock)
+        self.rt.start()
+        self.clock_running = (side != 0x04)
 
     def light_squares_revelation_board(self, squares):
         pass

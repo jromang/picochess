@@ -1,0 +1,11 @@
+[Unit]
+Description=DGT PI Hello
+DefaultDependencies=false
+
+[Service]
+Type=oneshot
+ExecStart=/opt/dgtpi/dgtpicom "  DGT  PI  " 1
+WorkingDirectory=/opt/dgtpi/
+
+[Install]
+WantedBy=basic.target

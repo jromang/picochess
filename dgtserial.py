@@ -17,10 +17,9 @@
 
 import serial as pyserial
 
-import time
-from struct import unpack
+import struct
 from utilities import *
-from threading import Timer
+from threading import Timer, Lock
 
 try:
     import enum
@@ -56,15 +55,19 @@ class DgtSerial(object):
         self.device = device
         self.serial = None
         self.waitchars = ['/', '-', '\\', '|']
-        # the next two are only used for "not dgtpi" mode
+        self.lock = Lock()  # inside setup_serial()
+        self.incoming_board_thread = None
+        self.is_pi = False
+        # the next three are only used for "not dgtpi" mode
         self.clock_lock = False  # serial connected clock is locked
         self.last_clock_command = []  # Used for resend last (failed) clock command
+        self.rt = RepeatedTimer(1, self.watchdog)
 
     def write_board_command(self, message):
         mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
-        logging.debug('->DGT board [%s], length %i', mes, len(message))
+        logging.debug('->DGT board [%s], length: %i', mes, len(message))
         if mes.value == DgtClk.DGT_CMD_CLOCK_ASCII.value:
-            logging.debug(''.join([chr(elem) for elem in message[4:10]]))
+            logging.debug('sending text [{}] to clock'. format(''.join([chr(elem) for elem in message[4:10]])))
 
         array = []
         for v in message:
@@ -76,7 +79,7 @@ class DgtSerial(object):
                 for c in v:
                     array.append(char_to_DGTXL[c.lower()])
             else:
-                logging.error('Type not supported [%s]', type(v))
+                logging.error('type not supported [%s]', type(v))
 
         while True:
             if not self.serial:
@@ -86,7 +89,7 @@ class DgtSerial(object):
                 self.serial.write(bytearray(array))
                 break
             except ValueError:
-                logging.error('Invalid bytes sent {0}'.format(message))
+                logging.error('invalid bytes sent {0}'.format(message))
                 break
             except pyserial.SerialException as e:
                 logging.error(e)
@@ -110,15 +113,17 @@ class DgtSerial(object):
                 board_version = str(message[0]) + '.' + str(message[1])
                 logging.debug("DGT board version %0.2f", float(board_version))
                 if self.device.find('rfc') == -1:
-                    text_m = 'USB E-board'
-                    text_s = 'ok usb'
+                    text_l, text_m, text_s = 'USB E-board', 'USBboard', 'ok usb'
                     channel = 'USB'
                 else:
-                    text_m = 'BT E-board'
-                    text_s = 'ok bt'
+                    text_l, text_m, text_s = 'BT E-board', 'BT board', 'ok bt'
                     channel = 'BT'
-                text = Dgt.DISPLAY_TEXT(l=None, m=text_m, s=text_s, beep=BeepLevel.NO, duration=0.5)
+                text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, beep=False, duration=0.5)
                 DisplayMsg.show(Message.EBOARD_VERSION(text=text, channel=channel))
+                if self.rt.is_running():
+                    logging.warning('watchdog timer is already running')
+                else:
+                    self.rt.start()
                 break
             if case(DgtMsg.DGT_MSG_BWTIME):
                 if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
@@ -130,7 +135,7 @@ class DgtSerial(object):
                     if ack0 != 0x10:
                         logging.warning("DGT clock [ser]: ACK error %s", (ack0, ack1, ack2, ack3))
                         if self.last_clock_command:
-                            logging.debug('Resending failed DGT clock message [%s]', self.last_clock_command)
+                            logging.debug('resending failed DGT clock message [%s]', self.last_clock_command)
                             self.write_board_command(self.last_clock_command)
                             self.last_clock_command = []  # only resend once
                         break
@@ -138,26 +143,30 @@ class DgtSerial(object):
                         logging.debug("DGT clock [ser]: ACK okay [%s]", DgtClk(ack1))
                     if ack1 == 0x88:
                         # this are the other (ack2-ack3) codes
-                        # 6-49 34-52 18-51 10-50 66-53 | button 0-4 (single)
-                        #      38-52 22-51 14-50 70-53 | button 0 + 1-4
-                        #            50-51 42-50 98-53 | button 1 + 2-4
-                        #                  26-50 82-53 | button 2 + 3-4
-                        #                        74-53 | button 3 + 4
+                        # 05-49 33-52 17-51 09-50 65-53 | button 0-4 (single)
+                        #       37-52 21-51 13-50 69-53 | button 0 + 1-4
+                        #             49-51 41-50 97-53 | button 1 + 2-4
+                        #                   25-50 81-53 | button 2 + 3-4
+                        #                         73-53 | button 3 + 4
                         if ack3 == 49:
-                            logging.info("DGT clock [ser]: button 0 pressed")
+                            logging.info("DGT clock [ser]: button 0 pressed - ack2: %i", ack2)
                             DisplayMsg.show(Message.DGT_BUTTON(button=0))
                         if ack3 == 52:
-                            logging.info("DGT clock [ser]: button 1 pressed")
+                            logging.info("DGT clock [ser]: button 1 pressed - ack2: %i", ack2)
                             DisplayMsg.show(Message.DGT_BUTTON(button=1))
                         if ack3 == 51:
-                            logging.info("DGT clock [ser]: button 2 pressed")
+                            logging.info("DGT clock [ser]: button 2 pressed - ack2: %i", ack2)
                             DisplayMsg.show(Message.DGT_BUTTON(button=2))
                         if ack3 == 50:
-                            logging.info("DGT clock [ser]: button 3 pressed")
+                            logging.info("DGT clock [ser]: button 3 pressed - ack2: %i", ack2)
                             DisplayMsg.show(Message.DGT_BUTTON(button=3))
                         if ack3 == 53:
-                            logging.info("DGT clock [ser]: button 4 pressed")
-                            DisplayMsg.show(Message.DGT_BUTTON(button=4))
+                            if ack2 == 69:
+                                logging.info("DGT clock [ser]: button 0+4 pressed - ack2: %i", ack2)
+                                DisplayMsg.show(Message.DGT_BUTTON(button=40))
+                            else:
+                                logging.info("DGT clock [ser]: button 4 pressed - ack2: %i", ack2)
+                                DisplayMsg.show(Message.DGT_BUTTON(button=4))
                     if ack1 == 0x09:
                         main_version = ack2 >> 4
                         sub_version = ack2 & 0x0f
@@ -172,7 +181,7 @@ class DgtSerial(object):
                     l_secs = (message[5] >> 4) * 10 + (message[5] & 0x0f)
                     tr = [r_hours, r_mins, r_secs]
                     tl = [l_hours, l_mins, l_secs]
-                    logging.info('DGT clock [ser]: time received {} : {}'.format(tl, tr))
+                    logging.info('DGT clock [ser]: received time from clock l:{} r:{}'.format(tl, tr))
                     DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=tl, time_right=tr))
                 else:
                     logging.debug('DGT clock [ser]: null message ignored')
@@ -225,20 +234,18 @@ class DgtSerial(object):
             header = self.serial.read(header_len)
 
         pattern = '>'+'B'*header_len
-        header = unpack(pattern, header)
-
-        # header = unpack('>BBB', (self.serial.read(3)))
+        header = struct.unpack(pattern, header)
+        # header = struct.unpack('>BBB', (self.serial.read(3)))
         message_id = header[0]
         message_length = (header[1] << 7) + header[2] - 3
 
         try:
-            logging.debug("<-DGT board [%s], length %i", DgtMsg(message_id), message_length)
-        except ValueError:
-            logging.warning("Unknown DGT message value %i", message_id)
-        if message_length:
-            message = unpack('>' + str(message_length) + 'B', self.serial.read(message_length))
+            logging.debug("<-DGT board [%s], length: %i", DgtMsg(message_id), message_length)
+            message = struct.unpack('>' + str(message_length) + 'B', self.serial.read(message_length))
             self.process_board_message(message_id, message)
-            return message_id
+        except ValueError:
+            logging.warning("unknown DGT message value: %i length: %i", message_id, message_length)
+        return message_id
 
     def process_incoming_board_forever(self):
         while True:
@@ -254,32 +261,48 @@ class DgtSerial(object):
                 pass
             except TypeError:
                 pass
+            except struct.error:  # can happen, when plugin board-cable again
+                pass
+
+    def startup_clock(self):
+        # Get clock version
+        command = [DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                   DgtClk.DGT_CMD_CLOCK_VERSION, DgtClk.DGT_CMD_CLOCK_END_MESSAGE]
+        self.write_board_command(command)
 
     def startup_board(self):
         self.write_board_command([DgtCmd.DGT_SEND_UPDATE_NICE])  # Set the board update mode
         self.write_board_command([DgtCmd.DGT_SEND_VERSION])  # Get board version
         self.write_board_command([DgtCmd.DGT_SEND_BRD])  # Update the board
 
+    def watchdog(self):
+        self.write_board_command([DgtCmd.DGT_RETURN_SERIALNR])  # the code doesnt really matter ;-)
+
     def setup_serial(self):
-        wait_counter = 0
-        while not self.serial:
-            # Open the serial port
-            try:
-                self.serial = pyserial.Serial(self.device, stopbits=pyserial.STOPBITS_ONE,
-                                              parity=pyserial.PARITY_NONE,
-                                              bytesize=pyserial.EIGHTBITS,
-                                              timeout=2
-                                              )
-            except pyserial.SerialException as e:
-                logging.error(e)
-                w = self.waitchars[wait_counter]
-                text = Dgt.DISPLAY_TEXT(l='no E-board' + w, m='noboard' + w, s='board' + w, beep=BeepLevel.NO, duration=0)
-                DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text))
-                wait_counter = (wait_counter + 1) % len(self.waitchars)
-                time.sleep(0.5)
-        # self.startup_board()
+        if self.rt.is_running():
+            self.rt.stop()
+        with self.lock:
+            wait_counter = 0
+            while not self.serial:
+                # Open the serial port
+                try:
+                    self.serial = pyserial.Serial(self.device, stopbits=pyserial.STOPBITS_ONE,
+                                                  parity=pyserial.PARITY_NONE,
+                                                  bytesize=pyserial.EIGHTBITS,
+                                                  timeout=2
+                                                  )
+                except pyserial.SerialException as e:
+                    # logging.warning(e)
+                    s = 'Board' + self.waitchars[wait_counter]
+                    text = Dgt.DISPLAY_TEXT(l='no e-' + s, m='no' + s, s=s, beep=False, duration=0)
+                    DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text, is_pi=self.is_pi))
+                    wait_counter = (wait_counter + 1) % len(self.waitchars)
+                    time.sleep(0.5)
+
+    def enable_pi(self):
+        self.is_pi = True
 
     def run(self):
-        incoming_board_thread = Timer(0, self.process_incoming_board_forever)
-        incoming_board_thread.start()
-        self.setup_serial()
+        self.incoming_board_thread = Timer(0, self.process_incoming_board_forever)
+        self.incoming_board_thread.start()
+        # self.setup_serial()

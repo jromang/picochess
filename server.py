@@ -61,12 +61,12 @@ def create_game_header(cls, game):
             if "level" in cls.shared["game_info"]:
                 engine_name += " (Level {0})".format(cls.shared["game_info"]["level"])
             game.headers["Black"] = engine_name if cls.shared["game_info"][
-                                                       "play_mode"] == PlayMode.PLAY_WHITE else user_name
+                                                       "play_mode"] == PlayMode.USER_WHITE else user_name
             game.headers["White"] = engine_name if cls.shared["game_info"][
-                                                       "play_mode"] == PlayMode.PLAY_BLACK else user_name
+                                                       "play_mode"] == PlayMode.USER_BLACK else user_name
 
-            comp_color = "Black" if cls.shared["game_info"]["play_mode"] == PlayMode.PLAY_WHITE else "White"
-            user_color = "Black" if cls.shared["game_info"]["play_mode"] == PlayMode.PLAY_BLACK else "White"
+            comp_color = "Black" if cls.shared["game_info"]["play_mode"] == PlayMode.USER_WHITE else "White"
+            user_color = "Black" if cls.shared["game_info"]["play_mode"] == PlayMode.USER_BLACK else "White"
             game.headers[comp_color + "Elo"] = "2900"
             game.headers[user_color + "Elo"] = "-"
 
@@ -108,7 +108,7 @@ class ChannelHandler(tornado.web.RequestHandler):
             r = {'type': 'broadcast', 'msg': 'Received position from Spectators!', 'pgn': pgn_str, 'fen': fen}
             EventHandler.write_to_clients(r)
         elif action == 'move':
-            WebServer.fire(Event.REMOTE_MOVE(move=self.get_argument("source") + self.get_argument("target"), fen= self.get_argument("fen")))
+            WebServer.fire(Event.REMOTE_MOVE(move=self.get_argument("source") + self.get_argument("target"), fen=self.get_argument("fen")))
 
 
 class EventHandler(WebSocketHandler):

@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block title %}
+PicoChess Webserver
+{% endblock %}
+
 {% block prebody %}
 
 <style>
@@ -544,13 +548,15 @@ $(function () {
 // Process messages from picochess
         ws.onmessage=function(e){
             var j = JSON.parse(e.data);
-            el.innerHTML=j.msg;
+            if ('msg' in j){
+                el.innerHTML = j.msg;
+            }
             switch(j.event){
                 case "newFEN":
                     updateDGTPosition(j);
                     break;
                 case "NewGame":
-                    newBoard()
+                    newBoard();
                     break;
                 case "Message":
                     updateDGTPosition(j);
@@ -560,7 +566,7 @@ $(function () {
                     game.load_pgn(pgnData[0].join('\n'), {newline_char:'\n'});
                     writeGameText(game, pgnEl, false);
                     break;
-             };
+             }
         };
         ws.onclose=function(){
             el.innerHTML='closed';
