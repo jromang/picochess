@@ -383,6 +383,8 @@ def main():
                         help="show current version", default=None)
     parser.add_argument("-pi", "--dgtpi", action='store_true', help="use the dgtpi hardware")
     parser.add_argument("-lang", "--language", choices=['en', 'de', 'nl'], default='en', help="picochess language")
+    parser.add_argument("-c", "--console", action='store_true', help="use console interface")
+
 
     args = parser.parse_args()
     if args.engine is None:
@@ -426,7 +428,13 @@ def main():
     if args.web_server_port:
         WebServer(args.web_server_port).start()
 
-    if args.dgt_port:
+    if args.console:
+        # Enable keyboard input and terminal display
+        logging.debug("starting picochess with virtual DGT board")
+        KeyboardInput().start()
+        TerminalDisplay().start()
+        dgthardware = DgtVr(args.enable_revelation_leds)
+    else:
         # Connect to DGT board
         logging.debug("starting picochess with DGT board on [%s]", args.dgt_port)
         dgtserial = DgtSerial(args.dgt_port)
@@ -434,12 +442,6 @@ def main():
             dgthardware = DgtPi(dgtserial, dgttranslate, args.enable_revelation_leds)
         else:
             dgthardware = DgtHw(dgtserial, dgttranslate, args.enable_revelation_leds)
-    else:
-        # Enable keyboard input and terminal display
-        logging.debug("starting picochess with virtual DGT board")
-        KeyboardInput().start()
-        TerminalDisplay().start()
-        dgthardware = DgtVr(args.enable_revelation_leds)
     # Start the show
     dgthardware.start()
     dgthardware.startup()
