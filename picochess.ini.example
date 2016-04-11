@@ -17,8 +17,12 @@
 beep-level = 15
 ## Should a confirmation message (after moves) be displayed? If not, please active the next line
 # disable-ok-move
-## Specify the serial port your dgt-board is connected to
+## Specify the serial port your dgt-board is connected to. If y not give a parameter picochess tries to find the board
 # dgt-port = /dev/ttyACM0
+## Instead of connecting to a dgt board, you can also start picochess with a command line.
+## If so, please uncomment the next line
+# console
+
 
 ### ========================
 ### = Chess engine options =

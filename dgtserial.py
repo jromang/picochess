@@ -52,6 +52,7 @@ piece_to_char = {
 class DgtSerial(object):
     def __init__(self, device):
         super(DgtSerial, self).__init__()
+        self.given_device = device
         self.device = device
         self.serial = None
         self.waitchars = ['/', '-', '\\', '|']
@@ -278,26 +279,51 @@ class DgtSerial(object):
     def watchdog(self):
         self.write_board_command([DgtCmd.DGT_RETURN_SERIALNR])  # the code doesnt really matter ;-)
 
+    def check_serial(self, device):
+        # Open the serial port
+        try:
+            self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE,
+                                          parity=pyserial.PARITY_NONE,
+                                          bytesize=pyserial.EIGHTBITS,
+                                          timeout=2)
+        except pyserial.SerialException as e:
+            return False
+        return True
+
     def setup_serial(self):
         if self.rt.is_running():
             self.rt.stop()
         with self.lock:
             wait_counter = 0
             while not self.serial:
-                # Open the serial port
-                try:
-                    self.serial = pyserial.Serial(self.device, stopbits=pyserial.STOPBITS_ONE,
-                                                  parity=pyserial.PARITY_NONE,
-                                                  bytesize=pyserial.EIGHTBITS,
-                                                  timeout=2
-                                                  )
-                except pyserial.SerialException as e:
-                    # logging.warning(e)
-                    s = 'Board' + self.waitchars[wait_counter]
-                    text = Dgt.DISPLAY_TEXT(l='no e-' + s, m='no' + s, s=s, beep=False, duration=0)
-                    DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text, is_pi=self.is_pi))
-                    wait_counter = (wait_counter + 1) % len(self.waitchars)
-                    time.sleep(0.5)
+                if self.given_device:
+                    self.check_serial(self.given_device)
+                else:
+                    for file in os.listdir("/dev"):
+                        if file.startswith("ttyACM"):
+                            if self.check_serial(os.path.join("/dev", file)):
+                                self.device = os.path.join("/dev", file)
+                                break
+                    if self.serial:
+                        break
+                    for file in os.listdir("/dev"):
+                        if file.startswith("ttyUSB"):
+                            if self.check_serial(os.path.join("/dev", file)):
+                                self.device = os.path.join("/dev", file)
+                                break
+                    if self.serial:
+                        break
+                    if self.check_serial(os.path.join("/dev", "rfcomm0")):
+                        self.device = os.path.join("/dev", "rfcomm0")
+                        break
+
+                # logging.warning(e)
+                s = 'Board' + self.waitchars[wait_counter]
+                text = Dgt.DISPLAY_TEXT(l='no e-' + s, m='no' + s, s=s, beep=False, duration=0)
+                DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text, is_pi=self.is_pi))
+                wait_counter = (wait_counter + 1) % len(self.waitchars)
+                time.sleep(0.5)
+            logging.debug('connected to %s', self.device)
 
     def enable_pi(self):
         self.is_pi = True

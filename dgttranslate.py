@@ -95,7 +95,7 @@ class DgtTranslate(object):
             en = Dgt.DISPLAY_TEXT(l='please wait', m='pls wait', s='wait', beep=self.bl(BeepLevel.YES), duration=1)
             de = Dgt.DISPLAY_TEXT(l='bittewarten', m='warten', s=None, beep=self.bl(BeepLevel.YES), duration=1)
             nl = Dgt.DISPLAY_TEXT(l='wacht even', m='wachten', s='wacht', beep=self.bl(BeepLevel.YES), duration=1)
-            fr = Dgt.DISPLAY_TEXT(l='patientez', m='patiente', s='patien', beep=self.bl(BeepLevel.YES), duration=1)
+            fr = Dgt.DISPLAY_TEXT(l='patientez', m='patience', s='patien', beep=self.bl(BeepLevel.YES), duration=1)
             es = Dgt.DISPLAY_TEXT(l='please wait', m='pls wait', s='wait', beep=self.bl(BeepLevel.YES), duration=1)
         if text_id == 'B10_nomove':
             en = Dgt.DISPLAY_TEXT(l=None, m='no move', s='nomove', beep=self.bl(BeepLevel.BUTTON), duration=1)
