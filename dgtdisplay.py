@@ -133,7 +133,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.system_sound_result = None
         self.system_sound_index = self.dgttranslate.beep_level
         self.system_language_result = None
-        self.system_language_index = {'en': Language.EN, 'de': Language.DE, 'nl': Language.NL}[self.dgttranslate.language]
+        langs = {'en': Language.EN, 'de': Language.DE, 'nl': Language.NL, 'fr': Language.FR, 'es': Language.ES}
+        self.system_language_index = langs[self.dgttranslate.language]
 
         self.time_mode_result = None
         self.time_mode_index = TimeMode.BLITZ
@@ -579,7 +580,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     text = self.dgttranslate.text(self.system_language_result.value)
                     exit_menu = False
                 else:
-                    language = {Language.EN: 'en', Language.DE: 'de', Language.NL: 'nl'}[self.system_language_index]
+                    langs = {Language.EN: 'en', Language.DE: 'de', Language.NL: 'nl', Language.FR: 'fr', Language.ES: 'es'}
+                    language = langs[self.system_language_index]
                     self.dgttranslate.set_language(language)
                     text = self.dgttranslate.text('B10_oklang')
                 DisplayDgt.show(text)
