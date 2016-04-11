@@ -382,7 +382,7 @@ def main():
     parser.add_argument("-v", "--version", action='version', version='%(prog)s version {}'.format(version),
                         help="show current version", default=None)
     parser.add_argument("-pi", "--dgtpi", action='store_true', help="use the dgtpi hardware")
-    parser.add_argument("-lang", "--language", choices=['en', 'de', 'nl'], default='en', help="picochess language")
+    parser.add_argument("-lang", "--language", choices=['en', 'de', 'nl', 'fr', 'es'], default='en', help="picochess language")
 
     args = parser.parse_args()
     if args.engine is None:
