@@ -301,27 +301,13 @@ class DgtSerial(object):
                 else:
                     for file in os.listdir("/dev"):
                         if file.startswith("ttyACM"):
-<<<<<<< HEAD
-                            if self.check_serial(os.path.join("/dev",file)):
-                                self.device = os.path.join("/dev",file)
-=======
                             if self.check_serial(os.path.join("/dev", file)):
                                 self.device = os.path.join("/dev", file)
->>>>>>> 1bee88d42955166cc1eb65a477fe322f711d80ea
                                 break
                     if self.serial:
                         break
                     for file in os.listdir("/dev"):
                         if file.startswith("ttyUSB"):
-<<<<<<< HEAD
-                            if self.check_serial(os.path.join("/dev",file)):
-                                self.device = os.path.join("/dev",file)
-                                break
-                    if self.serial:
-                        break
-                    if self.check_serial(os.path.join("/dev","rfcomm0")):
-                        self.device = os.path.join("/dev","rfcomm0")
-=======
                             if self.check_serial(os.path.join("/dev", file)):
                                 self.device = os.path.join("/dev", file)
                                 break
@@ -329,7 +315,6 @@ class DgtSerial(object):
                         break
                     if self.check_serial(os.path.join("/dev", "rfcomm0")):
                         self.device = os.path.join("/dev", "rfcomm0")
->>>>>>> 1bee88d42955166cc1eb65a477fe322f711d80ea
                         break
 
                 # logging.warning(e)
@@ -338,11 +323,7 @@ class DgtSerial(object):
                 DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text, is_pi=self.is_pi))
                 wait_counter = (wait_counter + 1) % len(self.waitchars)
                 time.sleep(0.5)
-<<<<<<< HEAD
-            logging.debug('connected to %s',self.device)
-=======
             logging.debug('connected to %s', self.device)
->>>>>>> 1bee88d42955166cc1eb65a477fe322f711d80ea
 
     def enable_pi(self):
         self.is_pi = True

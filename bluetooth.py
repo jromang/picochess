@@ -1,7 +1,8 @@
 import subprocess
 import time
+import array
 from fcntl import fcntl, F_GETFL, F_SETFL
-from os import O_NONBLOCK, read
+from os import O_NONBLOCK, read, popen
 
 p = subprocess.Popen("bluetoothctl", stdin=subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True, shell=True)
 
@@ -10,8 +11,9 @@ flags = fcntl(p.stdout, F_GETFL) # get current p.stdout flags
 fcntl(p.stdout, F_SETFL, flags | O_NONBLOCK)
 
 line = ""
-lastmac = ""
-lastname = ""
+current = -1
+mac_list = []
+name_list = []
 state = 0
 p.stdin.write("power on\n")
 p.stdin.flush()
@@ -46,17 +48,17 @@ while True:
             state = 4
 
         if "DGT_BT_" in line or "PCS-REVII" in line:
-            if not lastmac == line.split()[3] :
-                lastmac=line.split()[3]
-                lastname=line.split()[4]
+            if not line.split()[3] in mac_list :
+                mac_list.append(line.split()[3])
+                name_list.append(line.split()[4])
 
         line=""
 
     if "Enter PIN code:" in line:
-        if "DGT_BT_" in lastname:
+        if "DGT_BT_" in name_list[current]:
             p.stdin.write("0000\n")
             p.stdin.flush()
-        if "PCS-REVII" in lastname:
+        if "PCS-REVII" in name_list[current]:
             p.stdin.write("1234\n")
             p.stdin.flush()
         line=""
@@ -67,15 +69,24 @@ while True:
         line=""
 
     if state == 4:
-        if lastmac:
+        if len(mac_list) > 0:
             state = 5
-            print("pairing to: ",lastmac,lastname)
-            p.stdin.write("pair "+lastmac+"\n")
+            current += 1
+            if current >= len(mac_list):
+                current = 0
+            print("pairing to: ",mac_list[current],name_list[current])
+            p.stdin.write("pair "+mac_list[current]+"\n")
             p.stdin.flush()
 
     if state == 6:
         # now try rfcomm
-        print("JEEJ")
+        popen("rfcomm release 123")
+        print (popen("rfcomm bind 123 "+mac_list[current]))
+#        if (popen("rfcomm bind 123 "+mac_list[current])) == "":
+#            print("JEEJ")
+        break
+#        else:
+#            print("NOOOO")
         time.sleep(5)
         # if this fails try next
         state = 4

@@ -382,14 +382,8 @@ def main():
     parser.add_argument("-v", "--version", action='version', version='%(prog)s version {}'.format(version),
                         help="show current version", default=None)
     parser.add_argument("-pi", "--dgtpi", action='store_true', help="use the dgtpi hardware")
-<<<<<<< HEAD
-    parser.add_argument("-lang", "--language", choices=['en', 'de', 'nl'], default='en', help="picochess language")
-    parser.add_argument("-c", "--console", action='store_true', help="use console interface")
-
-=======
     parser.add_argument("-lang", "--language", choices=['en', 'de', 'nl', 'fr', 'es'], default='en', help="picochess language")
     parser.add_argument("-c", "--console", action='store_true', help="use console interface")
->>>>>>> 1bee88d42955166cc1eb65a477fe322f711d80ea
 
     args = parser.parse_args()
     if args.engine is None:
@@ -447,10 +441,7 @@ def main():
             dgthardware = DgtPi(dgtserial, dgttranslate, args.enable_revelation_leds)
         else:
             dgthardware = DgtHw(dgtserial, dgttranslate, args.enable_revelation_leds)
-<<<<<<< HEAD
-=======
 
->>>>>>> 1bee88d42955166cc1eb65a477fe322f711d80ea
     # Start the show
     dgthardware.start()
     dgthardware.startup()
