@@ -147,11 +147,11 @@ class DgtTranslate(object):
             fr = Dgt.DISPLAY_TEXT(l='moteur err', m='mot err', s='errmot', beep=self.bl(BeepLevel.YES), duration=0)
             es = Dgt.DISPLAY_TEXT(l='motor error', m='mot err', s='errmot', beep=self.bl(BeepLevel.YES), duration=0)
         if text_id == 'B10_okengine':
-            en = Dgt.DISPLAY_TEXT(l='engine okay', m='ok engin', s='ok eng', beep=self.bl(BeepLevel.BUTTON), duration=1)
-            de = Dgt.DISPLAY_TEXT(l='engine okay', m='ok engin', s='ok eng', beep=self.bl(BeepLevel.BUTTON), duration=1)
-            nl = Dgt.DISPLAY_TEXT(l='engine ok', m='okengine', s='ok eng', beep=self.bl(BeepLevel.BUTTON), duration=1)
+            en = Dgt.DISPLAY_TEXT(l='engine okay', m='engineok', s='ok eng', beep=self.bl(BeepLevel.BUTTON), duration=1)
+            de = Dgt.DISPLAY_TEXT(l='engine okay', m='engineok', s='ok eng', beep=self.bl(BeepLevel.BUTTON), duration=1)
+            nl = Dgt.DISPLAY_TEXT(l='engine ok', m='engineok', s='ok eng', beep=self.bl(BeepLevel.BUTTON), duration=1)
             fr = Dgt.DISPLAY_TEXT(l='moteur ok', m='mot ok', s=None, beep=self.bl(BeepLevel.BUTTON), duration=1)
-            es = Dgt.DISPLAY_TEXT(l='motor okay', m='ok motor', s='ok mot', beep=self.bl(BeepLevel.BUTTON), duration=1)
+            es = Dgt.DISPLAY_TEXT(l='motor okay', m='motor ok', s='ok mot', beep=self.bl(BeepLevel.BUTTON), duration=1)
         if text_id == 'B10_okmode':
             en = Dgt.DISPLAY_TEXT(l='mode okay', m='mode ok', s='okmode', beep=self.bl(BeepLevel.BUTTON), duration=1)
             de = Dgt.DISPLAY_TEXT(l='Modus okay', m='Modus ok', s='okmode', beep=self.bl(BeepLevel.BUTTON), duration=1)
@@ -237,9 +237,9 @@ class DgtTranslate(object):
             fr = Dgt.DISPLAY_TEXT(l=None, m="pico ok", s="pic ok", beep=self.bl(BeepLevel.OKAY), duration=0.5)
             es = Dgt.DISPLAY_TEXT(l="pico okay", m="pico ok", s="okpico", beep=self.bl(BeepLevel.OKAY), duration=0.5)
         if text_id == 'K05_okuser':
-            en = Dgt.DISPLAY_TEXT(l="user okay", m="ok user", s="okuser", beep=self.bl(BeepLevel.OKAY), duration=0.5)
-            de = Dgt.DISPLAY_TEXT(l="Spielr okay", m="Splr ok", s="oksplr", beep=self.bl(BeepLevel.OKAY), duration=0.5)
-            nl = Dgt.DISPLAY_TEXT(l="user ok", m="user ok", s="okuser", beep=self.bl(BeepLevel.OKAY), duration=0.5)
+            en = Dgt.DISPLAY_TEXT(l="player okay", m="playerok", s="okuser", beep=self.bl(BeepLevel.OKAY), duration=0.5)
+            de = Dgt.DISPLAY_TEXT(l="Spieler ok", m="Splr ok", s="oksplr", beep=self.bl(BeepLevel.OKAY), duration=0.5)
+            nl = Dgt.DISPLAY_TEXT(l="speler ok", m="spelerok", s="okuser", beep=self.bl(BeepLevel.OKAY), duration=0.5)
             fr = Dgt.DISPLAY_TEXT(l="joueur ok", m="user ok", s="ok jr", beep=self.bl(BeepLevel.OKAY), duration=0.5)
             es = Dgt.DISPLAY_TEXT(l="jugador ok", m="jugad ok", s="okjuga", beep=self.bl(BeepLevel.OKAY), duration=0.5)
         if text_id == 'K05_okmove':
