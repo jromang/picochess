@@ -2,7 +2,12 @@ import subprocess
 import time
 import array
 from fcntl import fcntl, F_GETFL, F_SETFL
-from os import O_NONBLOCK, read, popen
+from os import O_NONBLOCK, read
+import os.path
+
+if os.path.exists("/dev/rfcomm123"):
+    print("release 123")
+    subprocess.call(["rfcomm","release","123"])
 
 p = subprocess.Popen("bluetoothctl", stdin=subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True, shell=True)
 
@@ -21,10 +26,11 @@ p.stdin.flush()
 while True:
     try:
         line += read(p.stdout.fileno(), 1).decode(encoding='UTF-8')
+        time.sleep(0.001)
     except OSError as e:
         time.sleep(0.1)
     if '\n' in line:
-        print(line,)
+        print(line,end="")
         if "Changing power on succeeded" in line:
             state = 1
             p.stdin.write("agent on\n")
@@ -46,11 +52,20 @@ while True:
         elif "Failed to pair" in line:
             # try the next
             state = 4
+        if  "not available" in line:
+            # remove and try the next
+            state = 4
+            mac_list.remove(mac_list[current])
+            name_list.remove(name_list[current])
+            print(name_list)
+            current -= 1
 
-        if "DGT_BT_" in line or "PCS-REVII" in line:
+        if ("DGT_BT_" in line or "PCS-REVII" in line) and "NEW" in line:
             if not line.split()[3] in mac_list :
                 mac_list.append(line.split()[3])
                 name_list.append(line.split()[4])
+                print(name_list)
+
 
         line=""
 
@@ -80,13 +95,42 @@ while True:
 
     if state == 6:
         # now try rfcomm
-        popen("rfcomm release 123")
-        print (popen("rfcomm bind 123 "+mac_list[current]))
+#        popen("rfcomm release 123")
+        state = 7
+        print("rfcomm connect")
+        rfcomm = subprocess.Popen("rfcomm connect 123 "+mac_list[current], universal_newlines=True, shell=True)
+        # set the O_NONBLOCK flag of p.stdout file descriptor:
+#        flags = fcntl(rfcomm.stdout, F_GETFL) # get current p.stdout flags
+ #       fcntl(rfcomm.stdout, F_SETFL, flags | O_NONBLOCK)
+  #      while (True):
+  #          try:
+  #              lll=read(rfcomm.stdout.fileno(), 1).decode(encoding='UTF-8')
+#                if not l == "":
+    #            print(lll)
+   #         except OSError as e:
+     #           time.sleep(0.1)
+      #          print(e)
+
+       # line = rfcomm.stdout.readline()
+      #  print(line)
+    if state == 7:
+        if os.path.exists("/dev/rfcomm123"):
 #        if (popen("rfcomm bind 123 "+mac_list[current])) == "":
-#            print("JEEJ")
-        break
-#        else:
-#            print("NOOOO")
-        time.sleep(5)
-        # if this fails try next
-        state = 4
+            print("JEEJ connected to: ",mac_list[current],name_list[current])
+            break
+        if (rfcomm.poll() != None):
+            p.stdin.write("remove "+mac_list[current]+"\n")
+            mac_list.remove(mac_list[current])
+            name_list.remove(name_list[current])
+            print(name_list)
+            current -= 1
+            p.stdin.flush()
+            print("removed, try the next")
+            state = 4
+        else:
+            print(end=".",flush=True)
+            time.sleep(0.1)
+            
+#            state = 4
+p.stdin.write("quit\n")
+p.stdin.flush()
