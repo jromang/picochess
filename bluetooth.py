@@ -1,15 +1,18 @@
 import subprocess
 import time
-import array
 from fcntl import fcntl, F_GETFL, F_SETFL
 from os import O_NONBLOCK, read
 import os.path
+
+import sys
+if not os.path.exists("/usr/bin/bluetoothctl"):
+    sys.exit()
 
 if os.path.exists("/dev/rfcomm123"):
     print("release 123")
     subprocess.call(["rfcomm","release","123"])
 
-p = subprocess.Popen("bluetoothctl", stdin=subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True, shell=True)
+p = subprocess.Popen("/usr/bin/bluetoothctl", stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, shell=True)
 
 # set the O_NONBLOCK flag of p.stdout file descriptor:
 flags = fcntl(p.stdout, F_GETFL) # get current p.stdout flags
@@ -19,6 +22,7 @@ line = ""
 current = -1
 mac_list = []
 name_list = []
+
 state = 0
 p.stdin.write("power on\n")
 p.stdin.flush()
@@ -95,27 +99,11 @@ while True:
 
     if state == 6:
         # now try rfcomm
-#        popen("rfcomm release 123")
         state = 7
         print("rfcomm connect")
-        rfcomm = subprocess.Popen("rfcomm connect 123 "+mac_list[current], universal_newlines=True, shell=True)
-        # set the O_NONBLOCK flag of p.stdout file descriptor:
-#        flags = fcntl(rfcomm.stdout, F_GETFL) # get current p.stdout flags
- #       fcntl(rfcomm.stdout, F_SETFL, flags | O_NONBLOCK)
-  #      while (True):
-  #          try:
-  #              lll=read(rfcomm.stdout.fileno(), 1).decode(encoding='UTF-8')
-#                if not l == "":
-    #            print(lll)
-   #         except OSError as e:
-     #           time.sleep(0.1)
-      #          print(e)
-
-       # line = rfcomm.stdout.readline()
-      #  print(line)
+        rfcomm = subprocess.Popen("rfcomm connect 123 "+mac_list[current], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, shell=True)
     if state == 7:
         if os.path.exists("/dev/rfcomm123"):
-#        if (popen("rfcomm bind 123 "+mac_list[current])) == "":
             print("JEEJ connected to: ",mac_list[current],name_list[current])
             break
         if (rfcomm.poll() != None):
@@ -131,6 +119,5 @@ while True:
             print(end=".",flush=True)
             time.sleep(0.1)
             
-#            state = 4
 p.stdin.write("quit\n")
 p.stdin.flush()
