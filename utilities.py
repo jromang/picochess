@@ -323,12 +323,16 @@ class LanguageLoop(object):
         elif m == Language.NL:
             return Language.FR
         elif m == Language.FR:
+            return Language.ES
+        elif m == Language.ES:
             return Language.EN
         return 'error Language next'
 
     @staticmethod
     def prev(m):
         if m == Language.EN:
+            return Language.ES
+        if m == Language.ES:
             return Language.FR
         if m == Language.FR:
             return Language.NL

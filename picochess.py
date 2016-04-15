@@ -683,6 +683,7 @@ def main():
 
                 if case(EventApi.DRAWRESIGN):
                     if not game_declared:  # in case user leaves kings in place while moving other pieces
+                        stop_search_and_clock()
                         custom_fen = getattr(game, 'custom_fen', None)
                         DisplayMsg.show(Message.GAME_ENDS(result=event.result, play_mode=play_mode,
                                                           game=copy.deepcopy(game), custom_fen=custom_fen))

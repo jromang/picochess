@@ -320,7 +320,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 if self.system_language_result is None:
                     self.system_sound_index = (self.system_sound_index-1) & 0x0f
-                    msg = str(self.system_sound_index)
+                    msg = str(self.system_sound_index).rjust(2)
                     text = self.dgttranslate.text('B00_beep', msg)
                 else:
                     self.system_language_index = LanguageLoop.prev(self.system_language_index)
@@ -337,7 +337,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     text = self.dgttranslate.text('B00_default', msg)
                 else:
                     self.engine_level_index = (self.engine_level_index-1) % self.n_levels
-                    msg = str(self.engine_level_index)
+                    msg = str(self.engine_level_index).rjust(2)
                     text = self.dgttranslate.text('B00_level', msg)
             DisplayDgt.show(text)
 
@@ -428,7 +428,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 if self.system_language_result is None:
                     self.system_sound_index = (self.system_sound_index+1) & 0x0f
-                    msg = str(self.system_sound_index)
+                    msg = str(self.system_sound_index).rjust(2)
                     text = self.dgttranslate.text('B00_beep', msg)
                 else:
                     self.system_language_index = LanguageLoop.next(self.system_language_index)
@@ -445,7 +445,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     text = self.dgttranslate.text('B00_default', msg)
                 else:
                     self.engine_level_index = (self.engine_level_index+1) % self.n_levels
-                    msg = str(self.engine_level_index)
+                    msg = str(self.engine_level_index).rjust(2)
                     text = self.dgttranslate.text('B00_level', msg)
             DisplayDgt.show(text)
 
@@ -567,7 +567,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             elif self.system_index == Settings.SOUND:
                 if self.system_sound_result is None:
                     self.system_sound_result = self.system_sound_index
-                    msg = str(self.system_sound_index)
+                    msg = str(self.system_sound_index).rjust(2)
                     text = self.dgttranslate.text('B00_beep', msg)
                     exit_menu = False
                 else:
@@ -605,7 +605,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     eng = self.installed_engines[self.engine_index]
                     if eng[2]:  # 2=has_levels
                         self.engine_result = self.engine_index
-                        msg = str(self.engine_level_index)
+                        msg = str(self.engine_level_index).rjust(2)
                         text = self.dgttranslate.text('B00_level', msg)
                         DisplayDgt.show(text)
                     else:
@@ -615,7 +615,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.reset_menu_results()
                 else:
                     level = self.engine_level_index
-                    text = self.dgttranslate.text('B10_level', str(level))
+                    text = self.dgttranslate.text('B10_level', str(level).rjust(2))
                     eng = self.installed_engines[self.engine_result]
                     self.fire(Event.NEW_ENGINE(eng=eng, eng_text=self.dgttranslate.text('B10_okengine'),
                                                level=level, level_text=text))
@@ -888,7 +888,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.engine_level_result = level
                             self.engine_level_index = level
                             logging.debug("Map-Fen: New level")
-                            text = self.dgttranslate.text('M10_level', str(level))
+                            text = self.dgttranslate.text('M10_level', str(level).rjust(2))
                             self.fire(Event.LEVEL(level=level, level_text=text))
                         elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":
                             logging.debug("Map-Fen: New game")
@@ -914,7 +914,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                     logging.debug("Map-Fen: Engine name [%s]", eng[1])
                                     eng_text = self.dgttranslate.text('M10_default', eng[1])
                                     level = self.engine_level_index if self.engine_level_result is None else self.engine_level_result
-                                    text = self.dgttranslate.text('M10_level', str(level))
+                                    text = self.dgttranslate.text('M10_level', str(level).rjust(2))
                                     self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, level=level, level_text=text))
                                     self.engine_restart = True
                                     self.reset_menu_results()
