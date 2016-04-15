@@ -73,6 +73,7 @@ class DgtSerial(object):
         self.bt_current_device = -1
         self.bt_mac_list = []
         self.bt_name_list = []
+        self.bt_name = ""
 
     def write_board_command(self, message):
         mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
@@ -127,7 +128,16 @@ class DgtSerial(object):
                     text_l, text_m, text_s = 'USB E-board', 'USBboard', 'ok usb'
                     channel = 'USB'
                 else:
-                    text_l, text_m, text_s = 'BT E-board', 'BT board', 'ok bt'
+                    if "REVII" in self.bt_name:
+                        text_l = "RevII "+self.bt_name[-5:]
+                        text_m = "Rev"+self.bt_name[-5:]
+                        text_s = self.bt_name[-6:]
+                    elif "DGT_BT" in self.bt_name:
+                        text_l = "DGTBT "+self.bt_name[-5:]
+                        text_m = "BT "+self.bt_name[-5:]
+                        text_s = self.bt_name[-5:]
+                    else:
+                        text_l, text_m, text_s = 'BT E-board', 'BT board', 'ok bt'
                     channel = 'BT'
                 text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, beep=False, duration=0.5)
                 DisplayMsg.show(Message.EBOARD_VERSION(text=text, channel=channel))
@@ -299,6 +309,9 @@ class DgtSerial(object):
                 if os.path.exists("/dev/rfcomm123"):
                     logging.debug('releasing /dev/rfcomm123')
                     subprocess.call(["rfcomm","release","123"])
+                self.bt_current_device = -1
+                self.bt_mac_list = []
+                self.bt_name_list = []
 
                 logging.debug("starting bluetoothctl")
                 self.btctl = subprocess.Popen("/usr/bin/bluetoothctl",
@@ -319,8 +332,11 @@ class DgtSerial(object):
 
             # check for new data from bluetoothctl
             try:
-                self.bt_line += read(self.btctl.stdout.fileno(), 1).decode(encoding='UTF-8')
-                time.sleep(0.001)
+                while True:
+                    b = read(self.btctl.stdout.fileno(), 1).decode(encoding='UTF-8')
+                    self.bt_line += b
+                    if b == "" or b == '\n':
+                        break
             except OSError as e:
                 time.sleep(0.1)
 
@@ -414,6 +430,8 @@ class DgtSerial(object):
                     if self.check_serial("/dev/rfcomm123"):
                         self.btctl.stdin.write("quit\n")
                         self.btctl.stdin.flush()
+                        self.bt_name = self.bt_name_list[self.bt_current_device]
+ 
                         self.bt_state = -1
                         return True
                 # rfcomm failed
@@ -466,11 +484,11 @@ class DgtSerial(object):
                         break
 
                 # logging.warning(e)
-#                s = 'Board' + self.waitchars[wait_counter]
-#                text = Dgt.DISPLAY_TEXT(l='no e-' + s, m='no' + s, s=s, beep=False, duration=0)
-#                DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text, is_pi=self.is_pi))
-#                wait_counter = (wait_counter + 1) % len(self.waitchars)
-                #time.sleep(0.5)
+                s = 'Board' + self.waitchars[wait_counter]
+                text = Dgt.DISPLAY_TEXT(l='no e-' + s, m='no' + s, s=s, beep=False, duration=0)
+                DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text, is_pi=self.is_pi))
+                wait_counter = (wait_counter + 1) % len(self.waitchars)
+                time.sleep(0.1)
             logging.debug('connected to %s', self.device)
 
     def enable_pi(self):
