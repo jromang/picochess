@@ -357,7 +357,7 @@ class DgtSerial(object):
                     self.bt_state = 4
                 if "Pairing successful" in self.bt_line:
                     self.bt_state = 6
-                    logging.debug("BT pairing succesful")
+                    logging.debug("BT pairing successful")
                 if "Failed to pair: org.bluez.Error.AlreadyExists" in self.bt_line:
                     self.bt_state = 6
                     logging.debug("BT already paired")
@@ -404,8 +404,8 @@ class DgtSerial(object):
                     if self.bt_current_device >= len(self.bt_mac_list):
                         self.bt_current_device = 0
                     logging.debug("BT pairing to: %s %s",
-                                 self.bt_mac_list[self.bt_current_device],
-                                 self.bt_name_list[self.bt_current_device])
+                                  self.bt_mac_list[self.bt_current_device],
+                                  self.bt_name_list[self.bt_current_device])
                     self.btctl.stdin.write("pair "+self.bt_mac_list[self.bt_current_device]+"\n")
                     self.btctl.stdin.flush()
 
