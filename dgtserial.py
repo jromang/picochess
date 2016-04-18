@@ -16,8 +16,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import serial as pyserial
-# import os.path
-
 import struct
 from utilities import *
 from threading import Timer, Lock
@@ -464,10 +462,9 @@ class DgtSerial(object):
                     self.check_serial(self.given_device)
                 else:
                     for file in os.listdir("/dev"):
-                        if file.startswith("ttyACM") or file.startswith("ttyUSB"):
-                            dev = path.join("/dev", file)
-                            if self.check_serial(dev):
-                                self.device = dev
+                        if file.startswith("ttyACM") or file.startswith("ttyUSB") or file == "rfcomm0":
+                            if self.check_serial(os.path.join("/dev", file)):
+                                self.device = os.path.join("/dev", file)
                                 break
                     if self.serial:
                         break
