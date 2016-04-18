@@ -462,7 +462,7 @@ class DgtSerial(object):
                     self.check_serial(self.given_device)
                 else:
                     for file in os.listdir("/dev"):
-                        if file.startswith("ttyACM") or file.startswith("ttyUSB"):
+                        if file.startswith("ttyACM") or file.startswith("ttyUSB") or file == "rfcomm0":
                             if self.check_serial(os.path.join("/dev", file)):
                                 self.device = os.path.join("/dev", file)
                                 break
