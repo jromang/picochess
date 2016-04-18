@@ -16,13 +16,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import serial as pyserial
-import os.path
-
 import struct
 from utilities import *
 from threading import Timer, Lock
 from fcntl import fcntl, F_GETFL, F_SETFL
-from os import O_NONBLOCK, read
+from os import O_NONBLOCK, read, path
 import subprocess
 import time
 
@@ -68,12 +66,14 @@ class DgtSerial(object):
         self.clock_lock = False  # serial connected clock is locked
         self.last_clock_command = []  # Used for resend last (failed) clock command
         self.rt = RepeatedTimer(1, self.watchdog)
+        # bluetooth vars for Jessie & autoconnect
+        self.btctl = None
         self.bt_state = -1
-        self.bt_line = ""
+        self.bt_line = ''
         self.bt_current_device = -1
         self.bt_mac_list = []
         self.bt_name_list = []
-        self.bt_name = ""
+        self.bt_name = ''
 
     def write_board_command(self, message):
         mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
@@ -129,13 +129,9 @@ class DgtSerial(object):
                     channel = 'USB'
                 else:
                     if "REVII" in self.bt_name:
-                        text_l = "RevII "+self.bt_name[-5:]
-                        text_m = "Rev"+self.bt_name[-5:]
-                        text_s = self.bt_name[-6:]
+                        text_l, text_m, text_s = "RevII "+self.bt_name[-5:], "Rev"+self.bt_name[-5:], self.bt_name[-6:]
                     elif "DGT_BT" in self.bt_name:
-                        text_l = "DGTBT "+self.bt_name[-5:]
-                        text_m = "BT "+self.bt_name[-5:]
-                        text_s = self.bt_name[-5:]
+                        text_l, text_m, text_s = "DGTBT "+self.bt_name[-5:], "BT "+self.bt_name[-5:], self.bt_name[-5:]
                     else:
                         text_l, text_m, text_s = 'BT E-board', 'BT board', 'ok bt'
                     channel = 'BT'
@@ -302,27 +298,27 @@ class DgtSerial(object):
     def check_bluetooth(self):
         if self.bt_state == -1:
             # only for jessie
-            if os.path.exists("/usr/bin/bluetoothctl"):
+            if path.exists("/usr/bin/bluetoothctl"):
                 self.bt_state = 0
 
                 # get rid of old rfcomm
-                if os.path.exists("/dev/rfcomm123"):
-                    logging.debug('releasing /dev/rfcomm123')
+                if path.exists("/dev/rfcomm123"):
+                    logging.debug('BT releasing /dev/rfcomm123')
                     subprocess.call(["rfcomm","release","123"])
                 self.bt_current_device = -1
                 self.bt_mac_list = []
                 self.bt_name_list = []
 
-                logging.debug("starting bluetoothctl")
+                logging.debug("BT starting bluetoothctl")
                 self.btctl = subprocess.Popen("/usr/bin/bluetoothctl",
-                                                     stdin=subprocess.PIPE,
-                                                     stdout=subprocess.PIPE,
-                                                     stderr=subprocess.STDOUT,
-                                                     universal_newlines=True,
-                                                     shell=True)
+                                              stdin=subprocess.PIPE,
+                                              stdout=subprocess.PIPE,
+                                              stderr=subprocess.STDOUT,
+                                              universal_newlines=True,
+                                              shell=True)
 
                 # set the O_NONBLOCK flag of file descriptor:
-                flags = fcntl(self.btctl.stdout, F_GETFL) # get current flags
+                flags = fcntl(self.btctl.stdout, F_GETFL)  # get current flags
                 fcntl(self.btctl.stdout, F_SETFL, flags | O_NONBLOCK)
 
                 self.btctl.stdin.write("power on\n")
@@ -335,14 +331,14 @@ class DgtSerial(object):
                 while True:
                     b = read(self.btctl.stdout.fileno(), 1).decode(encoding='UTF-8')
                     self.bt_line += b
-                    if b == "" or b == '\n':
+                    if b == '' or b == '\n':
                         break
             except OSError as e:
                 time.sleep(0.1)
 
             # complete line
             if '\n' in self.bt_line:
-#                print(self.bt_line,end="")
+                # print(self.bt_line,end='')
                 if "Changing power on succeeded" in self.bt_line:
                     self.bt_state = 1
                     self.btctl.stdin.write("agent on\n")
@@ -359,30 +355,30 @@ class DgtSerial(object):
                     self.bt_state = 4
                 if "Pairing successful" in self.bt_line:
                     self.bt_state = 6
-                    logging.debug("pairing succesfull")
+                    logging.debug("BT pairing succesful")
                 if "Failed to pair: org.bluez.Error.AlreadyExists" in self.bt_line:
                     self.bt_state = 6
-                    logging.debug("already paired")
+                    logging.debug("BT already paired")
                 elif "Failed to pair" in self.bt_line:
                     # try the next
                     self.bt_state = 4
-                    logging.debug("pairing failed")
-                if  "not available" in self.bt_line:
+                    logging.debug("BT pairing failed")
+                if "not available" in self.bt_line:
                     # remove and try the next
                     self.bt_state = 4
                     self.bt_mac_list.remove(self.bt_mac_list[self.bt_current_device])
                     self.bt_name_list.remove(self.bt_name_list[self.bt_current_device])
                     self.bt_current_device -= 1
-                    logging.debug("pairing failed, unkown device")
+                    logging.debug("BT pairing failed, unkown device")
                 if ("DGT_BT_" in self.bt_line or "PCS-REVII" in self.bt_line) and "NEW" in self.bt_line:
                     # New e-Board found add to list
                     if not self.bt_line.split()[3] in self.bt_mac_list :
                         self.bt_mac_list.append(self.bt_line.split()[3])
                         self.bt_name_list.append(self.bt_line.split()[4])
-                        logging.debug('found device: %s %s', self.bt_line.split()[3], self.bt_line.split()[4])
+                        logging.debug('BT found device: %s %s', self.bt_line.split()[3], self.bt_line.split()[4])
 
                 # clear the line
-                self.bt_line = ""
+                self.bt_line = ''
 
             if "Enter PIN code:" in self.bt_line:
                 if "DGT_BT_" in self.bt_name_list[self.bt_current_device]:
@@ -391,12 +387,12 @@ class DgtSerial(object):
                 if "PCS-REVII" in self.bt_name_list[self.bt_current_device]:
                     self.btctl.stdin.write("1234\n")
                     self.btctl.stdin.flush()
-                self.bt_line=""
+                self.bt_line=''
 
             if "Confirm passkey" in self.bt_line:
                 self.btctl.stdin.write("yes\n")
                 self.btctl.stdin.flush()
-                self.bt_line=""
+                self.bt_line=''
 
             # if there are devices in the list try one
             if self.bt_state == 4:
@@ -405,13 +401,13 @@ class DgtSerial(object):
                     self.bt_current_device += 1
                     if self.bt_current_device >= len(self.bt_mac_list):
                         self.bt_current_device = 0
-                    logging.debug("pairing to: %s %s",
+                    logging.debug("BT pairing to: %s %s",
                                  self.bt_mac_list[self.bt_current_device],
                                  self.bt_name_list[self.bt_current_device])
                     self.btctl.stdin.write("pair "+self.bt_mac_list[self.bt_current_device]+"\n")
                     self.btctl.stdin.flush()
 
-            # pair succesfull, try rfcomm
+            # pair succesful, try rfcomm
             if self.bt_state == 6:
                 # now try rfcomm
                 self.bt_state = 7
@@ -425,8 +421,8 @@ class DgtSerial(object):
             # wait for rfcomm to fail or suceed
             if self.bt_state == 7:
                 # rfcomm succeeded
-                if os.path.exists("/dev/rfcomm123"):
-                    logging.debug("connected to: %s",self.bt_name_list[self.bt_current_device])
+                if path.exists("/dev/rfcomm123"):
+                    logging.debug("BT connected to: %s",self.bt_name_list[self.bt_current_device])
                     if self.check_serial("/dev/rfcomm123"):
                         self.btctl.stdin.write("quit\n")
                         self.btctl.stdin.flush()
@@ -435,8 +431,8 @@ class DgtSerial(object):
                         self.bt_state = -1
                         return True
                 # rfcomm failed
-                if (self.bt_rfcomm.poll() != None):
-                    logging.debug("rfcomm failed")
+                if self.bt_rfcomm.poll() is not None:
+                    logging.debug("BT rfcomm failed")
                     self.btctl.stdin.write("remove "+self.bt_mac_list[self.bt_current_device]+"\n")
                     self.bt_mac_list.remove(self.bt_mac_list[self.bt_current_device])
                     self.bt_name_list.remove(self.bt_name_list[self.bt_current_device])
@@ -476,7 +472,6 @@ class DgtSerial(object):
                         self.device = "/dev/rfcomm123"
                         break
 
-                # logging.warning(e)
                 s = 'Board' + self.waitchars[wait_counter]
                 text = Dgt.DISPLAY_TEXT(l='no e-' + s, m='no' + s, s=s, beep=False, duration=0)
                 DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text, is_pi=self.is_pi))
@@ -490,4 +485,3 @@ class DgtSerial(object):
     def run(self):
         self.incoming_board_thread = Timer(0, self.process_incoming_board_forever)
         self.incoming_board_thread.start()
-        # self.setup_serial()
