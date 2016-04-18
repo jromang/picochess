@@ -19,6 +19,7 @@ from timecontrol import *
 from collections import OrderedDict
 
 from dgtiface import *
+from engine import get_installed_engines
 import threading
 
 level_map = ("rnbqkbnr/pppppppp/8/q7/8/8/PPPPPPPP/RNBQKBNR",

@@ -21,6 +21,59 @@ import spur
 import paramiko
 import chess.uci
 from threading import Timer
+import configparser
+
+
+def get_installed_engines(engine_shell, engine_path):
+    return read_engine_ini(engine_shell, (engine_path.rsplit(os.sep, 1))[0])
+
+
+def read_engine_ini(engine_shell=None, engine_path=None):
+    config = configparser.ConfigParser()
+    try:
+        if engine_shell is None:
+            if not engine_path:
+                program_path = os.path.dirname(os.path.realpath(__file__)) + os.sep
+                engine_path = program_path + 'engines' + os.sep + platform.machine()
+            config.read(engine_path + os.sep + 'engines.ini')
+        else:
+            with engine_shell.open(engine_path + os.sep + 'engines.ini', 'r') as file:
+                config.read_file(file)
+    except FileNotFoundError:
+        pass
+
+    library = []
+    for section in config.sections():
+        library.append((engine_path + os.sep + config[section]['file'], section, config[section].getboolean('has_levels')))
+    return library
+
+
+def write_engine_ini(engine_path=None):
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+    if not engine_path:
+        program_path = os.path.dirname(os.path.realpath(__file__)) + os.sep
+        engine_path = program_path + 'engines' + os.sep + platform.machine()
+    engine_list = sorted(os.listdir(engine_path))
+    config = configparser.ConfigParser()
+    for engine_file_name in engine_list:
+        print(engine_file_name)
+        if is_exe(engine_path + os.sep + engine_file_name):
+            engine = UciEngine(engine_path + os.sep + engine_file_name)
+            if engine:
+                try:
+                    config[engine_file_name[2:]] = {
+                        'file': engine_file_name,
+                        'name': engine.get().name,
+                        'has_levels': engine.has_levels(),
+                        'has_chess960': engine.has_chess960()
+                    }
+                except AttributeError:
+                    pass
+                engine.quit()
+    with open(engine_path + os.sep + 'engines.ini', 'w') as configfile:
+        config.write(configfile)
 
 
 class Informer(chess.uci.InfoHandler):
@@ -73,10 +126,10 @@ class Informer(chess.uci.InfoHandler):
         super().pv(moves)
 
 
-class Engine(object):
+class UciEngine(object):
 
     def __init__(self, path, hostname=None, username=None, key_file=None, password=None):
-        super(Engine, self).__init__()
+        super(UciEngine, self).__init__()
         try:
             self.shell = None
             if hostname:
@@ -166,9 +219,6 @@ class Engine(object):
 
     def kill(self):
         return self.engine.kill()
-
-    def popen_engine(self, path):
-        self.engine = chess.uci.popen_engine(path)
 
     def uci(self):
         self.engine.uci()

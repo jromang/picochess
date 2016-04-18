@@ -26,9 +26,6 @@ import json
 import time
 from threading import Timer
 
-import uci
-import configparser
-
 try:
     import enum
 except ImportError:
@@ -682,58 +679,6 @@ def get_opening_books():
         # Can't use isfile() as that doesn't count links
         if not os.path.isdir('books' + os.sep + book):
             library.append((book[2:book.index('.')], 'books' + os.sep + book))
-    return library
-
-
-def get_installed_engines(engine_shell, engine_path):
-    return read_engine_ini(engine_shell, (engine_path.rsplit(os.sep, 1))[0])
-
-
-def write_engine_ini(engine_path=None):
-    def is_exe(fpath):
-        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
-
-    if not engine_path:
-        program_path = os.path.dirname(os.path.realpath(__file__)) + os.sep
-        engine_path = program_path + 'engines' + os.sep + platform.machine()
-    engine_list = sorted(os.listdir(engine_path))
-    config = configparser.ConfigParser()
-    for engine_file_name in engine_list:
-        print(engine_file_name)
-        if is_exe(engine_path + os.sep + engine_file_name):
-            engine = uci.Engine(engine_path + os.sep + engine_file_name)
-            if engine:
-                try:
-                    config[engine_file_name[2:]] = {
-                        'file': engine_file_name,
-                        'name': engine.get().name,
-                        'has_levels': engine.has_levels(),
-                        'has_chess960': engine.has_chess960()
-                    }
-                except AttributeError:
-                    pass
-                engine.quit()
-    with open(engine_path + os.sep + 'engines.ini', 'w') as configfile:
-        config.write(configfile)
-
-
-def read_engine_ini(engine_shell=None, engine_path=None):
-    config = configparser.ConfigParser()
-    try:
-        if engine_shell is None:
-            if not engine_path:
-                program_path = os.path.dirname(os.path.realpath(__file__)) + os.sep
-                engine_path = program_path + 'engines' + os.sep + platform.machine()
-            config.read(engine_path + os.sep + 'engines.ini')
-        else:
-            with engine_shell.open(engine_path + os.sep + 'engines.ini', 'r') as file:
-                config.read_file(file)
-    except FileNotFoundError:
-        pass
-
-    library = []
-    for section in config.sections():
-        library.append((engine_path + os.sep + config[section]['file'], section, config[section].getboolean('has_levels')))
     return library
 
 

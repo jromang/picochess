@@ -29,7 +29,7 @@ import threading
 import copy
 import gc
 
-import uci
+from engine import UciEngine, read_engine_ini
 import chesstalker.chesstalker
 
 from timecontrol import TimeControl
@@ -469,8 +469,8 @@ def main():
         logging.debug("ChessTalker disabled")
 
     # Gentlemen, start your engines...
-    engine = uci.Engine(args.engine, hostname=args.remote, username=args.user,
-                        key_file=args.server_key, password=args.password)
+    engine = UciEngine(args.engine, hostname=args.remote, username=args.user,
+                       key_file=args.server_key, password=args.password)
     try:
         engine_name = engine.get().name
     except AttributeError:
@@ -567,14 +567,14 @@ def main():
                         # Load the new one and send args.
                         # Local engines only
                         engine_fallback = False
-                        engine = uci.Engine(event.eng[0])
+                        engine = UciEngine(event.eng[0])
                         try:
                             engine_name = engine.get().name
                         except AttributeError:
                             # New engine failed to start, restart old engine
                             logging.error("new engine failed to start, reverting to %s", old_path)
                             engine_fallback = True
-                            engine = uci.Engine(old_path)
+                            engine = UciEngine(old_path)
                             try:
                                 engine_name = engine.get().name
                             except AttributeError:
