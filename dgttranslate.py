@@ -371,7 +371,7 @@ class DgtTranslate(object):
         if text_id == 'B00_mode_normal_menu':
             en = Dgt.DISPLAY_TEXT(l=None, m='normal', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
             de = Dgt.DISPLAY_TEXT(l=None, m='Normal', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
-            nl = Dgt.DISPLAY_TEXT(l=None, m='party', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
+            nl = Dgt.DISPLAY_TEXT(l='normaal', m='normal', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
             fr = Dgt.DISPLAY_TEXT(l=None, m='normal', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
             es = Dgt.DISPLAY_TEXT(l=None, m='normal', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
         if text_id == 'B00_mode_analysis_menu':
