@@ -98,12 +98,12 @@ class DgtPi(DgtIface):
                 self.lib.dgtpicom_get_time(clktime)
 
             times = list(clktime.raw)
-            counter = (counter + 1) % 4
-            if counter == 1:
+            counter = (counter + 1) % 10
+            if counter == 2:
                 DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=times[:3], time_right=times[3:]))
-            if counter == 3:  # issue 150 - force to write something to the board => check for alive connection!
+            if counter == 7:  # issue 150 - force to write something to the board => check for alive connection!
                 self.dgtserial.write_board_command([DgtCmd.DGT_RETURN_SERIALNR])  # the code doesnt really matter ;-)
-            time.sleep(0.25)
+            time.sleep(0.1)
 
     def _display_on_dgt_pi(self, text, beep=False):
         if len(text) > 11:
