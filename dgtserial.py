@@ -265,6 +265,7 @@ class DgtSerial(object):
         return message_id
 
     def process_incoming_board_forever(self):
+        logging.info('incoming_board ready')
         while True:
             try:
                 c = None
@@ -463,8 +464,9 @@ class DgtSerial(object):
                 else:
                     for file in os.listdir("/dev"):
                         if file.startswith("ttyACM") or file.startswith("ttyUSB") or file == "rfcomm0":
-                            if self.check_serial(os.path.join("/dev", file)):
-                                self.device = os.path.join("/dev", file)
+                            dev = os.path.join("/dev", file)
+                            if self.check_serial(dev):
+                                self.device = dev
                                 break
                     if self.serial:
                         break
@@ -477,7 +479,7 @@ class DgtSerial(object):
                 DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text, is_pi=self.is_pi))
                 wait_counter = (wait_counter + 1) % len(self.waitchars)
                 time.sleep(0.1)
-            logging.debug('connected to %s', self.device)
+            logging.debug('DGT board connected to %s', self.device)
 
     def enable_pi(self):
         self.is_pi = True

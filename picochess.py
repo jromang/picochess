@@ -429,13 +429,13 @@ def main():
 
     if args.console:
         # Enable keyboard input and terminal display
-        logging.debug("starting picochess with virtual DGT board")
+        logging.debug("starting picochess in virtual mode")
         KeyboardInput().start()
         TerminalDisplay().start()
         dgthardware = DgtVr(args.enable_revelation_leds)
     else:
         # Connect to DGT board
-        logging.debug("starting picochess with DGT board on [%s]", args.dgt_port)
+        logging.debug("starting picochess in board mode")
         dgtserial = DgtSerial(args.dgt_port)
         if args.dgtpi:
             dgthardware = DgtPi(dgtserial, dgttranslate, args.enable_revelation_leds)

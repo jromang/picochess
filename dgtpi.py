@@ -57,6 +57,7 @@ class DgtPi(DgtIface):
         buttime = c_byte(0)
         clktime = create_string_buffer(6)
         counter = 0
+        logging.info('incoming_clock ready')
         while True:
             with self.lock:
                 # get button events
