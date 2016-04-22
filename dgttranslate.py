@@ -544,7 +544,7 @@ class DgtTranslate(object):
             es = Dgt.DISPLAY_TEXT(l=None, m='Espanol', s='esp', beep=self.bl(BeepLevel.BUTTON), duration=0)
         if text_id == 'B10_oklang':
             en = Dgt.DISPLAY_TEXT(l='ok language', m='ok lang', s='oklang', beep=self.bl(BeepLevel.BUTTON), duration=1)
-            de = Dgt.DISPLAY_TEXT(l='ok Sprache', m='okSprache', s='ok spr', beep=self.bl(BeepLevel.BUTTON), duration=1)
+            de = Dgt.DISPLAY_TEXT(l='ok Sprache', m='okSprach', s='ok spr', beep=self.bl(BeepLevel.BUTTON), duration=1)
             nl = Dgt.DISPLAY_TEXT(l=None, m='ok taal', s='oktaal', beep=self.bl(BeepLevel.BUTTON), duration=1)
             fr = Dgt.DISPLAY_TEXT(l='ok langue', m='okLangue', s='oklang', beep=self.bl(BeepLevel.BUTTON), duration=1)
             es = Dgt.DISPLAY_TEXT(l='ok idioma', m='okIdioma', s='oklang', beep=self.bl(BeepLevel.BUTTON), duration=1)
