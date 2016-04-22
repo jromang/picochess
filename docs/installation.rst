@@ -113,7 +113,9 @@ Manual installation
 
 2. **Get a copy of the source code**
 
-  ``git clone --branch stable https://github.com/jromang/picochess.git``
+  ``cd /opt``
+
+  ``sudo git clone --branch stable https://www.github.com/jromang/picochess.git``
 
   ``cd picochess``
 
