@@ -115,7 +115,7 @@ Manual installation
 
   ``cd /opt``
 
-  ``sudo git clone --branch stable https://www.github.com/jromang/picochess.git``
+  ``sudo git clone --branch master https://github.com/jromang/picochess.git``
 
   ``cd picochess``
 
