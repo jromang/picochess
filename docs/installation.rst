@@ -113,7 +113,9 @@ Manual installation
 
 2. **Get a copy of the source code**
 
-  ``git clone --branch stable https://github.com/jromang/picochess.git``
+  ``cd /opt``
+
+  ``sudo git clone --branch stable https://www.github.com/jromang/picochess.git``
 
   ``cd picochess``
 
@@ -178,7 +180,7 @@ At start PicoChess looks at the file
 
 ... and sets itself up accordingly. Here is a list of some available options:
 
-* enable-dgt-board-leds = true
+* enable-revelation-leds = true
 * uci-option = Beginner Mode=true
 * log-level = debug
 * log-file = /opt/picochess/picochess.log
@@ -195,7 +197,7 @@ disable-ok-move
 To remove a setting, delete the appropriate line or comment it out using the hash character (#) or set the option to false.
 For example, to turn OFF the LED's on the Revelation II chessbot, this line will do:
 
-enable-dgt-board-leds = false
+enable-revelation-leds = false
 
 UCI engine options can be set using uci-option. For example, when using jromang's modified
 `Stockfish Human Player engine <https://github.com/jromang/Stockfish/tree/human_player>`_, the line
