@@ -179,7 +179,7 @@ class DgtTranslate(object):
         if text_id == 'B10_noipadr':
             en = Dgt.DISPLAY_TEXT(l='no ip addr', m='no ipadr', s='no ip', beep=self.bl(BeepLevel.BUTTON), duration=1)
             de = Dgt.DISPLAY_TEXT(l='keine IPadr', m='keine IP', s='kn ip', beep=self.bl(BeepLevel.BUTTON), duration=1)
-            nl = Dgt.DISPLAY_TEXT(l='geen IPadr', m='geen IP', s='gn ip', beep=self.bl(BeepLevel.BUTTON), duration=1)
+            nl = Dgt.DISPLAY_TEXT(l='geen IP adr', m='geen IP', s='gn ip', beep=self.bl(BeepLevel.BUTTON), duration=1)
             fr = Dgt.DISPLAY_TEXT(l=None, m='pas d ip', s='pd ip', beep=self.bl(BeepLevel.BUTTON), duration=1)
             es = Dgt.DISPLAY_TEXT(l='no ip dir', m='no ip', s=None, beep=self.bl(BeepLevel.BUTTON), duration=1)
         if text_id == 'Y00_errormenu':
@@ -221,7 +221,7 @@ class DgtTranslate(object):
         if text_id == 'B10_oktime':
             en = Dgt.DISPLAY_TEXT(l='time Okay', m='time Ok', s='oktime', beep=self.bl(BeepLevel.BUTTON), duration=1)
             de = Dgt.DISPLAY_TEXT(l='Zeit Okay', m='Zeit Ok', s='okzeit', beep=self.bl(BeepLevel.BUTTON), duration=1)
-            nl = Dgt.DISPLAY_TEXT(l='tijd Ok', m='tijd Ok', s='oktijd', beep=self.bl(BeepLevel.BUTTON), duration=1)
+            nl = Dgt.DISPLAY_TEXT(l='tyd Ok', m='tyd Ok', s='ok tyd', beep=self.bl(BeepLevel.BUTTON), duration=1)
             fr = Dgt.DISPLAY_TEXT(l=None, m='temps Ok', s='tps Ok', beep=self.bl(BeepLevel.BUTTON), duration=1)
             es = Dgt.DISPLAY_TEXT(l='tiempo Okay', m='tiempo Ok', s='oktime', beep=self.bl(BeepLevel.BUTTON), duration=1)
         if text_id == 'B10_okbeep':
@@ -257,7 +257,7 @@ class DgtTranslate(object):
         if text_id == 'C10_newgame':
             en = Dgt.DISPLAY_TEXT(l=None, m="new game", s="newgam", beep=self.bl(BeepLevel.CONFIG), duration=1)
             de = Dgt.DISPLAY_TEXT(l="neues Spiel", m="neuSpiel", s="neuspl", beep=self.bl(BeepLevel.CONFIG), duration=1)
-            nl = Dgt.DISPLAY_TEXT(l="nwe partij", m="nwpartij", s="newspl", beep=self.bl(BeepLevel.CONFIG), duration=1)
+            nl = Dgt.DISPLAY_TEXT(l="nieuw party", m="nw party", s="newspl", beep=self.bl(BeepLevel.CONFIG), duration=1)
             fr = Dgt.DISPLAY_TEXT(l='nvl partie', m="new game", s="newgam", beep=self.bl(BeepLevel.CONFIG), duration=1)
             es = Dgt.DISPLAY_TEXT(l='nuev partid', m="nuevpart", s="n part", beep=self.bl(BeepLevel.CONFIG), duration=1)
         if text_id == 'C00_takeback':
@@ -347,7 +347,7 @@ class DgtTranslate(object):
         if text_id == 'B00_menu_time_menu':
             en = Dgt.DISPLAY_TEXT(l=None, m='time', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
             de = Dgt.DISPLAY_TEXT(l=None, m='Zeit', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
-            nl = Dgt.DISPLAY_TEXT(l=None, m='tijd', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
+            nl = Dgt.DISPLAY_TEXT(l=None, m='tyd', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
             fr = Dgt.DISPLAY_TEXT(l=None, m='temps', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
             es = Dgt.DISPLAY_TEXT(l=None, m='tiempo', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
         if text_id == 'B00_menu_book_menu':
@@ -371,7 +371,7 @@ class DgtTranslate(object):
         if text_id == 'B00_mode_normal_menu':
             en = Dgt.DISPLAY_TEXT(l=None, m='normal', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
             de = Dgt.DISPLAY_TEXT(l=None, m='Normal', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
-            nl = Dgt.DISPLAY_TEXT(l=None, m='partij', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
+            nl = Dgt.DISPLAY_TEXT(l='normaal', m='normal', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
             fr = Dgt.DISPLAY_TEXT(l=None, m='normal', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
             es = Dgt.DISPLAY_TEXT(l=None, m='normal', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
         if text_id == 'B00_mode_analysis_menu':
@@ -389,7 +389,7 @@ class DgtTranslate(object):
         if text_id == 'B00_mode_observe_menu':
             en = Dgt.DISPLAY_TEXT(l=None, m='observe', s='observ', beep=self.bl(BeepLevel.BUTTON), duration=0)
             de = Dgt.DISPLAY_TEXT(l=None, m='Observe', s='observ', beep=self.bl(BeepLevel.BUTTON), duration=0)
-            nl = Dgt.DISPLAY_TEXT(l=None, m='bekijk', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
+            nl = Dgt.DISPLAY_TEXT(l='observeren', m='observr', s='observ', beep=self.bl(BeepLevel.BUTTON), duration=0)
             fr = Dgt.DISPLAY_TEXT(l=None, m='observer', s='observ', beep=self.bl(BeepLevel.BUTTON), duration=0)
             es = Dgt.DISPLAY_TEXT(l=None, m='observa', s='observ', beep=self.bl(BeepLevel.BUTTON), duration=0)
         if text_id == 'B00_mode_remote_menu':
@@ -423,9 +423,9 @@ class DgtTranslate(object):
             fr = Dgt.DISPLAY_TEXT(l=None, m='version', s='vers', beep=self.bl(BeepLevel.BUTTON), duration=0)
             es = Dgt.DISPLAY_TEXT(l=None, m='version', s='vers', beep=self.bl(BeepLevel.BUTTON), duration=0)
         if text_id == 'B00_settings_ipadr_menu':
-            en = Dgt.DISPLAY_TEXT(l=None, m='IP adr', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
+            en = Dgt.DISPLAY_TEXT(l='IP address', m='IP adr', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
             de = Dgt.DISPLAY_TEXT(l=None, m='IP adr', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
-            nl = Dgt.DISPLAY_TEXT(l=None, m='IP adr', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
+            nl = Dgt.DISPLAY_TEXT(l=None, m='IP adres', s='IP adr', beep=self.bl(BeepLevel.BUTTON), duration=0)
             fr = Dgt.DISPLAY_TEXT(l=None, m='adr IP', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
             es = Dgt.DISPLAY_TEXT(l=None, m='IP dir', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
         if text_id == 'B00_settings_sound_menu':
@@ -435,7 +435,7 @@ class DgtTranslate(object):
             fr = Dgt.DISPLAY_TEXT(l=None, m='sons', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
             es = Dgt.DISPLAY_TEXT(l=None, m='sonido', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
         if text_id == 'B00_settings_language_menu':
-            en = Dgt.DISPLAY_TEXT(l=None, m='language', s='lang', beep=self.bl(BeepLevel.BUTTON), duration=0)
+            en = Dgt.DISPLAY_TEXT(l=None, m='Language', s='lang', beep=self.bl(BeepLevel.BUTTON), duration=0)
             de = Dgt.DISPLAY_TEXT(l=None, m='Sprache', s='sprach', beep=self.bl(BeepLevel.BUTTON), duration=0)
             nl = Dgt.DISPLAY_TEXT(l=None, m='taal', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
             fr = Dgt.DISPLAY_TEXT(l=None, m='langue', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
@@ -455,7 +455,7 @@ class DgtTranslate(object):
         if text_id == 'B00_gameresult_time_menu':
             en = Dgt.DISPLAY_TEXT(l=None, m='time', s=None, beep=self.bl(BeepLevel.CONFIG), duration=1)
             de = Dgt.DISPLAY_TEXT(l=None, m='Zeit', s=None, beep=self.bl(BeepLevel.CONFIG), duration=1)
-            nl = Dgt.DISPLAY_TEXT(l=None, m='tijd', s=None, beep=self.bl(BeepLevel.CONFIG), duration=1)
+            nl = Dgt.DISPLAY_TEXT(l=None, m='tyd', s=None, beep=self.bl(BeepLevel.CONFIG), duration=1)
             fr = Dgt.DISPLAY_TEXT(l=None, m='tombe', s=None, beep=self.bl(BeepLevel.CONFIG), duration=1)
             es = Dgt.DISPLAY_TEXT(l=None, m='tiempo', s=None, beep=self.bl(BeepLevel.CONFIG), duration=1)
         if text_id == 'B00_gameresult_material_menu':
@@ -503,13 +503,13 @@ class DgtTranslate(object):
         if text_id == 'B10_playmode_white_user':
             en = Dgt.DISPLAY_TEXT(l=None, m='white', s=None, beep=self.bl(BeepLevel.CONFIG), duration=1)
             de = Dgt.DISPLAY_TEXT(l='Spieler W', m='Spielr W', s='splr w', beep=self.bl(BeepLevel.CONFIG), duration=1)
-            nl = Dgt.DISPLAY_TEXT(l='speler wit', m='speler w', s='splr w', beep=self.bl(BeepLevel.CONFIG), duration=1)
+            nl = Dgt.DISPLAY_TEXT(l='Speler wit', m='Speler w', s='splr w', beep=self.bl(BeepLevel.CONFIG), duration=1)
             fr = Dgt.DISPLAY_TEXT(l='joueur b', m='joueur b', s='blancs', beep=self.bl(BeepLevel.CONFIG), duration=1)
             es = Dgt.DISPLAY_TEXT(l='jugador b', m='jugad b', s='juga b', beep=self.bl(BeepLevel.CONFIG), duration=1)
         if text_id == 'B10_playmode_black_user':
             en = Dgt.DISPLAY_TEXT(l=None, m='black', s=None, beep=self.bl(BeepLevel.CONFIG), duration=1)
             de = Dgt.DISPLAY_TEXT(l='Spieler S', m='Spielr S', s='splr s', beep=self.bl(BeepLevel.CONFIG), duration=1)
-            nl = Dgt.DISPLAY_TEXT(l='speler zw', m='speler z', s='splr z', beep=self.bl(BeepLevel.CONFIG), duration=1)
+            nl = Dgt.DISPLAY_TEXT(l='Speler zw', m='Speler z', s='splr z', beep=self.bl(BeepLevel.CONFIG), duration=1)
             fr = Dgt.DISPLAY_TEXT(l='joueur n', m='joueur n', s='noirs', beep=self.bl(BeepLevel.CONFIG), duration=1)
             es = Dgt.DISPLAY_TEXT(l='jugador n', m='jugad n', s='juga n', beep=self.bl(BeepLevel.CONFIG), duration=1)
         if text_id == 'B00_language_en_menu':
