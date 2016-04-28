@@ -580,10 +580,15 @@ class RepeatedTimer(object):
             self._timer = Timer(self.interval, self._run)
             self._timer.start()
             self.timer_running = True
+        else:
+            logging.info('repeated timer already running - strange!')
 
     def stop(self):
-        self._timer.cancel()
-        self.timer_running = False
+        if self.timer_running:
+            self._timer.cancel()
+            self.timer_running = False
+        else:
+            logging.info('repeated timer already stopped - strange!')
 
 
 class Dgt():

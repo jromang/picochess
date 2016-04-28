@@ -508,6 +508,7 @@ def main():
                                            has_levels=engine.has_levels(), has_960=engine.has_chess960()))
 
     # Event loop
+    logging.info('evt_queue ready')
     while True:
         try:
             event = evt_queue.get()

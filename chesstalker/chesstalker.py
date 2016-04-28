@@ -80,6 +80,7 @@ class ChessTalker(DisplayMsg, threading.Thread):
         """
         previous_move = ""  # Ignore repeated broadcasts of a move.
         # Only run if we have any voices configured for user/computer.
+        logging.info('msg_queue ready')
         while self.user_chesstalker_voice or self.computer_chesstalker_voice:
             try:
                 # Check if we have something to say.

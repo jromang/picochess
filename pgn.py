@@ -147,6 +147,7 @@ class PgnDisplay(DisplayMsg, threading.Thread):
                 logging.debug(out)
 
     def run(self):
+        logging.info('msg_queue ready')
         while True:
             # Check if we have something to display
             try:

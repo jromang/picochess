@@ -184,7 +184,7 @@ class DgtTranslate(object):
             es = Dgt.DISPLAY_TEXT(l='no IP dir', m='no IP', s=None, beep=self.bl(BeepLevel.BUTTON), duration=1)
         if text_id == 'Y00_errormenu':
             en = Dgt.DISPLAY_TEXT(l='error menu', m='err menu', s='errmen', beep=self.bl(BeepLevel.YES), duration=0)
-            de = Dgt.DISPLAY_TEXT(l='error menu', m='err menu', s='errmen', beep=self.bl(BeepLevel.YES), duration=0)
+            de = Dgt.DISPLAY_TEXT(l='error Menu', m='err Menu', s='errmen', beep=self.bl(BeepLevel.YES), duration=0)
             nl = Dgt.DISPLAY_TEXT(l='fout menu', m='foutmenu', s='fout m', beep=self.bl(BeepLevel.YES), duration=0)
             fr = Dgt.DISPLAY_TEXT(l='error menu', m='err menu', s='pd men', beep=self.bl(BeepLevel.YES), duration=0)
             es = Dgt.DISPLAY_TEXT(l='error menu', m='err menu', s='errmen', beep=self.bl(BeepLevel.YES), duration=0)
@@ -256,13 +256,13 @@ class DgtTranslate(object):
             es = Dgt.DISPLAY_TEXT(l="altn jugada", m="altjugad", s="altjug", beep=self.bl(BeepLevel.BUTTON), duration=0.5)
         if text_id == 'C10_newgame':
             en = Dgt.DISPLAY_TEXT(l=None, m="new Game", s="newgam", beep=self.bl(BeepLevel.CONFIG), duration=1)
-            de = Dgt.DISPLAY_TEXT(l="neues Spiel", m="neuSpiel", s="neuspl", beep=self.bl(BeepLevel.CONFIG), duration=1)
+            de = Dgt.DISPLAY_TEXT(l="neues Spiel", m="neuesSpl", s="neuspl", beep=self.bl(BeepLevel.CONFIG), duration=1)
             nl = Dgt.DISPLAY_TEXT(l="nieuw party", m="nw party", s="nwpart", beep=self.bl(BeepLevel.CONFIG), duration=1)
             fr = Dgt.DISPLAY_TEXT(l='nvl partie', m="nvl part", s="newgam", beep=self.bl(BeepLevel.CONFIG), duration=1)
             es = Dgt.DISPLAY_TEXT(l='nuev partid', m="nuevpart", s="n part", beep=self.bl(BeepLevel.CONFIG), duration=1)
         if text_id == 'C00_takeback':
             en = Dgt.DISPLAY_TEXT(l=None, m="takeback", s="takbak", beep=self.bl(BeepLevel.CONFIG), duration=0)
-            de = Dgt.DISPLAY_TEXT(l="Ruecknahme", m="Ruecknah", s="rueckn", beep=self.bl(BeepLevel.CONFIG), duration=0)
+            de = Dgt.DISPLAY_TEXT(l="Ruecknahme", m="Rcknahme", s="rueckn", beep=self.bl(BeepLevel.CONFIG), duration=0)
             nl = Dgt.DISPLAY_TEXT(l="zet terug", m="zetterug", s="terug", beep=self.bl(BeepLevel.CONFIG), duration=0)
             fr = Dgt.DISPLAY_TEXT(l=None, m="retour", s=None, beep=self.bl(BeepLevel.CONFIG), duration=0)
             es = Dgt.DISPLAY_TEXT(l='retrocede', m="atras", s=None, beep=self.bl(BeepLevel.CONFIG), duration=0)
@@ -328,7 +328,7 @@ class DgtTranslate(object):
             es = en
         if text_id == 'B00_menu_top_menu':
             en = Dgt.DISPLAY_TEXT(l=None, m='Top menu', s='topmen', beep=self.bl(BeepLevel.BUTTON), duration=0)
-            de = Dgt.DISPLAY_TEXT(l=None, m='Top menu', s='topmen', beep=self.bl(BeepLevel.BUTTON), duration=0)
+            de = Dgt.DISPLAY_TEXT(l='Haupt Menu', m='Hpt Menu', s='topmen', beep=self.bl(BeepLevel.BUTTON), duration=0)
             nl = Dgt.DISPLAY_TEXT(l=None, m='Top menu', s='topmen', beep=self.bl(BeepLevel.BUTTON), duration=0)
             fr = Dgt.DISPLAY_TEXT(l=None, m='Top menu', s='topmen', beep=self.bl(BeepLevel.BUTTON), duration=0)
             es = Dgt.DISPLAY_TEXT(l=None, m='Top menu', s='topmen', beep=self.bl(BeepLevel.BUTTON), duration=0)
@@ -472,7 +472,7 @@ class DgtTranslate(object):
             es = Dgt.DISPLAY_TEXT(l=None, m='75 mov', s=None, beep=self.bl(BeepLevel.CONFIG), duration=1)
         if text_id == 'B00_gameresult_repetition_menu':
             en = Dgt.DISPLAY_TEXT(l='repetition', m='rep pos', s='reppos', beep=self.bl(BeepLevel.CONFIG), duration=1)
-            de = Dgt.DISPLAY_TEXT(l='Wiederholg', m='Wiederho', s='wh pos', beep=self.bl(BeepLevel.CONFIG), duration=1)
+            de = Dgt.DISPLAY_TEXT(l='Wiederholg', m='Wiederhg', s='wh pos', beep=self.bl(BeepLevel.CONFIG), duration=1)
             nl = Dgt.DISPLAY_TEXT(l='zetherhaling', m='herhalin', s='herhal', beep=self.bl(BeepLevel.CONFIG), duration=1)
             fr = Dgt.DISPLAY_TEXT(l='3ieme rep', m='3iem rep', s='3 rep', beep=self.bl(BeepLevel.CONFIG), duration=1)
             es = Dgt.DISPLAY_TEXT(l='repeticion', m='repite 3', s='rep 3', beep=self.bl(BeepLevel.CONFIG), duration=1)
@@ -526,13 +526,13 @@ class DgtTranslate(object):
             es = Dgt.DISPLAY_TEXT(l=None, m='Aleman', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
         if text_id == 'B00_language_nl_menu':
             en = Dgt.DISPLAY_TEXT(l=None, m='Dutch', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
-            de = Dgt.DISPLAY_TEXT(l='Niederlaend', m='Niederl', s='nl', beep=self.bl(BeepLevel.BUTTON), duration=0)
+            de = Dgt.DISPLAY_TEXT(l='Niederldsch', m='Niederl', s='nl', beep=self.bl(BeepLevel.BUTTON), duration=0)
             nl = Dgt.DISPLAY_TEXT(l='Nederlands', m='Nederl', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
             fr = Dgt.DISPLAY_TEXT(l='Neerlandais', m='Neerlnd', s='neer', beep=self.bl(BeepLevel.BUTTON), duration=0)
             es = Dgt.DISPLAY_TEXT(l=None, m='Holandes', s='holand', beep=self.bl(BeepLevel.BUTTON), duration=0)
         if text_id == 'B00_language_fr_menu':
             en = Dgt.DISPLAY_TEXT(l=None, m='French', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
-            de = Dgt.DISPLAY_TEXT(l='Franzosisch', m='Franzoes', s='fr', beep=self.bl(BeepLevel.BUTTON), duration=0)
+            de = Dgt.DISPLAY_TEXT(l='Franzosisch', m='Franzsch', s='fr', beep=self.bl(BeepLevel.BUTTON), duration=0)
             nl = Dgt.DISPLAY_TEXT(l=None, m='Frans', s=None, beep=self.bl(BeepLevel.BUTTON), duration=0)
             fr = Dgt.DISPLAY_TEXT(l=None, m='Francais', s='france', beep=self.bl(BeepLevel.BUTTON), duration=0)
             es = Dgt.DISPLAY_TEXT(l=None, m='Frances', s='franc', beep=self.bl(BeepLevel.BUTTON), duration=0)

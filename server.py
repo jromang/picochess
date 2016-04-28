@@ -190,6 +190,7 @@ class WebServer(Observable, threading.Thread):
         application.listen(port)
 
     def run(self):
+        logging.info('evt_queue ready')
         IOLoop.instance().start()
 
 
@@ -298,11 +299,9 @@ class WebDisplay(DisplayMsg, threading.Thread):
 
                 pgn_str = game.accept(exporter)
                 fen = message.game.fen()
-                # pgn_str = str(exporter)
-                r = {'pgn': pgn_str, 'fen': fen, 'event': "newFEN"}
-
-                r['move'] = message.result.bestmove.uci()
-                r['msg'] = 'Computer move: ' + str(message.result.bestmove)
+                mov = message.result.bestmove.uci()
+                msg = 'Computer move: ' + str(message.result.bestmove)
+                r = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'msg': msg, 'remote_play': False}
 
                 self.shared['last_dgt_move_msg'] = r
                 EventHandler.write_to_clients(r)
@@ -322,11 +321,9 @@ class WebDisplay(DisplayMsg, threading.Thread):
 
                 pgn_str = game.accept(exporter)
                 fen = message.game.fen()
-                # pgn_str = str(exporter)
-                r = {'pgn': pgn_str, 'fen': fen, 'event': "newFEN"}
-
-                r['move'] = message.move.uci()
-                r['msg'] = 'User move: ' + str(message.move)
+                msg = 'User move: ' + str(message.move)
+                mov = message.move.uci()
+                r = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'msg': msg, 'remote_play': False}
 
                 self.shared['last_dgt_move_msg'] = r
                 EventHandler.write_to_clients(r)
@@ -346,11 +343,8 @@ class WebDisplay(DisplayMsg, threading.Thread):
 
                 pgn_str = game.accept(exporter)
                 fen = message.game.fen()
-                # pgn_str = str(exporter)
-                r = {'pgn': pgn_str, 'fen': fen, 'event': "newFEN"}
-
-                r['move'] = 'User move: ' + str(message.move)
-                r['remote_play'] = True
+                mov = 'User move: ' + str(message.move)
+                r = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'remote_play': True}
 
                 self.shared['last_dgt_move_msg'] = r
                 EventHandler.write_to_clients(r)
@@ -363,6 +357,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
         IOLoop.instance().add_callback(callback=lambda: self.task(msg))
 
     def run(self):
+        logging.info('msg_queue ready')
         while True:
             # Check if we have something to display
             message = self.msg_queue.get()

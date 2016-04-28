@@ -27,6 +27,7 @@ class KeyboardInput(Observable, threading.Thread):
         super(KeyboardInput, self).__init__()
 
     def run(self):
+        logging.info('evt_queue ready')
         while True:
             raw = input('PicoChess v'+version+':>').strip()
             cmd = raw.lower()
@@ -85,6 +86,7 @@ class TerminalDisplay(DisplayMsg, threading.Thread):
         super(TerminalDisplay, self).__init__()
 
     def run(self):
+        logging.info('msg_queue ready')
         while True:
             # Check if we have something to display
             message = self.msg_queue.get()
