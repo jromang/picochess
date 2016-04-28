@@ -17,32 +17,30 @@
 
 from chess import Board
 from dgtiface import *
-from dgtserial import *
+# from dgtserial import *
 from ctypes import *
 from utilities import *
 from threading import Lock, Timer
 
 
 class DgtPi(DgtIface):
-    def __init__(self, dgtserial, dgtttranslate, enable_revelation_leds):
-        super(DgtPi, self).__init__(enable_revelation_leds)
-        self.dgtserial = dgtserial
+    def __init__(self, dgtserial, dgttranslate, enable_revelation_leds):
+        super(DgtPi, self).__init__(dgtserial, dgttranslate, enable_revelation_leds)
         self.dgtserial.enable_pi()
-        self.dgttranslate = dgtttranslate
 
         self.lock = Lock()
         self.lib = cdll.LoadLibrary("dgt/dgtpicom.so")
 
-        self.startup_pi_clock()
+        self.startup_i2c_clock()
         incoming_clock_thread = Timer(0, self.process_incoming_clock_forever)
         incoming_clock_thread.start()
         self.dgtserial.run()
 
-    def startup(self):
-        self.dgtserial.setup_serial()
-        self.dgtserial.startup_board()
+    def startup_serial_hardware(self):
+        self.dgtserial.setup_serial_port()
+        self.dgtserial.startup_serial_board()
 
-    def startup_pi_clock(self):
+    def startup_i2c_clock(self):
         while self.lib.dgtpicom_init() < 0:
             logging.warning('Init failed - Jack half connected?')
             DisplayMsg.show(Message.JACK_CONNECTED_ERROR())

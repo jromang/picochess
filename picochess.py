@@ -444,7 +444,7 @@ def main():
 
     # Start the show
     dgthardware.start()
-    dgthardware.startup()
+    dgthardware.startup_serial_hardware()
 
     # Save to PGN
     PgnDisplay(

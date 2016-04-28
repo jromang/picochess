@@ -17,7 +17,7 @@
 
 from chess import Board
 from dgtiface import *
-from dgtserial import *
+# from dgtserial import *
 from dgtlib import *
 from utilities import *
 from threading import Lock
@@ -25,23 +25,21 @@ from threading import Lock
 
 class DgtHw(DgtIface):
     def __init__(self, dgtserial, dgttranslate, enable_revelation_leds):
-        super(DgtHw, self).__init__(enable_revelation_leds)
-        self.dgtserial = dgtserial
-        self.dgttranslate = dgttranslate
+        super(DgtHw, self).__init__(dgtserial, dgttranslate, enable_revelation_leds)
 
         self.lock = Lock()
         self.lib = DgtLib(self.dgtserial)
         self.dgtserial.run()
 
-    def startup(self):
-        self.dgtserial.setup_serial()
-        self.dgtserial.startup_clock()
-        self.dgtserial.startup_board()
+    def startup_serial_hardware(self):
+        self.dgtserial.setup_serial_port()
+        self.dgtserial.startup_serial_clock()
+        self.dgtserial.startup_serial_board()
 
     def _display_on_dgt_xl(self, text, beep=False):
         if not self.clock_found:  # This can only happen on the XL function
             logging.debug('DGT clock (still) not found. Ignore [%s]', text)
-            self.dgtserial.startup_clock()
+            self.dgtserial.startup_serial_clock()
             return
         text = text.ljust(6)
         if len(text) > 6:

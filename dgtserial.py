@@ -95,8 +95,8 @@ class DgtSerial(object):
 
         while True:
             if not self.serial:
-                self.setup_serial()
-                self.startup_board()
+                self.setup_serial_port()
+                self.startup_serial_board()
             try:
                 self.serial.write(bytearray(array))
                 break
@@ -282,13 +282,13 @@ class DgtSerial(object):
             except struct.error:  # can happen, when plugin board-cable again
                 pass
 
-    def startup_clock(self):
+    def startup_serial_clock(self):
         # Get clock version
         command = [DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
                    DgtClk.DGT_CMD_CLOCK_VERSION, DgtClk.DGT_CMD_CLOCK_END_MESSAGE]
         self.write_board_command(command)
 
-    def startup_board(self):
+    def startup_serial_board(self):
         self.write_board_command([DgtCmd.DGT_SEND_UPDATE_NICE])  # Set the board update mode
         self.write_board_command([DgtCmd.DGT_SEND_VERSION])  # Get board version
         self.write_board_command([DgtCmd.DGT_SEND_BRD])  # Update the board
@@ -453,7 +453,7 @@ class DgtSerial(object):
             return False
         return True
 
-    def setup_serial(self):
+    def setup_serial_port(self):
         if self.rt.is_running():
             self.rt.stop()
         with self.lock:

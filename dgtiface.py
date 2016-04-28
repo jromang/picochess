@@ -21,8 +21,11 @@ from threading import Timer, Thread
 
 
 class DgtIface(DisplayDgt, Thread):
-    def __init__(self, enable_revelation_leds):
+    def __init__(self, dgtserial, dgttranslate, enable_revelation_leds):
         super(DgtIface, self).__init__()
+
+        self.dgtserial = dgtserial
+        self.dgttranslate = dgttranslate
 
         self.enable_dgt_3000 = False
         self.enable_dgt_pi = False
