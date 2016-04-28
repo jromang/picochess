@@ -36,10 +36,6 @@ class DgtPi(DgtIface):
         incoming_clock_thread.start()
         self.dgtserial.run()
 
-    def startup_serial_hardware(self):
-        self.dgtserial.setup_serial_port()
-        self.dgtserial.startup_serial_board()
-
     def startup_i2c_clock(self):
         while self.lib.dgtpicom_init() < 0:
             logging.warning('Init failed - Jack half connected?')

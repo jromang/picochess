@@ -75,6 +75,12 @@ class DgtSerial(object):
         self.bt_name_list = []
         self.bt_name = ''
 
+    def startup_serial_hardware(self):
+        self.setup_serial_port()
+        if not self.is_pi:  # can this "if" be removed for example for a RevII board?!?
+            self.startup_serial_clock()
+        self.startup_serial_board()
+
     def write_board_command(self, message):
         mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
         logging.debug('->DGT board [%s], length: %i', mes, len(message))

@@ -31,11 +31,6 @@ class DgtHw(DgtIface):
         self.lib = DgtLib(self.dgtserial)
         self.dgtserial.run()
 
-    def startup_serial_hardware(self):
-        self.dgtserial.setup_serial_port()
-        self.dgtserial.startup_serial_clock()
-        self.dgtserial.startup_serial_board()
-
     def _display_on_dgt_xl(self, text, beep=False):
         if not self.clock_found:  # This can only happen on the XL function
             logging.debug('DGT clock (still) not found. Ignore [%s]', text)

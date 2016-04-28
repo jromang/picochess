@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+e#!/usr/bin/env python3
 
 # Copyright (C) 2013-2016 Jean-Francois Romang (jromang@posteo.de)
 #                         Shivkumar Shivaji ()
@@ -433,6 +433,7 @@ def main():
         KeyboardInput().start()
         TerminalDisplay().start()
         dgthardware = DgtVr(args.enable_revelation_leds)
+        dgtserial = dgthardware  # Needed for the startup_serial_hardware call below
     else:
         # Connect to DGT board
         logging.debug("starting picochess in board mode")
@@ -444,7 +445,7 @@ def main():
 
     # Start the show
     dgthardware.start()
-    dgthardware.startup_serial_hardware()
+    dgtserial.startup_serial_hardware()  # only needed for non console, but make it easy now
 
     # Save to PGN
     PgnDisplay(
