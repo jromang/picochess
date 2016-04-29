@@ -101,8 +101,10 @@ class DgtSerial(object):
 
         while True:
             if not self.serial:
-                self.setup_serial_port()
-                self.startup_serial_board()
+                logging.warning('loop serial error')
+                # self.setup_serial_port()
+                # self.startup_serial_board()
+                self.startup_serial_hardware()
             try:
                 self.serial.write(bytearray(array))
                 break
@@ -141,7 +143,7 @@ class DgtSerial(object):
                     else:
                         text_l, text_m, text_s = 'BT E-board', 'BT board', 'ok bt'
                     channel = 'BT'
-                text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, beep=False, duration=0.5)
+                text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, beep=False, duration=1)
                 DisplayMsg.show(Message.EBOARD_VERSION(text=text, channel=channel))
                 if self.rt.is_running():
                     logging.warning('watchdog timer is already running')
