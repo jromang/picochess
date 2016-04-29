@@ -379,7 +379,7 @@ class DgtSerial(object):
                     self.bt_name_list.remove(self.bt_name_list[self.bt_current_device])
                     self.bt_current_device -= 1
                     logging.debug("BT pairing failed, unkown device")
-                if ("DGT_BT_" in self.bt_line or "PCS-REVII" in self.bt_line) and "NEW" in self.bt_line:
+                if ("DGT_BT_" in self.bt_line or "PCS-REVII" in self.bt_line) and not "DEL" in self.bt_line:
                     # New e-Board found add to list
                     if not self.bt_line.split()[3] in self.bt_mac_list :
                         self.bt_mac_list.append(self.bt_line.split()[3])
