@@ -21,16 +21,13 @@ from utilities import RepeatedTimer
 
 
 class DgtVr(DgtIface):
-    def __init__(self, enable_revelation_leds):
-        super(DgtVr, self).__init__(enable_revelation_leds)
+    def __init__(self, dgtserial, dgttranslate, enable_revelation_leds):
+        super(DgtVr, self).__init__(dgtserial, dgttranslate, enable_revelation_leds)
         # virtual lib
         self.rt = None
         self.time_side = None
         # setup virtual clock
         DisplayMsg.show(Message.DGT_CLOCK_VERSION(main_version=0, sub_version=0, attached="virtual"))
-
-    def startup_serial_hardware(self):
-        pass  # this function is needed
 
     # (START) dgtserial class simulation
     def runclock(self):

@@ -432,8 +432,8 @@ def main():
         logging.debug("starting picochess in virtual mode")
         KeyboardInput().start()
         TerminalDisplay().start()
-        dgthardware = DgtVr(args.enable_revelation_leds)
-        dgtserial = dgthardware  # Needed for the startup_serial_hardware call below
+        dgthardware = DgtVr(None, dgttranslate, args.enable_revelation_leds)
+        dgthardware.start()
     else:
         # Connect to DGT board
         logging.debug("starting picochess in board mode")
@@ -442,10 +442,9 @@ def main():
             dgthardware = DgtPi(dgtserial, dgttranslate, args.enable_revelation_leds)
         else:
             dgthardware = DgtHw(dgtserial, dgttranslate, args.enable_revelation_leds)
-
-    # Start the show
-    dgthardware.start()
-    dgtserial.startup_serial_hardware()  # only needed for non console, but make it easy now
+        # Start the show
+        dgthardware.start()
+        dgtserial.startup_serial_hardware()
 
     # Save to PGN
     PgnDisplay(
