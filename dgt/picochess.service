@@ -3,7 +3,7 @@ Description=PicoChess stand alone chess computer based on DGT board
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /opt/picochess/picochess.py -pi -d /dev/ttyACM0 -beep 0
+ExecStart=/usr/bin/python3 /opt/picochess/picochess.py
 ExecStop=/usr/bin/pkill -f picochess.py
 WorkingDirectory=/opt/picochess/
 
