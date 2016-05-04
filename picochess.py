@@ -490,6 +490,7 @@ def main():
     searchmoves = AlternativeMover()
     interaction_mode = Mode.NORMAL
     play_mode = PlayMode.USER_WHITE
+    # king_lifted = False
     time_control = TimeControl(TimeMode.BLITZ, minutes_per_game=5)
     last_computer_fen = None
     game_declared = False  # User declared resignation or draw
@@ -676,6 +677,13 @@ def main():
                     stop_search_and_clock()
                     time_control.reset()
                     searchmoves.reset()
+
+                    # if interaction_mode == Mode.NORMAL:
+                    #     if king_lifted:
+                    #         king_lifted = False
+                    #         if play_mode == PlayMode.USER_BLACK:
+                    #             think(time_control)
+
                     DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control))
                     game_declared = False
                     set_wait_state()
@@ -759,6 +767,12 @@ def main():
                     DisplayMsg.show(Message.GAME_ENDS(result=GameResult.OUT_OF_TIME, play_mode=play_mode,
                                                       game=copy.deepcopy(game), custom_fen=custom_fen))
                     break
+
+                # if case(Event.SET_PLAYMODE):
+                #     play_mode = event.play_mode
+                #     king_lifted = True
+                #     DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode))
+                #     break
 
                 if case(EventApi.UCI_OPTION_SET):
                     # Nowhere calls this yet, but they will need to be saved for engine restart
