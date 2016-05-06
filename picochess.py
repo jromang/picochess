@@ -254,7 +254,6 @@ def main():
                 DisplayMsg.show(Message.COMPUTER_MOVE_DONE_ON_BOARD())
                 if time_control.mode != TimeMode.FIXED:
                     DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=time_control, callback=timecontrol_callback))
-                    # time_control.start(game.turn)
         else:  # Check if this a a previous legal position and allow user to restart from this position
             game_history = copy.deepcopy(game)
             while game_history.move_stack:
@@ -642,7 +641,7 @@ def main():
                         engine.stop(show_best=True)
                     else:
                         play_mode = PlayMode.USER_WHITE if play_mode == PlayMode.USER_BLACK else PlayMode.USER_BLACK
-                        DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode))
+                        DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode, beep_level=BeepLevel.BUTTON))
                         if check_game_state(game, play_mode) and (interaction_mode != Mode.REMOTE):
                             time_control.reset_start_time()
                             think(game, time_control)
@@ -660,7 +659,6 @@ def main():
                     else:
                         time_control.add_inc(game.turn)
                         DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=time_control, callback=timecontrol_callback))
-                        # time_control.start(game.turn)
                     break
 
                 if case(EventApi.NEW_GAME):
@@ -745,7 +743,7 @@ def main():
                     if engine.is_thinking():
                         stop_search()  # dont need to stop, if pondering
                     if engine.is_pondering() and interaction_mode == Mode.NORMAL:
-                        stop_search()  # if change from ponder modes to game, also stops the pondering
+                        stop_search()  # if change from ponder modes to normal, also stops the pondering
                     set_wait_state()
                     DisplayMsg.show(Message.INTERACTION_MODE(mode=event.mode, mode_text=event.mode_text))
                     break
@@ -771,7 +769,7 @@ def main():
                 # if case(Event.SET_PLAYMODE):
                 #     play_mode = event.play_mode
                 #     king_lifted = True
-                #     DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode))
+                #     DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode, beep_level=BeepLevel.MAP))
                 #     break
 
                 if case(EventApi.UCI_OPTION_SET):

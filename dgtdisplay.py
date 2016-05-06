@@ -802,7 +802,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
                         break
                     if case(MessageApi.PLAY_MODE):
-                        DisplayDgt.show(self.dgttranslate.text(message.play_mode.value))
+                        text = self.dgttranslate.text(message.play_mode.value)
+                        text.beep = self.dgttranslate.bl(message.beep_level)
+                        DisplayDgt.show(text)
                         break
                     if case(MessageApi.NEW_SCORE):
                         self.score = message.score
