@@ -686,7 +686,7 @@ def main():
                         if king_lifted:
                             king_lifted = False
                             if play_mode == PlayMode.USER_BLACK:
-                                think(time_control)
+                                think(game, time_control)
                         else:
                             set_wait_state()
                             DisplayMsg.show(Message.WAIT_STATE())
