@@ -637,18 +637,24 @@ def main():
                     DisplayMsg.show(Message.WAIT_STATE())
                     break
 
-                if case(EventApi.STARTSTOP_THINK):
-                    if engine.is_thinking() and (interaction_mode != Mode.REMOTE):
+                if case(EventApi.STARTSTOP_THINK):  # @todo rename it! It stops search or halt/resume running clock
+                    if engine.is_thinking():
                         stop_clock()
                         engine.stop(show_best=True)
                     else:
-                        play_mode = PlayMode.USER_WHITE if play_mode == PlayMode.USER_BLACK else PlayMode.USER_BLACK
-                        text = dgttranslate.text(play_mode.value)
-
-                        DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode, play_mode_text=text))
-                        if check_game_state(game, play_mode) and (interaction_mode != Mode.REMOTE):
-                            time_control.reset_start_time()
-                            think(game, time_control)
+                        if time_control.is_ticking():
+                            stop_clock()
+                        else:
+                            DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=time_control,
+                                                              callback=timecontrol_callback))
+                        # @todo this is a lever function!
+                        # play_mode = PlayMode.USER_WHITE if play_mode == PlayMode.USER_BLACK else PlayMode.USER_BLACK
+                        # text = dgttranslate.text(play_mode.value)
+                        #
+                        # DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode, play_mode_text=text))
+                        # if check_game_state(game, play_mode) and (interaction_mode != Mode.REMOTE):
+                        #     time_control.reset_start_time()
+                        #     think(game, time_control)
                     break
 
                 if case(EventApi.ALTERNATIVE_MOVE):
@@ -657,13 +663,13 @@ def main():
                     think(game, time_control)
                     break
 
-                if case(EventApi.STARTSTOP_CLOCK):
-                    if time_control.is_ticking():
-                        stop_clock()
-                    else:
-                        time_control.add_inc(game.turn)
-                        DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=time_control, callback=timecontrol_callback))
-                    break
+                # if case(EventApi.STARTSTOP_CLOCK):  # @todo no longer used for the moment => use it for lever!
+                #     if time_control.is_ticking():
+                #         stop_clock()
+                #     else:
+                #         # time_control.add_inc(game.turn)
+                #         DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=time_control, callback=timecontrol_callback))
+                #     break
 
                 if case(EventApi.NEW_GAME):
                     if game.move_stack:

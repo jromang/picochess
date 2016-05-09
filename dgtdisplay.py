@@ -99,15 +99,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
         self.flip_board = False
         self.dgt_fen = None
-        self.alternative = False
+        self.engine_finished = False
         self.ip = '?'  # the last two parts of the IP
         self.drawresign_fen = None
         self.draw_setup_pieces = True
 
-        self.play_move = chess.Move.null()
-        self.last_move = chess.Move.null()
-        self.last_fen = None
-        self.reset_hint_and_score()
+        self.reset_moves_and_score()
 
         self.setup_whitetomove_index = None
         self.setup_whitetomove_result = None
@@ -202,16 +199,19 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.engine_restart = True
         self.fire(Event.REBOOT())
 
-    def reset_hint_and_score(self):
+    def reset_moves_and_score(self):
+        self.play_move = chess.Move.null()
         self.hint_move = chess.Move.null()
         self.hint_fen = None
+        self.last_move = chess.Move.null()
+        self.last_fen = None
         self.score = None
         self.mate = None
 
     def process_button0(self):
         if self.top_result is None:
-            if bool(self.hint_move):
-                text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen,
+            if bool(self.last_move):
+                text = Dgt.DISPLAY_MOVE(move=self.last_move, fen=self.last_fen,
                                         beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
             else:
                 text = self.dgttranslate.text('B10_nomove')
@@ -378,27 +378,23 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
     def process_button2(self):
         if self.top_result is None:
-            if self.mode_result == Mode.NORMAL:
-                if self.alternative:
-                    self.fire(Event.ALTERNATIVE_MOVE())
-                else:
-                    self.fire(Event.STARTSTOP_THINK())
-            if self.mode_result == Mode.REMOTE:
-                self.fire(Event.STARTSTOP_THINK())
-            if self.mode_result == Mode.OBSERVE:
-                self.fire(Event.STARTSTOP_CLOCK())
-            if self.mode_result == Mode.ANALYSIS or self.mode_result == Mode.KIBITZ:
+            if self.engine_finished:
                 text = self.dgttranslate.text('B00_nofunction')
                 DisplayDgt.show(text)
+            else:
+                self.fire(Event.STARTSTOP_THINK())
 
     def process_button3(self):
         if self.top_result is None:
-            if self.last_move:
-                text = Dgt.DISPLAY_MOVE(move=self.last_move, fen=self.last_fen,
-                                        beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
+            if self.engine_finished:
+                self.fire(Event.ALTERNATIVE_MOVE())
             else:
-                text = self.dgttranslate.text('B10_nomove')
-            DisplayDgt.show(text)
+                if bool(self.hint_move):
+                    text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen,
+                                            beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
+                else:
+                    text = self.dgttranslate.text('B10_nomove')
+                DisplayDgt.show(text)
 
         if self.top_result == Menu.TOP_MENU:
             self.top_index = MenuLoop.next(self.top_index)
@@ -666,6 +662,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=0x04, wait=True, callback=None))
                 self.reset_menu_results()
 
+    def process_lever(self, right_side_down):
+        pass
+
     def drawresign(self):
         _, _, _, rnk_5, rnk_4, _, _, _ = self.dgt_fen.split("/")
         return "8/8/8/" + rnk_5 + "/" + rnk_4 + "/8/8/8"
@@ -701,7 +700,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if case(MessageApi.COMPUTER_MOVE):
                         move = message.result.bestmove
                         ponder = message.result.ponder
-                        self.alternative = True
+                        self.engine_finished = True
                         self.last_move = move
                         self.play_move = move
                         self.hint_move = chess.Move.null() if ponder is None else ponder
@@ -715,12 +714,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         break
                     if case(MessageApi.START_NEW_GAME):
                         DisplayDgt.show(Dgt.LIGHT_CLEAR())
-                        self.play_move = chess.Move.null()
-                        self.last_move = chess.Move.null()
-                        self.reset_hint_and_score()
+                        self.reset_moves_and_score()
                         # self.mode_index = Mode.NORMAL  # @todo
                         self.reset_menu_results()
-                        self.alternative = False
+                        self.engine_finished = False
                         time_left, time_right = message.time_control.current_clock_time(flip_board=self.flip_board)
                         DisplayDgt.show(self.dgttranslate.text('C10_newgame'))
                         DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=0x04, wait=True, callback=None))
@@ -731,13 +728,13 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
                         DisplayDgt.show(Dgt.LIGHT_CLEAR())
                         self.play_move = chess.Move.null()
-                        self.alternative = False
+                        self.engine_finished = False
                         if self.ok_moves_messages:
                             DisplayDgt.show(self.dgttranslate.text('K05_okpico'))
                         self.reset_menu_results()
                         break
                     if case(MessageApi.USER_MOVE):
-                        self.alternative = False
+                        self.engine_finished = False
                         if self.ok_moves_messages:
                             DisplayDgt.show(self.dgttranslate.text('K05_okuser'))
                         break
@@ -779,8 +776,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
                         break
                     if case(MessageApi.USER_TAKE_BACK):
-                        self.reset_hint_and_score()
-                        self.alternative = False
+                        self.reset_moves_and_score()
+                        self.engine_finished = False
                         DisplayDgt.show(self.dgttranslate.text('C00_takeback'))
                         break
                     if case(MessageApi.GAME_ENDS):
@@ -790,7 +787,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if case(MessageApi.INTERACTION_MODE):
                         self.mode_index = message.mode
                         self.mode_result = message.mode  # needed, otherwise Q-placing wont work correctly
-                        self.alternative = False
+                        self.engine_finished = False
                         DisplayDgt.show(message.mode_text)
                         if self.play_move:
                             DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen,
@@ -863,8 +860,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 self.process_button3()
                             elif button == 4:
                                 self.process_button4()
-                            elif button == 40:
+                            elif button == 0x11:
                                 self.power_off()
+                            elif button == 0x40:
+                                self.process_lever(True)
+                            elif button == -0x40:
+                                self.process_lever(False)
                         break
                     if case(MessageApi.DGT_FEN):
                         fen = message.fen

@@ -188,10 +188,15 @@ class DgtSerial(object):
                         if ack3 == 53:
                             if ack2 == 69:
                                 logging.info("DGT clock [ser]: button 0+4 pressed - ack2: %i", ack2)
-                                DisplayMsg.show(Message.DGT_BUTTON(button=40))
+                                DisplayMsg.show(Message.DGT_BUTTON(button=0x11))
                             else:
                                 logging.info("DGT clock [ser]: button 4 pressed - ack2: %i", ack2)
                                 DisplayMsg.show(Message.DGT_BUTTON(button=4))
+
+                        # @todo find out the lever pos...and fire a DGT_BUTTON(button=+-0x40) Event
+                        # @todo for now, we display the message array
+                        logging.debug('Message array (@todo - lever pos!) {}'.format(message))
+
                     if ack1 == 0x09:
                         main_version = ack2 >> 4
                         sub_version = ack2 & 0x0f

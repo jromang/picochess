@@ -84,8 +84,10 @@ class DgtPi(DgtIface):
                         Observable.fire(Event.SHUTDOWN())
                     if ack3 == 0x40:
                         logging.info("DGT clock [i2c]: lever pressed > right side down")
+                        DisplayMsg.show(Message.DGT_BUTTON(button=0x40))
                     if ack3 == -0x40:
                         logging.info("DGT clock [i2c]: lever pressed > left side down")
+                        DisplayMsg.show(Message.DGT_BUTTON(button=-0x40))
                 if res < 0:
                     logging.warning('GetButtonMessage returned error %i', res)
 
