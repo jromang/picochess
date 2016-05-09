@@ -20,6 +20,7 @@ import time
 import threading
 from utilities import *
 import copy
+from math import floor
 
 
 class TimeControl(object):
@@ -68,7 +69,19 @@ class TimeControl(object):
 
     def add_inc(self, color):
         if self.mode == TimeMode.FISCHER:
+            # log times - issue #184
+            time_w, time_b = self.current_clock_time(flip_board=False)
+            w_hms = hours_minutes_seconds(time_w)
+            b_hms = hours_minutes_seconds(time_b)
+            logging.info('before internal time w:{} - b:{}'.format(w_hms, b_hms))
+
             self.clock_time[color] += self.fischer_increment
+
+            # log times - issue #184
+            time_w, time_b = self.current_clock_time(flip_board=False)
+            w_hms = hours_minutes_seconds(time_w)
+            b_hms = hours_minutes_seconds(time_b)
+            logging.info('after internal time w:{} - b:{}'.format(w_hms, b_hms))
 
     def start(self, color):
         """Starts the internal clock."""
@@ -102,7 +115,9 @@ class TimeControl(object):
 
                 self.timer.cancel()
                 self.timer.join()
-                self.clock_time[self.active_color] -= time.time() - self.start_time
+                used_time = floor((time.time() - self.start_time)*10)/10
+                logging.info('used time: {} secs'.format(used_time))
+                self.clock_time[self.active_color] -= used_time
 
                 # log times
                 time_w, time_b = self.current_clock_time(flip_board=False)
