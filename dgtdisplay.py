@@ -799,9 +799,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
                         break
                     if case(MessageApi.PLAY_MODE):
-                        text = self.dgttranslate.text(message.play_mode.value)
-                        text.beep = self.dgttranslate.bl(message.beep_level)
-                        DisplayDgt.show(text)
+                        DisplayDgt.show(message.play_mode_text)
                         break
                     if case(MessageApi.NEW_SCORE):
                         self.score = message.score
@@ -938,7 +936,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             logging.debug("Map-Fen: Play mode [%s]", play_map[fen])
                             text = self.dgttranslate.text(play_map[fen].value)
                             text.beep = map_bl  # BeepLevel is Map not Button
-                            # self.fire(Event.SET_PLAYMODE, play_mode=play_map[fen], play_mode_text=text)
+                            self.fire(Event.SET_PLAYMODE(play_mode=play_map[fen], play_mode_text=text))
                             self.reset_menu_results()
                         elif fen in self.time_control_fixed_map:
                             logging.debug("Map-Fen: Time control fixed")

@@ -489,7 +489,7 @@ def main():
     searchmoves = AlternativeMover()
     interaction_mode = Mode.NORMAL
     play_mode = PlayMode.USER_WHITE
-    # king_lifted = False
+    king_lifted = False
     time_control = TimeControl(TimeMode.BLITZ, minutes_per_game=5)
     last_computer_fen = None
     game_declared = False  # User declared resignation or draw
@@ -643,7 +643,9 @@ def main():
                         engine.stop(show_best=True)
                     else:
                         play_mode = PlayMode.USER_WHITE if play_mode == PlayMode.USER_BLACK else PlayMode.USER_BLACK
-                        DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode, beep_level=BeepLevel.BUTTON))
+                        text = dgttranslate.text(play_mode.value)
+
+                        DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode, play_mode_text=text))
                         if check_game_state(game, play_mode) and (interaction_mode != Mode.REMOTE):
                             time_control.reset_start_time()
                             think(game, time_control)
@@ -678,16 +680,16 @@ def main():
                     time_control.reset()
                     searchmoves.reset()
 
-                    # if interaction_mode == Mode.NORMAL:
-                    #     if king_lifted:
-                    #         king_lifted = False
-                    #         if play_mode == PlayMode.USER_BLACK:
-                    #             think(time_control)
-
                     DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control))
                     game_declared = False
-                    set_wait_state()
-                    DisplayMsg.show(Message.WAIT_STATE())
+                    if interaction_mode == Mode.NORMAL:
+                        if king_lifted:
+                            king_lifted = False
+                            if play_mode == PlayMode.USER_BLACK:
+                                think(time_control)
+                        else:
+                            set_wait_state()
+                            DisplayMsg.show(Message.WAIT_STATE())
                     break
 
                 if case(EventApi.DRAWRESIGN):
@@ -768,11 +770,11 @@ def main():
                                                       game=copy.deepcopy(game), custom_fen=custom_fen))
                     break
 
-                # if case(Event.SET_PLAYMODE):
-                #     play_mode = event.play_mode
-                #     king_lifted = True
-                #     DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode, beep_level=BeepLevel.MAP))
-                #     break
+                if case(EventApi.SET_PLAYMODE):
+                    play_mode = event.play_mode
+                    king_lifted = True
+                    DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode, play_mode_text=event.play_mode_text))
+                    break
 
                 if case(EventApi.UCI_OPTION_SET):
                     # Nowhere calls this yet, but they will need to be saved for engine restart

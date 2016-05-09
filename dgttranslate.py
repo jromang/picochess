@@ -560,7 +560,7 @@ class DgtTranslate(object):
             frtxt = entxt 
             estxt = entxt 
         if text_id == 'B00_tc_fisch':
-            entxt = Dgt.DISPLAY_TEXT(l='fischer', m='fsh' + msg, s='f' + msg, beep=bl_button, duration=0)
+            entxt = Dgt.DISPLAY_TEXT(l='fischr', m='fsh' + msg, s='f' + msg, beep=bl_button, duration=0)
             detxt = entxt 
             nltxt = entxt 
             frtxt = entxt 

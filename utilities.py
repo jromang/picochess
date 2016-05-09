@@ -70,6 +70,7 @@ class EventApi():
     SHUTDOWN = 'EVT_SHUTDOWN'  # User wants to shutdown the machine
     REBOOT = 'EVT_REBOOT'  # User wants to reboot the machine
     ALTERNATIVE_MOVE = 'EVT_ALTERNATIVE_MOVE'  # User wants engine to recalculate the position
+    SET_PLAYMODE = 'EVT_SET_PLAYMODE'  # Sets the playmode
     # dgt events
     DGT_BUTTON = 'EVT_DGT_BUTTON'  # User pressed a button at the dgt clock
     DGT_FEN = 'EVT_DGT_FEN'  # DGT board sends a fen
@@ -79,7 +80,6 @@ class EventApi():
     NEW_SCORE = 'EVT_NEW_SCORE'  # Engine sends a new score
     OUT_OF_TIME = 'EVT_OUT_OF_TIME'  # Clock flag fallen
     DGT_CLOCK_STARTED = 'EVT_DGT_CLOCK_STARTED'  # DGT Clock is running
-
 
 class MessageApi():
     # Messages to display devices
@@ -622,7 +622,7 @@ class Message():
     DGT_CLOCK_TIME = ClassFactory(MessageApi.DGT_CLOCK_TIME, ['time_left', 'time_right'])
 
     INTERACTION_MODE = ClassFactory(MessageApi.INTERACTION_MODE, ['mode', 'mode_text'])
-    PLAY_MODE = ClassFactory(MessageApi.PLAY_MODE, ['play_mode', 'beep_level'])
+    PLAY_MODE = ClassFactory(MessageApi.PLAY_MODE, ['play_mode', 'play_mode_text'])
     START_NEW_GAME = ClassFactory(MessageApi.START_NEW_GAME, ['time_control'])
     COMPUTER_MOVE_DONE_ON_BOARD = ClassFactory(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD, [])
     WAIT_STATE = ClassFactory(MessageApi.WAIT_STATE, [])
@@ -665,6 +665,7 @@ class Event():
     SHUTDOWN = ClassFactory(EventApi.SHUTDOWN, [])
     REBOOT = ClassFactory(EventApi.REBOOT, [])
     ALTERNATIVE_MOVE = ClassFactory(EventApi.ALTERNATIVE_MOVE, [])
+    SET_PLAYMODE = ClassFactory(EventApi.SET_PLAYMODE, ['play_mode', 'play_mode_text'])
     # dgt events
     DGT_BUTTON = ClassFactory(EventApi.DGT_BUTTON, ['button'])
     DGT_FEN = ClassFactory(EventApi.DGT_FEN, ['fen'])
