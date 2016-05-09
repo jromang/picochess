@@ -176,9 +176,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             ("rnbqkbnr/pppppppp/8/8/8/5Q2/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.FISCHER, minutes_per_game=15, fischer_increment=10)),
             ("rnbqkbnr/pppppppp/8/8/8/6Q1/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.FISCHER, minutes_per_game=30, fischer_increment=15)),
             ("rnbqkbnr/pppppppp/8/8/8/7Q/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.FISCHER, minutes_per_game=60, fischer_increment=30))])
-        self.time_control_fixed_list = ["mov  1", "mov  3", "mov  5", "mov 10", "mov 15", "mov 30", "mov 60", "mov 90"]
-        self.time_control_blitz_list = ["bl   1", "bl   3", "bl   5", "bl  10", "bl  15", "bl  30", "bl  60", "bl  90"]
-        self.time_control_fisch_list = ["f 1  1", "f 3  2", "f 4  2", "f 5  3", "f10  5", "f15 10", "f30 15", "f60 30"]
+        self.time_control_fixed_list = ["  1", "  3", "  5", " 10", " 15", " 30", " 60", " 90"]
+        self.time_control_blitz_list = ["   1", "   3", "   5", "  10", "  15", "  30", "  60", "  90"]
+        self.time_control_fisch_list = [" 1  1", " 3  2", " 4  2", " 5  3", "10  5", "15 10", "30 15", "60 30"]
 
     def reset_menu_results(self):
         # dont override "mode_result", otherwise wQ a5-e5 wont work anymore (=> if's)
@@ -364,17 +364,16 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 if self.time_mode_index == TimeMode.FIXED:
                     self.time_control_fixed_index = (self.time_control_fixed_index-1) % len(self.time_control_fixed_map)
-                    msg = self.time_control_fixed_list[self.time_control_fixed_index]
+                    text = self.dgttranslate.text('B00_tc_fixed', self.time_control_fixed_list[self.time_control_fixed_index])
                 elif self.time_mode_index == TimeMode.BLITZ:
                     self.time_control_blitz_index = (self.time_control_blitz_index-1) % len(self.time_control_blitz_map)
-                    msg = self.time_control_blitz_list[self.time_control_blitz_index]
+                    text = self.dgttranslate.text('B00_tc_blitz', self.time_control_blitz_list[self.time_control_blitz_index])
                 elif self.time_mode_index == TimeMode.FISCHER:
                     self.time_control_fisch_index = (self.time_control_fisch_index-1) % len(self.time_control_fisch_map)
-                    msg = self.time_control_fisch_list[self.time_control_fisch_index]
+                    text = self.dgttranslate.text('B00_tc_fisch', self.time_control_fisch_list[self.time_control_fisch_index])
                 else:
                     logging.warning('wrong value for time_mode_index: {0}'.format(self.time_mode_index))
-                    msg = 'error'
-                text = self.dgttranslate.text('B00_default', msg)
+                    text = self.dgttranslate.text('B00_default', 'error')
             DisplayDgt.show(text)
 
     def process_button2(self):
@@ -472,17 +471,16 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 if self.time_mode_index == TimeMode.FIXED:
                     self.time_control_fixed_index = (self.time_control_fixed_index+1) % len(self.time_control_fixed_map)
-                    msg = self.time_control_fixed_list[self.time_control_fixed_index]
+                    text = self.dgttranslate.text('B00_tc_fixed', self.time_control_fixed_list[self.time_control_fixed_index])
                 elif self.time_mode_index == TimeMode.BLITZ:
                     self.time_control_blitz_index = (self.time_control_blitz_index+1) % len(self.time_control_blitz_map)
-                    msg = self.time_control_blitz_list[self.time_control_blitz_index]
+                    text = self.dgttranslate.text('B00_tc_blitz', self.time_control_blitz_list[self.time_control_blitz_index])
                 elif self.time_mode_index == TimeMode.FISCHER:
                     self.time_control_fisch_index = (self.time_control_fisch_index+1) % len(self.time_control_fisch_map)
-                    msg = self.time_control_fisch_list[self.time_control_fisch_index]
+                    text = self.dgttranslate.text('B00_tc_fisch', self.time_control_fisch_list[self.time_control_fisch_index])
                 else:
                     logging.warning('wrong value for time_mode_index: {0}'.format(self.time_mode_index))
-                    msg = 'error'
-                text = self.dgttranslate.text('B00_default', msg)
+                    text = self.dgttranslate.text('B00_default', 'error')
             DisplayDgt.show(text)
 
     def process_button4(self):
@@ -643,15 +641,14 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.time_mode_result = self.time_mode_index
                 # display first entry of the submenu "time_control"
                 if self.time_mode_index == TimeMode.FIXED:
-                    msg = self.time_control_fixed_list[self.time_control_fixed_index]
+                    text = self.dgttranslate.text('B00_tc_fixed', self.time_control_fixed_list[self.time_control_fixed_index])
                 elif self.time_mode_index == TimeMode.BLITZ:
-                    msg = self.time_control_blitz_list[self.time_control_blitz_index]
+                    text = self.dgttranslate.text('B00_tc_blitz', self.time_control_blitz_list[self.time_control_blitz_index])
                 elif self.time_mode_index == TimeMode.FISCHER:
-                    msg = self.time_control_fisch_list[self.time_control_fisch_index]
+                    text = self.dgttranslate.text('B00_tc_fisch', self.time_control_fisch_list[self.time_control_fisch_index])
                 else:
                     logging.warning('wrong value for time_mode_index: {0}'.format(self.time_mode_index))
-                    msg = 'error'
-                text = self.dgttranslate.text('B00_default', msg)
+                    text = self.dgttranslate.text('B00_default', 'error')
                 DisplayDgt.show(text)
             else:
                 if self.time_mode_index == TimeMode.FIXED:
@@ -947,7 +944,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             logging.debug("Map-Fen: Time control fixed")
                             self.time_mode_index = TimeMode.FIXED
                             self.time_control_fixed_index = list(self.time_control_fixed_map.keys()).index(fen)
-                            text = self.dgttranslate.text('M10_default', self.time_control_fixed_list[self.time_control_fixed_index])
+                            text = self.dgttranslate.text('B00_tc_fixed', self.time_control_fixed_list[self.time_control_fixed_index])
+                            text.beep = map_bl  # BeepLevel is Map not Button
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_fixed_map[fen],
                                                              time_text=text))
                             self.reset_menu_results()
@@ -955,7 +953,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             logging.debug("Map-Fen: Time control blitz")
                             self.time_mode_index = TimeMode.BLITZ
                             self.time_control_blitz_index = list(self.time_control_blitz_map.keys()).index(fen)
-                            text = self.dgttranslate.text('M10_default', self.time_control_blitz_list[self.time_control_blitz_index])
+                            text = self.dgttranslate.text('B00_tc_blitz', self.time_control_blitz_list[self.time_control_blitz_index])
+                            text.beep = map_bl  # BeepLevel is Map not Button
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_blitz_map[fen],
                                                              time_text=text))
                             self.reset_menu_results()
@@ -963,7 +962,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             logging.debug("Map-Fen: Time control fischer")
                             self.time_mode_index = TimeMode.FISCHER
                             self.time_control_fisch_index = list(self.time_control_fisch_map.keys()).index(fen)
-                            text = self.dgttranslate.text('M10_default', self.time_control_fisch_list[self.time_control_fisch_index])
+                            text = self.dgttranslate.text('B00_tc_fisch', self.time_control_fisch_list[self.time_control_fisch_index])
+                            text.beep = map_bl  # BeepLevel is Map not Button
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_fisch_map[fen],
                                                              time_text=text))
                             self.reset_menu_results()
