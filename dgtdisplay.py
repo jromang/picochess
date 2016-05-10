@@ -382,7 +382,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text = self.dgttranslate.text('B00_nofunction')
                 DisplayDgt.show(text)
             else:
-                self.fire(Event.STARTSTOP_THINK())
+                self.fire(Event.PAUSE_RESUME())
 
     def process_button3(self):
         if self.top_result is None:
@@ -664,6 +664,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
     def process_lever(self, right_side_down):
         logging.debug('lever position right_side_down: {}'.format(right_side_down))
+        self.fire(Event.SWITCH_SIDES(engine_finished=self.engine_finished))
 
     def drawresign(self):
         _, _, _, rnk_5, rnk_4, _, _, _ = self.dgt_fen.split("/")
@@ -734,6 +735,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.reset_menu_results()
                         break
                     if case(MessageApi.USER_MOVE):
+                        self.last_move = message.move
+                        self.play_move = message.move
+                        self.last_fen = message.fen
                         self.engine_finished = False
                         if self.ok_moves_messages:
                             DisplayDgt.show(self.dgttranslate.text('K05_okuser'))
@@ -845,7 +849,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                                         side=side, wait=False, callback=message.callback))
                         break
                     if case(MessageApi.STOP_CLOCK):
-                        DisplayDgt.show(Dgt.CLOCK_STOP())
+                        DisplayDgt.show(Dgt.CLOCK_STOP(callback=message.callback))
                         break
                     if case(MessageApi.DGT_BUTTON):
                         button = int(message.button)

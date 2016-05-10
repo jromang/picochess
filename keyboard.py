@@ -30,6 +30,8 @@ class KeyboardInput(Observable, threading.Thread):
         logging.info('evt_queue ready')
         while True:
             raw = input('PicoChess v'+version+':>').strip()
+            if not raw:
+                continue
             cmd = raw.lower()
 
             try:
@@ -37,7 +39,7 @@ class KeyboardInput(Observable, threading.Thread):
                 # or "print:<legal_fen_string>"
                 #
                 # for simulating a dgt board use the following commands
-                # "fen:<legal_fen_string>" or "button:<0-4>"
+                # "fen:<legal_fen_string>" or "button:<0-4> or "lever:<l|r>"
                 #
                 # everything else is regarded as a move string
                 if cmd.startswith('newgame:'):
@@ -71,6 +73,12 @@ class KeyboardInput(Observable, threading.Thread):
                         button = int(cmd.split(':')[1])
                         if button not in range(5):
                             raise ValueError(button)
+                        self.fire(Event.DGT_BUTTON(button=button))
+                    elif cmd.startswith('lever:'):
+                        lever = cmd.split(':')[1]
+                        if lever not in ('l', 'r'):
+                            raise ValueError(lever)
+                        button = 0x40 if lever == 'r' else -0x40
                         self.fire(Event.DGT_BUTTON(button=button))
                     # end simulation code
                     else:

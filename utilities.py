@@ -33,7 +33,7 @@ except ImportError:
 
 
 # picochess version
-version = '064'
+version = '065'
 
 evt_queue = queue.Queue()
 serial_queue = queue.Queue()
@@ -63,8 +63,8 @@ class EventApi():
     NEW_ENGINE = 'EVT_NEW_ENGINE'  # Change engine
     SET_INTERACTION_MODE = 'EVT_SET_INTERACTION_MODE'  # Change interaction mode
     SETUP_POSITION = 'EVT_SETUP_POSITION'  # Setup custom position
-    STARTSTOP_THINK = 'EVT_STARTSTOP_THINK'  # Engine should start/stop thinking
-    STARTSTOP_CLOCK = 'EVT_STARTSTOP_CLOCK'  # Clock should start/stop
+    PAUSE_RESUME = 'EVT_PAUSE_RESUME'  # Stops search or halt/resume running clock
+    SWITCH_SIDES = 'EVT_SWITCH_SIDES'  # Switch the side
     SET_TIME_CONTROL = 'EVT_SET_TIME_CONTROL'  # User sets time control
     UCI_OPTION_SET = 'EVT_UCI_OPTION_SET'  # Users sets an UCI option, contains 'name' and 'value' (strings)
     SHUTDOWN = 'EVT_SHUTDOWN'  # User wants to shutdown the machine
@@ -79,19 +79,19 @@ class EventApi():
     NEW_PV = 'EVT_NEW_PV'  # Engine sends a new principal variation
     NEW_SCORE = 'EVT_NEW_SCORE'  # Engine sends a new score
     OUT_OF_TIME = 'EVT_OUT_OF_TIME'  # Clock flag fallen
-    DGT_CLOCK_STARTED = 'EVT_DGT_CLOCK_STARTED'  # DGT Clock is running
+    DGT_CLOCK_CALLBACK = 'EVT_DGT_CLOCK_CALLBACK'  # DGT Clock callback function
 
 class MessageApi():
     # Messages to display devices
     COMPUTER_MOVE = 'MSG_COMPUTER_MOVE'  # Show computer move
     BOOK_MOVE = 'MSG_BOOK_MOVE'  # Show book move
     NEW_PV = 'MSG_NEW_PV'  # Show the new Principal Variation
-    REVIEW_MOVE = 'MSG_REVIEW_MOVE'  # Player is reviewing a game
+    REVIEW_MOVE = 'MSG_REVIEW_MOVE'  # Player is reviewing a game (analysis, kibitz or observe modes)
     ENGINE_READY = 'MSG_ENGINE_READY'
     ENGINE_STARTUP = 'MSG_ENGINE_STARTUP'  # first time a new engine is ready
-    ENGINE_FAIL = 'MSG_ENGINE_FAIL'
+    ENGINE_FAIL = 'MSG_ENGINE_FAIL'  # Engine startup fails
     LEVEL = 'MSG_LEVEL'  # User sets engine level (from 0 to 20).
-    TIME_CONTROL = 'MSG_TIME_CONTROL'
+    TIME_CONTROL = 'MSG_TIME_CONTROL'  # New Timecontrol
     OPENING_BOOK = 'MSG_OPENING_BOOK'  # User chooses an opening book
     DGT_BUTTON = 'MSG_DGT_BUTTON'  # Clock button pressed
     DGT_FEN = 'MSG_DGT_FEN'  # DGT Board sends a fen
@@ -100,7 +100,7 @@ class MessageApi():
 
     INTERACTION_MODE = 'MSG_INTERACTON_MODE'  # Interaction mode
     PLAY_MODE = 'MSG_PLAY_MODE'  # Play mode
-    START_NEW_GAME = 'MSG_START_NEW_GAME'
+    START_NEW_GAME = 'MSG_START_NEW_GAME'  # User starts a new game
     COMPUTER_MOVE_DONE_ON_BOARD = 'MSG_COMPUTER_MOVE_DONE_ON_BOARD'  # User has done the compute move on board
     WAIT_STATE = 'MSG_WAIT_STATE'  # picochess waits for the user
     SEARCH_STARTED = 'MSG_SEARCH_STARTED'  # Engine has started to search
@@ -597,7 +597,7 @@ class Dgt():
     LIGHT_CLEAR = ClassFactory(DgtApi.LIGHT_CLEAR, [])
     LIGHT_SQUARES = ClassFactory(DgtApi.LIGHT_SQUARES, ['squares'])
     CLOCK_END = ClassFactory(DgtApi.CLOCK_END, ['wait', 'force'])
-    CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, [])
+    CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, ['callback'])
     CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side', 'wait', 'callback'])
     CLOCK_VERSION = ClassFactory(DgtApi.CLOCK_VERSION, ['main_version', 'sub_version', 'attached'])
     CLOCK_TIME = ClassFactory(DgtApi.CLOCK_TIME, ['time_left', 'time_right'])
@@ -630,8 +630,8 @@ class Message():
     SEARCH_STOPPED = ClassFactory(MessageApi.SEARCH_STOPPED, ['engine_status'])
     USER_TAKE_BACK = ClassFactory(MessageApi.USER_TAKE_BACK, [])
     RUN_CLOCK = ClassFactory(MessageApi.RUN_CLOCK, ['turn', 'time_control', 'callback'])
-    STOP_CLOCK = ClassFactory(MessageApi.STOP_CLOCK, [])
-    USER_MOVE = ClassFactory(MessageApi.USER_MOVE, ['move', 'game'])
+    STOP_CLOCK = ClassFactory(MessageApi.STOP_CLOCK, ['callback'])
+    USER_MOVE = ClassFactory(MessageApi.USER_MOVE, ['move', 'fen', 'game'])
     UCI_OPTION_LIST = ClassFactory(MessageApi.UCI_OPTION_LIST, ['options'])
     GAME_ENDS = ClassFactory(MessageApi.GAME_ENDS, ['result', 'play_mode', 'game', 'custom_fen'])
 
@@ -658,8 +658,8 @@ class Event():
     NEW_ENGINE = ClassFactory(EventApi.NEW_ENGINE, ['eng', 'eng_text', 'level', 'level_text'])
     SET_INTERACTION_MODE = ClassFactory(EventApi.SET_INTERACTION_MODE, ['mode', 'mode_text'])
     SETUP_POSITION = ClassFactory(EventApi.SETUP_POSITION, ['fen', 'uci960'])
-    STARTSTOP_THINK = ClassFactory(EventApi.STARTSTOP_THINK, [])
-    STARTSTOP_CLOCK = ClassFactory(EventApi.STARTSTOP_CLOCK, [])
+    PAUSE_RESUME = ClassFactory(EventApi.PAUSE_RESUME, [])
+    SWITCH_SIDES = ClassFactory(EventApi.SWITCH_SIDES, ['engine_finished'])
     SET_TIME_CONTROL = ClassFactory(EventApi.SET_TIME_CONTROL, ['time_control', 'time_text'])
     UCI_OPTION_SET = ClassFactory(EventApi.UCI_OPTION_SET, [])
     SHUTDOWN = ClassFactory(EventApi.SHUTDOWN, [])
@@ -674,7 +674,7 @@ class Event():
     NEW_PV = ClassFactory(EventApi.NEW_PV, ['pv'])
     NEW_SCORE = ClassFactory(EventApi.NEW_SCORE, ['score', 'mate'])
     OUT_OF_TIME = ClassFactory(EventApi.OUT_OF_TIME, ['color'])
-    DGT_CLOCK_STARTED = ClassFactory(EventApi.DGT_CLOCK_STARTED, ['callback'])
+    DGT_CLOCK_CALLBACK = ClassFactory(EventApi.DGT_CLOCK_CALLBACK, ['callback'])
 
 
 def get_opening_books():

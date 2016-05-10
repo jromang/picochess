@@ -195,13 +195,20 @@ def main():
         engine.stop()
 
     def stop_clock():
-        nonlocal time_control
-        time_control.stop()
-        DisplayMsg.show(Message.STOP_CLOCK())
+        DisplayMsg.show(Message.STOP_CLOCK(callback=tc_stop_callback()))
 
     def stop_search_and_clock():
         stop_clock()
         stop_search()
+
+    def start_clock():
+        DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=time_control, callback=tc_start_callback))
+
+    def tc_start_callback():
+        time_control.start(game.turn)
+
+    def tc_stop_callback():
+        time_control.stop()
 
     def check_game_state(game, play_mode):
         """
@@ -228,9 +235,6 @@ def main():
             DisplayMsg.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=copy.deepcopy(game), custom_fen=custom_fen))
             return False
 
-    def timecontrol_callback():
-        time_control.start(game.turn)
-
     def process_fen(fen, legal_fens):
         nonlocal last_computer_fen
         if fen in legal_fens:
@@ -253,7 +257,7 @@ def main():
                 time_control.add_inc(not game.turn)
                 DisplayMsg.show(Message.COMPUTER_MOVE_DONE_ON_BOARD())
                 if time_control.mode != TimeMode.FIXED:
-                    DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=time_control, callback=timecontrol_callback))
+                    start_clock()
         else:  # Check if this a a previous legal position and allow user to restart from this position
             game_history = copy.deepcopy(game)
             while game_history.move_stack:
@@ -302,7 +306,7 @@ def main():
                 DisplayMsg.show(text)
             else:
                 searchmoves.reset()
-                DisplayMsg.show(Message.USER_MOVE(move=move, game=game.copy()))
+                DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, game=game.copy()))
                 if check_game_state(game, play_mode):
                     think(game, time_control)
 
@@ -318,7 +322,7 @@ def main():
                 DisplayMsg.show(text)
             else:
                 searchmoves.reset()
-                DisplayMsg.show(Message.USER_MOVE(move=move, game=game.copy()))
+                DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, game=game.copy()))
                 if check_game_state(game, play_mode):
                     observe(game, time_control)
 
@@ -637,7 +641,7 @@ def main():
                     DisplayMsg.show(Message.WAIT_STATE())
                     break
 
-                if case(EventApi.STARTSTOP_THINK):  # @todo rename it! It stops search or halt/resume running clock
+                if case(EventApi.PAUSE_RESUME):
                     if engine.is_thinking():
                         stop_clock()
                         engine.stop(show_best=True)
@@ -645,16 +649,7 @@ def main():
                         if time_control.is_ticking():
                             stop_clock()
                         else:
-                            DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=time_control,
-                                                              callback=timecontrol_callback))
-                        # @todo this is a lever function!
-                        # play_mode = PlayMode.USER_WHITE if play_mode == PlayMode.USER_BLACK else PlayMode.USER_BLACK
-                        # text = dgttranslate.text(play_mode.value)
-                        #
-                        # DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode, play_mode_text=text))
-                        # if check_game_state(game, play_mode) and (interaction_mode != Mode.REMOTE):
-                        #     time_control.reset_start_time()
-                        #     think(game, time_control)
+                            start_clock()
                     break
 
                 if case(EventApi.ALTERNATIVE_MOVE):
@@ -663,13 +658,27 @@ def main():
                     think(game, time_control)
                     break
 
-                # if case(EventApi.STARTSTOP_CLOCK):  # @todo no longer used for the moment => use it for lever!
-                #     if time_control.is_ticking():
-                #         stop_clock()
-                #     else:
-                #         # time_control.add_inc(game.turn)
-                #         DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=time_control, callback=timecontrol_callback))
-                #     break
+                if case(EventApi.SWITCH_SIDES):
+                    if interaction_mode == Mode.NORMAL:
+                        user_to_move = False
+                        if engine.is_thinking():
+                            stop_clock()
+                            engine.stop(show_best=False)
+                            user_to_move = True
+                        if event.engine_finished:
+                            game.pop()
+                            user_to_move = True
+                        if user_to_move:
+                            play_mode = PlayMode.USER_WHITE if game.turn == chess.WHITE else PlayMode.USER_BLACK
+                        else:
+                            play_mode = PlayMode.USER_WHITE if game.turn == chess.BLACK else PlayMode.USER_BLACK
+
+                        text = dgttranslate.text(play_mode.value)
+                        DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode, play_mode_text=text))
+                        if not user_to_move and check_game_state(game, play_mode):
+                            time_control.reset_start_time()
+                            think(game, time_control)
+                    break
 
                 if case(EventApi.NEW_GAME):
                     if game.move_stack:
@@ -810,7 +819,7 @@ def main():
                     DisplayMsg.show(Message.DGT_FEN(fen=event.fen))
                     break
 
-                if case(EventApi.DGT_CLOCK_STARTED):
+                if case(EventApi.DGT_CLOCK_CALLBACK):
                     if event.callback:
                         logging.debug('callback started {}'.format(event.callback))
                         event.callback()
