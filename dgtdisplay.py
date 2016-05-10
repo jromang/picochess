@@ -201,6 +201,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
     def reset_moves_and_score(self):
         self.play_move = chess.Move.null()
+        self.play_fen = None
         self.hint_move = chess.Move.null()
         self.hint_fen = None
         self.last_move = chess.Move.null()
@@ -220,7 +221,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         if self.top_result == Menu.TOP_MENU:
             self.reset_menu_results()
             if self.play_move:
-                text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen,
+                text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen,
                                         beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
                 DisplayDgt.show(text)
             else:
@@ -546,6 +547,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.flip_board = self.setup_reverse_result
                             self.fire(Event.SETUP_POSITION(fen=bit_board.fen(), uci960=self.setup_uci960_result))
                             self.play_move = chess.Move.null()
+                            self.play_fen = None
                             self.reset_menu_results()
                             return
                         else:
@@ -591,7 +593,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if exit_menu:
                 self.reset_menu_results()
                 if self.play_move:
-                    text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen,
+                    text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen,
                                             beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
                     DisplayDgt.show(text)
                 else:
@@ -703,10 +705,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         ponder = message.result.ponder
                         self.engine_finished = True
                         self.last_move = move
-                        self.play_move = move
-                        self.hint_move = chess.Move.null() if ponder is None else ponder
-                        self.hint_fen = message.game.fen()
                         self.last_fen = message.fen
+                        self.play_move = move
+                        self.play_fen = message.fen
+                        self.hint_move = chess.Move.null() if ponder is None else ponder
+                        self.hint_fen = None if ponder is None else message.game.fen()
                         # Display the move
                         uci_move = move.uci()
                         DisplayDgt.show(Dgt.DISPLAY_MOVE(move=move, fen=message.fen,
@@ -729,6 +732,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
                         DisplayDgt.show(Dgt.LIGHT_CLEAR())
                         self.play_move = chess.Move.null()
+                        self.play_fen = None
                         self.engine_finished = False
                         if self.ok_moves_messages:
                             DisplayDgt.show(self.dgttranslate.text('K05_okpico'))
@@ -736,16 +740,18 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         break
                     if case(MessageApi.USER_MOVE):
                         self.last_move = message.move
-                        self.play_move = message.move
                         self.last_fen = message.fen
+                        self.play_move = message.move
+                        self.play_fen = message.fen
                         self.engine_finished = False
                         if self.ok_moves_messages:
                             DisplayDgt.show(self.dgttranslate.text('K05_okuser'))
                         break
                     if case(MessageApi.REVIEW_MOVE):
                         self.last_move = message.move
-                        self.play_move = message.move
                         self.last_fen = message.fen
+                        self.play_move = message.move
+                        self.play_fen = message.fen
                         if self.ok_moves_messages:
                             DisplayDgt.show(self.dgttranslate.text('K05_okmove'))
                         break
@@ -758,7 +764,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         else:
                             DisplayDgt.show(message.level_text)
                             if self.play_move:
-                                DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen,
+                                DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen,
                                                                  beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1))
                             else:
                                 DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
@@ -766,7 +772,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if case(MessageApi.TIME_CONTROL):
                         DisplayDgt.show(message.time_text)
                         if self.play_move:
-                            DgtDisplay.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen,
+                            DgtDisplay.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen,
                                                              beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1))
                         else:
                             DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
@@ -774,7 +780,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if case(MessageApi.OPENING_BOOK):
                         DisplayDgt.show(message.book_text)
                         if self.play_move:
-                            DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen,
+                            DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen,
                                                              beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1))
                         else:
                             DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
@@ -794,7 +800,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.engine_finished = False
                         DisplayDgt.show(message.mode_text)
                         if self.play_move:
-                            DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.last_fen,
+                            DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen,
                                                              beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1))
                         else:
                             DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
