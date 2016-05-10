@@ -663,7 +663,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.reset_menu_results()
 
     def process_lever(self, right_side_down):
-        pass
+        logging.debug('lever position right_side_down: {}'.format(right_side_down))
 
     def drawresign(self):
         _, _, _, rnk_5, rnk_4, _, _, _ = self.dgt_fen.split("/")
@@ -863,9 +863,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             elif button == 0x11:
                                 self.power_off()
                             elif button == 0x40:
-                                self.process_lever(True)
+                                self.process_lever(right_side_down=True)
                             elif button == -0x40:
-                                self.process_lever(False)
+                                self.process_lever(right_side_down=False)
                         break
                     if case(MessageApi.DGT_FEN):
                         fen = message.fen

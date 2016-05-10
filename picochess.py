@@ -722,10 +722,7 @@ def main():
                     break
 
                 if case(EventApi.NEW_PV):
-                    if interaction_mode == Mode.NORMAL:
-                        pass
-                    else:
-                        DisplayMsg.show(Message.NEW_PV(pv=event.pv, mode=interaction_mode, fen=game.fen()))
+                    DisplayMsg.show(Message.NEW_PV(pv=event.pv, mode=interaction_mode, fen=game.fen()))
                     break
 
                 if case(EventApi.NEW_SCORE):

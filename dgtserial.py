@@ -62,6 +62,7 @@ class DgtSerial(object):
         self.lock = Lock()  # inside setup_serial()
         self.incoming_board_thread = None
         self.is_pi = False
+        self.lever_pos = None
         # the next three are only used for "not dgtpi" mode
         self.clock_lock = False  # serial connected clock is locked
         self.last_clock_command = []  # Used for resend last (failed) clock command
@@ -193,10 +194,6 @@ class DgtSerial(object):
                                 logging.info("DGT clock [ser]: button 4 pressed - ack2: %i", ack2)
                                 DisplayMsg.show(Message.DGT_BUTTON(button=4))
 
-                        # @todo find out the lever pos...and fire a DGT_BUTTON(button=+-0x40) Event
-                        # @todo for now, we display the message array
-                        logging.debug('Message array (@todo - lever pos!) {}'.format(message))
-
                     if ack1 == 0x09:
                         main_version = ack2 >> 4
                         sub_version = ack2 & 0x0f
@@ -209,10 +206,20 @@ class DgtSerial(object):
                     l_hours = message[3] & 0x0f
                     l_mins = (message[4] >> 4) * 10 + (message[4] & 0x0f)
                     l_secs = (message[5] >> 4) * 10 + (message[5] & 0x0f)
-                    tr = [r_hours, r_mins, r_secs]
-                    tl = [l_hours, l_mins, l_secs]
-                    logging.info('DGT clock [ser]: received time from clock l:{} r:{}'.format(tl, tr))
-                    DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=tl, time_right=tr))
+                    status = (message[6] & 0x3f)
+                    if status & 0x20:
+                        logging.warning('DGT clock [ser] not connected')
+                    else:
+                        tr = [r_hours, r_mins, r_secs]
+                        tl = [l_hours, l_mins, l_secs]
+                        logging.info('DGT clock [ser]: received time from clock l:{} r:{}'.format(tl, tr))
+                        DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=tl, time_right=tr))
+
+                    right_side_down = -0x40 if status & 0x02 else 0x40
+                    if self.lever_pos != right_side_down:
+                        if self.lever_pos is not None:
+                            DisplayMsg.show(Message.DGT_BUTTON(button=right_side_down))
+                        self.lever_pos = right_side_down
                 else:
                     logging.debug('DGT clock [ser]: null message ignored')
                 if self.clock_lock:
