@@ -122,9 +122,12 @@ class DgtPi(DgtIface):
     def display_text_on_clock(self, text, beep=False):
         self._display_on_dgt_pi(text, beep)
 
-    def display_move_on_clock(self, move, fen, beep=False):
+    def display_move_on_clock(self, move, fen, side, beep=False):
         bit_board = Board(fen)
-        text = self.dgttranslate.move(bit_board.san(move))
+        move_text = bit_board.san(move)
+        if side == chess.BLACK:
+            move_text = move_text.rjust(11)
+        text = self.dgttranslate.move(move_text)
         self._display_on_dgt_pi(text, beep)
 
     def light_squares_revelation_board(self, squares):

@@ -62,14 +62,19 @@ class DgtHw(DgtIface):
         else:
             self._display_on_dgt_xl(text, beep)
 
-    def display_move_on_clock(self, move, fen, beep=False):
+    def display_move_on_clock(self, move, fen, side, beep=False):
         if self.enable_dgt_3000:
             bit_board = Board(fen)
-            text = self.dgttranslate.move(bit_board.san(move))
+            move_text = bit_board.san(move)
+            if side == chess.BLACK:
+                move_text = move_text.rjust(8)
+            text = self.dgttranslate.move(move_text)
             self._display_on_dgt_3000(text, beep)
         else:
-            text = ' ' + move.uci()
-            self._display_on_dgt_xl(text, beep)
+            move_text = move.uci()
+            if side == chess.BLACK:
+                move_text = move_text.rjust(6)
+            self._display_on_dgt_xl(move_text, beep)
 
     def light_squares_revelation_board(self, squares):
         if self.enable_revelation_leds:

@@ -52,12 +52,14 @@ class DgtVr(DgtIface):
         DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=self.time_left, time_right=self.time_right))
     # (END) dgtserial simulation class
 
-    def display_move_on_clock(self, move, fen, beep=False):
+    def display_move_on_clock(self, move, fen, side, beep=False):
         if self.enable_dgt_3000:
             bit_board = chess.Board(fen)
             text = bit_board.san(move)
         else:
             text = str(move)
+        if side == chess.BLACK:
+            text = text.rjust(8 if self.enable_dgt_3000 else 6)
         logging.debug(text)
         print('Clock move: {} Beep: {}'. format(text, beep))
 

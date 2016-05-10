@@ -17,6 +17,7 @@
 
 from utilities import *
 import time
+import chess
 from threading import Timer, Thread
 
 
@@ -41,7 +42,7 @@ class DgtIface(DisplayDgt, Thread):
     def display_text_on_clock(self, text, beep=False):
         raise NotImplementedError()
 
-    def display_move_on_clock(self, move, fen, beep=False):
+    def display_move_on_clock(self, move, fen, side, beep=False):
         raise NotImplementedError()
 
     def light_squares_revelation_board(self, squares):
@@ -77,6 +78,7 @@ class DgtIface(DisplayDgt, Thread):
                 for case in switch(message):
                     if case(DgtApi.DISPLAY_MOVE):
                         message.wait = True  # TEST!
+                        message.side = chess.WHITE  # TEST!
                         while self.timer_running and message.wait:
                             time.sleep(0.1)
                         if hasattr(message, 'duration') and message.duration > 0:
@@ -84,7 +86,7 @@ class DgtIface(DisplayDgt, Thread):
                             self.timer.start()
                             logging.debug('showing move for {} secs'.format(message.duration))
                             self.timer_running = True
-                        self.display_move_on_clock(message.move, message.fen, message.beep)
+                        self.display_move_on_clock(message.move, message.fen, message.side, message.beep)
                         break
                     if case(DgtApi.DISPLAY_TEXT):
                         message.wait = True  # TEST!
