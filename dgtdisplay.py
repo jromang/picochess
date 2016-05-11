@@ -1012,6 +1012,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         if message.is_pi:
                             DisplayDgt.show(message.text)
                         break
+                    if case(MessageApi.SWITCH_SIDES):
+                        self.engine_finished = False
+                        print(message.move)
+                        break
                     if case():  # Default
                         # print(message)
                         pass

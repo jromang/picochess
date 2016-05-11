@@ -654,6 +654,7 @@ def main():
 
                 if case(EventApi.ALTERNATIVE_MOVE):
                     game.pop()
+                    legal_fens = compute_legal_fens(game)
                     DisplayMsg.show(Message.ALTERNATIVE_MOVE())
                     think(game, time_control)
                     break
@@ -661,12 +662,14 @@ def main():
                 if case(EventApi.SWITCH_SIDES):
                     if interaction_mode == Mode.NORMAL:
                         user_to_move = False
+                        move = False
                         if engine.is_thinking():
                             stop_clock()
                             engine.stop(show_best=False)
                             user_to_move = True
                         if event.engine_finished:
-                            game.pop()
+                            move = game.pop()
+                            legal_fens = compute_legal_fens(game)
                             user_to_move = True
                         if user_to_move:
                             play_mode = PlayMode.USER_WHITE if game.turn == chess.WHITE else PlayMode.USER_BLACK
@@ -678,6 +681,8 @@ def main():
                         if not user_to_move and check_game_state(game, play_mode):
                             time_control.reset_start_time()
                             think(game, time_control)
+                        if event.engine_finished:
+                            DisplayMsg.show(Message.SWITCH_SIDES(move=move))
                     break
 
                 if case(EventApi.NEW_GAME):
