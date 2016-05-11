@@ -630,7 +630,7 @@ class Message():
     SEARCH_STARTED = ClassFactory(MessageApi.SEARCH_STARTED, ['engine_status'])
     SEARCH_STOPPED = ClassFactory(MessageApi.SEARCH_STOPPED, ['engine_status'])
     USER_TAKE_BACK = ClassFactory(MessageApi.USER_TAKE_BACK, [])
-    RUN_CLOCK = ClassFactory(MessageApi.RUN_CLOCK, ['turn', 'time_control', 'callback'])
+    RUN_CLOCK = ClassFactory(MessageApi.RUN_CLOCK, ['turn', 'time_control', 'wait', 'callback'])
     STOP_CLOCK = ClassFactory(MessageApi.STOP_CLOCK, ['callback'])
     USER_MOVE = ClassFactory(MessageApi.USER_MOVE, ['move', 'fen', 'game'])
     UCI_OPTION_LIST = ClassFactory(MessageApi.UCI_OPTION_LIST, ['options'])

@@ -158,13 +158,13 @@ def main():
             uci_dict['searchmoves'] = searchmoves.all(game)
             engine.go(uci_dict)
 
-    def think(game, tc):
+    def think(game, tc, wait=False):
         """
         Starts a new search on the current game.
         If a move is found in the opening book, fire an event in a few seconds.
         :return:
         """
-        DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=tc, callback=think_callback))
+        DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=tc, wait=wait, callback=think_callback))
 
     def analyse(game):
         """
@@ -185,7 +185,7 @@ def main():
         Starts a new ponder search on the current game.
         :return:
         """
-        DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=tc, callback=observe_callback))
+        DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=tc, wait=False, callback=observe_callback))
 
     def stop_search():
         """
@@ -201,8 +201,8 @@ def main():
         stop_clock()
         stop_search()
 
-    def start_clock():
-        DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=time_control, callback=tc_start_callback))
+    def start_clock(wait=False):
+        DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=time_control, wait=wait, callback=tc_start_callback))
 
     def tc_start_callback():
         time_control.start(game.turn)
@@ -680,9 +680,9 @@ def main():
                         DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode, play_mode_text=text))
                         if not user_to_move and check_game_state(game, play_mode):
                             time_control.reset_start_time()
-                            think(game, time_control)
+                            think(game, time_control, True)
                         else:
-                            start_clock()
+                            start_clock(wait=True)
                         if event.engine_finished:
                             DisplayMsg.show(Message.SWITCH_SIDES(move=move))
                     break
