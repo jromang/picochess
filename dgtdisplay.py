@@ -211,12 +211,13 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
     def process_button0(self):
         if self.top_result is None:
-            if bool(self.last_move):
+            if self.last_move:
                 text = Dgt.DISPLAY_MOVE(move=self.last_move, fen=self.last_fen,
                                         beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
             else:
                 text = self.dgttranslate.text('B10_nomove')
             DisplayDgt.show(text)
+            DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
 
         if self.top_result == Menu.TOP_MENU:
             self.reset_menu_results()
@@ -293,6 +294,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 text = self.dgttranslate.text('B10_mate', str(self.mate))
             DisplayDgt.show(text)
+            DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
 
         if self.top_result == Menu.TOP_MENU:
             self.top_index = MenuLoop.prev(self.top_index)
@@ -380,22 +382,19 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
     def process_button2(self):
         if self.top_result is None:
             if self.engine_finished:
-                text = self.dgttranslate.text('B00_nofunction')
-                DisplayDgt.show(text)
+                self.fire(Event.ALTERNATIVE_MOVE())
             else:
                 self.fire(Event.PAUSE_RESUME())
 
     def process_button3(self):
         if self.top_result is None:
-            if self.engine_finished:
-                self.fire(Event.ALTERNATIVE_MOVE())
+            if self.hint_move:
+                text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen,
+                                        beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
             else:
-                if bool(self.hint_move):
-                    text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen,
-                                            beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
-                else:
-                    text = self.dgttranslate.text('B10_nomove')
-                DisplayDgt.show(text)
+                text = self.dgttranslate.text('B10_nomove')
+            DisplayDgt.show(text)
+            DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
 
         if self.top_result == Menu.TOP_MENU:
             self.top_index = MenuLoop.next(self.top_index)
@@ -1014,7 +1013,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         break
                     if case(MessageApi.SWITCH_SIDES):
                         self.engine_finished = False
-                        print(message.move)
+                        logging.debug('user ignored move {}'.format(message.move))
                         break
                     if case():  # Default
                         # print(message)

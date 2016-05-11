@@ -681,6 +681,8 @@ def main():
                         if not user_to_move and check_game_state(game, play_mode):
                             time_control.reset_start_time()
                             think(game, time_control)
+                        else:
+                            start_clock()
                         if event.engine_finished:
                             DisplayMsg.show(Message.SWITCH_SIDES(move=move))
                     break
