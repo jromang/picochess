@@ -193,7 +193,6 @@ class DgtSerial(object):
                             else:
                                 logging.info("DGT clock [ser]: button 4 pressed - ack2: %i", ack2)
                                 DisplayMsg.show(Message.DGT_BUTTON(button=4))
-
                     if ack1 == 0x09:
                         main_version = ack2 >> 4
                         sub_version = ack2 & 0x0f

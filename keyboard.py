@@ -21,6 +21,8 @@ import time
 import logging
 from utilities import *
 
+keyboard_last_fen = None
+
 
 class KeyboardInput(Observable, threading.Thread):
     def __init__(self):
@@ -28,6 +30,14 @@ class KeyboardInput(Observable, threading.Thread):
 
     def run(self):
         logging.info('evt_queue ready')
+        print('#' * 42 + ' PicoChess v' + version + ' ' + '#' * 42)
+        print('To play a move enter the from-to squares like "e2e4". To play this move on board, enter "go".')
+        print('When the computer displays its move, also type "go" to actually do it on the board (see above).')
+        print('Other commands are: newgame:<w|b>, print:<fen>, setup:<fen>, fen:<fen>, button:<0-4>, lever:<l|r>')
+        print('')
+        print('This console mode is mainly for development. Better activate picochess together with a DGT-Board ;-)')
+        print('#' * 100)
+        print('')
         while True:
             raw = input('PicoChess v'+version+':>').strip()
             if not raw:
@@ -35,13 +45,6 @@ class KeyboardInput(Observable, threading.Thread):
             cmd = raw.lower()
 
             try:
-                # commands like "newgame:<w|b>" or "setup:<legal_fen_string>"
-                # or "print:<legal_fen_string>"
-                #
-                # for simulating a dgt board use the following commands
-                # "fen:<legal_fen_string>" or "button:<0-4> or "lever:<l|r>"
-                #
-                # everything else is regarded as a move string
                 if cmd.startswith('newgame:'):
                     side = cmd.split(':')[1]
                     if side == 'w':
@@ -80,6 +83,8 @@ class KeyboardInput(Observable, threading.Thread):
                             raise ValueError(lever)
                         button = 0x40 if lever == 'r' else -0x40
                         self.fire(Event.DGT_BUTTON(button=button))
+                    elif cmd.startswith('go'):
+                        self.fire(Event.DGT_FEN(fen=keyboard_last_fen.split(' ')[0]))
                     # end simulation code
                     else:
                         # move => fen => virtual board sends fen
@@ -94,6 +99,7 @@ class TerminalDisplay(DisplayMsg, threading.Thread):
         super(TerminalDisplay, self).__init__()
 
     def run(self):
+        global keyboard_last_fen
         logging.info('msg_queue ready')
         while True:
             # Check if we have something to display
@@ -102,10 +108,16 @@ class TerminalDisplay(DisplayMsg, threading.Thread):
                 if case(MessageApi.COMPUTER_MOVE):
                     print('\n' + str(message.game))
                     print(message.game.fen())
-                    print('emulate user to make the computer move...sleeping for one second')
-                    time.sleep(1)
-                    logging.debug('emulate user now finished doing computer move')
-                    DisplayMsg.show(Message.DGT_FEN(fen=message.game.board_fen()))
+                    keyboard_last_fen = message.game.fen()
+                    break
+                if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
+                    keyboard_last_fen = None
+                    break
+                if case(MessageApi.USER_MOVE):
+                    keyboard_last_fen = None
+                    break
+                if case(MessageApi.START_NEW_GAME):
+                    keyboard_last_fen = None
                     break
                 if case(MessageApi.SEARCH_STARTED):
                     if message.engine_status == EngineStatus.THINK:
@@ -122,6 +134,10 @@ class TerminalDisplay(DisplayMsg, threading.Thread):
                         print('Computer stops pondering')
                     if message.engine_status == EngineStatus.WAIT:
                         print('Computer stops waiting - hmmm')
+                    break
+                if case(MessageApi.KEYBOARD_MOVE):
+                    print(message.fen)
+                    keyboard_last_fen = message.fen
                     break
                 if case():  # Default
                     pass

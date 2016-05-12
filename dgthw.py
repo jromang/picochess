@@ -17,7 +17,6 @@
 
 from chess import Board
 from dgtiface import *
-# from dgtserial import *
 from dgtlib import *
 from utilities import *
 from threading import Lock

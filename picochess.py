@@ -535,7 +535,7 @@ def main():
                     else:
                         g = copy.deepcopy(game)
                         g.push(move)
-                        legal_fens = process_fen(g.board_fen(), legal_fens)
+                        DisplayMsg.show(Message.KEYBOARD_MOVE(fen=g.fen()))
                     break
 
                 if case(EventApi.USER_MOVE):

@@ -127,7 +127,6 @@ class Informer(chess.uci.InfoHandler):
 
 
 class UciEngine(object):
-
     def __init__(self, path, hostname=None, username=None, key_file=None, password=None):
         super(UciEngine, self).__init__()
         try:
