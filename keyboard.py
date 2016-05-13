@@ -84,7 +84,10 @@ class KeyboardInput(Observable, threading.Thread):
                         button = 0x40 if lever == 'r' else -0x40
                         self.fire(Event.DGT_BUTTON(button=button))
                     elif cmd.startswith('go'):
-                        self.fire(Event.DGT_FEN(fen=keyboard_last_fen.split(' ')[0]))
+                        if keyboard_last_fen is not None:
+                            self.fire(Event.DGT_FEN(fen=keyboard_last_fen.split(' ')[0]))
+                        else:
+                            print('last move already send to virtual board')
                     # end simulation code
                     else:
                         # move => fen => virtual board sends fen
