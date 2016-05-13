@@ -112,7 +112,7 @@ class DgtIface(DisplayDgt, Thread):
                         self.light_squares_revelation_board(message.squares)
                         break
                     if case(DgtApi.CLOCK_END):
-                        while self.timer_running and message.wait:
+                        while message.wait:
                             time.sleep(0.1)
                         self.end_clock(message.force)
                         break

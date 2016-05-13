@@ -217,17 +217,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 text = self.dgttranslate.text('B10_nomove')
             DisplayDgt.show(text)
-            DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
+            self.exit_display()
 
         if self.top_result == Menu.TOP_MENU:
             self.reset_menu_results()
-            if self.play_move:
-                text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen,
-                                        beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
-                DisplayDgt.show(text)
-            else:
-                # @todo here a button beep missing
-                DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=False))
+            self.exit_display()
 
         elif self.top_result == Menu.MODE_MENU:
             self.top_result = Menu.TOP_MENU
@@ -294,7 +288,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 text = self.dgttranslate.text('B10_mate', str(self.mate))
             DisplayDgt.show(text)
-            DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
+            self.exit_display()
 
         if self.top_result == Menu.TOP_MENU:
             self.top_index = MenuLoop.prev(self.top_index)
@@ -394,7 +388,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 text = self.dgttranslate.text('B10_nomove')
             DisplayDgt.show(text)
-            DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
+            self.exit_display()
 
         if self.top_result == Menu.TOP_MENU:
             self.top_index = MenuLoop.next(self.top_index)
@@ -591,12 +585,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 logging.warning('wrong value for system_index: {0}'.format(self.system_index))
             if exit_menu:
                 self.reset_menu_results()
-                if self.play_move:
-                    text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen,
-                                            beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
-                    DisplayDgt.show(text)
-                else:
-                    DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
+                self.exit_display()
 
         elif self.top_result == Menu.ENGINE_MENU:
             if self.mode_result == Mode.REMOTE:
@@ -670,6 +659,13 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
     def drawresign(self):
         _, _, _, rnk_5, rnk_4, _, _, _ = self.dgt_fen.split("/")
         return "8/8/8/" + rnk_5 + "/" + rnk_4 + "/8/8/8"
+
+    def exit_display(self):
+        if self.play_move:
+            DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen,
+                                             beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1))
+        else:
+            DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
 
     def run(self):
         logging.info('msg_queue ready')
@@ -762,27 +758,15 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             pass
                         else:
                             DisplayDgt.show(message.level_text)
-                            if self.play_move:
-                                DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen,
-                                                                 beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1))
-                            else:
-                                DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
+                            self.exit_display()
                         break
                     if case(MessageApi.TIME_CONTROL):
                         DisplayDgt.show(message.time_text)
-                        if self.play_move:
-                            DgtDisplay.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen,
-                                                             beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1))
-                        else:
-                            DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
+                        self.exit_display()
                         break
                     if case(MessageApi.OPENING_BOOK):
                         DisplayDgt.show(message.book_text)
-                        if self.play_move:
-                            DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen,
-                                                             beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1))
-                        else:
-                            DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
+                        self.exit_display()
                         break
                     if case(MessageApi.USER_TAKE_BACK):
                         self.reset_moves_and_score()
@@ -798,11 +782,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.mode_result = message.mode  # needed, otherwise Q-placing wont work correctly
                         self.engine_finished = False
                         DisplayDgt.show(message.mode_text)
-                        if self.play_move:
-                            DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen,
-                                                             beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1))
-                        else:
-                            DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
+                        self.exit_display()
                         break
                     if case(MessageApi.PLAY_MODE):
                         DisplayDgt.show(message.play_mode_text)
