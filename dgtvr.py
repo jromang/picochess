@@ -75,6 +75,9 @@ class DgtVr(DgtIface):
             print('Clock not ready')
         self.clock_running = False
 
+    def resume_clock(self, side):
+        pass
+
     def start_clock(self, time_left, time_right, side):
         self.time_left = hours_minutes_seconds(time_left)
         self.time_right = hours_minutes_seconds(time_right)

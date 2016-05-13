@@ -54,6 +54,9 @@ class DgtIface(DisplayDgt, Thread):
     def stop_clock(self):
         raise NotImplementedError()
 
+    def resume_clock(self, side):
+        raise NotImplementedError()
+
     def start_clock(self, time_left, time_right, side):
         raise NotImplementedError()
 

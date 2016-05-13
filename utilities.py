@@ -107,6 +107,7 @@ class MessageApi():
     SEARCH_STOPPED = 'MSG_SEARCH_STOPPED'  # Engine has stopped the search
     USER_TAKE_BACK = 'MSG_USER_TACK_BACK'  # User takes back his move while engine is searching
     RUN_CLOCK = 'MSG_RUN_CLOCK'  # Say to run autonomous clock, contains time_control
+    RESUME_CLOCK = 'MSG_RESUME_CLOCK'  # Restarts the clock
     STOP_CLOCK = 'MSG_STOP_CLOCK'  # Stops the clock
     USER_MOVE = 'MSG_USER_MOVE'  # Player has done a move on board
     UCI_OPTION_LIST = 'MSG_UCI_OPTION_LIST'  # Contains 'options', a dict of the current engine's UCI options
@@ -132,6 +133,7 @@ class DgtApi():
     LIGHT_SQUARES = 'DGT_LIGHT_SQUARES'
     CLOCK_STOP = 'DGT_CLOCK_STOP'
     CLOCK_START = 'DGT_CLOCK_START'
+    CLOCK_RESUME = 'DGT_CLOCK_RESUME'
     CLOCK_END = 'DGT_END_CLOCK'
     CLOCK_VERSION = 'DGT_CLOCK_VERSION'
     CLOCK_TIME = 'DGT_CLOCK_TIME'
@@ -601,6 +603,7 @@ class Dgt():
     CLOCK_END = ClassFactory(DgtApi.CLOCK_END, ['wait', 'force'])
     CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, ['callback'])
     CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side', 'wait', 'callback'])
+    CLOCK_RESUME = ClassFactory(DgtApi.CLOCK_START, ['side', 'wait', 'callback'])
     CLOCK_VERSION = ClassFactory(DgtApi.CLOCK_VERSION, ['main_version', 'sub_version', 'attached'])
     CLOCK_TIME = ClassFactory(DgtApi.CLOCK_TIME, ['time_left', 'time_right'])
     SERIALNR = ClassFactory(DgtApi.SERIALNR, [])
@@ -632,6 +635,7 @@ class Message():
     SEARCH_STOPPED = ClassFactory(MessageApi.SEARCH_STOPPED, ['engine_status'])
     USER_TAKE_BACK = ClassFactory(MessageApi.USER_TAKE_BACK, [])
     RUN_CLOCK = ClassFactory(MessageApi.RUN_CLOCK, ['turn', 'time_control', 'wait', 'callback'])
+    RESUME_CLOCK = ClassFactory(MessageApi.RUN_CLOCK, ['turn', 'wait', 'callback'])
     STOP_CLOCK = ClassFactory(MessageApi.STOP_CLOCK, ['callback'])
     USER_MOVE = ClassFactory(MessageApi.USER_MOVE, ['move', 'fen', 'game'])
     UCI_OPTION_LIST = ClassFactory(MessageApi.UCI_OPTION_LIST, ['options'])

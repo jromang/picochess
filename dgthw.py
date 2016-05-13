@@ -90,7 +90,7 @@ class DgtHw(DgtIface):
         l_hms = self.time_left
         r_hms = self.time_right
         if l_hms is None and r_hms is None:
-            logging.debug('time values not set - no need to stop the clock')
+            logging.debug('time values not set - abort function')
             return
         with self.lock:
             res = self.lib.set_and_run(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
@@ -99,11 +99,15 @@ class DgtHw(DgtIface):
             else:
                 self.clock_running = False
 
+    def resume_clock(self, side):
+        pass
+
     def start_clock(self, time_left, time_right, side):
-        l_hms = hours_minutes_seconds(time_left)
-        r_hms = hours_minutes_seconds(time_right)
-        self.time_left = l_hms
-        self.time_right = r_hms
+        self.time_left = hours_minutes_seconds(time_left)
+        self.time_right = hours_minutes_seconds(time_right)
+        l_hms = self.time_left
+        r_hms = self.time_right
+
         lr = rr = 0
         if side == 0x01:
             lr = 1

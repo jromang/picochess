@@ -141,35 +141,45 @@ class DgtPi(DgtIface):
             self.dgtserial.write_board_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
 
     def stop_clock(self):
+        self.resume_clock(0x04)
+
+    def resume_clock(self, side):
         l_hms = self.time_left
         r_hms = self.time_right
         if l_hms is None and r_hms is None:
-            logging.debug('time values not set - no need to stop the clock')
+            logging.warning('time values not set - abort function')
             return
-        with self.lock:
-            res = self.lib.dgtpicom_set_and_run(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
-            if res < 0:
-                logging.warning('SetAndRun returned error %i', res)
-                res = self.lib.dgtpicom_configure()
-                if res < 0:
-                    logging.warning('Configure also failed %i', res)
-                else:
-                    res = self.lib.dgtpicom_set_and_run(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
-            if res < 0:
-                logging.warning('Finally failed %i', res)
-            else:
-                self.clock_running = False
 
-    def start_clock(self, time_left, time_right, side):
-        l_hms = hours_minutes_seconds(time_left)
-        r_hms = hours_minutes_seconds(time_right)
         lr = rr = 0
         if side == 0x01:
             lr = 1
         if side == 0x02:
             rr = 1
-        self.time_left = l_hms
-        self.time_right = r_hms
+        with self.lock:
+            res = self.lib.dgtpicom_run(lr, rr)
+            if res < 0:
+                logging.warning('Run returned error %i', res)
+                res = self.lib.dgtpicom_configure()
+                if res < 0:
+                    logging.warning('Configure also failed %i', res)
+                else:
+                    res = self.lib.dgtpicom_run(lr, rr)
+            if res < 0:
+                logging.warning('Finally failed %i', res)
+            else:
+                self.clock_running = (side != 0x04)
+
+    def start_clock(self, time_left, time_right, side):
+        self.time_left = hours_minutes_seconds(time_left)
+        self.time_right = hours_minutes_seconds(time_right)
+        l_hms = self.time_left
+        r_hms = self.time_right
+
+        lr = rr = 0
+        if side == 0x01:
+            lr = 1
+        if side == 0x02:
+            rr = 1
         with self.lock:
             res = self.lib.dgtpicom_set_and_run(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
             if res < 0:

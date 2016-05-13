@@ -833,6 +833,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right,
                                                         side=side, wait=message.wait, callback=message.callback))
                         break
+                    if case(MessageApi.RESUME_CLOCK):
+                        # @todo Make this independent from side DGT Hex codes
+                        side = 0x01 if (message.turn == chess.WHITE) != self.flip_board else 0x02
+                        DisplayDgt.show(Dgt.CLOCK_RESUME(side=side, wait=message.wait, callback=message.callback))
+                        break
                     if case(MessageApi.STOP_CLOCK):
                         DisplayDgt.show(Dgt.CLOCK_STOP(callback=message.callback))
                         break
