@@ -81,7 +81,6 @@ class DgtIface(DisplayDgt, Thread):
                 for case in switch(message):
                     if case(DgtApi.DISPLAY_MOVE):
                         message.wait = True  # TEST!
-                        message.side = chess.WHITE  # TEST!
                         while self.timer_running and message.wait:
                             time.sleep(0.1)
                         if hasattr(message, 'duration') and message.duration > 0:

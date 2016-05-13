@@ -58,7 +58,7 @@ class DgtVr(DgtIface):
             text = bit_board.san(move)
         else:
             text = str(move)
-        if side == chess.BLACK:
+        if side == 0x02:
             text = text.rjust(8 if self.enable_dgt_3000 else 6)
         logging.debug(text)
         print('Clock move: {} Beep: {}'. format(text, beep))

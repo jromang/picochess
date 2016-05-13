@@ -124,7 +124,7 @@ class DgtPi(DgtIface):
     def display_move_on_clock(self, move, fen, side, beep=False):
         bit_board = Board(fen)
         move_text = bit_board.san(move)
-        if side == chess.BLACK:
+        if side == 0x02:
             move_text = move_text.rjust(11)
         text = self.dgttranslate.move(move_text)
         self._display_on_dgt_pi(text, beep)

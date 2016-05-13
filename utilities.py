@@ -660,7 +660,7 @@ class Event():
     NEW_GAME = ClassFactory(EventApi.NEW_GAME, [])
     DRAWRESIGN = ClassFactory(EventApi.DRAWRESIGN, ['result'])
     USER_MOVE = ClassFactory(EventApi.USER_MOVE, ['move'])
-    KEYBOARD_MOVE = ClassFactory(EventApi.KEYBOARD_MOVE, ['move'])
+    KEYBOARD_MOVE = ClassFactory(EventApi.KEYBOARD_MOVE, ['move', 'flip_board'])
     REMOTE_MOVE = ClassFactory(EventApi.REMOTE_MOVE, ['move', 'fen'])
     SET_OPENING_BOOK = ClassFactory(EventApi.SET_OPENING_BOOK, ['book', 'book_text'])
     NEW_ENGINE = ClassFactory(EventApi.NEW_ENGINE, ['eng', 'eng_text', 'level', 'level_text'])

@@ -65,7 +65,7 @@ class DgtHw(DgtIface):
         if self.enable_dgt_3000:
             bit_board = Board(fen)
             move_text = bit_board.san(move)
-            if side == chess.BLACK:
+            if side == 0x02:
                 move_text = move_text.rjust(8)
             text = self.dgttranslate.move(move_text)
             self._display_on_dgt_3000(text, beep)

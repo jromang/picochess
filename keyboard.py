@@ -27,6 +27,7 @@ keyboard_last_fen = None
 class KeyboardInput(Observable, threading.Thread):
     def __init__(self):
         super(KeyboardInput, self).__init__()
+        self.flip_board = False
 
     def run(self):
         logging.info('evt_queue ready')
@@ -48,8 +49,10 @@ class KeyboardInput(Observable, threading.Thread):
                 if cmd.startswith('newgame:'):
                     side = cmd.split(':')[1]
                     if side == 'w':
+                        self.flip_board = False
                         self.fire(Event.DGT_FEN(fen='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'))
                     elif side == 'b':
+                        self.flip_board = True
                         self.fire(Event.DGT_FEN(fen='RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr'))
                     else:
                         raise ValueError(raw)
@@ -85,14 +88,14 @@ class KeyboardInput(Observable, threading.Thread):
                         self.fire(Event.DGT_BUTTON(button=button))
                     elif cmd.startswith('go'):
                         if keyboard_last_fen is not None:
-                            self.fire(Event.DGT_FEN(fen=keyboard_last_fen.split(' ')[0]))
+                            self.fire(Event.DGT_FEN(fen=keyboard_last_fen))
                         else:
                             print('last move already send to virtual board')
                     # end simulation code
                     else:
                         # move => fen => virtual board sends fen
                         move = chess.Move.from_uci(cmd)
-                        self.fire(Event.KEYBOARD_MOVE(move=move))
+                        self.fire(Event.KEYBOARD_MOVE(move=move, flip_board=self.flip_board))
             except ValueError as e:
                 logging.warning('Invalid user input [%s]', raw)
 
@@ -111,7 +114,7 @@ class TerminalDisplay(DisplayMsg, threading.Thread):
                 if case(MessageApi.COMPUTER_MOVE):
                     print('\n' + str(message.game))
                     print(message.game.fen())
-                    keyboard_last_fen = message.game.fen()
+                    keyboard_last_fen = message.game.fen().split(' ')[0]
                     break
                 if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
                     keyboard_last_fen = None
@@ -139,7 +142,6 @@ class TerminalDisplay(DisplayMsg, threading.Thread):
                         print('Computer stops waiting - hmmm')
                     break
                 if case(MessageApi.KEYBOARD_MOVE):
-                    print(message.fen)
                     keyboard_last_fen = message.fen
                     break
                 if case():  # Default

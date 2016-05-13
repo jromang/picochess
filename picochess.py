@@ -535,7 +535,10 @@ def main():
                     else:
                         g = copy.deepcopy(game)
                         g.push(move)
-                        DisplayMsg.show(Message.KEYBOARD_MOVE(fen=g.fen()))
+                        fen = g.fen().split(' ')[0]
+                        if event.flip_board:
+                            fen = fen[::-1]
+                        DisplayMsg.show(Message.KEYBOARD_MOVE(fen=fen))
                     break
 
                 if case(EventApi.USER_MOVE):
