@@ -258,7 +258,7 @@ def main():
                 DisplayMsg.show(Message.COMPUTER_MOVE_DONE_ON_BOARD())
                 if time_control.mode != TimeMode.FIXED:
                     start_clock()
-        else:  # Check if this a a previous legal position and allow user to restart from this position
+        else:  # Check if this is a previous legal position and allow user to restart from this position
             game_history = copy.deepcopy(game)
             while game_history.move_stack:
                 game_history.pop()
@@ -549,8 +549,9 @@ def main():
                     else:
                         result = chess.uci.BestMove(bestmove=move, ponder=None)
                         game = handle_move(result, game)
+                        # deactivated cause of issue #185 => prg otherwise running in "sliding part"
                         # if check_game_state(game, interaction_mode):
-                        legal_fens = compute_legal_fens(game)
+                        # legal_fens = compute_legal_fens(game)
                     break
 
                 if case(EventApi.LEVEL):

@@ -112,14 +112,18 @@ class TerminalDisplay(DisplayMsg, threading.Thread):
             message = self.msg_queue.get()
             for case in switch(message):
                 if case(MessageApi.COMPUTER_MOVE):
-                    print('\n' + str(message.game))
-                    print(message.game.fen())
+                    print('\n' + message.fen)
+                    print(message.game)
+                    print(message.game.fen() + '\n')
                     keyboard_last_fen = message.game.fen().split(' ')[0]
                     break
                 if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
                     keyboard_last_fen = None
                     break
                 if case(MessageApi.USER_MOVE):
+                    print('\n' + message.fen)
+                    print(message.game)
+                    print(message.game.fen() + '\n')
                     keyboard_last_fen = None
                     break
                 if case(MessageApi.START_NEW_GAME):
