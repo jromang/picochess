@@ -153,6 +153,9 @@ def main():
             Observable.fire(Event.BEST_MOVE(result=book_move, inbook=True))
         else:
             probe_tablebase(game)
+            while not engine.is_waiting():
+                time.sleep(0.1)
+                logging.warning('engine is still not waiting')
             engine.position(copy.deepcopy(game))
             uci_dict = tc.uci()
             uci_dict['searchmoves'] = searchmoves.all(game)
@@ -493,7 +496,6 @@ def main():
     searchmoves = AlternativeMover()
     interaction_mode = Mode.NORMAL
     play_mode = PlayMode.USER_WHITE
-    king_lifted = False
     time_control = TimeControl(TimeMode.BLITZ, minutes_per_game=5)
     last_computer_fen = None
     game_declared = False  # User declared resignation or draw
@@ -708,14 +710,8 @@ def main():
 
                     DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control))
                     game_declared = False
-                    if interaction_mode == Mode.NORMAL:
-                        if king_lifted:
-                            king_lifted = False
-                            if play_mode == PlayMode.USER_BLACK:
-                                think(game, time_control)
-                        else:
-                            set_wait_state()
-                            DisplayMsg.show(Message.WAIT_STATE())
+                    set_wait_state()
+                    DisplayMsg.show(Message.WAIT_STATE())
                     break
 
                 if case(EventApi.DRAWRESIGN):
@@ -791,12 +787,6 @@ def main():
                     custom_fen = getattr(game, 'custom_fen', None)
                     DisplayMsg.show(Message.GAME_ENDS(result=GameResult.OUT_OF_TIME, play_mode=play_mode,
                                                       game=copy.deepcopy(game), custom_fen=custom_fen))
-                    break
-
-                if case(EventApi.SET_PLAYMODE):
-                    play_mode = event.play_mode
-                    king_lifted = True
-                    DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode, play_mode_text=event.play_mode_text))
                     break
 
                 if case(EventApi.UCI_OPTION_SET):

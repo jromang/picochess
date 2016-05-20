@@ -73,12 +73,6 @@ mode_map = {"rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR": Mode.NORMAL,
             "rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR": Mode.OBSERVE,
             "rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR": Mode.REMOTE}
 
-play_map = {
-    "rnbq1bnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR": PlayMode.USER_BLACK,  # Player plays black
-    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQ1BNR": PlayMode.USER_WHITE,  # Player plays white
-    "RNBQKBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbq1bnr": PlayMode.USER_BLACK,  # Player plays black (reversed board)
-    "RNBQ1BNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqkbnr": PlayMode.USER_WHITE}  # Player plays white (reversed board)
-
 drawresign_map = OrderedDict([
     ("8/8/8/3k4/4K3/8/8/8", GameResult.RESIGN_WHITE),
     ("8/8/8/3K4/4k3/8/8/8", GameResult.RESIGN_WHITE),
@@ -941,12 +935,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             text = self.dgttranslate.text(mode_map[fen].value)
                             text.beep = map_bl  # BeepLevel is Map not Button
                             self.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], mode_text=text))
-                            self.reset_menu_results()
-                        elif fen in play_map:  # Set play mode
-                            logging.debug("Map-Fen: Play mode [%s]", play_map[fen])
-                            text = self.dgttranslate.text(play_map[fen].value)
-                            text.beep = map_bl  # BeepLevel is Map not Button
-                            self.fire(Event.SET_PLAYMODE(play_mode=play_map[fen], play_mode_text=text))
                             self.reset_menu_results()
                         elif fen in self.time_control_fixed_map:
                             logging.debug("Map-Fen: Time control fixed")
