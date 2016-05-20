@@ -196,13 +196,13 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
     def reset_moves_and_score(self):
         self.play_move = chess.Move.null()
         self.play_fen = None
-        self.play_turn = chess.WHITE
+        self.play_turn = None
         self.hint_move = chess.Move.null()
         self.hint_fen = None
-        self.hint_turn = chess.BLACK
+        self.hint_turn = None
         self.last_move = chess.Move.null()
         self.last_fen = None
-        self.last_turn = chess.WHITE
+        self.last_turn = None
         self.score = None
         self.mate = None
 
@@ -662,10 +662,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
     def exit_display(self):
         if self.play_move:
             side = 0x01 if (self.play_turn == chess.WHITE) != self.flip_board else 0x02
-            DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side,
-                                             beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1))
+            text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side,
+                                    beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
         else:
-            DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
+            text = Dgt.CLOCK_END(force=True, wait=True)
+        DisplayDgt.show(text)
 
     def run(self):
         logging.info('msg_queue ready')
@@ -698,18 +699,17 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if case(MessageApi.COMPUTER_MOVE):
                         move = message.result.bestmove
                         ponder = message.result.ponder
+                        fen = message.fen
+                        turn = message.turn
                         self.engine_finished = True
-                        self.last_move = move
-                        self.last_fen = message.fen
-                        self.last_turn = not self.last_turn
                         self.play_move = move
-                        self.play_fen = message.fen
-                        self.play_turn = not self.play_turn
+                        self.play_fen = fen
+                        self.play_turn = turn
                         self.hint_move = chess.Move.null() if ponder is None else ponder
                         self.hint_fen = None if ponder is None else message.game.fen()
+                        self.hint_turn = None if ponder is None else message.game.turn
                         # Display the move
                         uci_move = move.uci()
-                        turn = chess.WHITE  # TEST!
                         side = 0x01 if (turn == chess.WHITE) != self.flip_board else 0x02
                         DisplayDgt.show(Dgt.DISPLAY_MOVE(move=move, fen=message.fen, side=side,
                                                          beep=self.dgttranslate.bl(BeepLevel.CONFIG), duration=0))
@@ -730,6 +730,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         break
                     if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
                         DisplayDgt.show(Dgt.LIGHT_CLEAR())
+                        self.last_move = self.play_move
+                        self.last_fen = self.play_fen
+                        self.last_turn = self.play_turn
                         self.play_move = chess.Move.null()
                         self.play_fen = None
                         self.engine_finished = False
@@ -740,10 +743,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if case(MessageApi.USER_MOVE):
                         self.last_move = message.move
                         self.last_fen = message.fen
-                        self.last_turn = not self.last_turn
+                        self.last_turn = message.turn
                         self.play_move = message.move
                         self.play_fen = message.fen
-                        self.play_turn = not self.play_turn
+                        self.play_turn = message.turn
                         self.engine_finished = False
                         if self.ok_moves_messages:
                             DisplayDgt.show(self.dgttranslate.text('K05_okuser'))
@@ -751,10 +754,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if case(MessageApi.REVIEW_MOVE):
                         self.last_move = message.move
                         self.last_fen = message.fen
-                        self.last_turn = not self.last_turn
+                        self.last_turn = message.turn
                         self.play_move = message.move
                         self.play_fen = message.fen
-                        self.play_turn = not self.play_turn
+                        self.play_turn = message.turn
                         if self.ok_moves_messages:
                             DisplayDgt.show(self.dgttranslate.text('K05_okmove'))
                         break
@@ -809,6 +812,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if case(MessageApi.NEW_PV):
                         self.hint_move = message.pv[0]
                         self.hint_fen = message.fen
+                        self.hint_turn = message.turn
                         if message.mode == Mode.ANALYSIS and self.top_result is None:
                             side = 0x01 if (self.hint_turn == chess.WHITE) != self.flip_board else 0x02
                             DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side,
@@ -1002,6 +1006,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if case(MessageApi.SWITCH_SIDES):
                         self.engine_finished = False
                         logging.debug('user ignored move {}'.format(message.move))
+                        self.play_move = self.last_move
+                        self.play_fen = self.last_fen
+                        self.play_turn = self.last_turn
                         break
                     if case():  # Default
                         # print(message)

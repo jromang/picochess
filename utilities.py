@@ -610,10 +610,10 @@ class Dgt():
 
 class Message():
     # Messages to display devices
-    COMPUTER_MOVE = ClassFactory(MessageApi.COMPUTER_MOVE, ['result', 'fen', 'game', 'time_control'])
+    COMPUTER_MOVE = ClassFactory(MessageApi.COMPUTER_MOVE, ['result', 'fen', 'turn', 'game', 'time_control'])
     BOOK_MOVE = ClassFactory(MessageApi.BOOK_MOVE, ['result'])
-    NEW_PV = ClassFactory(MessageApi.NEW_PV, ['pv', 'mode', 'fen'])
-    REVIEW_MOVE = ClassFactory(MessageApi.REVIEW_MOVE, ['move', 'fen', 'game', 'mode'])
+    NEW_PV = ClassFactory(MessageApi.NEW_PV, ['pv', 'mode', 'fen', 'turn'])
+    REVIEW_MOVE = ClassFactory(MessageApi.REVIEW_MOVE, ['move', 'fen', 'turn', 'game', 'mode'])
     ENGINE_READY = ClassFactory(MessageApi.ENGINE_READY, ['eng', 'eng_text', 'engine_name', 'has_levels', 'has_960'])
     ENGINE_STARTUP = ClassFactory(MessageApi.ENGINE_STARTUP, ['shell', 'path', 'has_levels', 'has_960'])
     ENGINE_FAIL = ClassFactory(MessageApi.ENGINE_FAIL, [])
@@ -636,7 +636,7 @@ class Message():
     RUN_CLOCK = ClassFactory(MessageApi.RUN_CLOCK, ['turn', 'time_control', 'wait', 'callback'])
     RESUME_CLOCK = ClassFactory(MessageApi.RUN_CLOCK, ['turn', 'wait', 'callback'])
     STOP_CLOCK = ClassFactory(MessageApi.STOP_CLOCK, ['callback'])
-    USER_MOVE = ClassFactory(MessageApi.USER_MOVE, ['move', 'fen', 'game'])
+    USER_MOVE = ClassFactory(MessageApi.USER_MOVE, ['move', 'fen', 'turn', 'game'])
     UCI_OPTION_LIST = ClassFactory(MessageApi.UCI_OPTION_LIST, ['options'])
     GAME_ENDS = ClassFactory(MessageApi.GAME_ENDS, ['result', 'play_mode', 'game', 'custom_fen'])
 

@@ -293,6 +293,7 @@ def main():
     def handle_move(result, game):
         move = result.bestmove
         fen = game.fen()
+        turn = game.turn
         game.push(move)
         nonlocal last_computer_fen
         nonlocal searchmoves
@@ -305,11 +306,11 @@ def main():
                     or (play_mode == PlayMode.USER_BLACK and game.turn == chess.BLACK):
                 last_computer_fen = game.board_fen()
                 searchmoves.add(move)
-                text = Message.COMPUTER_MOVE(result=result, fen=fen, game=game.copy(), time_control=time_control)
+                text = Message.COMPUTER_MOVE(result=result, fen=fen, turn=turn, game=game.copy(), time_control=time_control)
                 DisplayMsg.show(text)
             else:
                 searchmoves.reset()
-                DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, game=game.copy()))
+                DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
                 if check_game_state(game, play_mode):
                     think(game, time_control)
 
@@ -321,23 +322,23 @@ def main():
                     or (play_mode == PlayMode.USER_BLACK and game.turn == chess.BLACK):
                 last_computer_fen = game.board_fen()
                 searchmoves.add(move)
-                text = Message.COMPUTER_MOVE(result=result, fen=fen, game=game.copy(), time_control=time_control)
+                text = Message.COMPUTER_MOVE(result=result, fen=fen, turn=turn, game=game.copy(), time_control=time_control)
                 DisplayMsg.show(text)
             else:
                 searchmoves.reset()
-                DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, game=game.copy()))
+                DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
                 if check_game_state(game, play_mode):
                     observe(game, time_control)
 
         elif interaction_mode == Mode.OBSERVE:
             stop_search_and_clock()
-            DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, game=game.copy(), mode=interaction_mode))
+            DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode))
             if check_game_state(game, play_mode):
                 observe(game, time_control)
 
         elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
             stop_search()
-            DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, game=game.copy(), mode=interaction_mode))
+            DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode))
             if check_game_state(game, play_mode):
                 analyse(game)
 
@@ -738,7 +739,7 @@ def main():
                     break
 
                 if case(EventApi.NEW_PV):
-                    DisplayMsg.show(Message.NEW_PV(pv=event.pv, mode=interaction_mode, fen=game.fen()))
+                    DisplayMsg.show(Message.NEW_PV(pv=event.pv, mode=interaction_mode, fen=game.fen(), turn=game.turn))
                     break
 
                 if case(EventApi.NEW_SCORE):
