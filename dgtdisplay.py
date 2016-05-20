@@ -653,6 +653,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
     def process_lever(self, right_side_down):
         logging.debug('lever position right_side_down: {}'.format(right_side_down))
+        self.play_move = chess.Move.null()
+        self.play_fen = None
+        self.play_turn = None
         self.fire(Event.SWITCH_SIDES(engine_finished=self.engine_finished))
 
     def drawresign(self):
@@ -1005,10 +1008,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         break
                     if case(MessageApi.SWITCH_SIDES):
                         self.engine_finished = False
+                        self.hint_move = chess.Move.null()
+                        self.hint_fen = None
+                        self.hint_turn = None
                         logging.debug('user ignored move {}'.format(message.move))
-                        self.play_move = self.last_move
-                        self.play_fen = self.last_fen
-                        self.play_turn = self.last_turn
                         break
                     if case():  # Default
                         # print(message)
