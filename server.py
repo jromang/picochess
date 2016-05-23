@@ -223,6 +223,9 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 EventHandler.write_to_clients({'event': 'Message', 'msg': 'Book move'})
                 break
             if case(MessageApi.START_NEW_GAME):
+                r = {'fen': 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'}
+                self.shared['last_dgt_move_msg'] = r
+                EventHandler.write_to_clients(r)
                 EventHandler.write_to_clients({'event': 'NewGame'})
                 EventHandler.write_to_clients({'event': 'Message', 'msg': 'New game'})
                 update_headers(self)
@@ -234,6 +237,9 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 self.shared['uci_options'] = message.options
                 break
             if case(MessageApi.SYSTEM_INFO):
+                r = {'fen': 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'}
+                self.shared['last_dgt_move_msg'] = r
+                EventHandler.write_to_clients(r)
                 self.shared['system_info'] = message.info
                 self.shared['system_info']['old_engine'] = self.shared['system_info']['engine_name']
                 update_headers(self)
