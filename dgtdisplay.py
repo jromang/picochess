@@ -653,10 +653,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
     def process_lever(self, right_side_down):
         logging.debug('lever position right_side_down: {}'.format(right_side_down))
-        self.play_move = chess.Move.null()
-        self.play_fen = None
-        self.play_turn = None
-        self.fire(Event.SWITCH_SIDES(engine_finished=self.engine_finished))
+        if self.top_result is None:
+            self.play_move = chess.Move.null()
+            self.play_fen = None
+            self.play_turn = None
+            self.fire(Event.SWITCH_SIDES(engine_finished=self.engine_finished))
 
     def drawresign(self):
         _, _, _, rnk_5, rnk_4, _, _, _ = self.dgt_fen.split("/")
