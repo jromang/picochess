@@ -664,7 +664,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         return "8/8/8/" + rnk_5 + "/" + rnk_4 + "/8/8/8"
 
     def exit_display(self):
-        if self.play_move:
+        if self.play_move and self.mode_result in (Mode.NORMAL, Mode.REMOTE):
             side = 0x01 if (self.play_turn == chess.WHITE) != self.flip_board else 0x02
             text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side,
                                     beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
