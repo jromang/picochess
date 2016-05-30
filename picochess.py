@@ -167,7 +167,7 @@ def main():
         If a move is found in the opening book, fire an event in a few seconds.
         :return:
         """
-        DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=tc, wait=wait, callback=think_callback))
+        DisplayMsg.show(Message.CLOCK_START(turn=game.turn, time_control=tc, wait=wait, callback=think_callback))
 
     def analyse(game):
         """
@@ -188,7 +188,7 @@ def main():
         Starts a new ponder search on the current game.
         :return:
         """
-        DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=tc, wait=False, callback=observe_callback))
+        DisplayMsg.show(Message.CLOCK_START(turn=game.turn, time_control=tc, wait=False, callback=observe_callback))
 
     def stop_search():
         """
@@ -198,14 +198,14 @@ def main():
         engine.stop()
 
     def stop_clock():
-        DisplayMsg.show(Message.STOP_CLOCK(callback=tc_stop_callback()))
+        DisplayMsg.show(Message.CLOCK_STOP(callback=tc_stop_callback()))
 
     def stop_search_and_clock():
         stop_clock()
         stop_search()
 
     def start_clock(wait=False):
-        DisplayMsg.show(Message.RUN_CLOCK(turn=game.turn, time_control=time_control, wait=wait, callback=tc_start_callback))
+        DisplayMsg.show(Message.CLOCK_START(turn=game.turn, time_control=time_control, wait=wait, callback=tc_start_callback))
 
     def tc_start_callback():
         time_control.start(game.turn)

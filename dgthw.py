@@ -87,26 +87,14 @@ class DgtHw(DgtIface):
             self.lib.write([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
 
     def stop_clock(self):
+        self.resume_clock(0x04)
+
+    def resume_clock(self, side):
         l_hms = self.time_left
         r_hms = self.time_right
         if l_hms is None and r_hms is None:
             logging.debug('time values not set - abort function')
             return
-        with self.lock:
-            res = self.lib.set_and_run(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
-            if res < 0:
-                logging.warning('Finally failed %i', res)
-            else:
-                self.clock_running = False
-
-    def resume_clock(self, side):
-        pass
-
-    def start_clock(self, time_left, time_right, side):
-        self.time_left = hours_minutes_seconds(time_left)
-        self.time_right = hours_minutes_seconds(time_right)
-        l_hms = self.time_left
-        r_hms = self.time_right
 
         lr = rr = 0
         if side == 0x01:
@@ -119,6 +107,11 @@ class DgtHw(DgtIface):
                 logging.warning('Finally failed %i', res)
             else:
                 self.clock_running = (side != 0x04)
+
+    def start_clock(self, time_left, time_right, side):
+        self.time_left = hours_minutes_seconds(time_left)
+        self.time_right = hours_minutes_seconds(time_right)
+        self.resume_clock(side)
 
     def end_clock(self, force=False):
         if self.clock_running or force:

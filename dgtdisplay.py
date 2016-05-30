@@ -835,7 +835,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if case(MessageApi.SEARCH_STOPPED):
                         logging.debug('Search stopped')
                         break
-                    if case(MessageApi.RUN_CLOCK):
+                    if case(MessageApi.CLOCK_START):
                         tc = message.time_control
                         if tc.mode == TimeMode.FIXED:
                             time_left = time_right = tc.seconds_per_move
@@ -850,12 +850,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right,
                                                         side=side, wait=message.wait, callback=message.callback))
                         break
-                    if case(MessageApi.RESUME_CLOCK):
+                    if case(MessageApi.CLOCK_RESUME):
                         # @todo Make this independent from side DGT Hex codes
                         side = 0x01 if (message.turn == chess.WHITE) != self.flip_board else 0x02
                         DisplayDgt.show(Dgt.CLOCK_RESUME(side=side, wait=message.wait, callback=message.callback))
                         break
-                    if case(MessageApi.STOP_CLOCK):
+                    if case(MessageApi.CLOCK_STOP):
                         DisplayDgt.show(Dgt.CLOCK_STOP(callback=message.callback))
                         break
                     if case(MessageApi.DGT_BUTTON):

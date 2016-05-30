@@ -105,9 +105,9 @@ class MessageApi():
     SEARCH_STARTED = 'MSG_SEARCH_STARTED'  # Engine has started to search
     SEARCH_STOPPED = 'MSG_SEARCH_STOPPED'  # Engine has stopped the search
     USER_TAKE_BACK = 'MSG_USER_TACK_BACK'  # User takes back his move while engine is searching
-    RUN_CLOCK = 'MSG_RUN_CLOCK'  # Say to run autonomous clock, contains time_control
-    RESUME_CLOCK = 'MSG_RESUME_CLOCK'  # Restarts the clock
-    STOP_CLOCK = 'MSG_STOP_CLOCK'  # Stops the clock
+    CLOCK_START = 'MSG_CLOCK_START'  # Say to run autonomous clock, contains time_control
+    CLOCK_RESUME = 'MSG_CLOCK_RESUME'  # Restarts the clock
+    CLOCK_STOP = 'MSG_CLOCK_STOP'  # Stops the clock
     USER_MOVE = 'MSG_USER_MOVE'  # Player has done a move on board
     UCI_OPTION_LIST = 'MSG_UCI_OPTION_LIST'  # Contains 'options', a dict of the current engine's UCI options
     GAME_ENDS = 'MSG_GAME_ENDS'  # The current game has ended, contains a 'result' (GameResult) and list of 'moves'
@@ -633,9 +633,9 @@ class Message():
     SEARCH_STARTED = ClassFactory(MessageApi.SEARCH_STARTED, ['engine_status'])
     SEARCH_STOPPED = ClassFactory(MessageApi.SEARCH_STOPPED, ['engine_status'])
     USER_TAKE_BACK = ClassFactory(MessageApi.USER_TAKE_BACK, [])
-    RUN_CLOCK = ClassFactory(MessageApi.RUN_CLOCK, ['turn', 'time_control', 'wait', 'callback'])
-    RESUME_CLOCK = ClassFactory(MessageApi.RUN_CLOCK, ['turn', 'wait', 'callback'])
-    STOP_CLOCK = ClassFactory(MessageApi.STOP_CLOCK, ['callback'])
+    CLOCK_START = ClassFactory(MessageApi.CLOCK_START, ['turn', 'time_control', 'wait', 'callback'])
+    CLOCK_RESUME = ClassFactory(MessageApi.CLOCK_RESUME, ['turn', 'wait', 'callback'])
+    CLOCK_STOP = ClassFactory(MessageApi.CLOCK_STOP, ['callback'])
     USER_MOVE = ClassFactory(MessageApi.USER_MOVE, ['move', 'fen', 'turn', 'game'])
     UCI_OPTION_LIST = ClassFactory(MessageApi.UCI_OPTION_LIST, ['options'])
     GAME_ENDS = ClassFactory(MessageApi.GAME_ENDS, ['result', 'play_mode', 'game', 'custom_fen'])
