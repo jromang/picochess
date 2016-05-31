@@ -73,6 +73,16 @@ class DgtIface(DisplayDgt, Thread):
             logging.debug('clock not running - ignored duration')
 
     def run(self):
+        def duration_waiter(wait):
+            if wait:
+                while self.timer_running:
+                    time.sleep(0.1)
+            else:
+                if self.timer_running:
+                    logging.debug('ignore rest duration time')
+                    self.timer.cancel()
+                    self.timer_running = False
+
         logging.info('dgt_queue ready')
         while True:
             # Check if we have something to display
@@ -81,9 +91,7 @@ class DgtIface(DisplayDgt, Thread):
                 logging.debug("received command from dgt_queue: %s", message)
                 for case in switch(message):
                     if case(DgtApi.DISPLAY_MOVE):
-                        message.wait = True  # TEST!
-                        while self.timer_running and message.wait:
-                            time.sleep(0.1)
+                        duration_waiter(message.wait)
                         if hasattr(message, 'duration') and message.duration > 0:
                             self.timer = Timer(message.duration * self.duration_factor, self.stopped_timer)
                             self.timer.start()
@@ -92,9 +100,7 @@ class DgtIface(DisplayDgt, Thread):
                         self.display_move_on_clock(message.move, message.fen, message.side, message.beep)
                         break
                     if case(DgtApi.DISPLAY_TEXT):
-                        message.wait = True  # TEST!
-                        while self.timer_running and message.wait:
-                            time.sleep(0.1)
+                        duration_waiter(message.wait)
                         if self.enable_dgt_pi:
                             text = message.l
                         else:
@@ -109,8 +115,7 @@ class DgtIface(DisplayDgt, Thread):
                         self.display_text_on_clock(text, message.beep)
                         break
                     if case(DgtApi.DISPLAY_TIME):
-                        while self.timer_running and message.wait:
-                            time.sleep(0.1)
+                        duration_waiter(message.wait)
                         self.display_time_on_clock(message.force)
                         break
                     if case(DgtApi.LIGHT_CLEAR):
@@ -125,8 +130,7 @@ class DgtIface(DisplayDgt, Thread):
                         Observable.fire(Event.DGT_CLOCK_CALLBACK(callback=message.callback))
                         break
                     if case(DgtApi.CLOCK_START):
-                        while self.timer_running and message.wait:
-                            time.sleep(0.1)
+                        duration_waiter(message.wait)
                         self.clock_running = (message.side != 0x04)
                         # log times
                         l_hms = hours_minutes_seconds(message.time_left)
@@ -143,7 +147,8 @@ class DgtIface(DisplayDgt, Thread):
                             self.enable_dgt_3000 = True
                         if message.attached == 'i2c':
                             self.enable_dgt_pi = True
-                        self.show(Dgt.DISPLAY_TEXT(l='picoChs ' + version, m='pico ' + version, s='pic' + version, beep=True, duration=2))
+                        self.show(Dgt.DISPLAY_TEXT(l='picoChs ' + version, m='pico ' + version, s='pic' + version,
+                                                   wait=True, beep=True, duration=2))
                         break
                     if case(DgtApi.CLOCK_TIME):
                         self.time_left = message.time_left

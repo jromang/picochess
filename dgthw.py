@@ -71,7 +71,7 @@ class DgtHw(DgtIface):
             self._display_on_dgt_3000(text, beep)
         else:
             move_text = move.uci()
-            if side == chess.BLACK:
+            if side == 0x02:
                 move_text = move_text.rjust(6)
             self._display_on_dgt_xl(move_text, beep)
 
@@ -98,7 +98,7 @@ class DgtHw(DgtIface):
     def resume_clock(self, side):
         l_hms = self.time_left
         r_hms = self.time_right
-        if l_hms is None and r_hms is None:
+        if l_hms is None or r_hms is None:
             logging.debug('time values not set - abort function')
             return
 

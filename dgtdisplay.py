@@ -210,7 +210,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         if self.top_result is None:
             if self.last_move:
                 side = 0x01 if (self.last_turn == chess.WHITE) != self.flip_board else 0x02
-                text = Dgt.DISPLAY_MOVE(move=self.last_move, fen=self.last_fen, side=side,
+                text = Dgt.DISPLAY_MOVE(move=self.last_move, fen=self.last_fen, side=side, wait=False,
                                         beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
             else:
                 text = self.dgttranslate.text('B10_nomove')
@@ -382,7 +382,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         if self.top_result is None:
             if self.hint_move:
                 side = 0x01 if (self.hint_turn == chess.WHITE) != self.flip_board else 0x02
-                text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side,
+                text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=False,
                                         beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
             else:
                 text = self.dgttranslate.text('B10_nomove')
@@ -666,7 +666,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
     def exit_display(self):
         if self.play_move and self.mode_result in (Mode.NORMAL, Mode.REMOTE):
             side = 0x01 if (self.play_turn == chess.WHITE) != self.flip_board else 0x02
-            text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side,
+            text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side, wait=False,
                                     beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
         else:
             text = Dgt.DISPLAY_TIME(force=True, wait=True)
@@ -715,7 +715,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         # Display the move
                         uci_move = move.uci()
                         side = 0x01 if (turn == chess.WHITE) != self.flip_board else 0x02
-                        DisplayDgt.show(Dgt.DISPLAY_MOVE(move=move, fen=message.fen, side=side,
+                        DisplayDgt.show(Dgt.DISPLAY_MOVE(move=move, fen=message.fen, side=side, wait=False,
                                                          beep=self.dgttranslate.bl(BeepLevel.CONFIG), duration=0))
                         DisplayDgt.show(Dgt.LIGHT_SQUARES(squares=(uci_move[0:2], uci_move[2:4])))
                         break
@@ -819,7 +819,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.hint_turn = message.turn
                         if message.mode == Mode.ANALYSIS and self.top_result is None:
                             side = 0x01 if (self.hint_turn == chess.WHITE) != self.flip_board else 0x02
-                            DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side,
+                            DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=False,
                                                              beep=self.dgttranslate.bl(BeepLevel.NO), duration=0))
                         break
                     if case(MessageApi.SYSTEM_INFO):

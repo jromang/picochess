@@ -162,7 +162,7 @@ class DgtPi(DgtIface):
     def resume_clock(self, side):
         l_hms = self.time_left
         r_hms = self.time_right
-        if l_hms is None and r_hms is None:
+        if l_hms is None or r_hms is None:
             logging.warning('time values not set - abort function')
             return
 
