@@ -129,6 +129,22 @@ class DgtPi(DgtIface):
         text = self.dgttranslate.move(move_text)
         self._display_on_dgt_pi(text, beep)
 
+    def display_time_on_clock(self, force=False):
+        if self.clock_running or force:
+            with self.lock:
+                res = self.lib.dgtpicom_end_text()
+                if res < 0:
+                    logging.warning('EndText returned error %i', res)
+                    res = self.lib.dgtpicom_configure()
+                    if res < 0:
+                        logging.warning('Configure also failed %i', res)
+                    else:
+                        res = self.lib.dgtpicom_end_text()
+                if res < 0:
+                    logging.warning('Finally failed')
+        else:
+            logging.debug('DGT clock isnt running - no need for endClock')
+
     def light_squares_revelation_board(self, squares):
         if self.enable_revelation_leds:
             for sq in squares:
@@ -193,19 +209,3 @@ class DgtPi(DgtIface):
                 logging.warning('Finally failed %i', res)
             else:
                 self.clock_running = (side != 0x04)
-
-    def end_clock(self, force=False):
-        if self.clock_running or force:
-            with self.lock:
-                res = self.lib.dgtpicom_end_text()
-                if res < 0:
-                    logging.warning('EndText returned error %i', res)
-                    res = self.lib.dgtpicom_configure()
-                    if res < 0:
-                        logging.warning('Configure also failed %i', res)
-                    else:
-                        res = self.lib.dgtpicom_end_text()
-                if res < 0:
-                    logging.warning('Finally failed')
-        else:
-            logging.debug('DGT clock isnt running - no need for endClock')

@@ -669,7 +669,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side,
                                     beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
         else:
-            text = Dgt.CLOCK_END(force=True, wait=True)
+            text = Dgt.DISPLAY_TIME(force=True, wait=True)
         DisplayDgt.show(text)
 
     def run(self):
@@ -730,7 +730,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=0x04, wait=True, callback=None))
                         break
                     if case(MessageApi.WAIT_STATE):
-                        DisplayDgt.show(Dgt.CLOCK_END(force=True, wait=True))
+                        DisplayDgt.show(Dgt.DISPLAY_TIME(force=True, wait=True))
                         break
                     if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
                         DisplayDgt.show(Dgt.LIGHT_CLEAR())

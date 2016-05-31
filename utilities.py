@@ -128,12 +128,12 @@ class DgtApi():
     # Commands to the DgtHw/Pi (or the virtual hardware)
     DISPLAY_MOVE = 'DGT_DISPLAY_MOVE'
     DISPLAY_TEXT = 'DGT_DISPLAY_TEXT'
+    DISPLAY_TIME = 'DGT_DISPLAY_TIME'
     LIGHT_CLEAR = 'DGT_LIGHT_CLEAR'
     LIGHT_SQUARES = 'DGT_LIGHT_SQUARES'
     CLOCK_STOP = 'DGT_CLOCK_STOP'
     CLOCK_START = 'DGT_CLOCK_START'
     CLOCK_RESUME = 'DGT_CLOCK_RESUME'
-    CLOCK_END = 'DGT_END_CLOCK'
     CLOCK_VERSION = 'DGT_CLOCK_VERSION'
     CLOCK_TIME = 'DGT_CLOCK_TIME'
     SERIALNR = 'DGT_SERIALNR'
@@ -597,9 +597,9 @@ class RepeatedTimer(object):
 class Dgt():
     DISPLAY_MOVE = ClassFactory(DgtApi.DISPLAY_MOVE, ['move', 'fen', 'beep', 'duration', 'wait', 'side'])
     DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['l', 'm', 's', 'beep', 'duration', 'wait'])
+    DISPLAY_TIME = ClassFactory(DgtApi.DISPLAY_TIME, ['wait', 'force'])
     LIGHT_CLEAR = ClassFactory(DgtApi.LIGHT_CLEAR, [])
     LIGHT_SQUARES = ClassFactory(DgtApi.LIGHT_SQUARES, ['squares'])
-    CLOCK_END = ClassFactory(DgtApi.CLOCK_END, ['wait', 'force'])
     CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, ['callback'])
     CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side', 'wait', 'callback'])
     CLOCK_RESUME = ClassFactory(DgtApi.CLOCK_START, ['side', 'wait', 'callback'])

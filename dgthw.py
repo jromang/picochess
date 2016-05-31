@@ -75,6 +75,12 @@ class DgtHw(DgtIface):
                 move_text = move_text.rjust(6)
             self._display_on_dgt_xl(move_text, beep)
 
+    def display_time_on_clock(self, force=False):
+        if self.clock_running or force:
+            self.lib.end_text()
+        else:
+            logging.debug('DGT clock isnt running - no need for endClock')
+
     def light_squares_revelation_board(self, squares):
         if self.enable_revelation_leds:
             for sq in squares:
@@ -112,9 +118,3 @@ class DgtHw(DgtIface):
         self.time_left = hours_minutes_seconds(time_left)
         self.time_right = hours_minutes_seconds(time_right)
         self.resume_clock(side)
-
-    def end_clock(self, force=False):
-        if self.clock_running or force:
-            self.lib.end_text()
-        else:
-            logging.debug('DGT clock isnt running - no need for endClock')

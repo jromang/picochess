@@ -38,11 +38,15 @@ class DgtIface(DisplayDgt, Thread):
         self.timer = None
         self.timer_running = False
         self.clock_running = False
+        self.duration_factor = 1  # This is for testing the duration - remove it lateron!
 
     def display_text_on_clock(self, text, beep=False):
         raise NotImplementedError()
 
     def display_move_on_clock(self, move, fen, side, beep=False):
+        raise NotImplementedError()
+
+    def display_time_on_clock(self, force=False):
         raise NotImplementedError()
 
     def light_squares_revelation_board(self, squares):
@@ -60,14 +64,11 @@ class DgtIface(DisplayDgt, Thread):
     def start_clock(self, time_left, time_right, side):
         raise NotImplementedError()
 
-    def end_clock(self, force=False):
-        raise NotImplementedError()
-
     def stopped_timer(self):
         self.timer_running = False
         if self.clock_running:
             logging.debug('showing the running clock again')
-            self.end_clock(force=False)
+            self.display_time_on_clock(force=False)
         else:
             logging.debug('clock not running - ignored duration')
 
@@ -84,9 +85,9 @@ class DgtIface(DisplayDgt, Thread):
                         while self.timer_running and message.wait:
                             time.sleep(0.1)
                         if hasattr(message, 'duration') and message.duration > 0:
-                            self.timer = Timer(message.duration, self.stopped_timer)
+                            self.timer = Timer(message.duration * self.duration_factor, self.stopped_timer)
                             self.timer.start()
-                            logging.debug('showing move for {} secs'.format(message.duration))
+                            logging.debug('showing move for {} secs'.format(message.duration * self.duration_factor))
                             self.timer_running = True
                         self.display_move_on_clock(message.move, message.fen, message.side, message.beep)
                         break
@@ -101,22 +102,22 @@ class DgtIface(DisplayDgt, Thread):
                         if text is None:
                             text = message.m
                         if hasattr(message, 'duration') and message.duration > 0:
-                            self.timer = Timer(message.duration, self.stopped_timer)
+                            self.timer = Timer(message.duration * self.duration_factor, self.stopped_timer)
                             self.timer.start()
-                            logging.debug('showing text for {} secs'.format(message.duration))
+                            logging.debug('showing text for {} secs'.format(message.duration * self.duration_factor))
                             self.timer_running = True
                         self.display_text_on_clock(text, message.beep)
+                        break
+                    if case(DgtApi.DISPLAY_TIME):
+                        while self.timer_running and message.wait:
+                            time.sleep(0.1)
+                        self.display_time_on_clock(message.force)
                         break
                     if case(DgtApi.LIGHT_CLEAR):
                         self.clear_light_revelation_board()
                         break
                     if case(DgtApi.LIGHT_SQUARES):
                         self.light_squares_revelation_board(message.squares)
-                        break
-                    if case(DgtApi.CLOCK_END):
-                        while self.timer_running and message.wait:
-                            time.sleep(0.1)
-                        self.end_clock(message.force)
                         break
                     if case(DgtApi.CLOCK_STOP):
                         self.clock_running = False
@@ -127,7 +128,6 @@ class DgtIface(DisplayDgt, Thread):
                         while self.timer_running and message.wait:
                             time.sleep(0.1)
                         self.clock_running = (message.side != 0x04)
-
                         # log times
                         l_hms = hours_minutes_seconds(message.time_left)
                         r_hms = hours_minutes_seconds(message.time_right)

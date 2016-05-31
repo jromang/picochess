@@ -67,6 +67,12 @@ class DgtVr(DgtIface):
         logging.debug(text)
         print('Clock text: {} Beep: {}'. format(text, beep))
 
+    def display_time_on_clock(self, force=False):
+        if self.clock_running or force:
+            pass
+        else:
+            logging.debug('Clock isnt running - no need for endClock')
+
     def stop_clock(self):
         if self.rt:
             print('Clock time stopped at {} - {}'. format(self.time_left, self.time_right))
@@ -96,8 +102,3 @@ class DgtVr(DgtIface):
     def clear_light_revelation_board(self):
         pass
 
-    def end_clock(self, force=False):
-        if self.clock_running or force:
-            pass
-        else:
-            logging.debug('Clock isnt running - no need for endClock')
