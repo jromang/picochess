@@ -59,34 +59,34 @@ class DgtTranslate(object):
         bl_config = self.bl(BeepLevel.CONFIG)
         if text_id == 'B00_default':
             entxt = Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6], wait=False, beep=bl_button, duration=0)
-            detxt = entxt 
-            nltxt = entxt 
-            frtxt = entxt 
-            estxt = entxt 
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
         if text_id == 'B10_default':
             entxt = Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6], wait=False, beep=bl_button, duration=1)
-            detxt = entxt 
-            nltxt = entxt 
-            frtxt = entxt 
-            estxt = entxt 
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
         if text_id == 'M10_default':
             entxt = Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6], wait=False, beep=self.bl(BeepLevel.MAP), duration=1)
-            detxt = entxt 
-            nltxt = entxt 
-            frtxt = entxt 
-            estxt = entxt 
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
         if text_id == 'C10_default':
             entxt = Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6], wait=False, beep=bl_config, duration=1)
-            detxt = entxt 
-            nltxt = entxt 
-            frtxt = entxt 
-            estxt = entxt 
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
         if text_id == 'N10_default':
             entxt = Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6], wait=False, beep=self.bl(BeepLevel.NO), duration=1)
-            detxt = entxt 
-            nltxt = entxt 
-            frtxt = entxt 
-            estxt = entxt 
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
         if text_id == 'Y10_goodbye':
             entxt = Dgt.DISPLAY_TEXT(l=None, m='Good bye', s='bye', wait=False, beep=self.bl(BeepLevel.YES), duration=1)
             detxt = Dgt.DISPLAY_TEXT(l=None, m='Tschuess', s='tschau', wait=False, beep=self.bl(BeepLevel.YES), duration=1)
@@ -132,10 +132,10 @@ class DgtTranslate(object):
         if text_id == 'B10_picochess':
             entxt = Dgt.DISPLAY_TEXT(l='picoChs ' + version, m='pico ' + version, s='pic ' + version, wait=False,
                                      beep=bl_button, duration=1)
-            detxt = entxt 
-            nltxt = entxt 
-            frtxt = entxt 
-            estxt = entxt 
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
         if text_id == 'B00_nofunction':
             entxt = Dgt.DISPLAY_TEXT(l='no function', m='no funct', s='nofunc', wait=False, beep=bl_button, duration=0)
             detxt = Dgt.DISPLAY_TEXT(l='Keine Funkt', m='KeineFkt', s='kn fkt', wait=False, beep=bl_button, duration=0)
@@ -295,20 +295,20 @@ class DgtTranslate(object):
         if text_id == 'B00_level':
             entxt = Dgt.DISPLAY_TEXT(l=None, m='level ' + msg, s='lvl ' + msg, wait=False, beep=bl_button, duration=0)
             detxt = Dgt.DISPLAY_TEXT(l='SpielSt ' + msg, m='Stufe ' + msg, s='stf ' + msg, wait=False, beep=bl_button, duration=0)
-            nltxt = entxt 
+            nltxt = entxt
             frtxt = Dgt.DISPLAY_TEXT(l='niveau ' + msg, m='niveau' + msg, s='niv ' + msg, wait=False, beep=bl_button, duration=0)
             estxt = Dgt.DISPLAY_TEXT(l=None, m='nivel ' + msg, s='nvl ' + msg, wait=False, beep=bl_button, duration=0)
         if text_id == 'B10_level':
             entxt = Dgt.DISPLAY_TEXT(l=None, m='level ' + msg, s='lvl ' + msg, wait=False, beep=bl_button, duration=1)
             detxt = Dgt.DISPLAY_TEXT(l='SpielSt ' + msg, m='Stufe ' + msg, s='stf ' + msg, wait=False, beep=bl_button, duration=1)
-            nltxt = entxt 
+            nltxt = entxt
             frtxt = Dgt.DISPLAY_TEXT(l='niveau ' + msg, m='niveau' + msg, s='niv ' + msg, wait=False, beep=bl_button, duration=0)
             estxt = Dgt.DISPLAY_TEXT(l=None, m='nivel ' + msg, s='nvl ' + msg, wait=False, beep=bl_button, duration=0)
         if text_id == 'M10_level':
             entxt = Dgt.DISPLAY_TEXT(l=None, m='level ' + msg, s='lvl ' + msg, wait=False, beep=self.bl(BeepLevel.MAP), duration=1)
             detxt = Dgt.DISPLAY_TEXT(l='SpielSt ' + msg, m='Stufe ' + msg, s='stf ' + msg, wait=False, beep=self.bl(BeepLevel.MAP),
                                      duration=1)
-            nltxt = entxt 
+            nltxt = entxt
             frtxt = Dgt.DISPLAY_TEXT(l='niveau ' + msg, m='niveau' + msg, s='niv ' + msg, wait=False, beep=bl_button, duration=0)
             estxt = Dgt.DISPLAY_TEXT(l=None, m='nivel ' + msg, s='nvl ' + msg, wait=False, beep=bl_button, duration=0)
         if text_id == 'B10_mate':
@@ -321,10 +321,10 @@ class DgtTranslate(object):
             text_s = 'no scr' if msg is None else str(msg).rjust(6)
             text_m = 'no score' if msg is None else str(msg).rjust(8)
             entxt = Dgt.DISPLAY_TEXT(l=None, m=text_m, s=text_s, wait=False, beep=bl_button, duration=1)
-            detxt = entxt 
-            nltxt = entxt 
-            frtxt = entxt 
-            estxt = entxt 
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
         if text_id == 'B00_menu_top_menu':
             entxt = Dgt.DISPLAY_TEXT(l=None, m='Top menu', s='topmen', wait=False, beep=bl_button, duration=0)
             detxt = Dgt.DISPLAY_TEXT(l='Haupt Menu', m='Hpt Menu', s='topmen', wait=False, beep=bl_button, duration=0)
@@ -548,19 +548,19 @@ class DgtTranslate(object):
             frtxt = Dgt.DISPLAY_TEXT(l='ok langue', m='okLangue', s='oklang', wait=False, beep=bl_button, duration=1)
             estxt = Dgt.DISPLAY_TEXT(l='ok idioma', m='okIdioma', s='oklang', wait=False, beep=bl_button, duration=1)
         if text_id == 'B00_tc_fixed':
-            entxt = Dgt.DISPLAY_TEXT(l='fixed  ', m='fixd' + msg, s='mov' + msg, wait=False, beep=bl_button, duration=0)
-            detxt = entxt 
-            nltxt = entxt 
-            frtxt = entxt 
-            estxt = entxt 
+            entxt = Dgt.DISPLAY_TEXT(l='fixed  ' + msg, m='fixd' + msg, s='mov' + msg, wait=False, beep=bl_button, duration=0)
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
         if text_id == 'B00_tc_blitz':
-            entxt = Dgt.DISPLAY_TEXT(l='blitz  ', m='bltz' + msg, s='bl' + msg, wait=False, beep=bl_button, duration=0)
-            detxt = entxt 
-            nltxt = entxt 
-            frtxt = entxt 
-            estxt = entxt 
+            entxt = Dgt.DISPLAY_TEXT(l='blitz  ' + msg, m='bltz' + msg, s='bl' + msg, wait=False, beep=bl_button, duration=0)
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
         if text_id == 'B00_tc_fisch':
-            entxt = Dgt.DISPLAY_TEXT(l='fischr', m='fsh' + msg, s='f' + msg, wait=False, beep=bl_button, duration=0)
+            entxt = Dgt.DISPLAY_TEXT(l='fischr' + msg, m='fsh' + msg, s='f' + msg, wait=False, beep=bl_button, duration=0)
             detxt = entxt 
             nltxt = entxt 
             frtxt = entxt 
