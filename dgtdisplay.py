@@ -538,8 +538,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         if bit_board.is_valid():
                             self.flip_board = self.setup_reverse_result
                             self.fire(Event.SETUP_POSITION(fen=bit_board.fen(), uci960=self.setup_uci960_result))
-                            self.play_move = chess.Move.null()
-                            self.play_fen = None
+                            self.reset_moves_and_score()
                             self.reset_menu_results()
                             return
                         else:
@@ -663,13 +662,13 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         _, _, _, rnk_5, rnk_4, _, _, _ = self.dgt_fen.split("/")
         return "8/8/8/" + rnk_5 + "/" + rnk_4 + "/8/8/8"
 
-    def exit_display(self):
+    def exit_display(self, force=True):
         if self.play_move and self.mode_result in (Mode.NORMAL, Mode.REMOTE):
             side = 0x01 if (self.play_turn == chess.WHITE) != self.flip_board else 0x02
             text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side, wait=False,
                                     beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
         else:
-            text = Dgt.DISPLAY_TIME(force=True, wait=True)
+            text = Dgt.DISPLAY_TIME(force=force, wait=True)
         DisplayDgt.show(text)
 
     def run(self):
@@ -739,6 +738,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.last_turn = self.play_turn
                         self.play_move = chess.Move.null()
                         self.play_fen = None
+                        self.play_turn = None
                         self.engine_finished = False
                         if self.ok_moves_messages:
                             DisplayDgt.show(self.dgttranslate.text('K05_okpico'))
@@ -748,9 +748,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.last_move = message.move
                         self.last_fen = message.fen
                         self.last_turn = message.turn
-                        self.play_move = message.move
-                        self.play_fen = message.fen
-                        self.play_turn = message.turn
+                        # self.play_move = message.move
+                        # self.play_fen = message.fen
+                        # self.play_turn = message.turn
                         self.engine_finished = False
                         if self.ok_moves_messages:
                             DisplayDgt.show(self.dgttranslate.text('K05_okuser'))
@@ -759,9 +759,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.last_move = message.move
                         self.last_fen = message.fen
                         self.last_turn = message.turn
-                        self.play_move = message.move
-                        self.play_fen = message.fen
-                        self.play_turn = message.turn
+                        # self.play_move = message.move
+                        # self.play_fen = message.fen
+                        # self.play_turn = message.turn
                         if self.ok_moves_messages:
                             DisplayDgt.show(self.dgttranslate.text('K05_okmove'))
                         break
@@ -777,7 +777,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         break
                     if case(MessageApi.TIME_CONTROL):
                         DisplayDgt.show(message.time_text)
-                        self.exit_display()
+                        self.exit_display(force=False)
                         break
                     if case(MessageApi.OPENING_BOOK):
                         DisplayDgt.show(message.book_text)
