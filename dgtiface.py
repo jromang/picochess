@@ -18,7 +18,7 @@
 from utilities import *
 import time
 import chess
-from threading import Timer, Thread
+from threading import Timer, Thread, Lock
 
 
 class DgtIface(DisplayDgt, Thread):
@@ -38,7 +38,11 @@ class DgtIface(DisplayDgt, Thread):
         self.timer = None
         self.timer_running = False
         self.clock_running = False
-        self.duration_factor = 1  # This is for testing the duration - remove it lateron!
+        self.duration_factor = 3  # This is for testing the duration - remove it lateron!
+        # delayed task array
+        self.tasks = []
+        self.do_process = True
+        self.lock = Lock()
 
     def display_text_on_clock(self, text, beep=False):
         raise NotImplementedError()
@@ -71,90 +75,118 @@ class DgtIface(DisplayDgt, Thread):
             self.display_time_on_clock(force=False)
         else:
             logging.debug('clock not running - ignored duration')
+        logging.debug('tasks in stop: {}'.format(self.tasks))
+        if self.tasks:
+            message = self.tasks.pop(0)
+            self.process_message(message)
+
+    def process_message(self, message):
+        with self.lock:
+            for case in switch(message):
+                if case(DgtApi.DISPLAY_MOVE):
+                    if hasattr(message, 'duration') and message.duration > 0:
+                        self.timer = Timer(message.duration * self.duration_factor, self.stopped_timer)
+                        self.timer.start()
+                        logging.debug('showing move for {} secs'.format(message.duration * self.duration_factor))
+                        self.timer_running = True
+                    self.display_move_on_clock(message.move, message.fen, message.side, message.beep)
+                    break
+                if case(DgtApi.DISPLAY_TEXT):
+                    if self.enable_dgt_pi:
+                        text = message.l
+                    else:
+                        text = message.m if self.enable_dgt_3000 else message.s
+                    if text is None:
+                        text = message.m
+                    if hasattr(message, 'duration') and message.duration > 0:
+                        self.timer = Timer(message.duration * self.duration_factor, self.stopped_timer)
+                        self.timer.start()
+                        logging.debug('showing text for {} secs'.format(message.duration * self.duration_factor))
+                        self.timer_running = True
+                    self.display_text_on_clock(text, message.beep)
+                    break
+                if case(DgtApi.DISPLAY_TIME):
+                    self.display_time_on_clock(message.force)
+                    break
+                if case(DgtApi.LIGHT_CLEAR):
+                    self.clear_light_revelation_board()
+                    break
+                if case(DgtApi.LIGHT_SQUARES):
+                    self.light_squares_revelation_board(message.squares)
+                    break
+                if case(DgtApi.CLOCK_STOP):
+                    self.clock_running = False
+                    self.stop_clock()
+                    Observable.fire(Event.DGT_CLOCK_CALLBACK(callback=message.callback))
+                    break
+                if case(DgtApi.CLOCK_START):
+                    self.clock_running = (message.side != 0x04)
+                    # log times
+                    l_hms = hours_minutes_seconds(message.time_left)
+                    r_hms = hours_minutes_seconds(message.time_right)
+                    logging.debug('last time received from clock l:{} r:{}'.format(self.time_left, self.time_right))
+                    logging.debug('sending time to clock l:{} r:{}'.format(l_hms, r_hms))
+
+                    self.start_clock(message.time_left, message.time_right, message.side)
+                    Observable.fire(Event.DGT_CLOCK_CALLBACK(callback=message.callback))
+                    break
+                if case(DgtApi.CLOCK_VERSION):
+                    self.clock_found = True
+                    if message.main_version == 2:
+                        self.enable_dgt_3000 = True
+                    if message.attached == 'i2c':
+                        self.enable_dgt_pi = True
+                    self.show(Dgt.DISPLAY_TEXT(l='picoChs ' + version, m='pico ' + version, s='pic' + version,
+                                               wait=True, beep=True, duration=2))
+                    break
+                if case(DgtApi.CLOCK_TIME):
+                    self.time_left = message.time_left
+                    self.time_right = message.time_right
+                    break
+                if case():  # Default
+                    pass
 
     def run(self):
-        def duration_waiter(wait):
-            if wait:
-                while self.timer_running:
-                    time.sleep(0.1)
-            else:
-                if self.timer_running:
-                    logging.debug('ignore rest duration time')
-                    self.timer.cancel()
-                    self.timer_running = False
-
         logging.info('dgt_queue ready')
         while True:
             # Check if we have something to display
             try:
                 message = self.dgt_queue.get()
                 logging.debug("received command from dgt_queue: %s", message)
-                for case in switch(message):
-                    if case(DgtApi.DISPLAY_MOVE):
-                        duration_waiter(message.wait)
-                        if hasattr(message, 'duration') and message.duration > 0:
-                            self.timer = Timer(message.duration * self.duration_factor, self.stopped_timer)
-                            self.timer.start()
-                            logging.debug('showing move for {} secs'.format(message.duration * self.duration_factor))
-                            self.timer_running = True
-                        self.display_move_on_clock(message.move, message.fen, message.side, message.beep)
-                        break
-                    if case(DgtApi.DISPLAY_TEXT):
-                        duration_waiter(message.wait)
-                        if self.enable_dgt_pi:
-                            text = message.l
-                        else:
-                            text = message.m if self.enable_dgt_3000 else message.s
-                        if text is None:
-                            text = message.m
-                        if hasattr(message, 'duration') and message.duration > 0:
-                            self.timer = Timer(message.duration * self.duration_factor, self.stopped_timer)
-                            self.timer.start()
-                            logging.debug('showing text for {} secs'.format(message.duration * self.duration_factor))
-                            self.timer_running = True
-                        self.display_text_on_clock(text, message.beep)
-                        break
-                    if case(DgtApi.DISPLAY_TIME):
-                        duration_waiter(message.wait)
-                        self.display_time_on_clock(message.force)
-                        break
-                    if case(DgtApi.LIGHT_CLEAR):
-                        self.clear_light_revelation_board()
-                        break
-                    if case(DgtApi.LIGHT_SQUARES):
-                        self.light_squares_revelation_board(message.squares)
-                        break
-                    if case(DgtApi.CLOCK_STOP):
-                        self.clock_running = False
-                        self.stop_clock()
-                        Observable.fire(Event.DGT_CLOCK_CALLBACK(callback=message.callback))
-                        break
-                    if case(DgtApi.CLOCK_START):
-                        duration_waiter(message.wait)
-                        self.clock_running = (message.side != 0x04)
-                        # log times
-                        l_hms = hours_minutes_seconds(message.time_left)
-                        r_hms = hours_minutes_seconds(message.time_right)
-                        logging.debug('last time received from clock l:{} r:{}'.format(self.time_left, self.time_right))
-                        logging.debug('sending time to clock l:{} r:{}'.format(l_hms, r_hms))
 
-                        self.start_clock(message.time_left, message.time_right, message.side)
-                        Observable.fire(Event.DGT_CLOCK_CALLBACK(callback=message.callback))
-                        break
-                    if case(DgtApi.CLOCK_VERSION):
-                        self.clock_found = True
-                        if message.main_version == 2:
-                            self.enable_dgt_3000 = True
-                        if message.attached == 'i2c':
-                            self.enable_dgt_pi = True
-                        self.show(Dgt.DISPLAY_TEXT(l='picoChs ' + version, m='pico ' + version, s='pic' + version,
-                                                   wait=True, beep=True, duration=2))
-                        break
-                    if case(DgtApi.CLOCK_TIME):
-                        self.time_left = message.time_left
-                        self.time_right = message.time_right
-                        break
-                    if case():  # Default
-                        pass
+                # special code 1
+                if hasattr(message, 'duration') and message.duration > 0:
+                    if self.timer_running:
+                        if hasattr(message, 'wait') and message.wait:
+                            logging.debug('waiting for former duration to be over')
+                            while self.timer_running:
+                                time.sleep(0.1)
+                        else:
+                            logging.debug('ignore former duration')
+                            self.timer.cancel()
+
+                    self.timer = Timer(message.duration * self.duration_factor, self.stopped_timer)
+                    self.timer.start()
+                    logging.debug('showing {} for {} secs'.format(message, message.duration * self.duration_factor))
+                    self.timer_running = True
+
+                # special code 2
+                self.do_process = True
+                if self.timer_running:
+                    if hasattr(message, 'wait'):
+                        if message.wait:
+                            self.tasks.append(message)
+                            logging.debug('tasks delayed: {}'.format(self.tasks))
+                            self.do_process = False
+                        else:
+                            if self.tasks:
+                                logging.debug('delete following tasks: {}'.format(self.tasks))
+                                self.tasks = []
+
+                # now continue
+                if self.do_process:
+                    self.process_message(message)
+                else:
+                    logging.debug('tasks delayed: {}'.format(message))
             except queue.Empty:
                 pass
