@@ -78,17 +78,18 @@ class DgtIface(DisplayDgt, Thread):
         logging.debug('tasks in stop: {}'.format(self.tasks))
         if self.tasks:
             message = self.tasks.pop(0)
+            if hasattr(message, 'duration') and message.duration > 0:
+                self.timer = Timer(message.duration * self.duration_factor, self.stopped_timer)
+                self.timer.start()
+                logging.debug('showing {} for {} secs'.format(message, message.duration * self.duration_factor))
+                self.timer_running = True
             self.process_message(message)
 
     def process_message(self, message):
         with self.lock:
+            logging.debug("handle DgtApi: %s", message)
             for case in switch(message):
                 if case(DgtApi.DISPLAY_MOVE):
-                    if hasattr(message, 'duration') and message.duration > 0:
-                        self.timer = Timer(message.duration * self.duration_factor, self.stopped_timer)
-                        self.timer.start()
-                        logging.debug('showing move for {} secs'.format(message.duration * self.duration_factor))
-                        self.timer_running = True
                     self.display_move_on_clock(message.move, message.fen, message.side, message.beep)
                     break
                 if case(DgtApi.DISPLAY_TEXT):
@@ -98,11 +99,6 @@ class DgtIface(DisplayDgt, Thread):
                         text = message.m if self.enable_dgt_3000 else message.s
                     if text is None:
                         text = message.m
-                    if hasattr(message, 'duration') and message.duration > 0:
-                        self.timer = Timer(message.duration * self.duration_factor, self.stopped_timer)
-                        self.timer.start()
-                        logging.debug('showing text for {} secs'.format(message.duration * self.duration_factor))
-                        self.timer_running = True
                     self.display_text_on_clock(text, message.beep)
                     break
                 if case(DgtApi.DISPLAY_TIME):
@@ -154,39 +150,36 @@ class DgtIface(DisplayDgt, Thread):
                 message = self.dgt_queue.get()
                 logging.debug("received command from dgt_queue: %s", message)
 
-                # special code 1
+                # special code
+                self.do_process = True
                 if hasattr(message, 'duration') and message.duration > 0:
                     if self.timer_running:
-                        if hasattr(message, 'wait') and message.wait:
-                            logging.debug('waiting for former duration to be over')
-                            while self.timer_running:
-                                time.sleep(0.1)
-                        else:
-                            logging.debug('ignore former duration')
-                            self.timer.cancel()
-
-                    self.timer = Timer(message.duration * self.duration_factor, self.stopped_timer)
-                    self.timer.start()
-                    logging.debug('showing {} for {} secs'.format(message, message.duration * self.duration_factor))
-                    self.timer_running = True
-
-                # special code 2
-                self.do_process = True
-                if self.timer_running:
-                    if hasattr(message, 'wait'):
-                        if message.wait:
+                        if message.wait:  # hasattr(message, 'wait') not needed cause "duration" MUST have "wait" flag
                             self.tasks.append(message)
                             logging.debug('tasks delayed: {}'.format(self.tasks))
                             self.do_process = False
                         else:
+                            logging.debug('ignore former duration')
+                            self.timer.cancel()
+                            logging.debug('join start')
+                            self.timer.join()
+                            logging.debug('join ended')
                             if self.tasks:
                                 logging.debug('delete following tasks: {}'.format(self.tasks))
                                 self.tasks = []
+                    else:
+                        logging.debug('delay timer not running')
+
+                    if self.do_process:
+                        self.timer = Timer(message.duration * self.duration_factor, self.stopped_timer)
+                        self.timer.start()
+                        logging.debug('showing {} for {} secs'.format(message, message.duration * self.duration_factor))
+                        self.timer_running = True
 
                 # now continue
                 if self.do_process:
                     self.process_message(message)
                 else:
-                    logging.debug('tasks delayed: {}'.format(message))
+                    logging.debug('task delayed: {}'.format(message))
             except queue.Empty:
                 pass
