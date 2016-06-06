@@ -98,6 +98,45 @@ class DgtIface(DisplayDgt, Thread):
                 message = self.dgt_queue.get()
                 logging.debug("received command from dgt_queue: %s", message)
 
+                # special code
+                self.do_process = True
+                if self.timer_running:
+                    if hasattr(message, 'wait') and message.wait:
+                        self.tasks.append(message)
+                        logging.debug('tasks delayed: {}'.format(self.tasks))
+                        self.do_process = False
+                    else:
+                        logging.debug('ignore former duration')
+                        self.timer.cancel()
+                        logging.debug('join start')
+                        self.timer.join()
+                        logging.debug('join ended')
+                        if self.tasks:
+                            logging.debug('delete following tasks: {}'.format(self.tasks))
+                            self.tasks = []
+                else:
+                    logging.debug('delay timer not running')
+
+                if self.do_process:
+                    if hasattr(message, 'duration') and message.duration > 0:
+                        self.timer = Timer(message.duration * self.duration_factor, self.stopped_timer)
+                        self.timer.start()
+                        logging.debug('showing {} for {} secs'.format(message, message.duration * self.duration_factor))
+                        self.timer_running = True
+                    self.process_message(message)
+                else:
+                    logging.debug('task delayed: {}'.format(message))
+            except queue.Empty:
+                pass
+
+    def run_old(self):
+        logging.info('dgt_queue ready')
+        while True:
+            # Check if we have something to display
+            try:
+                message = self.dgt_queue.get()
+                logging.debug("received command from dgt_queue: %s", message)
+
                 # special code 1
                 if hasattr(message, 'duration') and message.duration > 0:
                     if self.timer_running:

@@ -31,6 +31,7 @@ def main():
     text3 = Dgt.DISPLAY_TEXT(l=None, m='text 3', s=None, wait=True, beep=bl_button, duration=0.5)
     text4 = Dgt.DISPLAY_TEXT(l=None, m='text 4', s=None, wait=True, beep=bl_button, duration=0.5)
     time0 = Dgt.DISPLAY_TIME(force=True, wait=True)
+    strt0 = Dgt.CLOCK_START(time_left=5, time_right=3, side=0x04, wait=True, callback=None)
 
     # test button - should be quick on second button press!
     nomove = Dgt.DISPLAY_TEXT(l=None, m='no move', s='nomove', wait=False, beep=bl_button, duration=1)
@@ -61,6 +62,11 @@ def main():
     # button press 2
     DisplayDgt.show(nomove)
     DisplayDgt.show(endclock)
+
+    # Test with clock_start
+    DisplayDgt.show(text1)
+    DisplayDgt.show(strt0)
+    DisplayDgt.show(text3)
 
     # Event loop
     logging.info('evt_queue ready')
