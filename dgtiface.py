@@ -153,20 +153,23 @@ class DgtIface(DisplayDgt, Thread):
                 # special code
                 self.do_process = True
                 if self.timer_running:
-                    if hasattr(message, 'wait') and message.wait:
-                        self.tasks.append(message)
-                        logging.debug('tasks delayed: {}'.format(self.tasks))
-                        self.do_process = False
+                    if hasattr(message, 'wait'):
+                        if message.wait:
+                            self.tasks.append(message)
+                            logging.debug('tasks delayed: {}'.format(self.tasks))
+                            self.do_process = False
+                        else:
+                            logging.debug('ignore former duration')
+                            self.timer.cancel()
+                            logging.debug('join start')
+                            self.timer.join()
+                            logging.debug('join ended')
+                            self.timer_running = False
+                            if self.tasks:
+                                logging.debug('delete following tasks: {}'.format(self.tasks))
+                                self.tasks = []
                     else:
-                        logging.debug('ignore former duration')
-                        self.timer.cancel()
-                        logging.debug('join start')
-                        self.timer.join()
-                        logging.debug('join ended')
-                        self.timer_running = False
-                        if self.tasks:
-                            logging.debug('delete following tasks: {}'.format(self.tasks))
-                            self.tasks = []
+                        logging.debug('command doesnt change the clock display => no need to interrupt delay timer')
                 else:
                     logging.debug('delay timer not running')
 
