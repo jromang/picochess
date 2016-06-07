@@ -75,12 +75,10 @@ class DgtPi(DgtIface):
                     if ack3 == 0x20:
                         logging.info("DGT clock [i2c]: button on/off pressed")
                         self.lib.dgtpicom_configure()  # restart the clock - cause its OFF
-                        self.lib.dgtpicom_set_text(b'shutdown', 0x01, 0, 0)
-                        Observable.fire(Event.SHUTDOWN())
+                        DisplayMsg.show(Message.DGT_BUTTON(button=0x11))
                     if ack3 == 0x11:
-                        logging.info("DGT clock [i2c]: button left/right pressed")
-                        self.lib.dgtpicom_set_text(b'shutdown', 0x01, 0, 0)
-                        Observable.fire(Event.SHUTDOWN())
+                        logging.info("DGT clock [i2c]: button 0+4 pressed")
+                        DisplayMsg.show(Message.DGT_BUTTON(button=0x11))
                     if ack3 == 0x40:
                         logging.info("DGT clock [i2c]: lever pressed > right side down")
                         DisplayMsg.show(Message.DGT_BUTTON(button=0x40))
