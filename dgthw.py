@@ -26,7 +26,7 @@ class DgtHw(DgtIface):
     def __init__(self, dgtserial, dgttranslate, enable_revelation_leds):
         super(DgtHw, self).__init__(dgtserial, dgttranslate, enable_revelation_leds)
 
-        self.lock = Lock()
+        self.lib_lock = Lock()
         self.lib = DgtLib(self.dgtserial)
         self.dgtserial.run()
 
@@ -39,7 +39,7 @@ class DgtHw(DgtIface):
         if len(text) > 6:
             logging.warning('DGT XL clock message too long [%s]', text)
         logging.debug(text)
-        with self.lock:
+        with self.lib_lock:
             res = self.lib.set_text_xl(text, 0x03 if beep else 0x00, 0, 0)
             if res < 0:
                 logging.warning('Finally failed %i', res)
@@ -50,7 +50,7 @@ class DgtHw(DgtIface):
             logging.warning('DGT 3000 clock message too long [%s]', text)
         logging.debug(text)
         text = bytes(text, 'utf-8')
-        with self.lock:
+        with self.lib_lock:
             res = self.lib.set_text_3k(text, 0x03 if beep else 0x00, 0, 0)
             if res < 0:
                 logging.warning('Finally failed %i', res)
@@ -107,7 +107,7 @@ class DgtHw(DgtIface):
             lr = 1
         if side == 0x02:
             rr = 1
-        with self.lock:
+        with self.lib_lock:
             res = self.lib.set_and_run(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
             if res < 0:
                 logging.warning('Finally failed %i', res)

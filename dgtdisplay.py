@@ -942,6 +942,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             logging.debug("Map-Fen: Interaction mode [%s]", mode_map[fen])
                             text = self.dgttranslate.text(mode_map[fen].value)
                             text.beep = map_bl  # BeepLevel is Map not Button
+                            text.duration = 1  # wait 1sec not forever
                             self.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], mode_text=text))
                             self.reset_menu_results()
                         elif fen in self.time_control_fixed_map:
@@ -950,6 +951,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.time_control_fixed_index = list(self.time_control_fixed_map.keys()).index(fen)
                             text = self.dgttranslate.text('B00_tc_fixed', self.time_control_fixed_list[self.time_control_fixed_index])
                             text.beep = map_bl  # BeepLevel is Map not Button
+                            text.duration = 1  # wait 1sec not forever
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_fixed_map[fen],
                                                              time_text=text))
                             self.reset_menu_results()
@@ -959,6 +961,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.time_control_blitz_index = list(self.time_control_blitz_map.keys()).index(fen)
                             text = self.dgttranslate.text('B00_tc_blitz', self.time_control_blitz_list[self.time_control_blitz_index])
                             text.beep = map_bl  # BeepLevel is Map not Button
+                            text.duration = 1  # wait 1sec not forever
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_blitz_map[fen],
                                                              time_text=text))
                             self.reset_menu_results()
@@ -968,6 +971,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.time_control_fisch_index = list(self.time_control_fisch_map.keys()).index(fen)
                             text = self.dgttranslate.text('B00_tc_fisch', self.time_control_fisch_list[self.time_control_fisch_index])
                             text.beep = map_bl  # BeepLevel is Map not Button
+                            text.duration = 1  # wait 1sec not forever
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_fisch_map[fen],
                                                              time_text=text))
                             self.reset_menu_results()

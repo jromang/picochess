@@ -27,7 +27,7 @@ class DgtPi(DgtIface):
         super(DgtPi, self).__init__(dgtserial, dgttranslate, enable_revelation_leds)
         self.dgtserial.enable_pi()
 
-        self.lock = Lock()
+        self.lib_lock = Lock()
         self.lib = cdll.LoadLibrary("dgt/dgtpicom.so")
 
         self.startup_i2c_clock()
@@ -52,7 +52,7 @@ class DgtPi(DgtIface):
         counter = 0
         logging.info('incoming_clock ready')
         while True:
-            with self.lock:
+            with self.lib_lock:
                 # get button events
                 res = self.lib.dgtpicom_get_button_message(pointer(but), pointer(buttime))
                 if res > 0:
@@ -104,7 +104,7 @@ class DgtPi(DgtIface):
             logging.warning('DGT PI clock message too long [%s]', text)
         logging.debug(text)
         text = bytes(text, 'utf-8')
-        with self.lock:
+        with self.lib_lock:
             res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, 0, 0)
             if res < 0:
                 logging.warning('SetText returned error %i', res)
@@ -129,7 +129,7 @@ class DgtPi(DgtIface):
 
     def display_time_on_clock(self, force=False):
         if self.clock_running or force:
-            with self.lock:
+            with self.lib_lock:
                 res = self.lib.dgtpicom_end_text()
                 if res < 0:
                     logging.warning('EndText returned error %i', res)
@@ -169,7 +169,7 @@ class DgtPi(DgtIface):
             lr = 1
         if side == 0x02:
             rr = 1
-        with self.lock:
+        with self.lib_lock:
             res = self.lib.dgtpicom_run(lr, rr)
             if res < 0:
                 logging.warning('Run returned error %i', res)
@@ -194,7 +194,7 @@ class DgtPi(DgtIface):
             lr = 1
         if side == 0x02:
             rr = 1
-        with self.lock:
+        with self.lib_lock:
             res = self.lib.dgtpicom_set_and_run(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
             if res < 0:
                 logging.warning('SetAndRun returned error %i', res)

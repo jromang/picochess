@@ -42,7 +42,7 @@ class DgtIface(DisplayDgt, Thread):
         # delayed task array
         self.tasks = []
         self.do_process = True
-        self.lock = Lock()
+        self.msg_lock = Lock()
 
     def display_text_on_clock(self, text, beep=False):
         raise NotImplementedError()
@@ -76,7 +76,7 @@ class DgtIface(DisplayDgt, Thread):
         else:
             logging.debug('clock not running - ignored duration')
         logging.debug('tasks in stop: {}'.format(self.tasks))
-        if self.tasks:
+        while self.tasks:
             message = self.tasks.pop(0)
             if hasattr(message, 'duration') and message.duration > 0:
                 self.timer = Timer(message.duration * self.duration_factor, self.stopped_timer)
@@ -84,9 +84,11 @@ class DgtIface(DisplayDgt, Thread):
                 logging.debug('showing {} for {} secs'.format(message, message.duration * self.duration_factor))
                 self.timer_running = True
             self.process_message(message)
+            if self.timer_running:  # run over the task list until a duration command was processed
+                break
 
     def process_message(self, message):
-        with self.lock:
+        with self.msg_lock:
             logging.debug("handle DgtApi: %s", message)
             for case in switch(message):
                 if case(DgtApi.DISPLAY_MOVE):
