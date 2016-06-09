@@ -163,9 +163,9 @@ class DgtIface(DisplayDgt, Thread):
                         else:
                             logging.debug('ignore former duration')
                             self.timer.cancel()
-                            logging.debug('join start')
-                            self.timer.join()
-                            logging.debug('join ended')
+                            # logging.debug('join start')
+                            # self.timer.join()
+                            # logging.debug('join ended')
                             self.timer_running = False
                             if self.tasks:
                                 logging.debug('delete following tasks: {}'.format(self.tasks))

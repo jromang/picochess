@@ -215,7 +215,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 text = self.dgttranslate.text('B10_nomove')
             DisplayDgt.show(text)
-            self.exit_display()
+            self.exit_display(wait=True)
 
         if self.top_result == Menu.TOP_MENU:
             self.reset_menu_results()
@@ -286,7 +286,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 text = self.dgttranslate.text('B10_mate', str(self.mate))
             DisplayDgt.show(text)
-            self.exit_display()
+            self.exit_display(wait=True)
 
         if self.top_result == Menu.TOP_MENU:
             self.top_index = MenuLoop.prev(self.top_index)
@@ -387,7 +387,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 text = self.dgttranslate.text('B10_nomove')
             DisplayDgt.show(text)
-            self.exit_display()
+            self.exit_display(wait=True)
 
         if self.top_result == Menu.TOP_MENU:
             self.top_index = MenuLoop.next(self.top_index)
@@ -662,10 +662,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         _, _, _, rnk_5, rnk_4, _, _, _ = self.dgt_fen.split("/")
         return "8/8/8/" + rnk_5 + "/" + rnk_4 + "/8/8/8"
 
-    def exit_display(self, force=True):
+    def exit_display(self, wait=False, force=True):
         if self.play_move and self.mode_result in (Mode.NORMAL, Mode.REMOTE):
             side = 0x01 if (self.play_turn == chess.WHITE) != self.flip_board else 0x02
-            text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side, wait=False,
+            text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side, wait=wait,
                                     beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
         else:
             text = Dgt.DISPLAY_TIME(force=force, wait=True)
