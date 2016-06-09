@@ -69,7 +69,7 @@ class DgtVr(DgtIface):
 
     def display_time_on_clock(self, force=False):
         if self.clock_running or force:
-            pass
+            print('Clock showing time again')
         else:
             logging.debug('Clock isnt running - no need for endClock')
 

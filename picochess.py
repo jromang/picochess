@@ -260,7 +260,7 @@ def main():
                 time_control.add_inc(not game.turn)
                 DisplayMsg.show(Message.COMPUTER_MOVE_DONE_ON_BOARD())
                 if time_control.mode != TimeMode.FIXED:
-                    start_clock()
+                    start_clock(wait=not args.disable_ok_move)
         else:  # Check if this is a previous legal position and allow user to restart from this position
             game_history = copy.deepcopy(game)
             while game_history.move_stack:
@@ -290,7 +290,7 @@ def main():
             nonlocal play_mode
             play_mode = PlayMode.USER_WHITE if game.turn == chess.WHITE else PlayMode.USER_BLACK
 
-    def handle_move(result, game):
+    def handle_move(result, game, wait=False):
         move = result.bestmove
         fen = game.fen()
         turn = game.turn
@@ -306,13 +306,14 @@ def main():
                     or (play_mode == PlayMode.USER_BLACK and game.turn == chess.BLACK):
                 last_computer_fen = game.board_fen()
                 searchmoves.add(move)
-                text = Message.COMPUTER_MOVE(result=result, fen=fen, turn=turn, game=game.copy(), time_control=time_control)
+                text = Message.COMPUTER_MOVE(result=result, fen=fen, turn=turn, game=game.copy(),
+                                             time_control=time_control, wait=wait)
                 DisplayMsg.show(text)
             else:
                 searchmoves.reset()
                 DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
                 if check_game_state(game, play_mode):
-                    think(game, time_control)
+                    think(game, time_control, wait=not args.disable_ok_move)
 
         elif interaction_mode == Mode.REMOTE:
             stop_search_and_clock()
@@ -322,7 +323,8 @@ def main():
                     or (play_mode == PlayMode.USER_BLACK and game.turn == chess.BLACK):
                 last_computer_fen = game.board_fen()
                 searchmoves.add(move)
-                text = Message.COMPUTER_MOVE(result=result, fen=fen, turn=turn, game=game.copy(), time_control=time_control)
+                text = Message.COMPUTER_MOVE(result=result, fen=fen, turn=turn, game=game.copy(),
+                                             time_control=time_control, wait=wait)
                 DisplayMsg.show(text)
             else:
                 searchmoves.reset()
@@ -663,7 +665,7 @@ def main():
                     game.pop()
                     legal_fens = compute_legal_fens(game)
                     DisplayMsg.show(Message.ALTERNATIVE_MOVE())
-                    think(game, time_control)
+                    think(game, time_control, wait=True)
                     break
 
                 if case(EventApi.SWITCH_SIDES):
@@ -687,7 +689,7 @@ def main():
                         DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode, play_mode_text=text))
                         if not user_to_move and check_game_state(game, play_mode):
                             time_control.reset_start_time()
-                            think(game, time_control, True)
+                            think(game, time_control, wait=True)
                         else:
                             start_clock(wait=True)
                         legal_fens = compute_legal_fens(game)
@@ -735,7 +737,7 @@ def main():
                 if case(EventApi.BEST_MOVE):
                     if event.inbook:
                         DisplayMsg.show(Message.BOOK_MOVE(result=event.result))
-                    game = handle_move(event.result, game)
+                    game = handle_move(event.result, game, event.inbook)
                     legal_fens = compute_legal_fens(game)
                     break
 

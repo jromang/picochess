@@ -714,7 +714,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         # Display the move
                         uci_move = move.uci()
                         side = 0x01 if (turn == chess.WHITE) != self.flip_board else 0x02
-                        DisplayDgt.show(Dgt.DISPLAY_MOVE(move=move, fen=message.fen, side=side, wait=False,
+                        DisplayDgt.show(Dgt.DISPLAY_MOVE(move=move, fen=message.fen, side=side, wait=message.wait,
                                                          beep=self.dgttranslate.bl(BeepLevel.CONFIG), duration=0))
                         DisplayDgt.show(Dgt.LIGHT_SQUARES(squares=(uci_move[0:2], uci_move[2:4])))
                         break
@@ -748,9 +748,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.last_move = message.move
                         self.last_fen = message.fen
                         self.last_turn = message.turn
-                        # self.play_move = message.move
-                        # self.play_fen = message.fen
-                        # self.play_turn = message.turn
                         self.engine_finished = False
                         if self.ok_moves_messages:
                             DisplayDgt.show(self.dgttranslate.text('K05_okuser'))
@@ -759,9 +756,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.last_move = message.move
                         self.last_fen = message.fen
                         self.last_turn = message.turn
-                        # self.play_move = message.move
-                        # self.play_fen = message.fen
-                        # self.play_turn = message.turn
                         if self.ok_moves_messages:
                             DisplayDgt.show(self.dgttranslate.text('K05_okmove'))
                         break
