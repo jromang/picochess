@@ -730,9 +730,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         DisplayDgt.show(self.dgttranslate.text('C10_newgame'))
                         DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE, wait=True, callback=None))
                         break
-                    if case(MessageApi.WAIT_STATE):
-                        DisplayDgt.show(Dgt.DISPLAY_TIME(force=True, wait=True))
-                        break
                     if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
                         DisplayDgt.show(Dgt.LIGHT_CLEAR())
                         self.last_move = self.play_move

@@ -33,7 +33,7 @@ except ImportError:
 
 
 # picochess version
-version = '065'
+version = '066'
 
 evt_queue = queue.Queue()
 serial_queue = queue.Queue()
@@ -101,7 +101,6 @@ class MessageApi():
     PLAY_MODE = 'MSG_PLAY_MODE'  # Play mode
     START_NEW_GAME = 'MSG_START_NEW_GAME'  # User starts a new game
     COMPUTER_MOVE_DONE_ON_BOARD = 'MSG_COMPUTER_MOVE_DONE_ON_BOARD'  # User has done the compute move on board
-    WAIT_STATE = 'MSG_WAIT_STATE'  # picochess waits for the user
     SEARCH_STARTED = 'MSG_SEARCH_STARTED'  # Engine has started to search
     SEARCH_STOPPED = 'MSG_SEARCH_STOPPED'  # Engine has stopped the search
     USER_TAKE_BACK = 'MSG_USER_TACK_BACK'  # User takes back his move while engine is searching
@@ -633,7 +632,6 @@ class Message():
     PLAY_MODE = ClassFactory(MessageApi.PLAY_MODE, ['play_mode', 'play_mode_text'])
     START_NEW_GAME = ClassFactory(MessageApi.START_NEW_GAME, ['time_control'])
     COMPUTER_MOVE_DONE_ON_BOARD = ClassFactory(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD, [])
-    WAIT_STATE = ClassFactory(MessageApi.WAIT_STATE, [])
     SEARCH_STARTED = ClassFactory(MessageApi.SEARCH_STARTED, ['engine_status'])
     SEARCH_STOPPED = ClassFactory(MessageApi.SEARCH_STOPPED, ['engine_status'])
     USER_TAKE_BACK = ClassFactory(MessageApi.USER_TAKE_BACK, [])

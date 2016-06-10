@@ -602,12 +602,6 @@ def main():
                         # Restore options - this doesn't deal with any
                         # supplementary uci options sent 'in game', see event.UCI_OPTION_SET
                         engine_startup()
-
-                        # Send user selected engine level to new engine
-                        # if event.level and engine.level(event.level):
-                        #     engine.send()
-                        #     DisplayMsg.show(Message.LEVEL(level=event.level, level_text=event.level_text, ok_text=event.ok_text))
-
                         # All done - rock'n'roll
                         if not engine_fallback:
                             DisplayMsg.show(Message.ENGINE_READY(eng=event.eng, engine_name=engine_name,
@@ -617,7 +611,6 @@ def main():
                         else:
                             DisplayMsg.show(Message.ENGINE_FAIL())
                         set_wait_state()
-                        # DisplayMsg.show(Message.WAIT_STATE())
                         # Go back to analysing or observing
                         if interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
                             analyse(game)
@@ -649,7 +642,6 @@ def main():
                     DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control))
                     game_declared = False
                     set_wait_state()
-                    # DisplayMsg.show(Message.WAIT_STATE())
                     break
 
                 if case(EventApi.PAUSE_RESUME):
@@ -717,7 +709,6 @@ def main():
                     DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control))
                     game_declared = False
                     set_wait_state()
-                    # DisplayMsg.show(Message.WAIT_STATE())
                     break
 
                 if case(EventApi.DRAWRESIGN):
