@@ -46,16 +46,14 @@ class DgtLib(object):
         return 0
 
     def set_and_run(self, lr, lh, lm, ls, rr, rh, rm, rs):
-        side = 0x04
+        side = ClockSide.NONE
         if lr == 1 and rr == 0:
-            side = 0x01
+            side = ClockSide.LEFT
         if lr == 0 and rr == 1:
-            side = 0x02
+            side = ClockSide.RIGHT
         self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0a, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_SETNRUN,
                     lh, lm, ls, rh, rm, rs,
                     side, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
-        # self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_END,
-        #             DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         return 0
 
     def end_text(self):

@@ -209,7 +209,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
     def process_button0(self):
         if self.top_result is None:
             if self.last_move:
-                side = 0x01 if (self.last_turn == chess.WHITE) != self.flip_board else 0x02
+                side = ClockSide.LEFT if (self.last_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
                 text = Dgt.DISPLAY_MOVE(move=self.last_move, fen=self.last_fen, side=side, wait=False,
                                         beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
             else:
@@ -381,7 +381,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
     def process_button3(self):
         if self.top_result is None:
             if self.hint_move:
-                side = 0x01 if (self.hint_turn == chess.WHITE) != self.flip_board else 0x02
+                side = ClockSide.LEFT if (self.hint_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
                 text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=False,
                                         beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
             else:
@@ -508,7 +508,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         elif self.top_result == Menu.MODE_MENU:
             self.mode_result = self.mode_index
             text = self.dgttranslate.text('B10_okmode')
-            self.fire(Event.SET_INTERACTION_MODE(mode=self.mode_result, mode_text=text))
+            self.fire(Event.SET_INTERACTION_MODE(mode=self.mode_result, mode_text=text, ok_text=True))
             self.reset_menu_results()
 
         elif self.top_result == Menu.POSITION_MENU:
@@ -598,16 +598,17 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         text = self.dgttranslate.text('B00_level', msg)
                         DisplayDgt.show(text)
                     else:
-                        self.fire(Event.NEW_ENGINE(eng=eng, eng_text=self.dgttranslate.text('B10_okengine'),
-                                                   level=None, level_text=self.dgttranslate.text('B00_nolevel')))
+                        text = self.dgttranslate.text('B10_okengine')
+                        self.fire(Event.NEW_ENGINE(eng=eng, eng_text=text, ok_text=True))
                         self.engine_restart = True
                         self.reset_menu_results()
                 else:
                     level = self.engine_level_index
-                    text = self.dgttranslate.text('B10_level', str(level).rjust(2))
+                    lvl_text = self.dgttranslate.text('B10_level', str(level).rjust(2))
                     eng = self.installed_engines[self.engine_result]
-                    self.fire(Event.NEW_ENGINE(eng=eng, eng_text=self.dgttranslate.text('B10_okengine'),
-                                               level=level, level_text=text))
+                    eng_text = self.dgttranslate.text('B10_okengine')
+                    self.fire(Event.LEVEL(level=level, level_text=lvl_text, ok_text=False))
+                    self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, ok_text=True))
                     self.engine_restart = True
                     self.reset_menu_results()
 
@@ -617,7 +618,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 DisplayDgt.show(text)
             else:
                 text = self.dgttranslate.text('B10_okbook')
-                self.fire(Event.SET_OPENING_BOOK(book=self.all_books[self.book_index], book_text=text))
+                self.fire(Event.SET_OPENING_BOOK(book=self.all_books[self.book_index], book_text=text, ok_text=True))
                 self.reset_menu_results()
 
         elif self.top_result == Menu.TIME_MENU:
@@ -646,8 +647,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     time_control = None
                 time_left, time_right = time_control.current_clock_time(self.flip_board)
                 text = self.dgttranslate.text('B10_oktime')
-                self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=text))
-                DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=0x04, wait=True, callback=None))
+                self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=text, ok_text=True))
+                DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE, wait=True, callback=None))
                 self.reset_menu_results()
 
     def process_lever(self, right_side_down):
@@ -664,7 +665,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
     def exit_display(self, wait=False, force=True):
         if self.play_move and self.mode_result in (Mode.NORMAL, Mode.REMOTE):
-            side = 0x01 if (self.play_turn == chess.WHITE) != self.flip_board else 0x02
+            side = ClockSide.LEFT if (self.play_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
             text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side, wait=wait,
                                     beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
         else:
@@ -685,6 +686,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.engine_has_960 = message.has_960
                         DisplayDgt.show(message.eng_text)
                         self.engine_restart = False
+                        self.exit_display(force=message.ok_text)
                         break
                     if case(MessageApi.ENGINE_STARTUP):
                         self.installed_engines = get_installed_engines(message.shell, message.path)
@@ -713,7 +715,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.hint_turn = None if ponder is None else message.game.turn
                         # Display the move
                         uci_move = move.uci()
-                        side = 0x01 if (turn == chess.WHITE) != self.flip_board else 0x02
+                        side = ClockSide.LEFT if (turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
                         DisplayDgt.show(Dgt.DISPLAY_MOVE(move=move, fen=message.fen, side=side, wait=message.wait,
                                                          beep=self.dgttranslate.bl(BeepLevel.CONFIG), duration=0))
                         DisplayDgt.show(Dgt.LIGHT_SQUARES(squares=(uci_move[0:2], uci_move[2:4])))
@@ -726,7 +728,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.engine_finished = False
                         time_left, time_right = message.time_control.current_clock_time(flip_board=self.flip_board)
                         DisplayDgt.show(self.dgttranslate.text('C10_newgame'))
-                        DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=0x04, wait=True, callback=None))
+                        DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE, wait=True, callback=None))
                         break
                     if case(MessageApi.WAIT_STATE):
                         DisplayDgt.show(Dgt.DISPLAY_TIME(force=True, wait=True))
@@ -767,15 +769,15 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             pass
                         else:
                             DisplayDgt.show(message.level_text)
-                            self.exit_display()
+                            self.exit_display(force=message.ok_text)
                         break
                     if case(MessageApi.TIME_CONTROL):
                         DisplayDgt.show(message.time_text)
-                        self.exit_display(force=False)
+                        self.exit_display(force=message.ok_text)
                         break
                     if case(MessageApi.OPENING_BOOK):
                         DisplayDgt.show(message.book_text)
-                        self.exit_display()
+                        self.exit_display(force=message.ok_text)
                         break
                     if case(MessageApi.USER_TAKE_BACK):
                         self.reset_moves_and_score()
@@ -791,7 +793,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.mode_result = message.mode  # needed, otherwise Q-placing wont work correctly
                         self.engine_finished = False
                         DisplayDgt.show(message.mode_text)
-                        self.exit_display()
+                        self.exit_display(force=message.ok_text)
                         break
                     if case(MessageApi.PLAY_MODE):
                         DisplayDgt.show(message.play_mode_text)
@@ -812,7 +814,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.hint_fen = message.fen
                         self.hint_turn = message.turn
                         if message.mode == Mode.ANALYSIS and self.top_result is None:
-                            side = 0x01 if (self.hint_turn == chess.WHITE) != self.flip_board else 0x02
+                            side = ClockSide.LEFT if (self.hint_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
                             DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=False,
                                                              beep=self.dgttranslate.bl(BeepLevel.NO), duration=0))
                         break
@@ -839,14 +841,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 time_left = 0
                             if time_right < 0:
                                 time_right = 0
-                        # @todo Make this independent from side DGT Hex codes
-                        side = 0x01 if (message.turn == chess.WHITE) != self.flip_board else 0x02
+                        side = ClockSide.LEFT if (message.turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
                         DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right,
                                                         side=side, wait=message.wait, callback=message.callback))
                         break
                     if case(MessageApi.CLOCK_RESUME):
-                        # @todo Make this independent from side DGT Hex codes
-                        side = 0x01 if (message.turn == chess.WHITE) != self.flip_board else 0x02
+                        side = ClockSide.LEFT if (message.turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
                         DisplayDgt.show(Dgt.CLOCK_RESUME(side=side, wait=message.wait, callback=message.callback))
                         break
                     if case(MessageApi.CLOCK_STOP):
@@ -899,7 +899,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.engine_level_index = level
                             logging.debug("Map-Fen: New level")
                             text = self.dgttranslate.text('M10_level', str(level).rjust(2))
-                            self.fire(Event.LEVEL(level=level, level_text=text))
+                            self.fire(Event.LEVEL(level=level, level_text=text, ok_text=False))
                         elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":
                             logging.debug("Map-Fen: New game")
                             self.draw_setup_pieces = False
@@ -911,7 +911,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 self.book_index = book_index
                                 logging.debug("Map-Fen: Opening book [%s]", b[1])
                                 text = self.dgttranslate.text('M10_default', b[0])
-                                self.fire(Event.SET_OPENING_BOOK(book=b, book_text=text))
+                                self.fire(Event.SET_OPENING_BOOK(book=b, book_text=text, ok_text=False))
                                 self.reset_menu_results()
                             except IndexError:
                                 pass
@@ -923,9 +923,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                     eng = self.installed_engines[self.engine_index]
                                     logging.debug("Map-Fen: Engine name [%s]", eng[1])
                                     eng_text = self.dgttranslate.text('M10_default', eng[1])
+
                                     level = self.engine_level_index if self.engine_level_result is None else self.engine_level_result
-                                    text = self.dgttranslate.text('M10_level', str(level).rjust(2))
-                                    self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, level=level, level_text=text))
+                                    lvl_text = self.dgttranslate.text('M10_level', str(level).rjust(2))
+                                    self.fire(Event.LEVEL(level=level, level_text=lvl_text, ok_text=False))
+                                    self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, ok_text=False))
                                     self.engine_restart = True
                                     self.reset_menu_results()
                                 except IndexError:
@@ -937,7 +939,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             text = self.dgttranslate.text(mode_map[fen].value)
                             text.beep = map_bl  # BeepLevel is Map not Button
                             text.duration = 1  # wait 1sec not forever
-                            self.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], mode_text=text))
+                            self.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], mode_text=text,ok_text=False))
                             self.reset_menu_results()
                         elif fen in self.time_control_fixed_map:
                             logging.debug("Map-Fen: Time control fixed")
@@ -947,7 +949,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             text.beep = map_bl  # BeepLevel is Map not Button
                             text.duration = 1  # wait 1sec not forever
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_fixed_map[fen],
-                                                             time_text=text))
+                                                             time_text=text, ok_text=False))
                             self.reset_menu_results()
                         elif fen in self.time_control_blitz_map:
                             logging.debug("Map-Fen: Time control blitz")
@@ -957,7 +959,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             text.beep = map_bl  # BeepLevel is Map not Button
                             text.duration = 1  # wait 1sec not forever
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_blitz_map[fen],
-                                                             time_text=text))
+                                                             time_text=text, ok_text=False))
                             self.reset_menu_results()
                         elif fen in self.time_control_fisch_map:
                             logging.debug("Map-Fen: Time control fischer")
@@ -967,7 +969,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             text.beep = map_bl  # BeepLevel is Map not Button
                             text.duration = 1  # wait 1sec not forever
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_fisch_map[fen],
-                                                             time_text=text))
+                                                             time_text=text, ok_text=False))
                             self.reset_menu_results()
                         elif fen in shutdown_map:
                             logging.debug("Map-Fen: shutdown")

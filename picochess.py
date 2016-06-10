@@ -563,7 +563,7 @@ def main():
                     logging.debug("setting engine to level %i", event.level)
                     if engine.level(event.level):
                         engine.send()
-                        DisplayMsg.show(Message.LEVEL(level=event.level, level_text=event.level_text))
+                        DisplayMsg.show(Message.LEVEL(level=event.level, level_text=event.level_text, ok_text=event.ok_text))
                     break
 
                 if case(EventApi.NEW_ENGINE):
@@ -602,20 +602,22 @@ def main():
                         # Restore options - this doesn't deal with any
                         # supplementary uci options sent 'in game', see event.UCI_OPTION_SET
                         engine_startup()
+
                         # Send user selected engine level to new engine
-                        if event.level and engine.level(event.level):
-                            engine.send()
-                            DisplayMsg.show(Message.LEVEL(level=event.level, level_text=event.level_text))
+                        # if event.level and engine.level(event.level):
+                        #     engine.send()
+                        #     DisplayMsg.show(Message.LEVEL(level=event.level, level_text=event.level_text, ok_text=event.ok_text))
+
                         # All done - rock'n'roll
                         if not engine_fallback:
                             DisplayMsg.show(Message.ENGINE_READY(eng=event.eng, engine_name=engine_name,
                                                                  eng_text=event.eng_text,
                                                                  has_levels=engine.has_levels(),
-                                                                 has_960=engine.has_chess960()))
+                                                                 has_960=engine.has_chess960(), ok_text=event.ok_text))
                         else:
                             DisplayMsg.show(Message.ENGINE_FAIL())
                         set_wait_state()
-                        DisplayMsg.show(Message.WAIT_STATE())
+                        # DisplayMsg.show(Message.WAIT_STATE())
                         # Go back to analysing or observing
                         if interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
                             analyse(game)
@@ -647,7 +649,7 @@ def main():
                     DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control))
                     game_declared = False
                     set_wait_state()
-                    DisplayMsg.show(Message.WAIT_STATE())
+                    # DisplayMsg.show(Message.WAIT_STATE())
                     break
 
                 if case(EventApi.PAUSE_RESUME):
@@ -715,7 +717,7 @@ def main():
                     DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control))
                     game_declared = False
                     set_wait_state()
-                    DisplayMsg.show(Message.WAIT_STATE())
+                    # DisplayMsg.show(Message.WAIT_STATE())
                     break
 
                 if case(EventApi.DRAWRESIGN):
@@ -772,18 +774,18 @@ def main():
                     if engine.is_pondering() and interaction_mode == Mode.NORMAL:
                         stop_search()  # if change from ponder modes to normal, also stops the pondering
                     set_wait_state()
-                    DisplayMsg.show(Message.INTERACTION_MODE(mode=event.mode, mode_text=event.mode_text))
+                    DisplayMsg.show(Message.INTERACTION_MODE(mode=event.mode, mode_text=event.mode_text, ok_text=event.ok_text))
                     break
 
                 if case(EventApi.SET_OPENING_BOOK):
                     logging.debug("changing opening book [%s]", event.book[1])
                     bookreader = chess.polyglot.open_reader(event.book[1])
-                    DisplayMsg.show(Message.OPENING_BOOK(book_name=event.book[0], book_text=event.book_text))
+                    DisplayMsg.show(Message.OPENING_BOOK(book_name=event.book[0], book_text=event.book_text, ok_text=event.ok_text))
                     break
 
                 if case(EventApi.SET_TIME_CONTROL):
                     time_control = event.time_control
-                    DisplayMsg.show(Message.TIME_CONTROL(time_text=event.time_text))
+                    DisplayMsg.show(Message.TIME_CONTROL(time_text=event.time_text, ok_text=event.ok_text))
                     break
 
                 if case(EventApi.OUT_OF_TIME):

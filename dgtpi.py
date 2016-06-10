@@ -122,7 +122,7 @@ class DgtPi(DgtIface):
     def display_move_on_clock(self, move, fen, side, beep=False):
         bit_board = Board(fen)
         move_text = bit_board.san(move)
-        if side == 0x02:
+        if side == ClockSide.RIGHT:
             move_text = move_text.rjust(11)
         text = self.dgttranslate.move(move_text)
         self._display_on_dgt_pi(text, beep)
@@ -155,7 +155,7 @@ class DgtPi(DgtIface):
             self.dgtserial.write_board_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
 
     def stop_clock(self):
-        self.resume_clock(0x04)
+        self.resume_clock(ClockSide.NONE)
 
     def resume_clock(self, side):
         l_hms = self.time_left
@@ -165,9 +165,9 @@ class DgtPi(DgtIface):
             return
 
         lr = rr = 0
-        if side == 0x01:
+        if side == ClockSide.LEFT:
             lr = 1
-        if side == 0x02:
+        if side == ClockSide.RIGHT:
             rr = 1
         with self.lib_lock:
             res = self.lib.dgtpicom_run(lr, rr)
@@ -181,7 +181,7 @@ class DgtPi(DgtIface):
             if res < 0:
                 logging.warning('Finally failed %i', res)
             else:
-                self.clock_running = (side != 0x04)
+                self.clock_running = (side != ClockSide.NONE)
 
     def start_clock(self, time_left, time_right, side):
         self.time_left = hours_minutes_seconds(time_left)
@@ -190,9 +190,9 @@ class DgtPi(DgtIface):
         r_hms = self.time_right
 
         lr = rr = 0
-        if side == 0x01:
+        if side == ClockSide.LEFT:
             lr = 1
-        if side == 0x02:
+        if side == ClockSide.RIGHT:
             rr = 1
         with self.lib_lock:
             res = self.lib.dgtpicom_set_and_run(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
@@ -206,4 +206,4 @@ class DgtPi(DgtIface):
             if res < 0:
                 logging.warning('Finally failed %i', res)
             else:
-                self.clock_running = (side != 0x04)
+                self.clock_running = (side != ClockSide.NONE)

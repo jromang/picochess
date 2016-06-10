@@ -65,13 +65,13 @@ class DgtHw(DgtIface):
         if self.enable_dgt_3000:
             bit_board = Board(fen)
             move_text = bit_board.san(move)
-            if side == 0x02:
+            if side == ClockSide.RIGHT:
                 move_text = move_text.rjust(8)
             text = self.dgttranslate.move(move_text)
             self._display_on_dgt_3000(text, beep)
         else:
             move_text = move.uci()
-            if side == 0x02:
+            if side == ClockSide.RIGHT:
                 move_text = move_text.rjust(6)
             self._display_on_dgt_xl(move_text, beep)
 
@@ -93,7 +93,7 @@ class DgtHw(DgtIface):
             self.lib.write([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
 
     def stop_clock(self):
-        self.resume_clock(0x04)
+        self.resume_clock(ClockSide.NONE)
 
     def resume_clock(self, side):
         l_hms = self.time_left
@@ -103,16 +103,16 @@ class DgtHw(DgtIface):
             return
 
         lr = rr = 0
-        if side == 0x01:
+        if side == ClockSide.LEFT:
             lr = 1
-        if side == 0x02:
+        if side == ClockSide.RIGHT:
             rr = 1
         with self.lib_lock:
             res = self.lib.set_and_run(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
             if res < 0:
                 logging.warning('Finally failed %i', res)
             else:
-                self.clock_running = (side != 0x04)
+                self.clock_running = (side != ClockSide.NONE)
 
     def start_clock(self, time_left, time_right, side):
         self.time_left = hours_minutes_seconds(time_left)

@@ -25,20 +25,20 @@ class DgtVr(DgtIface):
         super(DgtVr, self).__init__(dgtserial, dgttranslate, enable_revelation_leds)
         # virtual lib
         self.rt = None
-        self.time_side = None
+        self.time_side = ClockSide.NONE
         # setup virtual clock
         DisplayMsg.show(Message.DGT_CLOCK_VERSION(main_version=0, sub_version=0, attached="virtual"))
 
     # (START) dgtserial class simulation
     def runclock(self):
-        if self.time_side == 1:
+        if self.time_side == ClockSide.LEFT:
             h, m, s = self.time_left
             time_left = 3600*h + 60*m + s - 1
             if time_left <= 0:
                 print('Clock flag: left')
                 self.rt.stop()
             self.time_left = hours_minutes_seconds(time_left)
-        else:
+        if self.time_side == ClockSide.RIGHT:
             h, m, s = self.time_right
             time_right = 3600*h + 60*m + s - 1
             if time_right <= 0:
@@ -58,7 +58,7 @@ class DgtVr(DgtIface):
             text = bit_board.san(move)
         else:
             text = str(move)
-        if side == 0x02:
+        if side == ClockSide.RIGHT:
             text = text.rjust(8 if self.enable_dgt_3000 else 6)
         logging.debug(text)
         print('Clock move: {} Beep: {}'. format(text, beep))
@@ -71,7 +71,7 @@ class DgtVr(DgtIface):
         if self.clock_running or force:
             print('Clock showing time again')
         else:
-            logging.debug('Clock isnt running - no need for endClock')
+            logging.debug('virtual clock isnt running - no need for endClock')
 
     def stop_clock(self):
         if self.rt:
@@ -89,12 +89,13 @@ class DgtVr(DgtIface):
         self.time_right = hours_minutes_seconds(time_right)
         self.time_side = side
 
-        print('Clock time started at {} - {}'. format(self.time_left, self.time_right))
+        print('Clock time started at {} - {} on {}'. format(self.time_left, self.time_right, side))
         if self.rt:
             self.rt.stop()
-        self.rt = RepeatedTimer(1, self.runclock)
-        self.rt.start()
-        self.clock_running = (side != 0x04)
+        if side != ClockSide.NONE:
+            self.rt = RepeatedTimer(1, self.runclock)
+            self.rt.start()
+        self.clock_running = (side != ClockSide.NONE)
 
     def light_squares_revelation_board(self, squares):
         pass
