@@ -555,8 +555,9 @@ def main():
                         result = chess.uci.BestMove(bestmove=move, ponder=None)
                         game = handle_move(result, game)
                         # deactivated cause of issue #185 => prg otherwise running in "sliding part"
-                        # if check_game_state(game, interaction_mode):
-                        # legal_fens = compute_legal_fens(game)
+                        # reactivated cause of picochess now not working in non-normal mode => @fix it!
+                        if check_game_state(game, play_mode):
+                            legal_fens = compute_legal_fens(game)
                     break
 
                 if case(EventApi.LEVEL):
