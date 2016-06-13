@@ -198,7 +198,7 @@ def main():
         engine.stop()
 
     def stop_clock():
-        DisplayMsg.show(Message.CLOCK_STOP(callback=tc_stop_callback()))
+        DisplayMsg.show(Message.CLOCK_STOP(callback=tc_stop_callback))
 
     def stop_search_and_clock():
         stop_clock()
@@ -217,6 +217,7 @@ def main():
         """
         Check if the game has ended or not ; it also sends Message to Displays if the game has ended.
         :param game:
+        :param play_mode:
         :return: True is the game continues, False if it has ended
         """
         result = None
@@ -758,7 +759,7 @@ def main():
                     break
 
                 if case(EventApi.SET_INTERACTION_MODE):
-                    if interaction_mode == Mode.NORMAL or interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
+                    if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
                         stop_clock()  # only stop, if the clock is really running
                     interaction_mode = event.mode
                     if engine.is_thinking():

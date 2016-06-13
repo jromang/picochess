@@ -374,9 +374,15 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
     def process_button2(self):
         if self.top_result is None:
             if self.engine_finished:
+                # @todo Protect against multi entrance of Alt-move
+                self.engine_finished = False  # This is not 100% ok, but for the moment better as nothing
                 self.fire(Event.ALTERNATIVE_MOVE())
             else:
-                self.fire(Event.PAUSE_RESUME())
+                if self.mode_result in (Mode.ANALYSIS, Mode.KIBITZ):
+                    text = self.dgttranslate.text('B00_nofunction')
+                    DisplayDgt.show(text)
+                else:
+                    self.fire(Event.PAUSE_RESUME())
 
     def process_button3(self):
         if self.top_result is None:
@@ -726,9 +732,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         # self.mode_index = Mode.NORMAL  # @todo
                         self.reset_menu_results()
                         self.engine_finished = False
-                        time_left, time_right = message.time_control.current_clock_time(flip_board=self.flip_board)
                         DisplayDgt.show(self.dgttranslate.text('C10_newgame'))
-                        DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE, wait=True, callback=None))
+                        if self.mode_result in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
+                            time_left, time_right = message.time_control.current_clock_time(flip_board=self.flip_board)
+                            DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right,
+                                                            side=ClockSide.NONE, wait=True, callback=None))
                         break
                     if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
                         DisplayDgt.show(Dgt.LIGHT_CLEAR())
