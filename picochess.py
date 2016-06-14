@@ -198,14 +198,20 @@ def main():
         engine.stop()
 
     def stop_clock():
-        DisplayMsg.show(Message.CLOCK_STOP(callback=tc_stop_callback))
+        if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
+            DisplayMsg.show(Message.CLOCK_STOP(callback=tc_stop_callback))
+        else:
+            logging.warning('wrong mode: {}'.format(interaction_mode))
 
     def stop_search_and_clock():
         stop_clock()
         stop_search()
 
     def start_clock(wait=False):
-        DisplayMsg.show(Message.CLOCK_START(turn=game.turn, time_control=time_control, wait=wait, callback=tc_start_callback))
+        if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
+            DisplayMsg.show(Message.CLOCK_START(turn=game.turn, time_control=time_control, wait=wait, callback=tc_start_callback))
+        else:
+            logging.warning('wrong mode: {}'.format(interaction_mode))
 
     def tc_start_callback():
         time_control.start(game.turn)
