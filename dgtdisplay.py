@@ -732,7 +732,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         # self.mode_index = Mode.NORMAL  # @todo
                         self.reset_menu_results()
                         self.engine_finished = False
-                        DisplayDgt.show(self.dgttranslate.text('C10_newgame'))
+                        text = self.dgttranslate.text('C10_newgame')
+                        text.wait = message.wait  # in case of GAME_ENDS before, wait for "abort"
+                        DisplayDgt.show(text)
                         if self.mode_result in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
                             time_left, time_right = message.time_control.current_clock_time(flip_board=self.flip_board)
                             DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right,
@@ -790,8 +792,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         DisplayDgt.show(self.dgttranslate.text('C00_takeback'))
                         break
                     if case(MessageApi.GAME_ENDS):
-                        ge = message.result.value
-                        DisplayDgt.show(self.dgttranslate.text(ge))
+                        if not self.engine_restart:  # filter out the shutdown/reboot process
+                            ge = message.result.value
+                            DisplayDgt.show(self.dgttranslate.text(ge))
                         break
                     if case(MessageApi.INTERACTION_MODE):
                         self.mode_index = message.mode

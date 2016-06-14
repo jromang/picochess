@@ -634,11 +634,13 @@ def main():
                     else:  # start normal new game if engine can't handle the user wish
                         event.uci960 = False
                         logging.warning('engine doesnt support 960 mode')
+                    wait = False
                     if game.move_stack:
                         if game.is_game_over() or game_declared:
                             custom_fen = getattr(game, 'custom_fen', None)
                             DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode,
                                                               game=copy.deepcopy(game), custom_fen=custom_fen))
+                            wait=True
                     game = chess.Board(event.fen, event.uci960)
                     game.custom_fen = event.fen
                     legal_fens = compute_legal_fens(game)
@@ -647,7 +649,7 @@ def main():
                     interaction_mode = Mode.NORMAL
                     last_computer_fen = None
                     searchmoves.reset()
-                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control))
+                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, wait=wait))
                     game_declared = False
                     set_wait_state()
                     break
@@ -700,12 +702,14 @@ def main():
                     break
 
                 if case(EventApi.NEW_GAME):
+                    wait=False
                     if game.move_stack:
                         logging.debug("starting a new game")
                         if not (game.is_game_over() or game_declared):
                             custom_fen = getattr(game, 'custom_fen', None)
                             DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode,
                                                               game=copy.deepcopy(game), custom_fen=custom_fen))
+                            wait=True
                         game = chess.Board()
                     legal_fens = compute_legal_fens(game)
                     # interaction_mode = Mode.NORMAL @todo
@@ -714,7 +718,7 @@ def main():
                     time_control.reset()
                     searchmoves.reset()
 
-                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control))
+                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, wait=wait))
                     game_declared = False
                     set_wait_state()
                     break

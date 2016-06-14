@@ -34,7 +34,7 @@ class KeyboardInput(Observable, threading.Thread):
         print('#' * 42 + ' PicoChess v' + version + ' ' + '#' * 42)
         print('To play a move enter the from-to squares like "e2e4". To play this move on board, enter "go".')
         print('When the computer displays its move, also type "go" to actually do it on the board (see above).')
-        print('Other commands are: newgame:<w|b>, print:<fen>, setup:<fen>, fen:<fen>, button:<0-4>, lever:<l|r>')
+        print('Other commands are: newgame:<w|b>, print:<fen>, setup:<fen>, fen:<fen>, button:<0-5>, lever:<l|r>')
         print('')
         print('This console mode is mainly for development. Better activate picochess together with a DGT-Board ;-)')
         print('#' * 100)
@@ -77,8 +77,10 @@ class KeyboardInput(Observable, threading.Thread):
                         self.fire(Event.DGT_FEN(fen=fen.split(' ')[0]))
                     elif cmd.startswith('button:'):
                         button = int(cmd.split(':')[1])
-                        if button not in range(5):
+                        if button not in range(6):
                             raise ValueError(button)
+                        if button == 5:  # make it to power button
+                            button = 0x11
                         self.fire(Event.DGT_BUTTON(button=button))
                     elif cmd.startswith('lever:'):
                         lever = cmd.split(':')[1]
