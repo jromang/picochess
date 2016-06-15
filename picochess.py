@@ -527,7 +527,6 @@ def main():
     engine_startup()  # send the args options to the engine
 
     # Startup - external
-    # text = Dgt.DISPLAY_TEXT(l=None, m='bl   5', s=None, beep=False, duration=0)
     text = dgttranslate.text('B00_tc_blitz', '   5')
     text.beep = False
     DisplayMsg.show(Message.STARTUP_INFO(info={"interaction_mode": interaction_mode, "play_mode": play_mode,

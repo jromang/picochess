@@ -35,10 +35,10 @@ class DgtIface(DisplayDgt, Thread):
         self.time_left = None
         self.time_right = None
 
-        self.timer = None
-        self.timer_running = False
+        self.maxtimer = None
+        self.maxtimer_running = False
         self.clock_running = False
-        self.duration_factor = 3  # This is for testing the duration - remove it lateron!
+        self.time_factor = 3  # This is for testing the duration - remove it lateron!
         # delayed task array
         self.tasks = []
         self.do_process = True
@@ -68,26 +68,26 @@ class DgtIface(DisplayDgt, Thread):
     def start_clock(self, time_left, time_right, side):
         raise NotImplementedError()
 
-    def stopped_timer(self):
-        self.timer_running = False
+    def stopped_maxtimer(self):
+        self.maxtimer_running = False
         if self.clock_running:
             logging.debug('showing the running clock again')
             self.display_time_on_clock(force=False)
         else:
-            logging.debug('clock not running - ignored duration')
+            logging.debug('clock not running - ignored maxtime')
         logging.debug('tasks in stop: {}'.format(self.tasks))
         while self.tasks:
             message = self.tasks.pop(0)
             self.process_message(message)
-            if self.timer_running:  # run over the task list until a duration command was processed
+            if self.maxtimer_running:  # run over the task list until a maxtime command was processed
                 break
 
     def process_message(self, message):
-        if hasattr(message, 'duration') and message.duration > 0:
-            self.timer = Timer(message.duration * self.duration_factor, self.stopped_timer)
-            self.timer.start()
-            logging.debug('showing {} for {} secs'.format(message, message.duration * self.duration_factor))
-            self.timer_running = True
+        if hasattr(message, 'maxtime') and message.maxtime > 0:
+            self.maxtimer = Timer(message.maxtime * self.time_factor, self.stopped_maxtimer)
+            self.maxtimer.start()
+            logging.debug('showing {} for {} secs'.format(message, message.maxtime * self.time_factor))
+            self.maxtimer_running = True
         with self.msg_lock:
             logging.debug("handle DgtApi: %s", message)
             for case in switch(message):
@@ -135,7 +135,7 @@ class DgtIface(DisplayDgt, Thread):
                     if message.attached == 'i2c':
                         self.enable_dgt_pi = True
                     self.show(Dgt.DISPLAY_TEXT(l='picoChs ' + version, m='pico ' + version, s='pic' + version,
-                                               wait=True, beep=True, duration=2))
+                                               wait=True, beep=True, maxtime=2))
                     break
                 if case(DgtApi.CLOCK_TIME):
                     self.time_left = message.time_left
@@ -153,23 +153,23 @@ class DgtIface(DisplayDgt, Thread):
                 logging.debug("received command from dgt_queue: %s", message)
 
                 self.do_process = True
-                if self.timer_running:
+                if self.maxtimer_running:
                     if hasattr(message, 'wait'):
                         if message.wait:
                             self.tasks.append(message)
                             logging.debug('tasks delayed: {}'.format(self.tasks))
                             self.do_process = False
                         else:
-                            logging.debug('ignore former duration')
-                            self.timer.cancel()
-                            self.timer_running = False
+                            logging.debug('ignore former maxtime')
+                            self.maxtimer.cancel()
+                            self.maxtimer_running = False
                             if self.tasks:
                                 logging.debug('delete following tasks: {}'.format(self.tasks))
                                 self.tasks = []
                     else:
-                        logging.debug('command doesnt change the clock display => no need to interrupt duration timer')
+                        logging.debug('command doesnt change the clock display => no need to interrupt max timer')
                 else:
-                    logging.debug('duration timer not running')
+                    logging.debug('max timer not running')
 
                 if self.do_process:
                     self.process_message(message)
