@@ -211,7 +211,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if self.last_move:
                 side = ClockSide.LEFT if (self.last_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
                 text = Dgt.DISPLAY_MOVE(move=self.last_move, fen=self.last_fen, side=side, wait=False,
-                                        beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
+                                        beep=self.dgttranslate.bl(BeepLevel.BUTTON), maxtime=1)
             else:
                 text = self.dgttranslate.text('B10_nomove')
             DisplayDgt.show(text)
@@ -389,7 +389,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if self.hint_move:
                 side = ClockSide.LEFT if (self.hint_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
                 text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=False,
-                                        beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
+                                        beep=self.dgttranslate.bl(BeepLevel.BUTTON), maxtime=1)
             else:
                 text = self.dgttranslate.text('B10_nomove')
             DisplayDgt.show(text)
@@ -673,7 +673,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         if self.play_move and self.mode_result in (Mode.NORMAL, Mode.REMOTE):
             side = ClockSide.LEFT if (self.play_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
             text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side, wait=wait,
-                                    beep=self.dgttranslate.bl(BeepLevel.BUTTON), duration=1)
+                                    beep=self.dgttranslate.bl(BeepLevel.BUTTON), maxtime=1)
         else:
             text = Dgt.DISPLAY_TIME(force=force, wait=True)
         DisplayDgt.show(text)
@@ -723,7 +723,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         uci_move = move.uci()
                         side = ClockSide.LEFT if (turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
                         DisplayDgt.show(Dgt.DISPLAY_MOVE(move=move, fen=message.fen, side=side, wait=message.wait,
-                                                         beep=self.dgttranslate.bl(BeepLevel.CONFIG), duration=0))
+                                                         beep=self.dgttranslate.bl(BeepLevel.CONFIG), maxtime=0))
                         DisplayDgt.show(Dgt.LIGHT_SQUARES(squares=(uci_move[0:2], uci_move[2:4])))
                         break
                     if case(MessageApi.START_NEW_GAME):
@@ -824,7 +824,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         if message.mode == Mode.ANALYSIS and self.top_result is None:
                             side = ClockSide.LEFT if (self.hint_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
                             DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=False,
-                                                             beep=self.dgttranslate.bl(BeepLevel.NO), duration=0))
+                                                             beep=self.dgttranslate.bl(BeepLevel.NO), maxtime=0))
                         break
                     if case(MessageApi.SYSTEM_INFO):
                         self.ip = ' '.join(message.info["ip"].split('.')[2:])
@@ -946,7 +946,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             logging.debug("Map-Fen: Interaction mode [%s]", mode_map[fen])
                             text = self.dgttranslate.text(mode_map[fen].value)
                             text.beep = map_bl  # BeepLevel is Map not Button
-                            text.duration = 1  # wait 1sec not forever
+                            text.maxtime = 1  # wait 1sec not forever
                             self.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], mode_text=text,ok_text=False))
                             self.reset_menu_results()
                         elif fen in self.time_control_fixed_map:
@@ -955,7 +955,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.time_control_fixed_index = list(self.time_control_fixed_map.keys()).index(fen)
                             text = self.dgttranslate.text('B00_tc_fixed', self.time_control_fixed_list[self.time_control_fixed_index])
                             text.beep = map_bl  # BeepLevel is Map not Button
-                            text.duration = 1  # wait 1sec not forever
+                            text.maxtime = 1  # wait 1sec not forever
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_fixed_map[fen],
                                                              time_text=text, ok_text=False))
                             self.reset_menu_results()
@@ -965,7 +965,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.time_control_blitz_index = list(self.time_control_blitz_map.keys()).index(fen)
                             text = self.dgttranslate.text('B00_tc_blitz', self.time_control_blitz_list[self.time_control_blitz_index])
                             text.beep = map_bl  # BeepLevel is Map not Button
-                            text.duration = 1  # wait 1sec not forever
+                            text.maxtime = 1  # wait 1sec not forever
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_blitz_map[fen],
                                                              time_text=text, ok_text=False))
                             self.reset_menu_results()
@@ -975,7 +975,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.time_control_fisch_index = list(self.time_control_fisch_map.keys()).index(fen)
                             text = self.dgttranslate.text('B00_tc_fisch', self.time_control_fisch_list[self.time_control_fisch_index])
                             text.beep = map_bl  # BeepLevel is Map not Button
-                            text.duration = 1  # wait 1sec not forever
+                            text.maxtime = 1  # wait 1sec not forever
                             self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_fisch_map[fen],
                                                              time_text=text, ok_text=False))
                             self.reset_menu_results()

@@ -305,8 +305,20 @@ def main():
         nonlocal last_computer_fen
         nonlocal searchmoves
         last_computer_fen = None
+
+        # clock must be stoped BEFORE the "book_move" event cause SetNRun resets the clock display
         if interaction_mode == Mode.NORMAL:
             stop_clock()
+        elif interaction_mode == Mode.REMOTE or interaction_mode == Mode.OBSERVE:
+            stop_search_and_clock()
+        elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
+            stop_search()
+        # wait means "in_book" so lateron moves messages must wait too for delay time
+        if wait:
+            DisplayMsg.show(Message.BOOK_MOVE(result=event.result))
+
+        if interaction_mode == Mode.NORMAL:
+            # stop_clock()
             # If UserMove: reset all alternative moves
             # If ComputerMove: disallow this move, and finally reset all if DONE_ON_BOARD event @see: process_fen()
             if (play_mode == PlayMode.USER_WHITE and game.turn == chess.WHITE)\
@@ -323,7 +335,7 @@ def main():
                     think(game, time_control, wait=not args.disable_ok_move)
 
         elif interaction_mode == Mode.REMOTE:
-            stop_search_and_clock()
+            # stop_search_and_clock()
             # If UserMove: reset all alternative moves
             # If Remote Move: same process as for computer move above
             if (play_mode == PlayMode.USER_WHITE and game.turn == chess.WHITE)\
@@ -340,13 +352,13 @@ def main():
                     observe(game, time_control)
 
         elif interaction_mode == Mode.OBSERVE:
-            stop_search_and_clock()
+            # stop_search_and_clock()
             DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode))
             if check_game_state(game, play_mode):
                 observe(game, time_control)
 
         elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
-            stop_search()
+            # stop_search()
             DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode))
             if check_game_state(game, play_mode):
                 analyse(game)
@@ -515,7 +527,6 @@ def main():
     engine_startup()  # send the args options to the engine
 
     # Startup - external
-    # text = Dgt.DISPLAY_TEXT(l=None, m='bl   5', s=None, beep=False, duration=0)
     text = dgttranslate.text('B00_tc_blitz', '   5')
     text.beep = False
     DisplayMsg.show(Message.STARTUP_INFO(info={"interaction_mode": interaction_mode, "play_mode": play_mode,
@@ -740,8 +751,6 @@ def main():
                     break
 
                 if case(EventApi.BEST_MOVE):
-                    if event.inbook:
-                        DisplayMsg.show(Message.BOOK_MOVE(result=event.result))
                     game = handle_move(event.result, game, event.inbook)
                     legal_fens = compute_legal_fens(game)
                     break

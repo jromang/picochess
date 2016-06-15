@@ -144,7 +144,7 @@ class DgtSerial(object):
                     else:
                         text_l, text_m, text_s = 'BT E-board', 'BT board', 'ok bt'
                     channel = 'BT'
-                text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, wait=True, beep=False, duration=1)
+                text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, wait=True, beep=False, maxtime=1)
                 DisplayMsg.show(Message.EBOARD_VERSION(text=text, channel=channel))
                 if self.rt.is_running():
                     logging.warning('watchdog timer is already running')
@@ -494,7 +494,7 @@ class DgtSerial(object):
                         break
 
                 s = 'Board' + self.waitchars[wait_counter]
-                text = Dgt.DISPLAY_TEXT(l='no e-' + s, m='no' + s, s=s, wait=True, beep=False, duration=0)
+                text = Dgt.DISPLAY_TEXT(l='no e-' + s, m='no' + s, s=s, wait=True, beep=False, maxtime=0)
                 DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text, is_pi=self.is_pi))
                 wait_counter = (wait_counter + 1) % len(self.waitchars)
                 time.sleep(0.1)

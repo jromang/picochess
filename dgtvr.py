@@ -45,8 +45,8 @@ class DgtVr(DgtIface):
                 print('Clock flag: right')
                 self.rt.stop()
             self.time_right = hours_minutes_seconds(time_right)
-        if self.timer_running:
-            print('Clock duration not run out')
+        if self.maxtimer_running:
+            print('Clock maxtime not run out')
         else:
             print('Clock time: {} - {}'.format(self.time_left, self.time_right))
         DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=self.time_left, time_right=self.time_right))
