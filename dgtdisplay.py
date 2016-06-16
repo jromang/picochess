@@ -690,7 +690,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.engine_index = self.installed_engines.index(message.eng)
                         self.engine_has_levels = message.has_levels
                         self.engine_has_960 = message.has_960
-                        DisplayDgt.show(message.eng_text)
+                        if self.show_ok_message or not message.ok_text:
+                            DisplayDgt.show(message.eng_text)
                         self.engine_restart = False
                         self.exit_display(force=message.ok_text)
                         break
@@ -775,15 +776,18 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         if self.engine_restart:
                             pass
                         else:
-                            DisplayDgt.show(message.level_text)
+                            if self.show_ok_message or not message.ok_text:
+                                DisplayDgt.show(message.level_text)
                             self.exit_display(force=message.ok_text)
                         break
                     if case(MessageApi.TIME_CONTROL):
-                        DisplayDgt.show(message.time_text)
+                        if self.show_ok_message or not message.ok_text:
+                            DisplayDgt.show(message.time_text)
                         self.exit_display(force=message.ok_text)
                         break
                     if case(MessageApi.OPENING_BOOK):
-                        DisplayDgt.show(message.book_text)
+                        if self.show_ok_message or not message.ok_text:
+                            DisplayDgt.show(message.book_text)
                         self.exit_display(force=message.ok_text)
                         break
                     if case(MessageApi.USER_TAKE_BACK):
@@ -800,7 +804,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.mode_index = message.mode
                         self.mode_result = message.mode  # needed, otherwise Q-placing wont work correctly
                         self.engine_finished = False
-                        DisplayDgt.show(message.mode_text)
+                        if self.show_ok_message or not message.ok_text:
+                            DisplayDgt.show(message.mode_text)
                         self.exit_display(force=message.ok_text)
                         break
                     if case(MessageApi.PLAY_MODE):
