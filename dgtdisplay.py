@@ -86,9 +86,9 @@ drawresign_map = OrderedDict([
 
 
 class DgtDisplay(Observable, DisplayMsg, threading.Thread):
-    def __init__(self, disable_ok_move, dgttranslate):
+    def __init__(self, disable_ok_message, dgttranslate):
         super(DgtDisplay, self).__init__()
-        self.ok_moves_messages = not disable_ok_move
+        self.show_ok_message = not disable_ok_message
         self.dgttranslate = dgttranslate
 
         self.flip_board = False
@@ -749,7 +749,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.play_fen = None
                         self.play_turn = None
                         self.engine_finished = False
-                        if self.ok_moves_messages:
+                        if self.show_ok_message:
                             DisplayDgt.show(self.dgttranslate.text('K05_okpico'))
                         self.reset_menu_results()
                         break
@@ -758,14 +758,14 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.last_fen = message.fen
                         self.last_turn = message.turn
                         self.engine_finished = False
-                        if self.ok_moves_messages:
+                        if self.show_ok_message:
                             DisplayDgt.show(self.dgttranslate.text('K05_okuser'))
                         break
                     if case(MessageApi.REVIEW_MOVE):
                         self.last_move = message.move
                         self.last_fen = message.fen
                         self.last_turn = message.turn
-                        if self.ok_moves_messages:
+                        if self.show_ok_message:
                             DisplayDgt.show(self.dgttranslate.text('K05_okmove'))
                         break
                     if case(MessageApi.ALTERNATIVE_MOVE):

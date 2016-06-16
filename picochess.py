@@ -267,7 +267,7 @@ def main():
                 time_control.add_inc(not game.turn)
                 DisplayMsg.show(Message.COMPUTER_MOVE_DONE_ON_BOARD())
                 if time_control.mode != TimeMode.FIXED:
-                    start_clock(wait=not args.disable_ok_move)
+                    start_clock(wait=not args.disable_ok_message)
         else:  # Check if this is a previous legal position and allow user to restart from this position
             game_history = copy.deepcopy(game)
             while game_history.move_stack:
@@ -332,7 +332,7 @@ def main():
                 searchmoves.reset()
                 DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
                 if check_game_state(game, play_mode):
-                    think(game, time_control, wait=not args.disable_ok_move)
+                    think(game, time_control, wait=not args.disable_ok_message)
 
         elif interaction_mode == Mode.REMOTE:
             # stop_search_and_clock()
@@ -382,20 +382,20 @@ def main():
     parser.add_argument("-l", "--log-level", choices=['notset', 'debug', 'info', 'warning', 'error', 'critical'],
                         default='warning', help="logging level")
     parser.add_argument("-lf", "--log-file", type=str, help="log to the given file")
-    parser.add_argument("-r", "--remote", type=str, help="remote server running the engine")
-    parser.add_argument("-u", "--user", type=str, help="remote user on server running the engine")
-    parser.add_argument("-p", "--password", type=str, help="password for the remote user")
-    parser.add_argument("-sk", "--server-key", type=str, help="key file used to connect to the remote server")
-    parser.add_argument("-pgn", "--pgn-file", type=str, help="pgn file used to store the games", default='games.pgn')
-    parser.add_argument("-pgn_u", "--pgn-user", type=str, help="user name for the pgn file", default=None)
+    parser.add_argument("-rs", "--remote-server", type=str, help="remote server running the engine")
+    parser.add_argument("-ru", "--remote-user", type=str, help="remote user on server running the engine")
+    parser.add_argument("-rp", "--remote-pass", type=str, help="password for the remote user")
+    parser.add_argument("-rk", "--remote-key", type=str, help="key file used to connect to the remote server")
+    parser.add_argument("-pf", "--pgn-file", type=str, help="pgn file used to store the games", default='games.pgn')
+    parser.add_argument("-pu", "--pgn-user", type=str, help="user name for the pgn file", default=None)
     parser.add_argument("-ar", "--auto-reboot", action='store_true', help="reboot system after update")
     parser.add_argument("-web", "--web-server", dest="web_server_port", nargs="?", const=80, type=int, metavar="PORT",
                         help="launch web server")
-    parser.add_argument("-mail", "--email", type=str, help="email used to send pgn files", default=None)
-    parser.add_argument("-mail_s", "--smtp_server", type=str, help="Adress of email server", default=None)
-    parser.add_argument("-mail_u", "--smtp_user", type=str, help="Username for email server", default=None)
-    parser.add_argument("-mail_p", "--smtp_pass", type=str, help="Password for email server", default=None)
-    parser.add_argument("-mail_enc", "--smtp_encryption", action='store_true',
+    parser.add_argument("-m", "--email", type=str, help="email used to send pgn files", default=None)
+    parser.add_argument("-ms", "--smtp-server", type=str, help="Adress of email server", default=None)
+    parser.add_argument("-mu", "--smtp-user", type=str, help="Username for email server", default=None)
+    parser.add_argument("-mp", "--smtp-pass", type=str, help="Password for email server", default=None)
+    parser.add_argument("-me", "--smtp-encryption", action='store_true',
                         help="use ssl encryption connection to smtp-Server")
     parser.add_argument("-mk", "--mailgun-key", type=str, help="key used to send emails via Mailgun Webservice",
                         default=None)
@@ -406,7 +406,7 @@ def main():
     parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
     parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
     parser.add_argument("-inet", "--enable-internet", action='store_true', help="enable internet lookups")
-    parser.add_argument("-nookmove", "--disable-ok-move", action='store_true', help="disable ok move messages")
+    parser.add_argument("-nook", "--disable-ok-message", action='store_true', help="disable ok confirmation messages")
     parser.add_argument("-v", "--version", action='version', version='%(prog)s version {}'.format(version),
                         help="show current version", default=None)
     parser.add_argument("-pi", "--dgtpi", action='store_true', help="use the dgtpi hardware")
@@ -431,7 +431,7 @@ def main():
     logging.debug('#'*20 + ' PicoChess v' + version + ' ' + '#'*20)
     # log the startup parameters but hide the password fields
     p = copy.copy(vars(args))
-    p['mailgun_key'] = p['server_key'] = p['password'] = p['smtp_pass'] = '*****'
+    p['mailgun_key'] = p['remote_key'] = p['remote_pass'] = p['smtp-pass'] = '*****'
     logging.debug('startup parameters: {}'.format(p))
 
     # Update
@@ -449,7 +449,7 @@ def main():
 
     # This class talks to DgtHw/DgtPi or DgtVr
     dgttranslate = DgtTranslate(args.beep_level, args.language)
-    DgtDisplay(args.disable_ok_move, dgttranslate).start()
+    DgtDisplay(args.disable_ok_message, dgttranslate).start()
 
     # Launch web server
     if args.web_server_port:
@@ -497,8 +497,8 @@ def main():
         logging.debug("ChessTalker disabled")
 
     # Gentlemen, start your engines...
-    engine = UciEngine(args.engine, hostname=args.remote, username=args.user,
-                       key_file=args.server_key, password=args.password)
+    engine = UciEngine(args.engine, hostname=args.remote_server, username=args.remote_user,
+                       key_file=args.remote_key, password=args.remote_pass)
     try:
         engine_name = engine.get().name
     except AttributeError:
