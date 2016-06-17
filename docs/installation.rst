@@ -187,12 +187,12 @@ At start PicoChess looks at the file
 * uci-option = Threads = 4
 * user-voice = en:Elsie
 * computer-voice = en:Marvin
-* disable-ok-move
+* disable-ok-message
 
 To set a particular setting, simply include the appropriate line in the picochess.ini file.
-For example, to the disable default confirmation message on a move, include this line in picochess.ini:
+For example, to the disable default confirmation message, include this line in picochess.ini:
 
-disable-ok-move
+disable-ok-message
 
 To remove a setting, delete the appropriate line or comment it out using the hash character (#) or set the option to false.
 For example, to turn OFF the LED's on the Revelation II chessbot, this line will do:
@@ -211,3 +211,7 @@ the stockfish_human engine already waiting for your kids in the /opt/picochess/e
 An example .ini file can be found at /opt/picochess/picochess.ini.example.
 Uncomment the appropriate options and rename the file to picochess.ini.
 
+Please keep in mind that your picochess.ini file must suit the version of picochess.
+Old picochess.ini versions might not work with newer versions of picochess (picochess.ini.example is always valid).
+If you update picochess by hand or by providing the "inet" flag please take a look for changed settings and update
+picochess.ini accordingly.
