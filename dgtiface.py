@@ -29,7 +29,7 @@ class DgtIface(DisplayDgt, Thread):
         self.dgttranslate = dgttranslate
 
         self.enable_dgt_3000 = False
-        self.enable_dgt_pi = False
+        self.enable_dgt_pi = self.dgtserial.is_pi
         self.clock_found = False
         self.enable_revelation_leds = enable_revelation_leds
         self.time_left = None
@@ -132,8 +132,6 @@ class DgtIface(DisplayDgt, Thread):
                     self.clock_found = True
                     if message.main_version == 2:
                         self.enable_dgt_3000 = True
-                    if message.attached == 'i2c':
-                        self.enable_dgt_pi = True
                     self.show(Dgt.DISPLAY_TEXT(l='picoChs ' + version, m='pico ' + version, s='pic' + version,
                                                wait=True, beep=True, maxtime=2))
                     break

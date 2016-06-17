@@ -27,7 +27,8 @@ class DgtVr(DgtIface):
         self.rt = None
         self.time_side = ClockSide.NONE
         # setup virtual clock
-        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main_version=0, sub_version=0, attached="virtual"))
+        main_version = 2 if dgtserial.is_pi else 0
+        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main_version=main_version, sub_version=0, attached="virtual"))
 
     # (START) dgtserial class simulation
     def runclock(self):

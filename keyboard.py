@@ -17,24 +17,31 @@
 
 import threading
 import chess
-import time
-import logging
 from utilities import *
 
 keyboard_last_fen = None
 
 
 class KeyboardInput(Observable, threading.Thread):
-    def __init__(self):
+    def __init__(self, is_pi):
         super(KeyboardInput, self).__init__()
         self.flip_board = False
+        self.board_plugged_in = True
+        self.rt = RepeatedTimer(1, self.fire_no_board_connection)
+        self.is_pi = is_pi
+
+    def fire_no_board_connection(self):
+        s = 'Board!'
+        text = Dgt.DISPLAY_TEXT(l='no e-' + s, m='no' + s, s=s, wait=True, beep=False, maxtime=0)
+        DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text, is_pi=self.is_pi))
 
     def run(self):
         logging.info('evt_queue ready')
         print('#' * 42 + ' PicoChess v' + version + ' ' + '#' * 42)
         print('To play a move enter the from-to squares like "e2e4". To play this move on board, enter "go".')
         print('When the computer displays its move, also type "go" to actually do it on the board (see above).')
-        print('Other commands are: newgame:<w|b>, print:<fen>, setup:<fen>, fen:<fen>, button:<0-5>, lever:<l|r>')
+        print('Other commands are:')
+        print('newgame:<w|b>, print:<fen>, setup:<fen>, fen:<fen>, button:<0-5>, lever:<l|r>, plug:<in|off>')
         print('')
         print('This console mode is mainly for development. Better activate picochess together with a DGT-Board ;-)')
         print('#' * 100)
@@ -46,20 +53,23 @@ class KeyboardInput(Observable, threading.Thread):
             cmd = raw.lower()
 
             try:
-                if cmd.startswith('newgame:'):
-                    side = cmd.split(':')[1]
-                    if side == 'w':
-                        self.flip_board = False
-                        self.fire(Event.DGT_FEN(fen='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'))
-                    elif side == 'b':
-                        self.flip_board = True
-                        self.fire(Event.DGT_FEN(fen='RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr'))
-                    else:
-                        raise ValueError(raw)
+                if cmd.startswith('print:'):
+                    fen = raw.split(':')[1]
+                    print(chess.Board(fen))
                 else:
-                    if cmd.startswith('print:'):
-                        fen = raw.split(':')[1]
-                        print(chess.Board(fen))
+                    if not self.board_plugged_in and not cmd.startswith('plug:'):
+                        print('The command isnt accepted cause the virtual board is not plugged in')
+                        continue
+                    if cmd.startswith('newgame:'):
+                        side = cmd.split(':')[1]
+                        if side == 'w':
+                            self.flip_board = False
+                            self.fire(Event.DGT_FEN(fen='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'))
+                        elif side == 'b':
+                            self.flip_board = True
+                            self.fire(Event.DGT_FEN(fen='RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr'))
+                        else:
+                            raise ValueError(side)
                     elif cmd.startswith('setup:'):
                         fen = raw.split(':')[1]
                         uci960 = False  # make it easy for the moment
@@ -88,6 +98,19 @@ class KeyboardInput(Observable, threading.Thread):
                             raise ValueError(lever)
                         button = 0x40 if lever == 'r' else -0x40
                         self.fire(Event.DGT_BUTTON(button=button))
+                    elif cmd.startswith('plug:'):
+                        plug = cmd.split(':')[1]
+                        if plug not in ('in', 'off'):
+                            raise ValueError(plug)
+                        if plug == 'in':
+                            self.board_plugged_in = True
+                            self.rt.stop()
+                            text_l, text_m, text_s = 'VirtBoard  ', 'V-Board ', 'VBoard'
+                            text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, wait=True, beep=False, maxtime=1)
+                            DisplayMsg.show(Message.EBOARD_VERSION(text=text, channel='console'))
+                        if plug == 'off':
+                            self.board_plugged_in = False
+                            self.rt.start()
                     elif cmd.startswith('go'):
                         if keyboard_last_fen is not None:
                             self.fire(Event.DGT_FEN(fen=keyboard_last_fen))

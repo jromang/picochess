@@ -96,7 +96,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.engine_finished = False
         self.ip = '?'  # the last two parts of the IP
         self.drawresign_fen = None
-        self.draw_setup_pieces = True
+        self.show_setup_pieces_msg = True
 
         self.reset_moves_and_score()
 
@@ -915,7 +915,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.fire(Event.LEVEL(level=level, level_text=text, ok_text=False))
                         elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":
                             logging.debug("Map-Fen: New game")
-                            self.draw_setup_pieces = False
+                            self.show_setup_pieces_msg = False
                             self.fire(Event.NEW_GAME())
                         elif fen in book_map:
                             book_index = book_map.index(fen)
@@ -995,9 +995,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 logging.debug("Map-Fen: drawresign")
                                 self.fire(Event.DRAWRESIGN(result=drawresign_map[self.drawresign_fen]))
                         else:
-                            if self.draw_setup_pieces:
+                            if self.show_setup_pieces_msg:
                                 DisplayDgt.show(self.dgttranslate.text('N00_setpieces'))
-                                self.draw_setup_pieces = False
+                                self.show_setup_pieces_msg = False
                             if self.top_result is None:
                                 self.fire(Event.FEN(fen=fen))
                             else:

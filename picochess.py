@@ -107,11 +107,11 @@ def main():
             place = get_location()
             addr = get_ip()
         else:
-            place = "?"
-            addr = "?"
-        DisplayMsg.show(Message.SYSTEM_INFO(info={"version": version, "location": place,
-                                                  "books": get_opening_books(), "ip": addr,
-                                                  "engine_name": engine_name, "user_name": user_name
+            place = '?'
+            addr = '?'
+        DisplayMsg.show(Message.SYSTEM_INFO(info={'version': version, 'location': place,
+                                                  'books': get_opening_books(), 'ip': addr,
+                                                  'engine_name': engine_name, 'user_name': user_name
                                                   }))
 
     def compute_legal_fens(g):
@@ -260,7 +260,7 @@ def main():
             Observable.fire(Event.USER_MOVE(move=legal_moves[legal_fens.index(fen)]))
         elif fen == last_computer_fen:  # Player had done the computer move on the board
             last_computer_fen = None
-            if check_game_state(game, play_mode) and ((interaction_mode == Mode.NORMAL) or (interaction_mode == Mode.REMOTE)):
+            if check_game_state(game, play_mode) and interaction_mode in (Mode.NORMAL, Mode.REMOTE):
                 # finally reset all alternative moves see: handle_move()
                 nonlocal searchmoves
                 searchmoves.reset()
@@ -410,7 +410,8 @@ def main():
     parser.add_argument("-v", "--version", action='version', version='%(prog)s version {}'.format(version),
                         help="show current version", default=None)
     parser.add_argument("-pi", "--dgtpi", action='store_true', help="use the dgtpi hardware")
-    parser.add_argument("-lang", "--language", choices=['en', 'de', 'nl', 'fr', 'es'], default='en', help="picochess language")
+    parser.add_argument("-lang", "--language", choices=['en', 'de', 'nl', 'fr', 'es'], default='en',
+                        help="picochess language")
     parser.add_argument("-c", "--console", action='store_true', help="use console interface")
 
     args = parser.parse_args()
@@ -426,7 +427,7 @@ def main():
         logging.basicConfig(level=getattr(logging, args.log_level.upper()),
                             format='%(asctime)s.%(msecs)03d %(levelname)5s %(module)10s - %(funcName)s: %(message)s',
                             datefmt="%Y-%m-%d %H:%M:%S", handlers=[handler])
-    logging.getLogger("chess.uci").setLevel(logging.INFO)  # don't want to get so many python-chess uci messages
+    logging.getLogger('chess.uci').setLevel(logging.INFO)  # don't want to get so many python-chess uci messages
 
     logging.debug('#'*20 + ' PicoChess v' + version + ' ' + '#'*20)
     # log the startup parameters but hide the password fields
@@ -455,23 +456,24 @@ def main():
     if args.web_server_port:
         WebServer(args.web_server_port).start()
 
+    dgtserial = DgtSerial(args.dgt_port)
+    if args.dgtpi:
+        dgtserial.enable_pi()
+
     if args.console:
         # Enable keyboard input and terminal display
-        logging.debug("starting picochess in virtual mode")
-        KeyboardInput().start()
+        logging.debug('starting picochess in virtual mode')
+        KeyboardInput(args.dgtpi).start()
         TerminalDisplay().start()
-        dgthardware = DgtVr(None, dgttranslate, args.enable_revelation_leds)
-        dgthardware.start()
+        DgtVr(dgtserial, dgttranslate, args.enable_revelation_leds).start()
     else:
         # Connect to DGT board
-        logging.debug("starting picochess in board mode")
-        dgtserial = DgtSerial(args.dgt_port)
+        logging.debug('starting picochess in board mode')
         if args.dgtpi:
-            dgthardware = DgtPi(dgtserial, dgttranslate, args.enable_revelation_leds)
+            DgtPi(dgtserial, dgttranslate, args.enable_revelation_leds).start()
         else:
-            dgthardware = DgtHw(dgtserial, dgttranslate, args.enable_revelation_leds)
+            DgtHw(dgtserial, dgttranslate, args.enable_revelation_leds).start()
         # Start the show
-        dgthardware.start()
         dgtserial.startup_serial_hardware()
 
     # Save to PGN
@@ -485,7 +487,7 @@ def main():
         if args.email:
             user_name = args.email.split('@')[0]
         else:
-            user_name = "Player"
+            user_name = 'Player'
 
     # Create ChessTalker for speech output
     talker = None
@@ -494,7 +496,7 @@ def main():
         talker = chesstalker.chesstalker.ChessTalker(args.user_voice, args.computer_voice)
         talker.start()
     else:
-        logging.debug("ChessTalker disabled")
+        logging.debug('ChessTalker disabled')
 
     # Gentlemen, start your engines...
     engine = UciEngine(args.engine, hostname=args.remote_server, username=args.remote_user,
@@ -502,7 +504,7 @@ def main():
     try:
         engine_name = engine.get().name
     except AttributeError:
-        logging.error("no engines started")
+        logging.error('no engines started')
         sys.exit(-1)
 
     # Startup - internal
@@ -614,7 +616,7 @@ def main():
                                 engine_name = engine.get().name
                             except AttributeError:
                                 # Help - old engine failed to restart. There is no engine
-                                logging.error("no engines started")
+                                logging.error('no engines started')
                                 sys.exit(-1)
                         # Schedule cleanup of old objects
                         gc.collect()
@@ -715,7 +717,7 @@ def main():
                 if case(EventApi.NEW_GAME):
                     wait=False
                     if game.move_stack:
-                        logging.debug("starting a new game")
+                        logging.debug('starting a new game')
                         if not (game.is_game_over() or game_declared):
                             custom_fen = getattr(game, 'custom_fen', None)
                             DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode,

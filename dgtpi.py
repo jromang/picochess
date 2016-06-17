@@ -25,7 +25,6 @@ from threading import Lock, Timer
 class DgtPi(DgtIface):
     def __init__(self, dgtserial, dgttranslate, enable_revelation_leds):
         super(DgtPi, self).__init__(dgtserial, dgttranslate, enable_revelation_leds)
-        self.dgtserial.enable_pi()
 
         self.lib_lock = Lock()
         self.lib = cdll.LoadLibrary("dgt/dgtpicom.so")
