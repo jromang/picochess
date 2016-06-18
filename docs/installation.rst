@@ -136,14 +136,46 @@ Manual installation
 
 4. **Install dependencies**
 
-  ``pip3 install --upgrade -r requirements.txt``
+  To install the dependencies, you need to use pip3. If you are using Raspbian Jessie, your pip3 installation is probably outdated, resulting in IncompleteRead errors. You can update pip3 as follows:
+  
+  ``cd``
+  
+  ``curl -O https://bootstrap.pypa.io/get-pip.py``
+  
+  ``sudo python3 get-pip.py``
+  
+  ``rm get-pip.py``
+  
+  Once you have an up-to-date version of pip3 installed, you can continue to install the PicoChess dependencies:
 
-5. **Run PicoChess from the command line**
+  ``cd /opt/picochess``
 
-  PicoChess has a lot of options. Type ``python3 picochess.py -h`` for a list.
+  ``sudo pip3 install --upgrade -r requirements.txt``
+
+5. **Copy the services into the correct place**
+
+``cd /opt/picochess/dgt``
+
+``sudo cp picochess.service /etc/systemd/system``
+
+``sudo chmod a+x /etc/systemd/system/picochess.service``
+
+``sudo systemctl enable picochess``
+
+``sudo cp hciuart.service /lib/systemd/system``
+
+``sudo reboot``
+
+6. **Run PicoChess from the command line**
+
+  If installed correctly, PicoChess will start automatically at boot (as a service). You can also start PicoChess from the command line.
+
+  PicoChess has a lot of options. Type ``sudo python3 /opt/picochess/picochess.py -h`` for a list.
 
 Bluetooth Connection
 --------------------
+
+Bluetooth connection should work out of the box. If it does not, then you can try the following troubleshooting steps:
 
 1. Install Bluetooth utilities and Bluetooth Manager (in Raspbian Wheezy: sudo apt-get install bluez-utils blueman).
 
