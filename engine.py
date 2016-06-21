@@ -49,6 +49,38 @@ def read_engine_ini(engine_shell=None, engine_path=None):
 
 
 def write_engine_ini(engine_path=None):
+    def write_level_ini():
+        minlevel = maxlevel = 0
+        parser = configparser.ConfigParser()
+        if not parser.read(engine_path + os.sep + engine_file_name + '.txt'):
+            if engine.has_limit_strength():
+                uelevel = engine.get().options['UCI_Elo']
+                elo_1, elo_2 = int(uelevel[2]), int(uelevel[3])
+                minlevel, maxlevel = min(elo_1, elo_2), max(elo_1, elo_2)
+                if maxlevel - minlevel > 1000:
+                    inc = int((maxlevel - minlevel) / 100)
+                else:
+                    inc = int((maxlevel - minlevel) / 10)
+                if 20 * inc + minlevel < maxlevel:
+                    inc = int((maxlevel - minlevel) / 20)
+                set_elo = minlevel
+                while set_elo < maxlevel:
+                    parser.add_section('Elo{}'.format(set_elo))
+                    parser.set('Elo{}'.format(set_elo), 'UCI_LimitStrength', 'true')
+                    parser.set('Elo{}'.format(set_elo), 'UCI_Elo', str(set_elo))
+                    set_elo += inc
+                parser.add_section('Elo{}'.format(maxlevel))
+                parser.set('Elo{}'.format(maxlevel), 'UCI_LimitStrength', 'false')
+            if engine.has_skill_level():
+                sklevel = engine.get().options['Skill Level']
+                minlevel, maxlevel = int(sklevel[3]), int(sklevel[4])
+                for level in range(minlevel, maxlevel):
+                    parser.add_section('Level{}'.format(level))
+                    parser.set('Level{}'.format(level), 'Skill Level', str(level))
+            with open(engine_path + os.sep + engine_file_name + '.txt', 'w') as configfile:
+                parser.write(configfile)
+        return minlevel, maxlevel
+
     def is_exe(fpath):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
@@ -58,15 +90,23 @@ def write_engine_ini(engine_path=None):
     engine_list = sorted(os.listdir(engine_path))
     config = configparser.ConfigParser()
     for engine_file_name in engine_list:
-        print(engine_file_name)
         if is_exe(engine_path + os.sep + engine_file_name):
+            print(engine_file_name)
             engine = UciEngine(engine_path + os.sep + engine_file_name)
             if engine:
                 try:
+                    if engine.has_levels():
+                        minlevel, maxlevel = write_level_ini()
+                    else:
+                        minlevel = maxlevel = 0
                     config[engine_file_name[2:]] = {
                         'file': engine_file_name,
                         'name': engine.get().name,
                         'has_levels': engine.has_levels(),
+                        'has_limit_strength': engine.has_limit_strength(),
+                        'has_skill_level': engine.has_skill_level(),
+                        'min_level': minlevel,
+                        'max_level': maxlevel,
                         'has_chess960': engine.has_chess960()
                     }
                 except AttributeError:
@@ -159,9 +199,9 @@ class UciEngine(object):
             self.status = EngineStatus.WAIT
 
         except OSError:
-            logging.exception("OS error in starting engine")
+            logging.exception('OS error in starting engine')
         except TypeError:
-            logging.exception("engine executable not found")
+            logging.exception('engine executable not found')
 
     def get(self):
         return self.engine
@@ -175,28 +215,34 @@ class UciEngine(object):
     def level(self, level):
         """ Sets the engine playing strength, between 0 and 20. """
         if level < 0 or level > 20:
-            logging.error('level not in range (0,20): [%i]', level)
+            logging.error("level not in range (0,20): [%i]", level)
             return False
-        if 'Skill Level' in self.engine.options:  # Stockfish uses 'Skill Level' option
-            self.option("Skill Level", level)
-        elif 'UCI_LimitStrength' in self.engine.options:  # Generic 'UCI_LimitStrength' option for other engines
+        if self.has_skill_level():
+            self.option('Skill Level', level)
+        elif self.has_limit_strength():
             if level == 20:
                 self.option('UCI_LimitStrength', 'false')
             else:
                 self.option('UCI_LimitStrength', 'true')
-                
+
                 elo_1, elo_2 = float(self.engine.options['UCI_Elo'][2]), float(self.engine.options['UCI_Elo'][3])
                 min_elo, max_elo = min(elo_1, elo_2), max(elo_1, elo_2)
-                set_elo = min(int(min_elo + (max_elo-min_elo) * (float(level)) / 19.0), int(max_elo))
+                set_elo = min(int(min_elo + (max_elo - min_elo) * (float(level)) / 19.0), int(max_elo))
                 self.option('UCI_Elo', str(set_elo))
             pass
         else:
-            logging.warning("engine does not support skill levels")
+            logging.warning('engine does not support skill levels')
             return False
         return True
 
     def has_levels(self):
-        return ('Skill Level' in self.engine.options) or ('UCI_LimitStrength' in self.engine.options)
+        return self.has_skill_level() or self.has_limit_strength()
+
+    def has_skill_level(self):
+        return 'Skill Level' in self.engine.options
+
+    def has_limit_strength(self):
+        return 'UCI_LimitStrength' in self.engine.options
 
     def has_chess960(self):
         return 'UCI_Chess960' in self.engine.options
@@ -205,7 +251,7 @@ class UciEngine(object):
         return self.path
 
     def get_shell(self):
-        return self.shell # shell is only "not none" if its a local engine - see __init__
+        return self.shell  # shell is only "not none" if its a local engine - see __init__
 
     def position(self, game):
         self.engine.position(game)
@@ -223,7 +269,7 @@ class UciEngine(object):
         self.engine.uci()
 
     def stop(self, show_best=False):
-        if self.status == EngineStatus.WAIT:
+        if self.is_waiting():
             logging.info('engine already stopped')
             return self.res
         self.show_best = show_best
@@ -231,8 +277,8 @@ class UciEngine(object):
         return self.future.result()
 
     def go(self, time_dict):
-        if self.status != EngineStatus.WAIT:
-            logging.warning('search think still not waiting - strange!')
+        if not self.is_waiting():
+            logging.warning('engine (still) not waiting - strange!')
         self.status = EngineStatus.THINK
         self.show_best = True
         time_dict['async_callback'] = self.callback
@@ -242,8 +288,8 @@ class UciEngine(object):
         return self.future
 
     def ponder(self):
-        if self.status != EngineStatus.WAIT:
-            logging.warning('search ponder still not waiting - strange!')
+        if not self.is_waiting():
+            logging.warning('engine (still) not waiting - strange!')
         self.status = EngineStatus.PONDER
         self.show_best = False
 
@@ -257,7 +303,7 @@ class UciEngine(object):
         if self.show_best:
             Observable.fire(Event.BEST_MOVE(result=self.res, inbook=False))
         else:
-            logging.debug('EVT_BEST_MOVE not fired')
+            logging.debug('event_best_move not fired')
         self.status = EngineStatus.WAIT
 
     def is_thinking(self):
@@ -268,3 +314,4 @@ class UciEngine(object):
 
     def is_waiting(self):
         return self.status == EngineStatus.WAIT
+
