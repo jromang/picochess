@@ -302,15 +302,15 @@ class DgtTranslate(object):
             entxt = Dgt.DISPLAY_TEXT(l=None, m='level ' + msg, s='lvl ' + msg, wait=False, beep=bl_button, maxtime=1)
             detxt = Dgt.DISPLAY_TEXT(l='SpielSt ' + msg, m='Stufe ' + msg, s='stf ' + msg, wait=False, beep=bl_button, maxtime=1)
             nltxt = entxt
-            frtxt = Dgt.DISPLAY_TEXT(l='niveau ' + msg, m='niveau' + msg, s='niv ' + msg, wait=False, beep=bl_button, maxtime=0)
-            estxt = Dgt.DISPLAY_TEXT(l=None, m='nivel ' + msg, s='nvl ' + msg, wait=False, beep=bl_button, maxtime=0)
+            frtxt = Dgt.DISPLAY_TEXT(l='niveau ' + msg, m='niveau' + msg, s='niv ' + msg, wait=False, beep=bl_button, maxtime=1)
+            estxt = Dgt.DISPLAY_TEXT(l=None, m='nivel ' + msg, s='nvl ' + msg, wait=False, beep=bl_button, maxtime=1)
         if text_id == 'M10_level':
             entxt = Dgt.DISPLAY_TEXT(l=None, m='level ' + msg, s='lvl ' + msg, wait=False, beep=self.bl(BeepLevel.MAP), maxtime=1)
             detxt = Dgt.DISPLAY_TEXT(l='SpielSt ' + msg, m='Stufe ' + msg, s='stf ' + msg, wait=False, beep=self.bl(BeepLevel.MAP),
                                      maxtime=1)
             nltxt = entxt
-            frtxt = Dgt.DISPLAY_TEXT(l='niveau ' + msg, m='niveau' + msg, s='niv ' + msg, wait=False, beep=bl_button, maxtime=0)
-            estxt = Dgt.DISPLAY_TEXT(l=None, m='nivel ' + msg, s='nvl ' + msg, wait=False, beep=bl_button, maxtime=0)
+            frtxt = Dgt.DISPLAY_TEXT(l='niveau ' + msg, m='niveau' + msg, s='niv ' + msg, wait=False, beep=bl_button, maxtime=1)
+            estxt = Dgt.DISPLAY_TEXT(l=None, m='nivel ' + msg, s='nvl ' + msg, wait=False, beep=bl_button, maxtime=1)
         if text_id == 'B10_mate':
             entxt = Dgt.DISPLAY_TEXT(l='mate in ' + msg, m='mate ' + msg, s='mate' + msg, wait=False, beep=bl_button, maxtime=1)
             detxt = Dgt.DISPLAY_TEXT(l='Matt in ' + msg, m='Matt ' + msg, s='matt' + msg, wait=False, beep=bl_button, maxtime=1)
