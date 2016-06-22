@@ -581,8 +581,8 @@ def main():
                     break
 
                 if case(EventApi.LEVEL):
-                    logging.debug("setting engine to level %i", event.level)
-                    if engine.level(event.level):
+                    logging.debug("setting engine with options {}".format(event.options))
+                    if engine.level(event.options):
                         engine.send()
                         DisplayMsg.show(Message.LEVEL(level=event.level, level_text=event.level_text, ok_text=event.ok_text))
                     break

@@ -46,7 +46,7 @@ def read_engine_ini(engine_shell=None, engine_path=None):
     for section in config.sections():
         parser = configparser.ConfigParser()
         level_dict = {}
-        if parser.read(engine_path + os.sep + config[section]['file'] + '.txt'):
+        if parser.read(engine_path + os.sep + config[section]['file'] + '.lvl'):
             for ps in parser.sections():
                 level_dict[ps] = {}
                 for option in parser.options(ps):
@@ -67,7 +67,7 @@ def write_engine_ini(engine_path=None):
     def write_level_ini():
         minlevel = maxlevel = 0
         parser = configparser.ConfigParser()
-        if not parser.read(engine_path + os.sep + engine_file_name + '.txt'):
+        if not parser.read(engine_path + os.sep + engine_file_name + '.lvl'):
             if engine.has_limit_strength():
                 uelevel = engine.get().options['UCI_Elo']
                 elo_1, elo_2 = int(uelevel[2]), int(uelevel[3])
@@ -88,7 +88,7 @@ def write_engine_ini(engine_path=None):
                 minlevel, maxlevel = int(sklevel[3]), int(sklevel[4])
                 for level in range(minlevel, maxlevel):
                     parser['Level {:02d}'.format(level)] = {'Skill Level': str(level)}
-            with open(engine_path + os.sep + engine_file_name + '.txt', 'w') as configfile:
+            with open(engine_path + os.sep + engine_file_name + '.lvl', 'w') as configfile:
                 parser.write(configfile)
         return minlevel, maxlevel
 
@@ -223,27 +223,8 @@ class UciEngine(object):
     def send(self):
         self.engine.setoption(self.options)
 
-    def level(self, level):
-        """ Sets the engine playing strength, between 0 and 20. """
-        if level < 0 or level > 20:
-            logging.error("level not in range (0,20): [%i]", level)
-            return False
-        if self.has_skill_level():
-            self.option('Skill Level', level)
-        elif self.has_limit_strength():
-            if level == 20:
-                self.option('UCI_LimitStrength', 'false')
-            else:
-                self.option('UCI_LimitStrength', 'true')
-
-                elo_1, elo_2 = float(self.engine.options['UCI_Elo'][2]), float(self.engine.options['UCI_Elo'][3])
-                min_elo, max_elo = min(elo_1, elo_2), max(elo_1, elo_2)
-                set_elo = min(int(min_elo + (max_elo - min_elo) * (float(level)) / 19.0), int(max_elo))
-                self.option('UCI_Elo', str(set_elo))
-            pass
-        else:
-            logging.warning('engine does not support skill levels')
-            return False
+    def level(self, options):
+        self.options = options
         return True
 
     def has_levels(self):

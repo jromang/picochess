@@ -1,0 +1,223 @@
+[Petrosian]
+; Petrosian personality for Rodent II.
+; Author: Pawel Koziol
+; Cautious solid grinder, unimpaired tactical vision, dislikes rooks.
+;
+BookFilter = 20
+UseBook = true
+Contempt = 0
+SlowMover = 110
+Selectivity = 175
+EvalBlur = 0
+NpsLimit = 0
+Outposts = 150
+Lines = 100
+PawnStructure = 150
+PassedPawns = 110
+PiecePressure = 100
+KingTropism = 20
+OppMobility = 120
+OwnMobility = 100
+OppAttack = 130
+OwnAttack = 110
+RookLikesOpen = 3
+KnightLikesClosed = 7
+PiecePlacement = 105
+Material = 100
+QueenValue = 1000
+RookValue = 500
+BishopValue = 335
+KnightValue = 325
+PawnValue = 100
+KeepQueen = 0
+KeepRook = -25
+KeepBishop = -5
+KeepKnight = 5
+KeepPawn = 2
+GuideBookFile = books/guide/petrosian.bin
+
+[Nimzowitsch]
+; Nimzowitsch personality for Rodent II.
+; Author: Pawel Koziol
+;
+BookFilter = 20
+UseBook = true
+Contempt = 0
+SlowMover = 100
+Selectivity = 100
+EvalBlur = 0
+NpsLimit = 0
+Outposts = 150
+Lines = 100
+PawnStructure = 150
+PassedPawns = 110
+PiecePressure = 100
+KingTropism = 20
+OppMobility = 125
+OwnMobility = 100
+OppAttack = 100
+OwnAttack = 110
+RookLikesOpen = 3
+KnightLikesClosed = 8
+PiecePlacement = 90
+Material = 100
+QueenValue = 1000
+RookValue = 500
+BishopValue = 335
+KnightValue = 325
+PawnValue = 100
+KeepQueen = 0
+KeepRook = 0
+KeepBishop = -10
+KeepKnight = 10
+KeepPawn = 2
+GuideBookFile = books/guide/nimzowitsch.bin
+
+[Karpov]
+; Karpov personality for Rodent II.
+; Author: Pawel Koziol
+; Harmonious, mildly defensive, solid. 
+;
+BookFilter = 20
+UseBook = true
+Contempt = 30
+SlowMover = 100
+Selectivity = 175
+EvalBlur = 0
+NpsLimit = 0
+Outposts = 90
+Lines = 100
+PawnStructure = 110
+PassedPawns = 100
+PiecePressure = 100
+KingTropism = 0
+OppMobility = 100
+OwnMobility = 100
+OppAttack = 110
+OwnAttack = 90
+RookLikesOpen = 3
+KnightLikesClosed = 6
+PiecePlacement = 100
+Material = 105
+QueenValue = 1000
+RookValue = 500
+BishopValue = 335
+KnightValue = 325
+PawnValue = 105
+KeepQueen = 0
+KeepRook = 0
+KeepBishop = 0
+KeepKnight = 0
+KeepPawn = 0
+
+[Fischer]
+; Fischer personality for Rodent II.
+; Author: Pawel Koziol
+; Attacking, contemptous, mobility for both sides increased.
+;
+BookFilter = 20
+UseBook = true
+Contempt = 25
+SlowMover = 100
+Selectivity = 175
+EvalBlur = 0
+NpsLimit = 0
+Outposts = 100
+Lines = 100
+PawnStructure = 100
+PassedPawns = 100
+PiecePressure = 100
+KingTropism = 20
+OppMobility = 110
+OwnMobility = 110
+OppAttack = 100
+OwnAttack = 120
+RookLikesOpen = 3
+KnightLikesClosed = 6
+PiecePlacement = 100
+Material = 102
+QueenValue = 990
+RookValue = 500
+BishopValue = 335
+KnightValue = 325
+PawnValue = 100
+KeepQueen = 0
+KeepRook = 3
+KeepBishop = 4
+KeepKnight = 0
+KeepPawn = 0
+GuideBookFile = books/guide/fischer.bin
+
+[Default]
+; Default personality for Rodent II.
+; Author: Pawel Koziol
+;
+BookFilter = 20
+UseBook = true
+Contempt = 0
+SlowMover = 100
+Selectivity = 175
+EvalBlur = 0
+NpsLimit = 0
+Outposts = 100
+Lines = 100
+PawnStructure = 100
+PassedPawns = 100
+PiecePressure = 100
+KingTropism = 20
+OppMobility = 110
+OwnMobility = 100
+OppAttack = 100
+OwnAttack = 110
+RookLikesOpen = 3
+KnightLikesClosed = 6
+PiecePlacement = 100
+Material = 100
+QueenValue = 1000
+RookValue = 500
+BishopValue = 335
+KnightValue = 325
+PawnValue = 100
+KeepQueen = 0
+KeepRook = 0
+KeepBishop = 0
+KeepKnight = 0
+KeepPawn = 0
+
+[Alekhine]
+; Alekhine personality for Rodent II.
+; Author: Pawel Koziol
+; Aggressive, active, likes bishops.
+;
+BookFilter = 20
+UseBook = true
+Contempt = 75
+SlowMover = 100
+Selectivity = 175
+EvalBlur = 10
+NpsLimit = 0
+Outposts = 100
+Lines = 120
+PawnStructure = 100
+PassedPawns = 105
+PiecePressure = 110
+KingTropism = 30
+OppMobility = 115
+OwnMobility = 120
+OppAttack = 100
+OwnAttack = 125
+RookLikesOpen = 3
+KnightLikesClosed = 6
+PiecePlacement = 90
+Material = 104
+QueenValue = 1000
+RookValue = 500
+BishopValue = 335
+KnightValue = 325
+PawnValue = 100
+KeepQueen = 0
+KeepRook = 0
+KeepBishop = 12
+KeepKnight = 0
+KeepPawn = 0
+GuideBookFile = books/guide/alekhine.bin

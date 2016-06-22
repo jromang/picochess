@@ -59,11 +59,9 @@ def create_game_header(cls, game):
     if 'game_info' in cls.shared:
         if "play_mode" in cls.shared["game_info"]:
             if "level" in cls.shared["game_info"]:
-                engine_name += " (Level {0})".format(cls.shared["game_info"]["level"])
-            game.headers["Black"] = engine_name if cls.shared["game_info"][
-                                                       "play_mode"] == PlayMode.USER_WHITE else user_name
-            game.headers["White"] = engine_name if cls.shared["game_info"][
-                                                       "play_mode"] == PlayMode.USER_BLACK else user_name
+                engine_name += " /{0}\\".format(cls.shared["game_info"]["level"])
+            game.headers["Black"] = engine_name if cls.shared["game_info"]["play_mode"] == PlayMode.USER_WHITE else user_name
+            game.headers["White"] = engine_name if cls.shared["game_info"]["play_mode"] == PlayMode.USER_BLACK else user_name
 
             comp_color = "Black" if cls.shared["game_info"]["play_mode"] == PlayMode.USER_WHITE else "White"
             user_color = "Black" if cls.shared["game_info"]["play_mode"] == PlayMode.USER_BLACK else "White"

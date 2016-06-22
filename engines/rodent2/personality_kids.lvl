@@ -1,0 +1,443 @@
+[Amy]
+; Amy personality for Rodent II.
+; Author: Pawel Koziol
+; weak, no particular strengths or weaknesses
+;
+BookFilter = 20
+UseBook = true
+SlowMover = 100
+Selectivity = 175
+Contempt = 0
+EvalBlur = 100
+NpsLimit = 1100
+Outposts = 100
+Lines = 100
+PawnStructure = 100
+PassedPawns = 100
+PiecePressure = 100
+KingTropism = 20
+OppMobility = 100
+OwnMobility = 100
+OppAttack = 100
+OwnAttack = 100
+RookLikesOpen = 3
+KnightLikesClosed = 6
+PiecePlacement = 100
+Material = 100
+QueenValue = 1000
+RookValue = 500
+BishopValue = 335
+KnightValue = 325
+PawnValue = 100
+KeepQueen = 0
+KeepRook = 0
+KeepBishop = 0
+KeepKnight = 0
+KeepPawn = 0
+
+[Ben]
+; Ben - kid personality for Rodent II.
+; Author: Pawel Koziol
+; weak, very strong preference for own mobility, but afraid of opponent's attack
+;
+BookFilter = 20
+UseBook = true
+SlowMover = 100
+Selectivity = 175
+Contempt = 0
+EvalBlur = 100
+NpsLimit = 1000
+Outposts = 100
+Lines = 100
+PawnStructure = 50
+PassedPawns = 100
+PiecePressure = 100
+KingTropism = 20
+OppMobility = 100
+OwnMobility = 150
+OppAttack = 150
+OwnAttack = 100
+RookLikesOpen = 3
+KnightLikesClosed = 6
+PiecePlacement = 100
+Material = 100
+QueenValue = 1000
+RookValue = 500
+BishopValue = 335
+KnightValue = 325
+PawnValue = 100
+KeepQueen = 0
+KeepRook = 0
+KeepBishop = 0
+KeepKnight = 0
+KeepPawn = 0
+
+[Chris]
+; Chris - kid personality for Rodent II.
+; Author: Pawel Koziol
+; somewhat stronger, amasses pieces around enemy king
+;
+BookFilter = 20
+UseBook = true
+SlowMover = 100
+Selectivity = 175
+Contempt = 0
+EvalBlur = 90
+NpsLimit = 2000
+Outposts = 100
+Lines = 100
+PawnStructure = 100
+PassedPawns = 100
+PiecePressure = 100
+KingTropism = 200
+OppMobility = 100
+OwnMobility = 100
+OppAttack = 100
+OwnAttack = 100
+RookLikesOpen = 3
+KnightLikesClosed = 6
+Material = 100
+QueenValue = 1000
+RookValue = 500
+BishopValue = 335
+KnightValue = 325
+PawnValue = 100
+KeepQueen = 10
+KeepRook = 0
+KeepBishop = 0
+KeepKnight = 0
+KeepPawn = 0
+
+[Default]
+; Default kid personality for Rodent II.
+; Author: Pawel Koziol
+; weak, balanced
+;
+BookFilter = 20
+UseBook = true
+SlowMover = 100
+Selectivity = 175
+Contempt = 0
+EvalBlur = 100
+NpsLimit = 1000
+Outposts = 100
+Lines = 100
+PawnStructure = 50
+PassedPawns = 100
+PiecePressure = 100
+KingTropism = 20
+OppMobility = 100
+OwnMobility = 100
+OppAttack = 100
+OwnAttack = 100
+RookLikesOpen = 3
+KnightLikesClosed = 6
+PiecePlacement = 100
+Material = 100
+QueenValue = 1000
+RookValue = 500
+BishopValue = 335
+KnightValue = 325
+PawnValue = 100
+KeepQueen = 0
+KeepRook = 0
+KeepBishop = 0
+KeepKnight = 0
+KeepPawn = 0
+
+[Dorothy]
+; Dorothy - kid personality for Rodent II.
+; Author: Pawel Koziol
+; weak, undervalues pawns and doesn't know how to handle them
+;
+BookFilter = 20
+UseBook = true
+Contempt = 0
+SlowMover = 100
+Selectivity = 175
+EvalBlur = 100
+NpsLimit = 1000
+Outposts = 100
+Lines = 100
+PawnStructure = 0
+PassedPawns = 50
+PiecePressure = 100
+KingTropism = 20
+OppMobility = 100
+OwnMobility = 100
+OppAttack = 100
+OwnAttack = 100
+RookLikesOpen = 3
+KnightLikesClosed = 6
+PiecePlacement = 100
+Material = 100
+QueenValue = 1000
+RookValue = 500
+BishopValue = 335
+KnightValue = 325
+PawnValue = 70
+KeepQueen = 0
+KeepRook = 0
+KeepBishop = 0
+KeepKnight = 0
+KeepPawn = 0
+
+[Helen]
+; Helen personality for Rodent II.
+; Author: Pawel Koziol
+; relatively good at tactics, likes to sacrifice
+;
+BookFilter = 20
+UseBook = true
+SlowMover = 120
+Selectivity = 175
+Contempt = 0
+EvalBlur = 100
+NpsLimit = 3000
+Outposts = 100
+Lines = 100
+PawnStructure = 100
+PassedPawns = 100
+PiecePressure = 100
+KingTropism = 20
+OppMobility = 100
+OwnMobility = 100
+OppAttack = 120
+OwnAttack = 100
+RookLikesOpen = 3
+KnightLikesClosed = 6
+PiecePlacement = 100
+Material = 80
+QueenValue = 1000
+RookValue = 500
+BishopValue = 335
+KnightValue = 325
+PawnValue = 100
+KeepQueen = 0
+KeepRook = 0
+KeepBishop = 0
+KeepKnight = 0
+KeepPawn = 0
+
+[John]
+; John - kid personality for Rodent II.
+; Author: Pawel Koziol
+; weak, leaves the king unprotected
+;
+BookFilter = 20
+UseBook = true
+SlowMover = 100
+Selectivity = 175
+Contempt = -20
+EvalBlur = 100
+NpsLimit = 1000
+Outposts = 100
+Lines = 100
+PawnStructure = 100
+PassedPawns = 100
+PiecePressure = 100
+KingTropism = 20
+OppMobility = 100
+OwnMobility = 100
+OppAttack = 0
+OwnAttack = 100
+RookLikesOpen = 3
+KnightLikesClosed = 6
+PiecePlacement = 100
+Material = 100
+QueenValue = 1000
+RookValue = 500
+BishopValue = 335
+KnightValue = 325
+PawnValue = 100
+KeepQueen = 0
+KeepRook = 0
+KeepBishop = 0
+KeepKnight = 0
+KeepPawn = 0
+
+[Mary]
+; Mary - kid personality for Rodent II.
+; Author: Pawel Koziol
+; weak, overvalues knights and has good feeling for their placement
+;
+BookFilter = 20
+UseBook = true
+SlowMover = 100
+Selectivity = 175
+Contempt = 0
+EvalBlur = 100
+NpsLimit = 1300
+Outposts = 200
+Lines = 100
+PawnStructure = 50
+PassedPawns = 100
+PiecePressure = 100
+KingTropism = 20
+OppMobility = 100
+OwnMobility = 100
+OppAttack = 100
+OwnAttack = 100
+RookLikesOpen = 3
+KnightLikesClosed = 6
+PiecePlacement = 100
+Material = 100
+QueenValue = 1000
+RookValue = 500
+BishopValue = 315
+KnightValue = 335
+PawnValue = 100
+KeepQueen = 0
+KeepRook = 0
+KeepBishop = -5
+KeepKnight = 10
+KeepPawn = 0
+
+[Rita]
+; Defult kid personality for Rodent II.
+; Author: Pawel Koziol
+; weak, overvalues rooks
+;
+BookFilter = 20
+UseBook = true
+SlowMover = 100
+Selectivity = 175
+Contempt = 0
+EvalBlur = 100
+NpsLimit = 1100
+Outposts = 100
+Lines = 200
+PawnStructure = 50
+PassedPawns = 100
+PiecePressure = 100
+KingTropism = 20
+OppMobility = 100
+OwnMobility = 100
+OppAttack = 100
+OwnAttack = 100
+RookLikesOpen = 4
+KnightLikesClosed = 6
+PiecePlacement = 100
+Material = 100
+QueenValue = 1000
+RookValue = 550
+BishopValue = 335
+KnightValue = 325
+PawnValue = 100
+KeepQueen = 0
+KeepRook = 10
+KeepBishop = -2
+KeepKnight = -2
+KeepPawn = 0
+
+[Sam]
+; Sam - kid personality for Rodent II.
+; Author: Pawel Koziol
+; somewhat stronger, relatively good pawn play, likes draws
+;
+BookFilter = 20
+UseBook = true
+SlowMover = 100
+Selectivity = 175
+Contempt = -20
+EvalBlur = 100
+NpsLimit = 1800
+Outposts = 100
+Lines = 100
+PawnStructure = 150
+PassedPawns = 150
+PiecePressure = 100
+KingTropism = 200
+OppMobility = 100
+OwnMobility = 100
+OppAttack = 100
+OwnAttack = 100
+RookLikesOpen = 3
+KnightLikesClosed = 6
+Material = 105
+QueenValue = 1000
+RookValue = 500
+BishopValue = 335
+KnightValue = 325
+PawnValue = 105
+KeepQueen = 0
+KeepRook = 0
+KeepBishop = 0
+KeepKnight = 0
+KeepPawn = 0
+
+[Toby]
+; Toby - kid personality for Rodent II.
+; Author: Pawel Koziol
+; weak, overvalues major pieces, likes attacking
+;
+BookFilter = 20
+UseBook = true
+SlowMover = 100
+Selectivity = 175
+Contempt = 0
+EvalBlur = 100
+NpsLimit = 1200
+Outposts = 100
+Lines = 120
+PawnStructure = 50
+PassedPawns = 100
+PiecePressure = 100
+KingTropism = 20
+OppMobility = 100
+OwnMobility = 100
+OppAttack = 100
+OwnAttack = 120
+RookLikesOpen = 3
+KnightLikesClosed = 6
+PiecePlacement = 100
+Material = 100
+QueenValue = 1200
+RookValue = 550
+BishopValue = 335
+KnightValue = 325
+PawnValue = 100
+KeepQueen = 10
+KeepRook = 5
+KeepBishop = -5
+KeepKnight = -5
+KeepPawn = 0
+
+[Vincent]
+; Vincent - kid personality for Rodent II.
+; Author: Pawel Koziol
+; weak, attacker
+;
+BookFilter = 20
+UseBook = true
+SlowMover = 100
+Selectivity = 175
+Contempt = 0
+EvalBlur = 80
+NpsLimit = 1600
+Outposts = 100
+Lines = 100
+PawnStructure = 50
+PassedPawns = 100
+PiecePressure = 100
+KingTropism = 20
+OppMobility = 100
+OwnMobility = 100
+OppAttack = 100
+OwnAttack = 200
+RookLikesOpen = 3
+KnightLikesClosed = 6
+PiecePlacement = 100
+Material = 95
+QueenValue = 1000
+RookValue = 500
+BishopValue = 335
+KnightValue = 325
+PawnValue = 100
+KeepQueen = 0
+KeepRook = 0
+KeepBishop = 0
+KeepKnight = 0
+KeepPawn = 0
+
+

@@ -657,7 +657,7 @@ class Message():
 class Event():
     # User events
     FEN = ClassFactory(EventApi.FEN, ['fen'])
-    LEVEL = ClassFactory(EventApi.LEVEL, ['level', 'level_text', 'ok_text'])
+    LEVEL = ClassFactory(EventApi.LEVEL, ['options', 'level', 'level_text', 'ok_text'])
     NEW_GAME = ClassFactory(EventApi.NEW_GAME, [])
     DRAWRESIGN = ClassFactory(EventApi.DRAWRESIGN, ['result'])
     USER_MOVE = ClassFactory(EventApi.USER_MOVE, ['move'])
