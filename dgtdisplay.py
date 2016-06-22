@@ -260,7 +260,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.top_result = Menu.TOP_MENU
                 text = self.dgttranslate.text(self.top_index.value)
             else:
-                msg = (self.installed_engines[self.engine_result])[1]
+                msg = (self.installed_engines[self.engine_result])['section']
                 text = self.dgttranslate.text('B00_default', msg)
                 self.engine_result = None
             DisplayDgt.show(text)
@@ -335,7 +335,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 if self.engine_result is None:
                     self.engine_index = (self.engine_index-1) % self.n_engines
-                    msg = (self.installed_engines[self.engine_index])[1]
+                    msg = (self.installed_engines[self.engine_index])['section']
                     text = self.dgttranslate.text('B00_default', msg)
                 else:
                     self.engine_level_index = (self.engine_level_index-1) % self.n_levels
@@ -442,7 +442,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 if self.engine_result is None:
                     self.engine_index = (self.engine_index+1) % self.n_engines
-                    msg = (self.installed_engines[self.engine_index])[1]
+                    msg = (self.installed_engines[self.engine_index])['section']
                     text = self.dgttranslate.text('B00_default', msg)
                 else:
                     self.engine_level_index = (self.engine_level_index+1) % self.n_levels
@@ -502,7 +502,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 if self.mode_result == Mode.REMOTE:
                     text = self.dgttranslate.text('B00_nofunction')
                 else:
-                    msg = (self.installed_engines[self.engine_index])[1]
+                    msg = (self.installed_engines[self.engine_index])['section']
                     text = self.dgttranslate.text('B00_default', msg)
             elif self.top_index == Menu.SYSTEM_MENU:
                 text = self.dgttranslate.text(self.system_index.value)
@@ -598,7 +598,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 if self.engine_result is None:
                     eng = self.installed_engines[self.engine_index]
-                    if eng[2]:  # 2=has_levels
+                    if eng['has_levels']:
                         self.engine_result = self.engine_index
                         msg = str(self.engine_level_index).rjust(2)
                         text = self.dgttranslate.text('B00_level', msg)
@@ -696,11 +696,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.exit_display(force=message.ok_text)
                         break
                     if case(MessageApi.ENGINE_STARTUP):
-                        self.installed_engines = get_installed_engines(message.shell, message.path)
+                        self.installed_engines = get_installed_engines(message.shell, message.file)
                         self.n_engines = len(self.installed_engines)
                         for index in range(0, self.n_engines):
-                            full_path, short, haslevels = self.installed_engines[index]
-                            if full_path == message.path:
+                            if self.installed_engines[index]['file'] == message.file:
                                 self.engine_index = index
                                 self.engine_has_levels = message.has_levels
                                 self.engine_has_960 = message.has_960
@@ -935,7 +934,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                     self.engine_index = engine_index
                                     eng = self.installed_engines[self.engine_index]
                                     logging.debug("Map-Fen: Engine name [%s]", eng[1])
-                                    eng_text = self.dgttranslate.text('M10_default', eng[1])
+                                    eng_text = self.dgttranslate.text('M10_default', eng['section'])
 
                                     level = self.engine_level_index if self.engine_level_result is None else self.engine_level_result
                                     lvl_text = self.dgttranslate.text('M10_level', str(level).rjust(2))

@@ -417,7 +417,7 @@ def main():
     args = parser.parse_args()
     if args.engine is None:
         el = read_engine_ini()
-        args.engine = el[0][0]  # read the first engine path and use it as standard
+        args.engine = el[0]['file']  # read the first engine path and use it as standard
     else:
         args.engine = which(args.engine)
 
@@ -535,7 +535,7 @@ def main():
                                                "book": all_books[book_index][1], "book_index": book_index,
                                                "time_text": text}))
     DisplayMsg.show(Message.UCI_OPTION_LIST(options=engine.options))
-    DisplayMsg.show(Message.ENGINE_STARTUP(shell=engine.get_shell(), path=engine.get_path(),
+    DisplayMsg.show(Message.ENGINE_STARTUP(shell=engine.get_shell(), file=engine.get_file(),
                                            has_levels=engine.has_levels(), has_960=engine.has_chess960()))
 
     # Event loop
@@ -588,7 +588,7 @@ def main():
                     break
 
                 if case(EventApi.NEW_ENGINE):
-                    old_path = engine.path
+                    old_file = engine.get_file()
                     engine_shutdown = True
                     # Stop the old engine cleanly
                     engine.stop()
@@ -604,14 +604,14 @@ def main():
                         # Load the new one and send args.
                         # Local engines only
                         engine_fallback = False
-                        engine = UciEngine(event.eng[0])
+                        engine = UciEngine(event.eng['file'])
                         try:
                             engine_name = engine.get().name
                         except AttributeError:
                             # New engine failed to start, restart old engine
-                            logging.error("new engine failed to start, reverting to %s", old_path)
+                            logging.error("new engine failed to start, reverting to %s", old_file)
                             engine_fallback = True
-                            engine = UciEngine(old_path)
+                            engine = UciEngine(old_file)
                             try:
                                 engine_name = engine.get().name
                             except AttributeError:

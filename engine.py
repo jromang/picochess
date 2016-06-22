@@ -24,8 +24,8 @@ from threading import Timer
 import configparser
 
 
-def get_installed_engines(engine_shell, engine_path):
-    return read_engine_ini(engine_shell, (engine_path.rsplit(os.sep, 1))[0])
+def get_installed_engines(engine_shell, engine_file):
+    return read_engine_ini(engine_shell, (engine_file.rsplit(os.sep, 1))[0])
 
 
 def read_engine_ini(engine_shell=None, engine_path=None):
@@ -44,7 +44,13 @@ def read_engine_ini(engine_shell=None, engine_path=None):
 
     library = []
     for section in config.sections():
-        library.append((engine_path + os.sep + config[section]['file'], section, config[section].getboolean('has_levels')))
+        library.append(
+            {
+                'file' : engine_path + os.sep + config[section]['file'],
+                'section' : section,
+                'has_levels' : config[section].getboolean('has_levels')
+            }
+        )
     return library
 
 
@@ -65,18 +71,14 @@ def write_engine_ini(engine_path=None):
                     inc = int((maxlevel - minlevel) / 20)
                 set_elo = minlevel
                 while set_elo < maxlevel:
-                    parser.add_section('Elo{}'.format(set_elo))
-                    parser.set('Elo{}'.format(set_elo), 'UCI_LimitStrength', 'true')
-                    parser.set('Elo{}'.format(set_elo), 'UCI_Elo', str(set_elo))
+                    parser['Elo{}'.format(set_elo)] = {'UCI_LimitStrength' : 'true', 'UCI_Elo' : str(set_elo)}
                     set_elo += inc
-                parser.add_section('Elo{}'.format(maxlevel))
-                parser.set('Elo{}'.format(maxlevel), 'UCI_LimitStrength', 'false')
+                parser['Elo{}'.format(maxlevel)] = {'UCI_LimitStrength': 'false', 'UCI_Elo': str(maxlevel)}
             if engine.has_skill_level():
                 sklevel = engine.get().options['Skill Level']
                 minlevel, maxlevel = int(sklevel[3]), int(sklevel[4])
                 for level in range(minlevel, maxlevel):
-                    parser.add_section('Level{}'.format(level))
-                    parser.set('Level{}'.format(level), 'Skill Level', str(level))
+                    parser['Level{}'.format(level)] = {'Skill Level': str(level)}
             with open(engine_path + os.sep + engine_file_name + '.txt', 'w') as configfile:
                 parser.write(configfile)
         return minlevel, maxlevel
@@ -91,9 +93,9 @@ def write_engine_ini(engine_path=None):
     config = configparser.ConfigParser()
     for engine_file_name in engine_list:
         if is_exe(engine_path + os.sep + engine_file_name):
-            print(engine_file_name)
             engine = UciEngine(engine_path + os.sep + engine_file_name)
             if engine:
+                print(engine_file_name)
                 try:
                     if engine.has_levels():
                         minlevel, maxlevel = write_level_ini()
@@ -167,7 +169,7 @@ class Informer(chess.uci.InfoHandler):
 
 
 class UciEngine(object):
-    def __init__(self, path, hostname=None, username=None, key_file=None, password=None):
+    def __init__(self, file, hostname=None, username=None, key_file=None, password=None):
         super(UciEngine, self).__init__()
         try:
             self.shell = None
@@ -180,17 +182,17 @@ class UciEngine(object):
                     shell = spur.SshShell(hostname=hostname, username=username, password=password,
                                           missing_host_key=paramiko.AutoAddPolicy())
                 self.shell = shell
-                self.engine = chess.uci.spur_spawn_engine(shell, [path])
+                self.engine = chess.uci.spur_spawn_engine(shell, [file])
             else:
-                self.engine = chess.uci.popen_engine(path)
+                self.engine = chess.uci.popen_engine(file)
 
-            self.path = path
+            self.file = file
             if self.engine:
                 handler = Informer()
                 self.engine.info_handlers.append(handler)
                 self.engine.uci()
             else:
-                logging.error("engine executable [%s] not found", path)
+                logging.error("engine executable [%s] not found", file)
             self.options = {}
             self.future = None
             self.show_best = True
@@ -247,8 +249,8 @@ class UciEngine(object):
     def has_chess960(self):
         return 'UCI_Chess960' in self.engine.options
 
-    def get_path(self):
-        return self.path
+    def get_file(self):
+        return self.file
 
     def get_shell(self):
         return self.shell  # shell is only "not none" if its a local engine - see __init__
