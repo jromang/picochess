@@ -44,11 +44,20 @@ def read_engine_ini(engine_shell=None, engine_path=None):
 
     library = []
     for section in config.sections():
+        parser = configparser.ConfigParser()
+        level_dict = {}
+        if parser.read(engine_path + os.sep + config[section]['file'] + '.txt'):
+            for ps in parser.sections():
+                level_dict[ps] = {}
+                for option in parser.options(ps):
+                    level_dict[ps][option] = parser[ps][option]
+
         library.append(
             {
                 'file' : engine_path + os.sep + config[section]['file'],
                 'section' : section,
-                'has_levels' : config[section].getboolean('has_levels')
+                'has_levels' : config[section].getboolean('has_levels'),
+                'level_dict' : level_dict
             }
         )
     return library
@@ -71,14 +80,14 @@ def write_engine_ini(engine_path=None):
                     inc = int((maxlevel - minlevel) / 20)
                 set_elo = minlevel
                 while set_elo < maxlevel:
-                    parser['Elo{}'.format(set_elo)] = {'UCI_LimitStrength' : 'true', 'UCI_Elo' : str(set_elo)}
+                    parser['Elo {:04d}'.format(set_elo)] = {'UCI_LimitStrength' : 'true', 'UCI_Elo' : str(set_elo)}
                     set_elo += inc
-                parser['Elo{}'.format(maxlevel)] = {'UCI_LimitStrength': 'false', 'UCI_Elo': str(maxlevel)}
+                parser['Elo {:04d}'.format(maxlevel)] = {'UCI_LimitStrength': 'false', 'UCI_Elo': str(maxlevel)}
             if engine.has_skill_level():
                 sklevel = engine.get().options['Skill Level']
                 minlevel, maxlevel = int(sklevel[3]), int(sklevel[4])
                 for level in range(minlevel, maxlevel):
-                    parser['Level{}'.format(level)] = {'Skill Level': str(level)}
+                    parser['Level {:02d}'.format(level)] = {'Skill Level': str(level)}
             with open(engine_path + os.sep + engine_file_name + '.txt', 'w') as configfile:
                 parser.write(configfile)
         return minlevel, maxlevel

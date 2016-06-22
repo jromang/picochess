@@ -49,13 +49,13 @@ book_map = ("rnbqkbnr/pppppppp/8/8/8/q7/PPPPPPPP/RNBQKBNR",
             "rnbqkbnr/pppppppp/8/8/7q/8/PPPPPPPP/RNBQKBNR")
 
 engine_map = ("rnbqkbnr/pppppppp/q7/8/8/8/PPPPPPPP/RNBQKBNR",
-             "rnbqkbnr/pppppppp/1q6/8/8/8/PPPPPPPP/RNBQKBNR",
-             "rnbqkbnr/pppppppp/2q5/8/8/8/PPPPPPPP/RNBQKBNR",
-             "rnbqkbnr/pppppppp/3q4/8/8/8/PPPPPPPP/RNBQKBNR",
-             "rnbqkbnr/pppppppp/4q3/8/8/8/PPPPPPPP/RNBQKBNR",
-             "rnbqkbnr/pppppppp/5q2/8/8/8/PPPPPPPP/RNBQKBNR",
-             "rnbqkbnr/pppppppp/6q1/8/8/8/PPPPPPPP/RNBQKBNR",
-             "rnbqkbnr/pppppppp/7q/8/8/8/PPPPPPPP/RNBQKBNR")
+              "rnbqkbnr/pppppppp/1q6/8/8/8/PPPPPPPP/RNBQKBNR",
+              "rnbqkbnr/pppppppp/2q5/8/8/8/PPPPPPPP/RNBQKBNR",
+              "rnbqkbnr/pppppppp/3q4/8/8/8/PPPPPPPP/RNBQKBNR",
+              "rnbqkbnr/pppppppp/4q3/8/8/8/PPPPPPPP/RNBQKBNR",
+              "rnbqkbnr/pppppppp/5q2/8/8/8/PPPPPPPP/RNBQKBNR",
+              "rnbqkbnr/pppppppp/6q1/8/8/8/PPPPPPPP/RNBQKBNR",
+              "rnbqkbnr/pppppppp/7q/8/8/8/PPPPPPPP/RNBQKBNR")
 
 shutdown_map = ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQQBNR",
                 "RNBQQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr",
@@ -114,7 +114,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
         self.engine_level_result = None
         self.engine_level_index = 20
-        self.n_levels = 21  # Default engine (Stockfish) has 21 playing levels
         self.engine_has_levels = False  # Not all engines support levels - assume not
         self.engine_has_960 = False  # Not all engines support 960 mode - assume not
         self.engine_restart = False
@@ -338,9 +337,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     msg = (self.installed_engines[self.engine_index])['section']
                     text = self.dgttranslate.text('B00_default', msg)
                 else:
-                    self.engine_level_index = (self.engine_level_index-1) % self.n_levels
-                    msg = str(self.engine_level_index).rjust(2)
-                    text = self.dgttranslate.text('B00_level', msg)
+                    level_dict = self.installed_engines[self.engine_index]['level_dict']
+                    self.engine_level_index = (self.engine_level_index-1) % len(level_dict)
+                    msg = sorted(level_dict)[self.engine_level_index]
+                    text = self.dgttranslate.text('B00_default', msg)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.BOOK_MENU:
@@ -445,9 +445,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     msg = (self.installed_engines[self.engine_index])['section']
                     text = self.dgttranslate.text('B00_default', msg)
                 else:
-                    self.engine_level_index = (self.engine_level_index+1) % self.n_levels
-                    msg = str(self.engine_level_index).rjust(2)
-                    text = self.dgttranslate.text('B00_level', msg)
+                    level_dict = self.installed_engines[self.engine_index]['level_dict']
+                    self.engine_level_index = (self.engine_level_index+1) % len(level_dict)
+                    msg = sorted(level_dict)[self.engine_level_index]
+                    text = self.dgttranslate.text('B00_default', msg)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.BOOK_MENU:
@@ -600,8 +601,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     eng = self.installed_engines[self.engine_index]
                     if eng['has_levels']:
                         self.engine_result = self.engine_index
-                        msg = str(self.engine_level_index).rjust(2)
-                        text = self.dgttranslate.text('B00_level', msg)
+                        level_dict = self.installed_engines[self.engine_index]['level_dict']
+                        msg = sorted(level_dict)[self.engine_level_index]
+                        text = self.dgttranslate.text('B00_default', msg)
                         DisplayDgt.show(text)
                     else:
                         text = self.dgttranslate.text('B10_okengine')
