@@ -532,7 +532,7 @@ def main():
     text = dgttranslate.text('B00_tc_blitz', '   5')
     text.beep = False
     DisplayMsg.show(Message.STARTUP_INFO(info={"interaction_mode": interaction_mode, "play_mode": play_mode,
-                                               "book": all_books[book_index][1], "book_index": book_index,
+                                               "books": all_books, "book_index": book_index,
                                                "time_text": text}))
     DisplayMsg.show(Message.UCI_OPTION_LIST(options=engine.options))
     DisplayMsg.show(Message.ENGINE_STARTUP(shell=engine.get_shell(), file=engine.get_file(),

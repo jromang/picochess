@@ -17,6 +17,7 @@
 
 from timecontrol import *
 from collections import OrderedDict
+import math
 
 from dgtiface import *
 from engine import get_installed_engines
@@ -108,23 +109,21 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.setup_uci960_result = None
 
         self.top_result = None
-        self.top_index = None  # @todo
+        self.top_index = None
         self.mode_result = None
-        self.mode_index = Mode.NORMAL
+        self.mode_index = None
 
         self.engine_level_result = None
-        self.engine_level_index = 20
+        self.engine_level_index = None
         self.engine_has_levels = False  # Not all engines support levels - assume not
         self.engine_has_960 = False  # Not all engines support 960 mode - assume not
         self.engine_restart = False
         self.engine_result = None
         self.engine_index = 0
         self.installed_engines = None
-        self.n_engines = 0
 
-        self.book_index = 7  # Default book is 7 - book 'h'
-        self.all_books = get_opening_books()
-        self.n_books = len(self.all_books)
+        self.book_index = 0
+        self.all_books = None
 
         self.system_index = Settings.VERSION
         self.system_sound_result = None
@@ -333,7 +332,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text = self.dgttranslate.text('B00_nofunction')
             else:
                 if self.engine_result is None:
-                    self.engine_index = (self.engine_index-1) % self.n_engines
+                    self.engine_index = (self.engine_index-1) % len(self.installed_engines)
                     msg = (self.installed_engines[self.engine_index])['section']
                     text = self.dgttranslate.text('B00_default', msg)
                 else:
@@ -347,7 +346,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if self.mode_result == Mode.REMOTE:
                 text = self.dgttranslate.text('B00_nofunction')
             else:
-                self.book_index = (self.book_index-1) % self.n_books
+                self.book_index = (self.book_index-1) % len(self.all_books)
                 msg = (self.all_books[self.book_index])[0]
                 text = self.dgttranslate.text('B00_default', msg)
             DisplayDgt.show(text)
@@ -441,7 +440,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text = self.dgttranslate.text('B00_nofunction')
             else:
                 if self.engine_result is None:
-                    self.engine_index = (self.engine_index+1) % self.n_engines
+                    self.engine_index = (self.engine_index+1) % len(self.installed_engines)
                     msg = (self.installed_engines[self.engine_index])['section']
                     text = self.dgttranslate.text('B00_default', msg)
                 else:
@@ -455,7 +454,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if self.mode_result == Mode.REMOTE:
                 text = self.dgttranslate.text('B00_nofunction')
             else:
-                self.book_index = (self.book_index+1) % self.n_books
+                self.book_index = (self.book_index+1) % len(self.all_books)
                 msg = (self.all_books[self.book_index])[0]
                 text = self.dgttranslate.text('B00_default', msg)
             DisplayDgt.show(text)
@@ -611,9 +610,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.engine_restart = True
                         self.reset_menu_results()
                 else:
+                    eng = self.installed_engines[self.engine_result]
                     level = self.engine_level_index
                     lvl_text = self.dgttranslate.text('B10_level', str(level).rjust(2))
-                    eng = self.installed_engines[self.engine_result]
                     eng_text = self.dgttranslate.text('B10_okengine')
                     self.fire(Event.LEVEL(level=level, level_text=lvl_text, ok_text=False))
                     self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, ok_text=True))
@@ -699,12 +698,13 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         break
                     if case(MessageApi.ENGINE_STARTUP):
                         self.installed_engines = get_installed_engines(message.shell, message.file)
-                        self.n_engines = len(self.installed_engines)
-                        for index in range(0, self.n_engines):
-                            if self.installed_engines[index]['file'] == message.file:
+                        for index in range(0, len(self.installed_engines)):
+                            eng = self.installed_engines[index]
+                            if eng['file'] == message.file:
                                 self.engine_index = index
                                 self.engine_has_levels = message.has_levels
                                 self.engine_has_960 = message.has_960
+                                self.engine_level_index = len(eng['level_dict'])
                         break
                     if case(MessageApi.ENGINE_FAIL):
                         DisplayDgt.show(self.dgttranslate.text('Y00_erroreng'))
@@ -836,8 +836,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.ip = ' '.join(message.info["ip"].split('.')[2:])
                         break
                     if case(MessageApi.STARTUP_INFO):
+                        self.mode_index = message.info['interaction_mode']
                         self.mode_result = message.info['interaction_mode']
                         self.book_index = message.info['book_index']
+                        self.all_books = message.info['books']
                         break
                     if case(MessageApi.SEARCH_STARTED):
                         logging.debug('Search started')
@@ -906,14 +908,28 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         map_bl = self.dgttranslate.bl(BeepLevel.MAP)
                         # Fire the appropriate event
                         if fen in level_map:
-                            level = 3 * level_map.index(fen)
-                            if level > 20:
-                                level = 20
-                            self.engine_level_result = level
-                            self.engine_level_index = level
-                            logging.debug("Map-Fen: New level")
-                            text = self.dgttranslate.text('M10_level', str(level).rjust(2))
-                            self.fire(Event.LEVEL(level=level, level_text=text, ok_text=False))
+                            level_dict = self.installed_engines[self.engine_index]['level_dict']
+                            if self.installed_engines[self.engine_index]['has_levels']:
+                                inc = math.ceil(len(level_dict) / 8)
+                                level_index = min(inc * level_map.index(fen), len(level_dict)-1)
+                                self.engine_level_result = level_index
+                                self.engine_level_index = level_index
+
+                                msg = sorted(level_dict)[level_index]
+                                print(level_dict[msg])
+                                text = self.dgttranslate.text('M10_default', msg)
+                                logging.debug("Map-Fen: New level {}".format(level_index))
+                                self.fire(Event.LEVEL(level=level_index, level_text=text, ok_text=False))
+                            else:
+                                logging.debug('engine doesnt support levels')
+                            # level = 3 * level_map.index(fen)
+                            # if level > 20:
+                            #     level = 20
+                            # self.engine_level_result = level
+                            # self.engine_level_index = level
+                            # logging.debug("Map-Fen: New level")
+                            # text = self.dgttranslate.text('M10_level', str(level).rjust(2))
+                            # self.fire(Event.LEVEL(level=level, level_text=text, ok_text=False))
                         elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":
                             logging.debug("Map-Fen: New game")
                             self.show_setup_pieces_msg = False
@@ -935,7 +951,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 try:
                                     self.engine_index = engine_index
                                     eng = self.installed_engines[self.engine_index]
-                                    logging.debug("Map-Fen: Engine name [%s]", eng[1])
+                                    logging.debug("Map-Fen: Engine name [%s]", eng['section'])
                                     eng_text = self.dgttranslate.text('M10_default', eng['section'])
 
                                     level = self.engine_level_index if self.engine_level_result is None else self.engine_level_result
