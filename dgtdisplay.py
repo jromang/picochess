@@ -951,14 +951,15 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 try:
                                     self.engine_index = engine_index
                                     eng = self.installed_engines[self.engine_index]
-                                    level_dict = eng['level_dict']
                                     logging.debug("Map-Fen: Engine name [%s]", eng['section'])
                                     eng_text = self.dgttranslate.text('M10_default', eng['section'])
 
-                                    level_index = self.engine_level_index if self.engine_level_result is None else self.engine_level_result
-                                    msg = sorted(level_dict)[level_index]
-                                    lvl_text = self.dgttranslate.text('M10_default', msg)
-                                    self.fire(Event.LEVEL(options=level_dict[msg], level=msg, level_text=lvl_text, ok_text=False))
+                                    level_dict = eng['level_dict']
+                                    if level_dict:
+                                        level_index = self.engine_level_index if self.engine_level_result is None else self.engine_level_result
+                                        msg = sorted(level_dict)[level_index]
+                                        lvl_text = self.dgttranslate.text('M10_default', msg)
+                                        self.fire(Event.LEVEL(options=level_dict[msg], level=msg, level_text=lvl_text, ok_text=False))
                                     self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, ok_text=False))
                                     self.engine_restart = True
                                     self.reset_menu_results()
