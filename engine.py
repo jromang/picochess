@@ -79,17 +79,16 @@ def write_engine_ini(engine_path=None):
                     inc = int((maxlevel - minlevel) / 20)
                 set_elo = minlevel
                 while set_elo < maxlevel:
-                    parser['Elo {:04d}'.format(set_elo)] = {'UCI_LimitStrength' : 'true', 'UCI_Elo' : str(set_elo)}
+                    parser['Elo@{:04d}'.format(set_elo)] = {'UCI_LimitStrength' : 'true', 'UCI_Elo' : str(set_elo)}
                     set_elo += inc
-                parser['Elo {:04d}'.format(maxlevel)] = {'UCI_LimitStrength': 'false', 'UCI_Elo': str(maxlevel)}
+                parser['Elo@{:04d}'.format(maxlevel)] = {'UCI_LimitStrength': 'false', 'UCI_Elo': str(maxlevel)}
             if engine.has_skill_level():
                 sklevel = engine.get().options['Skill Level']
                 minlevel, maxlevel = int(sklevel[3]), int(sklevel[4])
                 for level in range(minlevel, maxlevel):
-                    parser['Level {:02d}'.format(level)] = {'Skill Level': str(level)}
+                    parser['Level@{:02d}'.format(level)] = {'Skill Level': str(level)}
             with open(engine_path + os.sep + engine_file_name + '.lvl', 'w') as configfile:
                 parser.write(configfile)
-        return minlevel, maxlevel
 
     def is_exe(fpath):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
