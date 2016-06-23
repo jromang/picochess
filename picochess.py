@@ -85,23 +85,6 @@ class AlternativeMover:
 
 def main():
 
-    def engine_startup():
-        if 'Hash' in engine.get().options:
-            engine.option("Hash", args.hash_size)
-        if 'Threads' in engine.get().options:  # Stockfish
-            engine.option("Threads", args.threads)
-        if 'Core Threads' in engine.get().options:  # Hiarcs
-            engine.option("Core Threads", args.threads)
-        if args.uci_option:
-            for uci_option in args.uci_option.strip('"').split(";"):
-                uci_parameter = uci_option.strip().split('=')
-                engine.option(uci_parameter[0], uci_parameter[1])
-        # send the options to the engine
-        engine.send()
-        # Log the engine info
-        logging.debug('Loaded engine [%s]', engine_name)
-        logging.debug('Supported options [%s]', engine.get().options)
-
     def display_system_info():
         if args.enable_internet:
             place = get_location()
@@ -417,9 +400,7 @@ def main():
     args = parser.parse_args()
     if args.engine is None:
         el = read_engine_ini()
-        args.engine = el[0]['file']  # read the first engine path and use it as standard
-    else:
-        args.engine = which(args.engine)
+        args.engine = el[0]['file']  # read the first engine filename and use it as standard
 
     # Enable logging
     if args.log_file:
@@ -526,7 +507,7 @@ def main():
 
     system_info_thread = threading.Timer(0, display_system_info)
     system_info_thread.start()
-    engine_startup()  # send the args options to the engine
+    engine.startup(args)  # send the args options to the engine
 
     # Startup - external
     text = dgttranslate.text('B00_tc_blitz', '   5')
@@ -581,10 +562,10 @@ def main():
                     break
 
                 if case(EventApi.LEVEL):
-                    logging.debug("setting engine with options {}".format(event.options))
-                    if engine.level(event.options):
-                        engine.send()
-                        DisplayMsg.show(Message.LEVEL(level=event.level, level_text=event.level_text, ok_text=event.ok_text))
+                    logging.debug("setting engine with (lvl) options {}".format(event.options))
+                    engine.level(event.options)
+                    engine.send()
+                    DisplayMsg.show(Message.LEVEL(level=event.level, level_text=event.level_text, ok_text=event.ok_text))
                     break
 
                 if case(EventApi.NEW_ENGINE):
@@ -620,9 +601,7 @@ def main():
                                 sys.exit(-1)
                         # Schedule cleanup of old objects
                         gc.collect()
-                        # Restore options - this doesn't deal with any
-                        # supplementary uci options sent 'in game', see event.UCI_OPTION_SET
-                        engine_startup()
+                        engine.startup(args)
                         # All done - rock'n'roll
                         if not engine_fallback:
                             DisplayMsg.show(Message.ENGINE_READY(eng=event.eng, engine_name=engine_name,
@@ -807,11 +786,6 @@ def main():
                     custom_fen = getattr(game, 'custom_fen', None)
                     DisplayMsg.show(Message.GAME_ENDS(result=GameResult.OUT_OF_TIME, play_mode=play_mode,
                                                       game=copy.deepcopy(game), custom_fen=custom_fen))
-                    break
-
-                if case(EventApi.UCI_OPTION_SET):
-                    # Nowhere calls this yet, but they will need to be saved for engine restart
-                    engine.option(event.name, event.value)
                     break
 
                 if case(EventApi.SHUTDOWN):

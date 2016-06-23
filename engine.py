@@ -56,7 +56,6 @@ def read_engine_ini(engine_shell=None, engine_path=None):
             {
                 'file' : engine_path + os.sep + config[section]['file'],
                 'section' : section,
-                'has_levels' : config[section].getboolean('has_levels'),
                 'level_dict' : level_dict
             }
         )
@@ -107,18 +106,10 @@ def write_engine_ini(engine_path=None):
                 print(engine_file_name)
                 try:
                     if engine.has_levels():
-                        minlevel, maxlevel = write_level_ini()
-                    else:
-                        minlevel = maxlevel = 0
+                        write_level_ini()
                     config[engine_file_name[2:]] = {
                         'file': engine_file_name,
                         'name': engine.get().name,
-                        'has_levels': engine.has_levels(),
-                        'has_limit_strength': engine.has_limit_strength(),
-                        'has_skill_level': engine.has_skill_level(),
-                        'min_level': minlevel,
-                        'max_level': maxlevel,
-                        'has_chess960': engine.has_chess960()
                     }
                 except AttributeError:
                     pass
@@ -225,7 +216,6 @@ class UciEngine(object):
 
     def level(self, options):
         self.options = options
-        return True
 
     def has_levels(self):
         return self.has_skill_level() or self.has_limit_strength()
@@ -295,7 +285,7 @@ class UciEngine(object):
         if self.show_best:
             Observable.fire(Event.BEST_MOVE(result=self.res, inbook=False))
         else:
-            logging.debug('event_best_move not fired')
+            logging.debug('event best_move not fired')
         self.status = EngineStatus.WAIT
 
     def is_thinking(self):
@@ -307,3 +297,26 @@ class UciEngine(object):
     def is_waiting(self):
         return self.status == EngineStatus.WAIT
 
+    def startup(self, args):
+        # first send the last lvl values to the engine
+        parser = configparser.ConfigParser()
+        if parser.read(self.get_file() + '.lvl'):
+            options = dict(parser[parser.sections().pop()])
+            logging.debug("setting engine with (lvl) options {}".format(options))
+            self.level(options)
+
+        if 'Hash' in self.get().options:
+            self.option('Hash', args.hash_size)
+        if 'Threads' in self.get().options:  # Stockfish
+            self.option('Threads', args.threads)
+        if 'Core Threads' in self.get().options:  # Hiarcs
+            self.option('Core Threads', args.threads)
+        if args.uci_option:
+            for uci_option in args.uci_option.strip('"').split(";"):
+                uci_parameter = uci_option.strip().split('=')
+                self.option(uci_parameter[0], uci_parameter[1])
+        # send the options to the engine
+        self.send()
+        # Log the engine info
+        logging.debug('Loaded engine [%s]', self.get().name)
+        logging.debug('Supported options [%s]', self.get().options)

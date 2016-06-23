@@ -598,9 +598,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 if self.engine_result is None:
                     eng = self.installed_engines[self.engine_index]
-                    if eng['has_levels']:
+                    level_dict = eng['level_dict']
+                    if level_dict:
                         self.engine_result = self.engine_index
-                        level_dict = self.installed_engines[self.engine_index]['level_dict']
+                        if len(level_dict) <= self.engine_level_index:
+                            self.engine_level_index = len(level_dict)-1
                         msg = sorted(level_dict)[self.engine_level_index]
                         text = self.dgttranslate.text('B00_default', msg)
                         DisplayDgt.show(text)
@@ -612,10 +614,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 else:
                     eng = self.installed_engines[self.engine_result]
                     level_dict = eng['level_dict']
-                    msg = sorted(level_dict)[self.engine_level_index]
-                    lvl_text = self.dgttranslate.text('B10_default', msg)
+                    if level_dict:
+                        msg = sorted(level_dict)[self.engine_level_index]
+                        lvl_text = self.dgttranslate.text('B10_default', msg)
+                        self.fire(Event.LEVEL(options=level_dict[msg], level=msg, level_text=lvl_text, ok_text=False))
                     eng_text = self.dgttranslate.text('B10_okengine')
-                    self.fire(Event.LEVEL(options=level_dict[msg], level=msg, level_text=lvl_text, ok_text=False))
                     self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, ok_text=True))
                     self.engine_restart = True
                     self.reset_menu_results()
@@ -909,8 +912,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         map_bl = self.dgttranslate.bl(BeepLevel.MAP)
                         # Fire the appropriate event
                         if fen in level_map:
-                            level_dict = self.installed_engines[self.engine_index]['level_dict']
-                            if self.installed_engines[self.engine_index]['has_levels']:
+                            eng = self.installed_engines[self.engine_index]
+                            level_dict = eng['level_dict']
+                            if level_dict:
                                 inc = math.ceil(len(level_dict) / 8)
                                 level_index = min(inc * level_map.index(fen), len(level_dict)-1)
                                 self.engine_level_result = level_index
@@ -922,14 +926,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 self.fire(Event.LEVEL(options=level_dict[msg], level=msg, level_text=text, ok_text=False))
                             else:
                                 logging.debug('engine doesnt support levels')
-                            # level = 3 * level_map.index(fen)
-                            # if level > 20:
-                            #     level = 20
-                            # self.engine_level_result = level
-                            # self.engine_level_index = level
-                            # logging.debug("Map-Fen: New level")
-                            # text = self.dgttranslate.text('M10_level', str(level).rjust(2))
-                            # self.fire(Event.LEVEL(level=level, level_text=text, ok_text=False))
                         elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":
                             logging.debug("Map-Fen: New game")
                             self.show_setup_pieces_msg = False
@@ -954,11 +950,13 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                     level_dict = eng['level_dict']
                                     logging.debug("Map-Fen: Engine name [%s]", eng['section'])
                                     eng_text = self.dgttranslate.text('M10_default', eng['section'])
-
-                                    level_index = self.engine_level_index if self.engine_level_result is None else self.engine_level_result
-                                    msg = sorted(level_dict)[level_index]
-                                    lvl_text = self.dgttranslate.text('M10_default', msg)
-                                    self.fire(Event.LEVEL(options=level_dict[msg], level=msg, level_text=lvl_text, ok_text=False))
+                                    if level_dict:
+                                        if len(level_dict) <= self.engine_level_index:
+                                            self.engine_level_index = len(level_dict) - 1
+                                        level_index = self.engine_level_index if self.engine_level_result is None else self.engine_level_result
+                                        msg = sorted(level_dict)[level_index]
+                                        lvl_text = self.dgttranslate.text('M10_default', msg)
+                                        self.fire(Event.LEVEL(options=level_dict[msg], level=msg, level_text=lvl_text, ok_text=False))
                                     self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, ok_text=False))
                                     self.engine_restart = True
                                     self.reset_menu_results()
