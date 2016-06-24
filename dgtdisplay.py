@@ -617,7 +617,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if level_dict:
                         msg = sorted(level_dict)[self.engine_level_index]
                         lvl_text = self.dgttranslate.text('B10_level', msg)
-                        self.fire(Event.LEVEL(options=level_dict[msg], level=msg, level_text=lvl_text, ok_text=False))
+                        self.fire(Event.LEVEL(options=level_dict[msg], level_text=lvl_text, ok_text=False))
                     eng_text = self.dgttranslate.text('B10_okengine')
                     self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, ok_text=True))
                     self.engine_restart = True
@@ -923,7 +923,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 msg = sorted(level_dict)[level_index]
                                 text = self.dgttranslate.text('M10_level', msg)
                                 logging.debug("Map-Fen: New level {}".format(level_index))
-                                self.fire(Event.LEVEL(options=level_dict[msg], level=msg, level_text=text, ok_text=False))
+                                self.fire(Event.LEVEL(options=level_dict[msg], level_text=text, ok_text=False))
                             else:
                                 logging.debug('engine doesnt support levels')
                         elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":
@@ -956,7 +956,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                         level_index = self.engine_level_index if self.engine_level_result is None else self.engine_level_result
                                         msg = sorted(level_dict)[level_index]
                                         lvl_text = self.dgttranslate.text('M10_level', msg)
-                                        self.fire(Event.LEVEL(options=level_dict[msg], level=msg, level_text=lvl_text, ok_text=False))
+                                        self.fire(Event.LEVEL(options=level_dict[msg], level_text=lvl_text, ok_text=False))
                                     self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, ok_text=False))
                                     self.engine_restart = True
                                     self.reset_menu_results()

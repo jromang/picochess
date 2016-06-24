@@ -64,7 +64,6 @@ def read_engine_ini(engine_shell=None, engine_path=None):
 
 def write_engine_ini(engine_path=None):
     def write_level_ini():
-        minlevel = maxlevel = 0
         parser = configparser.ConfigParser()
         if not parser.read(engine_path + os.sep + engine_file_name + '.lvl'):
             if engine.has_limit_strength():
@@ -198,6 +197,7 @@ class UciEngine(object):
 
             self.res = None
             self.status = EngineStatus.WAIT
+            self.level_support = False
 
         except OSError:
             logging.exception('OS error in starting engine')
@@ -214,10 +214,11 @@ class UciEngine(object):
         self.engine.setoption(self.options)
 
     def level(self, options):
+        self.level_support = True
         self.options = options
 
     def has_levels(self):
-        return self.has_skill_level() or self.has_limit_strength()
+        return self.level_support or self.has_skill_level() or self.has_limit_strength()
 
     def has_skill_level(self):
         return 'Skill Level' in self.engine.options

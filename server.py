@@ -259,7 +259,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 self.create_game_info()
                 self.shared['game_info']['mode'] = message.mode
                 if self.shared['game_info']['mode'] == Mode.REMOTE:
-                    self.shared['system_info']['engine_name'] = "Remote Player"
+                    self.shared['system_info']['engine_name'] = 'Remote Player'
                 else:
                     self.shared['system_info']['engine_name'] = self.shared['system_info']['old_engine']
                 update_headers(self)
@@ -273,7 +273,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 self.shared['game_info']['time_text'] = message.time_text
                 break
             if case(MessageApi.LEVEL):
-                self.shared['game_info']['level'] = message.level
+                self.shared['game_info']['level'] = message.level_text.m
                 update_headers(self)
                 break
             if case(MessageApi.JACK_CONNECTED_ERROR):

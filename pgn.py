@@ -78,7 +78,7 @@ class PgnDisplay(DisplayMsg, threading.Thread):
         if self.level is None:
             engine_level = ""
         else:
-            engine_level = " (Level {0})".format(self.level)
+            engine_level = " ({0})".format(self.level)
 
         if message.play_mode == PlayMode.USER_WHITE:
             pgn.headers["White"] = self.user_name
@@ -160,7 +160,7 @@ class PgnDisplay(DisplayMsg, threading.Thread):
                         self.location = message.info['location']
                         break
                     if case(MessageApi.LEVEL):
-                        self.level = message.level
+                        self.level = message.level_text.m
                         break
                     if case(MessageApi.INTERACTION_MODE):
                         if message.mode == Mode.REMOTE:

@@ -565,7 +565,7 @@ def main():
                     logging.debug("setting engine with (lvl) options {}".format(event.options))
                     engine.level(event.options)
                     engine.send()
-                    DisplayMsg.show(Message.LEVEL(level=event.level, level_text=event.level_text, ok_text=event.ok_text))
+                    DisplayMsg.show(Message.LEVEL(level_text=event.level_text, ok_text=event.ok_text))
                     break
 
                 if case(EventApi.NEW_ENGINE):

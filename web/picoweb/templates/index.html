@@ -667,7 +667,7 @@ var onDrop = function(source, target) {
 
         // illegal move
     if (move === null) return 'snapback';
-}
+};
 
 // update the board position after the piece snap
 // for castling, en passant, pawn promotion
@@ -1057,7 +1057,7 @@ function writeVariationTree(dom, gameMoves, gameHistoryEl) {
 
 
 function getGameHeader(h) {
-    var gameHeaderText = '<h4>' + h.White + ' (' + h.WhiteElo + ') - ' + h.Black + ' (' + h.BlackElo + ')</h4>';
+    var gameHeaderText = '<h4>' + h.White + ' (' + h.WhiteElo + ') vs ' + h.Black + ' (' + h.BlackElo + ')</h4>';
     gameHeaderText += '<h5>' + h.Event + ', ' + h.Site + ' ' + h.Date + '</h5>';
     return gameHeaderText;
 }
@@ -1070,8 +1070,7 @@ function writeGameText(g, dom, skip_header) {
     if (typeof(h.Result) == 'undefined') {
         h.Result = '';
     }
-    var gameHeaderText = '<h4>' + h.White + ' (' + h.WhiteElo + ') - ' + h.Black + ' (' + h.BlackElo + ')</h4>';
-    gameHeaderText += '<h5>' + h.Event + ', ' + h.Site + ' ' + h.Date + '</h5>';
+    var gameHeaderText = getGameHeader(h);
     if (skip_header) {
         gameHeaderText = '';
     }
