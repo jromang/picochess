@@ -2,7 +2,7 @@ General
 =======
 This folder is for the UCI-Engines. Place the engines in your corresponding plattform folder ("armv7l" or "x86_64")
 
-The engines must be named after "<char>-<max 6chars>" for example "x-engnam". The first char descides the order
+The engines must be named after "char-max 6chars" for example "x-engnam". The first char descides the order
 shown in the dgt display (the first 8 engines can also be activated with the queen). The last max 6 chars decides the
 engine inside the dgt-clock (for XL clocks these max 6chars - please keep this rule, even you have a DGT3000 clock).
 
@@ -15,7 +15,9 @@ During the engine build (see above) the script will also build a level file for 
 such file already). These files are named after the engine with a ".lvl" at the end.
 
 You can update them lateron by hand if y want but they should already be in good shape for standard engines (with level
-support).
+support). If you do this please follow the standard level naming way with "Level@01" & "Elo@0123". The numbers must be
+2chars or 4chars long and with this Key-Value (ending on "@") infront.
+
 
 If you have a personality engine (like rodent_II) please use something similar to the "rodent2" folder.
 I uploaded some personality_* files already. Please move them to the plattform-engine folder, and name them similar to
