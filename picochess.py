@@ -228,8 +228,10 @@ def main():
             DisplayMsg.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=copy.deepcopy(game), custom_fen=custom_fen))
             return False
 
-    def process_fen(fen, legal_fens):
+    def process_fen(fen):
         nonlocal last_computer_fen
+        nonlocal game
+        nonlocal legal_fens
         if fen in legal_fens:
             # Check if we have to undo a previous move (sliding)
             if interaction_mode == Mode.NORMAL:
@@ -238,27 +240,38 @@ def main():
                     stop_search()
                     if game.move_stack:
                         game.pop()
-            legal_moves = list(game.legal_moves)
             time_control.add_inc(game.turn)
-            Observable.fire(Event.USER_MOVE(move=legal_moves[legal_fens.index(fen)]))
+
+            move = list(game.legal_moves)[legal_fens.index(fen)]
+            logging.debug('user move [%s]', move)
+            if move not in game.legal_moves:
+                logging.warning('Illegal move [%s]', move)
+            else:
+                result = chess.uci.BestMove(bestmove=move, ponder=None)
+                game = handle_move(result, game)
+                if check_game_state(game, play_mode):
+                    legal_fens = compute_legal_fens(game)
+
         elif fen == last_computer_fen:  # Player had done the computer move on the board
             last_computer_fen = None
-            if check_game_state(game, play_mode) and interaction_mode in (Mode.NORMAL, Mode.REMOTE):
-                # finally reset all alternative moves see: handle_move()
-                nonlocal searchmoves
-                searchmoves.reset()
-                time_control.add_inc(not game.turn)
-                DisplayMsg.show(Message.COMPUTER_MOVE_DONE_ON_BOARD())
-                if time_control.mode != TimeMode.FIXED:
-                    start_clock(wait=not args.disable_ok_message)
+            if interaction_mode in (Mode.NORMAL, Mode.REMOTE):
+                if check_game_state(game, play_mode):
+                    # finally reset all alternative moves see: handle_move()
+                    nonlocal searchmoves
+                    searchmoves.reset()
+                    time_control.add_inc(not game.turn)
+                    DisplayMsg.show(Message.COMPUTER_MOVE_DONE_ON_BOARD())
+                    if time_control.mode != TimeMode.FIXED:
+                        start_clock(wait=not args.disable_ok_message)
+            else:
+                logging.warning('wrong interaction mode {} for fen {}'.format(interaction_mode, fen))
         else:  # Check if this is a previous legal position and allow user to restart from this position
             game_history = copy.deepcopy(game)
             while game_history.move_stack:
                 game_history.pop()
                 if (play_mode == PlayMode.USER_WHITE and game_history.turn == chess.WHITE) \
                         or (play_mode == PlayMode.USER_BLACK and game_history.turn == chess.BLACK) \
-                        or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.KIBITZ) \
-                        or (interaction_mode == Mode.REMOTE) or (interaction_mode == Mode.ANALYSIS):
+                        or interaction_mode in (Mode.OBSERVE, Mode.KIBITZ, Mode.REMOTE, Mode.ANALYSIS):
                     if game_history.board_fen() == fen:
                         logging.debug("Legal Fens root       : " + str(legal_fens.root))
                         logging.debug("Current game FEN      : " + str(game.fen()))
@@ -273,7 +286,6 @@ def main():
                         DisplayMsg.show(Message.USER_TAKE_BACK())
                         legal_fens = compute_legal_fens(game)
                         break
-        return legal_fens
 
     def set_wait_state():
         if interaction_mode == Mode.NORMAL:
@@ -301,7 +313,6 @@ def main():
             DisplayMsg.show(Message.BOOK_MOVE(result=event.result))
 
         if interaction_mode == Mode.NORMAL:
-            # stop_clock()
             # If UserMove: reset all alternative moves
             # If ComputerMove: disallow this move, and finally reset all if DONE_ON_BOARD event @see: process_fen()
             if (play_mode == PlayMode.USER_WHITE and game.turn == chess.WHITE)\
@@ -318,7 +329,6 @@ def main():
                     think(game, time_control, wait=not args.disable_ok_message)
 
         elif interaction_mode == Mode.REMOTE:
-            # stop_search_and_clock()
             # If UserMove: reset all alternative moves
             # If Remote Move: same process as for computer move above
             if (play_mode == PlayMode.USER_WHITE and game.turn == chess.WHITE)\
@@ -335,13 +345,11 @@ def main():
                     observe(game, time_control)
 
         elif interaction_mode == Mode.OBSERVE:
-            # stop_search_and_clock()
             DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode))
             if check_game_state(game, play_mode):
                 observe(game, time_control)
 
         elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
-            # stop_search()
             DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode))
             if check_game_state(game, play_mode):
                 analyse(game)
@@ -530,7 +538,7 @@ def main():
             logging.debug('received event from evt_queue: %s', event)
             for case in switch(event):
                 if case(EventApi.FEN):
-                    legal_fens = process_fen(event.fen, legal_fens)
+                    process_fen(event.fen)
                     break
 
                 if case(EventApi.KEYBOARD_MOVE):
@@ -545,20 +553,6 @@ def main():
                         if event.flip_board:
                             fen = fen[::-1]
                         DisplayMsg.show(Message.KEYBOARD_MOVE(fen=fen))
-                    break
-
-                if case(EventApi.USER_MOVE):
-                    move = event.move
-                    logging.debug('user move [%s]', move)
-                    if move not in game.legal_moves:
-                        logging.warning('Illegal move [%s]', move)
-                    else:
-                        result = chess.uci.BestMove(bestmove=move, ponder=None)
-                        game = handle_move(result, game)
-                        # deactivated cause of issue #185 => prg otherwise running in "sliding part"
-                        # reactivated cause of picochess now not working in non-normal mode => @fix it!
-                        if check_game_state(game, play_mode):
-                            legal_fens = compute_legal_fens(game)
                     break
 
                 if case(EventApi.LEVEL):

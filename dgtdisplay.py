@@ -922,7 +922,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
                                 msg = sorted(level_dict)[level_index]
                                 text = self.dgttranslate.text('M10_level', msg)
-                                logging.debug("Map-Fen: New level {}".format(level_index))
+                                logging.debug("Map-Fen: New level {}".format(msg))
                                 self.fire(Event.LEVEL(options=level_dict[msg], level_text=text, ok_text=False))
                             else:
                                 logging.debug('engine doesnt support levels')
