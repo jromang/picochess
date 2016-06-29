@@ -143,10 +143,13 @@ def main():
             Observable.fire(Event.NEW_SCORE(score='tb', mate=score))
         return score
 
-    def think_callback():
-        tc = time_control
-        tc.start(game.turn)
-
+    def think(game, tc, wait=False):
+        """
+        Starts a new search on the current game.
+        If a move is found in the opening book, fire an event in a few seconds.
+        :return:
+        """
+        start_clock(wait=False)
         book_move = searchmoves.book(bookreader, game)
         if book_move:
             Observable.fire(Event.NEW_SCORE(score='book', mate=None))
@@ -161,14 +164,6 @@ def main():
             uci_dict['searchmoves'] = searchmoves.all(game)
             engine.go(uci_dict)
 
-    def think(game, tc, wait=False):
-        """
-        Starts a new search on the current game.
-        If a move is found in the opening book, fire an event in a few seconds.
-        :return:
-        """
-        DisplayMsg.show(Message.CLOCK_START(turn=game.turn, time_control=tc, wait=wait, callback=think_callback))
-
     def analyse(game):
         """
         Starts a new ponder search on the current game.
@@ -178,17 +173,13 @@ def main():
         engine.position(copy.deepcopy(game))
         engine.ponder()
 
-    def observe_callback():
-        tc = time_control
-        tc.start(game.turn)
-        analyse(game)
-
     def observe(game, tc):
         """
         Starts a new ponder search on the current game.
         :return:
         """
-        DisplayMsg.show(Message.CLOCK_START(turn=game.turn, time_control=tc, wait=False, callback=observe_callback))
+        start_clock(wait=False)
+        analyse(game)
 
     def stop_search():
         """
@@ -199,7 +190,8 @@ def main():
 
     def stop_clock():
         if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
-            DisplayMsg.show(Message.CLOCK_STOP(callback=tc_stop_callback))
+            time_control.stop()
+            DisplayMsg.show(Message.CLOCK_STOP(callback=None))
         else:
             logging.warning('wrong mode: {}'.format(interaction_mode))
 
@@ -209,15 +201,10 @@ def main():
 
     def start_clock(wait=False):
         if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
-            DisplayMsg.show(Message.CLOCK_START(turn=game.turn, time_control=time_control, wait=wait, callback=tc_start_callback))
+            time_control.start(game.turn)
+            DisplayMsg.show(Message.CLOCK_START(turn=game.turn, time_control=time_control, wait=False, callback=None))
         else:
             logging.warning('wrong mode: {}'.format(interaction_mode))
-
-    def tc_start_callback():
-        time_control.start(game.turn)
-
-    def tc_stop_callback():
-        time_control.stop()
 
     def check_game_state(game, play_mode):
         """
@@ -247,50 +234,113 @@ def main():
 
     def process_fen(fen, legal_fens):
         nonlocal last_computer_fen
-        if fen in legal_fens:
-            # Check if we have to undo a previous move (sliding)
+        nonlocal last_legal_fens
+        nonlocal searchmoves
+
+        # Check if we have to undo a previous move (sliding)
+        if fen in last_legal_fens:
             if interaction_mode == Mode.NORMAL:
                 if (play_mode == PlayMode.USER_WHITE and game.turn == chess.BLACK) or \
                         (play_mode == PlayMode.USER_BLACK and game.turn == chess.WHITE):
                     stop_search()
-                    if game.move_stack:
-                        game.pop()
+                    game.pop()
+                    logging.debug("User move in computer turn, reverting to: " + game.board_fen())
+                elif (last_computer_fen):
+                    last_computer_fen = None
+                    game.pop()
+                    game.pop()
+                    logging.debug("User move while computer move is displayed, reverting to: " + game.board_fen())
+                else:
+                    logging.error("last_legal_fens not cleared: " + game.board_fen())
+            elif interaction_mode == Mode.REMOTE:
+                if (play_mode == PlayMode.USER_WHITE and game.turn == chess.BLACK) or \
+                        (play_mode == PlayMode.USER_BLACK and game.turn == chess.WHITE):
+                    game.pop()
+                    logging.debug("User move in remote turn, reverting to: " + game.board_fen())
+                elif (last_computer_fen):
+                    last_computer_fen = None
+                    game.pop()
+                    game.pop()
+                    logging.debug("User move while remote move is displayed, reverting to: " + game.board_fen())
+                else:
+                    logging.error("last_legal_fens not cleared: " + game.board_fen())
+            else:
+                game.pop()
+                logging.debug("Wrong color move -> sliding, reverting to: " + game.board_fen())
             legal_moves = list(game.legal_moves)
+            user_move(legal_moves[last_legal_fens.index(fen)])
+            if interaction_mode == Mode.NORMAL or interaction_mode == Mode.REMOTE :
+                legal_fens = []
+            else:
+                legal_fens = compute_legal_fens(game)
+
+        # legal move
+        elif fen in legal_fens:
             time_control.add_inc(game.turn)
-            Observable.fire(Event.USER_MOVE(move=legal_moves[legal_fens.index(fen)]))
-        elif fen == last_computer_fen:  # Player had done the computer move on the board
+            legal_moves = list(game.legal_moves)
+            user_move(legal_moves[legal_fens.index(fen)])
+            last_legal_fens = legal_fens
+            if interaction_mode == Mode.NORMAL or interaction_mode == Mode.REMOTE :
+                legal_fens = []
+            else:
+                legal_fens = compute_legal_fens(game)
+
+        # Player had done the computer or remote move on the board
+        elif fen == last_computer_fen:
             last_computer_fen = None
-            if check_game_state(game, play_mode) and interaction_mode in (Mode.NORMAL, Mode.REMOTE):
+            #if check_game_state(game, play_mode) and interaction_mode in (Mode.NORMAL, Mode.REMOTE):
                 # finally reset all alternative moves see: handle_move()
-                nonlocal searchmoves
-                searchmoves.reset()
-                time_control.add_inc(not game.turn)
-                DisplayMsg.show(Message.COMPUTER_MOVE_DONE_ON_BOARD())
-                if time_control.mode != TimeMode.FIXED:
-                    start_clock(wait=not args.disable_ok_message)
-        else:  # Check if this is a previous legal position and allow user to restart from this position
+            nonlocal searchmoves
+            searchmoves.reset()
+            time_control.add_inc(not game.turn)
+            if time_control.mode != TimeMode.FIXED:
+                start_clock(wait=False)
+            DisplayMsg.show(Message.COMPUTER_MOVE_DONE_ON_BOARD())
+            legal_fens = compute_legal_fens(game)
+            last_legal_fens = []
+
+        # Check if this is a previous legal position and allow user to restart from this position
+        else:
             game_history = copy.deepcopy(game)
             while game_history.move_stack:
                 game_history.pop()
-                if (play_mode == PlayMode.USER_WHITE and game_history.turn == chess.WHITE) \
-                        or (play_mode == PlayMode.USER_BLACK and game_history.turn == chess.BLACK) \
-                        or (interaction_mode == Mode.OBSERVE) or (interaction_mode == Mode.KIBITZ) \
-                        or (interaction_mode == Mode.REMOTE) or (interaction_mode == Mode.ANALYSIS):
-                    if game_history.board_fen() == fen:
-                        logging.debug("Legal Fens root       : " + str(legal_fens.root))
-                        logging.debug("Current game FEN      : " + str(game.fen()))
-                        logging.debug("Undoing game until FEN: " + fen)
-                        stop_search()
-                        while len(game_history.move_stack) < len(game.move_stack):
-                            game.pop()
-                        if interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
-                            analyse(game)
-                        if interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
-                            observe(game, time_control)
-                        DisplayMsg.show(Message.USER_TAKE_BACK())
+                if game_history.board_fen() == fen:
+                    logging.debug("Current game FEN      : " + str(game.fen()))
+                    logging.debug("Undoing game until FEN: " + fen)
+                    stop_search_and_clock()
+                    while len(game_history.move_stack) < len(game.move_stack):
+                        game.pop()
+                    last_computer_fen = None
+                    last_legal_fens = []
+                    if (interaction_mode == Mode.REMOTE or interaction_mode == Mode.NORMAL) and \
+                            ( (play_mode == PlayMode.USER_WHITE and game_history.turn == chess.BLACK) \
+                            or (play_mode == PlayMode.USER_BLACK and game_history.turn == chess.WHITE) ):
+                        legal_fens = []
+                        if interaction_mode == Mode.NORMAL:
+                            searchmoves.reset()
+                            if check_game_state(game, play_mode):
+                                think(game, time_control, wait=not args.disable_ok_message)
+                    else:
                         legal_fens = compute_legal_fens(game)
-                        break
+
+                    if interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
+                        analyse(game)
+                    elif interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
+                        observe(game, time_control)
+                    start_clock(wait=False)
+                    DisplayMsg.show(Message.USER_TAKE_BACK())
+                    break
+
         return legal_fens
+
+    def user_move(move):
+        nonlocal game
+        logging.debug('user move [%s]', move)
+        if move not in game.legal_moves:
+            logging.warning('Illegal move [%s]', move)
+        else:
+            result = chess.uci.BestMove(bestmove=move, ponder=None)
+            game = handle_move(result, game)
 
     def set_wait_state():
         if interaction_mode == Mode.NORMAL:
@@ -301,7 +351,6 @@ def main():
         move = result.bestmove
         fen = game.fen()
         turn = game.turn
-        game.push(move)
         nonlocal last_computer_fen
         nonlocal searchmoves
         last_computer_fen = None
@@ -313,9 +362,13 @@ def main():
             stop_search_and_clock()
         elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
             stop_search()
+
+        game.push(move)
+
         # wait means "in_book" so lateron moves messages must wait too for delay time
         if wait:
-            DisplayMsg.show(Message.BOOK_MOVE(result=event.result))
+            DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
+            DisplayMsg.show(Message.BOOK_MOVE(result=event.result,wait=True))
 
         if interaction_mode == Mode.NORMAL:
             # stop_clock()
@@ -330,9 +383,9 @@ def main():
                 DisplayMsg.show(text)
             else:
                 searchmoves.reset()
-                DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
                 if check_game_state(game, play_mode):
                     think(game, time_control, wait=not args.disable_ok_message)
+                DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
 
         elif interaction_mode == Mode.REMOTE:
             # stop_search_and_clock()
@@ -353,15 +406,15 @@ def main():
 
         elif interaction_mode == Mode.OBSERVE:
             # stop_search_and_clock()
-            DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode))
             if check_game_state(game, play_mode):
                 observe(game, time_control)
+            DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode))
 
         elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
             # stop_search()
-            DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode))
             if check_game_state(game, play_mode):
                 analyse(game)
+            DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode, wait=False))
 
         return game
 
@@ -522,6 +575,7 @@ def main():
     play_mode = PlayMode.USER_WHITE
     time_control = TimeControl(TimeMode.BLITZ, minutes_per_game=5)
     last_computer_fen = None
+    last_legal_fens = []
     game_declared = False  # User declared resignation or draw
 
     system_info_thread = threading.Timer(0, display_system_info)
@@ -564,20 +618,6 @@ def main():
                         if event.flip_board:
                             fen = fen[::-1]
                         DisplayMsg.show(Message.KEYBOARD_MOVE(fen=fen))
-                    break
-
-                if case(EventApi.USER_MOVE):
-                    move = event.move
-                    logging.debug('user move [%s]', move)
-                    if move not in game.legal_moves:
-                        logging.warning('Illegal move [%s]', move)
-                    else:
-                        result = chess.uci.BestMove(bestmove=move, ponder=None)
-                        game = handle_move(result, game)
-                        # deactivated cause of issue #185 => prg otherwise running in "sliding part"
-                        # reactivated cause of picochess now not working in non-normal mode => @fix it!
-                        if check_game_state(game, play_mode):
-                            legal_fens = compute_legal_fens(game)
                     break
 
                 if case(EventApi.LEVEL):
@@ -652,7 +692,7 @@ def main():
                         if game.is_game_over() or game_declared:
                             custom_fen = getattr(game, 'custom_fen', None)
                             DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode,
-                                                              game=copy.deepcopy(game), custom_fen=custom_fen))
+                                                              game=copy.deepcopy(game), custom_fen=custom_fen, wait=False))
                             wait=True
                     game = chess.Board(event.fen, event.uci960)
                     game.custom_fen = event.fen
@@ -662,7 +702,7 @@ def main():
                     interaction_mode = Mode.NORMAL
                     last_computer_fen = None
                     searchmoves.reset()
-                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, wait=wait))
+                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, wait=True))
                     game_declared = False
                     set_wait_state()
                     break
@@ -679,59 +719,68 @@ def main():
                     break
 
                 if case(EventApi.ALTERNATIVE_MOVE):
-                    game.pop()
-                    legal_fens = compute_legal_fens(game)
-                    DisplayMsg.show(Message.ALTERNATIVE_MOVE())
-                    think(game, time_control, wait=True)
+                    if last_computer_fen:
+                        last_computer_fen = None
+                        game.pop()
+                        DisplayMsg.show(Message.ALTERNATIVE_MOVE())
+                        think(game, time_control, wait=True)
                     break
 
                 if case(EventApi.SWITCH_SIDES):
                     if interaction_mode == Mode.NORMAL:
                         user_to_move = False
+                        last_legal_fens = []
+
                         if engine.is_thinking():
                             stop_clock()
                             engine.stop(show_best=False)
                             user_to_move = True
                         if event.engine_finished:
+                            last_computer_fen = None
                             move = game.pop()
                             user_to_move = True
                         else:
                             move = chess.Move.null()
                         if user_to_move:
+                            last_legal_fens = []
                             play_mode = PlayMode.USER_WHITE if game.turn == chess.WHITE else PlayMode.USER_BLACK
                         else:
                             play_mode = PlayMode.USER_WHITE if game.turn == chess.BLACK else PlayMode.USER_BLACK
 
-                        text = dgttranslate.text(play_mode.value)
-                        DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode, play_mode_text=text))
                         if not user_to_move and check_game_state(game, play_mode):
                             time_control.reset_start_time()
                             think(game, time_control, wait=True)
+                            legal_fens = []
                         else:
                             start_clock(wait=True)
-                        legal_fens = compute_legal_fens(game)
+                            legal_fens = compute_legal_fens(game)
+
+                        text = dgttranslate.text(play_mode.value)
+                        DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode, play_mode_text=text))
+
                         if event.engine_finished:
                             DisplayMsg.show(Message.SWITCH_SIDES(move=move))
                     break
 
                 if case(EventApi.NEW_GAME):
                     wait=False
+                    stop_search_and_clock()
                     if game.move_stack:
                         logging.debug('starting a new game')
                         if not (game.is_game_over() or game_declared):
                             custom_fen = getattr(game, 'custom_fen', None)
                             DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode,
-                                                              game=copy.deepcopy(game), custom_fen=custom_fen))
+                                                              game=copy.deepcopy(game), custom_fen=custom_fen, wait=False))
                             wait=True
                         game = chess.Board()
                     legal_fens = compute_legal_fens(game)
+                    last_legal_fens = []
                     # interaction_mode = Mode.NORMAL @todo
                     last_computer_fen = None
-                    stop_search_and_clock()
                     time_control.reset()
                     searchmoves.reset()
 
-                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, wait=wait))
+                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, wait=True))
                     game_declared = False
                     set_wait_state()
                     break
@@ -754,11 +803,14 @@ def main():
 
                 if case(EventApi.BEST_MOVE):
                     game = handle_move(event.result, game, event.inbook)
-                    legal_fens = compute_legal_fens(game)
                     break
 
                 if case(EventApi.NEW_PV):
-                    DisplayMsg.show(Message.NEW_PV(pv=event.pv, mode=interaction_mode, fen=game.fen(), turn=game.turn))
+                    # illegal moves can occur if a pv from the engine arrives at the same time as a user move.
+                    if game.is_legal(event.pv[0]):
+                        DisplayMsg.show(Message.NEW_PV(pv=event.pv, mode=interaction_mode, fen=game.fen(), turn=game.turn))
+                    else:
+                        logging.info('illegal move can not be displayed. move:%s fen=%s',event.pv[0],game.fen())
                     break
 
                 if case(EventApi.NEW_SCORE):
