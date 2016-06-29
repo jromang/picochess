@@ -654,7 +654,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 time_left, time_right = time_control.current_clock_time(self.flip_board)
                 text = self.dgttranslate.text('B10_oktime')
                 self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=text, ok_text=True))
-                DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE, wait=True))
+                DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE))
                 self.reset_menu_results()
 
     def process_lever(self, right_side_down):
@@ -738,7 +738,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         DisplayDgt.show(text)
                         if self.mode_result in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
                             time_left, time_right = message.time_control.current_clock_time(flip_board=self.flip_board)
-                            DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE, wait=True))
+                            DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE))
                         break
                     if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
                         DisplayDgt.show(Dgt.LIGHT_CLEAR())
@@ -854,7 +854,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             if time_right < 0:
                                 time_right = 0
                         side = ClockSide.LEFT if (message.turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
-                        DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side, wait=False))
+                        DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side))
                         break
                     if case(MessageApi.CLOCK_STOP):
                         DisplayDgt.show(Dgt.CLOCK_STOP())
