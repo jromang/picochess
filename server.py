@@ -305,8 +305,8 @@ class WebDisplay(DisplayMsg, threading.Thread):
 
                 pgn_str = game.accept(exporter)
                 fen = message.game.fen()
-                mov = message.result.bestmove.uci()
-                msg = 'Computer move: ' + str(message.result.bestmove)
+                mov = message.move.uci()
+                msg = 'Computer move: ' + str(message.move)
                 r = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'msg': msg, 'remote_play': False}
 
                 self.shared['last_dgt_move_msg'] = r

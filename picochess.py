@@ -232,10 +232,19 @@ def main():
             DisplayMsg.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=copy.deepcopy(game), custom_fen=custom_fen))
             return False
 
-    def process_fen(fen, legal_fens):
+    def process_fen(fen):
         nonlocal last_computer_fen
         nonlocal last_legal_fens
         nonlocal searchmoves
+        nonlocal legal_fens
+
+        def user_move(move):
+            nonlocal game
+            logging.debug('user move [%s]', move)
+            if move not in game.legal_moves:
+                logging.warning('Illegal move [%s]', move)
+            else:
+                handle_move(move=move)
 
         # Check for same position
         if (fen == game.board_fen() and not last_computer_fen) or fen == last_computer_fen:
@@ -339,28 +348,17 @@ def main():
                     DisplayMsg.show(Message.USER_TAKE_BACK())
                     break
 
-        return legal_fens
-
-    def user_move(move):
-        nonlocal game
-        logging.debug('user move [%s]', move)
-        if move not in game.legal_moves:
-            logging.warning('Illegal move [%s]', move)
-        else:
-            result = chess.uci.BestMove(bestmove=move, ponder=None)
-            game = handle_move(result, game)
-
     def set_wait_state():
         if interaction_mode == Mode.NORMAL:
             nonlocal play_mode
             play_mode = PlayMode.USER_WHITE if game.turn == chess.WHITE else PlayMode.USER_BLACK
 
-    def handle_move(result, game, wait=False):
-        move = result.bestmove
-        fen = game.fen()
-        turn = game.turn
+    def handle_move(move, ponder=None, inbook=False):
+        nonlocal game
         nonlocal last_computer_fen
         nonlocal searchmoves
+        fen = game.fen()
+        turn = game.turn
 
         # clock must be stoped BEFORE the "book_move" event cause SetNRun resets the clock display
         if interaction_mode == Mode.NORMAL:
@@ -376,39 +374,37 @@ def main():
                  or (play_mode == PlayMode.USER_BLACK and game.turn == chess.WHITE)):
             last_computer_fen = game.board_fen()
             game.push(move)
-            # wait means "in_book" so lateron moves messages must wait too for delay time
-            if wait:
+            if inbook:
                 DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
                 DisplayMsg.show(Message.BOOK_MOVE(result=event.result))
             searchmoves.add(move)
-            text = Message.COMPUTER_MOVE(result=result, fen=fen, turn=turn, game=game.copy(),
-                                         time_control=time_control, wait=wait)
+            text = Message.COMPUTER_MOVE(move=move, ponder=ponder, fen=fen, turn=turn, game=game.copy(),
+                                         time_control=time_control, wait=inbook)
             DisplayMsg.show(text)
         else:
             last_computer_fen = None
             game.push(move)
-            # wait means "in_book" so lateron moves messages must wait too for delay time
-            if wait:
+            if inbook:
                 DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
                 DisplayMsg.show(Message.BOOK_MOVE(result=event.result))
             searchmoves.reset()
             if interaction_mode == Mode.NORMAL:
                 if check_game_state(game, play_mode):
                     think(game, time_control)
-                DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
+                text = Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy())
             elif interaction_mode == Mode.REMOTE:
                 if check_game_state(game, play_mode):
                     observe(game)
-                DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
+                text = Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy())
             elif interaction_mode == Mode.OBSERVE:
                 if check_game_state(game, play_mode):
                     observe(game)
-                DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode))
-            elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
+                text = Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode)
+            else: # interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ):
                 if check_game_state(game, play_mode):
                     analyse(game)
-                DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode))
-        return game
+                text = Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode)
+            DisplayMsg.show(text)
 
     # Enable garbage collection - needed for engine swapping as objects orphaned
     gc.enable()
@@ -595,7 +591,7 @@ def main():
             logging.debug('received event from evt_queue: %s', event)
             for case in switch(event):
                 if case(EventApi.FEN):
-                    legal_fens = process_fen(event.fen, legal_fens)
+                    process_fen(event.fen)
                     break
 
                 if case(EventApi.KEYBOARD_MOVE):
@@ -785,13 +781,12 @@ def main():
 
                 if case(EventApi.REMOTE_MOVE):
                     if interaction_mode == Mode.REMOTE:
-                        bm = chess.uci.BestMove(bestmove=chess.Move.from_uci(event.move), ponder=None)
-                        game = handle_move(bm, game)
+                        handle_move(move=chess.Move.from_uci(event.move))
                         legal_fens = compute_legal_fens(game)
                     break
 
                 if case(EventApi.BEST_MOVE):
-                    game = handle_move(event.result, game, event.inbook)
+                    handle_move(move=event.result.bestmove, ponder=event.result.ponder, inbook=event.inbook)
                     break
 
                 if case(EventApi.NEW_PV):

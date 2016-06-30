@@ -709,8 +709,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         DisplayDgt.show(self.dgttranslate.text('Y00_erroreng'))
                         break
                     if case(MessageApi.COMPUTER_MOVE):
-                        move = message.result.bestmove
-                        ponder = message.result.ponder
+                        move = message.move
+                        ponder = message.ponder
                         fen = message.fen
                         turn = message.turn
                         self.engine_finished = True

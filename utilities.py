@@ -611,7 +611,7 @@ class Dgt():
 
 class Message():
     # Messages to display devices
-    COMPUTER_MOVE = ClassFactory(MessageApi.COMPUTER_MOVE, ['result', 'fen', 'turn', 'game', 'time_control', 'wait'])
+    COMPUTER_MOVE = ClassFactory(MessageApi.COMPUTER_MOVE, ['move', 'ponder', 'fen', 'turn', 'game', 'time_control', 'wait'])
     BOOK_MOVE = ClassFactory(MessageApi.BOOK_MOVE, ['result'])
     NEW_PV = ClassFactory(MessageApi.NEW_PV, ['pv', 'mode', 'fen', 'turn'])
     REVIEW_MOVE = ClassFactory(MessageApi.REVIEW_MOVE, ['move', 'fen', 'turn', 'game', 'mode'])
