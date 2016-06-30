@@ -237,8 +237,12 @@ def main():
         nonlocal last_legal_fens
         nonlocal searchmoves
 
+        # Check for same position
+        if (fen == game.board_fen() and not last_computer_fen) or fen == last_computer_fen:
+            logging.debug("Already in this fen:" + fen)
+
         # Check if we have to undo a previous move (sliding)
-        if fen in last_legal_fens:
+        elif fen in last_legal_fens:
             if interaction_mode == Mode.NORMAL:
                 if (play_mode == PlayMode.USER_WHITE and game.turn == chess.BLACK) or \
                         (play_mode == PlayMode.USER_BLACK and game.turn == chess.WHITE):
@@ -257,7 +261,7 @@ def main():
                         (play_mode == PlayMode.USER_BLACK and game.turn == chess.WHITE):
                     game.pop()
                     logging.debug("User move in remote turn, reverting to: " + game.board_fen())
-                elif (last_computer_fen):
+                elif last_computer_fen:
                     last_computer_fen = None
                     game.pop()
                     game.pop()
@@ -286,22 +290,26 @@ def main():
                 legal_fens = compute_legal_fens(game)
 
         # Player had done the computer or remote move on the board
-        elif fen == last_computer_fen:
+        elif fen == last_computer_fen and fen == game.board_fen():
             last_computer_fen = None
-            # if check_game_state(game, play_mode) and interaction_mode in (Mode.NORMAL, Mode.REMOTE):
-            # finally reset all alternative moves see: handle_move()
-            nonlocal searchmoves
-            searchmoves.reset()
-            time_control.add_inc(not game.turn)
-            if time_control.mode != TimeMode.FIXED:
-                start_clock()
-            DisplayMsg.show(Message.COMPUTER_MOVE_DONE_ON_BOARD())
-            legal_fens = compute_legal_fens(game)
+            if check_game_state(game, play_mode) and interaction_mode in (Mode.NORMAL, Mode.REMOTE):
+                # finally reset all alternative moves see: handle_move()
+                nonlocal searchmoves
+                searchmoves.reset()
+                time_control.add_inc(not game.turn)
+                if time_control.mode != TimeMode.FIXED:
+                    start_clock()
+                DisplayMsg.show(Message.COMPUTER_MOVE_DONE_ON_BOARD())
+                legal_fens = compute_legal_fens(game)
+            else:
+                legal_fens = []
             last_legal_fens = []
 
         # Check if this is a previous legal position and allow user to restart from this position
         else:
             game_history = copy.deepcopy(game)
+            if last_computer_fen:
+                game_history.pop()
             while game_history.move_stack:
                 game_history.pop()
                 if game_history.board_fen() == fen:
@@ -353,7 +361,6 @@ def main():
         turn = game.turn
         nonlocal last_computer_fen
         nonlocal searchmoves
-        last_computer_fen = None
 
         # clock must be stoped BEFORE the "book_move" event cause SetNRun resets the clock display
         if interaction_mode == Mode.NORMAL:
@@ -363,55 +370,44 @@ def main():
         elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
             stop_search()
 
-        game.push(move)
-
-        # wait means "in_book" so lateron moves messages must wait too for delay time
-        if wait:
-            DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
-            DisplayMsg.show(Message.BOOK_MOVE(result=event.result))
-
-        if interaction_mode == Mode.NORMAL:
-            # If UserMove: reset all alternative moves
-            # If ComputerMove: disallow this move, and finally reset all if DONE_ON_BOARD event @see: process_fen()
-            if (play_mode == PlayMode.USER_WHITE and game.turn == chess.WHITE)\
-                    or (play_mode == PlayMode.USER_BLACK and game.turn == chess.BLACK):
-                last_computer_fen = game.board_fen()
-                searchmoves.add(move)
-                text = Message.COMPUTER_MOVE(result=result, fen=fen, turn=turn, game=game.copy(),
-                                             time_control=time_control, wait=wait)
-                DisplayMsg.show(text)
-            else:
-                searchmoves.reset()
+        # engine or remote move
+        if (interaction_mode == Mode.NORMAL or interaction_mode == Mode.REMOTE) and \
+                ((play_mode == PlayMode.USER_WHITE and game.turn == chess.BLACK)
+                 or (play_mode == PlayMode.USER_BLACK and game.turn == chess.WHITE)):
+            last_computer_fen = game.board_fen()
+            game.push(move)
+            # wait means "in_book" so lateron moves messages must wait too for delay time
+            if wait:
+                DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
+                DisplayMsg.show(Message.BOOK_MOVE(result=event.result))
+            searchmoves.add(move)
+            text = Message.COMPUTER_MOVE(result=result, fen=fen, turn=turn, game=game.copy(),
+                                         time_control=time_control, wait=wait)
+            DisplayMsg.show(text)
+        else:
+            last_computer_fen = None
+            game.push(move)
+            # wait means "in_book" so lateron moves messages must wait too for delay time
+            if wait:
+                DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
+                DisplayMsg.show(Message.BOOK_MOVE(result=event.result))
+            searchmoves.reset()
+            if interaction_mode == Mode.NORMAL:
                 if check_game_state(game, play_mode):
                     think(game, time_control)
                 DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
-
-        elif interaction_mode == Mode.REMOTE:
-            # If UserMove: reset all alternative moves
-            # If Remote Move: same process as for computer move above
-            if (play_mode == PlayMode.USER_WHITE and game.turn == chess.WHITE)\
-                    or (play_mode == PlayMode.USER_BLACK and game.turn == chess.BLACK):
-                last_computer_fen = game.board_fen()
-                searchmoves.add(move)
-                text = Message.COMPUTER_MOVE(result=result, fen=fen, turn=turn, game=game.copy(),
-                                             time_control=time_control, wait=wait)
-                DisplayMsg.show(text)
-            else:
-                searchmoves.reset()
-                DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
+            elif interaction_mode == Mode.REMOTE:
                 if check_game_state(game, play_mode):
                     observe(game)
-
-        elif interaction_mode == Mode.OBSERVE:
-            if check_game_state(game, play_mode):
-                observe(game)
-            DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode))
-
-        elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
-            if check_game_state(game, play_mode):
-                analyse(game)
-            DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode))
-
+                DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
+            elif interaction_mode == Mode.OBSERVE:
+                if check_game_state(game, play_mode):
+                    observe(game)
+                DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode))
+            elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
+                if check_game_state(game, play_mode):
+                    analyse(game)
+                DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode))
         return game
 
     # Enable garbage collection - needed for engine swapping as objects orphaned
@@ -695,6 +691,7 @@ def main():
                     time_control.reset()
                     interaction_mode = Mode.NORMAL
                     last_computer_fen = None
+                    last_legal_fens = []
                     searchmoves.reset()
                     DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control))
                     game_declared = False
