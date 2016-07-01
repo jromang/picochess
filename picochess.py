@@ -233,21 +233,17 @@ def main():
             return False
 
     def user_move(move):
-        nonlocal game
         logging.debug('user move [%s]', move)
         if move not in game.legal_moves:
             logging.warning('Illegal move [%s]', move)
         else:
-            game = handle_move(move=move, game=game)
+            handle_move(move=move)
 
-    def process_fen(fen, legal_fens):
+    def process_fen(fen):
         nonlocal last_computer_fen
         nonlocal last_legal_fens
         nonlocal searchmoves
-        # nonlocal legal_fens
-
-        print(fen)
-        print(legal_fens)
+        nonlocal legal_fens
 
         # Check for same position
         if (fen == game.board_fen() and not last_computer_fen) or fen == last_computer_fen:
@@ -350,15 +346,14 @@ def main():
                     start_clock()
                     DisplayMsg.show(Message.USER_TAKE_BACK())
                     break
-        return legal_fens
 
     def set_wait_state():
         if interaction_mode == Mode.NORMAL:
             nonlocal play_mode
             play_mode = PlayMode.USER_WHITE if game.turn == chess.WHITE else PlayMode.USER_BLACK
 
-    def handle_move(move, ponder=None, game=None, inbook=False):
-        # nonlocal game
+    def handle_move(move, ponder=None, inbook=False):
+        nonlocal game
         nonlocal last_computer_fen
         nonlocal searchmoves
         fen = game.fen()
@@ -374,8 +369,8 @@ def main():
 
         # engine or remote move
         if (interaction_mode == Mode.NORMAL or interaction_mode == Mode.REMOTE) and \
-                ((play_mode == PlayMode.USER_WHITE and game.turn == chess.BLACK)
-                 or (play_mode == PlayMode.USER_BLACK and game.turn == chess.WHITE)):
+                ((play_mode == PlayMode.USER_WHITE and game.turn == chess.BLACK) or
+                     (play_mode == PlayMode.USER_BLACK and game.turn == chess.WHITE)):
             last_computer_fen = game.board_fen()
             game.push(move)
             if inbook:
@@ -409,7 +404,6 @@ def main():
                     analyse(game)
                 text = Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode)
             DisplayMsg.show(text)
-        return game
 
     # Enable garbage collection - needed for engine swapping as objects orphaned
     gc.enable()
@@ -596,7 +590,7 @@ def main():
             logging.debug('received event from evt_queue: %s', event)
             for case in switch(event):
                 if case(EventApi.FEN):
-                    legal_fens = process_fen(event.fen, legal_fens)
+                    process_fen(event.fen)
                     break
 
                 if case(EventApi.KEYBOARD_MOVE):
@@ -786,12 +780,12 @@ def main():
 
                 if case(EventApi.REMOTE_MOVE):
                     if interaction_mode == Mode.REMOTE:
-                        game = handle_move(move=chess.Move.from_uci(event.move), game=game)
+                        handle_move(move=chess.Move.from_uci(event.move))
                         legal_fens = compute_legal_fens(game)
                     break
 
                 if case(EventApi.BEST_MOVE):
-                    game = handle_move(move=event.result.bestmove, ponder=event.result.ponder, game=game, inbook=event.inbook)
+                    handle_move(move=event.result.bestmove, ponder=event.result.ponder, inbook=event.inbook)
                     break
 
                 if case(EventApi.NEW_PV):
