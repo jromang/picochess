@@ -41,9 +41,10 @@ class DgtLib(object):
         return res
 
     def set_text_xl(self, text, beep, ld, rd):
+        icn = ((rd & 0x07) | (ld << 3) & 0x38)
         res = self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0b, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
                           DgtClk.DGT_CMD_CLOCK_DISPLAY,
-                          text[2], text[1], text[0], text[5], text[4], text[3], 0x00, beep,
+                          text[2], text[1], text[0], text[5], text[4], text[3], icn, beep,
                           DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         return res
 
