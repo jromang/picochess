@@ -299,7 +299,7 @@ def main():
                 legal_fens = compute_legal_fens(game)
 
         # Player had done the computer or remote move on the board
-        elif fen == last_computer_fen and fen == game.board_fen():
+        elif last_computer_fen and fen == game.board_fen():
             last_computer_fen = None
             if check_game_state(game, play_mode) and interaction_mode in (Mode.NORMAL, Mode.REMOTE):
                 # finally reset all alternative moves see: handle_move()
