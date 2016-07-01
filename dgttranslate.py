@@ -263,11 +263,11 @@ class DgtTranslate(object):
             frtxt = Dgt.DISPLAY_TEXT(l='nvl partie', m="nvl part", s="newgam", wait=False, beep=bl_config, maxtime=1)
             estxt = Dgt.DISPLAY_TEXT(l='nuev partid', m="nuevpart", s="n part", wait=False, beep=bl_config, maxtime=1)
         if text_id == 'C00_takeback':
-            entxt = Dgt.DISPLAY_TEXT(l=None, m="takeback", s="takbak", wait=True, beep=bl_config, maxtime=0)
-            detxt = Dgt.DISPLAY_TEXT(l="Ruecknahme", m="Rcknahme", s="rueckn", wait=True, beep=bl_config, maxtime=0)
-            nltxt = Dgt.DISPLAY_TEXT(l="zet terug", m="zetterug", s="terug", wait=True, beep=bl_config, maxtime=0)
-            frtxt = Dgt.DISPLAY_TEXT(l=None, m="retour", s=None, wait=True, beep=bl_config, maxtime=0)
-            estxt = Dgt.DISPLAY_TEXT(l='retrocede', m="atras", s=None, wait=True, beep=bl_config, maxtime=0)
+            entxt = Dgt.DISPLAY_TEXT(l=None, m="takeback", s="takbak", wait=True, beep=bl_config, maxtime=1)
+            detxt = Dgt.DISPLAY_TEXT(l="Ruecknahme", m="Rcknahme", s="rueckn", wait=True, beep=bl_config, maxtime=1)
+            nltxt = Dgt.DISPLAY_TEXT(l="zet terug", m="zetterug", s="terug", wait=True, beep=bl_config, maxtime=1)
+            frtxt = Dgt.DISPLAY_TEXT(l=None, m="retour", s=None, wait=True, beep=bl_config, maxtime=1)
+            estxt = Dgt.DISPLAY_TEXT(l='retrocede', m="atras", s=None, wait=True, beep=bl_config, maxtime=1)
         if text_id == 'N10_bookmove':
             entxt = Dgt.DISPLAY_TEXT(l=None, m="book", s=None, wait=True, beep=self.bl(BeepLevel.NO), maxtime=1)
             detxt = Dgt.DISPLAY_TEXT(l=None, m="Buch", s=None, wait=True, beep=self.bl(BeepLevel.NO), maxtime=1)

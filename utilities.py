@@ -56,7 +56,6 @@ class EventApi():
     LEVEL = 'EVT_LEVEL'  # User sets engine level (from 1 to 20)
     NEW_GAME = 'EVT_NEW_GAME'  # User starts a new game
     DRAWRESIGN = 'EVT_DRAWRESIGN'  # User declares a resignation or draw
-    USER_MOVE = 'EVT_USER_MOVE'  # User sends a move
     KEYBOARD_MOVE = 'EVT_KEYBOARD_MOVE'  # Keyboard sends a move (to be transfered to a fen)
     REMOTE_MOVE = 'EVT_REMOTE_MOVE'  # Remote player move
     SET_OPENING_BOOK = 'EVT_SET_OPENING_BOOK'  # User chooses an opening book
@@ -603,21 +602,18 @@ class Dgt():
     DISPLAY_TIME = ClassFactory(DgtApi.DISPLAY_TIME, ['wait', 'force'])
     LIGHT_CLEAR = ClassFactory(DgtApi.LIGHT_CLEAR, [])
     LIGHT_SQUARES = ClassFactory(DgtApi.LIGHT_SQUARES, ['squares'])
-    CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, ['callback'])  # This maybe needs a "wait" flag? see dgtiface run code
-    CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side', 'wait', 'callback'])
-    CLOCK_RESUME = ClassFactory(DgtApi.CLOCK_RESUME, ['side', 'wait', 'callback'])
+    CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, [])
+    CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side'])
     CLOCK_VERSION = ClassFactory(DgtApi.CLOCK_VERSION, ['main_version', 'sub_version', 'attached'])
     CLOCK_TIME = ClassFactory(DgtApi.CLOCK_TIME, ['time_left', 'time_right'])
 
 
 class Message():
     # Messages to display devices
-    COMPUTER_MOVE = ClassFactory(MessageApi.COMPUTER_MOVE, ['result', 'fen', 'turn', 'game', 'time_control', 'wait'])
-    COMPUTER_MOVE_DONE_ON_BOARD = ClassFactory(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD, [])
+    COMPUTER_MOVE = ClassFactory(MessageApi.COMPUTER_MOVE, ['move', 'ponder', 'fen', 'turn', 'game', 'time_control', 'wait'])
     BOOK_MOVE = ClassFactory(MessageApi.BOOK_MOVE, ['result'])
-    USER_MOVE = ClassFactory(MessageApi.USER_MOVE, ['move', 'fen', 'turn', 'game'])
-    REVIEW_MOVE = ClassFactory(MessageApi.REVIEW_MOVE, ['move', 'fen', 'turn', 'game', 'mode'])
     NEW_PV = ClassFactory(MessageApi.NEW_PV, ['pv', 'mode', 'fen', 'turn'])
+    REVIEW_MOVE = ClassFactory(MessageApi.REVIEW_MOVE, ['move', 'fen', 'turn', 'game', 'mode'])
     ENGINE_READY = ClassFactory(MessageApi.ENGINE_READY, ['eng', 'eng_text', 'engine_name', 'has_levels', 'has_960', 'ok_text'])
     ENGINE_STARTUP = ClassFactory(MessageApi.ENGINE_STARTUP, ['shell', 'file', 'has_levels', 'has_960'])
     ENGINE_FAIL = ClassFactory(MessageApi.ENGINE_FAIL, [])
@@ -631,13 +627,14 @@ class Message():
 
     INTERACTION_MODE = ClassFactory(MessageApi.INTERACTION_MODE, ['mode', 'mode_text', 'ok_text'])
     PLAY_MODE = ClassFactory(MessageApi.PLAY_MODE, ['play_mode', 'play_mode_text'])
-    START_NEW_GAME = ClassFactory(MessageApi.START_NEW_GAME, ['time_control', 'wait'])
+    START_NEW_GAME = ClassFactory(MessageApi.START_NEW_GAME, ['time_control'])
+    COMPUTER_MOVE_DONE_ON_BOARD = ClassFactory(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD, [])
     SEARCH_STARTED = ClassFactory(MessageApi.SEARCH_STARTED, ['engine_status'])
     SEARCH_STOPPED = ClassFactory(MessageApi.SEARCH_STOPPED, ['engine_status'])
     USER_TAKE_BACK = ClassFactory(MessageApi.USER_TAKE_BACK, [])
-    CLOCK_START = ClassFactory(MessageApi.CLOCK_START, ['turn', 'time_control', 'wait', 'callback'])
-    CLOCK_RESUME = ClassFactory(MessageApi.CLOCK_RESUME, ['turn', 'wait', 'callback'])
-    CLOCK_STOP = ClassFactory(MessageApi.CLOCK_STOP, ['callback'])
+    CLOCK_START = ClassFactory(MessageApi.CLOCK_START, ['turn', 'time_control'])
+    CLOCK_STOP = ClassFactory(MessageApi.CLOCK_STOP, [])
+    USER_MOVE = ClassFactory(MessageApi.USER_MOVE, ['move', 'fen', 'turn', 'game'])
     UCI_OPTION_LIST = ClassFactory(MessageApi.UCI_OPTION_LIST, ['options'])
     GAME_ENDS = ClassFactory(MessageApi.GAME_ENDS, ['result', 'play_mode', 'game', 'custom_fen'])
 
@@ -674,7 +671,6 @@ class Event():
     # dgt events
     DGT_BUTTON = ClassFactory(EventApi.DGT_BUTTON, ['button'])
     DGT_FEN = ClassFactory(EventApi.DGT_FEN, ['fen'])
-    DGT_CLOCK_CALLBACK = ClassFactory(EventApi.DGT_CLOCK_CALLBACK, ['callback'])
     # Engine events
     BEST_MOVE = ClassFactory(EventApi.BEST_MOVE, ['result', 'inbook'])
     NEW_PV = ClassFactory(EventApi.NEW_PV, ['pv'])

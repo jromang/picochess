@@ -115,7 +115,6 @@ class DgtIface(DisplayDgt, Thread):
                 if case(DgtApi.CLOCK_STOP):
                     self.clock_running = False
                     self.stop_clock()
-                    Observable.fire(Event.DGT_CLOCK_CALLBACK(callback=message.callback))
                     break
                 if case(DgtApi.CLOCK_START):
                     self.clock_running = (message.side != ClockSide.NONE)
@@ -124,9 +123,7 @@ class DgtIface(DisplayDgt, Thread):
                     r_hms = hours_minutes_seconds(message.time_right)
                     logging.debug('last time received from clock l:{} r:{}'.format(self.time_left, self.time_right))
                     logging.debug('sending time to clock l:{} r:{}'.format(l_hms, r_hms))
-
                     self.start_clock(message.time_left, message.time_right, message.side)
-                    Observable.fire(Event.DGT_CLOCK_CALLBACK(callback=message.callback))
                     break
                 if case(DgtApi.CLOCK_VERSION):
                     self.clock_found = True

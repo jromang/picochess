@@ -659,7 +659,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 time_left, time_right = time_control.current_clock_time(self.flip_board)
                 text = self.dgttranslate.text('B10_oktime')
                 self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=text, ok_text=True))
-                DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE, wait=True, callback=None))
+                DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE))
                 self.reset_menu_results()
 
     def process_lever(self, right_side_down):
@@ -714,8 +714,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         DisplayDgt.show(self.dgttranslate.text('Y00_erroreng'))
                         break
                     if case(MessageApi.COMPUTER_MOVE):
-                        move = message.result.bestmove
-                        ponder = message.result.ponder
+                        move = message.move
+                        ponder = message.ponder
                         fen = message.fen
                         turn = message.turn
                         self.engine_finished = True
@@ -739,12 +739,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.reset_menu_results()
                         self.engine_finished = False
                         text = self.dgttranslate.text('C10_newgame')
-                        text.wait = message.wait  # in case of GAME_ENDS before, wait for "abort"
+                        text.wait = True  # in case of GAME_ENDS before, wait for "abort"
                         DisplayDgt.show(text)
                         if self.mode_result in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
                             time_left, time_right = message.time_control.current_clock_time(flip_board=self.flip_board)
-                            DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right,
-                                                            side=ClockSide.NONE, wait=True, callback=None))
+                            DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE))
                         break
                     if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
                         DisplayDgt.show(Dgt.LIGHT_CLEAR())
@@ -862,15 +861,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             if time_right < 0:
                                 time_right = 0
                         side = ClockSide.LEFT if (message.turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
-                        DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right,
-                                                        side=side, wait=message.wait, callback=message.callback))
-                        break
-                    if case(MessageApi.CLOCK_RESUME):
-                        side = ClockSide.LEFT if (message.turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
-                        DisplayDgt.show(Dgt.CLOCK_RESUME(side=side, wait=message.wait, callback=message.callback))
+                        DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side))
                         break
                     if case(MessageApi.CLOCK_STOP):
-                        DisplayDgt.show(Dgt.CLOCK_STOP(callback=message.callback))
+                        DisplayDgt.show(Dgt.CLOCK_STOP())
                         break
                     if case(MessageApi.DGT_BUTTON):
                         button = int(message.button)
