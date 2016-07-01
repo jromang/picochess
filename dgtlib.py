@@ -31,19 +31,21 @@ class DgtLib(object):
         if command[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value:
             while self.dgtserial.clock_lock:
                 time.sleep(0.1)
-        self.dgtserial.write_board_command(command)
+        return self.dgtserial.write_board_command(command)
 
     def set_text_3k(self, text, beep, ld, rd):
-        self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0c, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_ASCII,
-                    text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], beep,
-                    DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
-        return 0
+        res = self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0c, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                          DgtClk.DGT_CMD_CLOCK_ASCII,
+                          text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], beep,
+                          DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        return res
 
     def set_text_xl(self, text, beep, ld, rd):
-        self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0b, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_DISPLAY,
-                    text[2], text[1], text[0], text[5], text[4], text[3], 0x00, beep,
-                    DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
-        return 0
+        res = self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0b, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                          DgtClk.DGT_CMD_CLOCK_DISPLAY,
+                          text[2], text[1], text[0], text[5], text[4], text[3], 0x00, beep,
+                          DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        return res
 
     def set_and_run(self, lr, lh, lm, ls, rr, rh, rm, rs):
         side = ClockSide.NONE
@@ -51,12 +53,14 @@ class DgtLib(object):
             side = ClockSide.LEFT
         if lr == 0 and rr == 1:
             side = ClockSide.RIGHT
-        self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0a, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_SETNRUN,
-                    lh, lm, ls, rh, rm, rs,
-                    side, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
-        return 0
+        res = self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0a, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                          DgtClk.DGT_CMD_CLOCK_SETNRUN,
+                          lh, lm, ls, rh, rm, rs, side,
+                          DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        return res
 
     def end_text(self):
-        self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_END,
-                    DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
-        return 0
+        res = self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                          DgtClk.DGT_CMD_CLOCK_END,
+                          DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        return res

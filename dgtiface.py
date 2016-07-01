@@ -44,10 +44,10 @@ class DgtIface(DisplayDgt, Thread):
         self.do_process = True
         self.msg_lock = Lock()
 
-    def display_text_on_clock(self, text, beep=False):
+    def display_text_on_clock(self, text, beep=False, left_dots=0, right_dots=0):
         raise NotImplementedError()
 
-    def display_move_on_clock(self, move, fen, side, beep=False):
+    def display_move_on_clock(self, move, fen, side, beep=False, left_dots=0, right_dots=0):
         raise NotImplementedError()
 
     def display_time_on_clock(self, force=False):
@@ -92,7 +92,9 @@ class DgtIface(DisplayDgt, Thread):
             logging.debug("handle DgtApi: %s", message)
             for case in switch(message):
                 if case(DgtApi.DISPLAY_MOVE):
-                    self.display_move_on_clock(message.move, message.fen, message.side, message.beep)
+                    ld = message.ld if hasattr(message, 'ld') else 0
+                    rd = message.rd if hasattr(message, 'rd') else 0
+                    self.display_move_on_clock(message.move, message.fen, message.side, message.beep, ld, rd)
                     break
                 if case(DgtApi.DISPLAY_TEXT):
                     if self.enable_dgt_pi:
@@ -101,7 +103,9 @@ class DgtIface(DisplayDgt, Thread):
                         text = message.m if self.enable_dgt_3000 else message.s
                     if text is None:
                         text = message.m
-                    self.display_text_on_clock(text, message.beep)
+                    ld = message.ld if hasattr(message, 'ld') else 0
+                    rd = message.rd if hasattr(message, 'rd') else 0
+                    self.display_text_on_clock(text, message.beep, ld, rd)
                     break
                 if case(DgtApi.DISPLAY_TIME):
                     self.display_time_on_clock(message.force)

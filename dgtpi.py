@@ -98,33 +98,33 @@ class DgtPi(DgtIface):
                 self.dgtserial.write_board_command([DgtCmd.DGT_RETURN_SERIALNR])  # the code doesnt really matter ;-)
             time.sleep(0.1)
 
-    def _display_on_dgt_pi(self, text, beep=False):
+    def _display_on_dgt_pi(self, text, beep=False, left_dots=0, right_dots=0):
         if len(text) > 11:
             logging.warning('DGT PI clock message too long [%s]', text)
         logging.debug(text)
         text = bytes(text, 'utf-8')
         with self.lib_lock:
-            res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, 0, 0)
+            res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, left_dots, right_dots)
             if res < 0:
                 logging.warning('SetText returned error %i', res)
                 res = self.lib.dgtpicom_configure()
                 if res < 0:
                     logging.warning('Configure also failed %i', res)
                 else:
-                    res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, 0, 0)
+                    res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, left_dots, right_dots)
             if res < 0:
                 logging.warning('Finally failed %i', res)
 
-    def display_text_on_clock(self, text, beep=False):
-        self._display_on_dgt_pi(text, beep)
+    def display_text_on_clock(self, text, beep=False, left_dots=0, right_dots=0):
+        self._display_on_dgt_pi(text, beep, left_dots, right_dots)
 
-    def display_move_on_clock(self, move, fen, side, beep=False):
+    def display_move_on_clock(self, move, fen, side, beep=False, left_dots=0, right_dots=0):
         bit_board = Board(fen)
         move_text = bit_board.san(move)
         if side == ClockSide.RIGHT:
             move_text = move_text.rjust(11)
         text = self.dgttranslate.move(move_text)
-        self._display_on_dgt_pi(text, beep)
+        self._display_on_dgt_pi(text, beep, left_dots, right_dots)
 
     def display_time_on_clock(self, force=False):
         if self.clock_running or force:

@@ -30,7 +30,7 @@ class DgtHw(DgtIface):
         self.lib = DgtLib(self.dgtserial)
         self.dgtserial.run()
 
-    def _display_on_dgt_xl(self, text, beep=False):
+    def _display_on_dgt_xl(self, text, beep=False, left_dots=0, right_dots=0):
         if not self.clock_found:  # This can only happen on the XL function
             logging.debug('DGT clock (still) not found. Ignore [%s]', text)
             self.dgtserial.startup_serial_clock()
@@ -40,40 +40,40 @@ class DgtHw(DgtIface):
             logging.warning('DGT XL clock message too long [%s]', text)
         logging.debug(text)
         with self.lib_lock:
-            res = self.lib.set_text_xl(text, 0x03 if beep else 0x00, 0, 0)
-            if res < 0:
+            res = self.lib.set_text_xl(text, 0x03 if beep else 0x00, left_dots, right_dots)
+            if not res:
                 logging.warning('Finally failed %i', res)
 
-    def _display_on_dgt_3000(self, text, beep=False):
+    def _display_on_dgt_3000(self, text, beep=False, left_dots=0, right_dots=0):
         text = text.ljust(8)
         if len(text) > 8:
             logging.warning('DGT 3000 clock message too long [%s]', text)
         logging.debug(text)
         text = bytes(text, 'utf-8')
         with self.lib_lock:
-            res = self.lib.set_text_3k(text, 0x03 if beep else 0x00, 0, 0)
-            if res < 0:
+            res = self.lib.set_text_3k(text, 0x03 if beep else 0x00, left_dots, right_dots)
+            if not res:
                 logging.warning('Finally failed %i', res)
 
-    def display_text_on_clock(self, text, beep=False):
+    def display_text_on_clock(self, text, beep=False, left_dots=0, right_dots=0):
         if self.enable_dgt_3000:
-            self._display_on_dgt_3000(text, beep)
+            self._display_on_dgt_3000(text, beep, left_dots, right_dots)
         else:
-            self._display_on_dgt_xl(text, beep)
+            self._display_on_dgt_xl(text, beep, left_dots, right_dots)
 
-    def display_move_on_clock(self, move, fen, side, beep=False):
+    def display_move_on_clock(self, move, fen, side, beep=False, left_dots=0, right_dots=0):
         if self.enable_dgt_3000:
             bit_board = Board(fen)
             move_text = bit_board.san(move)
             if side == ClockSide.RIGHT:
                 move_text = move_text.rjust(8)
             text = self.dgttranslate.move(move_text)
-            self._display_on_dgt_3000(text, beep)
+            self._display_on_dgt_3000(text, beep, left_dots, right_dots)
         else:
             move_text = move.uci()
             if side == ClockSide.RIGHT:
                 move_text = move_text.rjust(6)
-            self._display_on_dgt_xl(move_text, beep)
+            self._display_on_dgt_xl(move_text, beep, left_dots, right_dots)
 
     def display_time_on_clock(self, force=False):
         if self.clock_running or force:
@@ -109,10 +109,12 @@ class DgtHw(DgtIface):
             rr = 1
         with self.lib_lock:
             res = self.lib.set_and_run(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
-            if res < 0:
+            if not res:
                 logging.warning('Finally failed %i', res)
             else:
                 self.clock_running = (side != ClockSide.NONE)
+            # this is needed for some(!) clocks
+            self.lib.end_text()
 
     def start_clock(self, time_left, time_right, side):
         self.time_left = hours_minutes_seconds(time_left)

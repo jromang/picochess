@@ -100,19 +100,18 @@ class DgtSerial(object):
                     array.append(char_to_DGTXL[c.lower()])
             else:
                 logging.error('type not supported [%s]', type(v))
+                return False
 
         while True:
             if not self.serial:
                 logging.warning('loop serial error')
-                # self.setup_serial_port()
-                # self.startup_serial_board()
                 self.startup_serial_hardware()
             try:
                 self.serial.write(bytearray(array))
                 break
             except ValueError:
                 logging.error('invalid bytes sent {0}'.format(message))
-                break
+                return False
             except pyserial.SerialException as e:
                 logging.error(e)
                 self.serial.close()
@@ -121,6 +120,7 @@ class DgtSerial(object):
                 logging.error(e)
                 self.serial.close()
                 self.serial = None
+
         if message[0] == DgtCmd.DGT_CLOCK_MESSAGE:
             self.last_clock_command = message
             if self.clock_lock:
@@ -128,6 +128,7 @@ class DgtSerial(object):
             else:
                 logging.debug('DGT clock [ser]: locked')
                 self.clock_lock = time.time()
+        return True
 
     def process_board_message(self, message_id, message):
         for case in switch(message_id):
