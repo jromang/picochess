@@ -472,7 +472,7 @@ def main():
     logging.debug('#'*20 + ' PicoChess v' + version + ' ' + '#'*20)
     # log the startup parameters but hide the password fields
     p = copy.copy(vars(args))
-    p['mailgun_key'] = p['remote_key'] = p['remote_pass'] = p['smtp-pass'] = '*****'
+    p['mailgun_key'] = p['remote_key'] = p['remote_pass'] = p['smtp_pass'] = '*****'
     logging.debug('startup parameters: {}'.format(p))
 
     # Update
