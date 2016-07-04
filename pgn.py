@@ -120,8 +120,7 @@ class PgnDisplay(DisplayMsg, threading.Thread):
                     conn = SMTP(self.smtp_server)  # contact smtp server
                     conn.set_debuglevel(False)  # no debug info from smtp lib
                     logging.debug("SMTP Mail delivery: trying to log to SMTP Server")
-                    logging.debug(
-                        "SMTP Mail delivery: Username=" + self.smtp_user + ", Pass=" + self.smtp_pass)
+                    # logging.debug("SMTP Mail delivery: Username=" + self.smtp_user + ", Pass=" + self.smtp_pass)
                     conn.login(self.smtp_user, self.smtp_pass)  # login at smtp server
                     try:
                         logging.debug("SMTP Mail delivery: trying to send email")
