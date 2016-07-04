@@ -117,22 +117,14 @@ def main():
     def compute_legal_fens(g):
         """
         Computes a list of legal FENs for the given game.
-        Also stores the initial position in the 'root' attribute.
         :param g: The game
-        :return: A list of legal FENs, and the root FEN
+        :return: A list of legal FENs
         """
-
-        class FenList(list):
-            def __init__(self, *args):
-                list.__init__(self, *args)
-                self.root = ''
-
-        fens = FenList()
+        fens = []
         for move in g.legal_moves:
             g.push(move)
             fens.append(g.board_fen())
             g.pop()
-        fens.root = g.board_fen()
         return fens
 
     def probe_tablebase(game):
@@ -229,7 +221,7 @@ def main():
             return True
         else:
             custom_fen = getattr(game, 'custom_fen', None)
-            DisplayMsg.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=copy.deepcopy(game), custom_fen=custom_fen))
+            DisplayMsg.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=game.copy(), custom_fen=custom_fen))
             return False
 
     def user_move(move):
@@ -247,7 +239,7 @@ def main():
 
         # Check for same position
         if (fen == game.board_fen() and not last_computer_fen) or fen == last_computer_fen:
-            logging.debug("Already in this fen:" + fen)
+            logging.debug('Already in this fen: ' + fen)
 
         # Check if we have to undo a previous move (sliding)
         elif fen in last_legal_fens:
@@ -256,29 +248,29 @@ def main():
                         (play_mode == PlayMode.USER_BLACK and game.turn == chess.WHITE):
                     stop_search()
                     game.pop()
-                    logging.debug("User move in computer turn, reverting to: " + game.board_fen())
+                    logging.debug('User move in computer turn, reverting to: ' + game.board_fen())
                 elif last_computer_fen:
                     last_computer_fen = None
                     game.pop()
                     game.pop()
-                    logging.debug("User move while computer move is displayed, reverting to: " + game.board_fen())
+                    logging.debug('User move while computer move is displayed, reverting to: ' + game.board_fen())
                 else:
                     logging.error("last_legal_fens not cleared: " + game.board_fen())
             elif interaction_mode == Mode.REMOTE:
                 if (play_mode == PlayMode.USER_WHITE and game.turn == chess.BLACK) or \
                         (play_mode == PlayMode.USER_BLACK and game.turn == chess.WHITE):
                     game.pop()
-                    logging.debug("User move in remote turn, reverting to: " + game.board_fen())
+                    logging.debug('User move in remote turn, reverting to: ' + game.board_fen())
                 elif last_computer_fen:
                     last_computer_fen = None
                     game.pop()
                     game.pop()
-                    logging.debug("User move while remote move is displayed, reverting to: " + game.board_fen())
+                    logging.debug('User move while remote move is displayed, reverting to: ' + game.board_fen())
                 else:
-                    logging.error("last_legal_fens not cleared: " + game.board_fen())
+                    logging.error('last_legal_fens not cleared: ' + game.board_fen())
             else:
                 game.pop()
-                logging.debug("Wrong color move -> sliding, reverting to: " + game.board_fen())
+                logging.debug('Wrong color move -> sliding, reverting to: ' + game.board_fen())
             legal_moves = list(game.legal_moves)
             user_move(legal_moves[last_legal_fens.index(fen)])
             if interaction_mode == Mode.NORMAL or interaction_mode == Mode.REMOTE:
@@ -374,8 +366,8 @@ def main():
             last_computer_fen = game.board_fen()
             game.push(move)
             if inbook:
-                DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
-                DisplayMsg.show(Message.BOOK_MOVE(result=event.result))
+                # DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
+                DisplayMsg.show(Message.BOOK_MOVE())
             searchmoves.add(move)
             text = Message.COMPUTER_MOVE(move=move, ponder=ponder, fen=fen, turn=turn, game=game.copy(),
                                          time_control=time_control, wait=inbook)
@@ -384,8 +376,8 @@ def main():
             last_computer_fen = None
             game.push(move)
             if inbook:
-                DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
-                DisplayMsg.show(Message.BOOK_MOVE(result=event.result))
+                # DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
+                DisplayMsg.show(Message.BOOK_MOVE())
             searchmoves.reset()
             if interaction_mode == Mode.NORMAL:
                 if check_game_state(game, play_mode):
@@ -678,7 +670,7 @@ def main():
                         if game.is_game_over() or game_declared:
                             custom_fen = getattr(game, 'custom_fen', None)
                             DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode,
-                                                              game=copy.deepcopy(game), custom_fen=custom_fen))
+                                                              game=game.copy(), custom_fen=custom_fen))
                     game = chess.Board(event.fen, event.uci960)
                     game.custom_fen = event.fen
                     legal_fens = compute_legal_fens(game)
@@ -755,7 +747,7 @@ def main():
                         if not (game.is_game_over() or game_declared):
                             custom_fen = getattr(game, 'custom_fen', None)
                             DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode,
-                                                              game=copy.deepcopy(game), custom_fen=custom_fen))
+                                                              game=game.copy(), custom_fen=custom_fen))
                         game = chess.Board()
                     legal_fens = compute_legal_fens(game)
                     last_legal_fens = []
@@ -774,7 +766,7 @@ def main():
                         stop_search_and_clock()
                         custom_fen = getattr(game, 'custom_fen', None)
                         DisplayMsg.show(Message.GAME_ENDS(result=event.result, play_mode=play_mode,
-                                                          game=copy.deepcopy(game), custom_fen=custom_fen))
+                                                          game=game.copy(), custom_fen=custom_fen))
                         game_declared = True
                     break
 
@@ -841,7 +833,7 @@ def main():
                     stop_search_and_clock()
                     custom_fen = getattr(game, 'custom_fen', None)
                     DisplayMsg.show(Message.GAME_ENDS(result=GameResult.OUT_OF_TIME, play_mode=play_mode,
-                                                      game=copy.deepcopy(game), custom_fen=custom_fen))
+                                                      game=game.copy(), custom_fen=custom_fen))
                     break
 
                 if case(EventApi.UCI_OPTION_SET):
@@ -854,7 +846,7 @@ def main():
                         talker.say_event(event)
                     custom_fen = getattr(game, 'custom_fen', None)
                     DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode,
-                                                      game=copy.deepcopy(game), custom_fen=custom_fen))
+                                                      game=game.copy(), custom_fen=custom_fen))
                     shutdown(args.dgtpi)
                     break
 
@@ -863,7 +855,7 @@ def main():
                         talker.say_event(event)
                     custom_fen = getattr(game, 'custom_fen', None)
                     DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode,
-                                                      game=copy.deepcopy(game), custom_fen=custom_fen))
+                                                      game=game.copy(), custom_fen=custom_fen))
                     reboot()
                     break
 

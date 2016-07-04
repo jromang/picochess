@@ -90,6 +90,7 @@ class DgtHw(DgtIface):
 
     def clear_light_revelation_board(self):
         if self.enable_revelation_leds:
+            logging.debug('REV2 lights turned off')
             self.lib.write([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
 
     def stop_clock(self):
