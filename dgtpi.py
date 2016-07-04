@@ -57,32 +57,32 @@ class DgtPi(DgtIface):
                 if res > 0:
                     ack3 = but.value
                     if ack3 == 0x01:
-                        logging.info("DGT clock [i2c]: button 0 pressed")
+                        logging.info('DGT clock [i2c]: button 0 pressed')
                         DisplayMsg.show(Message.DGT_BUTTON(button=0))
                     if ack3 == 0x02:
-                        logging.info("DGT clock [i2c]: button 1 pressed")
+                        logging.info('DGT clock [i2c]: button 1 pressed')
                         DisplayMsg.show(Message.DGT_BUTTON(button=1))
                     if ack3 == 0x04:
-                        logging.info("DGT clock [i2c]: button 2 pressed")
+                        logging.info('DGT clock [i2c]: button 2 pressed')
                         DisplayMsg.show(Message.DGT_BUTTON(button=2))
                     if ack3 == 0x08:
-                        logging.info("DGT clock [i2c]: button 3 pressed")
+                        logging.info('DGT clock [i2c]: button 3 pressed')
                         DisplayMsg.show(Message.DGT_BUTTON(button=3))
                     if ack3 == 0x10:
-                        logging.info("DGT clock [i2c]: button 4 pressed")
+                        logging.info('DGT clock [i2c]: button 4 pressed')
                         DisplayMsg.show(Message.DGT_BUTTON(button=4))
                     if ack3 == 0x20:
-                        logging.info("DGT clock [i2c]: button on/off pressed")
+                        logging.info('DGT clock [i2c]: button on/off pressed')
                         self.lib.dgtpicom_configure()  # restart the clock - cause its OFF
                         DisplayMsg.show(Message.DGT_BUTTON(button=0x11))
                     if ack3 == 0x11:
-                        logging.info("DGT clock [i2c]: button 0+4 pressed")
+                        logging.info('DGT clock [i2c]: button 0+4 pressed')
                         DisplayMsg.show(Message.DGT_BUTTON(button=0x11))
                     if ack3 == 0x40:
-                        logging.info("DGT clock [i2c]: lever pressed > right side down")
+                        logging.info('DGT clock [i2c]: lever pressed > right side down')
                         DisplayMsg.show(Message.DGT_BUTTON(button=0x40))
                     if ack3 == -0x40:
-                        logging.info("DGT clock [i2c]: lever pressed > left side down")
+                        logging.info('DGT clock [i2c]: lever pressed > left side down')
                         DisplayMsg.show(Message.DGT_BUTTON(button=-0x40))
                 if res < 0:
                     logging.warning('GetButtonMessage returned error %i', res)
@@ -98,33 +98,33 @@ class DgtPi(DgtIface):
                 self.dgtserial.write_board_command([DgtCmd.DGT_RETURN_SERIALNR])  # the code doesnt really matter ;-)
             time.sleep(0.1)
 
-    def _display_on_dgt_pi(self, text, beep=False):
+    def _display_on_dgt_pi(self, text, beep=False, left_dots=0, right_dots=0):
         if len(text) > 11:
             logging.warning('DGT PI clock message too long [%s]', text)
         logging.debug(text)
         text = bytes(text, 'utf-8')
         with self.lib_lock:
-            res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, 0, 0)
+            res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, left_dots, right_dots)
             if res < 0:
                 logging.warning('SetText returned error %i', res)
                 res = self.lib.dgtpicom_configure()
                 if res < 0:
                     logging.warning('Configure also failed %i', res)
                 else:
-                    res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, 0, 0)
+                    res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, left_dots, right_dots)
             if res < 0:
                 logging.warning('Finally failed %i', res)
 
-    def display_text_on_clock(self, text, beep=False):
-        self._display_on_dgt_pi(text, beep)
+    def display_text_on_clock(self, text, beep=False, left_dots=0, right_dots=0):
+        self._display_on_dgt_pi(text, beep, left_dots, right_dots)
 
-    def display_move_on_clock(self, move, fen, side, beep=False):
+    def display_move_on_clock(self, move, fen, side, beep=False, left_dots=0, right_dots=0):
         bit_board = Board(fen)
         move_text = bit_board.san(move)
         if side == ClockSide.RIGHT:
             move_text = move_text.rjust(11)
         text = self.dgttranslate.move(move_text)
-        self._display_on_dgt_pi(text, beep)
+        self._display_on_dgt_pi(text, beep, left_dots, right_dots)
 
     def display_time_on_clock(self, force=False):
         if self.clock_running or force:
@@ -151,6 +151,7 @@ class DgtPi(DgtIface):
 
     def clear_light_revelation_board(self):
         if self.enable_revelation_leds:
+            logging.debug('REV2 lights turned off')
             self.dgtserial.write_board_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
 
     def stop_clock(self):

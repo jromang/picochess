@@ -98,8 +98,7 @@ class ChessTalker(DisplayMsg, threading.Thread):
                         if message.move and message.game and str(message.move) != previous_move \
                                 and self.computer_chesstalker_voice is not None:
                             logging.debug('Announcing COMPUTER_MOVE [%s]', message.move)
-                            local_game = copy.deepcopy(message.game)
-                            self.computer_chesstalker_voice.say_move(message.move, local_game)
+                            self.computer_chesstalker_voice.say_move(message.move, copy.deepcopy(message.game))
                             previous_move = str(message.move)
                         break
                     if case(MessageApi.USER_MOVE):
@@ -565,7 +564,8 @@ class ChessTalkerVoice():
         to_square = moveText[2:4]
         logging.debug("say_move: Saying move [%s]", moveText)
 
-        # Game board is currently in the POST-move state - get anything we need from this state before we look at the previous state.
+        # Game board is currently in the POST-move state
+        # get anything we need from this state before we look at the previous state.
         is_check = game.is_check()
         is_checkmate = game.is_checkmate()
         is_stalemate = game.is_stalemate()

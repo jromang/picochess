@@ -53,7 +53,7 @@ class DgtVr(DgtIface):
         DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=self.time_left, time_right=self.time_right))
     # (END) dgtserial simulation class
 
-    def display_move_on_clock(self, move, fen, side, beep=False):
+    def display_move_on_clock(self, move, fen, side, beep=False, left_dots=0, right_dots=0):
         if self.enable_dgt_3000:
             bit_board = chess.Board(fen)
             text = bit_board.san(move)
@@ -64,7 +64,7 @@ class DgtVr(DgtIface):
         logging.debug(text)
         print('Clock move: {} Beep: {}'. format(text, beep))
 
-    def display_text_on_clock(self, text, beep=False):
+    def display_text_on_clock(self, text, beep=False, left_dots=0, right_dots=0):
         logging.debug(text)
         print('Clock text: {} Beep: {}'. format(text, beep))
 

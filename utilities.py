@@ -597,8 +597,8 @@ class RepeatedTimer(object):
 
 
 class Dgt():
-    DISPLAY_MOVE = ClassFactory(DgtApi.DISPLAY_MOVE, ['move', 'fen', 'beep', 'maxtime', 'wait', 'side'])
-    DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['l', 'm', 's', 'beep', 'maxtime', 'wait'])
+    DISPLAY_MOVE = ClassFactory(DgtApi.DISPLAY_MOVE, ['move', 'fen', 'beep', 'maxtime', 'side', 'wait', 'ld', 'rd'])
+    DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['l', 'm', 's', 'beep', 'maxtime', 'wait', 'ld', 'rd'])
     DISPLAY_TIME = ClassFactory(DgtApi.DISPLAY_TIME, ['wait', 'force'])
     LIGHT_CLEAR = ClassFactory(DgtApi.LIGHT_CLEAR, [])
     LIGHT_SQUARES = ClassFactory(DgtApi.LIGHT_SQUARES, ['squares'])
@@ -611,7 +611,7 @@ class Dgt():
 class Message():
     # Messages to display devices
     COMPUTER_MOVE = ClassFactory(MessageApi.COMPUTER_MOVE, ['move', 'ponder', 'fen', 'turn', 'game', 'time_control', 'wait'])
-    BOOK_MOVE = ClassFactory(MessageApi.BOOK_MOVE, ['result'])
+    BOOK_MOVE = ClassFactory(MessageApi.BOOK_MOVE, [])
     NEW_PV = ClassFactory(MessageApi.NEW_PV, ['pv', 'mode', 'fen', 'turn'])
     REVIEW_MOVE = ClassFactory(MessageApi.REVIEW_MOVE, ['move', 'fen', 'turn', 'game', 'mode'])
     ENGINE_READY = ClassFactory(MessageApi.ENGINE_READY, ['eng', 'eng_text', 'engine_name', 'has_levels', 'has_960', 'ok_text'])

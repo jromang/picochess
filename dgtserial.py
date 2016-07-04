@@ -100,19 +100,18 @@ class DgtSerial(object):
                     array.append(char_to_DGTXL[c.lower()])
             else:
                 logging.error('type not supported [%s]', type(v))
+                return False
 
         while True:
             if not self.serial:
                 logging.warning('loop serial error')
-                # self.setup_serial_port()
-                # self.startup_serial_board()
                 self.startup_serial_hardware()
             try:
                 self.serial.write(bytearray(array))
                 break
             except ValueError:
                 logging.error('invalid bytes sent {0}'.format(message))
-                break
+                return False
             except pyserial.SerialException as e:
                 logging.error(e)
                 self.serial.close()
@@ -121,6 +120,7 @@ class DgtSerial(object):
                 logging.error(e)
                 self.serial.close()
                 self.serial = None
+
         if message[0] == DgtCmd.DGT_CLOCK_MESSAGE:
             self.last_clock_command = message
             if self.clock_lock:
@@ -128,6 +128,7 @@ class DgtSerial(object):
             else:
                 logging.debug('DGT clock [ser]: locked')
                 self.clock_lock = time.time()
+        return True
 
     def process_board_message(self, message_id, message):
         for case in switch(message_id):
@@ -138,10 +139,10 @@ class DgtSerial(object):
                     text_l, text_m, text_s = 'USB E-board', 'USBboard', 'ok usb'
                     channel = 'USB'
                 else:
-                    if "REVII" in self.bt_name:
-                        text_l, text_m, text_s = "RevII "+self.bt_name[-5:], "Rev"+self.bt_name[-5:], self.bt_name[-6:]
-                    elif "DGT_BT" in self.bt_name:
-                        text_l, text_m, text_s = "DGTBT "+self.bt_name[-5:], "BT "+self.bt_name[-5:], self.bt_name[-5:]
+                    if 'REVII' in self.bt_name:
+                        text_l, text_m, text_s = 'RevII '+self.bt_name[-5:], 'Rev'+self.bt_name[-5:], self.bt_name[-6:]
+                    elif 'DGT_BT' in self.bt_name:
+                        text_l, text_m, text_s = 'DGTBT '+self.bt_name[-5:], 'BT '+self.bt_name[-5:], self.bt_name[-5:]
                     else:
                         text_l, text_m, text_s = 'BT E-board', 'BT board', 'ok bt'
                     channel = 'BT'
@@ -198,7 +199,7 @@ class DgtSerial(object):
                         main_version = ack2 >> 4
                         sub_version = ack2 & 0x0f
                         logging.debug("DGT clock [ser]: version %0.2f", float(str(main_version) + '.' + str(sub_version)))
-                        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main_version=main_version, sub_version=sub_version, attached="serial"))
+                        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main_version=main_version, sub_version=sub_version, attached='serial'))
                 elif any(message[:6]):
                     r_hours = message[0] & 0x0f
                     r_mins = (message[1] >> 4) * 10 + (message[1] & 0x0f)
@@ -217,6 +218,7 @@ class DgtSerial(object):
 
                     right_side_down = -0x40 if status & 0x02 else 0x40
                     if self.lever_pos != right_side_down:
+                        logging.debug('button status: {}'.format(status))
                         if self.lever_pos is not None:
                             DisplayMsg.show(Message.DGT_BUTTON(button=right_side_down))
                         self.lever_pos = right_side_down
