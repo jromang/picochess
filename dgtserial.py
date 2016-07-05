@@ -86,7 +86,7 @@ class DgtSerial(object):
         mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
         if not mes == DgtCmd.DGT_RETURN_SERIALNR:
             logging.debug('->DGT board [%s], length: %i', mes, len(message))
-        if mes.value == DgtClk.DGT_CMD_CLOCK_ASCII.value:
+        if mes.value in (DgtClk.DGT_CMD_CLOCK_ASCII.value, DgtClk.DGT_CMD_CLOCK_DISPLAY.value):
             logging.debug('sending text [{}] to clock'. format(''.join([chr(elem) for elem in message[4:10]])))
 
         array = []
@@ -218,7 +218,7 @@ class DgtSerial(object):
 
                     right_side_down = -0x40 if status & 0x02 else 0x40
                     if self.lever_pos != right_side_down:
-                        logging.debug('button status: {}'.format(status))
+                        logging.debug('button status: {} old lever_pos: {}'.format(status, self.lever_pos))
                         if self.lever_pos is not None:
                             DisplayMsg.show(Message.DGT_BUTTON(button=right_side_down))
                         self.lever_pos = right_side_down
@@ -249,8 +249,8 @@ class DgtSerial(object):
                             fen += str(empty)
                             empty = 0
                         if sq < 63:
-                            fen += "/"
-                        empty = 0
+                            fen += '/'
+                        # empty = 0
 
                 # Attention! This fen is NOT flipped
                 logging.debug("Raw-Fen [%s]", fen)
@@ -485,16 +485,16 @@ class DgtSerial(object):
                 if self.given_device:
                     self.check_serial(self.given_device)
                 else:
-                    for file in os.listdir("/dev"):
-                        if file.startswith("ttyACM") or file.startswith("ttyUSB") or file == "rfcomm0":
-                            dev = os.path.join("/dev", file)
+                    for file in os.listdir('/dev'):
+                        if file.startswith('ttyACM') or file.startswith('ttyUSB') or file == 'rfcomm0':
+                            dev = os.path.join('/dev', file)
                             if self.check_serial(dev):
                                 self.device = dev
                                 break
                     if self.serial:
                         break
                     if self.check_bluetooth():
-                        self.device = "/dev/rfcomm123"
+                        self.device = '/dev/rfcomm123'
                         break
 
                 s = 'Board' + self.waitchars[wait_counter]

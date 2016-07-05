@@ -48,7 +48,7 @@ class PgnDisplay(DisplayMsg, threading.Thread):
         self.smtp_pass = smtp_pass
         # store information for mailgun mail delivery
         if email and mailgun_key:
-            self.mailgun_key = base64.b64decode(str.encode(mailgun_key)).decode("utf-8")
+            self.mailgun_key = base64.b64decode(str.encode(mailgun_key)).decode('utf-8')
         else:
             self.mailgun_key = False
 
@@ -62,37 +62,37 @@ class PgnDisplay(DisplayMsg, threading.Thread):
         for move in message.game.move_stack:
             node = node.add_main_variation(move)
         # Headers
-        pgn.headers["Event"] = "PicoChess game"
-        pgn.headers["Site"] = self.location
-        pgn.headers["Date"] = datetime.date.today().strftime('%Y.%m.%d')
+        pgn.headers['Event'] = 'PicoChess game'
+        pgn.headers['Site'] = self.location
+        pgn.headers['Date'] = datetime.date.today().strftime('%Y.%m.%d')
         if message.result == GameResult.ABORT:
-            pgn.headers["Result"] = "*"
+            pgn.headers['Result'] = '*'
         elif message.result in (GameResult.DRAW, GameResult.STALEMATE, GameResult.SEVENTYFIVE_MOVES,
                                 GameResult.FIVEFOLD_REPETITION, GameResult.INSUFFICIENT_MATERIAL):
-            pgn.headers["Result"] = "1/2-1/2"
+            pgn.headers['Result'] = '1/2-1/2'
         elif message.result in (GameResult.RESIGN_WHITE, GameResult.RESIGN_BLACK):
-            pgn.headers["Result"] = "1-0" if message.result == GameResult.RESIGN_WHITE else "0-1"
+            pgn.headers['Result'] = '1-0' if message.result == GameResult.RESIGN_WHITE else '0-1'
         elif message.result in (GameResult.MATE, GameResult.OUT_OF_TIME):
-            pgn.headers["Result"] = "0-1" if message.game.turn == chess.WHITE else "1-0"
+            pgn.headers['Result'] = '0-1' if message.game.turn == chess.WHITE else '1-0'
 
         if self.level is None:
-            engine_level = ""
+            engine_level = ''
         else:
-            engine_level = " (Level {0})".format(self.level)
+            engine_level = ' (Level {0})'.format(self.level)
 
         if message.play_mode == PlayMode.USER_WHITE:
-            pgn.headers["White"] = self.user_name
-            pgn.headers["Black"] = self.engine_name + engine_level
-            pgn.headers["WhiteElo"] = "-"
-            pgn.headers["BlackElo"] = "2900"
+            pgn.headers['White'] = self.user_name
+            pgn.headers['Black'] = self.engine_name + engine_level
+            pgn.headers['WhiteElo'] = '-'
+            pgn.headers['BlackElo'] = '2900'
         if message.play_mode == PlayMode.USER_BLACK:
-            pgn.headers["White"] = self.engine_name + engine_level
-            pgn.headers["Black"] = self.user_name
-            pgn.headers["WhiteElo"] = "2900"
-            pgn.headers["BlackElo"] = "-"
+            pgn.headers['White'] = self.engine_name + engine_level
+            pgn.headers['Black'] = self.user_name
+            pgn.headers['WhiteElo'] = '2900'
+            pgn.headers['BlackElo'] = '-'
 
         # Save to file
-        file = open(self.file_name, "a")
+        file = open(self.file_name, 'a')
         exporter = chess.pgn.FileExporter(file)
         pgn.accept(exporter)
         file.flush()
@@ -101,48 +101,49 @@ class PgnDisplay(DisplayMsg, threading.Thread):
         if self.email:  # check if email adress to send the pgn to is provided
             if self.smtp_server: # check if smtp server adress provided
                 # if self.smtp_server is not provided than don't try to send email via smtp service
-                logging.debug("SMTP Mail delivery: Started")
+                logging.debug('SMTP Mail delivery: Started')
                 # change to smtp based mail delivery
                 # depending on encrypted mail delivery, we need to import the right lib
                 if self.smtp_encryption:
                     # lib with ssl encryption
-                    logging.debug("SMTP Mail delivery: Import SSL SMTP Lib")
+                    logging.debug('SMTP Mail delivery: Import SSL SMTP Lib')
                     from smtplib import SMTP_SSL as SMTP
                 else:
                     # lib without encryption (SMTP-port 21)
-                    logging.debug("SMTP Mail delivery: Import standard SMTP Lib (no SSL encryption)")
+                    logging.debug('SMTP Mail delivery: Import standard SMTP Lib (no SSL encryption)')
                     from smtplib import SMTP
                 try:
                     msg = MIMEText(str(pgn), 'plain')  # pack the pgn to Email body
-                    msg['Subject'] = "Game PGN"  # put subject to mail
-                    msg['From'] = "Your PicoChess computer <no-reply@picochess.org>"
-                    logging.debug("SMTP Mail delivery: trying to connect to " + self.smtp_server)
+                    msg['Subject'] = 'Game PGN'  # put subject to mail
+                    msg['From'] = 'Your PicoChess computer <no-reply@picochess.org>'
+                    msg['To'] = self.email
+                    logging.debug('SMTP Mail delivery: trying to connect to ' + self.smtp_server)
                     conn = SMTP(self.smtp_server)  # contact smtp server
                     conn.set_debuglevel(False)  # no debug info from smtp lib
-                    logging.debug("SMTP Mail delivery: trying to log to SMTP Server")
-                    # logging.debug("SMTP Mail delivery: Username=" + self.smtp_user + ", Pass=" + self.smtp_pass)
+                    logging.debug('SMTP Mail delivery: trying to log to SMTP Server')
+                    # logging.debug('SMTP Mail delivery: Username=' + self.smtp_user + ', Pass=' + self.smtp_pass)
                     conn.login(self.smtp_user, self.smtp_pass)  # login at smtp server
                     try:
-                        logging.debug("SMTP Mail delivery: trying to send email")
+                        logging.debug('SMTP Mail delivery: trying to send email')
                         conn.sendmail('no-reply@picochess.org', self.email, msg.as_string())
-                        logging.debug("SMTP Mail delivery: successfuly delivered message to SMTP server")
+                        logging.debug('SMTP Mail delivery: successfuly delivered message to SMTP server')
                     except Exception as e:
-                        logging.error("SMTP Mail delivery: Failed")
-                        logging.error("SMTP Mail delivery: " + str(e))
+                        logging.error('SMTP Mail delivery: Failed')
+                        logging.error('SMTP Mail delivery: ' + str(e))
                     finally:
                         conn.close()
-                        logging.debug("SMTP Mail delivery: Ended")
+                        logging.debug('SMTP Mail delivery: Ended')
                 except Exception as e:
-                    logging.error("SMTP Mail delivery: Failed")
-                    logging.error("SMTP Mail delivery: " + str(e))
+                    logging.error('SMTP Mail delivery: Failed')
+                    logging.error('SMTP Mail delivery: ' + str(e))
             # smtp based system end
             if self.mailgun_key:  # check if we have mailgun-key available to send the pgn successful
-                out = requests.post("https://api.mailgun.net/v2/picochess.org/messages",
-                                    auth=("api", self.mailgun_key),
-                                    data={"from": "Your PicoChess computer <no-reply@picochess.org>",
-                                          "to": self.email,
-                                          "subject": "Game PGN",
-                                          "text": str(pgn)})
+                out = requests.post('https://api.mailgun.net/v2/picochess.org/messages',
+                                    auth=('api', self.mailgun_key),
+                                    data={'from': 'Your PicoChess computer <no-reply@picochess.org>',
+                                          'to': self.email,
+                                          'subject': 'Game PGN',
+                                          'text': str(pgn)})
                 logging.debug(out)
 
     def run(self):
@@ -164,7 +165,7 @@ class PgnDisplay(DisplayMsg, threading.Thread):
                     if case(MessageApi.INTERACTION_MODE):
                         if message.mode == Mode.REMOTE:
                             self.old_engine = self.engine_name
-                            self.engine_name = "Remote Player"
+                            self.engine_name = 'Remote Player'
                         else:
                             self.engine_name = self.old_engine
                         break

@@ -87,13 +87,13 @@ def main():
 
     def engine_startup():
         if 'Hash' in engine.get().options:
-            engine.option("Hash", args.hash_size)
+            engine.option('Hash', args.hash_size)
         if 'Threads' in engine.get().options:  # Stockfish
-            engine.option("Threads", args.threads)
+            engine.option('Threads', args.threads)
         if 'Core Threads' in engine.get().options:  # Hiarcs
-            engine.option("Core Threads", args.threads)
+            engine.option('Core Threads', args.threads)
         if args.uci_option:
-            for uci_option in args.uci_option.strip('"').split(";"):
+            for uci_option in args.uci_option.strip('"').split(';'):
                 uci_parameter = uci_option.strip().split('=')
                 engine.option(uci_parameter[0], uci_parameter[1])
         # send the options to the engine
@@ -366,7 +366,6 @@ def main():
             last_computer_fen = game.board_fen()
             game.push(move)
             if inbook:
-                # DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
                 DisplayMsg.show(Message.BOOK_MOVE())
             searchmoves.add(move)
             text = Message.COMPUTER_MOVE(move=move, ponder=ponder, fen=fen, turn=turn, game=game.copy(),
@@ -376,7 +375,6 @@ def main():
             last_computer_fen = None
             game.push(move)
             if inbook:
-                # DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
                 DisplayMsg.show(Message.BOOK_MOVE())
             searchmoves.reset()
             if interaction_mode == Mode.NORMAL:
@@ -564,9 +562,9 @@ def main():
     # Startup - external
     text = dgttranslate.text('B00_tc_blitz', '   5')
     text.beep = False
-    DisplayMsg.show(Message.STARTUP_INFO(info={"interaction_mode": interaction_mode, "play_mode": play_mode,
-                                               "book": all_books[book_index][1], "book_index": book_index,
-                                               "time_text": text}))
+    DisplayMsg.show(Message.STARTUP_INFO(info={'interaction_mode': interaction_mode, 'play_mode': play_mode,
+                                               'book': all_books[book_index][1], 'book_index': book_index,
+                                               'time_text': text}))
     DisplayMsg.show(Message.UCI_OPTION_LIST(options=engine.options))
     DisplayMsg.show(Message.ENGINE_STARTUP(shell=engine.get_shell(), path=engine.get_path(),
                                            has_levels=engine.has_levels(), has_960=engine.has_chess960()))
