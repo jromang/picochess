@@ -551,6 +551,9 @@ class BaseClass(object):
     def __repr__(self):
         return self._type
 
+    def __hash__(self):
+        return hash(str(self.__class__) + ": " + str(self.__dict__))
+
 
 def ClassFactory(name, argnames, BaseClass=BaseClass):
     def __init__(self, **kwargs):

@@ -44,6 +44,8 @@ class DgtIface(DisplayDgt, Thread):
         self.do_process = True
         self.msg_lock = Lock()
 
+        self.display_hash = None  # Hash value of clock's display
+
     def display_text_on_clock(self, text, beep=False, left_dots=0, right_dots=0):
         raise NotImplementedError()
 
@@ -94,7 +96,11 @@ class DgtIface(DisplayDgt, Thread):
                 if case(DgtApi.DISPLAY_MOVE):
                     ld = message.ld if hasattr(message, 'ld') else 0
                     rd = message.rd if hasattr(message, 'rd') else 0
-                    self.display_move_on_clock(message.move, message.fen, message.side, message.beep, ld, rd)
+                    if self.display_hash == hash(message) and not message.beep:
+                        logging.debug('message ignored cause already on display')
+                    else:
+                        self.display_move_on_clock(message.move, message.fen, message.side, message.beep, ld, rd)
+                        self.display_hash = hash(message)
                     break
                 if case(DgtApi.DISPLAY_TEXT):
                     if self.enable_dgt_pi:
@@ -105,9 +111,14 @@ class DgtIface(DisplayDgt, Thread):
                         text = message.m
                     ld = message.ld if hasattr(message, 'ld') else 0
                     rd = message.rd if hasattr(message, 'rd') else 0
-                    self.display_text_on_clock(text, message.beep, ld, rd)
+                    if self.display_hash == hash(message) and not message.beep:
+                        logging.debug('message ignored cause already on display')
+                    else:
+                        self.display_text_on_clock(text, message.beep, ld, rd)
+                        self.display_hash = hash(message)
                     break
                 if case(DgtApi.DISPLAY_TIME):
+                    self.display_hash = None
                     self.display_time_on_clock(message.force)
                     break
                 if case(DgtApi.LIGHT_CLEAR):
@@ -117,10 +128,12 @@ class DgtIface(DisplayDgt, Thread):
                     self.light_squares_revelation_board(message.squares)
                     break
                 if case(DgtApi.CLOCK_STOP):
+                    self.display_hash = None
                     self.clock_running = False
                     self.stop_clock()
                     break
                 if case(DgtApi.CLOCK_START):
+                    self.display_hash = None
                     self.clock_running = (message.side != ClockSide.NONE)
                     # log times
                     l_hms = hours_minutes_seconds(message.time_left)
@@ -130,6 +143,7 @@ class DgtIface(DisplayDgt, Thread):
                     self.start_clock(message.time_left, message.time_right, message.side)
                     break
                 if case(DgtApi.CLOCK_VERSION):
+                    self.display_hash = None
                     self.clock_found = True
                     if message.main_version == 2:
                         self.enable_dgt_3000 = True
