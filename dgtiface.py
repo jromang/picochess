@@ -84,78 +84,82 @@ class DgtIface(DisplayDgt, Thread):
             if self.maxtimer_running:  # run over the task list until a maxtime command was processed
                 break
 
+    def handle_message(self, message):
+        for case in switch(message):
+            if case(DgtApi.DISPLAY_MOVE):
+                ld = message.ld if hasattr(message, 'ld') else 0
+                rd = message.rd if hasattr(message, 'rd') else 0
+                self.display_move_on_clock(message.move, message.fen, message.side, message.beep, ld, rd)
+                break
+            if case(DgtApi.DISPLAY_TEXT):
+                if self.enable_dgt_pi:
+                    text = message.l
+                else:
+                    text = message.m if self.enable_dgt_3000 else message.s
+                if text is None:
+                    text = message.m
+                ld = message.ld if hasattr(message, 'ld') else 0
+                rd = message.rd if hasattr(message, 'rd') else 0
+                self.display_text_on_clock(text, message.beep, ld, rd)
+                break
+            if case(DgtApi.DISPLAY_TIME):
+                self.display_time_on_clock(message.force)
+                break
+            if case(DgtApi.LIGHT_CLEAR):
+                self.clear_light_revelation_board()
+                break
+            if case(DgtApi.LIGHT_SQUARES):
+                self.light_squares_revelation_board(message.squares)
+                break
+            if case(DgtApi.CLOCK_STOP):
+                self.clock_running = False
+                self.stop_clock()
+                break
+            if case(DgtApi.CLOCK_START):
+                self.clock_running = (message.side != ClockSide.NONE)
+                # log times
+                l_hms = hours_minutes_seconds(message.time_left)
+                r_hms = hours_minutes_seconds(message.time_right)
+                logging.debug('last time received from clock l:{} r:{}'.format(self.time_left, self.time_right))
+                logging.debug('sending time to clock l:{} r:{}'.format(l_hms, r_hms))
+                self.start_clock(message.time_left, message.time_right, message.side)
+                break
+            if case(DgtApi.CLOCK_VERSION):
+                self.clock_found = True
+                if message.main_version == 2:
+                    self.enable_dgt_3000 = True
+                self.show(Dgt.DISPLAY_TEXT(l='picoChs ' + version, m='pico ' + version, s='pic' + version,
+                                           wait=True, beep=True, maxtime=2))
+                break
+            if case(DgtApi.CLOCK_TIME):
+                self.time_left = message.time_left
+                self.time_right = message.time_right
+                break
+            if case():  # Default
+                pass
+
     def process_message(self, message):
-        if hasattr(message, 'maxtime') and message.maxtime > 0:
-            self.maxtimer = Timer(message.maxtime * self.time_factor, self.stopped_maxtimer)
-            self.maxtimer.start()
-            logging.debug('showing {} for {} secs'.format(message, message.maxtime * self.time_factor))
-            self.maxtimer_running = True
-        with self.msg_lock:
+        do_handle = True
+        if repr(message) in (DgtApi.CLOCK_START, DgtApi.CLOCK_STOP):
+            self.display_hash = None  # Cant know the clock display if command changing the running status
+        else:
+            if repr(message) in (DgtApi.DISPLAY_MOVE, DgtApi.DISPLAY_TEXT):
+                if self.display_hash == hash(message) and not message.beep:
+                    do_handle = False
+                else:
+                    self.display_hash = hash(message)
+
+        if do_handle:
             logging.debug("handle DgtApi: %s", message)
-            for case in switch(message):
-                if case(DgtApi.DISPLAY_MOVE):
-                    ld = message.ld if hasattr(message, 'ld') else 0
-                    rd = message.rd if hasattr(message, 'rd') else 0
-                    if self.display_hash == hash(message) and not message.beep:
-                        logging.debug('message ignored cause already on display')
-                    else:
-                        self.display_move_on_clock(message.move, message.fen, message.side, message.beep, ld, rd)
-                        self.display_hash = hash(message)
-                    break
-                if case(DgtApi.DISPLAY_TEXT):
-                    if self.enable_dgt_pi:
-                        text = message.l
-                    else:
-                        text = message.m if self.enable_dgt_3000 else message.s
-                    if text is None:
-                        text = message.m
-                    ld = message.ld if hasattr(message, 'ld') else 0
-                    rd = message.rd if hasattr(message, 'rd') else 0
-                    if self.display_hash == hash(message) and not message.beep:
-                        logging.debug('message ignored cause already on display')
-                    else:
-                        self.display_text_on_clock(text, message.beep, ld, rd)
-                        self.display_hash = hash(message)
-                    break
-                if case(DgtApi.DISPLAY_TIME):
-                    self.display_hash = None
-                    self.display_time_on_clock(message.force)
-                    break
-                if case(DgtApi.LIGHT_CLEAR):
-                    self.clear_light_revelation_board()
-                    break
-                if case(DgtApi.LIGHT_SQUARES):
-                    self.light_squares_revelation_board(message.squares)
-                    break
-                if case(DgtApi.CLOCK_STOP):
-                    self.display_hash = None
-                    self.clock_running = False
-                    self.stop_clock()
-                    break
-                if case(DgtApi.CLOCK_START):
-                    self.display_hash = None
-                    self.clock_running = (message.side != ClockSide.NONE)
-                    # log times
-                    l_hms = hours_minutes_seconds(message.time_left)
-                    r_hms = hours_minutes_seconds(message.time_right)
-                    logging.debug('last time received from clock l:{} r:{}'.format(self.time_left, self.time_right))
-                    logging.debug('sending time to clock l:{} r:{}'.format(l_hms, r_hms))
-                    self.start_clock(message.time_left, message.time_right, message.side)
-                    break
-                if case(DgtApi.CLOCK_VERSION):
-                    self.display_hash = None
-                    self.clock_found = True
-                    if message.main_version == 2:
-                        self.enable_dgt_3000 = True
-                    self.show(Dgt.DISPLAY_TEXT(l='picoChs ' + version, m='pico ' + version, s='pic' + version,
-                                               wait=True, beep=True, maxtime=2))
-                    break
-                if case(DgtApi.CLOCK_TIME):
-                    self.time_left = message.time_left
-                    self.time_right = message.time_right
-                    break
-                if case():  # Default
-                    pass
+            if hasattr(message, 'maxtime') and message.maxtime > 0:
+                self.maxtimer = Timer(message.maxtime * self.time_factor, self.stopped_maxtimer)
+                self.maxtimer.start()
+                logging.debug('showing {} for {} secs'.format(message, message.maxtime * self.time_factor))
+                self.maxtimer_running = True
+            with self.msg_lock:
+                self.handle_message(message)
+        else:
+            logging.debug("ignore DgtApi: %s", message)
 
     def run(self):
         logging.info('dgt_queue ready')

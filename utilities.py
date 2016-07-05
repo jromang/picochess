@@ -104,7 +104,6 @@ class MessageApi():
     SEARCH_STOPPED = 'MSG_SEARCH_STOPPED'  # Engine has stopped the search
     USER_TAKE_BACK = 'MSG_USER_TACK_BACK'  # User takes back his move while engine is searching
     CLOCK_START = 'MSG_CLOCK_START'  # Say to run autonomous clock, contains time_control
-    CLOCK_RESUME = 'MSG_CLOCK_RESUME'  # Restarts the clock
     CLOCK_STOP = 'MSG_CLOCK_STOP'  # Stops the clock
     USER_MOVE = 'MSG_USER_MOVE'  # Player has done a move on board
     UCI_OPTION_LIST = 'MSG_UCI_OPTION_LIST'  # Contains 'options', a dict of the current engine's UCI options
@@ -131,7 +130,6 @@ class DgtApi():
     LIGHT_SQUARES = 'DGT_LIGHT_SQUARES'
     CLOCK_STOP = 'DGT_CLOCK_STOP'
     CLOCK_START = 'DGT_CLOCK_START'
-    CLOCK_RESUME = 'DGT_CLOCK_RESUME'
     CLOCK_VERSION = 'DGT_CLOCK_VERSION'
     CLOCK_TIME = 'DGT_CLOCK_TIME'
     SERIALNR = 'DGT_SERIALNR'
