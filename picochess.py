@@ -427,6 +427,7 @@ def main():
     parser.add_argument("-mp", "--smtp-pass", type=str, help="Password for email server", default=None)
     parser.add_argument("-me", "--smtp-encryption", action='store_true',
                         help="use ssl encryption connection to smtp-Server")
+    parser.add_argument("-mf", "--smtp-from", type=str, help="From email", default='no-reply@picochess.org')
     parser.add_argument("-mk", "--mailgun-key", type=str, help="key used to send emails via Mailgun Webservice",
                         default=None)
     parser.add_argument("-uci", "--uci-option", type=str, help="pass an UCI option to the engine (name;value)",
@@ -510,7 +511,7 @@ def main():
     PgnDisplay(
         args.pgn_file, net=args.enable_internet, email=args.email, mailgun_key=args.mailgun_key,
         smtp_server=args.smtp_server, smtp_user=args.smtp_user,
-        smtp_pass=args.smtp_pass, smtp_encryption=args.smtp_encryption).start()
+        smtp_pass=args.smtp_pass, smtp_encryption=args.smtp_encryption, smtp_from=args.smtp_from).start()
     if args.pgn_user:
         user_name = args.pgn_user
     else:

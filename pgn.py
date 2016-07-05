@@ -29,7 +29,7 @@ from email.mime.text import MIMEText
 class PgnDisplay(DisplayMsg, threading.Thread):
     def __init__(self, pgn_file_name, net, email=None, mailgun_key=None,
                  smtp_server=None, smtp_user=None,
-                 smtp_pass=None, smtp_encryption=False):
+                 smtp_pass=None, smtp_encryption=False, smtp_from=None):
         super(PgnDisplay, self).__init__()
         self.file_name = pgn_file_name
         self.engine_name = ''
@@ -51,6 +51,7 @@ class PgnDisplay(DisplayMsg, threading.Thread):
             self.mailgun_key = base64.b64decode(str.encode(mailgun_key)).decode('utf-8')
         else:
             self.mailgun_key = False
+        self.smtp_from = smtp_from
 
     def save_and_email_pgn(self, message):
         logging.debug('Saving game to [' + self.file_name + ']')
@@ -115,7 +116,7 @@ class PgnDisplay(DisplayMsg, threading.Thread):
                 try:
                     msg = MIMEText(str(pgn), 'plain')  # pack the pgn to Email body
                     msg['Subject'] = 'Game PGN'  # put subject to mail
-                    msg['From'] = 'Your PicoChess computer <no-reply@picochess.org>'
+                    msg['From'] = 'Your PicoChess computer <{}>'.format(self.smtp_from)
                     msg['To'] = self.email
                     logging.debug('SMTP Mail delivery: trying to connect to ' + self.smtp_server)
                     conn = SMTP(self.smtp_server)  # contact smtp server
