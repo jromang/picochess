@@ -78,6 +78,8 @@ beep-level = 15
 ## Otherwise PicoChess will use the default and unencrypted SMTP Port 21.
 ## Some SMTP Server require an SSL encryption (e.g. GMAIL). If so, uncomment the next line.
 # smtp-encryption
+## In case the SMTP Server thinks you are spamming, you must enter a valid from email here
+# smtp-from = no-reply@picochess.org
 ### ==========================================
 ### = Section for email delivery via Mailgun =
 ### ==========================================
