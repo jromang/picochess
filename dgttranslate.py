@@ -286,12 +286,6 @@ class DgtTranslate(object):
             nltxt = Dgt.DISPLAY_TEXT(l="fout Kabel", m="errKabel", s="errkab", wait=True, beep=self.bl(BeepLevel.YES), maxtime=0)
             frtxt = Dgt.DISPLAY_TEXT(l="jack error", m="jack err", s="jack", wait=True, beep=self.bl(BeepLevel.YES), maxtime=0)
             estxt = Dgt.DISPLAY_TEXT(l="jack error", m="jack err", s="jack", wait=True, beep=self.bl(BeepLevel.YES), maxtime=0)
-        if text_id == 'B00_beep':
-            entxt = Dgt.DISPLAY_TEXT(l=None, m='beep ' + msg, s='beep' + msg, wait=False, beep=bl_button, maxtime=0)
-            detxt = Dgt.DISPLAY_TEXT(l='TonStufe ' + msg, m='TonSt ' + msg, s='ton ' + msg, wait=False, beep=bl_button, maxtime=0)
-            nltxt = Dgt.DISPLAY_TEXT(l=None, m='piep ' + msg, s='piep' + msg, wait=False, beep=bl_button, maxtime=0)
-            frtxt = Dgt.DISPLAY_TEXT(l=None, m='son ' + msg, s='son ' + msg, wait=False, beep=bl_button, maxtime=0)
-            estxt = Dgt.DISPLAY_TEXT(l=None, m='beep ' + msg, s='beep' + msg, wait=False, beep=bl_button, maxtime=0)
         if text_id == 'B00_level':
             entxt = Dgt.DISPLAY_TEXT(l=None, m='level ' + msg, s='lvl ' + msg, wait=False, beep=bl_button, maxtime=0)
             detxt = Dgt.DISPLAY_TEXT(l='SpielSt ' + msg, m='Stufe ' + msg, s='stf ' + msg, wait=False, beep=bl_button, maxtime=0)

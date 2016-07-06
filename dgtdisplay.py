@@ -129,9 +129,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
         self.system_index = Settings.VERSION
         self.system_sound_result = None
-        if self.dgttranslate.beep_level == 0:
+        if self.dgttranslate.beep_level == BeepLevel.NO:
             self.system_sound_index = Beep.OFF
-        elif self.dgttranslate.beep_level == 15:
+        elif self.dgttranslate.beep_level == BeepLevel.YES:
             self.system_sound_index = Beep.ON
         else:
             self.system_sound_index = Beep.SOME
@@ -148,35 +148,35 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.time_control_blitz_index = 2  # Default time control: Blitz, 5min
         self.time_control_fisch_index = 0
         self.time_control_fixed_map = OrderedDict([
-            ("rnbqkbnr/pppppppp/Q7/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.FIXED, seconds_per_move=1)),
-            ("rnbqkbnr/pppppppp/1Q6/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.FIXED, seconds_per_move=3)),
-            ("rnbqkbnr/pppppppp/2Q5/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.FIXED, seconds_per_move=5)),
-            ("rnbqkbnr/pppppppp/3Q4/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.FIXED, seconds_per_move=10)),
-            ("rnbqkbnr/pppppppp/4Q3/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.FIXED, seconds_per_move=15)),
-            ("rnbqkbnr/pppppppp/5Q2/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.FIXED, seconds_per_move=30)),
-            ("rnbqkbnr/pppppppp/6Q1/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.FIXED, seconds_per_move=60)),
-            ("rnbqkbnr/pppppppp/7Q/8/8/8/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.FIXED, seconds_per_move=90))])
+            ('rnbqkbnr/pppppppp/Q7/8/8/8/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FIXED, seconds_per_move=1)),
+            ('rnbqkbnr/pppppppp/1Q6/8/8/8/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FIXED, seconds_per_move=3)),
+            ('rnbqkbnr/pppppppp/2Q5/8/8/8/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FIXED, seconds_per_move=5)),
+            ('rnbqkbnr/pppppppp/3Q4/8/8/8/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FIXED, seconds_per_move=10)),
+            ('rnbqkbnr/pppppppp/4Q3/8/8/8/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FIXED, seconds_per_move=15)),
+            ('rnbqkbnr/pppppppp/5Q2/8/8/8/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FIXED, seconds_per_move=30)),
+            ('rnbqkbnr/pppppppp/6Q1/8/8/8/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FIXED, seconds_per_move=60)),
+            ('rnbqkbnr/pppppppp/7Q/8/8/8/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FIXED, seconds_per_move=90))])
         self.time_control_blitz_map = OrderedDict([
-            ("rnbqkbnr/pppppppp/8/8/Q7/8/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.BLITZ, minutes_per_game=1)),
-            ("rnbqkbnr/pppppppp/8/8/1Q6/8/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.BLITZ, minutes_per_game=3)),
-            ("rnbqkbnr/pppppppp/8/8/2Q5/8/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.BLITZ, minutes_per_game=5)),
-            ("rnbqkbnr/pppppppp/8/8/3Q4/8/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.BLITZ, minutes_per_game=10)),
-            ("rnbqkbnr/pppppppp/8/8/4Q3/8/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.BLITZ, minutes_per_game=15)),
-            ("rnbqkbnr/pppppppp/8/8/5Q2/8/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.BLITZ, minutes_per_game=30)),
-            ("rnbqkbnr/pppppppp/8/8/6Q1/8/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.BLITZ, minutes_per_game=60)),
-            ("rnbqkbnr/pppppppp/8/8/7Q/8/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.BLITZ, minutes_per_game=90))])
+            ('rnbqkbnr/pppppppp/8/8/Q7/8/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.BLITZ, minutes_per_game=1)),
+            ('rnbqkbnr/pppppppp/8/8/1Q6/8/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.BLITZ, minutes_per_game=3)),
+            ('rnbqkbnr/pppppppp/8/8/2Q5/8/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.BLITZ, minutes_per_game=5)),
+            ('rnbqkbnr/pppppppp/8/8/3Q4/8/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.BLITZ, minutes_per_game=10)),
+            ('rnbqkbnr/pppppppp/8/8/4Q3/8/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.BLITZ, minutes_per_game=15)),
+            ('rnbqkbnr/pppppppp/8/8/5Q2/8/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.BLITZ, minutes_per_game=30)),
+            ('rnbqkbnr/pppppppp/8/8/6Q1/8/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.BLITZ, minutes_per_game=60)),
+            ('rnbqkbnr/pppppppp/8/8/7Q/8/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.BLITZ, minutes_per_game=90))])
         self.time_control_fisch_map = OrderedDict([
-            ("rnbqkbnr/pppppppp/8/8/8/Q7/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.FISCHER, minutes_per_game=1, fischer_increment=1)),
-            ("rnbqkbnr/pppppppp/8/8/8/1Q6/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.FISCHER, minutes_per_game=3, fischer_increment=2)),
-            ("rnbqkbnr/pppppppp/8/8/8/2Q5/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.FISCHER, minutes_per_game=4, fischer_increment=2)),
-            ("rnbqkbnr/pppppppp/8/8/8/3Q4/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.FISCHER, minutes_per_game=5, fischer_increment=3)),
-            ("rnbqkbnr/pppppppp/8/8/8/4Q3/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.FISCHER, minutes_per_game=10, fischer_increment=5)),
-            ("rnbqkbnr/pppppppp/8/8/8/5Q2/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.FISCHER, minutes_per_game=15, fischer_increment=10)),
-            ("rnbqkbnr/pppppppp/8/8/8/6Q1/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.FISCHER, minutes_per_game=30, fischer_increment=15)),
-            ("rnbqkbnr/pppppppp/8/8/8/7Q/PPPPPPPP/RNBQKBNR", TimeControl(TimeMode.FISCHER, minutes_per_game=60, fischer_increment=30))])
-        self.time_control_fixed_list = ["  1", "  3", "  5", " 10", " 15", " 30", " 60", " 90"]
-        self.time_control_blitz_list = ["   1", "   3", "   5", "  10", "  15", "  30", "  60", "  90"]
-        self.time_control_fisch_list = [" 1  1", " 3  2", " 4  2", " 5  3", "10  5", "15 10", "30 15", "60 30"]
+            ('rnbqkbnr/pppppppp/8/8/8/Q7/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FISCHER, minutes_per_game=1, fischer_increment=1)),
+            ('rnbqkbnr/pppppppp/8/8/8/1Q6/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FISCHER, minutes_per_game=3, fischer_increment=2)),
+            ('rnbqkbnr/pppppppp/8/8/8/2Q5/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FISCHER, minutes_per_game=4, fischer_increment=2)),
+            ('rnbqkbnr/pppppppp/8/8/8/3Q4/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FISCHER, minutes_per_game=5, fischer_increment=3)),
+            ('rnbqkbnr/pppppppp/8/8/8/4Q3/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FISCHER, minutes_per_game=10, fischer_increment=5)),
+            ('rnbqkbnr/pppppppp/8/8/8/5Q2/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FISCHER, minutes_per_game=15, fischer_increment=10)),
+            ('rnbqkbnr/pppppppp/8/8/8/6Q1/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FISCHER, minutes_per_game=30, fischer_increment=15)),
+            ('rnbqkbnr/pppppppp/8/8/8/7Q/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FISCHER, minutes_per_game=60, fischer_increment=30))])
+        self.time_control_fixed_list = ['  1', '  3', '  5', ' 10', ' 15', ' 30', ' 60', ' 90']
+        self.time_control_blitz_list = ['   1', '   3', '   5', '  10', '  15', '  30', '  60', '  90']
+        self.time_control_fisch_list = [' 1  1', ' 3  2', ' 4  2', ' 5  3', '10  5', '15 10', '30 15', '60 30']
 
     def reset_menu_results(self):
         # dont override "mode_result", otherwise wQ a5-e5 wont work anymore (=> if's)
@@ -572,14 +572,13 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             elif self.system_index == Settings.SOUND:
                 if self.system_sound_result is None:
                     self.system_sound_result = self.system_sound_index
-                    msg = str(self.system_sound_index).rjust(2)
-                    text = self.dgttranslate.text('B00_beep', msg)
+                    text = self.dgttranslate.text(self.system_sound_result.value)
                     exit_menu = False
                 else:
                     if self.system_sound_index == Beep.OFF:
-                        self.dgttranslate.set_beep_level(0)
+                        self.dgttranslate.set_beep_level(BeepLevel.NO)
                     elif self.system_sound_index == Beep.ON:
-                        self.dgttranslate.set_beep_level(15)
+                        self.dgttranslate.set_beep_level(BeepLevel.YES)
                     else:
                         self.dgttranslate.set_beep_level(self.system_sound_some_level)
                     text = self.dgttranslate.text('B10_okbeep')
