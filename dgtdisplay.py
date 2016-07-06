@@ -22,66 +22,66 @@ from dgtiface import *
 from engine import get_installed_engines
 import threading
 
-level_map = ("rnbqkbnr/pppppppp/8/q7/8/8/PPPPPPPP/RNBQKBNR",
-             "rnbqkbnr/pppppppp/8/1q6/8/8/PPPPPPPP/RNBQKBNR",
-             "rnbqkbnr/pppppppp/8/2q5/8/8/PPPPPPPP/RNBQKBNR",
-             "rnbqkbnr/pppppppp/8/3q4/8/8/PPPPPPPP/RNBQKBNR",
-             "rnbqkbnr/pppppppp/8/4q3/8/8/PPPPPPPP/RNBQKBNR",
-             "rnbqkbnr/pppppppp/8/5q2/8/8/PPPPPPPP/RNBQKBNR",
-             "rnbqkbnr/pppppppp/8/6q1/8/8/PPPPPPPP/RNBQKBNR",
-             "rnbqkbnr/pppppppp/8/7q/8/8/PPPPPPPP/RNBQKBNR")
+level_map = ('rnbqkbnr/pppppppp/8/q7/8/8/PPPPPPPP/RNBQKBNR',
+             'rnbqkbnr/pppppppp/8/1q6/8/8/PPPPPPPP/RNBQKBNR',
+             'rnbqkbnr/pppppppp/8/2q5/8/8/PPPPPPPP/RNBQKBNR',
+             'rnbqkbnr/pppppppp/8/3q4/8/8/PPPPPPPP/RNBQKBNR',
+             'rnbqkbnr/pppppppp/8/4q3/8/8/PPPPPPPP/RNBQKBNR',
+             'rnbqkbnr/pppppppp/8/5q2/8/8/PPPPPPPP/RNBQKBNR',
+             'rnbqkbnr/pppppppp/8/6q1/8/8/PPPPPPPP/RNBQKBNR',
+             'rnbqkbnr/pppppppp/8/7q/8/8/PPPPPPPP/RNBQKBNR')
 
-book_map = ("rnbqkbnr/pppppppp/8/8/8/q7/PPPPPPPP/RNBQKBNR",
-            "rnbqkbnr/pppppppp/8/8/8/1q6/PPPPPPPP/RNBQKBNR",
-            "rnbqkbnr/pppppppp/8/8/8/2q5/PPPPPPPP/RNBQKBNR",
-            "rnbqkbnr/pppppppp/8/8/8/3q4/PPPPPPPP/RNBQKBNR",
-            "rnbqkbnr/pppppppp/8/8/8/4q3/PPPPPPPP/RNBQKBNR",
-            "rnbqkbnr/pppppppp/8/8/8/5q2/PPPPPPPP/RNBQKBNR",
-            "rnbqkbnr/pppppppp/8/8/8/6q1/PPPPPPPP/RNBQKBNR",
-            "rnbqkbnr/pppppppp/8/8/8/7q/PPPPPPPP/RNBQKBNR",
-            "rnbqkbnr/pppppppp/8/8/q7/8/PPPPPPPP/RNBQKBNR",
-            "rnbqkbnr/pppppppp/8/8/1q6/8/PPPPPPPP/RNBQKBNR",
-            "rnbqkbnr/pppppppp/8/8/2q5/8/PPPPPPPP/RNBQKBNR",
-            "rnbqkbnr/pppppppp/8/8/3q4/8/PPPPPPPP/RNBQKBNR",
-            "rnbqkbnr/pppppppp/8/8/4q3/8/PPPPPPPP/RNBQKBNR",
-            "rnbqkbnr/pppppppp/8/8/5q2/8/PPPPPPPP/RNBQKBNR",
-            "rnbqkbnr/pppppppp/8/8/6q1/8/PPPPPPPP/RNBQKBNR",
-            "rnbqkbnr/pppppppp/8/8/7q/8/PPPPPPPP/RNBQKBNR")
+book_map = ('rnbqkbnr/pppppppp/8/8/8/q7/PPPPPPPP/RNBQKBNR',
+            'rnbqkbnr/pppppppp/8/8/8/1q6/PPPPPPPP/RNBQKBNR',
+            'rnbqkbnr/pppppppp/8/8/8/2q5/PPPPPPPP/RNBQKBNR',
+            'rnbqkbnr/pppppppp/8/8/8/3q4/PPPPPPPP/RNBQKBNR',
+            'rnbqkbnr/pppppppp/8/8/8/4q3/PPPPPPPP/RNBQKBNR',
+            'rnbqkbnr/pppppppp/8/8/8/5q2/PPPPPPPP/RNBQKBNR',
+            'rnbqkbnr/pppppppp/8/8/8/6q1/PPPPPPPP/RNBQKBNR',
+            'rnbqkbnr/pppppppp/8/8/8/7q/PPPPPPPP/RNBQKBNR',
+            'rnbqkbnr/pppppppp/8/8/q7/8/PPPPPPPP/RNBQKBNR',
+            'rnbqkbnr/pppppppp/8/8/1q6/8/PPPPPPPP/RNBQKBNR',
+            'rnbqkbnr/pppppppp/8/8/2q5/8/PPPPPPPP/RNBQKBNR',
+            'rnbqkbnr/pppppppp/8/8/3q4/8/PPPPPPPP/RNBQKBNR',
+            'rnbqkbnr/pppppppp/8/8/4q3/8/PPPPPPPP/RNBQKBNR',
+            'rnbqkbnr/pppppppp/8/8/5q2/8/PPPPPPPP/RNBQKBNR',
+            'rnbqkbnr/pppppppp/8/8/6q1/8/PPPPPPPP/RNBQKBNR',
+            'rnbqkbnr/pppppppp/8/8/7q/8/PPPPPPPP/RNBQKBNR')
 
-engine_map = ("rnbqkbnr/pppppppp/q7/8/8/8/PPPPPPPP/RNBQKBNR",
-             "rnbqkbnr/pppppppp/1q6/8/8/8/PPPPPPPP/RNBQKBNR",
-             "rnbqkbnr/pppppppp/2q5/8/8/8/PPPPPPPP/RNBQKBNR",
-             "rnbqkbnr/pppppppp/3q4/8/8/8/PPPPPPPP/RNBQKBNR",
-             "rnbqkbnr/pppppppp/4q3/8/8/8/PPPPPPPP/RNBQKBNR",
-             "rnbqkbnr/pppppppp/5q2/8/8/8/PPPPPPPP/RNBQKBNR",
-             "rnbqkbnr/pppppppp/6q1/8/8/8/PPPPPPPP/RNBQKBNR",
-             "rnbqkbnr/pppppppp/7q/8/8/8/PPPPPPPP/RNBQKBNR")
+engine_map = ('rnbqkbnr/pppppppp/q7/8/8/8/PPPPPPPP/RNBQKBNR',
+              'rnbqkbnr/pppppppp/1q6/8/8/8/PPPPPPPP/RNBQKBNR',
+              'rnbqkbnr/pppppppp/2q5/8/8/8/PPPPPPPP/RNBQKBNR',
+              'rnbqkbnr/pppppppp/3q4/8/8/8/PPPPPPPP/RNBQKBNR',
+              'rnbqkbnr/pppppppp/4q3/8/8/8/PPPPPPPP/RNBQKBNR',
+              'rnbqkbnr/pppppppp/5q2/8/8/8/PPPPPPPP/RNBQKBNR',
+              'rnbqkbnr/pppppppp/6q1/8/8/8/PPPPPPPP/RNBQKBNR',
+              'rnbqkbnr/pppppppp/7q/8/8/8/PPPPPPPP/RNBQKBNR')
 
-shutdown_map = ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQQBNR",
-                "RNBQQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr",
-                "8/8/8/8/8/8/8/3QQ3",
-                "3QQ3/8/8/8/8/8/8/8")
+shutdown_map = ('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQQBNR',
+                'RNBQQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr',
+                '8/8/8/8/8/8/8/3QQ3',
+                '3QQ3/8/8/8/8/8/8/8')
 
-reboot_map = ("rnbqqbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR",
-              "RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqqbnr",
-              "8/8/8/8/8/8/8/3qq3",
-              "3qq3/8/8/8/8/8/8/8")
+reboot_map = ('rnbqqbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR',
+              'RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbqqbnr',
+              '8/8/8/8/8/8/8/3qq3',
+              '3qq3/8/8/8/8/8/8/8')
 
-mode_map = {"rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR": Mode.NORMAL,
-            "rnbqkbnr/pppppppp/8/1Q6/8/8/PPPPPPPP/RNBQKBNR": Mode.ANALYSIS,
-            "rnbqkbnr/pppppppp/8/2Q5/8/8/PPPPPPPP/RNBQKBNR": Mode.KIBITZ,
-            "rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR": Mode.OBSERVE,
-            "rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR": Mode.REMOTE}
+mode_map = {'rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR': Mode.NORMAL,
+            'rnbqkbnr/pppppppp/8/1Q6/8/8/PPPPPPPP/RNBQKBNR': Mode.ANALYSIS,
+            'rnbqkbnr/pppppppp/8/2Q5/8/8/PPPPPPPP/RNBQKBNR': Mode.KIBITZ,
+            'rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR': Mode.OBSERVE,
+            'rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR': Mode.REMOTE}
 
 drawresign_map = OrderedDict([
-    ("8/8/8/3k4/4K3/8/8/8", GameResult.RESIGN_WHITE),
-    ("8/8/8/3K4/4k3/8/8/8", GameResult.RESIGN_WHITE),
-    ("8/8/8/4k3/3K4/8/8/8", GameResult.RESIGN_BLACK),
-    ("8/8/8/4K3/3k4/8/8/8", GameResult.RESIGN_BLACK),
-    ("8/8/8/3kK3/8/8/8/8", GameResult.DRAW),
-    ("8/8/8/3Kk3/8/8/8/8", GameResult.DRAW),
-    ("8/8/8/8/3kK3/8/8/8", GameResult.DRAW),
-    ("8/8/8/8/3Kk3/8/8/8", GameResult.DRAW)
+    ('8/8/8/3k4/4K3/8/8/8', GameResult.RESIGN_WHITE),
+    ('8/8/8/3K4/4k3/8/8/8', GameResult.RESIGN_WHITE),
+    ('8/8/8/4k3/3K4/8/8/8', GameResult.RESIGN_BLACK),
+    ('8/8/8/4K3/3k4/8/8/8', GameResult.RESIGN_BLACK),
+    ('8/8/8/3kK3/8/8/8/8', GameResult.DRAW),
+    ('8/8/8/3Kk3/8/8/8/8', GameResult.DRAW),
+    ('8/8/8/8/3kK3/8/8/8', GameResult.DRAW),
+    ('8/8/8/8/3Kk3/8/8/8', GameResult.DRAW)
 ])
 
 
@@ -675,8 +675,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             self.fire(Event.SWITCH_SIDES(engine_finished=self.engine_finished))
 
     def drawresign(self):
-        _, _, _, rnk_5, rnk_4, _, _, _ = self.dgt_fen.split("/")
-        return "8/8/8/" + rnk_5 + "/" + rnk_4 + "/8/8/8"
+        _, _, _, rnk_5, rnk_4, _, _, _ = self.dgt_fen.split('/')
+        return '8/8/8/' + rnk_5 + '/' + rnk_4 + '/8/8/8'
 
     def exit_display(self, wait=False, force=True):
         if self.play_move and self.mode_result in (Mode.NORMAL, Mode.REMOTE):
@@ -840,7 +840,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                                              beep=self.dgttranslate.bl(BeepLevel.NO), maxtime=0))
                         break
                     if case(MessageApi.SYSTEM_INFO):
-                        self.ip = ' '.join(message.info["ip"].split('.')[2:])
+                        self.ip = ' '.join(message.info['ip'].split('.')[2:])
                         break
                     if case(MessageApi.STARTUP_INFO):
                         self.mode_result = message.info['interaction_mode']
@@ -892,7 +892,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         fen = message.fen
                         if self.flip_board:  # Flip the board if needed
                             fen = fen[::-1]
-                        if fen == "RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr":  # Check if we have to flip the board
+                        if fen == 'RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr':  # Check if we have to flip the board
                             logging.debug('flipping the board')
                             # Flip the board
                             self.flip_board = not self.flip_board
@@ -913,10 +913,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 level = 20
                             self.engine_level_result = level
                             self.engine_level_index = level
-                            logging.debug("Map-Fen: New level")
+                            logging.debug('Map-Fen: New level')
                             text = self.dgttranslate.text('M10_level', str(level).rjust(2))
                             self.fire(Event.LEVEL(level=level, level_text=text, ok_text=False))
-                        elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":
+                        elif fen == 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR':
                             logging.debug("Map-Fen: New game")
                             self.show_setup_pieces_msg = False
                             self.fire(Event.NEW_GAME())
@@ -958,7 +958,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], mode_text=text,ok_text=False))
                             self.reset_menu_results()
                         elif fen in self.time_control_fixed_map:
-                            logging.debug("Map-Fen: Time control fixed")
+                            logging.debug('Map-Fen: Time control fixed')
                             self.time_mode_index = TimeMode.FIXED
                             self.time_control_fixed_index = list(self.time_control_fixed_map.keys()).index(fen)
                             text = self.dgttranslate.text('B00_tc_fixed', self.time_control_fixed_list[self.time_control_fixed_index])
@@ -968,7 +968,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                                              time_text=text, ok_text=False))
                             self.reset_menu_results()
                         elif fen in self.time_control_blitz_map:
-                            logging.debug("Map-Fen: Time control blitz")
+                            logging.debug('Map-Fen: Time control blitz')
                             self.time_mode_index = TimeMode.BLITZ
                             self.time_control_blitz_index = list(self.time_control_blitz_map.keys()).index(fen)
                             text = self.dgttranslate.text('B00_tc_blitz', self.time_control_blitz_list[self.time_control_blitz_index])
@@ -978,7 +978,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                                              time_text=text, ok_text=False))
                             self.reset_menu_results()
                         elif fen in self.time_control_fisch_map:
-                            logging.debug("Map-Fen: Time control fischer")
+                            logging.debug('Map-Fen: Time control fischer')
                             self.time_mode_index = TimeMode.FISCHER
                             self.time_control_fisch_index = list(self.time_control_fisch_map.keys()).index(fen)
                             text = self.dgttranslate.text('B00_tc_fisch', self.time_control_fisch_list[self.time_control_fisch_index])
@@ -988,14 +988,14 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                                              time_text=text, ok_text=False))
                             self.reset_menu_results()
                         elif fen in shutdown_map:
-                            logging.debug("Map-Fen: shutdown")
+                            logging.debug('Map-Fen: shutdown')
                             self.power_off()
                         elif fen in reboot_map:
-                            logging.debug("Map-Fen: reboot")
+                            logging.debug('Map-Fen: reboot')
                             self.reboot()
                         elif self.drawresign_fen in drawresign_map:
                             if self.top_result is None:
-                                logging.debug("Map-Fen: drawresign")
+                                logging.debug('Map-Fen: drawresign')
                                 self.fire(Event.DRAWRESIGN(result=drawresign_map[self.drawresign_fen]))
                         else:
                             if self.show_setup_pieces_msg:

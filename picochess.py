@@ -449,8 +449,6 @@ def main():
     if args.engine is None:
         el = read_engine_ini()
         args.engine = el[0][0]  # read the first engine path and use it as standard
-    else:
-        args.engine = which(args.engine)
 
     # Enable logging
     if args.log_file:
@@ -638,8 +636,6 @@ def main():
                                 sys.exit(-1)
                         # Schedule cleanup of old objects
                         gc.collect()
-                        # Restore options - this doesn't deal with any
-                        # supplementary uci options sent 'in game', see event.UCI_OPTION_SET
                         engine_startup()
                         # All done - rock'n'roll
                         if not engine_fallback:
@@ -833,11 +829,6 @@ def main():
                     custom_fen = getattr(game, 'custom_fen', None)
                     DisplayMsg.show(Message.GAME_ENDS(result=GameResult.OUT_OF_TIME, play_mode=play_mode,
                                                       game=game.copy(), custom_fen=custom_fen))
-                    break
-
-                if case(EventApi.UCI_OPTION_SET):
-                    # Nowhere calls this yet, but they will need to be saved for engine restart
-                    engine.option(event.name, event.value)
                     break
 
                 if case(EventApi.SHUTDOWN):
