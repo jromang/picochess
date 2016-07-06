@@ -129,7 +129,14 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
         self.system_index = Settings.VERSION
         self.system_sound_result = None
-        self.system_sound_index = self.dgttranslate.beep_level
+        if self.dgttranslate.beep_level == 0:
+            self.system_sound_index = Beep.OFF
+        elif self.dgttranslate.beep_level == 15:
+            self.system_sound_index = Beep.ON
+        else:
+            self.system_sound_index = Beep.SOME
+        self.system_sound_some_level = self.dgttranslate.beep_level
+
         self.system_language_result = None
         langs = {'en': Language.EN, 'de': Language.DE, 'nl': Language.NL, 'fr': Language.FR, 'es': Language.ES}
         self.system_language_index = langs[self.dgttranslate.language]
@@ -321,9 +328,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text = self.dgttranslate.text(self.system_index.value)
             else:
                 if self.system_language_result is None:
-                    self.system_sound_index = (self.system_sound_index-1) & 0x0f
-                    msg = str(self.system_sound_index).rjust(2)
-                    text = self.dgttranslate.text('B00_beep', msg)
+                    self.system_sound_index = BeepLoop.prev(self.system_sound_index)
+                    text = self.dgttranslate.text(self.system_sound_index.value)
                 else:
                     self.system_language_index = LanguageLoop.prev(self.system_language_index)
                     text = self.dgttranslate.text(self.system_language_index.value)
@@ -428,9 +434,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text = self.dgttranslate.text(self.system_index.value)
             else:
                 if self.system_language_result is None:
-                    self.system_sound_index = (self.system_sound_index+1) & 0x0f
-                    msg = str(self.system_sound_index).rjust(2)
-                    text = self.dgttranslate.text('B00_beep', msg)
+                    self.system_sound_index = BeepLoop.next(self.system_sound_index)
+                    text = self.dgttranslate.text(self.system_sound_index.value)
                 else:
                     self.system_language_index = LanguageLoop.next(self.system_language_index)
                     text = self.dgttranslate.text(self.system_language_index.value)
@@ -571,7 +576,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     text = self.dgttranslate.text('B00_beep', msg)
                     exit_menu = False
                 else:
-                    self.dgttranslate.set_beep_level(self.system_sound_index)
+                    if self.system_sound_index == Beep.OFF:
+                        self.dgttranslate.set_beep_level(0)
+                    elif self.system_sound_index == Beep.ON:
+                        self.dgttranslate.set_beep_level(15)
+                    else:
+                        self.dgttranslate.set_beep_level(self.system_sound_some_level)
                     text = self.dgttranslate.text('B10_okbeep')
                 DisplayDgt.show(text)
             elif self.system_index == Settings.LANGUAGE:

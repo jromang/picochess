@@ -339,6 +339,37 @@ class LanguageLoop(object):
         return 'error Language prev'
 
 
+class Beep(enum.Enum):
+    OFF = 'B00_beep_off_menu'
+    SOME = 'B00_beep_some_menu'
+    ON = 'B00_beep_on_menu'
+
+
+class BeepLoop(object):
+    def __init__(self):
+        super(BeepLoop, self).__init__()
+
+    @staticmethod
+    def next(m):
+        if m == Beep.OFF:
+            return Beep.SOME
+        elif m == Beep.SOME:
+            return Beep.ON
+        elif m == Beep.ON:
+            return Beep.OFF
+        return 'error beep next'
+
+    @staticmethod
+    def prev(m):
+        if m == Beep.OFF:
+            return Beep.ON
+        if m == Beep.ON:
+            return Beep.SOME
+        if m == Beep.SOME:
+            return Beep.OFF
+        return 'error beep prev'
+
+
 @enum.unique
 class GameResult(enum.Enum):
     MATE = 'B00_gameresult_mate_menu'
