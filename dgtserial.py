@@ -86,8 +86,8 @@ class DgtSerial(object):
         mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
         if not mes == DgtCmd.DGT_RETURN_SERIALNR:
             logging.debug('->DGT board [%s], length: %i', mes, len(message))
-        if mes.value in (DgtClk.DGT_CMD_CLOCK_ASCII.value, DgtClk.DGT_CMD_CLOCK_DISPLAY.value):
-            logging.debug('sending text [{}] to clock'. format(''.join([chr(elem) for elem in message[4:10]])))
+            if mes.value == DgtClk.DGT_CMD_CLOCK_ASCII.value:
+                logging.debug('sending text [{}] to clock'.format(''.join([chr(elem) for elem in message[4:10]])))
 
         array = []
         for v in message:
