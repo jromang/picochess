@@ -75,7 +75,8 @@ class DgtIface(DisplayDgt, Thread):
             self.display_time_on_clock(force=False)
         else:
             logging.debug('clock not running - ignored maxtime')
-        logging.debug('tasks in stop: {}'.format(self.tasks))
+        if self.tasks:
+            logging.debug('processing delayed tasks: {}'.format(self.tasks))
         while self.tasks:
             message = self.tasks.pop(0)
             self.process_message(message)
