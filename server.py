@@ -223,10 +223,11 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 EventHandler.write_to_clients({'event': 'Message', 'msg': 'Book move'})
                 break
             if case(MessageApi.START_NEW_GAME):
-                r = {'fen': 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'}
+                # r = {'fen': 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'}
+                r = {'fen': message.fen}
                 self.shared['last_dgt_move_msg'] = r
                 EventHandler.write_to_clients(r)
-                EventHandler.write_to_clients({'event': 'NewGame'})
+                EventHandler.write_to_clients({'event': 'NewGame', 'fen': message.fen})
                 EventHandler.write_to_clients({'event': 'Message', 'msg': 'New game'})
                 update_headers(self)
                 break

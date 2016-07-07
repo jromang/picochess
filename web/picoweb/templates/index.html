@@ -556,7 +556,7 @@ $(function () {
                     updateDGTPosition(j);
                     break;
                 case "NewGame":
-                    newBoard();
+                    newBoard(j.fen);
                     break;
                 case "Message":
                     updateDGTPosition(j);
@@ -1144,7 +1144,7 @@ function fwd() {
     updateStatus();
 }
 
-function newBoard() {
+function newBoard(fen) {
     stop_analysis();
     currentPosition = {};
     gameHistory = currentPosition;
@@ -1152,12 +1152,18 @@ function newBoard() {
     gameHistory.result = '';
     gameHistory.variations = [];
 
+    console.log(fen);
+
     curr_move.num = 1;
     curr_move.fen = '';
-    currentPosition.fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+    currentPosition.fen = fen;
     board.position(currentPosition.fen);
-    setupBoardFen = '';
-
+    if (fen == 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR') {
+            setupBoardFen = '';
+    else {
+            setupBoardFen = fen;
+        }
+    }
     writeVariationTree(pgnEl, walk_tree_iterative(gameHistory.variations), gameHistory);
 
     updateStatus();

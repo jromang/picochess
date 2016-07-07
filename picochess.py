@@ -675,7 +675,7 @@ def main():
                     last_computer_fen = None
                     last_legal_fens = []
                     searchmoves.reset()
-                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control))
+                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, fen=event.fen))
                     game_declared = False
                     set_wait_state()
                     break
@@ -751,7 +751,7 @@ def main():
                     time_control.reset()
                     searchmoves.reset()
 
-                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control))
+                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, fen=game.board_fen()))
                     game_declared = False
                     set_wait_state()
                     break
