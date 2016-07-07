@@ -1027,7 +1027,7 @@ function loadGame(i, fromDGT) {
         current_position = __ret.node;
     }
     if (fromDGT){
-        fenHash[dgtFEN] = fenHash[tmp_game.fen()]
+        fenHash[dgtFEN] = fenHash[tmp_game.fen()];
         fenHash[dgtFEN].fen = dgtFEN;
         fenHash['last'] = fenHash[dgtFEN];
         curr_fen = dgtFEN;
@@ -1152,30 +1152,25 @@ function newBoard(fen) {
     gameHistory.result = '';
     gameHistory.variations = [];
 
-    console.log(fen);
-
     curr_move.num = 1;
     curr_move.fen = '';
     currentPosition.fen = fen;
     board.position(currentPosition.fen);
-    if (fen == 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR') {
-            setupBoardFen = '';
-    else {
-            setupBoardFen = fen;
-        }
+    if (fen == START_FEN) {
+        setupBoardFen = '';
+    } else {
+        setupBoardFen = fen;
     }
     writeVariationTree(pgnEl, walk_tree_iterative(gameHistory.variations), gameHistory);
 
     updateStatus();
 }
 
-
 function goToStart() {
     stop_analysis();
     currentPosition = gameHistory;
     board.position(currentPosition.fen);
     updateStatus();
-
 }
 
 function getDGTPGN() {

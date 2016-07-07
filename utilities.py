@@ -659,7 +659,7 @@ class Message():
 
     INTERACTION_MODE = ClassFactory(MessageApi.INTERACTION_MODE, ['mode', 'mode_text', 'ok_text'])
     PLAY_MODE = ClassFactory(MessageApi.PLAY_MODE, ['play_mode', 'play_mode_text'])
-    START_NEW_GAME = ClassFactory(MessageApi.START_NEW_GAME, ['time_control', 'fen'])
+    START_NEW_GAME = ClassFactory(MessageApi.START_NEW_GAME, ['time_control', 'game'])
     COMPUTER_MOVE_DONE_ON_BOARD = ClassFactory(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD, [])
     SEARCH_STARTED = ClassFactory(MessageApi.SEARCH_STARTED, ['engine_status'])
     SEARCH_STOPPED = ClassFactory(MessageApi.SEARCH_STOPPED, ['engine_status'])
@@ -668,7 +668,7 @@ class Message():
     CLOCK_STOP = ClassFactory(MessageApi.CLOCK_STOP, [])
     USER_MOVE = ClassFactory(MessageApi.USER_MOVE, ['move', 'fen', 'turn', 'game'])
     UCI_OPTION_LIST = ClassFactory(MessageApi.UCI_OPTION_LIST, ['options'])
-    GAME_ENDS = ClassFactory(MessageApi.GAME_ENDS, ['result', 'play_mode', 'game', 'custom_fen'])
+    GAME_ENDS = ClassFactory(MessageApi.GAME_ENDS, ['result', 'play_mode', 'game'])
 
     SYSTEM_INFO = ClassFactory(MessageApi.SYSTEM_INFO, ['info'])
     STARTUP_INFO = ClassFactory(MessageApi.STARTUP_INFO, ['info'])
