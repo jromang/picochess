@@ -235,7 +235,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 node = node.add_variation(move)
             # transfer game to a pgn string
             exporter = pgn.StringExporter(headers=True, comments=False, variations=False)
-            return msg_game.accept(exporter)
+            return pgn_game.accept(exporter)
 
         for case in switch(message):
             if case(MessageApi.BOOK_MOVE):
