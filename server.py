@@ -31,6 +31,8 @@ import chess
 import json
 import datetime
 
+import copy
+
 _workers = ThreadPool(5)
 
 # This needs to be reworked to be session based (probably by token)
@@ -219,7 +221,8 @@ class WebDisplay(DisplayMsg, threading.Thread):
             self.shared['system_info'] = {}
 
     def task(self, message):
-        def transfer(msg_game):
+        def transfer(g):
+            msg_game = copy.deepcopy(g)
             pgn_game = pgn.Game()
             moves = []
             # go back, to see if the first fen is not standard fen
