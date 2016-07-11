@@ -890,7 +890,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             # set standard for setup orientation too
                             self.setup_reverse_index = self.flip_board
                             fen = fen[::-1]
-                        logging.debug("DGT-Fen: "+fen)
+                        logging.debug("DGT-Fen [%s]", fen)
                         if fen == self.dgt_fen:
                             logging.debug('ignore same fen')
                             break
