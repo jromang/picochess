@@ -74,7 +74,8 @@ class DgtIface(DisplayDgt, Thread):
         self.maxtimer_running = False
         if self.clock_running:
             logging.debug('showing the running clock again')
-            self.display_time_on_clock(force=False)
+            # self.display_time_on_clock(force=False)
+            self.show(Dgt.DISPLAY_TIME(force=False, wait=True))
         else:
             logging.debug('clock not running - ignored maxtime')
         if self.tasks:
