@@ -21,17 +21,23 @@ from utilities import *
 class DgtTranslate(object):
     def __init__(self, beep_level, language):
         self.beep_level = beep_level
+        if beep_level == BeepLevel.YES:
+            self.beep = Beep.ON
+        elif beep_level == BeepLevel.NO:
+            self.beep = Beep.OFF
+        else:
+            self.beep = Beep.SOME
         self.language = language
 
     def bl(self, beeplevel):
-        if beeplevel == BeepLevel.YES:
+        if self.beep == Beep.ON:
             return True
-        if beeplevel == BeepLevel.NO:
+        if self.beep == Beep.OFF:
             return False
         return bool(self.beep_level & beeplevel.value)
 
-    def set_beep_level(self, beep_level):
-        self.beep_level = beep_level
+    def set_beep(self, beep):
+        self.beep = beep
 
     def set_language(self, language):
         self.language  = language
