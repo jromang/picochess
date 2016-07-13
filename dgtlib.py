@@ -28,8 +28,14 @@ class DgtLib(object):
         self.dgtserial = dgtserial
 
     def wait(self):
+        has_to_wait = False
         while self.dgtserial.clock_lock:
+            if not has_to_wait:
+                has_to_wait = True
+                logging.debug('clock is locked => waiting')
             time.sleep(0.1)
+        if has_to_wait:
+            logging.debug('clock is released now')
 
     def write(self, command):
         return self.dgtserial.write_board_command(command)
