@@ -1,5 +1,5 @@
 ### ===============================
-### = picochess.ini.example v0.67 =
+### = picochess.ini.example v0.69 =
 ### ===============================
 ### Example and description how to configure PicoChess
 ### To use this file, simply copy this file to picochess.ini and edit the appropriate settings
@@ -14,7 +14,14 @@
 ## enable-revelation-leds turn ON or OFF the LED's on the Revelation II board. If so, please uncomment the next line
 # enable-revelation-leds
 ## beep-level changes the occurrence of beeps. Minimum value is 0 (no beeps), maximum is 15 (all beeps).
-beep-level = 15
+## inside the clock menu you can choose between "always", "never" and "some". The value you give inside here, is
+## the value of "some". Each part of beeps has a special number and you have to add them to get the beep-level
+## CONFIG = 1 Takeback, GameEnd, NewGame and ComputerMove
+## BUTTON = 2 All Events coming from button press)
+## MAP = 4    All Events coming from Queen placing at start pos (line3-6)
+## OKAY = 8   All Events from "ok" (confirm) messages
+## For example to beep on "ok messages" and "button press" would result in 8+2=10 as beep-level
+# beep-level = 3
 ## Should a confirmation message (after moves) be displayed? If not, please active the next line
 # disable-ok-message
 ## Specify the serial port your dgt-board is connected to. If y not give a parameter picochess tries to find the board
