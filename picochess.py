@@ -432,7 +432,7 @@ def main():
     parser.add_argument("-uci", "--uci-option", type=str, help="pass an UCI option to the engine (name;value)",
                         default=None)
     parser.add_argument("-beep", "--beep-level", type=int, help="sets a beep level from 0(=no beeps) to 15(=all beeps)",
-                        default=0x0f)
+                        default=0x03)
     parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
     parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
     parser.add_argument("-inet", "--enable-internet", action='store_true', help="enable internet lookups")
