@@ -161,7 +161,7 @@ class Informer(chess.uci.InfoHandler):
         super().score(cp, mate, lowerbound, upperbound)
 
     def pv(self, moves):
-        if self._allow_fire_pv():
+        if self._allow_fire_pv() and moves:
             Observable.fire(Event.NEW_PV(pv=moves))
         super().pv(moves)
 
