@@ -33,7 +33,7 @@ except ImportError:
 
 
 # picochess version
-version = '068'
+version = '069'
 
 evt_queue = queue.Queue()
 serial_queue = queue.Queue()
@@ -76,7 +76,7 @@ class EventApi():
     NEW_PV = 'EVT_NEW_PV'  # Engine sends a new principal variation
     NEW_SCORE = 'EVT_NEW_SCORE'  # Engine sends a new score
     OUT_OF_TIME = 'EVT_OUT_OF_TIME'  # Clock flag fallen
-    DGT_CLOCK_CALLBACK = 'EVT_DGT_CLOCK_CALLBACK'  # DGT Clock callback function
+
 
 class MessageApi():
     # Messages to display devices
@@ -103,7 +103,6 @@ class MessageApi():
     SEARCH_STOPPED = 'MSG_SEARCH_STOPPED'  # Engine has stopped the search
     USER_TAKE_BACK = 'MSG_USER_TACK_BACK'  # User takes back his move while engine is searching
     CLOCK_START = 'MSG_CLOCK_START'  # Say to run autonomous clock, contains time_control
-    CLOCK_RESUME = 'MSG_CLOCK_RESUME'  # Restarts the clock
     CLOCK_STOP = 'MSG_CLOCK_STOP'  # Stops the clock
     USER_MOVE = 'MSG_USER_MOVE'  # Player has done a move on board
     UCI_OPTION_LIST = 'MSG_UCI_OPTION_LIST'  # Contains 'options', a dict of the current engine's UCI options
@@ -130,7 +129,6 @@ class DgtApi():
     LIGHT_SQUARES = 'DGT_LIGHT_SQUARES'
     CLOCK_STOP = 'DGT_CLOCK_STOP'
     CLOCK_START = 'DGT_CLOCK_START'
-    CLOCK_RESUME = 'DGT_CLOCK_RESUME'
     CLOCK_VERSION = 'DGT_CLOCK_VERSION'
     CLOCK_TIME = 'DGT_CLOCK_TIME'
     SERIALNR = 'DGT_SERIALNR'
@@ -338,6 +336,37 @@ class LanguageLoop(object):
         elif m == Language.DE:
             return Language.EN
         return 'error Language prev'
+
+
+class Beep(enum.Enum):
+    OFF = 'B00_beep_off_menu'
+    SOME = 'B00_beep_some_menu'
+    ON = 'B00_beep_on_menu'
+
+
+class BeepLoop(object):
+    def __init__(self):
+        super(BeepLoop, self).__init__()
+
+    @staticmethod
+    def next(m):
+        if m == Beep.OFF:
+            return Beep.SOME
+        elif m == Beep.SOME:
+            return Beep.ON
+        elif m == Beep.ON:
+            return Beep.OFF
+        return 'error beep next'
+
+    @staticmethod
+    def prev(m):
+        if m == Beep.OFF:
+            return Beep.ON
+        if m == Beep.ON:
+            return Beep.SOME
+        if m == Beep.SOME:
+            return Beep.OFF
+        return 'error beep prev'
 
 
 @enum.unique
@@ -550,6 +579,9 @@ class BaseClass(object):
     def __repr__(self):
         return self._type
 
+    def __hash__(self):
+        return hash(str(self.__class__) + ": " + str(self.__dict__))
+
 
 def ClassFactory(name, argnames, BaseClass=BaseClass):
     def __init__(self, **kwargs):
@@ -627,7 +659,7 @@ class Message():
 
     INTERACTION_MODE = ClassFactory(MessageApi.INTERACTION_MODE, ['mode', 'mode_text', 'ok_text'])
     PLAY_MODE = ClassFactory(MessageApi.PLAY_MODE, ['play_mode', 'play_mode_text'])
-    START_NEW_GAME = ClassFactory(MessageApi.START_NEW_GAME, ['time_control'])
+    START_NEW_GAME = ClassFactory(MessageApi.START_NEW_GAME, ['time_control', 'game'])
     COMPUTER_MOVE_DONE_ON_BOARD = ClassFactory(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD, [])
     SEARCH_STARTED = ClassFactory(MessageApi.SEARCH_STARTED, ['engine_status'])
     SEARCH_STOPPED = ClassFactory(MessageApi.SEARCH_STOPPED, ['engine_status'])
@@ -636,7 +668,7 @@ class Message():
     CLOCK_STOP = ClassFactory(MessageApi.CLOCK_STOP, [])
     USER_MOVE = ClassFactory(MessageApi.USER_MOVE, ['move', 'fen', 'turn', 'game'])
     UCI_OPTION_LIST = ClassFactory(MessageApi.UCI_OPTION_LIST, ['options'])
-    GAME_ENDS = ClassFactory(MessageApi.GAME_ENDS, ['result', 'play_mode', 'game', 'custom_fen'])
+    GAME_ENDS = ClassFactory(MessageApi.GAME_ENDS, ['result', 'play_mode', 'game'])
 
     SYSTEM_INFO = ClassFactory(MessageApi.SYSTEM_INFO, ['info'])
     STARTUP_INFO = ClassFactory(MessageApi.STARTUP_INFO, ['info'])
@@ -697,28 +729,29 @@ def hours_minutes_seconds(seconds):
 
 def update_picochess(auto_reboot=False):
     git = 'git.exe' if platform.system() == 'Windows' else 'git'
-    branch = subprocess.Popen([git, "rev-parse", "--abbrev-ref", "HEAD"],
-                              stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8').rstrip()
-    if branch == 'stable' or branch == 'master':
-        # Fetch remote repo
-        output = subprocess.Popen([git, "remote", "update"],
-                                  stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
-        logging.debug(output)
-        # Check if update is needed
-        output = subprocess.Popen([git, "status", "-uno"],
-                                  stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
-        logging.debug(output)
-        if 'up-to-date' not in output:
-            # Update
-            logging.debug('updating picochess')
-            output = subprocess.Popen(["pip3", "install", "-r", "requirements.txt"],
+    if git:
+        branch = subprocess.Popen([git, "rev-parse", "--abbrev-ref", "HEAD"],
+                                  stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8').rstrip()
+        if branch == 'stable' or branch == 'master':
+            # Fetch remote repo
+            output = subprocess.Popen([git, "remote", "update"],
                                       stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
             logging.debug(output)
-            output = subprocess.Popen([git, "pull", "origin", branch],
+            # Check if update is needed
+            output = subprocess.Popen([git, "status", "-uno"],
                                       stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
             logging.debug(output)
-            if auto_reboot:
-                reboot()
+            if 'up-to-date' not in output:
+                # Update
+                logging.debug('updating picochess')
+                output = subprocess.Popen(["pip3", "install", "-r", "requirements.txt"],
+                                          stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
+                logging.debug(output)
+                output = subprocess.Popen([git, "pull", "origin", branch],
+                                          stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
+                logging.debug(output)
+                if auto_reboot:
+                    reboot()
 
 
 def shutdown(dgtpi):

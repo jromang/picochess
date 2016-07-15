@@ -21,17 +21,23 @@ from utilities import *
 class DgtTranslate(object):
     def __init__(self, beep_level, language):
         self.beep_level = beep_level
+        if beep_level == BeepLevel.YES:
+            self.beep = Beep.ON
+        elif beep_level == BeepLevel.NO:
+            self.beep = Beep.OFF
+        else:
+            self.beep = Beep.SOME
         self.language = language
 
     def bl(self, beeplevel):
-        if beeplevel == BeepLevel.YES:
+        if self.beep == Beep.ON:
             return True
-        if beeplevel == BeepLevel.NO:
+        if self.beep == Beep.OFF:
             return False
         return bool(self.beep_level & beeplevel.value)
 
-    def set_beep_level(self, beep_level):
-        self.beep_level = beep_level
+    def set_beep(self, beep):
+        self.beep = beep
 
     def set_language(self, language):
         self.language  = language
@@ -286,12 +292,6 @@ class DgtTranslate(object):
             nltxt = Dgt.DISPLAY_TEXT(l="fout Kabel", m="errKabel", s="errkab", wait=True, beep=self.bl(BeepLevel.YES), maxtime=0)
             frtxt = Dgt.DISPLAY_TEXT(l="jack error", m="jack err", s="jack", wait=True, beep=self.bl(BeepLevel.YES), maxtime=0)
             estxt = Dgt.DISPLAY_TEXT(l="jack error", m="jack err", s="jack", wait=True, beep=self.bl(BeepLevel.YES), maxtime=0)
-        if text_id == 'B00_beep':
-            entxt = Dgt.DISPLAY_TEXT(l=None, m='beep ' + msg, s='beep' + msg, wait=False, beep=bl_button, maxtime=0)
-            detxt = Dgt.DISPLAY_TEXT(l='TonStufe ' + msg, m='TonSt ' + msg, s='ton ' + msg, wait=False, beep=bl_button, maxtime=0)
-            nltxt = Dgt.DISPLAY_TEXT(l=None, m='piep ' + msg, s='piep' + msg, wait=False, beep=bl_button, maxtime=0)
-            frtxt = Dgt.DISPLAY_TEXT(l=None, m='son ' + msg, s='son ' + msg, wait=False, beep=bl_button, maxtime=0)
-            estxt = Dgt.DISPLAY_TEXT(l=None, m='beep ' + msg, s='beep' + msg, wait=False, beep=bl_button, maxtime=0)
         if text_id == 'B00_level':
             if msg.startswith('Elo@'):
                 msg = str(int(msg[4:])).rjust(4)
@@ -586,6 +586,24 @@ class DgtTranslate(object):
             nltxt = Dgt.DISPLAY_TEXT(l=None, m='Spaans', s=None, wait=False, beep=bl_button, maxtime=0)
             frtxt = Dgt.DISPLAY_TEXT(l=None, m='Espagnol', s='espag', wait=False, beep=bl_button, maxtime=0)
             estxt = Dgt.DISPLAY_TEXT(l=None, m='Espanol', s='esp', wait=False, beep=bl_button, maxtime=0)
+        if text_id == 'B00_beep_off_menu':
+            entxt = Dgt.DISPLAY_TEXT(l=None, m='Never', s=None, wait=False, beep=bl_button, maxtime=0)
+            detxt = Dgt.DISPLAY_TEXT(l=None, m='Nie', s=None, wait=False, beep=bl_button, maxtime=0)
+            nltxt = Dgt.DISPLAY_TEXT(l=None, m='Nooit', s=None, wait=False, beep=bl_button, maxtime=0)
+            frtxt = Dgt.DISPLAY_TEXT(l=None, m='Jamais', s=None, wait=False, beep=bl_button, maxtime=0)
+            estxt = Dgt.DISPLAY_TEXT(l=None, m='Nunca', s=None, wait=False, beep=bl_button, maxtime=0)
+        if text_id == 'B00_beep_some_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='Sometimes', m='Some', s=None, wait=False, beep=bl_button, maxtime=0)
+            detxt = Dgt.DISPLAY_TEXT(l=None, m='Manchmal', s='manch', wait=False, beep=bl_button, maxtime=0)
+            nltxt = Dgt.DISPLAY_TEXT(l=None, m='Soms', s=None, wait=False, beep=bl_button, maxtime=0)
+            frtxt = Dgt.DISPLAY_TEXT(l=None, m='Parfois', s='parfoi', wait=False, beep=bl_button, maxtime=0)
+            estxt = Dgt.DISPLAY_TEXT(l=None, m='A veces', s='aveces', wait=False, beep=bl_button, maxtime=0)
+        if text_id == 'B00_beep_on_menu':
+            entxt = Dgt.DISPLAY_TEXT(l=None, m='Always', s=None, wait=False, beep=bl_button, maxtime=0)
+            detxt = Dgt.DISPLAY_TEXT(l=None, m='Immer', s=None, wait=False, beep=bl_button, maxtime=0)
+            nltxt = Dgt.DISPLAY_TEXT(l=None, m='Altyd', s=None, wait=False, beep=bl_button, maxtime=0)
+            frtxt = Dgt.DISPLAY_TEXT(l=None, m='Toujours', s='toujou', wait=False, beep=bl_button, maxtime=0)
+            estxt = Dgt.DISPLAY_TEXT(l=None, m='Siempre', s='siempr', wait=False, beep=bl_button, maxtime=0)
         if text_id == 'B10_oklang':
             entxt = Dgt.DISPLAY_TEXT(l='ok language', m='ok lang', s='oklang', wait=False, beep=bl_button, maxtime=1)
             detxt = Dgt.DISPLAY_TEXT(l='ok Sprache', m='okSprach', s='ok spr', wait=False, beep=bl_button, maxtime=1)

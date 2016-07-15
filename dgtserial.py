@@ -85,9 +85,9 @@ class DgtSerial(object):
     def write_board_command(self, message):
         mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
         if not mes == DgtCmd.DGT_RETURN_SERIALNR:
-            logging.debug('->DGT board [%s], length: %i', mes, len(message))
+            logging.debug('put DGT board [%s], length: %i', mes, len(message))
             if mes.value == DgtClk.DGT_CMD_CLOCK_ASCII.value:
-                logging.debug('sending text [{}] to clock'.format(''.join([chr(elem) for elem in message[4:10]])))
+                logging.debug('sending text [{}] to clock'.format(''.join([chr(elem) for elem in message[4:12]])))
 
         array = []
         for v in message:
@@ -280,7 +280,7 @@ class DgtSerial(object):
 
         try:
             if not message_id == DgtMsg.DGT_MSG_SERIALNR:
-                logging.debug("<-DGT board [%s], length: %i", DgtMsg(message_id), message_length)
+                logging.debug("get DGT board [%s], length: %i", DgtMsg(message_id), message_length)
             message = struct.unpack('>' + str(message_length) + 'B', self.serial.read(message_length))
             self.process_board_message(message_id, message)
         except ValueError:

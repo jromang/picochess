@@ -55,26 +55,31 @@ class PgnDisplay(DisplayMsg, threading.Thread):
 
     def save_and_email_pgn(self, message):
         logging.debug('Saving game to [' + self.file_name + ']')
-        pgn = chess.pgn.Game()
-        if message.custom_fen:
-            pgn.setup(message.custom_fen)
+        pgn_game = chess.pgn.Game()
+        msg_game = message.game
+        moves = []
+        # go back, to see if the first fen is not standard fen
+        while msg_game.move_stack:
+            moves.insert(0, msg_game.pop())
+        if msg_game.fen() != chess.STARTING_FEN:
+            pgn_game.setup(msg_game.fen())
 
-        node = pgn
-        for move in message.game.move_stack:
-            node = node.add_main_variation(move)
+        node = pgn_game
+        for move in moves:
+            node = node.add_variation(move)
         # Headers
-        pgn.headers['Event'] = 'PicoChess game'
-        pgn.headers['Site'] = self.location
-        pgn.headers['Date'] = datetime.date.today().strftime('%Y.%m.%d')
+        pgn_game.headers['Event'] = 'PicoChess game'
+        pgn_game.headers['Site'] = self.location
+        pgn_game.headers['Date'] = datetime.date.today().strftime('%Y.%m.%d')
         if message.result == GameResult.ABORT:
-            pgn.headers['Result'] = '*'
+            pgn_game.headers['Result'] = '*'
         elif message.result in (GameResult.DRAW, GameResult.STALEMATE, GameResult.SEVENTYFIVE_MOVES,
                                 GameResult.FIVEFOLD_REPETITION, GameResult.INSUFFICIENT_MATERIAL):
-            pgn.headers['Result'] = '1/2-1/2'
+            pgn_game.headers['Result'] = '1/2-1/2'
         elif message.result in (GameResult.RESIGN_WHITE, GameResult.RESIGN_BLACK):
-            pgn.headers['Result'] = '1-0' if message.result == GameResult.RESIGN_WHITE else '0-1'
+            pgn_game.headers['Result'] = '1-0' if message.result == GameResult.RESIGN_WHITE else '0-1'
         elif message.result in (GameResult.MATE, GameResult.OUT_OF_TIME):
-            pgn.headers['Result'] = '0-1' if message.game.turn == chess.WHITE else '1-0'
+            pgn_game.headers['Result'] = '0-1' if message.game.turn == chess.WHITE else '1-0'
 
         if self.level is None:
             engine_level = ''
@@ -82,20 +87,20 @@ class PgnDisplay(DisplayMsg, threading.Thread):
             engine_level = " ({0})".format(self.level)
 
         if message.play_mode == PlayMode.USER_WHITE:
-            pgn.headers['White'] = self.user_name
-            pgn.headers['Black'] = self.engine_name + engine_level
-            pgn.headers['WhiteElo'] = '-'
-            pgn.headers['BlackElo'] = '2900'
+            pgn_game.headers['White'] = self.user_name
+            pgn_game.headers['Black'] = self.engine_name + engine_level
+            pgn_game.headers['WhiteElo'] = '-'
+            pgn_game.headers['BlackElo'] = '2900'
         if message.play_mode == PlayMode.USER_BLACK:
-            pgn.headers['White'] = self.engine_name + engine_level
-            pgn.headers['Black'] = self.user_name
-            pgn.headers['WhiteElo'] = '2900'
-            pgn.headers['BlackElo'] = '-'
+            pgn_game.headers['White'] = self.engine_name + engine_level
+            pgn_game.headers['Black'] = self.user_name
+            pgn_game.headers['WhiteElo'] = '2900'
+            pgn_game.headers['BlackElo'] = '-'
 
         # Save to file
         file = open(self.file_name, 'a')
         exporter = chess.pgn.FileExporter(file)
-        pgn.accept(exporter)
+        pgn_game.accept(exporter)
         file.flush()
         file.close()
         # section send email
@@ -114,7 +119,7 @@ class PgnDisplay(DisplayMsg, threading.Thread):
                     logging.debug('SMTP Mail delivery: Import standard SMTP Lib (no SSL encryption)')
                     from smtplib import SMTP
                 try:
-                    msg = MIMEText(str(pgn), 'plain')  # pack the pgn to Email body
+                    msg = MIMEText(str(pgn_game), 'plain')  # pack the pgn to Email body
                     msg['Subject'] = 'Game PGN'  # put subject to mail
                     msg['From'] = 'Your PicoChess computer <{}>'.format(self.smtp_from)
                     msg['To'] = self.email
@@ -144,7 +149,7 @@ class PgnDisplay(DisplayMsg, threading.Thread):
                                     data={'from': 'Your PicoChess computer <no-reply@picochess.org>',
                                           'to': self.email,
                                           'subject': 'Game PGN',
-                                          'text': str(pgn)})
+                                          'text': str(pgn_game)})
                 logging.debug(out)
 
     def run(self):

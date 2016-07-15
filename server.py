@@ -27,8 +27,11 @@ from utilities import *
 import queue
 from web.picoweb import picoweb as pw
 import chess.pgn as pgn
+import chess
 import json
 import datetime
+
+import copy
 
 _workers = ThreadPool(5)
 
@@ -216,15 +219,35 @@ class WebDisplay(DisplayMsg, threading.Thread):
             self.shared['system_info'] = {}
 
     def task(self, message):
+        def transfer(g):
+            msg_game = copy.deepcopy(g)
+            pgn_game = pgn.Game()
+            moves = []
+            # go back, to see if the first fen is not standard fen
+            while msg_game.move_stack:
+                moves.insert(0, msg_game.pop())
+            if msg_game.fen() != chess.STARTING_FEN:
+                pgn_game.setup(msg_game.fen())
+
+            create_game_header(self, pgn_game)
+
+            node = pgn_game
+            for move in moves:
+                node = node.add_variation(move)
+            # transfer game to a pgn string
+            exporter = pgn.StringExporter(headers=True, comments=False, variations=False)
+            return pgn_game.accept(exporter)
+
         for case in switch(message):
             if case(MessageApi.BOOK_MOVE):
                 EventHandler.write_to_clients({'event': 'Message', 'msg': 'Book move'})
                 break
             if case(MessageApi.START_NEW_GAME):
-                r = {'fen': 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'}
+                fen = message.game.fen()
+                r = {'fen': fen}
                 self.shared['last_dgt_move_msg'] = r
                 EventHandler.write_to_clients(r)
-                EventHandler.write_to_clients({'event': 'NewGame'})
+                EventHandler.write_to_clients({'event': 'NewGame', 'fen': fen})
                 EventHandler.write_to_clients({'event': 'Message', 'msg': 'New game'})
                 update_headers(self)
                 break
@@ -289,19 +312,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 EventHandler.write_to_clients({'event': 'Message', 'msg': 'DGT clock connected through ' + message.attached})
                 break
             if case(MessageApi.COMPUTER_MOVE):
-                game = pgn.Game()
-                custom_fen = getattr(message.game, 'custom_fen', None)
-                if custom_fen:
-                    game.setup(custom_fen)
-                create_game_header(self, game)
-
-                tmp = game
-                move_stack = message.game.move_stack
-                for move in move_stack:
-                    tmp = tmp.add_variation(move)
-                exporter = pgn.StringExporter(headers=True, comments=False, variations=False)
-
-                pgn_str = game.accept(exporter)
+                pgn_str = transfer(message.game)
                 fen = message.game.fen()
                 mov = message.move.uci()
                 msg = 'Computer move: ' + str(message.move)
@@ -311,19 +322,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 EventHandler.write_to_clients(r)
                 break
             if case(MessageApi.USER_MOVE):
-                game = pgn.Game()
-                custom_fen = getattr(message.game, 'custom_fen', None)
-                if custom_fen:
-                    game.setup(custom_fen)
-                create_game_header(self, game)
-
-                tmp = game
-                move_stack = message.game.move_stack
-                for move in move_stack:
-                    tmp = tmp.add_variation(move)
-                exporter = pgn.StringExporter(headers=True, comments=False, variations=False)
-
-                pgn_str = game.accept(exporter)
+                pgn_str = transfer(message.game)
                 fen = message.game.fen()
                 msg = 'User move: ' + str(message.move)
                 mov = message.move.uci()
@@ -333,19 +332,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 EventHandler.write_to_clients(r)
                 break
             if case(MessageApi.REVIEW_MOVE):
-                game = pgn.Game()
-                custom_fen = getattr(message.game, 'custom_fen', None)
-                if custom_fen:
-                    game.setup(custom_fen)
-                create_game_header(self, game)
-
-                tmp = game
-                move_stack = message.game.move_stack
-                for move in move_stack:
-                    tmp = tmp.add_variation(move)
-                exporter = pgn.StringExporter(headers=True, comments=False, variations=False)
-
-                pgn_str = game.accept(exporter)
+                pgn_str = transfer(message.game)
                 fen = message.game.fen()
                 mov = 'User move: ' + str(message.move)
                 r = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'remote_play': True}

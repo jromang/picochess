@@ -203,8 +203,7 @@ def main():
         if result is None:
             return True
         else:
-            custom_fen = getattr(game, 'custom_fen', None)
-            DisplayMsg.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=game.copy(), custom_fen=custom_fen))
+            DisplayMsg.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=game.copy()))
             return False
 
     def user_move(move):
@@ -416,7 +415,7 @@ def main():
     parser.add_argument("-uci", "--uci-option", type=str, help="pass an UCI option to the engine (name;value)",
                         default=None)
     parser.add_argument("-beep", "--beep-level", type=int, help="sets a beep level from 0(=no beeps) to 15(=all beeps)",
-                        default=0x0f)
+                        default=0x03)
     parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
     parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
     parser.add_argument("-inet", "--enable-internet", action='store_true', help="enable internet lookups")
@@ -646,11 +645,8 @@ def main():
                         logging.warning('engine doesnt support 960 mode')
                     if game.move_stack:
                         if game.is_game_over() or game_declared:
-                            custom_fen = getattr(game, 'custom_fen', None)
-                            DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode,
-                                                              game=game.copy(), custom_fen=custom_fen))
+                            DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=game.copy()))
                     game = chess.Board(event.fen, event.uci960)
-                    game.custom_fen = event.fen
                     legal_fens = compute_legal_fens(game)
                     stop_search_and_clock()
                     time_control.reset()
@@ -658,7 +654,7 @@ def main():
                     last_computer_fen = None
                     last_legal_fens = []
                     searchmoves.reset()
-                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control))
+                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, game=game.copy()))
                     game_declared = False
                     set_wait_state()
                     break
@@ -723,9 +719,7 @@ def main():
                     if game.move_stack:
                         logging.debug('starting a new game')
                         if not (game.is_game_over() or game_declared):
-                            custom_fen = getattr(game, 'custom_fen', None)
-                            DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode,
-                                                              game=game.copy(), custom_fen=custom_fen))
+                            DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=game.copy()))
                         game = chess.Board()
                     legal_fens = compute_legal_fens(game)
                     last_legal_fens = []
@@ -734,7 +728,7 @@ def main():
                     time_control.reset()
                     searchmoves.reset()
 
-                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control))
+                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, game=game.copy()))
                     game_declared = False
                     set_wait_state()
                     break
@@ -742,9 +736,7 @@ def main():
                 if case(EventApi.DRAWRESIGN):
                     if not game_declared:  # in case user leaves kings in place while moving other pieces
                         stop_search_and_clock()
-                        custom_fen = getattr(game, 'custom_fen', None)
-                        DisplayMsg.show(Message.GAME_ENDS(result=event.result, play_mode=play_mode,
-                                                          game=game.copy(), custom_fen=custom_fen))
+                        DisplayMsg.show(Message.GAME_ENDS(result=event.result, play_mode=play_mode, game=game.copy()))
                         game_declared = True
                     break
 
@@ -809,26 +801,20 @@ def main():
 
                 if case(EventApi.OUT_OF_TIME):
                     stop_search_and_clock()
-                    custom_fen = getattr(game, 'custom_fen', None)
-                    DisplayMsg.show(Message.GAME_ENDS(result=GameResult.OUT_OF_TIME, play_mode=play_mode,
-                                                      game=game.copy(), custom_fen=custom_fen))
+                    DisplayMsg.show(Message.GAME_ENDS(result=GameResult.OUT_OF_TIME, play_mode=play_mode, game=game.copy()))
                     break
 
                 if case(EventApi.SHUTDOWN):
                     if talker:
                         talker.say_event(event)
-                    custom_fen = getattr(game, 'custom_fen', None)
-                    DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode,
-                                                      game=game.copy(), custom_fen=custom_fen))
+                    DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=game.copy()))
                     shutdown(args.dgtpi)
                     break
 
                 if case(EventApi.REBOOT):
                     if talker:
                         talker.say_event(event)
-                    custom_fen = getattr(game, 'custom_fen', None)
-                    DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode,
-                                                      game=game.copy(), custom_fen=custom_fen))
+                    DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=game.copy()))
                     reboot()
                     break
 
