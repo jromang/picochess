@@ -389,8 +389,6 @@ def main():
                         default='h-varied.bin')
     parser.add_argument("-g", "--enable-gaviota", action='store_true', help="enable gavoita tablebase probing")
     parser.add_argument("-leds", "--enable-revelation-leds", action='store_true', help="enable Revelation leds")
-    parser.add_argument("-hs", "--hash-size", type=int, help="hashtable size in MB (default:64)", default=64)
-    parser.add_argument("-t", "--threads", type=int, help="number of engine threads (default:1)", default=1)
     parser.add_argument("-l", "--log-level", choices=['notset', 'debug', 'info', 'warning', 'error', 'critical'],
                         default='warning', help="logging level")
     parser.add_argument("-lf", "--log-file", type=str, help="log to the given file")
@@ -411,8 +409,6 @@ def main():
                         help="use ssl encryption connection to smtp-Server")
     parser.add_argument("-mf", "--smtp-from", type=str, help="From email", default='no-reply@picochess.org')
     parser.add_argument("-mk", "--mailgun-key", type=str, help="key used to send emails via Mailgun Webservice",
-                        default=None)
-    parser.add_argument("-uci", "--uci-option", type=str, help="pass an UCI option to the engine (name;value)",
                         default=None)
     parser.add_argument("-beep", "--beep-level", type=int, help="sets a beep level from 0(=no beeps) to 15(=all beeps)",
                         default=0x03)
@@ -538,7 +534,7 @@ def main():
 
     system_info_thread = threading.Timer(0, display_system_info)
     system_info_thread.start()
-    engine.startup(args)  # send the args options to the engine
+    engine.startup()
 
     # Startup - external
     text = dgttranslate.text('B00_tc_blitz', '   5')
@@ -618,7 +614,7 @@ def main():
                                 sys.exit(-1)
                         # Schedule cleanup of old objects
                         gc.collect()
-                        engine.startup(args)
+                        engine.startup()
                         # All done - rock'n'roll
                         if not engine_fallback:
                             DisplayMsg.show(Message.ENGINE_READY(eng=event.eng, engine_name=engine_name,

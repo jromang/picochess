@@ -46,7 +46,7 @@ def read_engine_ini(engine_shell=None, engine_path=None):
     for section in config.sections():
         parser = configparser.ConfigParser()
         level_dict = {}
-        if parser.read(engine_path + os.sep + config[section]['file'] + '.lvl'):
+        if parser.read(engine_path + os.sep + config[section]['file'] + '.uci'):
             for ps in parser.sections():
                 level_dict[ps] = {}
                 for option in parser.options(ps):
@@ -65,7 +65,7 @@ def read_engine_ini(engine_shell=None, engine_path=None):
 def write_engine_ini(engine_path=None):
     def write_level_ini():
         parser = configparser.ConfigParser()
-        if not parser.read(engine_path + os.sep + engine_file_name + '.lvl'):
+        if not parser.read(engine_path + os.sep + engine_file_name + '.uci'):
             if engine.has_limit_strength():
                 uelevel = engine.get().options['UCI_Elo']
                 elo_1, elo_2 = int(uelevel[2]), int(uelevel[3])
@@ -86,7 +86,7 @@ def write_engine_ini(engine_path=None):
                 minlevel, maxlevel = int(sklevel[3]), int(sklevel[4])
                 for level in range(minlevel, maxlevel):
                     parser['Level@{:02d}'.format(level)] = {'Skill Level': str(level)}
-            with open(engine_path + os.sep + engine_file_name + '.lvl', 'w') as configfile:
+            with open(engine_path + os.sep + engine_file_name + '.uci', 'w') as configfile:
                 parser.write(configfile)
 
     def is_exe(fpath):
@@ -297,24 +297,18 @@ class UciEngine(object):
     def is_waiting(self):
         return self.status == EngineStatus.WAIT
 
-    def startup(self, args):
+    def startup(self):
         # first send the last lvl values to the engine
         parser = configparser.ConfigParser()
-        if parser.read(self.get_file() + '.lvl'):
+        if parser.read(self.get_file() + '.uci'):
             options = dict(parser[parser.sections().pop()])
             logging.debug("setting engine with (lvl) options {}".format(options))
             self.level(options)
+        if parser.read('picochess.uci'):
+            options = dict(parser[parser.sections().pop()])
+            logging.debug("setting engine with (uci) options {}".format(options))
+            self.level(options)
 
-        if 'Hash' in self.get().options:
-            self.option('Hash', args.hash_size)
-        if 'Threads' in self.get().options:  # Stockfish
-            self.option('Threads', args.threads)
-        if 'Core Threads' in self.get().options:  # Hiarcs
-            self.option('Core Threads', args.threads)
-        if args.uci_option:
-            for uci_option in args.uci_option.strip('"').split(";"):
-                uci_parameter = uci_option.strip().split('=')
-                self.option(uci_parameter[0], uci_parameter[1])
         # send the options to the engine
         self.send()
         # Log the engine info

@@ -45,11 +45,6 @@
 # remote-pass = your_secret_password
 ## The secret server-key for the remote-engine-server
 # remote-key = your_secret_key
-## uci-option stores options that will be passed to the engine
-## This are possible examples - it depends on your search-engine
-# uci-option = Hash = 128
-# uci-option = Threads = 4
-# uci-option = Beginner Mode=true
 
 ### ==========================
 ### = Opening book selection =

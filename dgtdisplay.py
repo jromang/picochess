@@ -115,7 +115,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
         self.engine_level_result = None
         self.engine_level_index = None
-        self.engine_has_levels = False  # Not all engines support levels - assume not
         self.engine_has_960 = False  # Not all engines support 960 mode - assume not
         self.engine_restart = False
         self.engine_result = None
@@ -688,7 +687,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         for case in switch(message):
             if case(MessageApi.ENGINE_READY):
                 self.engine_index = self.installed_engines.index(message.eng)
-                self.engine_has_levels = message.has_levels
                 self.engine_has_960 = message.has_960
                 if self.show_ok_message or not message.ok_text:
                     DisplayDgt.show(message.eng_text)
@@ -701,7 +699,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     eng = self.installed_engines[index]
                     if eng['file'] == message.file:
                         self.engine_index = index
-                        self.engine_has_levels = message.has_levels
                         self.engine_has_960 = message.has_960
                         self.engine_level_index = len(eng['level_dict'])-1
                 break
