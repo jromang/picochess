@@ -479,7 +479,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     text = self.dgttranslate.text('B00_tc_fisch', self.time_control_fisch_list[self.time_control_fisch_index])
                 else:
                     logging.warning('wrong value for time_mode_index: {0}'.format(self.time_mode_index))
-                    text = self.dgttranslate.text('B00_default', 'error')
+                    text = self.dgttranslate.text('Y00_errormenu')
             DisplayDgt.show(text)
 
     def process_button4(self):
@@ -560,14 +560,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             exit_menu = True
             if self.system_index == Settings.VERSION:
                 text = self.dgttranslate.text('B10_picochess')
-                DisplayDgt.show(text)
             elif self.system_index == Settings.IPADR:
                 if len(self.ip):
                     msg = self.ip
                     text = self.dgttranslate.text('B10_default', msg)
                 else:
                     text = self.dgttranslate.text('B10_noipadr')
-                DisplayDgt.show(text)
             elif self.system_index == Settings.SOUND:
                 if self.system_sound_result is None:
                     self.system_sound_result = self.system_sound_index
@@ -576,7 +574,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 else:
                     self.dgttranslate.set_beep(self.system_sound_index)
                     text = self.dgttranslate.text('B10_okbeep')
-                DisplayDgt.show(text)
             elif self.system_index == Settings.LANGUAGE:
                 if self.system_language_result is None:
                     self.system_language_result = self.system_language_index
@@ -587,9 +584,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     language = langs[self.system_language_index]
                     self.dgttranslate.set_language(language)
                     text = self.dgttranslate.text('B10_oklang')
-                DisplayDgt.show(text)
             else:
                 logging.warning('wrong value for system_index: {0}'.format(self.system_index))
+                text = self.dgttranslate.text('Y00_errormenu')
+            DisplayDgt.show(text)
             if exit_menu:
                 self.reset_menu_results()
                 self.exit_display()
@@ -599,9 +597,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text = self.dgttranslate.text('B00_nofunction')
                 DisplayDgt.show(text)
             else:
+                eng = self.installed_engines[self.engine_index]
+                level_dict = eng['level_dict']
                 if self.engine_result is None:
-                    eng = self.installed_engines[self.engine_index]
-                    level_dict = eng['level_dict']
                     if level_dict:
                         self.engine_result = self.engine_index
                         if len(level_dict) <= self.engine_level_index:
@@ -615,8 +613,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.engine_restart = True
                         self.reset_menu_results()
                 else:
-                    eng = self.installed_engines[self.engine_result]
-                    level_dict = eng['level_dict']
                     if level_dict:
                         msg = sorted(level_dict)[self.engine_level_index]
                         lvl_text = self.dgttranslate.text('B10_level', msg)
@@ -647,7 +643,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     text = self.dgttranslate.text('B00_tc_fisch', self.time_control_fisch_list[self.time_control_fisch_index])
                 else:
                     logging.warning('wrong value for time_mode_index: {0}'.format(self.time_mode_index))
-                    text = self.dgttranslate.text('B00_default', 'error')
+                    text = self.dgttranslate.text('Y00_errormenu')
                 DisplayDgt.show(text)
             else:
                 if self.time_mode_index == TimeMode.FIXED:
@@ -658,7 +654,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     time_control = self.time_control_fisch_map[list(self.time_control_fisch_map)[self.time_control_fisch_index]]
                 else:
                     logging.warning('wrong value for time_mode_index: {0}'.format(self.time_mode_index))
-                    time_control = None
+                    text = self.dgttranslate.text('Y00_errormenu')
+                    DisplayDgt.show(text)
+                    return
                 time_left, time_right = time_control.current_clock_time(self.flip_board)
                 text = self.dgttranslate.text('B10_oktime')
                 self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=text, ok_text=True))
@@ -686,6 +684,359 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             text = Dgt.DISPLAY_TIME(force=force, wait=True)
         DisplayDgt.show(text)
 
+    def process_message(self, message):
+        for case in switch(message):
+            if case(MessageApi.ENGINE_READY):
+                self.engine_index = self.installed_engines.index(message.eng)
+                self.engine_has_levels = message.has_levels
+                self.engine_has_960 = message.has_960
+                if self.show_ok_message or not message.ok_text:
+                    DisplayDgt.show(message.eng_text)
+                self.engine_restart = False
+                self.exit_display(force=message.ok_text)
+                break
+            if case(MessageApi.ENGINE_STARTUP):
+                self.installed_engines = get_installed_engines(message.shell, message.file)
+                for index in range(0, len(self.installed_engines)):
+                    eng = self.installed_engines[index]
+                    if eng['file'] == message.file:
+                        self.engine_index = index
+                        self.engine_has_levels = message.has_levels
+                        self.engine_has_960 = message.has_960
+                        self.engine_level_index = len(eng['level_dict'])-1
+                break
+            if case(MessageApi.ENGINE_FAIL):
+                DisplayDgt.show(self.dgttranslate.text('Y00_erroreng'))
+                break
+            if case(MessageApi.COMPUTER_MOVE):
+                move = message.move
+                ponder = message.ponder
+                fen = message.fen
+                turn = message.turn
+                self.engine_finished = True
+                self.play_move = move
+                self.play_fen = fen
+                self.play_turn = turn
+                self.hint_move = chess.Move.null() if ponder is None else ponder
+                self.hint_fen = None if ponder is None else message.game.fen()
+                self.hint_turn = None if ponder is None else message.game.turn
+                # Display the move
+                uci_move = move.uci()
+                side = ClockSide.LEFT if (turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
+                DisplayDgt.show(Dgt.DISPLAY_MOVE(move=move, fen=message.fen, side=side, wait=message.wait,
+                                                 beep=self.dgttranslate.bl(BeepLevel.CONFIG), maxtime=0))
+                DisplayDgt.show(Dgt.LIGHT_SQUARES(squares=(uci_move[0:2], uci_move[2:4])))
+                break
+            if case(MessageApi.START_NEW_GAME):
+                DisplayDgt.show(Dgt.LIGHT_CLEAR())
+                self.reset_moves_and_score()
+                # self.mode_index = Mode.NORMAL  # @todo
+                self.reset_menu_results()
+                self.engine_finished = False
+                text = self.dgttranslate.text('C10_newgame')
+                text.wait = True  # in case of GAME_ENDS before, wait for "abort"
+                DisplayDgt.show(text)
+                if self.mode_result in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
+                    time_left, time_right = message.time_control.current_clock_time(flip_board=self.flip_board)
+                    DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE))
+                break
+            if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
+                DisplayDgt.show(Dgt.LIGHT_CLEAR())
+                self.last_move = self.play_move
+                self.last_fen = self.play_fen
+                self.last_turn = self.play_turn
+                self.play_move = chess.Move.null()
+                self.play_fen = None
+                self.play_turn = None
+                self.engine_finished = False
+                if self.show_ok_message:
+                    DisplayDgt.show(self.dgttranslate.text('K05_okpico'))
+                self.reset_menu_results()
+                break
+            if case(MessageApi.USER_MOVE):
+                self.last_move = message.move
+                self.last_fen = message.fen
+                self.last_turn = message.turn
+                self.engine_finished = False
+                if self.show_ok_message:
+                    DisplayDgt.show(self.dgttranslate.text('K05_okuser'))
+                break
+            if case(MessageApi.REVIEW_MOVE):
+                self.last_move = message.move
+                self.last_fen = message.fen
+                self.last_turn = message.turn
+                if self.show_ok_message:
+                    DisplayDgt.show(self.dgttranslate.text('K05_okmove'))
+                break
+            if case(MessageApi.ALTERNATIVE_MOVE):
+                DisplayDgt.show(self.dgttranslate.text('B05_altmove'))
+                break
+            if case(MessageApi.LEVEL):
+                if self.engine_restart:
+                    pass
+                else:
+                    if self.show_ok_message or not message.ok_text:
+                        DisplayDgt.show(message.level_text)
+                    self.exit_display(force=message.ok_text)
+                break
+            if case(MessageApi.TIME_CONTROL):
+                if self.show_ok_message or not message.ok_text:
+                    DisplayDgt.show(message.time_text)
+                self.exit_display(force=message.ok_text)
+                break
+            if case(MessageApi.OPENING_BOOK):
+                if self.show_ok_message or not message.ok_text:
+                    DisplayDgt.show(message.book_text)
+                self.exit_display(force=message.ok_text)
+                break
+            if case(MessageApi.USER_TAKE_BACK):
+                self.reset_moves_and_score()
+                self.engine_finished = False
+                DisplayDgt.show(self.dgttranslate.text('C00_takeback'))
+                break
+            if case(MessageApi.GAME_ENDS):
+                if not self.engine_restart:  # filter out the shutdown/reboot process
+                    ge = message.result.value
+                    DisplayDgt.show(self.dgttranslate.text(ge))
+                break
+            if case(MessageApi.INTERACTION_MODE):
+                self.mode_index = message.mode
+                self.mode_result = message.mode  # needed, otherwise Q-placing wont work correctly
+                self.engine_finished = False
+                if self.show_ok_message or not message.ok_text:
+                    DisplayDgt.show(message.mode_text)
+                self.exit_display(force=message.ok_text)
+                break
+            if case(MessageApi.PLAY_MODE):
+                DisplayDgt.show(message.play_mode_text)
+                break
+            if case(MessageApi.NEW_SCORE):
+                self.score = message.score
+                self.mate = message.mate
+                if message.mode == Mode.KIBITZ and self.top_result is None:
+                    DisplayDgt.show(self.dgttranslate.text('N10_default', str(self.score).rjust(6)))
+                break
+            if case(MessageApi.BOOK_MOVE):
+                self.score = None
+                self.mate = None
+                DisplayDgt.show(self.dgttranslate.text('N10_bookmove'))
+                break
+            if case(MessageApi.NEW_PV):
+                self.hint_move = message.pv[0]
+                self.hint_fen = message.fen
+                self.hint_turn = message.turn
+                if message.mode == Mode.ANALYSIS and self.top_result is None:
+                    side = ClockSide.LEFT if (self.hint_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
+                    DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=False,
+                                                     beep=self.dgttranslate.bl(BeepLevel.NO), maxtime=0))
+                break
+            if case(MessageApi.SYSTEM_INFO):
+                self.ip = ' '.join(message.info['ip'].split('.')[2:])
+                break
+            if case(MessageApi.STARTUP_INFO):
+                self.mode_index = message.info['interaction_mode']
+                self.mode_result = message.info['interaction_mode']
+                self.book_index = message.info['book_index']
+                self.all_books = message.info['books']
+                break
+            if case(MessageApi.SEARCH_STARTED):
+                logging.debug('Search started')
+                break
+            if case(MessageApi.SEARCH_STOPPED):
+                logging.debug('Search stopped')
+                break
+            if case(MessageApi.CLOCK_START):
+                tc = message.time_control
+                if tc.mode == TimeMode.FIXED:
+                    time_left = time_right = tc.seconds_per_move
+                else:
+                    time_left, time_right = tc.current_clock_time(flip_board=self.flip_board)
+                    if time_left < 0:
+                        time_left = 0
+                    if time_right < 0:
+                        time_right = 0
+                side = ClockSide.LEFT if (message.turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
+                DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side))
+                break
+            if case(MessageApi.CLOCK_STOP):
+                DisplayDgt.show(Dgt.CLOCK_STOP())
+                break
+            if case(MessageApi.DGT_BUTTON):
+                button = int(message.button)
+                if not self.engine_restart:
+                    if button == 0:
+                        self.process_button0()
+                    elif button == 1:
+                        self.process_button1()
+                    elif button == 2:
+                        self.process_button2()
+                    elif button == 3:
+                        self.process_button3()
+                    elif button == 4:
+                        self.process_button4()
+                    elif button == 0x11:
+                        self.power_off()
+                    elif button == 0x40:
+                        self.process_lever(right_side_down=True)
+                    elif button == -0x40:
+                        self.process_lever(right_side_down=False)
+                break
+            if case(MessageApi.DGT_FEN):
+                fen = message.fen
+                if self.flip_board:  # Flip the board if needed
+                    fen = fen[::-1]
+                if fen == 'RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr':  # Check if we have to flip the board
+                    logging.debug('flipping the board')
+                    # Flip the board
+                    self.flip_board = not self.flip_board
+                    # set standard for setup orientation too
+                    self.setup_reverse_index = self.flip_board
+                    fen = fen[::-1]
+                logging.debug("DGT-Fen [%s]", fen)
+                if fen == self.dgt_fen:
+                    logging.debug('ignore same fen')
+                    break
+                self.dgt_fen = fen
+                self.drawresign_fen = self.drawresign()
+                map_bl = self.dgttranslate.bl(BeepLevel.MAP)
+                # Fire the appropriate event
+                if fen in level_map:
+                    eng = self.installed_engines[self.engine_index]
+                    level_dict = eng['level_dict']
+                    if level_dict:
+                        inc = math.ceil(len(level_dict) / 8)
+                        level_index = min(inc * level_map.index(fen), len(level_dict)-1)
+                        self.engine_level_result = level_index
+                        self.engine_level_index = level_index
+
+                        msg = sorted(level_dict)[level_index]
+                        text = self.dgttranslate.text('M10_level', msg)
+                        logging.debug("Map-Fen: New level {}".format(msg))
+                        self.fire(Event.LEVEL(options=level_dict[msg], level_text=text, ok_text=False))
+                    else:
+                        logging.debug('engine doesnt support levels')
+                elif fen == 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR':
+                    logging.debug("Map-Fen: New game")
+                    self.show_setup_pieces_msg = False
+                    self.fire(Event.NEW_GAME())
+                elif fen in book_map:
+                    book_index = book_map.index(fen)
+                    try:
+                        b = self.all_books[book_index]
+                        self.book_index = book_index
+                        logging.debug("Map-Fen: Opening book [%s]", b[1])
+                        text = self.dgttranslate.text('M10_default', b[0])
+                        self.fire(Event.SET_OPENING_BOOK(book=b, book_text=text, ok_text=False))
+                        self.reset_menu_results()
+                    except IndexError:
+                        pass
+                elif fen in engine_map:
+                    if self.installed_engines:
+                        engine_index = engine_map.index(fen)
+                        try:
+                            self.engine_index = engine_index
+                            eng = self.installed_engines[self.engine_index]
+                            level_dict = eng['level_dict']
+                            logging.debug("Map-Fen: Engine name [%s]", eng['section'])
+                            eng_text = self.dgttranslate.text('M10_default', eng['section'])
+                            if level_dict:
+                                if len(level_dict) <= self.engine_level_index:
+                                    self.engine_level_index = len(level_dict) - 1
+                                level_index = self.engine_level_index if self.engine_level_result is None else self.engine_level_result
+                                msg = sorted(level_dict)[level_index]
+                                lvl_text = self.dgttranslate.text('M10_level', msg)
+                                self.fire(Event.LEVEL(options=level_dict[msg], level_text=lvl_text, ok_text=False))
+                            self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, ok_text=False))
+                            self.engine_restart = True
+                            self.reset_menu_results()
+                        except IndexError:
+                            pass
+                    else:
+                        DisplayDgt.show(self.dgttranslate.text('Y00_erroreng'))
+                elif fen in mode_map:
+                    logging.debug("Map-Fen: Interaction mode [%s]", mode_map[fen])
+                    text = self.dgttranslate.text(mode_map[fen].value)
+                    text.beep = map_bl  # BeepLevel is Map not Button
+                    text.maxtime = 1  # wait 1sec not forever
+                    self.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], mode_text=text,ok_text=False))
+                    self.reset_menu_results()
+                elif fen in self.time_control_fixed_map:
+                    logging.debug('Map-Fen: Time control fixed')
+                    self.time_mode_index = TimeMode.FIXED
+                    self.time_control_fixed_index = list(self.time_control_fixed_map.keys()).index(fen)
+                    text = self.dgttranslate.text('B00_tc_fixed', self.time_control_fixed_list[self.time_control_fixed_index])
+                    text.beep = map_bl  # BeepLevel is Map not Button
+                    text.maxtime = 1  # wait 1sec not forever
+                    self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_fixed_map[fen],
+                                                     time_text=text, ok_text=False))
+                    self.reset_menu_results()
+                elif fen in self.time_control_blitz_map:
+                    logging.debug('Map-Fen: Time control blitz')
+                    self.time_mode_index = TimeMode.BLITZ
+                    self.time_control_blitz_index = list(self.time_control_blitz_map.keys()).index(fen)
+                    text = self.dgttranslate.text('B00_tc_blitz', self.time_control_blitz_list[self.time_control_blitz_index])
+                    text.beep = map_bl  # BeepLevel is Map not Button
+                    text.maxtime = 1  # wait 1sec not forever
+                    self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_blitz_map[fen],
+                                                     time_text=text, ok_text=False))
+                    self.reset_menu_results()
+                elif fen in self.time_control_fisch_map:
+                    logging.debug('Map-Fen: Time control fischer')
+                    self.time_mode_index = TimeMode.FISCHER
+                    self.time_control_fisch_index = list(self.time_control_fisch_map.keys()).index(fen)
+                    text = self.dgttranslate.text('B00_tc_fisch', self.time_control_fisch_list[self.time_control_fisch_index])
+                    text.beep = map_bl  # BeepLevel is Map not Button
+                    text.maxtime = 1  # wait 1sec not forever
+                    self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_fisch_map[fen],
+                                                     time_text=text, ok_text=False))
+                    self.reset_menu_results()
+                elif fen in shutdown_map:
+                    logging.debug('Map-Fen: shutdown')
+                    self.power_off()
+                elif fen in reboot_map:
+                    logging.debug('Map-Fen: reboot')
+                    self.reboot()
+                elif self.drawresign_fen in drawresign_map:
+                    if self.top_result is None:
+                        logging.debug('Map-Fen: drawresign')
+                        self.fire(Event.DRAWRESIGN(result=drawresign_map[self.drawresign_fen]))
+                else:
+                    if self.show_setup_pieces_msg:
+                        DisplayDgt.show(self.dgttranslate.text('N00_setpieces'))
+                        self.show_setup_pieces_msg = False
+                    if self.top_result is None:
+                        self.fire(Event.FEN(fen=fen))
+                    else:
+                        logging.debug('inside the menu. fen "{}" ignored'.format(fen))
+                break
+            if case(MessageApi.DGT_CLOCK_VERSION):
+                DisplayDgt.show(Dgt.CLOCK_VERSION(main_version=message.main_version,
+                                                  sub_version=message.sub_version, attached=message.attached))
+                break
+            if case(MessageApi.DGT_CLOCK_TIME):
+                DisplayDgt.show(Dgt.CLOCK_TIME(time_left=message.time_left, time_right=message.time_right))
+                break
+            if case(MessageApi.JACK_CONNECTED_ERROR):  # this will only work in case of 2 clocks connected!
+                DisplayDgt.show(self.dgttranslate.text('Y00_errorjack'))
+                break
+            if case(MessageApi.EBOARD_VERSION):
+                DisplayDgt.show(message.text)
+                break
+            if case(MessageApi.NO_EBOARD_ERROR):
+                if message.is_pi:
+                    DisplayDgt.show(message.text)
+                break
+            if case(MessageApi.SWITCH_SIDES):
+                self.engine_finished = False
+                self.hint_move = chess.Move.null()
+                self.hint_fen = None
+                self.hint_turn = None
+                logging.debug('user ignored move {}'.format(message.move))
+                break
+            if case():  # Default
+                # print(message)
+                pass
+
     def run(self):
         logging.info('msg_queue ready')
         while True:
@@ -693,356 +1044,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             try:
                 message = self.msg_queue.get()
                 logging.debug("received message from msg_queue: %s", message)
-                for case in switch(message):
-                    if case(MessageApi.ENGINE_READY):
-                        self.engine_index = self.installed_engines.index(message.eng)
-                        self.engine_has_levels = message.has_levels
-                        self.engine_has_960 = message.has_960
-                        if self.show_ok_message or not message.ok_text:
-                            DisplayDgt.show(message.eng_text)
-                        self.engine_restart = False
-                        self.exit_display(force=message.ok_text)
-                        break
-                    if case(MessageApi.ENGINE_STARTUP):
-                        self.installed_engines = get_installed_engines(message.shell, message.file)
-                        for index in range(0, len(self.installed_engines)):
-                            eng = self.installed_engines[index]
-                            if eng['file'] == message.file:
-                                self.engine_index = index
-                                self.engine_has_levels = message.has_levels
-                                self.engine_has_960 = message.has_960
-                                self.engine_level_index = len(eng['level_dict'])-1
-                        break
-                    if case(MessageApi.ENGINE_FAIL):
-                        DisplayDgt.show(self.dgttranslate.text('Y00_erroreng'))
-                        break
-                    if case(MessageApi.COMPUTER_MOVE):
-                        move = message.move
-                        ponder = message.ponder
-                        fen = message.fen
-                        turn = message.turn
-                        self.engine_finished = True
-                        self.play_move = move
-                        self.play_fen = fen
-                        self.play_turn = turn
-                        self.hint_move = chess.Move.null() if ponder is None else ponder
-                        self.hint_fen = None if ponder is None else message.game.fen()
-                        self.hint_turn = None if ponder is None else message.game.turn
-                        # Display the move
-                        uci_move = move.uci()
-                        side = ClockSide.LEFT if (turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
-                        DisplayDgt.show(Dgt.DISPLAY_MOVE(move=move, fen=message.fen, side=side, wait=message.wait,
-                                                         beep=self.dgttranslate.bl(BeepLevel.CONFIG), maxtime=0))
-                        DisplayDgt.show(Dgt.LIGHT_SQUARES(squares=(uci_move[0:2], uci_move[2:4])))
-                        break
-                    if case(MessageApi.START_NEW_GAME):
-                        DisplayDgt.show(Dgt.LIGHT_CLEAR())
-                        self.reset_moves_and_score()
-                        # self.mode_index = Mode.NORMAL  # @todo
-                        self.reset_menu_results()
-                        self.engine_finished = False
-                        text = self.dgttranslate.text('C10_newgame')
-                        text.wait = True  # in case of GAME_ENDS before, wait for "abort"
-                        DisplayDgt.show(text)
-                        if self.mode_result in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
-                            time_left, time_right = message.time_control.current_clock_time(flip_board=self.flip_board)
-                            DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE))
-                        break
-                    if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
-                        DisplayDgt.show(Dgt.LIGHT_CLEAR())
-                        self.last_move = self.play_move
-                        self.last_fen = self.play_fen
-                        self.last_turn = self.play_turn
-                        self.play_move = chess.Move.null()
-                        self.play_fen = None
-                        self.play_turn = None
-                        self.engine_finished = False
-                        if self.show_ok_message:
-                            DisplayDgt.show(self.dgttranslate.text('K05_okpico'))
-                        self.reset_menu_results()
-                        break
-                    if case(MessageApi.USER_MOVE):
-                        self.last_move = message.move
-                        self.last_fen = message.fen
-                        self.last_turn = message.turn
-                        self.engine_finished = False
-                        if self.show_ok_message:
-                            DisplayDgt.show(self.dgttranslate.text('K05_okuser'))
-                        break
-                    if case(MessageApi.REVIEW_MOVE):
-                        self.last_move = message.move
-                        self.last_fen = message.fen
-                        self.last_turn = message.turn
-                        if self.show_ok_message:
-                            DisplayDgt.show(self.dgttranslate.text('K05_okmove'))
-                        break
-                    if case(MessageApi.ALTERNATIVE_MOVE):
-                        DisplayDgt.show(self.dgttranslate.text('B05_altmove'))
-                        break
-                    if case(MessageApi.LEVEL):
-                        if self.engine_restart:
-                            pass
-                        else:
-                            if self.show_ok_message or not message.ok_text:
-                                DisplayDgt.show(message.level_text)
-                            self.exit_display(force=message.ok_text)
-                        break
-                    if case(MessageApi.TIME_CONTROL):
-                        if self.show_ok_message or not message.ok_text:
-                            DisplayDgt.show(message.time_text)
-                        self.exit_display(force=message.ok_text)
-                        break
-                    if case(MessageApi.OPENING_BOOK):
-                        if self.show_ok_message or not message.ok_text:
-                            DisplayDgt.show(message.book_text)
-                        self.exit_display(force=message.ok_text)
-                        break
-                    if case(MessageApi.USER_TAKE_BACK):
-                        self.reset_moves_and_score()
-                        self.engine_finished = False
-                        DisplayDgt.show(self.dgttranslate.text('C00_takeback'))
-                        break
-                    if case(MessageApi.GAME_ENDS):
-                        if not self.engine_restart:  # filter out the shutdown/reboot process
-                            ge = message.result.value
-                            DisplayDgt.show(self.dgttranslate.text(ge))
-                        break
-                    if case(MessageApi.INTERACTION_MODE):
-                        self.mode_index = message.mode
-                        self.mode_result = message.mode  # needed, otherwise Q-placing wont work correctly
-                        self.engine_finished = False
-                        if self.show_ok_message or not message.ok_text:
-                            DisplayDgt.show(message.mode_text)
-                        self.exit_display(force=message.ok_text)
-                        break
-                    if case(MessageApi.PLAY_MODE):
-                        DisplayDgt.show(message.play_mode_text)
-                        break
-                    if case(MessageApi.NEW_SCORE):
-                        self.score = message.score
-                        self.mate = message.mate
-                        if message.mode == Mode.KIBITZ and self.top_result is None:
-                            DisplayDgt.show(self.dgttranslate.text('N10_default', str(self.score).rjust(6)))
-                        break
-                    if case(MessageApi.BOOK_MOVE):
-                        self.score = None
-                        self.mate = None
-                        DisplayDgt.show(self.dgttranslate.text('N10_bookmove'))
-                        break
-                    if case(MessageApi.NEW_PV):
-                        self.hint_move = message.pv[0]
-                        self.hint_fen = message.fen
-                        self.hint_turn = message.turn
-                        if message.mode == Mode.ANALYSIS and self.top_result is None:
-                            side = ClockSide.LEFT if (self.hint_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
-                            DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=False,
-                                                             beep=self.dgttranslate.bl(BeepLevel.NO), maxtime=0))
-                        break
-                    if case(MessageApi.SYSTEM_INFO):
-                        self.ip = ' '.join(message.info['ip'].split('.')[2:])
-                        break
-                    if case(MessageApi.STARTUP_INFO):
-                        self.mode_index = message.info['interaction_mode']
-                        self.mode_result = message.info['interaction_mode']
-                        self.book_index = message.info['book_index']
-                        self.all_books = message.info['books']
-                        break
-                    if case(MessageApi.SEARCH_STARTED):
-                        logging.debug('Search started')
-                        break
-                    if case(MessageApi.SEARCH_STOPPED):
-                        logging.debug('Search stopped')
-                        break
-                    if case(MessageApi.CLOCK_START):
-                        tc = message.time_control
-                        if tc.mode == TimeMode.FIXED:
-                            time_left = time_right = tc.seconds_per_move
-                        else:
-                            time_left, time_right = tc.current_clock_time(flip_board=self.flip_board)
-                            if time_left < 0:
-                                time_left = 0
-                            if time_right < 0:
-                                time_right = 0
-                        side = ClockSide.LEFT if (message.turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
-                        DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side))
-                        break
-                    if case(MessageApi.CLOCK_STOP):
-                        DisplayDgt.show(Dgt.CLOCK_STOP())
-                        break
-                    if case(MessageApi.DGT_BUTTON):
-                        button = int(message.button)
-                        if not self.engine_restart:
-                            if button == 0:
-                                self.process_button0()
-                            elif button == 1:
-                                self.process_button1()
-                            elif button == 2:
-                                self.process_button2()
-                            elif button == 3:
-                                self.process_button3()
-                            elif button == 4:
-                                self.process_button4()
-                            elif button == 0x11:
-                                self.power_off()
-                            elif button == 0x40:
-                                self.process_lever(right_side_down=True)
-                            elif button == -0x40:
-                                self.process_lever(right_side_down=False)
-                        break
-                    if case(MessageApi.DGT_FEN):
-                        fen = message.fen
-                        if self.flip_board:  # Flip the board if needed
-                            fen = fen[::-1]
-                        if fen == 'RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr':  # Check if we have to flip the board
-                            logging.debug('flipping the board')
-                            # Flip the board
-                            self.flip_board = not self.flip_board
-                            # set standard for setup orientation too
-                            self.setup_reverse_index = self.flip_board
-                            fen = fen[::-1]
-                        logging.debug("DGT-Fen [%s]", fen)
-                        if fen == self.dgt_fen:
-                            logging.debug('ignore same fen')
-                            break
-                        self.dgt_fen = fen
-                        self.drawresign_fen = self.drawresign()
-                        map_bl = self.dgttranslate.bl(BeepLevel.MAP)
-                        # Fire the appropriate event
-                        if fen in level_map:
-                            eng = self.installed_engines[self.engine_index]
-                            level_dict = eng['level_dict']
-                            if level_dict:
-                                inc = math.ceil(len(level_dict) / 8)
-                                level_index = min(inc * level_map.index(fen), len(level_dict)-1)
-                                self.engine_level_result = level_index
-                                self.engine_level_index = level_index
-
-                                msg = sorted(level_dict)[level_index]
-                                text = self.dgttranslate.text('M10_level', msg)
-                                logging.debug("Map-Fen: New level {}".format(msg))
-                                self.fire(Event.LEVEL(options=level_dict[msg], level_text=text, ok_text=False))
-                            else:
-                                logging.debug('engine doesnt support levels')
-                        elif fen == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR":
-                            logging.debug("Map-Fen: New game")
-                            self.show_setup_pieces_msg = False
-                            self.fire(Event.NEW_GAME())
-                        elif fen in book_map:
-                            book_index = book_map.index(fen)
-                            try:
-                                b = self.all_books[book_index]
-                                self.book_index = book_index
-                                logging.debug("Map-Fen: Opening book [%s]", b[1])
-                                text = self.dgttranslate.text('M10_default', b[0])
-                                self.fire(Event.SET_OPENING_BOOK(book=b, book_text=text, ok_text=False))
-                                self.reset_menu_results()
-                            except IndexError:
-                                pass
-                        elif fen in engine_map:
-                            if self.installed_engines:
-                                engine_index = engine_map.index(fen)
-                                try:
-                                    self.engine_index = engine_index
-                                    eng = self.installed_engines[self.engine_index]
-                                    level_dict = eng['level_dict']
-                                    logging.debug("Map-Fen: Engine name [%s]", eng['section'])
-                                    eng_text = self.dgttranslate.text('M10_default', eng['section'])
-                                    if level_dict:
-                                        if len(level_dict) <= self.engine_level_index:
-                                            self.engine_level_index = len(level_dict) - 1
-                                        level_index = self.engine_level_index if self.engine_level_result is None else self.engine_level_result
-                                        msg = sorted(level_dict)[level_index]
-                                        lvl_text = self.dgttranslate.text('M10_level', msg)
-                                        self.fire(Event.LEVEL(options=level_dict[msg], level_text=lvl_text, ok_text=False))
-                                    self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, ok_text=False))
-                                    self.engine_restart = True
-                                    self.reset_menu_results()
-                                except IndexError:
-                                    pass
-                            else:
-                                DisplayDgt.show(self.dgttranslate.text('Y00_erroreng'))
-                        elif fen in mode_map:
-                            logging.debug("Map-Fen: Interaction mode [%s]", mode_map[fen])
-                            text = self.dgttranslate.text(mode_map[fen].value)
-                            text.beep = map_bl  # BeepLevel is Map not Button
-                            text.maxtime = 1  # wait 1sec not forever
-                            self.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], mode_text=text,ok_text=False))
-                            self.reset_menu_results()
-                        elif fen in self.time_control_fixed_map:
-                            logging.debug('Map-Fen: Time control fixed')
-                            self.time_mode_index = TimeMode.FIXED
-                            self.time_control_fixed_index = list(self.time_control_fixed_map.keys()).index(fen)
-                            text = self.dgttranslate.text('B00_tc_fixed', self.time_control_fixed_list[self.time_control_fixed_index])
-                            text.beep = map_bl  # BeepLevel is Map not Button
-                            text.maxtime = 1  # wait 1sec not forever
-                            self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_fixed_map[fen],
-                                                             time_text=text, ok_text=False))
-                            self.reset_menu_results()
-                        elif fen in self.time_control_blitz_map:
-                            logging.debug('Map-Fen: Time control blitz')
-                            self.time_mode_index = TimeMode.BLITZ
-                            self.time_control_blitz_index = list(self.time_control_blitz_map.keys()).index(fen)
-                            text = self.dgttranslate.text('B00_tc_blitz', self.time_control_blitz_list[self.time_control_blitz_index])
-                            text.beep = map_bl  # BeepLevel is Map not Button
-                            text.maxtime = 1  # wait 1sec not forever
-                            self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_blitz_map[fen],
-                                                             time_text=text, ok_text=False))
-                            self.reset_menu_results()
-                        elif fen in self.time_control_fisch_map:
-                            logging.debug('Map-Fen: Time control fischer')
-                            self.time_mode_index = TimeMode.FISCHER
-                            self.time_control_fisch_index = list(self.time_control_fisch_map.keys()).index(fen)
-                            text = self.dgttranslate.text('B00_tc_fisch', self.time_control_fisch_list[self.time_control_fisch_index])
-                            text.beep = map_bl  # BeepLevel is Map not Button
-                            text.maxtime = 1  # wait 1sec not forever
-                            self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_fisch_map[fen],
-                                                             time_text=text, ok_text=False))
-                            self.reset_menu_results()
-                        elif fen in shutdown_map:
-                            logging.debug('Map-Fen: shutdown')
-                            self.power_off()
-                        elif fen in reboot_map:
-                            logging.debug('Map-Fen: reboot')
-                            self.reboot()
-                        elif self.drawresign_fen in drawresign_map:
-                            if self.top_result is None:
-                                logging.debug('Map-Fen: drawresign')
-                                self.fire(Event.DRAWRESIGN(result=drawresign_map[self.drawresign_fen]))
-                        else:
-                            if self.show_setup_pieces_msg:
-                                DisplayDgt.show(self.dgttranslate.text('N00_setpieces'))
-                                self.show_setup_pieces_msg = False
-                            if self.top_result is None:
-                                self.fire(Event.FEN(fen=fen))
-                            else:
-                                logging.debug('inside the menu. fen "{}" ignored'.format(fen))
-                        break
-                    if case(MessageApi.DGT_CLOCK_VERSION):
-                        DisplayDgt.show(Dgt.CLOCK_VERSION(main_version=message.main_version,
-                                                          sub_version=message.sub_version, attached=message.attached))
-                        break
-                    if case(MessageApi.DGT_CLOCK_TIME):
-                        DisplayDgt.show(Dgt.CLOCK_TIME(time_left=message.time_left, time_right=message.time_right))
-                        break
-                    if case(MessageApi.JACK_CONNECTED_ERROR):  # this will only work in case of 2 clocks connected!
-                        DisplayDgt.show(self.dgttranslate.text('Y00_errorjack'))
-                        break
-                    if case(MessageApi.EBOARD_VERSION):
-                        DisplayDgt.show(message.text)
-                        break
-                    if case(MessageApi.NO_EBOARD_ERROR):
-                        if message.is_pi:
-                            DisplayDgt.show(message.text)
-                        break
-                    if case(MessageApi.SWITCH_SIDES):
-                        self.engine_finished = False
-                        self.hint_move = chess.Move.null()
-                        self.hint_fen = None
-                        self.hint_turn = None
-                        logging.debug('user ignored move {}'.format(message.move))
-                        break
-                    if case():  # Default
-                        # print(message)
-                        pass
+                self.process_message(message)
             except queue.Empty:
                 pass
