@@ -91,7 +91,7 @@ def main():
             addr = get_ip()
         else:
             place = '?'
-            addr = '?'
+            addr = None
         DisplayMsg.show(Message.SYSTEM_INFO(info={'version': version, 'location': place,
                                                   'books': get_opening_books(), 'ip': addr,
                                                   'engine_name': engine_name, 'user_name': user_name

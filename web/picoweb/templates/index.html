@@ -1181,10 +1181,12 @@ function getDGTPGN() {
 function getSystemInfo() {
      $.get("/info", { action: "get_system_info"}, function (data) {
         window.system_info = data;
-
-        $("#SystemInfo").text('Picochess '+window.system_info.version + ' ' + window.system_info.ip + ' ');
+        var ip = '?';
+        if (window.system_info.ip) {
+            var ip = window.system_info.ip;
+        }
+        $("#SystemInfo").text('Picochess '+window.system_info.version + ' - IP: ' + ip + ' ');
     });
-
 }
 
 function goToDGTFen() {

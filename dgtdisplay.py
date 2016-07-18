@@ -95,7 +95,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.flip_board = False
         self.dgt_fen = None
         self.engine_finished = False
-        self.ip = '?'  # the last two parts of the IP
+        self.ip = None
         self.drawresign_fen = None
         self.show_setup_pieces_msg = True
 
@@ -372,7 +372,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     text = self.dgttranslate.text('B00_tc_fisch', self.time_control_fisch_list[self.time_control_fisch_index])
                 else:
                     logging.warning('wrong value for time_mode_index: {0}'.format(self.time_mode_index))
-                    text = self.dgttranslate.text('B00_default', 'error')
+                    text = self.dgttranslate.text('Y00_errormenu')
             DisplayDgt.show(text)
 
     def process_button2(self):
@@ -561,8 +561,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if self.system_index == Settings.VERSION:
                 text = self.dgttranslate.text('B10_picochess')
             elif self.system_index == Settings.IPADR:
-                if len(self.ip):
-                    msg = self.ip
+                if self.ip:
+                    msg = ' '.join(self.ip.split('.')[2:])
                     text = self.dgttranslate.text('B10_default', msg)
                 else:
                     text = self.dgttranslate.text('B10_noipadr')
@@ -831,7 +831,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                                      beep=self.dgttranslate.bl(BeepLevel.NO), maxtime=0))
                 break
             if case(MessageApi.SYSTEM_INFO):
-                self.ip = ' '.join(message.info['ip'].split('.')[2:])
+                self.ip = message.info['ip']
                 break
             if case(MessageApi.STARTUP_INFO):
                 self.mode_index = message.info['interaction_mode']
