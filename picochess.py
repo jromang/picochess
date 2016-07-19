@@ -534,7 +534,7 @@ def main():
 
     system_info_thread = threading.Timer(0, display_system_info)
     system_info_thread.start()
-    engine.startup()
+    engine.startup({})
 
     # Startup - external
     text = dgttranslate.text('B00_tc_blitz', '   5')
@@ -575,10 +575,9 @@ def main():
                     break
 
                 if case(EventApi.LEVEL):
-                    logging.debug("setting engine with (lvl) options {}".format(event.options))
-                    engine.level(event.options)
-                    engine.send()
-                    DisplayMsg.show(Message.LEVEL(level_text=event.level_text, ok_text=event.ok_text))
+                    if event.options:
+                        engine.startup(event.options, False)
+                    DisplayMsg.show(Message.LEVEL(level_text=event.level_text))
                     break
 
                 if case(EventApi.NEW_ENGINE):
@@ -605,6 +604,7 @@ def main():
                             # New engine failed to start, restart old engine
                             logging.error("new engine failed to start, reverting to %s", old_file)
                             engine_fallback = True
+                            event.options = {}  # Reset options. This will load the last(=strongest?) level
                             engine = UciEngine(old_file)
                             try:
                                 engine_name = engine.get().name
@@ -614,7 +614,7 @@ def main():
                                 sys.exit(-1)
                         # Schedule cleanup of old objects
                         gc.collect()
-                        engine.startup()
+                        engine.startup(event.options)
                         # All done - rock'n'roll
                         if not engine_fallback:
                             DisplayMsg.show(Message.ENGINE_READY(eng=event.eng, engine_name=engine_name,

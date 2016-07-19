@@ -608,16 +608,19 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         DisplayDgt.show(text)
                     else:
                         text = self.dgttranslate.text('B10_okengine')
-                        self.fire(Event.NEW_ENGINE(eng=eng, eng_text=text, ok_text=True))
+                        self.fire(Event.NEW_ENGINE(eng=eng, eng_text=text, options={}, ok_text=True))
                         self.engine_restart = True
                         self.reset_menu_results()
                 else:
                     if level_dict:
                         msg = sorted(level_dict)[self.engine_level_index]
                         lvl_text = self.dgttranslate.text('B10_level', msg)
-                        self.fire(Event.LEVEL(options=level_dict[msg], level_text=lvl_text, ok_text=False))
+                        options = level_dict[msg]
+                        self.fire(Event.LEVEL(options={}, level_text=lvl_text))
+                    else:
+                        options = {}
                     eng_text = self.dgttranslate.text('B10_okengine')
-                    self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, ok_text=True))
+                    self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options=options, ok_text=True))
                     self.engine_restart = True
                     self.reset_menu_results()
 
@@ -772,8 +775,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 if self.engine_restart:
                     pass
                 else:
-                    if self.show_ok_message or not message.ok_text:
-                        DisplayDgt.show(message.level_text)
+                    DisplayDgt.show(message.level_text)
                     self.exit_display(force=message.ok_text)
                 break
             if case(MessageApi.TIME_CONTROL):
@@ -909,7 +911,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         msg = sorted(level_dict)[level_index]
                         text = self.dgttranslate.text('M10_level', msg)
                         logging.debug("Map-Fen: New level {}".format(msg))
-                        self.fire(Event.LEVEL(options=level_dict[msg], level_text=text, ok_text=False))
+                        self.fire(Event.LEVEL(options=level_dict[msg], level_text=text))
                     else:
                         logging.debug('engine doesnt support levels')
                 elif fen == 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR':
@@ -942,8 +944,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 level_index = self.engine_level_index if self.engine_level_result is None else self.engine_level_result
                                 msg = sorted(level_dict)[level_index]
                                 lvl_text = self.dgttranslate.text('M10_level', msg)
-                                self.fire(Event.LEVEL(options=level_dict[msg], level_text=lvl_text, ok_text=False))
-                            self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, ok_text=False))
+                                options = level_dict[msg]
+                                self.fire(Event.LEVEL(options={}, level_text=lvl_text))
+                            else:
+                                options = {}
+                            self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options=options, ok_text=False))
                             self.engine_restart = True
                             self.reset_menu_results()
                         except IndexError:

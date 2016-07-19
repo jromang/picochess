@@ -297,20 +297,16 @@ class UciEngine(object):
     def is_waiting(self):
         return self.status == EngineStatus.WAIT
 
-    def startup(self):
-        # first send the last lvl values to the engine
+    def startup(self, options, show=True):
         parser = configparser.ConfigParser()
-        if parser.read(self.get_file() + '.uci'):
+        if not options and parser.read(self.get_file() + '.uci'):
             options = dict(parser[parser.sections().pop()])
-            logging.debug("setting engine with (lvl) options {}".format(options))
-            self.level(options)
         if parser.read('picochess.uci'):
-            options = dict(parser[parser.sections().pop()])
-            logging.debug("setting engine with (uci) options {}".format(options))
-            self.level(options)
+            options.update(dict(parser[parser.sections().pop()]))
 
-        # send the options to the engine
+        logging.debug("setting engine with options {}".format(options))
+        self.level(options)
         self.send()
-        # Log the engine info
-        logging.debug('Loaded engine [%s]', self.get().name)
-        logging.debug('Supported options [%s]', self.get().options)
+        if show:
+            logging.debug('Loaded engine [%s]', self.get().name)
+            logging.debug('Supported options [%s]', self.get().options)
