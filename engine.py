@@ -84,7 +84,7 @@ def write_engine_ini(engine_path=None):
             if engine.has_skill_level():
                 sklevel = engine.get().options['Skill Level']
                 minlevel, maxlevel = int(sklevel[3]), int(sklevel[4])
-                for level in range(minlevel, maxlevel):
+                for level in range(minlevel, maxlevel+1):
                     parser['Level@{:02d}'.format(level)] = {'Skill Level': str(level)}
             with open(engine_path + os.sep + engine_file_name + '.uci', 'w') as configfile:
                 parser.write(configfile)
