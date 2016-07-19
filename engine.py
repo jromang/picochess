@@ -302,7 +302,9 @@ class UciEngine(object):
         if not options and parser.read(self.get_file() + '.uci'):
             options = dict(parser[parser.sections().pop()])
         if parser.read('picochess.uci'):
-            options.update(dict(parser[parser.sections().pop()]))
+            pc_opts = dict(parser[parser.sections().pop()])
+            pc_opts.update(options)
+            options = pc_opts
 
         logging.debug("setting engine with options {}".format(options))
         self.level(options)
