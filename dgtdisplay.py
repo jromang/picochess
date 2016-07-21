@@ -776,7 +776,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     pass
                 else:
                     DisplayDgt.show(message.level_text)
-                    self.exit_display(force=message.ok_text)
+                    self.exit_display(force=False)
                 break
             if case(MessageApi.TIME_CONTROL):
                 if self.show_ok_message or not message.ok_text:
