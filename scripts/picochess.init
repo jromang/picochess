@@ -28,7 +28,7 @@ case "$1" in
       fi
 
       echo $dgt_port
-      python3 picochess.py -d $dgt_port -web -lf picochess.log -l debug -hs 128
+      python3 picochess.py -d $dgt_port -web -lf picochess.log -l debug
     ;;
   stop)
     echo "Stopping picochess"
