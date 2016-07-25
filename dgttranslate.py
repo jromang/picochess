@@ -19,8 +19,9 @@ from utilities import *
 
 
 class DgtTranslate(object):
-    def __init__(self, beep_level, language):
-        self.beep_level = beep_level
+    def __init__(self, beep_level, some_beep_level, language):
+        self.some_beep_level = some_beep_level
+        # self.beep_level = beep_level
         if beep_level == BeepLevel.YES:
             self.beep = Beep.ON
         elif beep_level == BeepLevel.NO:
@@ -34,7 +35,7 @@ class DgtTranslate(object):
             return True
         if self.beep == Beep.OFF:
             return False
-        return bool(self.beep_level & beeplevel.value)
+        return bool(self.some_beep_level & beeplevel.value)
 
     def set_beep(self, beep):
         self.beep = beep

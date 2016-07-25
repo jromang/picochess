@@ -46,6 +46,7 @@ from dgtserial import DgtSerial
 from dgttranslate import DgtTranslate
 
 from logging.handlers import RotatingFileHandler
+from configobj import ConfigObj
 
 
 class AlternativeMover:
@@ -383,10 +384,15 @@ def main():
     # Command line argument parsing
     parser = configargparse.ArgParser(default_config_files=[os.path.join(os.path.dirname(__file__), "picochess.ini")])
     parser.add_argument("-e", "--engine", type=str, help="UCI engine executable path", default=None)
+    parser.add_argument("-el", "--engine-level", type=str, help="UCI engine level", default=None)
     parser.add_argument("-d", "--dgt-port", type=str,
                         help="enable dgt board on the given serial port such as /dev/ttyUSB0")
     parser.add_argument("-b", "--book", type=str, help="Opening book - full name of book in 'books' folder",
                         default='h-varied.bin')
+    parser.add_argument("-tmode", "--time-mode", type=str, help="TimeMode", default=TimeMode.BLITZ)
+    parser.add_argument("-tsec", "--time-seconds-per-move", type=int, help="Fixed time seconds per move", default=0)
+    parser.add_argument("-tmin", "--time-minutes-per-game", type=int, help="Minutes per game", default=5)
+    parser.add_argument("-tinc", "--time-fischer-increment", type=int, help="Fischer increment in seconds", default=0)
     parser.add_argument("-g", "--enable-gaviota", action='store_true', help="enable gavoita tablebase probing")
     parser.add_argument("-leds", "--enable-revelation-leds", action='store_true', help="enable Revelation leds")
     parser.add_argument("-l", "--log-level", choices=['notset', 'debug', 'info', 'warning', 'error', 'critical'],
@@ -411,6 +417,8 @@ def main():
     parser.add_argument("-mk", "--mailgun-key", type=str, help="key used to send emails via Mailgun Webservice",
                         default=None)
     parser.add_argument("-beep", "--beep-level", type=int, help="sets a beep level from 0(=no beeps) to 15(=all beeps)",
+                        default=0x03)
+    parser.add_argument("-beepsome", "--some-beep-level", type=int, help="sets the some beep level from 1 to 14",
                         default=0x03)
     parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
     parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
@@ -456,7 +464,7 @@ def main():
             gaviota = None
 
     # This class talks to DgtHw/DgtPi or DgtVr
-    dgttranslate = DgtTranslate(args.beep_level, args.language)
+    dgttranslate = DgtTranslate(args.beep_level, args.some_beep_level, args.language)
     DgtDisplay(args.disable_ok_message, dgttranslate).start()
 
     # Launch web server
@@ -527,7 +535,15 @@ def main():
     searchmoves = AlternativeMover()
     interaction_mode = Mode.NORMAL
     play_mode = PlayMode.USER_WHITE
-    time_control = TimeControl(TimeMode.BLITZ, minutes_per_game=5)
+    if args.time_mode == 'TimeMode.BLITZ':
+        time_control = TimeControl(TimeMode.BLITZ, minutes_per_game=args.time_minutes_per_game)
+    elif args.time_mode == 'TimeMode.FISCHER':
+        time_control = TimeControl(TimeMode.FISCHER, minutes_per_game=args.time_minutes_per_game,
+                                   fischer_increment=args.time_fischer_increment)
+    elif args.time_mode == 'TimeMode.FIXED':
+        time_control = TimeControl(TimeMode.FIXED, seconds_per_move=args.time_seconds_per_move)
+    else:
+        time_control = TimeControl(TimeMode.BLITZ, minutes_per_game=5)
     last_computer_fen = None
     last_legal_fens = []
     game_declared = False  # User declared resignation or draw
@@ -581,6 +597,9 @@ def main():
                     break
 
                 if case(EventApi.NEW_ENGINE):
+                    config = ConfigObj("picochess.ini")
+                    config['engine'] = event.eng['file']
+                    config.write()
                     old_file = engine.get_file()
                     engine_shutdown = True
                     # Stop the old engine cleanly
@@ -785,12 +804,21 @@ def main():
                     break
 
                 if case(EventApi.SET_OPENING_BOOK):
+                    config = ConfigObj("picochess.ini")
+                    config['book'] = event.book[1][6:]
+                    config.write()
                     logging.debug("changing opening book [%s]", event.book[1])
                     bookreader = chess.polyglot.open_reader(event.book[1])
                     DisplayMsg.show(Message.OPENING_BOOK(book_name=event.book[0], book_text=event.book_text, ok_text=event.ok_text))
                     break
 
                 if case(EventApi.SET_TIME_CONTROL):
+                    config = ConfigObj("picochess.ini")
+                    config['time-mode'] = time_control.mode
+                    config['time-seconds-per-move'] = time_control.seconds_per_move
+                    config['time-minutes-per-game'] = time_control.minutes_per_game
+                    config['time-fischer-increment'] = time_control.fischer_increment
+                    config.write()
                     time_control = event.time_control
                     DisplayMsg.show(Message.TIME_CONTROL(time_text=event.time_text, ok_text=event.ok_text))
                     break
