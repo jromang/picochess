@@ -102,14 +102,16 @@ Manual installation
   first:
 
   * `Python 3.4 or newer (also comes with pip) <https://www.python.org/downloads/>`_
-    (on mac OS X, ``brew install python3``)
+    (on Mac OS X, ``brew install python3``)
 
-  * `git <http://git-scm.com/>`_ (use git executable has to be in the system PATH)
+  * `git <http://git-scm.com/>`_ (``sudo apt-get install git``, git executable has to be in the system PATH)
 
   * A UCI chess engine; `Stockfish <http://stockfishchess.org/>`_ is probably
-    the best choice !
+    the best choice!
 
-  * `zeroconf` (``apt-get install avahi-daemon avahi-discover libnss-mdns``, included on Mac OS X)
+  * zeroconf (``sudo apt-get install avahi-daemon avahi-discover libnss-mdns``, included on Mac OS X)
+
+  * espeak and festival (``sudo apt-get install espeak festival``) to enable speech
 
 2. **Get a copy of the source code**
 
@@ -152,7 +154,13 @@ Manual installation
 
   ``sudo pip3 install --upgrade -r requirements.txt``
 
-5. **Copy the services into the correct place**
+5. **UCI config files**
+
+  Initialize the engines' UCI settings via .uci files:
+
+  ``sudo python3 ./build_engines.py``
+
+6. **Copy the services into the correct place**
 
 ``cd /opt/picochess/dgt``
 
@@ -166,7 +174,7 @@ Manual installation
 
 ``sudo reboot``
 
-6. **Run PicoChess from the command line**
+7. **Run PicoChess: automatically or from the command line**
 
   If installed correctly, PicoChess will start automatically at boot (as a service). You can also start PicoChess from the command line.
 
@@ -197,7 +205,7 @@ Bluetooth connection should work out of the box. If it does not, then you can tr
 
 9. Open Terminal app and shut down the machine:
 
-   sudo shutdown -h now
+   sudo shutdown -h -P now
 
 10. Restart the Pi without the keyboard and monitor and tada! the connection should work.
 
@@ -213,10 +221,8 @@ At start PicoChess looks at the file
 ... and sets itself up accordingly. Here is a list of some available options:
 
 * enable-revelation-leds = true
-* uci-option = Beginner Mode=true
 * log-level = debug
 * log-file = /opt/picochess/picochess.log
-* uci-option = Threads = 4
 * user-voice = en:Elsie
 * computer-voice = en:Marvin
 * disable-ok-message
@@ -231,10 +237,10 @@ For example, to turn OFF the LED's on the Revelation II chessbot, this line will
 
 enable-revelation-leds = false
 
-UCI engine options can be set using uci-option. For example, when using jromang's modified
+UCI engine options can be set in the picochess.uci configuration file which you will find in the /opt/picochess/ directory. To set the option, use the uci-option flag. For example, when using jromang's modified
 `Stockfish Human Player engine <https://github.com/jromang/Stockfish/tree/human_player>`_, the line
 
-uci-option = Beginner Mode=true
+Beginner Mode = true
 
 will dumb Stockfish down enough for play against children and total beginners to give
 them a chance of beating the machine. If you are using our image files, you will probably find
