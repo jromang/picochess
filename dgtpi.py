@@ -32,7 +32,7 @@ class DgtPi(DgtIface):
         self.startup_i2c_clock()
         incoming_clock_thread = Timer(0, self.process_incoming_clock_forever)
         incoming_clock_thread.start()
-        self.dgtserial.run()
+        # self.dgtserial.run()
 
     def startup_i2c_clock(self):
         while self.lib.dgtpicom_init() < 0:
@@ -94,8 +94,8 @@ class DgtPi(DgtIface):
             counter = (counter + 1) % 8
             if counter == 0:
                 DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=times[:3], time_right=times[3:]))
-            if counter == 4:  # issue 150 - force to write something to the board => check for alive connection!
-                self.dgtserial.write_board_command([DgtCmd.DGT_RETURN_SERIALNR])  # the code doesnt really matter ;-)
+            # if counter == 4:  # issue 150 - force to write something to the board => check for alive connection!
+            #     self.dgtserial.write_board_command([DgtCmd.DGT_RETURN_SERIALNR])  # the code doesnt really matter ;-)
             time.sleep(0.1)
 
     def _display_on_dgt_pi(self, text, beep=False, left_dots=0, right_dots=0):

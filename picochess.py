@@ -487,11 +487,7 @@ def main():
         logging.debug('starting picochess in board mode')
         if args.dgtpi:
             DgtPi(dgtserial, dgttranslate, args.enable_revelation_leds).start()
-        else:
-            DgtHw(dgtserial, dgttranslate, args.enable_revelation_leds).start()
-        # Start the show
-        dgtserial.startup_serial_hardware()
-
+        DgtHw(dgtserial, dgttranslate, args.enable_revelation_leds).start()
     # Save to PGN
     PgnDisplay(
         args.pgn_file, net=args.enable_internet, email=args.email, mailgun_key=args.mailgun_key,
@@ -815,7 +811,12 @@ def main():
 
                 if case(EventApi.SET_TIME_CONTROL):
                     config = ConfigObj("picochess.ini")
-                    config['time-mode'] = time_control.mode
+                    if time_control.mode == TimeMode.BLITZ:
+                        config['time-mode'] = 'blitz'
+                    elif time_control.mode == TimeMode.FISCHER:
+                        config['time-mode'] = 'fischer'
+                    elif time_control.mode == TimeMode.FIXED:
+                        config['time-mode'] = 'fixed'
                     config['time-seconds-per-move'] = time_control.seconds_per_move
                     config['time-minutes-per-game'] = time_control.minutes_per_game
                     config['time-fischer-increment'] = time_control.fischer_increment
