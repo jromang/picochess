@@ -390,7 +390,8 @@ def main():
                         help="enable dgt board on the given serial port such as /dev/ttyUSB0")
     parser.add_argument("-b", "--book", type=str, help="Opening book - full name of book in 'books' folder",
                         default='h-varied.bin')
-    parser.add_argument("-tmode", "--time-mode", type=str, help="TimeMode", default=TimeMode.BLITZ)
+    parser.add_argument("-tmode", "--time-mode", choices=['blitz', 'fischer', 'fixed'], help="TimeMode",
+                        default='blitz')
     parser.add_argument("-tsec", "--time-seconds-per-move", type=int, help="Fixed time seconds per move", default=0)
     parser.add_argument("-tmin", "--time-minutes-per-game", type=int, help="Minutes per game", default=5)
     parser.add_argument("-tinc", "--time-fischer-increment", type=int, help="Fischer increment in seconds", default=0)
@@ -417,10 +418,10 @@ def main():
     parser.add_argument("-mf", "--smtp-from", type=str, help="From email", default='no-reply@picochess.org')
     parser.add_argument("-mk", "--mailgun-key", type=str, help="key used to send emails via Mailgun Webservice",
                         default=None)
-    parser.add_argument("-beep", "--beep-level", type=int, help="sets a beep level from 0(=no beeps) to 15(=all beeps)",
-                        default=0x03)
-    parser.add_argument("-beepsome", "--some-beep-level", type=int, help="sets the some beep level from 1 to 14",
-                        default=0x03)
+    parser.add_argument("-bc", "--beep-config", choices=['none', 'some', 'all'], help="sets standard beep config",
+                        default='some')
+    parser.add_argument("-beep", "--beep-level", type=int, default=0x03,
+                        help="sets (some-)beep level from 0(=no beeps) to 15(=all beeps)")
     parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
     parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
     parser.add_argument("-inet", "--enable-internet", action='store_true', help="enable internet lookups")
@@ -464,8 +465,8 @@ def main():
             logging.error('Tablebases gaviota doesnt exist')
             gaviota = None
 
-    # This class talks to DgtHw/DgtPi or DgtVr
-    dgttranslate = DgtTranslate(args.beep_level, args.some_beep_level, args.language)
+    # The class dgtDisplay talks to DgtHw/DgtPi or DgtVr
+    dgttranslate = DgtTranslate(args.beep_config, args.beep_level, args.language)
     DgtDisplay(args.disable_ok_message, dgttranslate).start()
 
     # Launch web server
@@ -487,11 +488,7 @@ def main():
         logging.debug('starting picochess in board mode')
         if args.dgtpi:
             DgtPi(dgtserial, dgttranslate, args.enable_revelation_leds).start()
-        else:
-            DgtHw(dgtserial, dgttranslate, args.enable_revelation_leds).start()
-        # Start the show
-        dgtserial.startup_serial_hardware()
-
+        DgtHw(dgtserial, dgttranslate, args.enable_revelation_leds).start()
     # Save to PGN
     PgnDisplay(
         args.pgn_file, net=args.enable_internet, email=args.email, mailgun_key=args.mailgun_key,
@@ -536,12 +533,12 @@ def main():
     searchmoves = AlternativeMover()
     interaction_mode = Mode.NORMAL
     play_mode = PlayMode.USER_WHITE
-    if args.time_mode == 'TimeMode.BLITZ':
+    if args.time_mode == 'blitz':
         time_control = TimeControl(TimeMode.BLITZ, minutes_per_game=args.time_minutes_per_game)
-    elif args.time_mode == 'TimeMode.FISCHER':
+    elif args.time_mode == 'fischer':
         time_control = TimeControl(TimeMode.FISCHER, minutes_per_game=args.time_minutes_per_game,
                                    fischer_increment=args.time_fischer_increment)
-    elif args.time_mode == 'TimeMode.FIXED':
+    elif args.time_mode == 'fixed':
         time_control = TimeControl(TimeMode.FIXED, seconds_per_move=args.time_seconds_per_move)
     else:
         time_control = TimeControl(TimeMode.BLITZ, minutes_per_game=5)
@@ -829,7 +826,12 @@ def main():
 
                 if case(EventApi.SET_TIME_CONTROL):
                     config = ConfigObj("picochess.ini")
-                    config['time-mode'] = time_control.mode
+                    if time_control.mode == TimeMode.BLITZ:
+                        config['time-mode'] = 'blitz'
+                    elif time_control.mode == TimeMode.FISCHER:
+                        config['time-mode'] = 'fischer'
+                    elif time_control.mode == TimeMode.FIXED:
+                        config['time-mode'] = 'fixed'
                     config['time-seconds-per-move'] = time_control.seconds_per_move
                     config['time-minutes-per-game'] = time_control.minutes_per_game
                     config['time-fischer-increment'] = time_control.fischer_increment

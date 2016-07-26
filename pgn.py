@@ -131,7 +131,7 @@ class PgnDisplay(DisplayMsg, threading.Thread):
                     conn.login(self.smtp_user, self.smtp_pass)  # login at smtp server
                     try:
                         logging.debug('SMTP Mail delivery: trying to send email')
-                        conn.sendmail('no-reply@picochess.org', self.email, msg.as_string())
+                        conn.sendmail(self.smtp_from, self.email, msg.as_string())
                         logging.debug('SMTP Mail delivery: successfuly delivered message to SMTP server')
                     except Exception as e:
                         logging.error('SMTP Mail delivery: Failed')
