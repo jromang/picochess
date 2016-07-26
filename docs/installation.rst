@@ -117,7 +117,7 @@ Manual installation
 
   ``cd /opt``
 
-  ``sudo git clone --branch master https://www.github.com/jromang/picochess.git``
+  ``sudo git clone --branch master https://github.com/jromang/picochess.git``
 
   ``cd picochess``
 
@@ -237,10 +237,10 @@ For example, to turn OFF the LED's on the Revelation II chessbot, this line will
 
 enable-revelation-leds = false
 
-UCI engine options can be set in the engine's .uci configuration file which you will find in /opt/picochess/engines/armv7l. To set the option, use the uci-option flag. For example, when using jromang's modified
+UCI engine options can be set in the picochess.uci configuration file which you will find in the /opt/picochess/ directory. To set the option, use the uci-option flag. For example, when using jromang's modified
 `Stockfish Human Player engine <https://github.com/jromang/Stockfish/tree/human_player>`_, the line
 
-uci-option = Beginner Mode=true
+Beginner Mode = true
 
 will dumb Stockfish down enough for play against children and total beginners to give
 them a chance of beating the machine. If you are using our image files, you will probably find
