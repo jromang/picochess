@@ -569,12 +569,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 else:
                     self.dgttranslate.set_beep(self.system_sound_index)
                     config = ConfigObj("picochess.ini")
-                    if self.system_sound_index == Beep.ON:
-                        config['beep-level'] = BeepLevel.YES.value
-                    elif self.system_sound_index == Beep.OFF:
-                        config['beep-level'] = BeepLevel.NO.value
-                    else:
-                        config['beep-level'] = self.dgttranslate.some_beep_level
+                    config['beep-config'] = self.dgttranslate.beep_to_config(self.system_sound_index)
                     config.write()
                     text = self.dgttranslate.text('B10_okbeep')
             elif self.system_index == Settings.LANGUAGE:
