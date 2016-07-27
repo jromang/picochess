@@ -623,7 +623,7 @@ def main():
                     break
 
                 if case(EventApi.NEW_ENGINE):
-                    config = ConfigObj("picochess.ini")
+                    config = ConfigObj('picochess.ini')
                     config['engine'] = event.eng['file']
                     config.write()
                     old_file = engine.get_file()
@@ -830,7 +830,7 @@ def main():
                     break
 
                 if case(EventApi.SET_OPENING_BOOK):
-                    config = ConfigObj("picochess.ini")
+                    config = ConfigObj('picochess.ini')
                     config['book'] = event.book[1][6:]
                     config.write()
                     logging.debug("changing opening book [%s]", event.book[1])
@@ -839,16 +839,13 @@ def main():
                     break
 
                 if case(EventApi.SET_TIME_CONTROL):
-                    config = ConfigObj("picochess.ini")
+                    config = ConfigObj('picochess.ini')
                     if time_control.mode == TimeMode.BLITZ:
-                        config['time-mode'] = 'blitz'
+                        config['time'] = '{:d} 0'.format(time_control.minutes_per_game)
                     elif time_control.mode == TimeMode.FISCHER:
-                        config['time-mode'] = 'fischer'
+                        config['time'] = '{:d} {:d}'.format(time_control.minutes_per_game, time_control.fischer_increment)
                     elif time_control.mode == TimeMode.FIXED:
-                        config['time-mode'] = 'fixed'
-                    config['time-seconds-per-move'] = time_control.seconds_per_move
-                    config['time-minutes-per-game'] = time_control.minutes_per_game
-                    config['time-fischer-increment'] = time_control.fischer_increment
+                        config['time'] = '{:d}'.format(time_control.seconds_per_move)
                     config.write()
                     time_control = event.time_control
                     DisplayMsg.show(Message.TIME_CONTROL(time_text=event.time_text, ok_text=event.ok_text))

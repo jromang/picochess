@@ -75,16 +75,14 @@ mode_map = {'rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR': Mode.NORMAL,
             'rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR': Mode.OBSERVE,
             'rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR': Mode.REMOTE}
 
-drawresign_map = OrderedDict([
-    ('8/8/8/3k4/4K3/8/8/8', GameResult.RESIGN_WHITE),
-    ('8/8/8/3K4/4k3/8/8/8', GameResult.RESIGN_WHITE),
-    ('8/8/8/4k3/3K4/8/8/8', GameResult.RESIGN_BLACK),
-    ('8/8/8/4K3/3k4/8/8/8', GameResult.RESIGN_BLACK),
-    ('8/8/8/3kK3/8/8/8/8', GameResult.DRAW),
-    ('8/8/8/3Kk3/8/8/8/8', GameResult.DRAW),
-    ('8/8/8/8/3kK3/8/8/8', GameResult.DRAW),
-    ('8/8/8/8/3Kk3/8/8/8', GameResult.DRAW)
-])
+drawresign_map = {'8/8/8/3k4/4K3/8/8/8': GameResult.RESIGN_WHITE,
+                  '8/8/8/3K4/4k3/8/8/8': GameResult.RESIGN_WHITE,
+                  '8/8/8/4k3/3K4/8/8/8': GameResult.RESIGN_BLACK,
+                  '8/8/8/4K3/3k4/8/8/8': GameResult.RESIGN_BLACK,
+                  '8/8/8/3kK3/8/8/8/8': GameResult.DRAW,
+                  '8/8/8/3Kk3/8/8/8/8': GameResult.DRAW,
+                  '8/8/8/8/3kK3/8/8/8': GameResult.DRAW,
+                  '8/8/8/8/3Kk3/8/8/8': GameResult.DRAW}
 
 
 class DgtDisplay(Observable, DisplayMsg, threading.Thread):
@@ -568,7 +566,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     exit_menu = False
                 else:
                     self.dgttranslate.set_beep(self.system_sound_index)
-                    config = ConfigObj("picochess.ini")
+                    config = ConfigObj('picochess.ini')
                     config['beep-config'] = self.dgttranslate.beep_to_config(self.system_sound_index)
                     config.write()
                     text = self.dgttranslate.text('B10_okbeep')
@@ -581,7 +579,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     langs = {Language.EN: 'en', Language.DE: 'de', Language.NL: 'nl', Language.FR: 'fr', Language.ES: 'es'}
                     language = langs[self.system_language_index]
                     self.dgttranslate.set_language(language)
-                    config = ConfigObj("picochess.ini")
+                    config = ConfigObj('picochess.ini')
                     config['language'] = language
                     config.write()
                     text = self.dgttranslate.text('B10_oklang')
@@ -609,7 +607,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         text = self.dgttranslate.text('B10_level', msg)
                         DisplayDgt.show(text)
                     else:
-                        config = ConfigObj("picochess.ini")
+                        config = ConfigObj('picochess.ini')
                         config['engine-level'] = None
                         config.write()
                         text = self.dgttranslate.text('B10_okengine')
@@ -621,7 +619,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         msg = sorted(level_dict)[self.engine_level_index]
                         lvl_text = self.dgttranslate.text('B10_level', msg)
                         options = level_dict[msg]
-                        config = ConfigObj("picochess.ini")
+                        config = ConfigObj('picochess.ini')
                         config['engine-level'] = msg
                         config.write()
                         self.fire(Event.LEVEL(options={}, level_text=lvl_text))
@@ -942,7 +940,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         msg = sorted(level_dict)[level_index]
                         text = self.dgttranslate.text('M10_level', msg)
                         logging.debug("Map-Fen: New level {}".format(msg))
-                        config = ConfigObj("picochess.ini")
+                        config = ConfigObj('picochess.ini')
                         config['engine-level'] = msg
                         config.write()
                         self.fire(Event.LEVEL(options=level_dict[msg], level_text=text))
@@ -979,12 +977,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 msg = sorted(level_dict)[level_index]
                                 lvl_text = self.dgttranslate.text('M10_level', msg)
                                 options = level_dict[msg]
-                                config = ConfigObj("picochess.ini")
+                                config = ConfigObj('picochess.ini')
                                 config['engine-level'] = msg
                                 config.write()
                                 self.fire(Event.LEVEL(options={}, level_text=lvl_text))
                             else:
-                                config = ConfigObj("picochess.ini")
+                                config = ConfigObj('picochess.ini')
                                 config['engine-level'] = None
                                 config.write()
                                 options = {}
