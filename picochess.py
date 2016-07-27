@@ -47,7 +47,7 @@ from dgttranslate import DgtTranslate
 
 from logging.handlers import RotatingFileHandler
 from configobj import ConfigObj
-from engine import get_installed_engines
+# from engine import get_installed_engines
 
 
 class AlternativeMover:
@@ -583,7 +583,7 @@ def main():
     text.beep = False
     DisplayMsg.show(Message.STARTUP_INFO(info={'interaction_mode': interaction_mode, 'play_mode': play_mode,
                                                'books': all_books, 'book_index': book_index,
-                                               'time_text': text}))
+                                               'time_control': time_control,'time_text': text}))
     DisplayMsg.show(Message.UCI_OPTION_LIST(options=engine.options))
     DisplayMsg.show(Message.ENGINE_STARTUP(shell=engine.get_shell(), file=engine.get_file(),
                                            has_levels=engine.has_levels(), has_960=engine.has_chess960()))

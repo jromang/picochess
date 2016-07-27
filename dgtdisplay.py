@@ -845,6 +845,29 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.mode_result = message.info['interaction_mode']
                 self.book_index = message.info['book_index']
                 self.all_books = message.info['books']
+                tc = message.info['time_control']
+                self.time_mode_index = tc.mode
+                # try to find the index from the given time_control (tc)
+                # if user gave a non-existent tc value stay at standard
+                index = 0
+                if tc.mode == TimeMode.FIXED:
+                    for val in self.time_control_fixed_map.values():
+                        if val == tc:
+                            self.time_control_fixed_index = index
+                            break
+                        index += 1
+                elif tc.mode == TimeMode.BLITZ:
+                    for val in self.time_control_blitz_map.values():
+                        if val == tc:
+                            self.time_control_blitz_index = index
+                            break
+                        index +=1
+                elif tc.mode == TimeMode.FISCHER:
+                    for val in self.time_control_fisch_map.values():
+                        if val == tc:
+                            self.time_control_fisch_index = index
+                            break
+                        index +=1
                 break
             if case(MessageApi.SEARCH_STARTED):
                 logging.debug('Search started')

@@ -37,6 +37,10 @@ class TimeControl(object):
         self.start_time = None
         self.reset()
 
+    def __eq__(self, other):
+        return self.mode == other.mode and self.seconds_per_move == other.seconds_per_move and \
+               self.minutes_per_game == other.minutes_per_game and self.fischer_increment == other.fischer_increment
+
     def reset(self):
         """Resets the clock's times for both players"""
         if self.mode == TimeMode.BLITZ:
