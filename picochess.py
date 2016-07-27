@@ -534,13 +534,15 @@ def main():
     play_mode = PlayMode.USER_WHITE
     if args.time_mode == 'blitz':
         time_control = TimeControl(TimeMode.BLITZ, minutes_per_game=args.time_minutes_per_game)
+        text = dgttranslate.text('B00_tc_blitz', args.time_minutes_per_game.rjust(4))
     elif args.time_mode == 'fischer':
         time_control = TimeControl(TimeMode.FISCHER, minutes_per_game=args.time_minutes_per_game,
                                    fischer_increment=args.time_fischer_increment)
-    elif args.time_mode == 'fixed':
-        time_control = TimeControl(TimeMode.FIXED, seconds_per_move=args.time_seconds_per_move)
+        text = dgttranslate.text('B00_tc_fisch', '{:2d} {:2d}'.format(args.time_minutes_per_game, args.time_fischer_increment))
     else:
-        time_control = TimeControl(TimeMode.BLITZ, minutes_per_game=5)
+        time_control = TimeControl(TimeMode.FIXED, seconds_per_move=args.time_seconds_per_move)
+        text = dgttranslate.text('B00_tc_fixed', args.time_minutes_per_game.rjust(3))
+    text.beep = False
     last_computer_fen = None
     last_legal_fens = []
     game_declared = False  # User declared resignation or draw
@@ -550,8 +552,6 @@ def main():
     engine.startup({})
 
     # Startup - external
-    text = dgttranslate.text('B00_tc_blitz', '   5')
-    text.beep = False
     DisplayMsg.show(Message.STARTUP_INFO(info={'interaction_mode': interaction_mode, 'play_mode': play_mode,
                                                'books': all_books, 'book_index': book_index,
                                                'time_text': text}))
