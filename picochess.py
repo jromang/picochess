@@ -378,6 +378,31 @@ def main():
                 text = Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode)
             DisplayMsg.show(text)
 
+    def transfer_time(time_list):
+        def num(ts):
+            try:
+                return int(ts)
+            except ValueError:
+                return 1
+
+        if len(time_list) == 1:
+            secs = num(time_list[0])
+            time_control = TimeControl(TimeMode.FIXED, seconds_per_move=secs)
+            text = dgttranslate.text('B00_tc_fixed', '{:3d}'.format(secs))
+        elif len(time_list) == 2:
+            mins = num(time_list[0])
+            if time_list[1] == 0:
+                time_control = TimeControl(TimeMode.BLITZ, minutes_per_game=mins)
+                text = dgttranslate.text('B00_tc_blitz', '{:4d}'.format(mins))
+            else:
+                finc = num(time_list[1])
+                time_control = TimeControl(TimeMode.FISCHER, minutes_per_game=mins, fischer_increment=finc)
+                text = dgttranslate.text('B00_tc_fisch', '{:2d} {:2d}'.format(mins, finc))
+        else:
+            time_control = TimeControl(TimeMode.BLITZ, minutes_per_game=5)
+            text = dgttranslate.text('B00_tc_blitz', '   5')
+        return time_control, text
+
     # Enable garbage collection - needed for engine swapping as objects orphaned
     gc.enable()
 
@@ -389,11 +414,8 @@ def main():
                         help="enable dgt board on the given serial port such as /dev/ttyUSB0")
     parser.add_argument("-b", "--book", type=str, help="Opening book - full name of book in 'books' folder",
                         default='h-varied.bin')
-    parser.add_argument("-tmode", "--time-mode", choices=['blitz', 'fischer', 'fixed'], help="TimeMode",
-                        default='blitz')
-    parser.add_argument("-tsec", "--time-seconds-per-move", type=int, help="Fixed time seconds per move", default=0)
-    parser.add_argument("-tmin", "--time-minutes-per-game", type=int, help="Minutes per game", default=5)
-    parser.add_argument("-tinc", "--time-fischer-increment", type=int, help="Fischer increment in seconds", default=0)
+    parser.add_argument("-t", "--time", type=str, default='5 0',
+                        help="Time settings <FixSec> or <StMin IncSec> like '10'(fixed) or '5 0'(blitz) '3 2'(fischer)")
     parser.add_argument("-g", "--enable-gaviota", action='store_true', help="enable gavoita tablebase probing")
     parser.add_argument("-leds", "--enable-revelation-leds", action='store_true', help="enable Revelation leds")
     parser.add_argument("-l", "--log-level", choices=['notset', 'debug', 'info', 'warning', 'error', 'critical'],
@@ -532,17 +554,7 @@ def main():
     searchmoves = AlternativeMover()
     interaction_mode = Mode.NORMAL
     play_mode = PlayMode.USER_WHITE
-    if args.time_mode == 'blitz':
-        time_control = TimeControl(TimeMode.BLITZ, minutes_per_game=args.time_minutes_per_game)
-        text = dgttranslate.text('B00_tc_blitz', args.time_minutes_per_game.rjust(4))
-    elif args.time_mode == 'fischer':
-        time_control = TimeControl(TimeMode.FISCHER, minutes_per_game=args.time_minutes_per_game,
-                                   fischer_increment=args.time_fischer_increment)
-        text = dgttranslate.text('B00_tc_fisch', '{:2d} {:2d}'.format(args.time_minutes_per_game, args.time_fischer_increment))
-    else:
-        time_control = TimeControl(TimeMode.FIXED, seconds_per_move=args.time_seconds_per_move)
-        text = dgttranslate.text('B00_tc_fixed', args.time_minutes_per_game.rjust(3))
-    text.beep = False
+
     last_computer_fen = None
     last_legal_fens = []
     game_declared = False  # User declared resignation or draw
@@ -552,6 +564,8 @@ def main():
     engine.startup({})
 
     # Startup - external
+    time_control, text = transfer_time(args.time.split())
+    text.beep = False
     DisplayMsg.show(Message.STARTUP_INFO(info={'interaction_mode': interaction_mode, 'play_mode': play_mode,
                                                'books': all_books, 'book_index': book_index,
                                                'time_text': text}))
