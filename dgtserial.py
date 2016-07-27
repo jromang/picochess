@@ -515,3 +515,4 @@ class DgtSerial(object):
 
     def run(self):
         self.incoming_board_thread = Timer(0, self.process_incoming_board_forever)
+        self.incoming_board_thread.start()
