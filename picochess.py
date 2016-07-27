@@ -47,6 +47,7 @@ from dgttranslate import DgtTranslate
 
 from logging.handlers import RotatingFileHandler
 from configobj import ConfigObj
+from engine import get_installed_engines
 
 
 class AlternativeMover:
@@ -561,6 +562,20 @@ def main():
 
     system_info_thread = threading.Timer(0, display_system_info)
     system_info_thread.start()
+
+    # installed_engines = get_installed_engines(engine.get_shell(), engine.get_file())
+    # for index in range(0, len(installed_engines)):
+    #     eng = installed_engines[index]
+    #     if eng['file'] == engine.get_file():
+    #         engine_index = index
+    #         try:
+    #             engine_level_dict = eng['level_dict'][args.engine_level]
+    #             engine_level_index = eng['level_dict'].index(args.engine_level)
+    #         except ValueError:
+    #             engine_level_dict = {}
+    #             engine_level_index = len(eng['level_dict']) - 1
+    # print(engine_index, engine_level_index, engine_level_dict)
+
     engine.startup({})
 
     # Startup - external
