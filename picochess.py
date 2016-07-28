@@ -575,6 +575,9 @@ def main():
     #             engine_level_dict = {}
     #             engine_level_index = len(eng['level_dict']) - 1
     # print(engine_index, engine_level_index, engine_level_dict)
+    #
+    # JP! Vielleicht geht sowas wie das?
+    # self.time_control_fixed_index = list(self.time_control_fixed_map.keys()).index(fen)
 
     engine.startup({})
 
