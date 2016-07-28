@@ -214,7 +214,6 @@ class UciEngine(object):
         self.engine.setoption(self.options)
 
     def level(self, options):
-        self.level_support = True
         self.options = options
 
     def has_levels(self):
@@ -301,6 +300,7 @@ class UciEngine(object):
         parser = configparser.ConfigParser()
         if not options and parser.read(self.get_file() + '.uci'):
             options = dict(parser[parser.sections().pop()])
+        self.level_support = bool(options)
         if parser.read('picochess.uci'):
             pc_opts = dict(parser[parser.sections().pop()])
             pc_opts.update(options)

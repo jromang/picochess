@@ -404,6 +404,21 @@ def main():
             text = dgttranslate.text('B00_tc_blitz', '   5')
         return time_control, text
 
+    def get_engine_level_dict(engine_level):
+        from engine import get_installed_engines
+
+        installed_engines = get_installed_engines(engine.get_shell(), engine.get_file())
+        for index in range(0, len(installed_engines)):
+            eng = installed_engines[index]
+            if eng['file'] == engine.get_file():
+                level_list = sorted(eng['level_dict'])
+                try:
+                    level_index = level_list.index(engine_level)
+                    return eng['level_dict'][level_list[level_index]]
+                except ValueError:
+                    break
+        return {}
+
     # Enable garbage collection - needed for engine swapping as objects orphaned
     gc.enable()
 
@@ -563,23 +578,7 @@ def main():
     system_info_thread = threading.Timer(0, display_system_info)
     system_info_thread.start()
 
-    # installed_engines = get_installed_engines(engine.get_shell(), engine.get_file())
-    # for index in range(0, len(installed_engines)):
-    #     eng = installed_engines[index]
-    #     if eng['file'] == engine.get_file():
-    #         engine_index = index
-    #         try:
-    #             engine_level_dict = eng['level_dict'][args.engine_level]
-    #             engine_level_index = eng['level_dict'].index(args.engine_level)
-    #         except ValueError:
-    #             engine_level_dict = {}
-    #             engine_level_index = len(eng['level_dict']) - 1
-    # print(engine_index, engine_level_index, engine_level_dict)
-    #
-    # JP! Vielleicht geht sowas wie das?
-    # self.time_control_fixed_index = list(self.time_control_fixed_map.keys()).index(fen)
-
-    engine.startup({})
+    engine.startup(get_engine_level_dict(args.engine_level))
 
     # Startup - external
     time_control, text = transfer_time(args.time.split())
