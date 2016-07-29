@@ -112,7 +112,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.mode_result = None
         self.mode_index = None
 
-        self.engine_level_result = None
         self.engine_level_index = None
         self.engine_has_960 = False  # Not all engines support 960 mode - assume not
         self.engine_restart = False
@@ -176,7 +175,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.setup_uci960_result = None
         self.top_result = None
         self.engine_result = None
-        self.engine_level_result = None
         self.system_sound_result = None
         self.system_language_result = None
 
@@ -601,7 +599,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 if self.engine_result is None:
                     if level_dict:
                         self.engine_result = self.engine_index
-                        if len(level_dict) <= self.engine_level_index:
+                        if self.engine_level_index is None or len(level_dict) <= self.engine_level_index:
                             self.engine_level_index = len(level_dict)-1
                         msg = sorted(level_dict)[self.engine_level_index]
                         text = self.dgttranslate.text('B10_level', msg)
@@ -617,12 +615,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 else:
                     if level_dict:
                         msg = sorted(level_dict)[self.engine_level_index]
-                        lvl_text = self.dgttranslate.text('B10_level', msg)
                         options = level_dict[msg]
                         config = ConfigObj('picochess.ini')
                         config['engine-level'] = msg
                         config.write()
-                        self.fire(Event.LEVEL(options={}, level_text=lvl_text))
+                        self.fire(Event.LEVEL(options={}, level_text=self.dgttranslate.text('B10_level', msg)))
                     else:
                         options = {}
                     eng_text = self.dgttranslate.text('B10_okengine')
@@ -709,7 +706,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if eng['file'] == message.file:
                         self.engine_index = index
                         self.engine_has_960 = message.has_960
-                        self.engine_level_index = len(eng['level_dict'])-1
+                        # todo: preset correct startup level (which needs a message.engine_index parameter)
+                        self.engine_level_index = len(eng['level_dict'])-1 if eng['level_dict'] else None
                 break
             if case(MessageApi.ENGINE_FAIL):
                 DisplayDgt.show(self.dgttranslate.text('Y00_erroreng'))
@@ -933,11 +931,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     level_dict = eng['level_dict']
                     if level_dict:
                         inc = math.ceil(len(level_dict) / 8)
-                        level_index = min(inc * level_map.index(fen), len(level_dict)-1)
-                        self.engine_level_result = level_index
-                        self.engine_level_index = level_index
-
-                        msg = sorted(level_dict)[level_index]
+                        self.engine_level_index = min(inc * level_map.index(fen), len(level_dict)-1)
+                        msg = sorted(level_dict)[self.engine_level_index]
                         text = self.dgttranslate.text('M10_level', msg)
                         logging.debug("Map-Fen: New level {}".format(msg))
                         config = ConfigObj('picochess.ini')
@@ -971,11 +966,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             logging.debug("Map-Fen: Engine name [%s]", eng['section'])
                             eng_text = self.dgttranslate.text('M10_default', eng['section'])
                             if level_dict:
-                                if len(level_dict) <= self.engine_level_index:
-                                    self.engine_level_index = len(level_dict) - 1
-                                level_index = self.engine_level_index if self.engine_level_result is None else self.engine_level_result
-                                msg = sorted(level_dict)[level_index]
-                                options = level_dict[msg]  # since there is a "new-engine", we send this lateron now {}
+                                if self.engine_level_index is None or len(level_dict) <= self.engine_level_index:
+                                    self.engine_level_index = len(level_dict)-1
+                                msg = sorted(level_dict)[self.engine_level_index]
+                                options = level_dict[msg]  # cause of "new-engine", we send this lateron now only {}
                                 self.fire(Event.LEVEL(options={}, level_text=self.dgttranslate.text('M10_level', msg)))
                             else:
                                 msg = None
