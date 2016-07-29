@@ -392,11 +392,11 @@ def main():
             text = dgttranslate.text('B00_tc_fixed', '{:3d}'.format(secs))
         elif len(time_list) == 2:
             mins = num(time_list[0])
-            if time_list[1] == 0:
+            finc = num(time_list[1])
+            if finc == 0:
                 time_control = TimeControl(TimeMode.BLITZ, minutes_per_game=mins)
                 text = dgttranslate.text('B00_tc_blitz', '{:4d}'.format(mins))
             else:
-                finc = num(time_list[1])
                 time_control = TimeControl(TimeMode.FISCHER, minutes_per_game=mins, fischer_increment=finc)
                 text = dgttranslate.text('B00_tc_fisch', '{:2d} {:2d}'.format(mins, finc))
         else:
@@ -841,6 +841,7 @@ def main():
                     break
 
                 if case(EventApi.SET_TIME_CONTROL):
+                    time_control = event.time_control
                     config = ConfigObj('picochess.ini')
                     if time_control.mode == TimeMode.BLITZ:
                         config['time'] = '{:d} 0'.format(time_control.minutes_per_game)
@@ -849,7 +850,6 @@ def main():
                     elif time_control.mode == TimeMode.FIXED:
                         config['time'] = '{:d}'.format(time_control.seconds_per_move)
                     config.write()
-                    time_control = event.time_control
                     DisplayMsg.show(Message.TIME_CONTROL(time_text=event.time_text, ok_text=event.ok_text))
                     break
 

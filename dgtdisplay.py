@@ -975,17 +975,14 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                     self.engine_level_index = len(level_dict) - 1
                                 level_index = self.engine_level_index if self.engine_level_result is None else self.engine_level_result
                                 msg = sorted(level_dict)[level_index]
-                                lvl_text = self.dgttranslate.text('M10_level', msg)
-                                options = level_dict[msg]
-                                config = ConfigObj('picochess.ini')
-                                config['engine-level'] = msg
-                                config.write()
-                                self.fire(Event.LEVEL(options={}, level_text=lvl_text))
+                                options = level_dict[msg]  # since there is a "new-engine", we send this lateron now {}
+                                self.fire(Event.LEVEL(options={}, level_text=self.dgttranslate.text('M10_level', msg)))
                             else:
-                                config = ConfigObj('picochess.ini')
-                                config['engine-level'] = None
-                                config.write()
+                                msg = None
                                 options = {}
+                            config = ConfigObj('picochess.ini')
+                            config['engine-level'] = msg
+                            config.write()
                             self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options=options, ok_text=False))
                             self.engine_restart = True
                             self.reset_menu_results()

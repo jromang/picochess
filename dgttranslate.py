@@ -473,7 +473,7 @@ class DgtTranslate(object):
             estxt = Dgt.DISPLAY_TEXT(l=None, m='IP dir', s=None, wait=False, beep=bl_button, maxtime=0)
         if text_id == 'B00_settings_sound_menu':
             entxt = Dgt.DISPLAY_TEXT(l=None, m='Sound', s=None, wait=False, beep=bl_button, maxtime=0)
-            detxt = Dgt.DISPLAY_TEXT(l=None, m='Sound', s=None, wait=False, beep=bl_button, maxtime=0)
+            detxt = Dgt.DISPLAY_TEXT(l=None, m='Toene', s=None, wait=False, beep=bl_button, maxtime=0)
             nltxt = Dgt.DISPLAY_TEXT(l=None, m='Geluid', s=None, wait=False, beep=bl_button, maxtime=0)
             frtxt = Dgt.DISPLAY_TEXT(l=None, m='Sons', s=None, wait=False, beep=bl_button, maxtime=0)
             estxt = Dgt.DISPLAY_TEXT(l=None, m='Sonido', s=None, wait=False, beep=bl_button, maxtime=0)
