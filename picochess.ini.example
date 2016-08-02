@@ -12,7 +12,7 @@
 ### = DGT related options =
 ### =======================
 ## enable-revelation-leds turn ON or OFF the LED's on the Revelation II board. If so, please uncomment the next line
-# enable-revelation-leds
+# enable-revelation-leds = True
 ## beep-level changes the occurrence of beeps. Minimum value is 0 (no beeps), maximum is 15 (all beeps).
 ## inside the clock menu you can choose between "always", "never" and "some". The value you give inside here, is
 ## the value of "some". Each part of beeps has a special number and you have to add them to get the beep-level
@@ -23,12 +23,12 @@
 ## For example to beep on "ok messages" and "button press" would result in 8+2=10 as beep-level
 # beep-level = 3
 ## Should a confirmation message (after moves) be displayed? If not, please active the next line
-# disable-ok-message
+# disable-ok-message = True
 ## Specify the serial port your dgt-board is connected to. If y not give a parameter picochess tries to find the board
 # dgt-port = /dev/ttyACM0
 ## Instead of connecting to a dgt board, you can also start picochess with a command line.
 ## If so, please uncomment the next line
-# console
+# console = True
 
 
 ### ========================
@@ -79,7 +79,7 @@
 ## Should PicoChess SSL-encrypt the communication with your smtp server (Port 465)?
 ## Otherwise PicoChess will use the default and unencrypted SMTP Port 21.
 ## Some SMTP Server require an SSL encryption (e.g. GMAIL). If so, uncomment the next line.
-# smtp-encryption
+# smtp-encryption = True
 ## In case the SMTP Server thinks you are spamming, you must enter a valid from email here
 # smtp-from = no-reply@picochess.org
 ### ==========================================
@@ -108,15 +108,15 @@
 # pgn-user = player
 ## Picochess connects to the internet like ip adr, update of newest software etc.
 ## This is by default not actived. If you want this feature, please uncomment the next line
-# enable-internet
+# enable-internet = True
 ## After an update should the machine reboot automatically? If so, please uncomment the next line
-# auto-reboot
+# auto-reboot = True
 ## The port of the webserver
 # web-server = 8080
 ## Do tablebase probing using gaviota? The database files must be in 'tablebases/gaviota/'
 ## This isn't used inside the chess engine. Just show the tb-value at dgt clock (for your info)
 ## If so, uncomment the next line
-# enable-gaviota
+# enable-gaviota = True
 ## PicoChess messages can be displayed in English, German, Dutch, French or Spanish.
 ## You can set the language with the "language" option. Default is English.
 ## en = English; de = German; nl = Dutch; fr = French; es = Spanish
