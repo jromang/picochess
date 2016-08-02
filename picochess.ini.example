@@ -1,12 +1,15 @@
 ### ===============================
-### = picochess.ini.example v0.70 =
+### = picochess.ini.example v0.71 =
 ### ===============================
 ### Example and description how to configure PicoChess
 ### To use this file, simply copy this file to picochess.ini and edit the appropriate settings
 
+### From v0.71 on some picochess.ini values are overridden when you change their values using the menu system
+### Perhaps its a good idea to keep a copy of "picochess.ini" before you are going live with your picochess ;-)
+
 ### Lines that start with 3x# are general comments
 ### Lines that start with 2x# explain the option of the next line that starts with one # 
-### Lines that start with 1x# are option lines, delete the # to use the option 
+### Lines that start with 1x# are option lines, delete the # to use the option
 
 ### =======================
 ### = DGT related options =
@@ -24,12 +27,15 @@
 # beep-level = 3
 ## Should a confirmation message (after moves) be displayed? If not, please active the next line
 # disable-ok-message = True
-## Specify the serial port your dgt-board is connected to. If y not give a parameter picochess tries to find the board
+## Specify the serial port your dgt-board is connected to.
+## If you dont give a parameter picochess tries to find the board automatically.
 # dgt-port = /dev/ttyACM0
 ## Instead of connecting to a dgt board, you can also start picochess with a command line.
 ## If so, please uncomment the next line
 # console = True
-
+## If you have a new DGT Pi Clock please uncomment the next line and change "False" to "True".
+## Handle with care. Picochess won't work if you have a DGT XL or DGT3000 clock (standard case).
+# dgtpi = False
 
 ### ========================
 ### = Chess engine options =
@@ -37,6 +43,9 @@
 ### Options for the UCI-Chess engine
 ## What engine should play. Path to a (startup) UCI engine
 # engine = engines/armv7l/a-stockf
+## What level the engine should have at startup?
+## For the value please see the engines/<your_plattform>/<engine_name>.uci
+# engine-level = Level@20
 ## Where is the server with the engine
 # remote-server = engine.remote-domain.com
 ## What user to use for connect to the remote-engine server
@@ -53,6 +62,15 @@
 ### Must be the full name of an opening book in the 'books' folder
 ### Defaults to book 'h', normally 'h-varied', if not set or not available
 # book = h-varied.bin
+
+### ==================
+### = Time selection =
+### ==================
+## Sets the startup time. If you give something like "5 0" that means 5mins blitz (default value)
+## Fischer time can be set by changing this "0" (increment value) to a positive number like "3 2"
+## Fixed time can be set by just giving one number like "10" meaning 10 secs/move
+## You can also give non-standard values (like "4 6"), but then you cant change them inside the menu.
+# time = 5 0
 
 ### ================
 ### = Mail Service =
