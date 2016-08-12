@@ -71,15 +71,15 @@ class PgnDisplay(DisplayMsg, threading.Thread):
         pgn_game.headers['Event'] = 'PicoChess game'
         pgn_game.headers['Site'] = self.location
         pgn_game.headers['Date'] = datetime.date.today().strftime('%Y.%m.%d')
-        if message.result == GameResult.ABORT:
-            pgn_game.headers['Result'] = '*'
-        elif message.result in (GameResult.DRAW, GameResult.STALEMATE, GameResult.SEVENTYFIVE_MOVES,
-                                GameResult.FIVEFOLD_REPETITION, GameResult.INSUFFICIENT_MATERIAL):
+
+        if message.result == GameResult.DRAW:
             pgn_game.headers['Result'] = '1/2-1/2'
-        elif message.result in (GameResult.RESIGN_WHITE, GameResult.RESIGN_BLACK):
-            pgn_game.headers['Result'] = '1-0' if message.result == GameResult.RESIGN_WHITE else '0-1'
-        elif message.result in (GameResult.MATE, GameResult.OUT_OF_TIME):
+        elif message.result in (GameResult.WIN_WHITE, GameResult.WIN_BLACK):
+            pgn_game.headers['Result'] = '1-0' if message.result == GameResult.WIN_WHITE else '0-1'
+        elif message.result == GameResult.OUT_OF_TIME:
             pgn_game.headers['Result'] = '0-1' if message.game.turn == chess.WHITE else '1-0'
+        else:
+            pgn_game.headers['Result'] = message.game.result()
 
         if self.level is None:
             engine_level = ''

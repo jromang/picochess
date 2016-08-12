@@ -378,8 +378,8 @@ class GameResult(enum.Enum):
     SEVENTYFIVE_MOVES = 'B00_gameresult_moves_menu'
     FIVEFOLD_REPETITION = 'B00_gameresult_repetition_menu'
     ABORT = 'B00_gameresult_abort_menu'
-    RESIGN_WHITE = 'B00_gameresult_white_menu'
-    RESIGN_BLACK = 'B00_gameresult_black_menu'
+    WIN_WHITE = 'B00_gameresult_white_menu'
+    WIN_BLACK = 'B00_gameresult_black_menu'
     DRAW = 'B00_gameresult_draw_menu'
 
 

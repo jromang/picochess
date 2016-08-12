@@ -167,10 +167,10 @@ class ChessTalker(DisplayMsg, threading.Thread):
                         elif message.result == GameResult.DRAW:
                             logging.debug('Announcing DRAW')
                             system_voice.say_draw()
-                        elif message.result == GameResult.RESIGN_WHITE:
+                        elif message.result == GameResult.WIN_WHITE:
                             logging.debug('Announcing WHITE WIN')
                             system_voice.say_winner(ChessTalkerVoice.COLOR_WHITE)
-                        elif message.result == GameResult.RESIGN_BLACK:
+                        elif message.result == GameResult.WIN_BLACK:
                             logging.debug('Announcing BLACK WIN')
                             system_voice.say_winner(ChessTalkerVoice.COLOR_BLACK)
                         break
