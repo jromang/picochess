@@ -56,7 +56,7 @@ class PgnDisplay(DisplayMsg, threading.Thread):
     def save_and_email_pgn(self, message):
         logging.debug('Saving game to [' + self.file_name + ']')
         pgn_game = chess.pgn.Game()
-        msg_game = message.game
+        msg_game = message.game.copy()
         moves = []
         # go back, to see if the first fen is not standard fen
         while msg_game.move_stack:
