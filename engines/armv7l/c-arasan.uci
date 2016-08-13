@@ -1,0 +1,84 @@
+[Elo@1000]
+uci_elo = 1000
+uci_limitstrength = true
+
+[Elo@1080]
+uci_elo = 1080
+uci_limitstrength = true
+
+[Elo@1160]
+uci_elo = 1160
+uci_limitstrength = true
+
+[Elo@1240]
+uci_elo = 1240
+uci_limitstrength = true
+
+[Elo@1320]
+uci_elo = 1320
+uci_limitstrength = true
+
+[Elo@1400]
+uci_elo = 1400
+uci_limitstrength = true
+
+[Elo@1480]
+uci_elo = 1480
+uci_limitstrength = true
+
+[Elo@1560]
+uci_elo = 1560
+uci_limitstrength = true
+
+[Elo@1640]
+uci_elo = 1640
+uci_limitstrength = true
+
+[Elo@1720]
+uci_elo = 1720
+uci_limitstrength = true
+
+[Elo@1800]
+uci_elo = 1800
+uci_limitstrength = true
+
+[Elo@1880]
+uci_elo = 1880
+uci_limitstrength = true
+
+[Elo@1960]
+uci_elo = 1960
+uci_limitstrength = true
+
+[Elo@2040]
+uci_elo = 2040
+uci_limitstrength = true
+
+[Elo@2120]
+uci_elo = 2120
+uci_limitstrength = true
+
+[Elo@2200]
+uci_elo = 2200
+uci_limitstrength = true
+
+[Elo@2280]
+uci_elo = 2280
+uci_limitstrength = true
+
+[Elo@2360]
+uci_elo = 2360
+uci_limitstrength = true
+
+[Elo@2440]
+uci_elo = 2440
+uci_limitstrength = true
+
+[Elo@2520]
+uci_elo = 2520
+uci_limitstrength = true
+
+[Elo@2600]
+uci_elo = 2600
+uci_limitstrength = false
+
