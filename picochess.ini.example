@@ -45,7 +45,7 @@
 # engine = engines/armv7l/a-stockf
 ## What level the engine should have at startup?
 ## For the value please see the engines/<your_plattform>/<engine_name>.uci
-# engine-level = Level@20
+# engine_level = Level@20
 ## Where is the server with the engine
 # remote-server = engine.remote-domain.com
 ## What user to use for connect to the remote-engine server
