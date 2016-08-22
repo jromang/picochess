@@ -610,19 +610,19 @@ class DgtTranslate(object):
             frtxt = Dgt.DISPLAY_TEXT(l='ok langue', m='okLangue', s='oklang', wait=False, beep=bl_button, maxtime=1)
             estxt = Dgt.DISPLAY_TEXT(l='ok idioma', m='okIdioma', s='oklang', wait=False, beep=bl_button, maxtime=1)
         if text_id == 'B00_tc_fixed':
-            entxt = Dgt.DISPLAY_TEXT(l='fixed  ' + msg, m='fixd' + msg, s='mov' + msg, wait=False, beep=bl_button, maxtime=0)
+            entxt = Dgt.DISPLAY_TEXT(l='Fixed  ' + msg, m='Fixd' + msg, s='mov' + msg, wait=False, beep=bl_button, maxtime=0)
             detxt = entxt
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
         if text_id == 'B00_tc_blitz':
-            entxt = Dgt.DISPLAY_TEXT(l='blitz  ' + msg, m='bltz' + msg, s='bl' + msg, wait=False, beep=bl_button, maxtime=0)
+            entxt = Dgt.DISPLAY_TEXT(l='Blitz  ' + msg, m='Bltz' + msg, s='bl' + msg, wait=False, beep=bl_button, maxtime=0)
             detxt = entxt
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
         if text_id == 'B00_tc_fisch':
-            entxt = Dgt.DISPLAY_TEXT(l='fischr' + msg, m='fsh' + msg, s='f' + msg, wait=False, beep=bl_button, maxtime=0)
+            entxt = Dgt.DISPLAY_TEXT(l='Fischr' + msg, m='Fsh' + msg, s='f' + msg, wait=False, beep=bl_button, maxtime=0)
             detxt = entxt 
             nltxt = entxt 
             frtxt = entxt 
