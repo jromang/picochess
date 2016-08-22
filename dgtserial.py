@@ -48,7 +48,7 @@ char_to_DGTXL = {
 
 piece_to_char = {
     0x01: 'P', 0x02: 'R', 0x03: 'N', 0x04: 'B', 0x05: 'K', 0x06: 'Q',
-    0x07: 'p', 0x08: 'r', 0x09: 'n', 0x0a: 'b', 0x0b: 'k', 0x0c: 'q', 0x00: '.'
+    0x07: 'p', 0x08: 'r', 0x09: 'n', 0x0a: 'b', 0x0b: 'k', 0x0c: 'q', 0x0d: '1', 0x0e: '2', 0x0f: '3', 0x00: '.'
 }
 
 
@@ -80,7 +80,9 @@ class DgtSerial(object):
     def startup_serial_hardware(self):
         self.setup_serial_port()
         if self.serial:
+            time.sleep(1.5)
             if not self.is_pi:  # can this "if" be removed for example for a RevII board?!?
+                self.clock_lock = False
                 self.startup_serial_clock()
             self.startup_serial_board()
 
@@ -139,7 +141,7 @@ class DgtSerial(object):
                 board_version = str(message[0]) + '.' + str(message[1])
                 logging.debug("DGT board version %0.2f", float(board_version))
                 if self.device.find('rfc') == -1:
-                    text_l, text_m, text_s = 'USB E-board', 'USBboard', 'ok usb'
+                    text_l, text_m, text_s = 'USB e-Board', 'USBboard', 'ok usb'
                     channel = 'USB'
                 else:
                     if 'REVII' in self.bt_name:
@@ -147,7 +149,7 @@ class DgtSerial(object):
                     elif 'DGT_BT' in self.bt_name:
                         text_l, text_m, text_s = 'DGTBT ' + self.bt_name[-5:], 'BT ' + self.bt_name[-5:], self.bt_name[-5:]
                     else:
-                        text_l, text_m, text_s = 'BT E-board', 'BT board', 'ok bt'
+                        text_l, text_m, text_s = 'BT e-Board', 'BT board', 'ok bt'
                     channel = 'BT'
                 text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, wait=True, beep=False, maxtime=1)
                 DisplayMsg.show(Message.EBOARD_VERSION(text=text, channel=channel))
