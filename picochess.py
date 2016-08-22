@@ -760,10 +760,12 @@ def main():
                 if case(EventApi.NEW_GAME):
                     stop_search_and_clock()
                     if game.move_stack:
-                        logging.debug('starting a new game')
+                        logging.debug('starting a new game with code: {}'.format(event.pos960))
                         if not (game.is_game_over() or game_declared):
                             DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=game.copy()))
-                        game = chess.Board()
+                    game = chess.Board()
+                    if event.pos960 != 518:  # 518 is normal game setup
+                        game.set_chess960_pos(event.pos960)
                     legal_fens = compute_legal_fens(game)
                     last_legal_fens = []
                     # interaction_mode = Mode.NORMAL @todo

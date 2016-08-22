@@ -1,0 +1,201 @@
+
+       .gameVariation {
+           font-size: 16px;
+           display: block;
+           margin-left: 3em;
+           margin-top: 0.25em;
+           margin-bottom: 0.25em;
+
+           /*padding-left: 22px ;*/
+           /*text-indent: -22px ;*/
+       }
+
+       .gameVariation .gameMoves {
+           font-weight: normal;
+       }
+
+       .comment {
+           font-size: 18px;
+           display: block;
+           /*margin-left: 3em;*/
+           margin-top: 0.25em;
+           margin-bottom: 0.25em;
+           color: green;
+           font-weight: normal;
+
+           /*padding-left: 22px ;*/
+           /*text-indent: -22px ;*/
+       }
+
+       .gameMoves {
+           font-size: 18px;
+           font-weight: bolder;
+           line-height: 150%;
+           font-family: Tahoma, Geneva, sans-serif;
+       }
+
+       .gameResult {
+           font-size: 24px;
+       }
+
+       .spacer {
+           margin-top: 20px; /* define margin as you see fit */
+       }
+
+       .container-xs-height {
+           display: table;
+           padding-left: 0px;
+           padding-right: 0px;
+       }
+
+       .row-xs-height {
+           display: table-row;
+       }
+
+       .col-xs-height {
+           display: table-cell;
+           float: none;
+       }
+
+       .top-buffer {
+           margin-top: 10px;
+       }
+
+       .bottom-buffer {
+           margin-bottom: 10px;
+       }
+
+       .left-buffer {
+           margin-left: 10px;
+       }
+
+       .right-buffer {
+           margin-right: 10px;
+       }
+
+       input[type=text] {
+           width: 100%;
+           box-sizing: border-box;
+           height: 28px;
+       }
+
+       .grid {
+           margin-top: 1em;
+       }
+
+       .panel-heading {
+           overflow: hidden;
+       }
+
+       .flat-table tr:nth-of-type(even) {
+           background: transparent;
+       }
+
+       .flat-table a {
+           /*color: #00008b;*/
+           color: #808080;
+           /*text-decoration: underline;*/
+       }
+
+       .flat-table {
+           /*table-layout:fixed;*/
+
+           margin-bottom: 20px;
+           border-collapse: collapse;
+           font-family: Calibri, Arial, sans-serif;
+           /*border: none;*/
+           border-radius: 3px;
+           -webkit-border-radius: 3px;
+           -moz-border-radius: 3px;
+       }
+
+       .flat-table th {
+           /*.a color:  -webkit-link;*/
+           font-weight: normal;
+           -webkit-font-smoothing: antialiased;
+           padding: 1em;
+           color: rgba(0, 0, 0, 0.45);
+           text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
+           font-size: 1.3em;
+           text-align: center !important;
+       }
+
+       .flat-table td {
+           /*color: #f7f7f7;*/
+           padding: 0.7em 1em 0.7em 1.15em;
+           /*text-shadow: 0 0 1px rgba(255,255,255,0.1);*/
+           font-size: 1.2em;
+           font-weight: normal;
+           text-align: center !important;
+           white-space: nowrap;
+           overflow: hidden;
+           text-overflow: ellipsis;
+       }
+
+       .flat-table tr {
+           -webkit-transition: background 0.3s, box-shadow 0.3s;
+           -moz-transition: background 0.3s, box-shadow 0.3s;
+           transition: background 0.3s, box-shadow 0.3s;
+       }
+
+       .flat-table-1 {
+           background: #fffaf0;
+
+       }
+
+       .flat-table-1 tr:hover {
+           background-color: rgba(0, 0, 0, 0.19);
+       }
+
+       .flat-table-2 tr:hover {
+           background-color: rgba(0, 0, 0, 0.1);
+       }
+
+       .flat-table-3 {
+           background: #fffaf0;
+       }
+
+       .flat-table-3 tr:hover {
+           background: rgba(0, 0, 0, 0.1);
+       }
+
+       .flat-table-2 {
+           background-color: hsl(145, 62%, 37%) !important;
+           background-repeat: repeat-x;
+           filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#4dd586", endColorstr="#239854");
+           background-image: -khtml-gradient(linear, left top, left bottom, from(#4dd586), to(#239854));
+           background-image: -moz-linear-gradient(top, #4dd586, #239854);
+           background-image: -ms-linear-gradient(top, #4dd586, #239854);
+           background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #4dd586), color-stop(100%, #239854));
+           background-image: -webkit-linear-gradient(top, #4dd586, #239854);
+           background-image: -o-linear-gradient(top, #4dd586, #239854);
+           background-image: linear-gradient(#4dd586, #239854);
+           border-color: #239854 #239854 hsl(145, 62%, 32%);
+           color: #fff !important;
+           text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.33);
+           -webkit-font-smoothing: antialiased;
+       }
+
+       .panel-heading>.nav-tabs {
+            border-bottom: none;
+            margin-bottom: -10px;
+            overflow: visible;
+
+        }
+
+       .panel .panel-borderless .panel-primary{
+           border: 0;
+           box-shadow: none;
+        }
+
+       .fixed-panel-heading {
+           overflow: visible;
+           min-height: 4em;
+           max-height: 4em;
+       }
+
+       /*.dropdown-menu{*/
+            /*position:relative;*/
+             /*height: auto !important;*/
+  /*overflow: visible !important;*/
+        /*}*/

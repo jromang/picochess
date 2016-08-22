@@ -686,7 +686,7 @@ class Event():
     # User events
     FEN = ClassFactory(EventApi.FEN, ['fen'])
     LEVEL = ClassFactory(EventApi.LEVEL, ['options', 'level_text'])
-    NEW_GAME = ClassFactory(EventApi.NEW_GAME, [])
+    NEW_GAME = ClassFactory(EventApi.NEW_GAME, ['pos960'])
     DRAWRESIGN = ClassFactory(EventApi.DRAWRESIGN, ['result'])
     KEYBOARD_MOVE = ClassFactory(EventApi.KEYBOARD_MOVE, ['move', 'flip_board'])
     REMOTE_MOVE = ClassFactory(EventApi.REMOTE_MOVE, ['move', 'fen'])

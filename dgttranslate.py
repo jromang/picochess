@@ -267,6 +267,13 @@ class DgtTranslate(object):
             nltxt = Dgt.DISPLAY_TEXT(l="nieuw party", m="nw party", s="nwpart", wait=False, beep=bl_config, maxtime=1)
             frtxt = Dgt.DISPLAY_TEXT(l='nvl partie', m="nvl part", s="newgam", wait=False, beep=bl_config, maxtime=1)
             estxt = Dgt.DISPLAY_TEXT(l='nuev partid', m="nuevpart", s="n part", wait=False, beep=bl_config, maxtime=1)
+        if text_id == 'C10_ucigame':
+            msg = msg.rjust(3)
+            entxt = Dgt.DISPLAY_TEXT(l="new Game" + msg, m="Game " + msg, s="gam" + msg, wait=False, beep=bl_config, maxtime=1)
+            detxt = Dgt.DISPLAY_TEXT(l="neuSpiel" + msg, m="Spiel" + msg, s="spl" + msg, wait=False, beep=bl_config, maxtime=1)
+            nltxt = Dgt.DISPLAY_TEXT(l="nw party" + msg, m="party" + msg, s="par" + msg, wait=False, beep=bl_config, maxtime=1)
+            frtxt = Dgt.DISPLAY_TEXT(l='nvl part' + msg, m="part " + msg, s="gam" + msg, wait=False, beep=bl_config, maxtime=1)
+            estxt = Dgt.DISPLAY_TEXT(l='partid  ' + msg, m="part " + msg, s="par" + msg, wait=False, beep=bl_config, maxtime=1)
         if text_id == 'C00_takeback':
             entxt = Dgt.DISPLAY_TEXT(l=None, m="takeback", s="takbak", wait=True, beep=bl_config, maxtime=1)
             detxt = Dgt.DISPLAY_TEXT(l="Ruecknahme", m="Rcknahme", s="rueckn", wait=True, beep=bl_config, maxtime=1)

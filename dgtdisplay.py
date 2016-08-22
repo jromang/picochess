@@ -941,10 +941,16 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.fire(Event.LEVEL(options=level_dict[msg], level_text=text))
                     else:
                         logging.debug('engine doesnt support levels')
-                elif fen == 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR':
-                    logging.debug("Map-Fen: New game")
-                    self.show_setup_pieces_msg = False
-                    self.fire(Event.NEW_GAME())
+                elif '/pppppppp/8/8/8/8/PPPPPPPP/' in fen:  # check for the lines 2-6 cause could be a uci960 pos too
+                    bit_board = chess.Board(fen + ' w - - 0 1')
+                    try:
+                        pos960 = bit_board.chess960_pos(ignore_castling=True)
+                    except AttributeError:  # this can be deleted as soon python-chess v0.15 is everywhere
+                        pos960 = 518 if fen == 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR' else None
+                    if pos960 is not None:
+                        logging.debug("Map-Fen: New game")
+                        self.show_setup_pieces_msg = False
+                        self.fire(Event.NEW_GAME(pos960=pos960))
                 elif fen in book_map:
                     book_index = book_map.index(fen)
                     try:

@@ -55,18 +55,18 @@ class PgnDisplay(DisplayMsg, threading.Thread):
 
     def save_and_email_pgn(self, message):
         logging.debug('Saving game to [' + self.file_name + ']')
-        pgn_game = chess.pgn.Game()
-        msg_game = message.game.copy()
-        moves = []
+        pgn_game = chess.pgn.Game().from_board(message.game.copy())
+        # moves = []
         # go back, to see if the first fen is not standard fen
-        while msg_game.move_stack:
-            moves.insert(0, msg_game.pop())
-        if msg_game.fen() != chess.STARTING_FEN:
-            pgn_game.setup(msg_game.fen())
+        # while msg_game.move_stack:
+        #     moves.insert(0, msg_game.pop())
+        # if msg_game.fen() != chess.STARTING_FEN:
+        #     pgn_game.setup(msg_game.fen())
+        #
+        # node = pgn_game
+        # for move in moves:
+        #     node = node.add_variation(move)
 
-        node = pgn_game
-        for move in moves:
-            node = node.add_variation(move)
         # Headers
         pgn_game.headers['Event'] = 'PicoChess game'
         pgn_game.headers['Site'] = self.location
@@ -78,8 +78,8 @@ class PgnDisplay(DisplayMsg, threading.Thread):
             pgn_game.headers['Result'] = '1-0' if message.result == GameResult.WIN_WHITE else '0-1'
         elif message.result == GameResult.OUT_OF_TIME:
             pgn_game.headers['Result'] = '0-1' if message.game.turn == chess.WHITE else '1-0'
-        else:
-            pgn_game.headers['Result'] = message.game.result()
+        # else:
+        #     pgn_game.headers['Result'] = message.game.result()
 
         if self.level is None:
             engine_level = ''
@@ -144,7 +144,7 @@ class PgnDisplay(DisplayMsg, threading.Thread):
                     logging.error('SMTP Mail delivery: ' + str(e))
             # smtp based system end
             if self.mailgun_key:  # check if we have mailgun-key available to send the pgn successful
-                out = requests.post('https://api.mailgun.net/v2/picochess.org/messages',
+                out = requests.post('https://api.mailgun.net/v3/picochess.org/messages',
                                     auth=('api', self.mailgun_key),
                                     data={'from': 'Your PicoChess computer <no-reply@picochess.org>',
                                           'to': self.email,

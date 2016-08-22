@@ -12,4 +12,4 @@ picoweb.jinja_env.globals['static'] = (
     lambda filename: url_for('static', filename=filename)
 )
 
-from web.picoweb import views
+# from web.picoweb import views
