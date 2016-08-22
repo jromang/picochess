@@ -60,12 +60,13 @@ function updateDGTPosition(data) {
     // if (data.type != "broadcast") {
     //     dgtFEN = data.fen;
     // }
-    console.log('updateDGTPosition > fen: ' + data.fen);
+
+    // console.log('updateDGTPosition > fen: ' + data.fen);
     if (!goToPosition(data.fen)) {
         loadGame(data['pgn'].split("\n"));
         goToPosition(data.fen);
     } else {
-        console.log('updateDGTPostion > goToPosition successful');
+        // console.log('updateDGTPostion > goToPosition successful');
     }
 }
 
@@ -77,7 +78,7 @@ function load_nacl_stockfish() {
 }
 
 function getSystemInfo() {
-    $.get("/info", {action: "get_system_info"}, function(data) {
+    $.get('/info', {action: 'get_system_info'}, function(data) {
         window.system_info = data;
         var ip = '';
         if (window.system_info.ip) {
@@ -88,7 +89,7 @@ function getSystemInfo() {
 }
 
 function goToDGTFen() {
-    $.get("/dgt", {action: "get_last_move"}, function(data) {
+    $.get('/dgt', {action: 'get_last_move'}, function(data) {
         updateDGTPosition(data);
         if (data['msg']) {
             dgtClockStatusEl.html(data['msg']);
@@ -103,6 +104,7 @@ $(function() {
         window.activedb = e.target.hash;
         updateStatus();
     });
+    /*
     $(".grid").sortable({
         tolerance: 'pointer',
         revert: 'invalid',
@@ -110,6 +112,7 @@ $(function() {
 //            placeholder: 'span2 well placeholder tile',
         forceHelperSize: true
     });
+    */
     window.engine_lines = {};
     window.activedb = "#ref";
     window.multipv = 1;
@@ -152,7 +155,7 @@ $(function() {
             }
         }).done(function(data) {
             loadGame(data['pgn']);
-            updateStatus();  // JP! needed, if y play some moves then load a game, to highlight the current move
+            updateStatus();
         });
     });
 
@@ -174,7 +177,7 @@ $(function() {
 //                 ajaxMethod: 'POST',
             ajaxOnLoad: true,
             ajaxData: {
-                action: "get_games",
+                action: 'get_games',
                 fen: START_FEN
             },
             records: []
@@ -234,8 +237,8 @@ $(function() {
             if ('msg' in data) {
                 dgtClockStatusEl.html(data.msg);
             }
-            console.log('Socket-Data:');
-            console.log(data);
+            // console.log('Socket-Data:');
+            // console.log(data);
             switch (data.event) {
                 case 'newFEN':
                     updateDGTPosition(data);
@@ -245,7 +248,7 @@ $(function() {
                     newBoard(data.fen);
                     break;
                 case 'Message':
-                    $('#EventMessage').html(data.msg);
+                    dgtClockStatusEl.html(data.msg);
                     break;
                 case 'header':
                     loadGame(data['pgn'].split("\n"));
@@ -276,7 +279,7 @@ function create_game_pointer() {
         tmp_game = new Chess(currentPosition.fen);
     }
     else {
-        tmp_game = new Chess(setupBoardFen); // JP!
+        tmp_game = new Chess(setupBoardFen);
     }
     return tmp_game;
 }
@@ -548,7 +551,7 @@ function export_game(root_node, exporter, include_comments, include_variations, 
     }
 
     // Then export sidelines.
-    if (include_variations && root_node.variations) { // JP!
+    if (include_variations && root_node.variations) {
         for (var j = 1; j < root_node.variations.length; j++) {
             var variation = root_node.variations[j];
             exporter.start_variation();
@@ -621,9 +624,9 @@ function updateCurrentPosition(move, tmp_game) {
         var __ret = addNewMove({'move': move}, currentPosition, tmp_game.fen());
         currentPosition = __ret.node;
 
-        console.log('updateCurrentPosition > currentPosition');
-        console.log(currentPosition);
-        console.log(gameHistory);
+        // console.log('updateCurrentPosition > currentPosition');
+        // console.log(currentPosition);
+        // console.log(gameHistory);
 
         var exporter = new WebExporter();
         export_game(gameHistory, exporter, true, true, undefined, false);
@@ -636,8 +639,8 @@ var onSnapEnd = function(source, target) {
     var tmp_game = create_game_pointer();
 
     if(!currentPosition) {
-        console.log('onSnapEnd > currentPosition not set');
-        console.log(gameHistory);
+        // console.log('onSnapEnd > currentPosition not set');
+        // console.log(gameHistory);
         currentPosition = {};
         currentPosition.fen = tmp_game.fen();
         gameHistory = currentPosition;
@@ -665,17 +668,6 @@ var updateStatus = function() {
     $('.fen').unbind('click', goToGameFen).one('click', goToGameFen);
 
     var moveColor = 'White';
-    // JP! changed to the next two lines
-    // var tmp_game;
-    // var fen;
-    // if (currentPosition && currentPosition.fen) {
-    //     fen = currentPosition.fen;
-    //     tmp_game = new Chess(fen);
-    // }
-    // else {
-    //     tmp_game = new Chess();
-    //     fen = tmp_game.fen();
-    // }
     var tmp_game = create_game_pointer();
     var fen = tmp_game.fen();
 
@@ -818,10 +810,10 @@ function addNewMove(m, current_position, fen, props) {
     node.fen = fen;
 //        console.log(node.fen);
     if ($.isEmptyObject(fenHash)) {
-        console.log('inserting first node');
+        // console.log('inserting first node');
         fenHash['first'] = node.previous;
         node.previous.fen = setupBoardFen;
-        console.log(fenHash['first']);
+        // console.log(fenHash['first']);
 //        node.previous.variations = [node];
     }
     fenHash[node.fen] = node;
@@ -878,7 +870,7 @@ function loadGame(pgn_lines) {
 
     var tmp_game;
     if ('FEN' in game_headers && 'SetUp' in game_headers) {
-        console.log('LoadGame > Found Custom FEN');
+        // console.log('LoadGame > Found Custom FEN');
         tmp_game = new Chess(game_headers['FEN']);
         setupBoardFen = game_headers['FEN'];
     }
@@ -998,8 +990,8 @@ function loadGame(pgn_lines) {
     }
     fenHash['last'] = fenHash[tmp_game.fen()];
 
-    console.log('LoadGame > CurrentPosition');
-    console.log(currentPosition);
+    // console.log('LoadGame > CurrentPosition');
+    // console.log(currentPosition);
 
     if (curr_fen === undefined) {
         currentPosition = fenHash['first'];
@@ -1008,9 +1000,9 @@ function loadGame(pgn_lines) {
         currentPosition = fenHash[curr_fen];
     }
 
-    console.log('LoadGame > CurrentPosition');
-    console.log(currentPosition);
-    console.log('LoadGame > curr_fen: ' + curr_fen);
+    // console.log('LoadGame > CurrentPosition');
+    // console.log(currentPosition);
+    // console.log('LoadGame > curr_fen: ' + curr_fen);
 
     gameHistory.gameHeader = getGameHeader(game_headers, false);
     gameHistory.result = game_headers.Result;
@@ -1020,11 +1012,11 @@ function loadGame(pgn_lines) {
     writeVariationTree(pgnEl, exporter.toString(), gameHistory);
     $('.fen').unbind('click', goToGameFen).one('click', goToGameFen);
 
-    console.log('LoadGame > FenHash');
-    console.log(fenHash);
-    console.log('LoadGame > gameHistory');
-    console.log(gameHistory);
-    console.log(' ');
+    // console.log('LoadGame > FenHash');
+    // console.log(fenHash);
+    // console.log('LoadGame > gameHistory');
+    // console.log(gameHistory);
+    // console.log(' ');
 }
 
 function get_full_game() {
@@ -1099,21 +1091,20 @@ function newBoard(fen) {
 
     setupBoardFen = fen;
 
-    console.log('newBoard > gameHistory');
-    console.log(gameHistory);
+    // console.log('newBoard > gameHistory');
+    // console.log(gameHistory);
 
     gameHistory = currentPosition;
     gameHistory.gameHeader = '';
     gameHistory.result = '';
     gameHistory.variations = [];
 
-    console.log('newBoard > gameHistory');
-    console.log(gameHistory);
+    // console.log('newBoard > gameHistory');
+    // console.log(gameHistory);
 
     updateStatus();
 }
 
-// JP! Start "gotoPosition" as function
 function goToGameFen() {
     var fen = $(this).attr('data-fen');
     goToPosition(fen);
@@ -1122,20 +1113,17 @@ function goToGameFen() {
 function goToPosition(fen) {
     stop_analysis();
     currentPosition = fenHash[fen];
-    // JP! start
     if (!currentPosition) {
-        console.log('goToPosition > NOT currentPos');
-        console.log(fen);
-        console.log(fenHash);
-        console.log(' ');
+        // console.log('goToPosition > NOT currentPos');
+        // console.log(fen);
+        // console.log(fenHash);
+        // console.log(' ');
         return false;
     }
-    // JP! Ende
     board.position(currentPosition.fen);
     updateStatus();
     return true;
 }
-// JP! Ende
 
 function goToStart() {
     stop_analysis();

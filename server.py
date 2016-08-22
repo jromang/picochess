@@ -39,6 +39,9 @@ _workers = ThreadPool(5)
 # Otherwise multiple clients behind a NAT can all play as the 'player'
 client_ips = []
 
+# Saved game
+game = None
+
 
 def create_game_header(cls, pgn_game):
     pgn_game.headers['Result'] = '*'
@@ -72,15 +75,20 @@ def create_game_header(cls, pgn_game):
             pgn_game.headers[user_color + 'Elo'] = '-'
 
 
-def update_headers(cls, g=None):
-    pgn_game = pgn.Game()
-    if g:
-        pgn_game = pgn_game.from_board(g)
-    else:
-        g = chess.Board()
+def update_headers(cls):
+    global game
+    if game is None:
+        game = chess.Board()
+    pgn_str = transfer(cls, game)
+    EventHandler.write_to_clients({'event': 'header', 'pgn': pgn_str, 'fen': game.fen()})
+
+
+def transfer(cls, g):
+    global game
+    game = g  # save for later
+    pgn_game = pgn.Game().from_board(g)
     create_game_header(cls, pgn_game)
-    pgn_str = pgn_game.accept(pgn.StringExporter(headers=True, comments=False, variations=False))
-    EventHandler.write_to_clients({'event': 'header', 'pgn': pgn_str, 'fen': g.fen()})
+    return pgn_game.accept(pgn.StringExporter(headers=True, comments=False, variations=False))
 
 
 class ChannelHandler(tornado.web.RequestHandler):
@@ -161,18 +169,6 @@ class InfoHandler(tornado.web.RequestHandler):
                 self.write(self.shared['system_info'])
 
 
-# class PGNHandler(tornado.web.RequestHandler):
-#     def initialize(self, shared=None):
-#         self.shared = shared
-#
-#     def get(self, *args, **kwargs):
-#         action = self.get_argument("action")
-#         if action == "get_pgn_file":
-#             self.set_header('Content-Type', 'text/pgn')
-#             self.set_header('Content-Disposition', 'attachment; filename=game.pgn')
-#             self.write(self.shared['last_dgt_move_msg']['pgn'])
-
-
 class ChessBoardHandler(tornado.web.RequestHandler):
     def initialize(self, shared=None):
         self.shared = shared
@@ -193,7 +189,6 @@ class WebServer(Observable, threading.Thread):
             (r'/', ChessBoardHandler, dict(shared=shared)),
             (r'/event', EventHandler, dict(shared=shared)),
             (r'/dgt', DGTHandler, dict(shared=shared)),
-            # (r'/pgn', PGNHandler, dict(shared=shared)),
             (r'/info', InfoHandler, dict(shared=shared)),
 
             (r'/channel', ChannelHandler, dict(shared=shared)),
@@ -239,18 +234,13 @@ class WebDisplay(DisplayMsg, threading.Thread):
             builder.append(str(g.halfmove_clock))
             builder.append(str(g.fullmove_number))
             return ' '.join(builder)
-        
-        def transfer(g):
-            pgn_game = pgn.Game().from_board(g)
-            create_game_header(self, pgn_game)
-            return pgn_game.accept(pgn.StringExporter(headers=True, comments=False, variations=False))
 
         for case in switch(message):
             if case(MessageApi.BOOK_MOVE):
                 EventHandler.write_to_clients({'event': 'Message', 'msg': 'Book move'})
                 break
             if case(MessageApi.START_NEW_GAME):
-                pgn_str = transfer(message.game)
+                pgn_str = transfer(self, message.game)
                 fen = message.game.fen()
                 r = {'pgn': pgn_str, 'fen': fen}
                 self.shared['last_dgt_move_msg'] = r
@@ -261,7 +251,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                     code_text = ' with setup'
                 EventHandler.write_to_clients({'event': 'NewGame', 'fen': fen})
                 EventHandler.write_to_clients({'event': 'Message', 'msg': 'New game' + code_text})
-                update_headers(self, message.game)
+                update_headers(self)
                 break
             if case(MessageApi.SEARCH_STARTED):
                 EventHandler.write_to_clients({'event': 'Message', 'msg': 'Thinking..'})
@@ -323,7 +313,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 EventHandler.write_to_clients({'event': 'Message', 'msg': 'DGT clock connected through ' + message.attached})
                 break
             if case(MessageApi.COMPUTER_MOVE):
-                pgn_str = transfer(message.game)
+                pgn_str = transfer(self, message.game)
                 fen = oldstyle_fen(message.game)
                 mov = message.move.uci()
                 msg = 'Computer move: ' + str(message.move)
@@ -332,7 +322,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 EventHandler.write_to_clients(r)
                 break
             if case(MessageApi.USER_MOVE):
-                pgn_str = transfer(message.game)
+                pgn_str = transfer(self, message.game)
                 fen = oldstyle_fen(message.game)
                 msg = 'User move: ' + str(message.move)
                 mov = message.move.uci()
@@ -341,7 +331,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 EventHandler.write_to_clients(r)
                 break
             if case(MessageApi.REVIEW_MOVE):
-                pgn_str = transfer(message.game)
+                pgn_str = transfer(self, message.game)
                 fen = oldstyle_fen(message.game)
                 msg = 'Review move: ' + str(message.move)
                 mov = message.move.uci()
