@@ -104,15 +104,6 @@ $(function() {
         window.activedb = e.target.hash;
         updateStatus();
     });
-    /*
-    $(".grid").sortable({
-        tolerance: 'pointer',
-        revert: 'invalid',
-        disabled: 'true',
-//            placeholder: 'span2 well placeholder tile',
-        forceHelperSize: true
-    });
-    */
     window.engine_lines = {};
     window.activedb = "#ref";
     window.multipv = 1;
