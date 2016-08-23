@@ -1,20 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="no-js" lang="en" dir="ltr">
 <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Picochess Webserver</title>
     <link rel="stylesheet" href="/static/css/ladda-themeless.min.css"/>
     <link rel="stylesheet" href="/static/css/custom.css"/>
+
     <link rel="stylesheet" href="/static/css/bootstrap-3.3.7.min.css"/>
-    <link rel="stylesheet" href="/static/css/bootstrap-theme-3.3.7.min.css"/>
-    <!--<link rel="stylesheet" href="/static/css/foundation-3.2.5.min.css"/>-->
+    <link rel="stylesheet" href="/static/css/material-design/ripples.min.css"/>
+    <link rel="stylesheet" href="/static/css/material-design/bootstrap-material-design.min.css"/>
+
     <link rel="stylesheet" href="/static/css/normalize-4.1.1.css"/>
     <link rel="stylesheet" href="/static/css/chessboard.css"/>
     <link rel="stylesheet" href="/static/css/font-awesome.min.css"/>
 
     <script src="/static/js/jquery-1.11.1.min.js"></script>
     <script src="/static/js/bootstrap-3.3.7.min.js"></script>
+    <script src="/static/js/material-design/ripples.min.js"></script>
+    <script src="/static/js/material-design/material.min.js"></script>
+
     <script src="/static/js/spin.min.js"></script>
     <script src="/static/js/ladda.min.js"></script>
     <script src="/static/js/jquery.dynatable.js"></script>
@@ -33,9 +40,9 @@
         <div class="col-sm-6">
             <div id="board_panel" class="panel panel-primary">
                 <div class="panel-body" style="position:relative;">
-                    <div id="board" class="bottom-buffer"></div>
+                    <div id="board" style="margin-bottom: 10px;"></div>
                     <div class="pull-left">
-                        <p id="BoardStatus">Showing the board status</p>
+                        <p id="BoardStatus"></p>
                     </div>
                     <div class="pull-right">
                         <div id="gameControls" class="btn-group">
@@ -51,139 +58,121 @@
 
         <div class="col-sm-6">
             <div class="panel panel-primary">
-                <div class="panel-heading fixed-panel-heading">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Actions</h3>
+                </div>
+                <div class="panel-body">
                     <div class="btn-group pull-right">
-                        <button type="button" id="flipOrientationBtn" class="btn btn-default"><i class='fa fa-refresh'></i>Flip</button>
-                        <button type="button" id="DgtSyncBtn" class="btn btn-primary"><i class='fa fa-delicious'></i>Sync</button>
-                        <button type="button" id="downloadBtn" class="btn btn-info"><i class='fa fa-download'></i>Get PGN</button>
-                        <button type="button" id="broadcastBtn" class="btn btn-success"><i class='fa fa-cloud-download'></i>Broadcast</button>
+                        <button type="button" id="flipOrientationBtn" class="btn btn-raised btn-default btn-sm"><i class='fa fa-refresh'></i>Flip</button>
+                        <button type="button" id="DgtSyncBtn" class="btn btn-raised btn-warning btn-sm"><i class='fa fa-delicious'></i>Sync</button>
+                        <button type="button" id="downloadBtn" class="btn btn-raised btn-info btn-sm"><i class='fa fa-download'></i>Get PGN</button>
+                        <button type="button" id="broadcastBtn" class="btn btn-raised btn-success btn-sm"><i class='fa fa-cloud-download'></i>Broadcast</button>
                     </div>
                 </div>
+            </div>
 
-                <div id="pgnPanelBody" class="panel-body" >
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Game record</h3>
+                </div>
+
+                <div class="panel-body">
                     <div id="pgn" style="max-height:37%; overflow-y:auto; overflow-x:hidden; min-height:40%; position:relative;"></div>
                 </div>
+            </div>
 
-                <div class="panel">
-                    <div class="clearfix">
-                        <ul class="nav nav-pills" role="tablist">
-                            <li class="nav-item active">
-                                <a href="#dgtclock" class="nav-link active" data-toggle="tab">DGT Clock</a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#book" class="nav-link" data-toggle="tab">Book</a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#engine" class="nav-link" data-toggle="tab">Engine</a>
-                            </li>
-                        </ul>
+            <div class="well" style="min-height: 150px;">
+                <ul class="nav nav-tabs">
+                    <li class="active">
+                        <a href="#dgtclock" data-toggle="tab">DGT Clock</a>
+                    </li>
+                    <li class="">
+                        <a href="#book" data-toggle="tab">Book</a>
+                    </li>
+                    <li class="">
+                        <a href="#engine" data-toggle="tab">Engine</a>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <div class="tab-pane fade active in" id="dgtclock">
+                        <p id="DGTClockStatus"></p>
                     </div>
 
-                    <div class="tab-content clearfix">
-                        <div class="spacer"></div>
+                    <div class="tab-pane fade" id="book">
+                        <table id="BookStatsTable" cellpadding="0" cellspacing="0" style="width:100%; align: center; overflow: auto" class="table-responsive table-condensed table-bordered flat-table flat-table-1">
+                            <thead>
+                            <tr>
+                                <th data-dynatable-column="move">Move</th>
+                                <th data-dynatable-column="freq">Games</th>
+                                <th data-dynatable-column="pct">Winning %</th>
+                                <th data-dynatable-column="wins">Wins</th>
+                                <th data-dynatable-column="draws">Draws</th>
+                                <th data-dynatable-column="losses">Losses</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
 
-                        <div class="tab-pane active" id="dgtclock">
-                            <div class="panel-primary" style="min-height:28%">
-                                <div class="panel-heading clearfix">
-                                    <h3 class="panel-title pull-left" style="padding-top: 7.5px;">DGT Clock</h3>
-                                </div>
-                                <div class="panel-body">
-                                    <p id="DGTClockStatus"></p>
-                                </div>
+                    <div class="tab-pane fade" id="engine">
+                        <div class="row">
+                            <div class="btn-group pull-left">
+                                <button id="analyzePlus" class="btn btn-raised btn-default">
+                                    <span id="analyzePlusText"><i class='fa fa-plus'></i></span>
+                                </button>
+                                <button id="analyzeMinus" class="btn btn-raised btn-default">
+                                    <span id="analyzeMinusText"><i class='fa fa-minus'></i></span>
+                                </button>
                             </div>
-                        </div>
 
-                        <div class="tab-pane" id="book">
-                            <div class="panel-primary" style="min-height:28%">
-                                <div class="panel-heading clearfix">
-                                    <h3 class="panel-title pull-left" style="padding-top: 7.5px;">Book</h3>
-                                </div>
-                                <div class="panel-body">
-                                    <table id="BookStatsTable" cellpadding="0" cellspacing="0" style="width:100%; align: center; overflow: auto" class="table-responsive table-condensed table-bordered flat-table flat-table-1">
-                                        <thead>
-                                        <tr>
-                                            <th data-dynatable-column="move">Move</th>
-                                            <th data-dynatable-column="freq">Games</th>
-                                            <th data-dynatable-column="pct">Winning %</th>
-
-                                            <th data-dynatable-column="wins">Wins</th>
-                                            <th data-dynatable-column="draws">Draws</th>
-                                            <th data-dynatable-column="losses">Losses</th>
-                                        </tr>
-                                        </thead>
-                                    </table>
-                                </div>
+                            <div class="btn-group pull-right">
+                                <button id="analyzeBtn" class="btn btn-raised btn-success"><i class='fa fa-cog'></i>
+                                    <span id="AnalyzeText">Analyze</span>
+                                </button>
                             </div>
+
+                            <div id="listener">
+                                <embed name="nacl_module" id='stockfish_module' width="0" height="0" src='/static/stockfish/stockfish.nmf' type='application/x-pnacl' />
+                            </div>
+                            <div id="engineStatus"></div>
+                            <span id="engineMultiPVStatus"></span>
                         </div>
-
-                        <div class="tab-pane" id="engine">
-                            <div class="panel-primary" style="min-height:28%">
-                                <div class="panel-heading clearfix">
-                                    <h3 class="panel-title pull-left" style="padding-top: 7.5px;">Engine</h3>
-
-                                    <div class="btn-group pull-right">
-                                        <button id="analyzeBtn" class="btn btn-success"><i class='fa fa-cog'></i>
-                                            <span id="AnalyzeText">Analyze</span>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="panel-body">
-                                    <div id="listener">
-                                        <embed name="nacl_module" id='stockfish_module' width="0" height="0" src='/static/stockfish/stockfish.nmf' type='application/x-pnacl' />
-                                    </div>
-                                    <div id="engineStatus"></div>
-                                    <div id="cloudEngineStatus"></div>
-                                    <div id="pv_output" class="gameMoves">
-                                        <div id="pv_1"></div>
-                                    </div>
-                                    <div id="engineControls">
-                                        <button id="analyzePlus" class="btn btn-default">
-                                            <span id="analyzePlusText"><i class='fa fa-plus'></i></span>
-                                        </button>
-                                        <button id="analyzeMinus" class="btn btn-default">
-                                            <span id="analyzeMinusText"><i class='fa fa-minus'></i></span>
-                                        </button>
-                                        <span id="engineMultiPVStatus"></span>
-                                    </div>
-                                </div>
+                        <div class="row">
+                            <div id="pv_output" class="gameMoves list-group">
+                                <div id="pv_1"></div>
                             </div>
                         </div>
                     </div>
-
                 </div>
+
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="tab-pane" id="database">
-            <div class="panel">
-                <div class="panel-body">
-                    <div class="spacer">
-                        <div class="tab-content clearfix">
-                            <div class="tab-pane active" id="reference">
-                                <table id="GameStatsTable" cellpadding="0" cellspacing="0" style="width: 100%; align: center; overflow: auto" class="table-condensed table-bordered table-responsive flat-table flat-table-1">
-                                    <thead>
-                                        <tr>
-                                            <th data-dynatable-column="white">White</th>
-                                            <th data-dynatable-column="white_elo">White Elo</th>
-                                            <th data-dynatable-column="black">Black</th>
-                                            <th data-dynatable-column="black_elo">Black Elo</th>
-                                            <th data-dynatable-column="result">Result</th>
-                                            <th data-dynatable-column="date">Date</th>
-                                            <th data-dynatable-column="event">Event</th>
-                                            <th data-dynatable-column="site">Site</th>
-                                            <th data-dynatable-column="eco">ECO</th>
-                                        </tr>
-                                    </thead>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+    <div class="row col-sm-12">
+
+        <div class="well">
+            <div class="tab-content clearfix">
+                <div class="tab-pane active" id="reference">
+                    <table id="GameStatsTable" cellpadding="0" cellspacing="0" style="width: 100%; align: center; overflow: auto" class="table-condensed table-bordered table-responsive flat-table flat-table-1">
+                        <thead>
+                            <tr>
+                                <th data-dynatable-column="white">White</th>
+                                <th data-dynatable-column="white_elo">White Elo</th>
+                                <th data-dynatable-column="black">Black</th>
+                                <th data-dynatable-column="black_elo">Black Elo</th>
+                                <th data-dynatable-column="result">Result</th>
+                                <th data-dynatable-column="date">Date</th>
+                                <th data-dynatable-column="event">Event</th>
+                                <th data-dynatable-column="site">Site</th>
+                                <th data-dynatable-column="eco">ECO</th>
+                            </tr>
+                        </thead>
+                    </table>
                 </div>
             </div>
         </div>
+
     </div>
 </div>
 

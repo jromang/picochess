@@ -85,6 +85,8 @@ function getSystemInfo() {
             ip = ' - IP: ' + window.system_info.ip;
         }
         document.title = 'Webserver Picochess ' + window.system_info.version + ip;
+    }).fail(function(jqXHR, textStatus) {
+        dgtClockStatusEl.html(textStatus);
     });
 }
 
@@ -94,16 +96,20 @@ function goToDGTFen() {
         if (data['msg']) {
             dgtClockStatusEl.html(data['msg']);
         }
+    }).fail(function(jqXHR, textStatus) {
+        dgtClockStatusEl.html(textStatus);
     });
 }
 
 $(function() {
     getSystemInfo();
-
+    /*
+    JP! turned off - guess activedb isnt supported right now
     $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
         window.activedb = e.target.hash;
         updateStatus();
     });
+    */
     window.engine_lines = {};
     window.activedb = "#ref";
     window.multipv = 1;
@@ -1216,12 +1222,17 @@ function formatEngineOutput(line) {
         if (start_move_num % 2 == 0) {
             turn_sep = '..';
         }
+
+        output = '<div class="list-group-item"><div class="row-picture"><i class="fa fa-paste"></i></div><div class="row-content">';
+
         if (score !== null) {
-            output = '<div id="pv_' + multipv + '_score"> ';
-            output += '<button id="import_pv_' + multipv + '" class="importPVBtn btn btn-default"> ';
-            output += '<span id="import_pv_' + multipv + '_text"><i class="fa fa-paste"></i></span></button> ';
-            output += "<p style='display:inline; color:blue'>" + score + "/" + depth + " " + " </p>" + turn_sep;
+            output += '<div class="least-content">' +
+                '<button id="import_pv_' + multipv + '" class="importPVBtn btn btn-xs btn-default">' +
+                '<i class="fa fa-paste"></i></button></div>';
+            output += '<h4 class="list-group-item-heading" id="pv_' + multipv + '_score">' +
+                '<span style="color:blue">' + score + '/' + depth + ' ' + '</span></h4>';
         }
+        output += '<p class="list-group-item-text">' + turn_sep;
         for (i = 0; i < history.length; ++i) {
             if ((start_move_num + i) % 2 == 1) {
                 output += Math.floor((start_move_num + i + 1) / 2) + ". ";
@@ -1229,9 +1240,9 @@ function formatEngineOutput(line) {
             if (history[i]) {
                 output += figurinize_move(history[i]) + " ";
             }
-
         }
-        output += ' </div>';
+        output += '</p></div></div><div class="list-group-separator"></div>';
+
         analysis_game = null;
         return {line: output, pv_index: multipv};
     }
