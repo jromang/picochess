@@ -745,6 +745,7 @@ $('#endBtn').on('click', goToEnd);
 
 $('#DgtSyncBtn').on('click', goToDGTFen);
 $('#downloadBtn').on('click', download);
+$('#broadcastBtn').on('click', broadcastPosition);
 
 $('#analyzeBtn').on('click', analyze_pressed);
 
@@ -1087,19 +1088,24 @@ function newBoard(fen) {
     currentPosition.fen = fen;
 
     setupBoardFen = fen;
-
     // console.log('newBoard > gameHistory');
     // console.log(gameHistory);
-
     gameHistory = currentPosition;
     gameHistory.gameHeader = '';
     gameHistory.result = '';
     gameHistory.variations = [];
-
     // console.log('newBoard > gameHistory');
     // console.log(gameHistory);
-
     updateStatus();
+}
+
+function broadcastPosition() {
+    // This function never worked - The moveStack is nonsense if there are vars inside the game record
+    console.log('Broadcast pressed');
+    // var moveStack = walk_tree_iterative(gameHistory.variations, "raw");
+    // $.post("/channel", { action: "broadcast", fen: currentPosition.fen, moveStack: JSON.stringify(moveStack)}, function (data) {
+    // });
+    // Only use FEN and Movestack (no variations) for broadcast at this point
 }
 
 function goToGameFen() {
