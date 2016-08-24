@@ -98,7 +98,7 @@ function goToDGTFen() {
 }
 
 $(function() {
-    getSystemInfo();
+    // JP! deactivated getSystemInfo();
     // JP! is this really needed?!?
     $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
         window.activedb = e.target.hash;

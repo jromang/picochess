@@ -369,12 +369,14 @@
 
       obj.$element.trigger('dynatable:beforeUpdate', rows);
 
-      // loop through records
-      for (var i = 0, len = settings.dataset.records.length; i < len; i++) {
-        var record = settings.dataset.records[i],
-            tr = rowWriter(i, record, columns, cellWriter);
-        rows += tr;
-      }
+        if (settings.dataset.records) { // JP!
+            // loop through records
+            for (var i = 0, len = settings.dataset.records.length; i < len; i++) {
+                var record = settings.dataset.records[i],
+                    tr = rowWriter(i, record, columns, cellWriter);
+                rows += tr;
+            }
+        }
 
       // Appended dynatable interactive elements
       if (settings.features.recordCount) {
