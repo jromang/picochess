@@ -1,11 +1,11 @@
 [Unit]
-Description=DGT PI Hello
+Description=DGT Pi Hello
 DefaultDependencies=false
 
 [Service]
 Type=oneshot
-ExecStart=/opt/picochess/dgt/dgtpicom "  DGT  PI  " 1
-WorkingDirectory=/opt/dgtpi/
+ExecStart=/opt/picochess/dgt/dgtpicom "  DGT  P|  " 1
+WorkingDirectory=/opt/picochess/dgt/
 
 [Install]
 WantedBy=basic.target
