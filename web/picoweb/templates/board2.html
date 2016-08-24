@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="/static/css/chessboard.css"/>
     <link rel="stylesheet" href="/static/css/font-awesome.min.css"/>
 
-    <script src="/static/js/jquery-1.11.1.min.js"></script>
+    <script src="/static/js/jquery-1.12.4.min.js"></script>
     <script src="/static/js/bootstrap-3.3.7.min.js"></script>
     <script src="/static/js/material-design/ripples.min.js"></script>
     <script src="/static/js/material-design/material.min.js"></script>
@@ -27,7 +27,7 @@
     <script src="/static/js/jquery.dynatable.js"></script>
     <script src="/static/js/enginegame.js"></script>
     <script src="/static/js/chessboard.js"></script>
-    <script src="/static/js/chess.min.js"></script>
+    <script src="/static/js/chess.js"></script>
 
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
     <meta http-equiv="Pragma" content="no-cache"/>
@@ -42,7 +42,8 @@
                 <div class="panel-body" style="position:relative;">
                     <div id="board" style="margin-bottom: 10px;"></div>
                     <div class="pull-left">
-                        <p id="BoardStatus"></p>
+                        <span id="sidetomove"></span>&nbsp;<span id="BoardStatus"></span>
+                        <p id="DGTClockStatus"></p>
                     </div>
                     <div class="pull-right">
                         <div id="gameControls" class="btn-group">
@@ -81,12 +82,9 @@
                 </div>
             </div>
 
-            <div class="well" style="min-height: 150px;">
-                <ul class="nav nav-tabs">
+            <div class="well">
+                <ul class="nav nav-pills">
                     <li class="active">
-                        <a href="#dgtclock" data-toggle="tab">DGT Clock</a>
-                    </li>
-                    <li class="">
                         <a href="#book" data-toggle="tab">Book</a>
                     </li>
                     <li class="">
@@ -95,11 +93,7 @@
                 </ul>
 
                 <div class="tab-content">
-                    <div class="tab-pane fade active in" id="dgtclock">
-                        <p id="DGTClockStatus"></p>
-                    </div>
-
-                    <div class="tab-pane fade" id="book">
+                    <div class="tab-pane fade active in" id="book">
                         <table id="BookStatsTable" cellpadding="0" cellspacing="0" style="width:100%; align: center; overflow: auto" class="table-responsive table-condensed table-bordered flat-table flat-table-1">
                             <thead>
                             <tr>

@@ -49,6 +49,9 @@ var backend_server_prefix = 'http://drshivaji.com:3334';
 fenHash = {};
 
 currentPosition = {};
+// JP!
+currentPosition.fen = START_FEN;
+
 gameHistory = currentPosition;
 gameHistory.gameHeader = '';
 gameHistory.result = '';
@@ -57,16 +60,9 @@ gameHistory.variations = [];
 var setupBoardFen = START_FEN;
 
 function updateDGTPosition(data) {
-    // if (data.type != "broadcast") {
-    //     dgtFEN = data.fen;
-    // }
-
-    // console.log('updateDGTPosition > fen: ' + data.fen);
     if (!goToPosition(data.fen)) {
         loadGame(data['pgn'].split("\n"));
         goToPosition(data.fen);
-    } else {
-        // console.log('updateDGTPostion > goToPosition successful');
     }
 }
 
@@ -103,13 +99,11 @@ function goToDGTFen() {
 
 $(function() {
     getSystemInfo();
-    /*
-    JP! turned off - guess activedb isnt supported right now
+    // JP! is this really needed?!?
     $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
         window.activedb = e.target.hash;
         updateStatus();
     });
-    */
     window.engine_lines = {};
     window.activedb = "#ref";
     window.multipv = 1;
@@ -170,8 +164,6 @@ $(function() {
             ajax: true,
             ajaxUrl: backend_server_prefix + '/query?callback=game_callback',
             ajaxDataType: 'jsonp',
-            // ajaxUrl: '/query',
-//                 ajaxMethod: 'POST',
             ajaxOnLoad: true,
             ajaxData: {
                 action: 'get_games',
@@ -234,8 +226,6 @@ $(function() {
             if ('msg' in data) {
                 dgtClockStatusEl.html(data.msg);
             }
-            // console.log('Socket-Data:');
-            // console.log(data);
             switch (data.event) {
                 case 'newFEN':
                     updateDGTPosition(data);
@@ -301,6 +291,7 @@ function figurinize_move(move) {
     move = move.replace("R", "&#9814;");
     move = move.replace("K", "&#9812;");
     move = move.replace("Q", "&#9813;");
+    move = move.replace("X", "&#9888;"); // error code
     return move;
 }
 
@@ -400,6 +391,7 @@ function WebExporter(columns) {
             console.warn('put_move error');
             console.log(tmp_board.ascii());
             console.log(m);
+            out_move = {'san': 'X' + move.from + move.to};
         }
         this.write_token('<span class="gameMove' + (board.fullmove_number) + '"><a href="#" class="fen" data-fen="' + fen + '" id="' + stripped_fen + '"> ' + figurinize_move(out_move.san) + ' </a></span>');
     };
@@ -620,11 +612,6 @@ function updateCurrentPosition(move, tmp_game) {
     if (!found_move) {
         var __ret = addNewMove({'move': move}, currentPosition, tmp_game.fen());
         currentPosition = __ret.node;
-
-        // console.log('updateCurrentPosition > currentPosition');
-        // console.log(currentPosition);
-        // console.log(gameHistory);
-
         var exporter = new WebExporter();
         export_game(gameHistory, exporter, true, true, undefined, false);
         writeVariationTree(pgnEl, exporter.toString(), gameHistory);
@@ -636,8 +623,6 @@ var onSnapEnd = function(source, target) {
     var tmp_game = create_game_pointer();
 
     if(!currentPosition) {
-        // console.log('onSnapEnd > currentPosition not set');
-        // console.log(gameHistory);
         currentPosition = {};
         currentPosition.fen = tmp_game.fen();
         gameHistory = currentPosition;
@@ -656,7 +641,7 @@ var onSnapEnd = function(source, target) {
     updateCurrentPosition(move, tmp_game);
     board.position(currentPosition.fen);
     updateStatus();
-    $.post("/channel", {action: "move", fen: currentPosition.fen, source: source, target: target}, function(data) {
+    $.post('/channel', {action: 'move', fen: currentPosition.fen, source: source, target: target}, function(data) {
     });
 };
 
@@ -727,7 +712,6 @@ var updateStatus = function() {
 
 var cfg = {
     showNotation: false,
-//          sparePieces: true,
     draggable: true,
     position: 'start',
     onDragStart: onDragStart,
@@ -795,7 +779,6 @@ function addNewMove(m, current_position, fen, props) {
         if (props.starting_comment) {
             node.starting_comment = props.starting_comment;
         }
-        // node.props = props;
     }
 
     if (current_position && current_position.previous) {
@@ -803,26 +786,19 @@ function addNewMove(m, current_position, fen, props) {
     }
     else {
         node.half_move_num = 1;
-//        gameHistory = current_position; // point to root node
     }
     node.fen = fen;
-//        console.log(node.fen);
     if ($.isEmptyObject(fenHash)) {
-        // console.log('inserting first node');
         fenHash['first'] = node.previous;
         node.previous.fen = setupBoardFen;
-        // console.log(fenHash['first']);
-//        node.previous.variations = [node];
     }
     fenHash[node.fen] = node;
-//    console.log(current_position);
     if (current_position) {
         if (!current_position.variations) {
             current_position.variations = [];
         }
         current_position.variations.push(node);
     }
-//    current_position = node;
     return {node: node, position: current_position};
 }
 
@@ -853,7 +829,6 @@ function loadGame(pgn_lines) {
         line = pgn_lines[j];
         // Parse headers first, then game body
         if (!parsed_headers) {
-            // console.log("parsing headers..");
             if ((result = game_header_regex.exec(line)) !== null) {
                 game_headers[result[1]] = result[2];
             }
@@ -868,7 +843,6 @@ function loadGame(pgn_lines) {
 
     var tmp_game;
     if ('FEN' in game_headers && 'SetUp' in game_headers) {
-        // console.log('LoadGame > Found Custom FEN');
         tmp_game = new Chess(game_headers['FEN']);
         setupBoardFen = game_headers['FEN'];
     }
@@ -927,7 +901,6 @@ function loadGame(pgn_lines) {
                 board_stack.push(Chess(variation_stack[last_variation_stack_index].fen));
                 in_variation = false;
             }
-//            console.log("fen: "+variation_stack[last_variation_stack_index].previous.fen);
         }
         else if (token == ')') {
             if (variation_stack.length > 1) {
@@ -936,7 +909,6 @@ function loadGame(pgn_lines) {
             }
         }
         else if (token[0] == '$') {
-            // last_variation_stack_index = variation_stack.length - 1;
             variation_stack[variation_stack.length - 1].nags.push(token.slice(1));
         }
         else if (token == '?') {
@@ -958,7 +930,6 @@ function loadGame(pgn_lines) {
             variation_stack[variation_stack.length - 1].nags.push(NAG_DUBIOUS_MOVE);
         }
         else {
-            // console.log("parsing move..");
             last_board_stack_index = board_stack.length - 1;
             last_variation_stack_index = variation_stack.length - 1;
 
@@ -988,19 +959,12 @@ function loadGame(pgn_lines) {
     }
     fenHash['last'] = fenHash[tmp_game.fen()];
 
-    // console.log('LoadGame > CurrentPosition');
-    // console.log(currentPosition);
-
     if (curr_fen === undefined) {
         currentPosition = fenHash['first'];
     }
     else {
         currentPosition = fenHash[curr_fen];
     }
-
-    // console.log('LoadGame > CurrentPosition');
-    // console.log(currentPosition);
-    // console.log('LoadGame > curr_fen: ' + curr_fen);
 
     gameHistory.gameHeader = getGameHeader(game_headers, false);
     gameHistory.result = game_headers.Result;
@@ -1009,12 +973,6 @@ function loadGame(pgn_lines) {
     export_game(gameHistory, exporter, true, true, undefined, false);
     writeVariationTree(pgnEl, exporter.toString(), gameHistory);
     $('.fen').unbind('click', goToGameFen).one('click', goToGameFen);
-
-    // console.log('LoadGame > FenHash');
-    // console.log(fenHash);
-    // console.log('LoadGame > gameHistory');
-    // console.log(gameHistory);
-    // console.log(' ');
 }
 
 function get_full_game() {
@@ -1049,7 +1007,7 @@ function writeVariationTree(dom, gameMoves, gameHistoryEl) {
 }
 
 function getGameHeader(h, pgn_output) {
-    var gameHeaderText = "";
+    var gameHeaderText = '';
 
     if (true == pgn_output) {
         for (var key in h) {
@@ -1088,24 +1046,17 @@ function newBoard(fen) {
     currentPosition.fen = fen;
 
     setupBoardFen = fen;
-    // console.log('newBoard > gameHistory');
-    // console.log(gameHistory);
     gameHistory = currentPosition;
     gameHistory.gameHeader = '';
     gameHistory.result = '';
     gameHistory.variations = [];
-    // console.log('newBoard > gameHistory');
-    // console.log(gameHistory);
     updateStatus();
 }
 
 function broadcastPosition() {
-    // This function never worked - The moveStack is nonsense if there are vars inside the game record
-    console.log('Broadcast pressed');
-    // var moveStack = walk_tree_iterative(gameHistory.variations, "raw");
-    // $.post("/channel", { action: "broadcast", fen: currentPosition.fen, moveStack: JSON.stringify(moveStack)}, function (data) {
-    // });
-    // Only use FEN and Movestack (no variations) for broadcast at this point
+    var content = get_full_game();
+    $.post('/channel', {action: 'broadcast', fen: currentPosition.fen, pgn: content}, function (data) {
+    });
 }
 
 function goToGameFen() {
@@ -1117,10 +1068,6 @@ function goToPosition(fen) {
     stop_analysis();
     currentPosition = fenHash[fen];
     if (!currentPosition) {
-        // console.log('goToPosition > NOT currentPos');
-        // console.log(fen);
-        // console.log(fenHash);
-        // console.log(' ');
         return false;
     }
     board.position(currentPosition.fen);
@@ -1129,25 +1076,25 @@ function goToPosition(fen) {
 }
 
 function goToStart() {
+    console.log(currentPosition);
     stop_analysis();
     currentPosition = gameHistory;
-    // console.log('goToStart > fenHash');
-    // console.log(fenHash);
     board.position(currentPosition.fen);
-//    if (currentPosition.variations) {
-//        currentPosition = currentPosition.variations[0];
-//    }
     updateStatus();
 }
 
 function goToEnd() {
+    console.log(currentPosition);
     stop_analysis();
-    currentPosition = fenHash.last;
-    board.position(currentPosition.fen);
+    if (fenHash.last) {
+        currentPosition = fenHash.last;
+        board.position(currentPosition.fen);
+    }
     updateStatus();
 }
 
 function goForward() {
+    console.log(currentPosition);
     stop_analysis();
     if (currentPosition && currentPosition.variations[0]) {
         currentPosition = currentPosition.variations[0];
@@ -1159,6 +1106,7 @@ function goForward() {
 }
 
 function goBack() {
+    console.log(currentPosition);
     stop_analysis();
     if (currentPosition && currentPosition.previous) {
         currentPosition = currentPosition.previous;
@@ -1168,24 +1116,21 @@ function goBack() {
 }
 
 function formatEngineOutput(line) {
-//    console.log(line);
-    if (line.search("depth") > 0 && line.search("currmove") < 0) {
+    if (line.search('depth') > 0 && line.search('currmove') < 0) {
         var analysis_game = new Chess();
         var start_move_num = 1;
-        var current_fen = 'startpos';
         if (currentPosition && currentPosition.fen) {
             analysis_game.load(currentPosition.fen);
             start_move_num = getCountPrevMoves(currentPosition) + 1;
-            current_fen = currentPosition.fen;
         }
 
         var output = '';
         var tokens = line.split(" ");
-        var depth_index = tokens.indexOf("depth") + 1;
+        var depth_index = tokens.indexOf('depth') + 1;
         var depth = tokens[depth_index];
-        var score_index = tokens.indexOf("score") + 1;
+        var score_index = tokens.indexOf('score') + 1;
 
-        var multipv_index = tokens.indexOf("multipv");
+        var multipv_index = tokens.indexOf('multipv');
         var multipv = 0;
         if (multipv_index > -1) {
             multipv = Number(tokens[multipv_index + 1]);
@@ -1201,7 +1146,7 @@ function formatEngineOutput(line) {
         else if (score == 'mate') {
             score = '#' + score;
         }
-        var pv_index = tokens.indexOf("pv") + 1;
+        var pv_index = tokens.indexOf('pv') + 1;
 
         var pv_out = tokens.slice(pv_index);
         var first_move = pv_out[0];
@@ -1220,8 +1165,7 @@ function formatEngineOutput(line) {
         }
 
         var history = analysis_game.history();
-
-        window.engine_lines["import_pv_" + multipv] = {score: score, depth: depth, line: history};
+        window.engine_lines['import_pv_' + multipv] = {score: score, depth: depth, line: history};
 
         var turn_sep = '';
         if (start_move_num % 2 == 0) {
@@ -1251,7 +1195,7 @@ function formatEngineOutput(line) {
         analysis_game = null;
         return {line: output, pv_index: multipv};
     }
-    else if (line.search("currmove") < 0 && line.search("time") < 0) {
+    else if (line.search('currmove') < 0 && line.search('time') < 0) {
         return line;
     }
 }
@@ -1262,7 +1206,6 @@ function multipv_increase() {
 
         if (window.stockfish) {
             window.stockfish.postMessage('setoption name multipv value ' + window.multipv);
-//                console.log("increaseing lines");
             if (window.analysis) {
                 window.stockfish.postMessage('stop');
                 window.stockfish.postMessage('go infinite');
@@ -1285,10 +1228,9 @@ function multipv_increase() {
 
 function multipv_decrease() {
     if (window.multipv > 1) {
-        $("#pv_" + window.multipv).remove();
+        $('#pv_' + window.multipv).remove();
 
         window.multipv -= 1;
-//    window.stockfish.postMessage('go infinite');
         if (window.stockfish) {
             window.stockfish.postMessage('setoption name multipv value ' + window.multipv);
             if (window.analysis) {
@@ -1327,18 +1269,16 @@ function analyze_pressed() {
 function stockfishPNACLModuleDidLoad() {
     window.StockfishModule = document.getElementById('stockfish_module');
     window.StockfishModule.postMessage('uci');
-//    window.StockfishModule.postMessage('setoption name multipv value 4');
     $('#analyzeBtn').prop('disabled', false);
 }
 
 function handleCrash(event) {
-    console.log("Nacl Module crash handler method..");
+    console.warn('Nacl Module crash handler method..');
     load_nacl_stockfish();
 }
 
 function handleMessage(event) {
     var output = formatEngineOutput(event.data);
-//    console.log(output);
     if (output && output.pv_index && output.pv_index > 0) {
         $('#pv_' + output.pv_index).html(output.line);
     }
@@ -1348,17 +1288,15 @@ function handleMessage(event) {
 
 function stop_analysis() {
     if (!window.StockfishModule) {
-//        console.log(window.stockfish);
         if (window.stockfish) {
             window.stockfish.terminate();
         }
-    }
-    else {
+    } else {
         try {
-            window.StockfishModule.postMessage("stop");
+            window.StockfishModule.postMessage('stop');
         }
         catch (err) {
-            console.log(err);
+            console.warn(err);
         }
     }
 }
@@ -1372,12 +1310,11 @@ function getCountPrevMoves(node) {
 }
 
 function getPreviousMoves(node, format) {
-    format = format || "raw";
+    format = format || 'raw';
 
     if (node.previous) {
-        if (format == "san") {
-            var san = "";
-//            console.log(node.half_move_num);
+        if (format == 'san') {
+            var san = '';
             if (node.half_move_num % 2 == 1) {
                 san += Math.floor((node.half_move_num + 1) / 2) + ". "
             }
@@ -1393,21 +1330,16 @@ function getPreviousMoves(node, format) {
 }
 
 function analyze(position_update) {
-//    StockfishModule = null;
-//    console.log('analyze called');
     if (!position_update) {
-        if ($('#AnalyzeText').text() == "Analyze") {
+        if ($('#AnalyzeText').text() == 'Analyze') {
             window.analysis = true;
-            $('#AnalyzeText').text("Stop");
+            $('#AnalyzeText').text('Stop');
         }
         else {
-            $('#AnalyzeText').text("Analyze");
-            console.log("stopping engine..");
+            $('#AnalyzeText').text('Analyze');
             stop_analysis();
             window.analysis = false;
             $('#engineStatus').html('');
-//            $('#engineMultiPVStatus').html(window.multipv + " line(s)");
-
             return;
         }
     }
@@ -1421,9 +1353,7 @@ function analyze(position_update) {
     if (!window.StockfishModule) {
         window.stockfish = new Worker('/static/js/stockfish.js');
         window.stockfish.onmessage = function(event) {
-//            $('#engineStatus').html(formatEngineOutput(event.data));
             handleMessage(event);
-//            $('#engineMultiPVStatus').html(window.multipv + " line(s)");
         };
     }
     else {

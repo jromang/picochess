@@ -105,18 +105,8 @@ class ChannelHandler(tornado.web.RequestHandler):
 
         if action == 'broadcast':
             fen = self.get_argument('fen')
-
-            move_stack = self.get_argument('moveStack')
-            move_stack = json.loads(move_stack)
-            pgn_game = pgn.Game()
-
-            create_game_header(self, pgn_game)
-            tmp = pgn_game
-            for move in move_stack:
-                tmp = tmp.add_variation(tmp.board().parse_san(move))
-
-            pgn_str = pgn_game.accept(pgn.StringExporter(headers=True, comments=False, variations=False))
-            r = {'type': 'broadcast', 'msg': 'Received position from Spectators!', 'pgn': pgn_str, 'fen': fen}
+            pgn_str = self.get_argument('pgn')
+            r = {'event': 'broadcast', 'msg': 'Received position from Spectators!', 'pgn': pgn_str, 'fen': fen}
             EventHandler.write_to_clients(r)
         elif action == 'move':
             WebServer.fire(Event.REMOTE_MOVE(move=self.get_argument('source') + self.get_argument('target'), fen=self.get_argument('fen')))
