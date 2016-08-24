@@ -1131,10 +1131,9 @@ function goToPosition(fen) {
 function goToStart() {
     stop_analysis();
     currentPosition = gameHistory;
-    console.log('goToStart > fenHash');
-    console.log(fenHash);
+    // console.log('goToStart > fenHash');
+    // console.log(fenHash);
     board.position(currentPosition.fen);
-
 //    if (currentPosition.variations) {
 //        currentPosition = currentPosition.variations[0];
 //    }
