@@ -14,6 +14,6 @@ pyserial==3.0.1
 python-chess==0.15.0
 requests==2.9.1
 shellescape==3.4.1
-spur==0.3.15
+spur==0.3.19
 tornado==4.3
 configobj==5.0.6
