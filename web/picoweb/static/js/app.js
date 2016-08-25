@@ -981,17 +981,11 @@ function get_full_game() {
         gameHistory.originalHeader = {
             'White': '*',
             'Black': '*',
-            'WhiteElo': '*',
-            'BlackElo': '*',
-            'PlyCount': '50',
             'Event': '?',
             'Site': '?',
             'Date': '?',
             'Round': '?',
-            'Result': '*',
-            'ECO': '?',
-            'Annotator': '?',
-            'SourceDate': '?'
+            'Result': '*'
         };
         game_header = getGameHeader(gameHistory.originalHeader, true);
     }
@@ -1076,7 +1070,6 @@ function goToPosition(fen) {
 }
 
 function goToStart() {
-    console.log(currentPosition);
     stop_analysis();
     currentPosition = gameHistory;
     board.position(currentPosition.fen);
@@ -1084,7 +1077,6 @@ function goToStart() {
 }
 
 function goToEnd() {
-    console.log(currentPosition);
     stop_analysis();
     if (fenHash.last) {
         currentPosition = fenHash.last;
@@ -1094,7 +1086,6 @@ function goToEnd() {
 }
 
 function goForward() {
-    console.log(currentPosition);
     stop_analysis();
     if (currentPosition && currentPosition.variations[0]) {
         currentPosition = currentPosition.variations[0];
@@ -1106,7 +1097,6 @@ function goForward() {
 }
 
 function goBack() {
-    console.log(currentPosition);
     stop_analysis();
     if (currentPosition && currentPosition.previous) {
         currentPosition = currentPosition.previous;

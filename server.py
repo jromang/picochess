@@ -15,23 +15,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import datetime
 import threading
+from multiprocessing.pool import ThreadPool
 
-from flask import Flask
+import chess
+import chess.pgn as pgn
 import tornado.web
 import tornado.wsgi
-from tornado.websocket import WebSocketHandler
 from tornado.ioloop import IOLoop
-from multiprocessing.pool import ThreadPool
-from utilities import *
-import queue
-from web.picoweb import picoweb as pw
-import chess.pgn as pgn
-import chess
-import json
-import datetime
+from tornado.websocket import WebSocketHandler
 
-import copy
+from utilities import *
+from web.picoweb import picoweb as pw
+
 
 _workers = ThreadPool(5)
 
@@ -96,7 +93,7 @@ class ChannelHandler(tornado.web.RequestHandler):
         self.shared = shared
 
     def real_ip(self):
-        x_real_ip = self.request.headers.get("X-Real-IP")
+        x_real_ip = self.request.headers.get('X-Real-IP')
         real_ip = self.request.remote_ip if not x_real_ip else x_real_ip
         return real_ip
 
@@ -119,14 +116,14 @@ class EventHandler(WebSocketHandler):
         self.shared = shared
 
     def real_ip(self):
-        x_real_ip = self.request.headers.get("X-Real-IP")
+        x_real_ip = self.request.headers.get('X-Real-IP')
         real_ip = self.request.remote_ip if not x_real_ip else x_real_ip
         return real_ip
 
     def open(self):
         EventHandler.clients.add(self)
         client_ips.append(self.real_ip())
-        update_headers(self)
+        # update_headers(self)
 
     def on_close(self):
         EventHandler.clients.remove(self)
@@ -143,8 +140,8 @@ class DGTHandler(tornado.web.RequestHandler):
         self.shared = shared
 
     def get(self, *args, **kwargs):
-        action = self.get_argument("action")
-        if action == "get_last_move":
+        action = self.get_argument('action')
+        if action == 'get_last_move':
             self.write(self.shared['last_dgt_move_msg'])
 
 
@@ -153,8 +150,8 @@ class InfoHandler(tornado.web.RequestHandler):
         self.shared = shared
 
     def get(self, *args, **kwargs):
-        action = self.get_argument("action")
-        if action == "get_system_info":
+        action = self.get_argument('action')
+        if action == 'get_system_info':
             if 'system_info' in self.shared:
                 self.write(self.shared['system_info'])
 
