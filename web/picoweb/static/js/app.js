@@ -84,13 +84,30 @@ function getSystemInfo() {
     }).fail(function(jqXHR, textStatus) {
         dgtClockStatusEl.html(textStatus);
     });
+    $.get('/info', {action: 'get_headers'}, function(data) {
+        setHeaders(data);
+    }).fail(function(jqXHR, textStatus) {
+        dgtClockStatusEl.html(textStatus);
+    });
+}
+
+// copied from loadGame()
+function setHeaders(data) {
+    gameHistory.gameHeader = getGameHeader(data, false);
+    gameHistory.result = data.Result;
+    gameHistory.originalHeader = data;
+    var exporter = new WebExporter();
+    export_game(gameHistory, exporter, true, true, undefined, false);
+    writeVariationTree(pgnEl, exporter.toString(), gameHistory);
 }
 
 function goToDGTFen() {
     $.get('/dgt', {action: 'get_last_move'}, function(data) {
-        updateDGTPosition(data);
-        if (data['msg']) {
-            dgtClockStatusEl.html(data['msg']);
+        if (data) {
+            updateDGTPosition(data);
+            if (data['msg']) {
+                dgtClockStatusEl.html(data['msg']);
+            }
         }
     }).fail(function(jqXHR, textStatus) {
         dgtClockStatusEl.html(textStatus);
@@ -98,7 +115,7 @@ function goToDGTFen() {
 }
 
 $(function() {
-    // JP! deactivated getSystemInfo();
+    getSystemInfo();
     // JP! is this really needed?!?
     $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
         window.activedb = e.target.hash;
@@ -238,9 +255,7 @@ $(function() {
                     dgtClockStatusEl.html(data.msg);
                     break;
                 case 'header':
-                    loadGame(data['pgn'].split("\n"));
-                    board.position(data['fen']);
-                    updateStatus();
+                    setHeaders(data['headers']);
                     break;
                 default:
                     console.warn(data);
@@ -966,12 +981,7 @@ function loadGame(pgn_lines) {
         currentPosition = fenHash[curr_fen];
     }
 
-    gameHistory.gameHeader = getGameHeader(game_headers, false);
-    gameHistory.result = game_headers.Result;
-    gameHistory.originalHeader = game_headers;
-    var exporter = new WebExporter();
-    export_game(gameHistory, exporter, true, true, undefined, false);
-    writeVariationTree(pgnEl, exporter.toString(), gameHistory);
+    setHeaders(game_headers);
     $('.fen').unbind('click', goToGameFen).one('click', goToGameFen);
 }
 
@@ -985,7 +995,9 @@ function get_full_game() {
             'Site': '?',
             'Date': '?',
             'Round': '?',
-            'Result': '*'
+            'Result': '*',
+            'BlackElo' : '-',
+            'WhiteElo' : '-'
         };
         game_header = getGameHeader(gameHistory.originalHeader, true);
     }
@@ -1048,9 +1060,11 @@ function newBoard(fen) {
 }
 
 function broadcastPosition() {
-    var content = get_full_game();
-    $.post('/channel', {action: 'broadcast', fen: currentPosition.fen, pgn: content}, function (data) {
-    });
+    if (currentPosition) {
+        var content = get_full_game();
+        $.post('/channel', {action: 'broadcast', fen: currentPosition.fen, pgn: content}, function (data) {
+        });
+    }
 }
 
 function goToGameFen() {
