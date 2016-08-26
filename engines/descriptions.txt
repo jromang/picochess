@@ -29,7 +29,7 @@ Elo: 2900
 Levels: yes
 Chess960: no
 License: GPLv3
-Source: http://dl.dropboxusercontent.com/u/89684995/texel106.7z
+Source: http://web.comhem.se/petero2home/javachess/index.html#texel
 Description: Texel is the successor to CuckooChess. It is a very strong engine that
 will beat every human GM. But thanks to its different skill levels, Texel
 will appeal to chess players of every strength. For absolute beginners
