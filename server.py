@@ -195,12 +195,12 @@ class WebDisplay(DisplayMsg, threading.Thread):
 
             if 'game_info' in self.shared:
                 if 'play_mode' in self.shared['game_info']:
-                    if 'level' in self.shared['game_info']:
-                        engine_name += ' /{0}\\'.format(self.shared['game_info']['level'])
-                    pgn_game.headers['Black'] = engine_name if self.shared['game_info'][
-                                                                   'play_mode'] == PlayMode.USER_WHITE else user_name
-                    pgn_game.headers['White'] = engine_name if self.shared['game_info'][
-                                                                   'play_mode'] == PlayMode.USER_BLACK else user_name
+                    if 'level_text' in self.shared['game_info']:
+                        engine_name += ' /{0}\\'.format(self.shared['game_info']['level_text'].m)
+                    pgn_game.headers['Black'] = \
+                        engine_name if self.shared['game_info']['play_mode'] == PlayMode.USER_WHITE else user_name
+                    pgn_game.headers['White'] = \
+                        engine_name if self.shared['game_info']['play_mode'] == PlayMode.USER_BLACK else user_name
 
                     comp_color = 'Black' if self.shared['game_info']['play_mode'] == PlayMode.USER_WHITE else 'White'
                     user_color = 'Black' if self.shared['game_info']['play_mode'] == PlayMode.USER_BLACK else 'White'
@@ -247,21 +247,23 @@ class WebDisplay(DisplayMsg, threading.Thread):
             if case(MessageApi.ENGINE_READY):
                 self.create_system_info()
                 self.shared['system_info']['engine_name'] = message.engine_name
-                if not message.has_levels and 'level' in self.shared['game_info']:
-                    del self.shared['game_info']['level']
+                if not message.has_levels and 'level_text' in self.shared['game_info']:
+                    del self.shared['game_info']['level_text']
                 update_headers()
                 break
             if case(MessageApi.STARTUP_INFO):
                 self.shared['game_info'] = message.info
+                if message.info['level_text'] is None:
+                    del self.shared['game_info']['level_text']
                 break
             if case(MessageApi.OPENING_BOOK):
                 self.create_game_info()
-                self.shared['game_info']['book_text'] = message.book_text
+                self.shared['game_info']['book_index'] = message.book_text  # @todo fixit
                 break
             if case(MessageApi.INTERACTION_MODE):
                 self.create_game_info()
-                self.shared['game_info']['mode'] = message.mode
-                if self.shared['game_info']['mode'] == Mode.REMOTE:
+                self.shared['game_info']['interaction_mode'] = message.mode
+                if self.shared['game_info']['interaction_mode'] == Mode.REMOTE:
                     self.shared['system_info']['engine_name'] = 'Remote Player'
                 else:
                     self.shared['system_info']['engine_name'] = self.shared['system_info']['old_engine']
@@ -277,7 +279,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 break
             if case(MessageApi.LEVEL):
                 self.create_game_info()
-                self.shared['game_info']['level'] = message.level_text.m
+                self.shared['game_info']['level_text'] = message.level_text
                 update_headers()
                 break
             if case(MessageApi.JACK_CONNECTED_ERROR):

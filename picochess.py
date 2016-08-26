@@ -94,8 +94,7 @@ def main():
         else:
             place = '?'
             addr = None
-        DisplayMsg.show(Message.SYSTEM_INFO(info={'version': version, 'location': place,
-                                                  'books': get_opening_books(), 'ip': addr,
+        DisplayMsg.show(Message.SYSTEM_INFO(info={'version': version, 'location': place, 'ip': addr,
                                                   'engine_name': engine_name, 'user_name': user_name
                                                   }))
 
@@ -578,11 +577,16 @@ def main():
     engine.startup(get_engine_level_dict(args.engine_level))
 
     # Startup - external
-    time_control, text = transfer_time(args.time.split())
-    text.beep = False
+    time_control, time_text = transfer_time(args.time.split())
+    time_text.beep = False
+    if args.engine_level:
+        level_text = dgttranslate.text('B00_level', args.engine_level)
+        level_text.beep = False
+    else:
+        level_text = None
     DisplayMsg.show(Message.STARTUP_INFO(info={'interaction_mode': interaction_mode, 'play_mode': play_mode,
-                                               'books': all_books, 'book_index': book_index,
-                                               'time_control': time_control,'time_text': text}))
+                                               'books': all_books, 'book_index': book_index, 'level_text': level_text,
+                                               'time_control': time_control, 'time_text': time_text}))
     DisplayMsg.show(Message.ENGINE_STARTUP(shell=engine.get_shell(), file=engine.get_file(),
                                            has_levels=engine.has_levels(), has_960=engine.has_chess960()))
 
