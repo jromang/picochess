@@ -255,8 +255,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.top_result = Menu.TOP_MENU
                 text = self.dgttranslate.text(self.top_index.value)
             else:
-                msg = (self.installed_engines[self.engine_result])['section']
-                text = self.dgttranslate.text('B00_default', msg)
+                text = self.installed_engines[self.engine_result]['text']
+                text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
                 self.engine_result = None
             DisplayDgt.show(text)
 
@@ -329,8 +329,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 if self.engine_result is None:
                     self.engine_index = (self.engine_index-1) % len(self.installed_engines)
-                    msg = (self.installed_engines[self.engine_index])['section']
-                    text = self.dgttranslate.text('B00_default', msg)
+                    text = self.installed_engines[self.engine_index]['text']
+                    text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
                 else:
                     level_dict = self.installed_engines[self.engine_index]['level_dict']
                     self.engine_level_index = (self.engine_level_index-1) % len(level_dict)
@@ -436,8 +436,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 if self.engine_result is None:
                     self.engine_index = (self.engine_index+1) % len(self.installed_engines)
-                    msg = (self.installed_engines[self.engine_index])['section']
-                    text = self.dgttranslate.text('B00_default', msg)
+                    text = self.installed_engines[self.engine_index]['text']
+                    text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
                 else:
                     level_dict = self.installed_engines[self.engine_index]['level_dict']
                     self.engine_level_index = (self.engine_level_index+1) % len(level_dict)
@@ -497,8 +497,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 if self.mode_result == Mode.REMOTE:
                     text = self.dgttranslate.text('B00_nofunction')
                 else:
-                    msg = (self.installed_engines[self.engine_index])['section']
-                    text = self.dgttranslate.text('B00_default', msg)
+                    text = self.installed_engines[self.engine_index]['text']
+                    text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
+
             elif self.top_index == Menu.SYSTEM_MENU:
                 text = self.dgttranslate.text(self.system_index.value)
             else:
@@ -960,8 +961,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.engine_index = engine_index
                             eng = self.installed_engines[self.engine_index]
                             level_dict = eng['level_dict']
-                            logging.debug("Map-Fen: Engine name [%s]", eng['section'])
-                            eng_text = self.dgttranslate.text('M10_default', eng['section'])
+                            logging.debug("Map-Fen: Engine name [%s]", eng['name'])
+                            eng_text = eng['text']
+                            eng_text.beep = self.dgttranslate.bl(BeepLevel.MAP)
+                            eng_text.maxtime = 1
                             if level_dict:
                                 if self.engine_level_index is None or len(level_dict) <= self.engine_level_index:
                                     self.engine_level_index = len(level_dict)-1

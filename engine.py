@@ -52,11 +52,13 @@ def read_engine_ini(engine_shell=None, engine_path=None):
                 for option in parser.options(ps):
                     level_dict[ps][option] = parser[ps][option]
 
+        text = Dgt.DISPLAY_TEXT(l=config[section]['large'], m=config[section]['medium'], s=config[section]['small'],
+                                wait=True, beep=False, maxtime=0)
         library.append(
             {
-                'file' : engine_path + os.sep + config[section]['file'],
-                'section' : section,
-                'level_dict' : level_dict
+                'file': engine_path + os.sep + config[section]['file'],
+                'level_dict': level_dict,
+                'text': text
             }
         )
     return library
@@ -92,6 +94,14 @@ def write_engine_ini(engine_path=None):
     def is_exe(fpath):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
+    def name_build(parts, maxlength, default_name):
+        r = ''
+        for p in parts:
+            if len(r) + len(p) > maxlength:
+                break
+            r += p
+        return r if r else default_name
+
     if not engine_path:
         program_path = os.path.dirname(os.path.realpath(__file__)) + os.sep
         engine_path = program_path + 'engines' + os.sep + platform.machine()
@@ -105,9 +115,19 @@ def write_engine_ini(engine_path=None):
                 try:
                     if engine.has_levels():
                         write_level_ini()
+                    engine_name = engine.get().name
+
+                    name_parts = engine_name.replace('.', '').split(' ')
+                    name_small = name_build(name_parts, 6, engine_file_name[2:])
+                    name_medium = name_build(name_parts, 8, name_small)
+                    name_large = name_build(name_parts, 11, name_medium)
+
                     config[engine_file_name[2:]] = {
                         'file': engine_file_name,
-                        'name': engine.get().name,
+                        'name': engine_name,
+                        'small': name_small,
+                        'medium': name_medium,
+                        'large': name_large
                     }
                 except AttributeError:
                     pass
