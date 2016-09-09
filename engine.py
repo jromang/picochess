@@ -46,7 +46,7 @@ def read_engine_ini(engine_shell=None, engine_path=None):
     for section in config.sections():
         parser = configparser.ConfigParser()
         level_dict = {}
-        if parser.read(engine_path + os.sep + config[section]['file'] + '.uci'):
+        if parser.read(engine_path + os.sep + section + '.uci'):
             for ps in parser.sections():
                 level_dict[ps] = {}
                 for option in parser.options(ps):
@@ -56,7 +56,7 @@ def read_engine_ini(engine_shell=None, engine_path=None):
                                 wait=True, beep=False, maxtime=0)
         library.append(
             {
-                'file': engine_path + os.sep + config[section]['file'],
+                'file': engine_path + os.sep + section,
                 'level_dict': level_dict,
                 'text': text
             }
@@ -122,8 +122,7 @@ def write_engine_ini(engine_path=None):
                     name_medium = name_build(name_parts, 8, name_small)
                     name_large = name_build(name_parts, 11, name_medium)
 
-                    config[engine_file_name[2:]] = {
-                        'file': engine_file_name,
+                    config[engine_file_name] = {
                         'name': engine_name,
                         'small': name_small,
                         'medium': name_medium,

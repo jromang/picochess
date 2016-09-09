@@ -561,11 +561,11 @@ def main():
     legal_fens = compute_legal_fens(game)  # Compute the legal FENs
     all_books = get_opening_books()
     try:
-        book_index = [book[1] for book in all_books].index('books/' + args.book)
+        book_index = [book['file'] for book in all_books].index(args.book)
     except ValueError:
-        logging.warning("selected book not present, defaulting to %s", all_books[7][1])
+        logging.warning("selected book not present, defaulting to %s", all_books[7]['file'])
         book_index = 7
-    bookreader = chess.polyglot.open_reader(all_books[book_index][1])
+    bookreader = chess.polyglot.open_reader(all_books[book_index]['file'])
     searchmoves = AlternativeMover()
     interaction_mode = Mode.NORMAL
     play_mode = PlayMode.USER_WHITE
@@ -838,11 +838,11 @@ def main():
 
                 if case(EventApi.SET_OPENING_BOOK):
                     config = ConfigObj('picochess.ini')
-                    config['book'] = event.book[1][6:]
+                    config['book'] = event.book['file']
                     config.write()
-                    logging.debug("changing opening book [%s]", event.book[1])
-                    bookreader = chess.polyglot.open_reader(event.book[1])
-                    DisplayMsg.show(Message.OPENING_BOOK(book_name=event.book[0], book_text=event.book_text, ok_text=event.ok_text))
+                    logging.debug("changing opening book [%s]", event.book['file'])
+                    bookreader = chess.polyglot.open_reader(event.book['file'])
+                    DisplayMsg.show(Message.OPENING_BOOK(book_text=event.book_text, ok_text=event.ok_text))
                     break
 
                 if case(EventApi.SET_TIME_CONTROL):

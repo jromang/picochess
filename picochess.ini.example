@@ -1,5 +1,5 @@
 ### ===============================
-### = picochess.ini.example v0.71 =
+### = picochess.ini.example v0.73 =
 ### ===============================
 ### Example and description how to configure PicoChess
 ### To use this file, simply copy this file to picochess.ini and edit the appropriate settings
@@ -41,11 +41,13 @@
 ### = Chess engine options =
 ### ========================
 ### Options for the UCI-Chess engine
-## What engine should play. Path to a (startup) UCI engine
+## Sets the UCI engine used at startup
+## Path to the engine relative to the 'picochess' folder
 # engine = engines/armv7l/a-stockf
 ## What level the engine should have at startup?
 ## For the value please see the engines/<your_plattform>/<engine_name>.uci
 # engine-level = Level@20
+### Parameters for a remote engine (server) - good chances you do not need them ;-)
 ## Where is the server with the engine
 # remote-server = engine.remote-domain.com
 ## What user to use for connect to the remote-engine server
@@ -58,10 +60,10 @@
 ### ==========================
 ### = Opening book selection =
 ### ==========================
-### Sets the opening book used at startup - may be changed from the clock buttons
-### Must be the full name of an opening book in the 'books' folder
-### Defaults to book 'h', normally 'h-varied', if not set or not available
-# book = h-varied.bin
+### Sets the opening book used at startup
+### Path of an opening book relative to the 'picochess' folder
+### Defaults to book 'h', normally 'h-varied.bin', if not set or not available
+# book = books/h-varied.bin
 
 ### ==================
 ### = Time selection =

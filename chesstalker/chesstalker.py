@@ -72,7 +72,7 @@ class ChessTalker(DisplayMsg, threading.Thread):
                     logging.error('ChessTalker: Failed to create computer voice: [%s]', str(computer_voice))
                     self.computer_chesstalker_voice = None
         except:
-            logging.exception("Unexpected error")
+            logging.exception('Unexpected error')
 
     def run(self):
         """
@@ -125,7 +125,7 @@ class ChessTalker(DisplayMsg, threading.Thread):
                         break
                     if case(MessageApi.OPENING_BOOK):
                         logging.debug('Announcing OPENING_BOOK')
-                        system_voice.say_opening_book(message.book_name)
+                        system_voice.say_opening_book(message.book_text.m)
                         break
                     if case(MessageApi.TIME_CONTROL):
                         logging.debug('Announcing SET_TIME_CONTROL')
@@ -138,11 +138,8 @@ class ChessTalker(DisplayMsg, threading.Thread):
                             system_voice.say_time_control_blitz(time_control_value)
                         elif time_text.startswith("f"):
                             time_control_values = time_text[1:].strip().split()
-                            # logging.debug('time_control_values: ' + str(time_control_values))
                             minutes_per_game = time_control_values[0]
                             fischer_increment = time_control_values[1]
-                            # logging.debug('minutes_per_game: ' + str(minutes_per_game))
-                            # logging.debug('fischer_increment: ' + str(fischer_increment))
                             system_voice.say_time_control_fischer(minutes_per_game, fischer_increment)
                         break
                     if case(MessageApi.GAME_ENDS):

@@ -343,8 +343,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text = self.dgttranslate.text('B00_nofunction')
             else:
                 self.book_index = (self.book_index-1) % len(self.all_books)
-                msg = (self.all_books[self.book_index])[0]
-                text = self.dgttranslate.text('B00_default', msg)
+                text = self.all_books[self.book_index]['text']
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.TIME_MENU:
@@ -450,8 +449,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text = self.dgttranslate.text('B00_nofunction')
             else:
                 self.book_index = (self.book_index+1) % len(self.all_books)
-                msg = (self.all_books[self.book_index])[0]
-                text = self.dgttranslate.text('B00_default', msg)
+                text = self.all_books[self.book_index]['text']
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.TIME_MENU:
@@ -491,14 +489,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             elif self.top_index == Menu.TIME_MENU:
                 text = self.dgttranslate.text(self.time_mode_index.value)
             elif self.top_index == Menu.BOOK_MENU:
-                msg = (self.all_books[self.book_index])[0]
-                text = self.dgttranslate.text('B00_default', msg)
+                text = self.all_books[self.book_index]['text']
             elif self.top_index == Menu.ENGINE_MENU:
                 if self.mode_result == Mode.REMOTE:
                     text = self.dgttranslate.text('B00_nofunction')
                 else:
                     text = self.installed_engines[self.engine_index]['text']
-                    text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
 
             elif self.top_index == Menu.SYSTEM_MENU:
                 text = self.dgttranslate.text(self.system_index.value)
@@ -948,8 +944,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     try:
                         b = self.all_books[book_index]
                         self.book_index = book_index
-                        logging.debug("Map-Fen: Opening book [%s]", b[1])
-                        text = self.dgttranslate.text('M10_default', b[0])
+                        logging.debug("Map-Fen: Opening book [%s]", b['file'])
+                        text = b['text']
+                        text.beep = self.dgttranslate.bl(BeepLevel.MAP)
+                        text.maxtime = 1
                         self.fire(Event.SET_OPENING_BOOK(book=b, book_text=text, ok_text=False))
                         self.reset_menu_results()
                     except IndexError:
@@ -969,7 +967,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                 if self.engine_level_index is None or len(level_dict) <= self.engine_level_index:
                                     self.engine_level_index = len(level_dict)-1
                                 msg = sorted(level_dict)[self.engine_level_index]
-                                options = level_dict[msg]  # cause of "new-engine", we send this lateron now only {}
+                                options = level_dict[msg]  # cause of "new-engine", send options lateron - now only {}
                                 self.fire(Event.LEVEL(options={}, level_text=self.dgttranslate.text('M10_level', msg)))
                             else:
                                 msg = None

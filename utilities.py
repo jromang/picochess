@@ -26,6 +26,9 @@ import json
 import time
 from threading import Timer
 
+import configparser
+
+
 try:
     import enum
 except ImportError:
@@ -650,7 +653,7 @@ class Message():
     ENGINE_FAIL = ClassFactory(MessageApi.ENGINE_FAIL, [])
     LEVEL = ClassFactory(MessageApi.LEVEL, ['level_text'])
     TIME_CONTROL = ClassFactory(MessageApi.TIME_CONTROL, ['time_text', 'ok_text'])
-    OPENING_BOOK = ClassFactory(MessageApi.OPENING_BOOK, ['book_name', 'book_text', 'ok_text'])
+    OPENING_BOOK = ClassFactory(MessageApi.OPENING_BOOK, ['book_text', 'ok_text'])
     DGT_BUTTON = ClassFactory(MessageApi.DGT_BUTTON, ['button'])
     DGT_FEN = ClassFactory(MessageApi.DGT_FEN, ['fen'])
     DGT_CLOCK_VERSION = ClassFactory(MessageApi.DGT_CLOCK_VERSION, ['main_version', 'sub_version', 'attached'])
@@ -709,13 +712,22 @@ class Event():
 
 
 def get_opening_books():
+    config = configparser.ConfigParser()
+
     program_path = os.path.dirname(os.path.realpath(__file__)) + os.sep
-    book_list = sorted(os.listdir(program_path + 'books'))
+    book_path = program_path + 'books'
+    config.read(book_path + os.sep + 'books.ini')
+
     library = []
-    for book in book_list:
-        # Can't use isfile() as that doesn't count links
-        if not os.path.isdir('books' + os.sep + book):
-            library.append((book[2:book.index('.')], 'books' + os.sep + book))
+    for section in config.sections():
+        text = Dgt.DISPLAY_TEXT(l=config[section]['large'], m=config[section]['medium'], s=config[section]['small'],
+                                wait=True, beep=False, maxtime=0)
+        library.append(
+            {
+                'file': 'books' + os.sep + section,
+                'text': text
+            }
+        )
     return library
 
 
@@ -728,24 +740,24 @@ def hours_minutes_seconds(seconds):
 def update_picochess(auto_reboot=False):
     git = 'git.exe' if platform.system() == 'Windows' else 'git'
     if git:
-        branch = subprocess.Popen([git, "rev-parse", "--abbrev-ref", "HEAD"],
+        branch = subprocess.Popen([git, 'rev-parse', '--abbrev-ref', 'HEAD'],
                                   stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8').rstrip()
         if branch == 'stable' or branch == 'master':
             # Fetch remote repo
-            output = subprocess.Popen([git, "remote", "update"],
+            output = subprocess.Popen([git, 'remote', 'update'],
                                       stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
             logging.debug(output)
             # Check if update is needed
-            output = subprocess.Popen([git, "status", "-uno"],
+            output = subprocess.Popen([git, 'status', '-uno'],
                                       stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
             logging.debug(output)
             if 'up-to-date' not in output:
                 # Update
                 logging.debug('updating picochess')
-                output = subprocess.Popen(["pip3", "install", "-r", "requirements.txt"],
+                output = subprocess.Popen(['pip3', 'install', '-r', 'requirements.txt'],
                                           stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
                 logging.debug(output)
-                output = subprocess.Popen([git, "pull", "origin", branch],
+                output = subprocess.Popen([git, 'pull', 'origin', branch],
                                           stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
                 logging.debug(output)
                 if auto_reboot:
@@ -772,7 +784,7 @@ def reboot():
 def get_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
-        s.connect(("google.com", 80))
+        s.connect(('google.com', 80))
         return s.getsockname()[0]
 
     # TODO: Better handling of exceptions of socket connect
