@@ -237,7 +237,7 @@ For example, to turn OFF the LED's on the Revelation II chessbot, this line will
 
 enable-revelation-leds = false
 
-UCI engine options can be set in the picochess.uci configuration file which you will find in the /opt/picochess/ directory. To set the option, use the uci-option flag. For example, when using jromang's modified
+UCI engine options can be set in the picochess.uci configuration file which you will find in the /opt/picochess/engines/<your_plattform> folder. To set the option, use the uci-option flag. For example, when using jromang's modified
 `Stockfish Human Player engine <https://github.com/jromang/Stockfish/tree/human_player>`_, the line
 
 Beginner Mode = true
