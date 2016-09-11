@@ -388,19 +388,19 @@ def main():
         if len(time_list) == 1:
             secs = num(time_list[0])
             time_control = TimeControl(TimeMode.FIXED, seconds_per_move=secs)
-            text = dgttranslate.text('B00_tc_fixed', '{:3d}'.format(secs))
+            text = dgttranslate.text('B00_tc_fixed', '{:2d}'.format(secs))
         elif len(time_list) == 2:
             mins = num(time_list[0])
             finc = num(time_list[1])
             if finc == 0:
                 time_control = TimeControl(TimeMode.BLITZ, minutes_per_game=mins)
-                text = dgttranslate.text('B00_tc_blitz', '{:4d}'.format(mins))
+                text = dgttranslate.text('B00_tc_blitz', '{:2d}'.format(mins))
             else:
                 time_control = TimeControl(TimeMode.FISCHER, minutes_per_game=mins, fischer_increment=finc)
                 text = dgttranslate.text('B00_tc_fisch', '{:2d} {:2d}'.format(mins, finc))
         else:
             time_control = TimeControl(TimeMode.BLITZ, minutes_per_game=5)
-            text = dgttranslate.text('B00_tc_blitz', '   5')
+            text = dgttranslate.text('B00_tc_blitz', ' 5')
         return time_control, text
 
     def get_engine_level_dict(engine_level):

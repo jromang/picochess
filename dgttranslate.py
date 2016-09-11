@@ -449,17 +449,17 @@ class DgtTranslate(object):
             frtxt = Dgt.DISPLAY_TEXT(l=None, m='Remote', s=None, wait=False, beep=bl_button, maxtime=0)
             estxt = Dgt.DISPLAY_TEXT(l=None, m='Remoto', s=None, wait=False, beep=bl_button, maxtime=0)
         if text_id == 'B00_timemode_fixed_menu':
-            entxt = Dgt.DISPLAY_TEXT(l=None, m='Fixed', s=None, wait=False, beep=bl_button, maxtime=0)
+            entxt = Dgt.DISPLAY_TEXT(l='Move time', m='Move t', s='fixed', wait=False, beep=bl_button, maxtime=0)
             detxt = Dgt.DISPLAY_TEXT(l='ZeitproZug', m='Zeit/Zug', s='fest', wait=False, beep=bl_button, maxtime=0)
-            nltxt = Dgt.DISPLAY_TEXT(l=None, m='Fixed', s=None, wait=False, beep=bl_button, maxtime=0)
-            frtxt = Dgt.DISPLAY_TEXT(l=None, m='Fixe', s=None, wait=False, beep=bl_button, maxtime=0)
-            estxt = Dgt.DISPLAY_TEXT(l=None, m='Reparado', s='repar', wait=False, beep=bl_button, maxtime=0)
+            nltxt = Dgt.DISPLAY_TEXT(l=None, m='Zet tyd', s='zet', wait=False, beep=bl_button, maxtime=0)
+            frtxt = Dgt.DISPLAY_TEXT(l='Mouv temps', m='Mouv tem', s='mouv', wait=False, beep=bl_button, maxtime=0)
+            estxt = Dgt.DISPLAY_TEXT(l='Mov tiempo', m='mov tiem', s='mov', wait=False, beep=bl_button, maxtime=0)
         if text_id == 'B00_timemode_blitz_menu':
-            entxt = Dgt.DISPLAY_TEXT(l=None, m='Blitz', s=None, wait=False, beep=bl_button, maxtime=0)
-            detxt = Dgt.DISPLAY_TEXT(l=None, m='Blitz', s=None, wait=False, beep=bl_button, maxtime=0)
-            nltxt = Dgt.DISPLAY_TEXT(l=None, m='Blitz', s=None, wait=False, beep=bl_button, maxtime=0)
-            frtxt = Dgt.DISPLAY_TEXT(l=None, m='Blitz', s=None, wait=False, beep=bl_button, maxtime=0)
-            estxt = Dgt.DISPLAY_TEXT(l=None, m='Blitz', s=None, wait=False, beep=bl_button, maxtime=0)
+            entxt = Dgt.DISPLAY_TEXT(l='Game time', m='Game t', s=None, wait=False, beep=bl_button, maxtime=0)
+            detxt = Dgt.DISPLAY_TEXT(l='Spiel zeit', m='Spiel z', s='spiel', wait=False, beep=bl_button, maxtime=0)
+            nltxt = Dgt.DISPLAY_TEXT(l=None, m='Spel tyd', s='spel', wait=False, beep=bl_button, maxtime=0)
+            frtxt = Dgt.DISPLAY_TEXT(l='Partie temp', m='Partie', s=None, wait=False, beep=bl_button, maxtime=0)
+            estxt = Dgt.DISPLAY_TEXT(l=None, m='Partid', s=None, wait=False, beep=bl_button, maxtime=0)
         if text_id == 'B00_timemode_fischer_menu':
             entxt = Dgt.DISPLAY_TEXT(l=None, m='Fischer', s='fischr', wait=False, beep=bl_button, maxtime=0)
             detxt = Dgt.DISPLAY_TEXT(l=None, m='Fischer', s='fischr', wait=False, beep=bl_button, maxtime=0)
@@ -617,17 +617,17 @@ class DgtTranslate(object):
             frtxt = Dgt.DISPLAY_TEXT(l='ok langue', m='okLangue', s='oklang', wait=False, beep=bl_button, maxtime=1)
             estxt = Dgt.DISPLAY_TEXT(l='ok idioma', m='okIdioma', s='oklang', wait=False, beep=bl_button, maxtime=1)
         if text_id == 'B00_tc_fixed':
-            entxt = Dgt.DISPLAY_TEXT(l='Fixed  ' + msg, m='Fixd' + msg, s='mov' + msg, wait=False, beep=bl_button, maxtime=0)
-            detxt = entxt
-            nltxt = entxt
-            frtxt = entxt
-            estxt = entxt
+            entxt = Dgt.DISPLAY_TEXT(l='Move time' + msg, m='Move t' + msg, s='mov ' + msg, wait=False, beep=bl_button, maxtime=0)
+            detxt = Dgt.DISPLAY_TEXT(l='Zugzeit  ' + msg, m='Zug z' + msg, s='zug ' + msg, wait=False, beep=bl_button, maxtime=0)
+            nltxt = Dgt.DISPLAY_TEXT(l='Zet tyd  ' + msg, m='Zet t ' + msg, s='zet ' + msg, wait=False, beep=bl_button, maxtime=0)
+            frtxt = Dgt.DISPLAY_TEXT(l='Mouv     ' + msg, m='Mouv ' + msg, s='mouv' + msg, wait=False, beep=bl_button, maxtime=0)
+            estxt = Dgt.DISPLAY_TEXT(l='Mov      ' + msg, m='Mov ' + msg, s='mov ' + msg, wait=False, beep=bl_button, maxtime=0)
         if text_id == 'B00_tc_blitz':
-            entxt = Dgt.DISPLAY_TEXT(l='Blitz  ' + msg, m='Bltz' + msg, s='bl' + msg, wait=False, beep=bl_button, maxtime=0)
-            detxt = entxt
-            nltxt = entxt
-            frtxt = entxt
-            estxt = entxt
+            entxt = Dgt.DISPLAY_TEXT(l='Game time' + msg, m='Game t' + msg, s='game' + msg, wait=False, beep=bl_button, maxtime=0)
+            detxt = Dgt.DISPLAY_TEXT(l='Spielzeit' + msg, m='Spielz' + msg, s='spl ' + msg, wait=False, beep=bl_button, maxtime=0)
+            nltxt = Dgt.DISPLAY_TEXT(l='Spel tyd ' + msg, m='Spel t' + msg, s='spel' + msg, wait=False, beep=bl_button, maxtime=0)
+            frtxt = Dgt.DISPLAY_TEXT(l='Partie   ' + msg, m='Partie' + msg, s='part' + msg, wait=False, beep=bl_button, maxtime=0)
+            estxt = Dgt.DISPLAY_TEXT(l='Partid   ' + msg, m='Partid' + msg, s='part' + msg, wait=False, beep=bl_button, maxtime=0)
         if text_id == 'B00_tc_fisch':
             entxt = Dgt.DISPLAY_TEXT(l='Fischr' + msg, m='Fsh' + msg, s='f' + msg, wait=False, beep=bl_button, maxtime=0)
             detxt = entxt 

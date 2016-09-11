@@ -163,8 +163,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             ('rnbqkbnr/pppppppp/8/8/8/5Q2/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FISCHER, minutes_per_game=15, fischer_increment=10)),
             ('rnbqkbnr/pppppppp/8/8/8/6Q1/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FISCHER, minutes_per_game=30, fischer_increment=15)),
             ('rnbqkbnr/pppppppp/8/8/8/7Q/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FISCHER, minutes_per_game=60, fischer_increment=30))])
-        self.time_control_fixed_list = ['  1', '  3', '  5', ' 10', ' 15', ' 30', ' 60', ' 90']
-        self.time_control_blitz_list = ['   1', '   3', '   5', '  10', '  15', '  30', '  60', '  90']
+        self.time_control_fixed_list = [' 1', ' 3', ' 5', '10', '15', '30', '60', '90']
+        self.time_control_blitz_list = [' 1', ' 3', ' 5', '10', '15', '30', '60', '90']
         self.time_control_fisch_list = [' 1  1', ' 3  2', ' 4  2', ' 5  3', '10  5', '15 10', '30 15', '60 30']
 
     def reset_menu_results(self):
