@@ -58,7 +58,8 @@ def read_engine_ini(engine_shell=None, engine_path=None):
             {
                 'file': engine_path + os.sep + section,
                 'level_dict': level_dict,
-                'text': text
+                'text': text,
+                'name': config[section]['name']
             }
         )
     return library
