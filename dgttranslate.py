@@ -62,26 +62,8 @@ class DgtTranslate(object):
         entxt = detxt = nltxt = frtxt = estxt = None  # error case
         bl_button = self.bl(BeepLevel.BUTTON)
         bl_config = self.bl(BeepLevel.CONFIG)
-        if text_id == 'B00_default':
-            entxt = Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6], wait=False, beep=bl_button, maxtime=0)
-            detxt = entxt
-            nltxt = entxt
-            frtxt = entxt
-            estxt = entxt
         if text_id == 'B10_default':
             entxt = Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6], wait=False, beep=bl_button, maxtime=1)
-            detxt = entxt
-            nltxt = entxt
-            frtxt = entxt
-            estxt = entxt
-        if text_id == 'M10_default':
-            entxt = Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6], wait=False, beep=self.bl(BeepLevel.MAP), maxtime=1)
-            detxt = entxt
-            nltxt = entxt
-            frtxt = entxt
-            estxt = entxt
-        if text_id == 'C10_default':
-            entxt = Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6], wait=False, beep=bl_config, maxtime=1)
             detxt = entxt
             nltxt = entxt
             frtxt = entxt
@@ -165,18 +147,6 @@ class DgtTranslate(object):
             nltxt = Dgt.DISPLAY_TEXT(l=None, m='ok modus', s='okmode', wait=False, beep=bl_button, maxtime=1)
             frtxt = Dgt.DISPLAY_TEXT(l=None, m='ok mode', s='okmode', wait=False, beep=bl_button, maxtime=1)
             estxt = Dgt.DISPLAY_TEXT(l=None, m='ok modo', s='okmodo', wait=False, beep=bl_button, maxtime=1)
-        if text_id == 'B10_oklevel':
-            entxt = Dgt.DISPLAY_TEXT(l=None, m='ok level', s='ok lvl', wait=False, beep=bl_button, maxtime=1)
-            detxt = Dgt.DISPLAY_TEXT(l=None, m='ok Stufe', s='ok stf', wait=False, beep=bl_button, maxtime=1)
-            nltxt = Dgt.DISPLAY_TEXT(l=None, m='ok level', s='ok lvl', wait=False, beep=bl_button, maxtime=1)
-            frtxt = Dgt.DISPLAY_TEXT(l='ok niveau', m='ok niv', s='ok niv', wait=False, beep=bl_button, maxtime=1)
-            estxt = Dgt.DISPLAY_TEXT(l=None, m='ok nivel', s='ok nvl', wait=False, beep=bl_button, maxtime=1)
-        if text_id == 'B00_nolevel':
-            entxt = Dgt.DISPLAY_TEXT(l=None, m='no level', s='no lvl', wait=False, beep=bl_button, maxtime=0)
-            detxt = Dgt.DISPLAY_TEXT(l='Keine Stufe', m='Keine St', s='kn stf', wait=False, beep=bl_button, maxtime=0)
-            nltxt = Dgt.DISPLAY_TEXT(l='Geen level', m='Gn level', s='gn lvl', wait=False, beep=bl_button, maxtime=0)
-            frtxt = Dgt.DISPLAY_TEXT(l='no niveau', m='no niv', s=None, wait=False, beep=bl_button, maxtime=0)
-            estxt = Dgt.DISPLAY_TEXT(l='sin nivel', m='sinNivel', s='no nvl', wait=False, beep=bl_button, maxtime=0)
         if text_id == 'B10_okbook':
             entxt = Dgt.DISPLAY_TEXT(l=None, m='ok book', s='okbook', wait=False, beep=bl_button, maxtime=1)
             detxt = Dgt.DISPLAY_TEXT(l=None, m='ok Buch', s='okbuch', wait=False, beep=bl_button, maxtime=1)
@@ -220,11 +190,11 @@ class DgtTranslate(object):
             frtxt = Dgt.DISPLAY_TEXT(l=None, m='illegale', s='pos il', wait=False, beep=self.bl(BeepLevel.YES), maxtime=0.5)
             estxt = Dgt.DISPLAY_TEXT(l='illegal pos', m='ileg pos', s='ilegpo', wait=False, beep=self.bl(BeepLevel.YES), maxtime=0.5)
         if text_id == 'Y00_error960':
-            entxt = Dgt.DISPLAY_TEXT(l='err uci960', m='err 960', s="err960", wait=False, beep=self.bl(BeepLevel.YES), maxtime=0)
-            detxt = Dgt.DISPLAY_TEXT(l='err uci960', m='err 960', s="err960", wait=False, beep=self.bl(BeepLevel.YES), maxtime=0)
-            nltxt = Dgt.DISPLAY_TEXT(l='fout uci960', m='fout 960', s="err960", wait=False, beep=self.bl(BeepLevel.YES), maxtime=0)
-            frtxt = Dgt.DISPLAY_TEXT(l='err uci960', m='err 960', s="err960", wait=False, beep=self.bl(BeepLevel.YES), maxtime=0)
-            estxt = Dgt.DISPLAY_TEXT(l='err uci960', m='err 960', s="err960", wait=False, beep=self.bl(BeepLevel.YES), maxtime=0)
+            entxt = Dgt.DISPLAY_TEXT(l='err uci960', m='err 960', s='err960', wait=False, beep=self.bl(BeepLevel.YES), maxtime=0)
+            detxt = Dgt.DISPLAY_TEXT(l='err uci960', m='err 960', s='err960', wait=False, beep=self.bl(BeepLevel.YES), maxtime=0)
+            nltxt = Dgt.DISPLAY_TEXT(l='fout uci960', m='fout 960', s='err960', wait=False, beep=self.bl(BeepLevel.YES), maxtime=0)
+            frtxt = Dgt.DISPLAY_TEXT(l='err uci960', m='err 960', s='err960', wait=False, beep=self.bl(BeepLevel.YES), maxtime=0)
+            estxt = Dgt.DISPLAY_TEXT(l='err uci960', m='err 960', s='err960', wait=False, beep=self.bl(BeepLevel.YES), maxtime=0)
         if text_id == 'B10_oktime':
             entxt = Dgt.DISPLAY_TEXT(l=None, m='ok time', s='ok tim', wait=False, beep=bl_button, maxtime=1)
             detxt = Dgt.DISPLAY_TEXT(l=None, m='ok Zeit', s='okzeit', wait=False, beep=bl_button, maxtime=1)
@@ -238,66 +208,66 @@ class DgtTranslate(object):
             frtxt = Dgt.DISPLAY_TEXT(l=None, m='ok sons', s='oksons', wait=False, beep=bl_button, maxtime=1)
             estxt = Dgt.DISPLAY_TEXT(l=None, m='ok beep', s='okbeep', wait=False, beep=bl_button, maxtime=1)
         if text_id == 'K05_okpico':
-            entxt = Dgt.DISPLAY_TEXT(l=None, m="ok pico", s="okpico", wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
-            detxt = Dgt.DISPLAY_TEXT(l=None, m="ok pico", s="okpico", wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
-            nltxt = Dgt.DISPLAY_TEXT(l=None, m="ok pico", s="okpico", wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
-            frtxt = Dgt.DISPLAY_TEXT(l=None, m="ok pico", s="okpico", wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
-            estxt = Dgt.DISPLAY_TEXT(l=None, m="ok pico", s="okpico", wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
+            entxt = Dgt.DISPLAY_TEXT(l=None, m='ok pico', s='okpico', wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
+            detxt = Dgt.DISPLAY_TEXT(l=None, m='ok pico', s='okpico', wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
+            nltxt = Dgt.DISPLAY_TEXT(l=None, m='ok pico', s='okpico', wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
+            frtxt = Dgt.DISPLAY_TEXT(l=None, m='ok pico', s='okpico', wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
+            estxt = Dgt.DISPLAY_TEXT(l=None, m='ok pico', s='okpico', wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
         if text_id == 'K05_okuser':
-            entxt = Dgt.DISPLAY_TEXT(l="ok player", m="okplayer", s="okplay", wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
-            detxt = Dgt.DISPLAY_TEXT(l="ok Spieler", m="ok Splr", s="oksplr", wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
-            nltxt = Dgt.DISPLAY_TEXT(l="ok Speler", m="okSpeler", s="oksplr", wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
-            frtxt = Dgt.DISPLAY_TEXT(l="ok joueur", m="okjoueur", s="ok jr", wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
-            estxt = Dgt.DISPLAY_TEXT(l="ok usuario", m="okusuari", s="okuser", wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
+            entxt = Dgt.DISPLAY_TEXT(l='ok player', m='okplayer', s='okplay', wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
+            detxt = Dgt.DISPLAY_TEXT(l='ok Spieler', m='ok Splr', s='oksplr', wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
+            nltxt = Dgt.DISPLAY_TEXT(l='ok Speler', m='okSpeler', s='oksplr', wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
+            frtxt = Dgt.DISPLAY_TEXT(l='ok joueur', m='okjoueur', s='ok jr', wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
+            estxt = Dgt.DISPLAY_TEXT(l='ok usuario', m='okusuari', s='okuser', wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
         if text_id == 'K05_okmove':
-            entxt = Dgt.DISPLAY_TEXT(l=None, m="ok move", s="okmove", wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
-            detxt = Dgt.DISPLAY_TEXT(l=None, m="ok Zug", s=None, wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
-            nltxt = Dgt.DISPLAY_TEXT(l=None, m="ok zet", s=None, wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
-            frtxt = Dgt.DISPLAY_TEXT(l=None, m="ok mouv", s="ok mvt", wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
-            estxt = Dgt.DISPLAY_TEXT(l=None, m="ok jugada", s="ok jug", wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
+            entxt = Dgt.DISPLAY_TEXT(l=None, m='ok move', s='okmove', wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
+            detxt = Dgt.DISPLAY_TEXT(l=None, m='ok Zug', s=None, wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
+            nltxt = Dgt.DISPLAY_TEXT(l=None, m='ok zet', s=None, wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
+            frtxt = Dgt.DISPLAY_TEXT(l=None, m='ok mouv', s='ok mvt', wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
+            estxt = Dgt.DISPLAY_TEXT(l=None, m='ok jugada', s='ok jug', wait=True, beep=self.bl(BeepLevel.OKAY), maxtime=0.5)
         if text_id == 'B05_altmove':
-            entxt = Dgt.DISPLAY_TEXT(l="altn move", m="alt move", s="altmov", wait=False, beep=bl_button, maxtime=0.5)
-            detxt = Dgt.DISPLAY_TEXT(l="altnatv Zug", m="alt Zug", s="altzug", wait=False, beep=bl_button, maxtime=0.5)
-            nltxt = Dgt.DISPLAY_TEXT(l="andere zet", m="alt zet", s="altzet", wait=False, beep=bl_button, maxtime=0.5)
-            frtxt = Dgt.DISPLAY_TEXT(l="autre mouv", m="alt move", s="altmov", wait=False, beep=bl_button, maxtime=0.5)
-            estxt = Dgt.DISPLAY_TEXT(l="altn jugada", m="altjugad", s="altjug", wait=False, beep=bl_button, maxtime=0.5)
+            entxt = Dgt.DISPLAY_TEXT(l='altn move', m='alt move', s='altmov', wait=False, beep=bl_button, maxtime=0.5)
+            detxt = Dgt.DISPLAY_TEXT(l='altnatv Zug', m='alt Zug', s='altzug', wait=False, beep=bl_button, maxtime=0.5)
+            nltxt = Dgt.DISPLAY_TEXT(l='andere zet', m='alt zet', s='altzet', wait=False, beep=bl_button, maxtime=0.5)
+            frtxt = Dgt.DISPLAY_TEXT(l='autre mouv', m='alt move', s='altmov', wait=False, beep=bl_button, maxtime=0.5)
+            estxt = Dgt.DISPLAY_TEXT(l='altn jugada', m='altjugad', s='altjug', wait=False, beep=bl_button, maxtime=0.5)
         if text_id == 'C10_newgame':
-            entxt = Dgt.DISPLAY_TEXT(l=None, m="new Game", s="newgam", wait=False, beep=bl_config, maxtime=1)
-            detxt = Dgt.DISPLAY_TEXT(l="neues Spiel", m="neuesSpl", s="neuspl", wait=False, beep=bl_config, maxtime=1)
-            nltxt = Dgt.DISPLAY_TEXT(l="nieuw party", m="nw party", s="nwpart", wait=False, beep=bl_config, maxtime=1)
-            frtxt = Dgt.DISPLAY_TEXT(l='nvl partie', m="nvl part", s="newgam", wait=False, beep=bl_config, maxtime=1)
-            estxt = Dgt.DISPLAY_TEXT(l='nuev partid', m="nuevpart", s="n part", wait=False, beep=bl_config, maxtime=1)
+            entxt = Dgt.DISPLAY_TEXT(l=None, m='new Game', s='newgam', wait=False, beep=bl_config, maxtime=1)
+            detxt = Dgt.DISPLAY_TEXT(l='neues Spiel', m='neuesSpl', s='neuspl', wait=False, beep=bl_config, maxtime=1)
+            nltxt = Dgt.DISPLAY_TEXT(l='nieuw party', m='nw party', s='nwpart', wait=False, beep=bl_config, maxtime=1)
+            frtxt = Dgt.DISPLAY_TEXT(l='nvl partie', m='nvl part', s='newgam', wait=False, beep=bl_config, maxtime=1)
+            estxt = Dgt.DISPLAY_TEXT(l='nuev partid', m='nuevpart', s='n part', wait=False, beep=bl_config, maxtime=1)
         if text_id == 'C10_ucigame':
             msg = msg.rjust(3)
-            entxt = Dgt.DISPLAY_TEXT(l="new Game" + msg, m="Game " + msg, s="gam" + msg, wait=False, beep=bl_config, maxtime=1)
-            detxt = Dgt.DISPLAY_TEXT(l="neuSpiel" + msg, m="Spiel" + msg, s="spl" + msg, wait=False, beep=bl_config, maxtime=1)
-            nltxt = Dgt.DISPLAY_TEXT(l="nw party" + msg, m="party" + msg, s="par" + msg, wait=False, beep=bl_config, maxtime=1)
-            frtxt = Dgt.DISPLAY_TEXT(l='nvl part' + msg, m="part " + msg, s="gam" + msg, wait=False, beep=bl_config, maxtime=1)
-            estxt = Dgt.DISPLAY_TEXT(l='partid  ' + msg, m="part " + msg, s="par" + msg, wait=False, beep=bl_config, maxtime=1)
+            entxt = Dgt.DISPLAY_TEXT(l='new Game' + msg, m='Game ' + msg, s='gam' + msg, wait=False, beep=bl_config, maxtime=1)
+            detxt = Dgt.DISPLAY_TEXT(l='neuSpiel' + msg, m='Spiel' + msg, s='spl' + msg, wait=False, beep=bl_config, maxtime=1)
+            nltxt = Dgt.DISPLAY_TEXT(l='nw party' + msg, m='party' + msg, s='par' + msg, wait=False, beep=bl_config, maxtime=1)
+            frtxt = Dgt.DISPLAY_TEXT(l='nvl part' + msg, m='part ' + msg, s='gam' + msg, wait=False, beep=bl_config, maxtime=1)
+            estxt = Dgt.DISPLAY_TEXT(l='partid  ' + msg, m='part ' + msg, s='par' + msg, wait=False, beep=bl_config, maxtime=1)
         if text_id == 'C00_takeback':
-            entxt = Dgt.DISPLAY_TEXT(l=None, m="takeback", s="takbak", wait=True, beep=bl_config, maxtime=1)
-            detxt = Dgt.DISPLAY_TEXT(l="Ruecknahme", m="Rcknahme", s="rueckn", wait=True, beep=bl_config, maxtime=1)
-            nltxt = Dgt.DISPLAY_TEXT(l="zet terug", m="zetterug", s="terug", wait=True, beep=bl_config, maxtime=1)
-            frtxt = Dgt.DISPLAY_TEXT(l=None, m="retour", s=None, wait=True, beep=bl_config, maxtime=1)
-            estxt = Dgt.DISPLAY_TEXT(l='retrocede', m="atras", s=None, wait=True, beep=bl_config, maxtime=1)
+            entxt = Dgt.DISPLAY_TEXT(l=None, m='takeback', s='takbak', wait=True, beep=bl_config, maxtime=1)
+            detxt = Dgt.DISPLAY_TEXT(l='Ruecknahme', m='Rcknahme', s='rueckn', wait=True, beep=bl_config, maxtime=1)
+            nltxt = Dgt.DISPLAY_TEXT(l='zet terug', m='zetterug', s='terug', wait=True, beep=bl_config, maxtime=1)
+            frtxt = Dgt.DISPLAY_TEXT(l=None, m='retour', s=None, wait=True, beep=bl_config, maxtime=1)
+            estxt = Dgt.DISPLAY_TEXT(l='retrocede', m='atras', s=None, wait=True, beep=bl_config, maxtime=1)
         if text_id == 'N10_bookmove':
-            entxt = Dgt.DISPLAY_TEXT(l=None, m="book", s=None, wait=True, beep=self.bl(BeepLevel.NO), maxtime=1)
-            detxt = Dgt.DISPLAY_TEXT(l=None, m="Buch", s=None, wait=True, beep=self.bl(BeepLevel.NO), maxtime=1)
-            nltxt = Dgt.DISPLAY_TEXT(l=None, m="boek", s=None, wait=True, beep=self.bl(BeepLevel.NO), maxtime=1)
-            frtxt = Dgt.DISPLAY_TEXT(l=None, m="livre", s=None, wait=True, beep=self.bl(BeepLevel.NO), maxtime=1)
-            estxt = Dgt.DISPLAY_TEXT(l=None, m="libro", s=None, wait=True, beep=self.bl(BeepLevel.NO), maxtime=1)
+            entxt = Dgt.DISPLAY_TEXT(l=None, m='book', s=None, wait=True, beep=self.bl(BeepLevel.NO), maxtime=1)
+            detxt = Dgt.DISPLAY_TEXT(l=None, m='Buch', s=None, wait=True, beep=self.bl(BeepLevel.NO), maxtime=1)
+            nltxt = Dgt.DISPLAY_TEXT(l=None, m='boek', s=None, wait=True, beep=self.bl(BeepLevel.NO), maxtime=1)
+            frtxt = Dgt.DISPLAY_TEXT(l=None, m='livre', s=None, wait=True, beep=self.bl(BeepLevel.NO), maxtime=1)
+            estxt = Dgt.DISPLAY_TEXT(l=None, m='libro', s=None, wait=True, beep=self.bl(BeepLevel.NO), maxtime=1)
         if text_id == 'N00_setpieces':
-            entxt = Dgt.DISPLAY_TEXT(l="set pieces", m="set pcs", s="setpcs", wait=True, beep=self.bl(BeepLevel.NO), maxtime=0)
-            detxt = Dgt.DISPLAY_TEXT(l="St aufbauen", m="aufbauen", s="aufbau", wait=True, beep=self.bl(BeepLevel.NO), maxtime=0)
-            nltxt = Dgt.DISPLAY_TEXT(l="zet stukken", m="zet stkn", s="zet st", wait=True, beep=self.bl(BeepLevel.NO), maxtime=0)
-            frtxt = Dgt.DISPLAY_TEXT(l="placer pcs", m="set pcs", s="setpcs", wait=True, beep=self.bl(BeepLevel.NO), maxtime=0)
-            estxt = Dgt.DISPLAY_TEXT(l="hasta piez", m="hasta pz", s="hastap", wait=True, beep=self.bl(BeepLevel.NO), maxtime=0)
+            entxt = Dgt.DISPLAY_TEXT(l='set pieces', m='set pcs', s='setpcs', wait=True, beep=self.bl(BeepLevel.NO), maxtime=0)
+            detxt = Dgt.DISPLAY_TEXT(l='St aufbauen', m='aufbauen', s='aufbau', wait=True, beep=self.bl(BeepLevel.NO), maxtime=0)
+            nltxt = Dgt.DISPLAY_TEXT(l='zet stukken', m='zet stkn', s='zet st', wait=True, beep=self.bl(BeepLevel.NO), maxtime=0)
+            frtxt = Dgt.DISPLAY_TEXT(l='placer pcs', m='set pcs', s='setpcs', wait=True, beep=self.bl(BeepLevel.NO), maxtime=0)
+            estxt = Dgt.DISPLAY_TEXT(l='hasta piez', m='hasta pz', s='hastap', wait=True, beep=self.bl(BeepLevel.NO), maxtime=0)
         if text_id == 'Y00_errorjack':
-            entxt = Dgt.DISPLAY_TEXT(l="error jack", m="err jack", s="jack", wait=True, beep=self.bl(BeepLevel.YES), maxtime=0)
-            detxt = Dgt.DISPLAY_TEXT(l="err Kabel", m="errKabel", s="errkab", wait=True, beep=self.bl(BeepLevel.YES), maxtime=0)
-            nltxt = Dgt.DISPLAY_TEXT(l="fout Kabel", m="errKabel", s="errkab", wait=True, beep=self.bl(BeepLevel.YES), maxtime=0)
-            frtxt = Dgt.DISPLAY_TEXT(l="jack error", m="jack err", s="jack", wait=True, beep=self.bl(BeepLevel.YES), maxtime=0)
-            estxt = Dgt.DISPLAY_TEXT(l="jack error", m="jack err", s="jack", wait=True, beep=self.bl(BeepLevel.YES), maxtime=0)
+            entxt = Dgt.DISPLAY_TEXT(l='error jack', m='err jack', s='jack', wait=True, beep=self.bl(BeepLevel.YES), maxtime=0)
+            detxt = Dgt.DISPLAY_TEXT(l='err Kabel', m='errKabel', s='errkab', wait=True, beep=self.bl(BeepLevel.YES), maxtime=0)
+            nltxt = Dgt.DISPLAY_TEXT(l='fout Kabel', m='errKabel', s='errkab', wait=True, beep=self.bl(BeepLevel.YES), maxtime=0)
+            frtxt = Dgt.DISPLAY_TEXT(l='jack error', m='jack err', s='jack', wait=True, beep=self.bl(BeepLevel.YES), maxtime=0)
+            estxt = Dgt.DISPLAY_TEXT(l='jack error', m='jack err', s='jack', wait=True, beep=self.bl(BeepLevel.YES), maxtime=0)
         if text_id == 'B00_level':
             if msg.startswith('Elo@'):
                 msg = str(int(msg[4:])).rjust(4)
@@ -449,23 +419,23 @@ class DgtTranslate(object):
             frtxt = Dgt.DISPLAY_TEXT(l=None, m='Remote', s=None, wait=False, beep=bl_button, maxtime=0)
             estxt = Dgt.DISPLAY_TEXT(l=None, m='Remoto', s=None, wait=False, beep=bl_button, maxtime=0)
         if text_id == 'B00_timemode_fixed_menu':
-            entxt = Dgt.DISPLAY_TEXT(l='Move time', m='Move t', s='fixed', wait=False, beep=bl_button, maxtime=0)
-            detxt = Dgt.DISPLAY_TEXT(l='ZeitproZug', m='Zeit/Zug', s='fest', wait=False, beep=bl_button, maxtime=0)
+            entxt = Dgt.DISPLAY_TEXT(l='Move time', m='Movetime', s='move t', wait=False, beep=bl_button, maxtime=0)
+            detxt = Dgt.DISPLAY_TEXT(l=None, m='Zugzeit', s='zug z', wait=False, beep=bl_button, maxtime=0)
             nltxt = Dgt.DISPLAY_TEXT(l=None, m='Zet tyd', s='zet', wait=False, beep=bl_button, maxtime=0)
             frtxt = Dgt.DISPLAY_TEXT(l='Mouv temps', m='Mouv tem', s='mouv', wait=False, beep=bl_button, maxtime=0)
             estxt = Dgt.DISPLAY_TEXT(l='Mov tiempo', m='mov tiem', s='mov', wait=False, beep=bl_button, maxtime=0)
         if text_id == 'B00_timemode_blitz_menu':
-            entxt = Dgt.DISPLAY_TEXT(l='Game time', m='Game t', s=None, wait=False, beep=bl_button, maxtime=0)
+            entxt = Dgt.DISPLAY_TEXT(l='Game time', m='Gametime', s='game t', wait=False, beep=bl_button, maxtime=0)
             detxt = Dgt.DISPLAY_TEXT(l='Spielzeit', m='Spielz', s='spielz', wait=False, beep=bl_button, maxtime=0)
             nltxt = Dgt.DISPLAY_TEXT(l=None, m='Spel tyd', s='spel', wait=False, beep=bl_button, maxtime=0)
             frtxt = Dgt.DISPLAY_TEXT(l='Partie temp', m='Partie', s=None, wait=False, beep=bl_button, maxtime=0)
             estxt = Dgt.DISPLAY_TEXT(l=None, m='Partid', s=None, wait=False, beep=bl_button, maxtime=0)
         if text_id == 'B00_timemode_fischer_menu':
             entxt = Dgt.DISPLAY_TEXT(l=None, m='Fischer', s='fischr', wait=False, beep=bl_button, maxtime=0)
-            detxt = Dgt.DISPLAY_TEXT(l=None, m='Fischer', s='fischr', wait=False, beep=bl_button, maxtime=0)
-            nltxt = Dgt.DISPLAY_TEXT(l=None, m='Fischer', s='fischr', wait=False, beep=bl_button, maxtime=0)
-            frtxt = Dgt.DISPLAY_TEXT(l=None, m='Fischer', s='fischr', wait=False, beep=bl_button, maxtime=0)
-            estxt = Dgt.DISPLAY_TEXT(l=None, m='Fischer', s='fischr', wait=False, beep=bl_button, maxtime=0)
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
         if text_id == 'B00_settings_version_menu':
             entxt = Dgt.DISPLAY_TEXT(l=None, m='Version', s='vers', wait=False, beep=bl_button, maxtime=0)
             detxt = Dgt.DISPLAY_TEXT(l=None, m='Version', s='vers', wait=False, beep=bl_button, maxtime=0)
@@ -534,13 +504,13 @@ class DgtTranslate(object):
             estxt = Dgt.DISPLAY_TEXT(l=None, m='abortar', s='abort', wait=True, beep=bl_config, maxtime=1)
         if text_id == 'B00_gameresult_white_menu':
             entxt = Dgt.DISPLAY_TEXT(l=None, m='W wins', s=None, wait=True, beep=bl_config, maxtime=1)
-            detxt = Dgt.DISPLAY_TEXT(l='W gewinnt', m='W gewinn', s='w gew', wait=True, beep=bl_config, maxtime=1)
+            detxt = Dgt.DISPLAY_TEXT(l='W gewinnt', m='W Gewinn', s='w gew', wait=True, beep=bl_config, maxtime=1)
             nltxt = Dgt.DISPLAY_TEXT(l='wit wint', m='wit wint', s='w wint', wait=True, beep=bl_config, maxtime=1)
             frtxt = Dgt.DISPLAY_TEXT(l=None, m='B gagne', s='b gagn', wait=True, beep=bl_config, maxtime=1)
             estxt = Dgt.DISPLAY_TEXT(l=None, m='B ganan', s='b gana', wait=True, beep=bl_config, maxtime=1)
         if text_id == 'B00_gameresult_black_menu':
             entxt = Dgt.DISPLAY_TEXT(l=None, m='B wins', s=None, wait=True, beep=bl_config, maxtime=1)
-            detxt = Dgt.DISPLAY_TEXT(l='S gewinnt', m='S gewinn', s='s gew', wait=True, beep=bl_config, maxtime=1)
+            detxt = Dgt.DISPLAY_TEXT(l='S gewinnt', m='S Gewinn', s='s gew', wait=True, beep=bl_config, maxtime=1)
             nltxt = Dgt.DISPLAY_TEXT(l='zwart wint', m='zw wint', s='z wint', wait=True, beep=bl_config, maxtime=1)
             frtxt = Dgt.DISPLAY_TEXT(l=None, m='N gagne', s='n gagn', wait=True, beep=bl_config, maxtime=1)
             estxt = Dgt.DISPLAY_TEXT(l=None, m='N ganan', s='n gana', wait=True, beep=bl_config, maxtime=1)
@@ -618,10 +588,10 @@ class DgtTranslate(object):
             estxt = Dgt.DISPLAY_TEXT(l='ok idioma', m='okIdioma', s='oklang', wait=False, beep=bl_button, maxtime=1)
         if text_id == 'B00_tc_fixed':
             entxt = Dgt.DISPLAY_TEXT(l='Move time' + msg, m='Move t' + msg, s='mov ' + msg, wait=False, beep=bl_button, maxtime=0)
-            detxt = Dgt.DISPLAY_TEXT(l='Zugzeit  ' + msg, m='Zug z' + msg, s='zug ' + msg, wait=False, beep=bl_button, maxtime=0)
+            detxt = Dgt.DISPLAY_TEXT(l='Zugzeit  ' + msg, m='Zug z ' + msg, s='zug ' + msg, wait=False, beep=bl_button, maxtime=0)
             nltxt = Dgt.DISPLAY_TEXT(l='Zet tyd  ' + msg, m='Zet t ' + msg, s='zet ' + msg, wait=False, beep=bl_button, maxtime=0)
-            frtxt = Dgt.DISPLAY_TEXT(l='Mouv     ' + msg, m='Mouv ' + msg, s='mouv' + msg, wait=False, beep=bl_button, maxtime=0)
-            estxt = Dgt.DISPLAY_TEXT(l='Mov      ' + msg, m='Mov ' + msg, s='mov ' + msg, wait=False, beep=bl_button, maxtime=0)
+            frtxt = Dgt.DISPLAY_TEXT(l='Mouv     ' + msg, m='Mouv  ' + msg, s='mouv' + msg, wait=False, beep=bl_button, maxtime=0)
+            estxt = Dgt.DISPLAY_TEXT(l='Mov      ' + msg, m='Mov   ' + msg, s='mov ' + msg, wait=False, beep=bl_button, maxtime=0)
         if text_id == 'B00_tc_blitz':
             entxt = Dgt.DISPLAY_TEXT(l='Game time' + msg, m='Game t' + msg, s='game' + msg, wait=False, beep=bl_button, maxtime=0)
             detxt = Dgt.DISPLAY_TEXT(l='Spielzeit' + msg, m='Spielz' + msg, s='spl ' + msg, wait=False, beep=bl_button, maxtime=0)
@@ -630,10 +600,10 @@ class DgtTranslate(object):
             estxt = Dgt.DISPLAY_TEXT(l='Partid   ' + msg, m='Partid' + msg, s='part' + msg, wait=False, beep=bl_button, maxtime=0)
         if text_id == 'B00_tc_fisch':
             entxt = Dgt.DISPLAY_TEXT(l='Fischr' + msg, m='Fsh' + msg, s='f' + msg, wait=False, beep=bl_button, maxtime=0)
-            detxt = entxt 
-            nltxt = entxt 
-            frtxt = entxt 
-            estxt = entxt 
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
         if entxt is None:
             entxt = Dgt.DISPLAY_TEXT(l=None, m=text_id, s=None, wait=False, beep=self.bl(BeepLevel.YES), maxtime=0)
             logging.warning('unknown text_id {}'.format(text_id))
