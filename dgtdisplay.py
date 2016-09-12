@@ -263,6 +263,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         elif self.top_result == Menu.BOOK_MENU:
             self.top_result = Menu.TOP_MENU
             text = self.dgttranslate.text(self.top_index.value)
+            text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.TIME_MENU:
@@ -344,6 +345,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 self.book_index = (self.book_index-1) % len(self.all_books)
                 text = self.all_books[self.book_index]['text']
+                text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.TIME_MENU:
@@ -450,6 +452,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 self.book_index = (self.book_index+1) % len(self.all_books)
                 text = self.all_books[self.book_index]['text']
+                text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.TIME_MENU:
@@ -490,11 +493,13 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text = self.dgttranslate.text(self.time_mode_index.value)
             elif self.top_index == Menu.BOOK_MENU:
                 text = self.all_books[self.book_index]['text']
+                text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             elif self.top_index == Menu.ENGINE_MENU:
                 if self.mode_result == Mode.REMOTE:
                     text = self.dgttranslate.text('B00_nofunction')
                 else:
                     text = self.installed_engines[self.engine_index]['text']
+                    text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
 
             elif self.top_index == Menu.SYSTEM_MENU:
                 text = self.dgttranslate.text(self.system_index.value)

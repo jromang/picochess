@@ -456,7 +456,7 @@ class DgtTranslate(object):
             estxt = Dgt.DISPLAY_TEXT(l='Mov tiempo', m='mov tiem', s='mov', wait=False, beep=bl_button, maxtime=0)
         if text_id == 'B00_timemode_blitz_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Game time', m='Game t', s=None, wait=False, beep=bl_button, maxtime=0)
-            detxt = Dgt.DISPLAY_TEXT(l='Spiel zeit', m='Spiel z', s='spiel', wait=False, beep=bl_button, maxtime=0)
+            detxt = Dgt.DISPLAY_TEXT(l='Spielzeit', m='Spielz', s='spielz', wait=False, beep=bl_button, maxtime=0)
             nltxt = Dgt.DISPLAY_TEXT(l=None, m='Spel tyd', s='spel', wait=False, beep=bl_button, maxtime=0)
             frtxt = Dgt.DISPLAY_TEXT(l='Partie temp', m='Partie', s=None, wait=False, beep=bl_button, maxtime=0)
             estxt = Dgt.DISPLAY_TEXT(l=None, m='Partid', s=None, wait=False, beep=bl_button, maxtime=0)
