@@ -36,7 +36,7 @@ except ImportError:
 
 
 # picochess version
-version = '073'
+version = '074'
 
 evt_queue = queue.Queue()
 serial_queue = queue.Queue()
