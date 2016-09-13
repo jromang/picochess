@@ -42,7 +42,7 @@ class DgtPi(DgtIface):
         if self.lib.dgtpicom_configure() < 0:
             logging.warning('Configure failed - Jack connected back?')
             DisplayMsg.show(Message.JACK_CONNECTED_ERROR())
-        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main_version=2, sub_version=2, attached="i2c"))
+        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=2, sub=2, attached="i2c"))
 
     def process_incoming_clock_forever(self):
         but = c_byte(0)

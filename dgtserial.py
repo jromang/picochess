@@ -29,28 +29,6 @@ try:
 except ImportError:
     import enum34 as enum
 
-char_to_DGTXL = {
-    '0': 0x01 | 0x02 | 0x20 | 0x08 | 0x04 | 0x10, '1': 0x02 | 0x04, '2': 0x01 | 0x40 | 0x08 | 0x02 | 0x10,
-    '3': 0x01 | 0x40 | 0x08 | 0x02 | 0x04, '4': 0x20 | 0x04 | 0x40 | 0x02, '5': 0x01 | 0x40 | 0x08 | 0x20 | 0x04,
-    '6': 0x01 | 0x40 | 0x08 | 0x20 | 0x04 | 0x10, '7': 0x02 | 0x04 | 0x01,
-    '8': 0x01 | 0x02 | 0x20 | 0x40 | 0x04 | 0x10 | 0x08, '9': 0x01 | 0x40 | 0x08 | 0x02 | 0x04 | 0x20,
-    'a': 0x01 | 0x02 | 0x20 | 0x40 | 0x04 | 0x10, 'b': 0x20 | 0x04 | 0x40 | 0x08 | 0x10, 'c': 0x01 | 0x20 | 0x10 | 0x08,
-    'd': 0x10 | 0x40 | 0x08 | 0x02 | 0x04, 'e': 0x01 | 0x40 | 0x08 | 0x20 | 0x10, 'f': 0x01 | 0x40 | 0x20 | 0x10,
-    'g': 0x01 | 0x20 | 0x10 | 0x08 | 0x04, 'h': 0x20 | 0x10 | 0x04 | 0x40, 'i': 0x02 | 0x04,
-    'j': 0x02 | 0x04 | 0x08 | 0x10, 'k': 0x01 | 0x20 | 0x40 | 0x04 | 0x10, 'l': 0x20 | 0x10 | 0x08,
-    'm': 0x01 | 0x40 | 0x04 | 0x10, 'n': 0x40 | 0x04 | 0x10, 'o': 0x40 | 0x04 | 0x10 | 0x08,
-    'p': 0x01 | 0x40 | 0x20 | 0x10 | 0x02, 'q': 0x01 | 0x40 | 0x20 | 0x04 | 0x02, 'r': 0x40 | 0x10,
-    's': 0x01 | 0x40 | 0x08 | 0x20 | 0x04, 't': 0x20 | 0x10 | 0x08 | 0x40, 'u': 0x08 | 0x02 | 0x20 | 0x04 | 0x10,
-    'v': 0x08 | 0x02 | 0x20, 'w': 0x40 | 0x08 | 0x20 | 0x02, 'x': 0x20 | 0x10 | 0x04 | 0x40 | 0x02,
-    'y': 0x20 | 0x08 | 0x04 | 0x40 | 0x02, 'z': 0x01 | 0x40 | 0x08 | 0x02 | 0x10, ' ': 0x00, '-': 0x40,
-    '/': 0x20 | 0x40 | 0x04, '|': 0x20 | 0x10 | 0x02 | 0x04, '\\': 0x02 | 0x40 | 0x10
-}
-
-piece_to_char = {
-    0x01: 'P', 0x02: 'R', 0x03: 'N', 0x04: 'B', 0x05: 'K', 0x06: 'Q',
-    0x07: 'p', 0x08: 'r', 0x09: 'n', 0x0a: 'b', 0x0b: 'k', 0x0c: 'q', 0x0d: '1', 0x0e: '2', 0x0f: '3', 0x00: '.'
-}
-
 
 class DgtSerial(object):
     def __init__(self, device, enable_revelation_leds, is_pi):
@@ -61,7 +39,6 @@ class DgtSerial(object):
         self.is_pi = is_pi
 
         self.serial = None
-        self.waitchars = ['/', '-', '\\', '|']
         self.lock = Lock()  # inside setup_serial()
         self.incoming_board_thread = None
         self.lever_pos = None
@@ -97,6 +74,26 @@ class DgtSerial(object):
                 logging.debug('sending text [{}] to clock'.format(''.join([chr(elem) for elem in message[4:12]])))
 
         array = []
+        char_to_xl = {
+            '0': 0x01 | 0x02 | 0x20 | 0x08 | 0x04 | 0x10, '1': 0x02 | 0x04, '2': 0x01 | 0x40 | 0x08 | 0x02 | 0x10,
+            '3': 0x01 | 0x40 | 0x08 | 0x02 | 0x04, '4': 0x20 | 0x04 | 0x40 | 0x02,
+            '5': 0x01 | 0x40 | 0x08 | 0x20 | 0x04,
+            '6': 0x01 | 0x40 | 0x08 | 0x20 | 0x04 | 0x10, '7': 0x02 | 0x04 | 0x01,
+            '8': 0x01 | 0x02 | 0x20 | 0x40 | 0x04 | 0x10 | 0x08, '9': 0x01 | 0x40 | 0x08 | 0x02 | 0x04 | 0x20,
+            'a': 0x01 | 0x02 | 0x20 | 0x40 | 0x04 | 0x10, 'b': 0x20 | 0x04 | 0x40 | 0x08 | 0x10,
+            'c': 0x01 | 0x20 | 0x10 | 0x08,
+            'd': 0x10 | 0x40 | 0x08 | 0x02 | 0x04, 'e': 0x01 | 0x40 | 0x08 | 0x20 | 0x10,
+            'f': 0x01 | 0x40 | 0x20 | 0x10,
+            'g': 0x01 | 0x20 | 0x10 | 0x08 | 0x04, 'h': 0x20 | 0x10 | 0x04 | 0x40, 'i': 0x02 | 0x04,
+            'j': 0x02 | 0x04 | 0x08 | 0x10, 'k': 0x01 | 0x20 | 0x40 | 0x04 | 0x10, 'l': 0x20 | 0x10 | 0x08,
+            'm': 0x01 | 0x40 | 0x04 | 0x10, 'n': 0x40 | 0x04 | 0x10, 'o': 0x40 | 0x04 | 0x10 | 0x08,
+            'p': 0x01 | 0x40 | 0x20 | 0x10 | 0x02, 'q': 0x01 | 0x40 | 0x20 | 0x04 | 0x02, 'r': 0x40 | 0x10,
+            's': 0x01 | 0x40 | 0x08 | 0x20 | 0x04, 't': 0x20 | 0x10 | 0x08 | 0x40,
+            'u': 0x08 | 0x02 | 0x20 | 0x04 | 0x10,
+            'v': 0x08 | 0x02 | 0x20, 'w': 0x40 | 0x08 | 0x20 | 0x02, 'x': 0x20 | 0x10 | 0x04 | 0x40 | 0x02,
+            'y': 0x20 | 0x08 | 0x04 | 0x40 | 0x02, 'z': 0x01 | 0x40 | 0x08 | 0x02 | 0x10, ' ': 0x00, '-': 0x40,
+            '/': 0x20 | 0x40 | 0x04, '|': 0x20 | 0x10 | 0x02 | 0x04, '\\': 0x02 | 0x40 | 0x10
+        }
         for v in message:
             if type(v) is int:
                 array.append(v)
@@ -104,7 +101,7 @@ class DgtSerial(object):
                 array.append(v.value)
             elif type(v) is str:
                 for c in v:
-                    array.append(char_to_DGTXL[c.lower()])
+                    array.append(char_to_xl[c.lower()])
             else:
                 logging.error('type not supported [%s]', type(v))
                 return False
@@ -205,10 +202,10 @@ class DgtSerial(object):
                                 logging.info("DGT clock [ser]: button 4 pressed - ack2: %i", ack2)
                                 DisplayMsg.show(Message.DGT_BUTTON(button=4))
                     if ack1 == 0x09:
-                        main_version = ack2 >> 4
-                        sub_version = ack2 & 0x0f
-                        logging.debug("DGT clock [ser]: version %0.2f", float(str(main_version) + '.' + str(sub_version)))
-                        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main_version=main_version, sub_version=sub_version, attached='serial'))
+                        main = ack2 >> 4
+                        sub = ack2 & 0x0f
+                        logging.debug("DGT clock [ser]: version %0.2f", float(str(main) + '.' + str(sub)))
+                        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=main, sub=sub, attached='serial'))
                 elif any(message[:6]):
                     r_hours = message[0] & 0x0f
                     r_mins = (message[1] >> 4) * 10 + (message[1] & 0x0f)
@@ -238,6 +235,11 @@ class DgtSerial(object):
                     self.clock_lock = False
                 break
             if case(DgtMsg.DGT_MSG_BOARD_DUMP):
+                piece_to_char = {
+                    0x01: 'P', 0x02: 'R', 0x03: 'N', 0x04: 'B', 0x05: 'K', 0x06: 'Q',
+                    0x07: 'p', 0x08: 'r', 0x09: 'n', 0x0a: 'b', 0x0b: 'k', 0x0c: 'q',
+                    0x0d: '1', 0x0e: '2', 0x0f: '3', 0x00: '.'
+                }
                 board = ''
                 for c in message:
                     board += piece_to_char[c]
@@ -407,7 +409,7 @@ class DgtSerial(object):
                     self.bt_mac_list.remove(self.bt_mac_list[self.bt_current_device])
                     self.bt_name_list.remove(self.bt_name_list[self.bt_current_device])
                     self.bt_current_device -= 1
-                    logging.debug("BT pairing failed, unkown device")
+                    logging.debug("BT pairing failed, unknown device")
                 if ("DGT_BT_" in self.bt_line or "PCS-REVII" in self.bt_line) and "DEL" not in self.bt_line:
                     # New e-Board found add to list
                     if not self.bt_line.split()[3] in self.bt_mac_list:
@@ -483,14 +485,14 @@ class DgtSerial(object):
         # Open the serial port
         try:
             self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE,
-                                          parity=pyserial.PARITY_NONE,
-                                          bytesize=pyserial.EIGHTBITS,
-                                          timeout=2)
-        except pyserial.SerialException as e:
+                                          parity=pyserial.PARITY_NONE, bytesize=pyserial.EIGHTBITS, timeout=2)
+        except pyserial.SerialException:
             return False
         return True
 
     def setup_serial_port(self):
+        waitchars = ['/', '-', '\\', '|']
+
         if self.rt.is_running():
             self.rt.stop()
         with self.lock:
@@ -510,10 +512,10 @@ class DgtSerial(object):
                         logging.debug('DGT board connected to %s', self.device)
                         return
 
-                s = 'Board' + self.waitchars[self.wait_counter]
+                s = 'Board' + waitchars[self.wait_counter]
                 text = Dgt.DISPLAY_TEXT(l='no e-' + s, m='no' + s, s=s, wait=True, beep=False, maxtime=0)
                 DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text, is_pi=self.is_pi))
-                self.wait_counter = (self.wait_counter + 1) % len(self.waitchars)
+                self.wait_counter = (self.wait_counter + 1) % len(waitchars)
 
     def run(self):
         self.incoming_board_thread = Timer(0, self.process_incoming_board_forever)

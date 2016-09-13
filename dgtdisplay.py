@@ -1051,8 +1051,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         logging.debug('inside the menu. fen "{}" ignored'.format(fen))
                 break
             if case(MessageApi.DGT_CLOCK_VERSION):
-                DisplayDgt.show(Dgt.CLOCK_VERSION(main_version=message.main_version,
-                                                  sub_version=message.sub_version, attached=message.attached))
+                DisplayDgt.show(Dgt.CLOCK_VERSION(main=message.main, sub=message.sub, attached=message.attached))
                 break
             if case(MessageApi.DGT_CLOCK_TIME):
                 DisplayDgt.show(Dgt.CLOCK_TIME(time_left=message.time_left, time_right=message.time_right))

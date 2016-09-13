@@ -128,7 +128,7 @@ class DgtIface(DisplayDgt, Thread):
                     self.show(Dgt.DISPLAY_TEXT(l='picoChs ' + version, m='pico ' + version, s='pic' + version,
                                                wait=True, beep=True, maxtime=2))
                 self.clock_found = True
-                if message.main_version == 2:
+                if message.main == 2:
                     self.enable_dgt_3000 = True
                 break
             if case(DgtApi.CLOCK_TIME):
