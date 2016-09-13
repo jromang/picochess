@@ -23,8 +23,8 @@ from threading import Lock
 
 
 class DgtHw(DgtIface):
-    def __init__(self, dgtserial, dgttranslate, enable_revelation_leds):
-        super(DgtHw, self).__init__(dgtserial, dgttranslate, enable_revelation_leds)
+    def __init__(self, dgtserial, dgttranslate):
+        super(DgtHw, self).__init__(dgtserial, dgttranslate)
 
         self.lib_lock = Lock()
         self.lib = DgtLib(self.dgtserial)
@@ -82,14 +82,14 @@ class DgtHw(DgtIface):
             logging.debug('DGT clock isnt running - no need for endClock')
 
     def light_squares_revelation_board(self, squares):
-        if self.enable_revelation_leds:
+        if self.dgtserial.enable_revelation_leds:
             for sq in squares:
                 dgt_square = (8 - int(sq[1])) * 8 + ord(sq[0]) - ord('a')
                 logging.debug("REV2 light on square %s", sq)
                 self.lib.write([DgtCmd.DGT_SET_LEDS, 0x04, 0x01, dgt_square, dgt_square])
 
     def clear_light_revelation_board(self):
-        if self.enable_revelation_leds:
+        if self.dgtserial.enable_revelation_leds:
             logging.debug('REV2 lights turned off')
             self.lib.write([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
 

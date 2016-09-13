@@ -53,7 +53,7 @@ piece_to_char = {
 
 
 class DgtSerial(object):
-    def __init__(self, device):
+    def __init__(self, device, enable_revelation_leds):
         super(DgtSerial, self).__init__()
         self.given_device = device
         self.device = device
@@ -76,6 +76,8 @@ class DgtSerial(object):
         self.bt_name_list = []
         self.bt_name = ''
         self.wait_counter = 0
+        # for TEST
+        self.enable_revelation_leds = enable_revelation_leds
 
     def startup_serial_hardware(self):
         self.setup_serial_port()
@@ -146,6 +148,7 @@ class DgtSerial(object):
                 else:
                     if 'REVII' in self.bt_name:
                         text_l, text_m, text_s = 'RevII ' + self.bt_name[-5:], 'Rev' + self.bt_name[-5:], self.bt_name[-6:]
+                        self.enable_revelation_leds = True
                     elif 'DGT_BT' in self.bt_name:
                         text_l, text_m, text_s = 'DGTBT ' + self.bt_name[-5:], 'BT ' + self.bt_name[-5:], self.bt_name[-5:]
                     else:

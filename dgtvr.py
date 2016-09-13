@@ -21,8 +21,8 @@ from utilities import RepeatedTimer
 
 
 class DgtVr(DgtIface):
-    def __init__(self, dgtserial, dgttranslate, enable_revelation_leds):
-        super(DgtVr, self).__init__(dgtserial, dgttranslate, enable_revelation_leds)
+    def __init__(self, dgtserial, dgttranslate):
+        super(DgtVr, self).__init__(dgtserial, dgttranslate)
         # virtual lib
         self.rt = None
         self.time_side = ClockSide.NONE
