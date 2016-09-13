@@ -62,17 +62,17 @@ class DgtTranslate(object):
         entxt = detxt = nltxt = frtxt = estxt = None  # error case
 
         (code, text_id) = str_code.split('_', 1)
-        if code[1] == 'B':
+        if code[0] == 'B':
             beep = self.bl(BeepLevel.BUTTON)
-        elif code[1] == 'N':
+        elif code[0] == 'N':
             beep = self.bl(BeepLevel.NO)
-        elif code[1] == 'Y':
+        elif code[0] == 'Y':
             beep = self.bl(BeepLevel.YES)
-        elif code[1] == 'K':
+        elif code[0] == 'K':
             beep = self.bl(BeepLevel.OKAY)
-        elif code[1] == 'C':
+        elif code[0] == 'C':
             beep = self.bl(BeepLevel.CONFIG)
-        elif code[1] == 'M':
+        elif code[0] == 'M':
             beep = self.bl(BeepLevel.MAP)
         else:
             beep = False
