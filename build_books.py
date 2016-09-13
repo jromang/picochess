@@ -29,6 +29,7 @@ def write_book_ini():
 
     book_list = sorted(os.listdir(books_path))
     config = configparser.ConfigParser()
+    config.optionxform = str
     for book_file_name in book_list:
         if is_book(book_file_name):
             print(book_file_name)
