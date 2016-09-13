@@ -52,10 +52,11 @@ class ChannelHandler(tornado.web.RequestHandler):
         if action == 'broadcast':
             fen = self.get_argument('fen')
             pgn_str = self.get_argument('pgn')
-            r = {'event': 'broadcast', 'msg': 'Received position from Spectators!', 'pgn': pgn_str, 'fen': fen}
-            EventHandler.write_to_clients(r)
+            result = {'event': 'broadcast', 'msg': 'Received position from Spectators!', 'pgn': pgn_str, 'fen': fen}
+            EventHandler.write_to_clients(result)
         elif action == 'move':
-            WebServer.fire(Event.REMOTE_MOVE(move=self.get_argument('source') + self.get_argument('target'), fen=self.get_argument('fen')))
+            move = self.get_argument('source') + self.get_argument('target')
+            WebServer.fire(Event.REMOTE_MOVE(move=move, fen=self.get_argument('fen')))
 
 
 class EventHandler(WebSocketHandler):
@@ -206,7 +207,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                     user_color = 'Black' if self.shared['game_info']['play_mode'] == PlayMode.USER_BLACK else 'White'
                     pgn_game.headers[comp_color + 'Elo'] = '2900'
                     pgn_game.headers[user_color + 'Elo'] = '-'
-                    
+
         def update_headers():
             pgn_game = pgn.Game()
             create_game_header(pgn_game)
@@ -225,8 +226,8 @@ class WebDisplay(DisplayMsg, threading.Thread):
             if case(MessageApi.START_NEW_GAME):
                 pgn_str = transfer(message.game)
                 fen = message.game.fen()
-                r = {'pgn': pgn_str, 'fen': fen}
-                self.shared['last_dgt_move_msg'] = r
+                result = {'pgn': pgn_str, 'fen': fen}
+                self.shared['last_dgt_move_msg'] = result
                 p = message.game.chess960_pos()
                 if p:
                     code_text = '' if p == 518 else ' - chess960 code {}'.format(p)
@@ -289,37 +290,39 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 EventHandler.write_to_clients({'event': 'Message', 'msg': 'Connect an E-Board please!'})
                 break
             if case(MessageApi.EBOARD_VERSION):
-                EventHandler.write_to_clients({'event': 'Message', 'msg': 'DGT board connected through ' + message.channel})
+                result = {'event': 'Message', 'msg': 'DGT board connected through ' + message.channel}
+                EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.DGT_CLOCK_VERSION):
-                EventHandler.write_to_clients({'event': 'Message', 'msg': 'DGT clock connected through ' + message.attached})
+                result = {'event': 'Message', 'msg': 'DGT clock connected through ' + message.attached}
+                EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.COMPUTER_MOVE):
                 pgn_str = transfer(message.game)
                 fen = oldstyle_fen(message.game)
                 mov = message.move.uci()
                 msg = 'Computer move: ' + str(message.move)
-                r = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'msg': msg, 'review_play': False}
-                self.shared['last_dgt_move_msg'] = r
-                EventHandler.write_to_clients(r)
+                result = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'msg': msg, 'review_play': False}
+                self.shared['last_dgt_move_msg'] = result
+                EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.USER_MOVE):
                 pgn_str = transfer(message.game)
                 fen = oldstyle_fen(message.game)
                 msg = 'User move: ' + str(message.move)
                 mov = message.move.uci()
-                r = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'msg': msg, 'review_play': False}
-                self.shared['last_dgt_move_msg'] = r
-                EventHandler.write_to_clients(r)
+                result = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'msg': msg, 'review_play': False}
+                self.shared['last_dgt_move_msg'] = result
+                EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.REVIEW_MOVE):
                 pgn_str = transfer(message.game)
                 fen = oldstyle_fen(message.game)
                 msg = 'Review move: ' + str(message.move)
                 mov = message.move.uci()
-                r = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'msg': msg, 'review_play': True}
-                self.shared['last_dgt_move_msg'] = r
-                EventHandler.write_to_clients(r)
+                result = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'msg': msg, 'review_play': True}
+                self.shared['last_dgt_move_msg'] = result
+                EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.GAME_ENDS):
                 if message.game.move_stack:

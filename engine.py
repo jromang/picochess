@@ -68,10 +68,10 @@ def read_engine_ini(engine_shell=None, engine_path=None):
 
 
 def write_engine_ini(engine_path=None):
-    def write_level_ini():
+    def write_level_ini(engine_filename):
         parser = configparser.ConfigParser()
         parser.optionxform = str
-        if not parser.read(engine_path + os.sep + engine_file_name + '.uci'):
+        if not parser.read(engine_path + os.sep + engine_filename + '.uci'):
             if engine.has_limit_strength():
                 uelevel = engine.get().options['UCI_Elo']
                 elo_1, elo_2 = int(uelevel[2]), int(uelevel[3])
@@ -92,19 +92,19 @@ def write_engine_ini(engine_path=None):
                 minlevel, maxlevel = int(sklevel[3]), int(sklevel[4])
                 for level in range(minlevel, maxlevel+1):
                     parser['Level@{:02d}'.format(level)] = {'Skill Level': str(level)}
-            with open(engine_path + os.sep + engine_file_name + '.uci', 'w') as configfile:
+            with open(engine_path + os.sep + engine_filename + '.uci', 'w') as configfile:
                 parser.write(configfile)
 
     def is_exe(fpath):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
     def name_build(parts, maxlength, default_name):
-        r = ''
-        for p in parts:
-            if len(r) + len(p) > maxlength:
+        eng_name = ''
+        for token in parts:
+            if len(eng_name) + len(token) > maxlength:
                 break
-            r += p
-        return r if r else default_name
+            eng_name += token
+        return eng_name if eng_name else default_name
 
     if not engine_path:
         program_path = os.path.dirname(os.path.realpath(__file__)) + os.sep
@@ -119,7 +119,7 @@ def write_engine_ini(engine_path=None):
                 print(engine_file_name)
                 try:
                     if engine.has_levels():
-                        write_level_ini()
+                        write_level_ini(engine_file_name)
                     engine_name = engine.get().name
 
                     name_parts = engine_name.replace('.', '').split(' ')

@@ -16,8 +16,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from utilities import *
-import time
-import chess
 from threading import Timer, Thread, Lock
 
 

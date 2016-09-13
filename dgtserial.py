@@ -71,6 +71,7 @@ class DgtSerial(object):
         self.rt = RepeatedTimer(1, self.watchdog)
         # bluetooth vars for Jessie & autoconnect
         self.btctl = None
+        self.bt_rfcomm = None
         self.bt_state = -1
         self.bt_line = ''
         self.bt_current_device = -1

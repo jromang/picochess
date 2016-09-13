@@ -39,24 +39,21 @@ class DgtTranslate(object):
         self.beep = beep
 
     def set_language(self, language):
-        self.language  = language
+        self.language = language
 
     def move(self, text):
-        def replace_all(text, dict):
-            for i, j in dict.items():
-                text = text.replace(i, j)
-            return text
-
-        dict = {}
+        directory = {}
         if self.language == 'de':
-            dict = {'R': 'T', 'N': 'S', 'B': 'L', 'Q': 'D'}
+            directory = {'R': 'T', 'N': 'S', 'B': 'L', 'Q': 'D'}
         if self.language == 'nl':
-            dict = {'R': 'T', 'N': 'P', 'B': 'L', 'Q': 'D'}
+            directory = {'R': 'T', 'N': 'P', 'B': 'L', 'Q': 'D'}
         if self.language == 'fr':
-            dict = {'R': 'T', 'N': 'C', 'B': 'F', 'Q': 'D', 'K': 'R'}
+            directory = {'R': 'T', 'N': 'C', 'B': 'F', 'Q': 'D', 'K': 'R'}
         if self.language == 'es':
-            dict = {'R': 'T', 'N': 'C', 'B': 'A', 'Q': 'D', 'K': 'R'}
-        return replace_all(text, dict)
+            directory = {'R': 'T', 'N': 'C', 'B': 'A', 'Q': 'D', 'K': 'R'}
+        for i, j in directory.items():
+            text = text.replace(i, j)
+        return text
 
     def text(self, str_code, msg=''):
         entxt = detxt = nltxt = frtxt = estxt = None  # error case
