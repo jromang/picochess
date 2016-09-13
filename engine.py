@@ -30,6 +30,7 @@ def get_installed_engines(engine_shell, engine_file):
 
 def read_engine_ini(engine_shell=None, engine_path=None):
     config = configparser.ConfigParser()
+    config.optionxform = str
     try:
         if engine_shell is None:
             if not engine_path:
@@ -45,6 +46,7 @@ def read_engine_ini(engine_shell=None, engine_path=None):
     library = []
     for section in config.sections():
         parser = configparser.ConfigParser()
+        parser.optionxform = str
         level_dict = {}
         if parser.read(engine_path + os.sep + section + '.uci'):
             for ps in parser.sections():
@@ -68,6 +70,7 @@ def read_engine_ini(engine_shell=None, engine_path=None):
 def write_engine_ini(engine_path=None):
     def write_level_ini():
         parser = configparser.ConfigParser()
+        parser.optionxform = str
         if not parser.read(engine_path + os.sep + engine_file_name + '.uci'):
             if engine.has_limit_strength():
                 uelevel = engine.get().options['UCI_Elo']
@@ -108,6 +111,7 @@ def write_engine_ini(engine_path=None):
         engine_path = program_path + 'engines' + os.sep + platform.machine()
     engine_list = sorted(os.listdir(engine_path))
     config = configparser.ConfigParser()
+    config.optionxform = str
     for engine_file_name in engine_list:
         if is_exe(engine_path + os.sep + engine_file_name):
             engine = UciEngine(engine_path + os.sep + engine_file_name)
@@ -318,6 +322,7 @@ class UciEngine(object):
 
     def startup(self, options, show=True):
         parser = configparser.ConfigParser()
+        parser.optionxform = str
         if not options and parser.read(self.get_file() + '.uci'):
             options = dict(parser[parser.sections().pop()])
         self.level_support = bool(options)

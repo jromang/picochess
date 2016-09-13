@@ -713,7 +713,7 @@ class Event():
 
 def get_opening_books():
     config = configparser.ConfigParser()
-
+    config.optionxform = str
     program_path = os.path.dirname(os.path.realpath(__file__)) + os.sep
     book_path = program_path + 'books'
     config.read(book_path + os.sep + 'books.ini')
