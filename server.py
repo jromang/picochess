@@ -321,6 +321,18 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 self.shared['last_dgt_move_msg'] = r
                 EventHandler.write_to_clients(r)
                 break
+            if case(MessageApi.GAME_ENDS):
+                if message.game.move_stack:
+                    result = None
+                    if message.result == GameResult.DRAW:
+                        result = '1/2-1/2'
+                    elif message.result in (GameResult.WIN_WHITE, GameResult.WIN_BLACK):
+                        result = '1-0' if message.result == GameResult.WIN_WHITE else '0-1'
+                    elif message.result == GameResult.OUT_OF_TIME:
+                        result = '0-1' if message.game.turn == chess.WHITE else '1-0'
+                    if result:
+                        EventHandler.write_to_clients({'event': 'Message', 'msg': 'Game over, Result: ' + result})
+                break
             if case():  # Default
                 # print(message)
                 pass
