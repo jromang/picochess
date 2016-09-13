@@ -509,9 +509,7 @@ def main():
     if args.web_server_port:
         WebServer(args.web_server_port).start()
 
-    dgtserial = DgtSerial(args.dgt_port, args.enable_revelation_leds)
-    if args.dgtpi:
-        dgtserial.enable_pi()
+    dgtserial = DgtSerial(args.dgt_port, args.enable_revelation_leds, args.dgtpi)
 
     if args.console:
         # Enable keyboard input and terminal display

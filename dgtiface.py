@@ -31,7 +31,6 @@ class DgtIface(DisplayDgt, Thread):
         self.enable_dgt_3000 = False
         self.enable_dgt_pi = self.dgtserial.is_pi
         self.clock_found = False
-        # self.enable_revelation_leds = enable_revelation_leds
         self.time_left = None
         self.time_right = None
 
