@@ -23,16 +23,16 @@ keyboard_last_fen = None
 
 
 class KeyboardInput(Observable, threading.Thread):
-    def __init__(self, is_pi):
+    def __init__(self, dgttranslate, is_pi):
         super(KeyboardInput, self).__init__()
         self.flip_board = False
         self.board_plugged_in = True
         self.rt = RepeatedTimer(1, self.fire_no_board_connection)
+        self.dgttranslate = dgttranslate
         self.is_pi = is_pi
 
     def fire_no_board_connection(self):
-        s = 'Board!'
-        text = Dgt.DISPLAY_TEXT(l='no e-' + s, m='no' + s, s=s, wait=True, beep=False, maxtime=0)
+        text = self.dgttranslate.text('N00_noboard', 'Board!')
         DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text, is_pi=self.is_pi))
 
     def run(self):
@@ -105,7 +105,7 @@ class KeyboardInput(Observable, threading.Thread):
                         if plug == 'in':
                             self.board_plugged_in = True
                             self.rt.stop()
-                            text_l, text_m, text_s = 'VirtBoard  ', 'V-Board ', 'VBoard'
+                            text_l, text_m, text_s = 'VirtBoard  ', 'V-Board ', 'vboard'
                             text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, wait=True, beep=False, maxtime=1)
                             DisplayMsg.show(Message.EBOARD_VERSION(text=text, channel='console'))
                         if plug == 'off':

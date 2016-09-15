@@ -553,6 +553,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             exit_menu = True
             if self.system_index == Settings.VERSION:
                 text = self.dgttranslate.text('B10_picochess')
+                text.wait = False
             elif self.system_index == Settings.IPADR:
                 if self.ip:
                     msg = ' '.join(self.ip.split('.')[2:])

@@ -125,6 +125,7 @@ class DgtTranslate(object):
             frtxt = Dgt.DISPLAY_TEXT(l='uci960 oui ', m='960 oui ', s='960oui')
             estxt = Dgt.DISPLAY_TEXT(l='uci960 si  ', m='960 si  ', s='960 si')
         if text_id == 'picochess':
+            wait = True
             entxt = Dgt.DISPLAY_TEXT(l='picoChs ' + version, m='pico ' + version, s='pic ' + version)
             detxt = entxt
             nltxt = entxt
@@ -583,6 +584,13 @@ class DgtTranslate(object):
             estxt = Dgt.DISPLAY_TEXT(l='Partid   ' + msg, m='Partid' + msg, s='part' + msg)
         if text_id == 'tc_fisch':
             entxt = Dgt.DISPLAY_TEXT(l='Fischr' + msg, m='Fsh' + msg, s='f' + msg)
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+        if text_id == 'noboard':
+            wait = True
+            entxt = Dgt.DISPLAY_TEXT(l='no e-' + msg, m='no' + msg, s=msg)
             detxt = entxt
             nltxt = entxt
             frtxt = entxt

@@ -514,7 +514,7 @@ def main():
     if args.console:
         # Enable keyboard input and terminal display
         logging.debug('starting picochess in virtual mode')
-        KeyboardInput(args.dgtpi).start()
+        KeyboardInput(dgttranslate, args.dgtpi).start()
         TerminalDisplay().start()
         DgtVr(dgtserial, dgttranslate).start()
     else:
