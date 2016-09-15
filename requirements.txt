@@ -11,7 +11,7 @@ itsdangerous==0.24
 paramiko==1.16.0
 pycrypto==2.6.1
 pyserial==3.0.1
-python-chess==0.15.1
+python-chess==0.15.2
 requests==2.9.1
 shellescape==3.4.1
 spur==0.3.19
