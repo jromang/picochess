@@ -512,7 +512,9 @@ class DgtSerial(object):
                         logging.debug('DGT board connected to %s', self.device)
                         return
 
-                text = Dgt.DISPLAY_TEXT('N00_noboard', 'Board' + waitchars[self.wait_counter])
+                # text = self.dgttranslate.text('N00_noboard', 'Board' + waitchars[self.wait_counter])
+                s = 'Board' + waitchars[self.wait_counter]
+                text = Dgt.DISPLAY_TEXT(l='no e-' + s, m='no' + s, s=s, wait=True, beep=False, maxtime=0)
                 DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text, is_pi=self.is_pi))
                 self.wait_counter = (self.wait_counter + 1) % len(waitchars)
 
