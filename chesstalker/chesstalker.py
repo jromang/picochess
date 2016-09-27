@@ -48,7 +48,7 @@ SPOKEN_PIECE_SOUNDS = {
 }
 
 
-class ChessTalker(Display, threading.Thread):
+class ChessTalker(DisplayMsg, threading.Thread):
     def __init__(self, user_voice, computer_voice):
         """
         Initialize a ChessTalker with voices for the user and/or computer players.
@@ -72,7 +72,7 @@ class ChessTalker(Display, threading.Thread):
                     logging.error('ChessTalker: Failed to create computer voice: [%s]', str(computer_voice))
                     self.computer_chesstalker_voice = None
         except:
-            logging.exception("Unexpected error")
+            logging.exception('Unexpected error')
 
     def run(self):
         """
@@ -80,10 +80,11 @@ class ChessTalker(Display, threading.Thread):
         """
         previous_move = ""  # Ignore repeated broadcasts of a move.
         # Only run if we have any voices configured for user/computer.
+        logging.info('msg_queue ready')
         while self.user_chesstalker_voice or self.computer_chesstalker_voice:
             try:
                 # Check if we have something to say.
-                message = self.message_queue.get()
+                message = self.msg_queue.get()
                 logging.debug("Read message from queue: %s", message)
                 system_voice = self.system_voice()
 
@@ -94,12 +95,11 @@ class ChessTalker(Display, threading.Thread):
                             system_voice.say_new_game()
                         break
                     if case(MessageApi.COMPUTER_MOVE):
-                        if message.result.bestmove and message.game and str(message.result.bestmove) != previous_move \
+                        if message.move and message.game and str(message.move) != previous_move \
                                 and self.computer_chesstalker_voice is not None:
-                            logging.debug('Announcing COMPUTER_MOVE [%s]', message.result.bestmove)
-                            local_game = copy.deepcopy(message.game)
-                            self.computer_chesstalker_voice.say_move(message.result.bestmove, local_game)
-                            previous_move = str(message.result.bestmove)
+                            logging.debug('Announcing COMPUTER_MOVE [%s]', message.move)
+                            self.computer_chesstalker_voice.say_move(message.move, copy.deepcopy(message.game))
+                            previous_move = str(message.move)
                         break
                     if case(MessageApi.USER_MOVE):
                         if message.move and message.game and str(message.move) != previous_move \
@@ -108,7 +108,7 @@ class ChessTalker(Display, threading.Thread):
                             self.user_chesstalker_voice.say_move(message.move, copy.deepcopy(message.game))
                             previous_move = str(message.move)
                         break
-                    if case(MessageApi.REVIEW_MODE_MOVE):
+                    if case(MessageApi.REVIEW_MOVE):
                         if message.move and message.game and str(message.move) != previous_move \
                                 and self.user_chesstalker_voice is not None:
                             logging.debug('Announcing REVIEW_MOVE [%s]', message.move)
@@ -125,29 +125,27 @@ class ChessTalker(Display, threading.Thread):
                         break
                     if case(MessageApi.OPENING_BOOK):
                         logging.debug('Announcing OPENING_BOOK')
-                        system_voice.say_opening_book(message.book[0])
+                        system_voice.say_opening_book(message.book_text.m)
                         break
                     if case(MessageApi.TIME_CONTROL):
                         logging.debug('Announcing SET_TIME_CONTROL')
-                        if message.time_control_string.startswith("mov"):
-                            time_control_value = int(message.time_control_string[3:].strip())
+                        time_text = message.time_text.m
+                        if time_text.startswith("mov"):
+                            time_control_value = int(time_text[3:].strip())
                             system_voice.say_time_control_fixed_time(time_control_value)
-                        elif message.time_control_string.startswith("bl"):
-                            time_control_value = int(message.time_control_string[2:].strip())
+                        elif time_text.startswith("bl"):
+                            time_control_value = int(time_text[2:].strip())
                             system_voice.say_time_control_blitz(time_control_value)
-                        elif message.time_control_string.startswith("f"):
-                            time_control_values = message.time_control_string[1:].strip().split()
-                            # logging.debug('time_control_values: ' + str(time_control_values))
+                        elif time_text.startswith("f"):
+                            time_control_values = time_text[1:].strip().split()
                             minutes_per_game = time_control_values[0]
                             fischer_increment = time_control_values[1]
-                            # logging.debug('minutes_per_game: ' + str(minutes_per_game))
-                            # logging.debug('fischer_increment: ' + str(fischer_increment))
                             system_voice.say_time_control_fischer(minutes_per_game, fischer_increment)
                         break
                     if case(MessageApi.GAME_ENDS):
                         if message.result == GameResult.OUT_OF_TIME:
                             logging.debug('Announcing GAME_ENDS/TIME_CONTROL')
-                            color = ChessTalkerVoice.COLOR_WHITE if message.color == chess.WHITE else ChessTalkerVoice.COLOR_BLACK
+                            color = ChessTalkerVoice.COLOR_WHITE if message.game.turn == chess.WHITE else ChessTalkerVoice.COLOR_BLACK
                             system_voice.say_out_of_time(color)
                         elif message.result == GameResult.INSUFFICIENT_MATERIAL:
                             pass
@@ -166,10 +164,10 @@ class ChessTalker(Display, threading.Thread):
                         elif message.result == GameResult.DRAW:
                             logging.debug('Announcing DRAW')
                             system_voice.say_draw()
-                        elif message.result == GameResult.RESIGN_WHITE:
+                        elif message.result == GameResult.WIN_WHITE:
                             logging.debug('Announcing WHITE WIN')
                             system_voice.say_winner(ChessTalkerVoice.COLOR_WHITE)
-                        elif message.result == GameResult.RESIGN_BLACK:
+                        elif message.result == GameResult.WIN_BLACK:
                             logging.debug('Announcing BLACK WIN')
                             system_voice.say_winner(ChessTalkerVoice.COLOR_BLACK)
                         break
@@ -196,7 +194,7 @@ class ChessTalker(Display, threading.Thread):
             return self.user_chesstalker_voice
 
     def say_event(self, event):
-        self.message_queue.put(event)
+        self.msg_queue.put(event)
 
     @staticmethod
     def localisations():
@@ -479,7 +477,7 @@ class ChessTalkerVoice():
     def say_mode(self, mode):
         """Announce an mode setting"""
         modeVocab = None
-        if mode == Mode.GAME:
+        if mode == Mode.NORMAL:
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_GAME]
         elif mode == Mode.ANALYSIS:
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_ANALYSIS]
@@ -489,9 +487,9 @@ class ChessTalkerVoice():
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_OBSERVE]
         elif mode == Mode.REMOTE:
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_REMOTE]
-        elif mode == PlayMode.PLAY_BLACK:
+        elif mode == PlayMode.USER_BLACK:
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_PLAY_BLACK]
-        elif mode == PlayMode.PLAY_WHITE:
+        elif mode == PlayMode.USER_WHITE:
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_PLAY_WHITE]
 
         if modeVocab:
@@ -563,7 +561,8 @@ class ChessTalkerVoice():
         to_square = moveText[2:4]
         logging.debug("say_move: Saying move [%s]", moveText)
 
-        # Game board is currently in the POST-move state - get anything we need from this state before we look at the previous state.
+        # Game board is currently in the POST-move state
+        # get anything we need from this state before we look at the previous state.
         is_check = game.is_check()
         is_checkmate = game.is_checkmate()
         is_stalemate = game.is_stalemate()
@@ -707,13 +706,13 @@ if __name__ == "__main__":
                     chesstalker.say_level(20)
                     chesstalker.say_opening_book("fun")
                     chesstalker.say_opening_book("anand")
-                    chesstalker.say_mode(Mode.GAME)
-                    chesstalker.say_mode(Mode.ANALYSIS)
-                    chesstalker.say_mode(Mode.OBSERVE)
-                    chesstalker.say_mode(Mode.REMOTE)
-                    chesstalker.say_mode(Mode.KIBITZ)
-                    chesstalker.say_mode(PlayMode.PLAY_WHITE)
-                    chesstalker.say_mode(PlayMode.PLAY_BLACK)
+                    chesstalker.say_mode("normal")
+                    chesstalker.say_mode("analysis")
+                    chesstalker.say_mode("kibitz")
+                    chesstalker.say_mode("observe")
+                    chesstalker.say_mode("remote")
+                    chesstalker.say_mode("White")
+                    chesstalker.say_mode("Black")
                     chesstalker.say_time_control_fixed_time(1)
                     chesstalker.say_time_control_fixed_time(3)
                     chesstalker.say_time_control_blitz(1)

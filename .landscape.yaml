@@ -1,4 +1,5 @@
-python-targets: 3
+python-targets:
+    - 3
 doc-warnings: yes
 test-warnings: no
 strictness: veryhigh
@@ -12,4 +13,5 @@ ignore-paths:
     - lib
     - src
     - tablebases
-    - test
+    - logs
+    - dgt

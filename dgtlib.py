@@ -1,5 +1,6 @@
-# Copyright (C) 2013-2014 Jean-Francois Romang (jromang@posteo.de)
+# Copyright (C) 2013-2016 Jean-Francois Romang (jromang@posteo.de)
 #                         Shivkumar Shivaji ()
+#                         Jürgen Précour (LocutusOfPenguin@posteo.de)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,45 +19,60 @@ from utilities import *
 import time
 
 
-class DGTlib(object):
-    # This file simulates DGT's SO-lib File with similar api
+class DgtLib(object):
+
+    """This class simulates DGT's SO-lib File with similar API."""
 
     def __init__(self, dgtserial):
-        super(DGTlib, self).__init__()
+        super(DgtLib, self).__init__()
         self.dgtserial = dgtserial
 
+    def wait(self):
+        has_to_wait = False
+        while self.dgtserial.clock_lock:
+            if not has_to_wait:
+                has_to_wait = True
+                logging.debug('clock is locked => waiting')
+            time.sleep(0.1)
+        if has_to_wait:
+            logging.debug('clock is released now')
+
     def write(self, command):
-        if command[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value:
-            while self.dgtserial.clock_lock:
-                time.sleep(0.1)
-        self.dgtserial.write_board_command(command)
+        return self.dgtserial.write_board_command(command)
 
-    def display(self, text, beep, ld, rd):
-        self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0c, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_ASCII,
-                    text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], beep,
-                    DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
-        return 0
+    def set_text_3k(self, text, beep, ld, rd):
+        self.wait()
+        res = self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0c, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                          DgtClk.DGT_CMD_CLOCK_ASCII,
+                          text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], beep,
+                          DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        return res
 
-    def display_xl(self, text, beep, ld, rd):
-        self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0b, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_DISPLAY,
-                    text[2], text[1], text[0], text[5], text[4], text[3], 0x00, beep,
-                    DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
-        return 0
+    def set_text_xl(self, text, beep, ld, rd):
+        self.wait()
+        icn = ((rd & 0x07) | (ld << 3) & 0x38)
+        res = self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0b, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                          DgtClk.DGT_CMD_CLOCK_DISPLAY,
+                          text[2], text[1], text[0], text[5], text[4], text[3], icn, beep,
+                          DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        return res
 
-    def setnrun(self, lr, lh, lm, ls, rr, rh, rm, rs):
-        side = 0x04
+    def set_and_run(self, lr, lh, lm, ls, rr, rh, rm, rs):
+        self.wait()
+        side = ClockSide.NONE
         if lr == 1 and rr == 0:
-            side = 0x01
+            side = ClockSide.LEFT
         if lr == 0 and rr == 1:
-            side = 0x02
-        self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0a, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_SETNRUN,
-                    lh, lm, ls, rh, rm, rs,
-                    side, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
-        self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_END,
-                    DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
-        return 0
+            side = ClockSide.RIGHT
+        res = self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0a, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                          DgtClk.DGT_CMD_CLOCK_SETNRUN,
+                          lh, lm, ls, rh, rm, rs, side,
+                          DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        return res
 
-    def end_clock(self):
-        self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE, DgtClk.DGT_CMD_CLOCK_END,
-                    DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
-        return 0
+    def end_text(self):
+        self.wait()
+        res = self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                          DgtClk.DGT_CMD_CLOCK_END,
+                          DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        return res

@@ -102,18 +102,22 @@ Manual installation
   first:
 
   * `Python 3.4 or newer (also comes with pip) <https://www.python.org/downloads/>`_
-    (on mac OS X, ``brew install python3``)
+    (on Mac OS X, ``brew install python3``)
 
-  * `git <http://git-scm.com/>`_ (use git executable has to be in the system PATH)
+  * `git <http://git-scm.com/>`_ (``sudo apt-get install git``, git executable has to be in the system PATH)
 
   * A UCI chess engine; `Stockfish <http://stockfishchess.org/>`_ is probably
-    the best choice !
+    the best choice!
 
-  * `zeroconf` (``apt-get install avahi-daemon avahi-discover libnss-mdns``, included on Mac OS X)
+  * zeroconf (``sudo apt-get install avahi-daemon avahi-discover libnss-mdns``, included on Mac OS X)
+
+  * espeak and festival (``sudo apt-get install espeak festival``) to enable speech
 
 2. **Get a copy of the source code**
 
-  ``git clone --branch stable https://github.com/jromang/picochess.git``
+  ``cd /opt``
+
+  ``sudo git clone --branch master https://github.com/jromang/picochess.git``
 
   ``cd picochess``
 
@@ -134,14 +138,52 @@ Manual installation
 
 4. **Install dependencies**
 
-  ``pip install --upgrade -r requirements.txt``
+  To install the dependencies, you need to use pip3. If you are using Raspbian Jessie, your pip3 installation is probably outdated, resulting in IncompleteRead errors. You can update pip3 as follows:
+  
+  ``cd``
+  
+  ``curl -O https://bootstrap.pypa.io/get-pip.py``
+  
+  ``sudo python3 get-pip.py``
+  
+  ``rm get-pip.py``
+  
+  Once you have an up-to-date version of pip3 installed, you can continue to install the PicoChess dependencies:
 
-5. **Run PicoChess from the command line**
+  ``cd /opt/picochess``
 
-  PicoChess has a lot of options. Type ``python3 picochess.py -h`` for a list.
+  ``sudo pip3 install --upgrade -r requirements.txt``
+
+5. **UCI config files**
+
+  Initialize the engines' UCI settings via .uci files:
+
+  ``sudo python3 ./build_engines.py``
+
+6. **Copy the services into the correct place**
+
+``cd /opt/picochess/dgt``
+
+``sudo cp picochess.service /etc/systemd/system``
+
+``sudo chmod a+x /etc/systemd/system/picochess.service``
+
+``sudo systemctl enable picochess``
+
+``sudo cp hciuart.service /lib/systemd/system``
+
+``sudo reboot``
+
+7. **Run PicoChess: automatically or from the command line**
+
+  If installed correctly, PicoChess will start automatically at boot (as a service). You can also start PicoChess from the command line.
+
+  PicoChess has a lot of options. Type ``sudo python3 /opt/picochess/picochess.py -h`` for a list.
 
 Bluetooth Connection
 --------------------
+
+Bluetooth connection should work out of the box. If it does not, then you can try the following troubleshooting steps:
 
 1. Install Bluetooth utilities and Bluetooth Manager (in Raspbian Wheezy: sudo apt-get install bluez-utils blueman).
 
@@ -163,7 +205,7 @@ Bluetooth Connection
 
 9. Open Terminal app and shut down the machine:
 
-   sudo shutdown -h now
+   sudo shutdown -h -P now
 
 10. Restart the Pi without the keyboard and monitor and tada! the connection should work.
 
@@ -178,29 +220,27 @@ At start PicoChess looks at the file
 
 ... and sets itself up accordingly. Here is a list of some available options:
 
-* enable-dgt-board-leds = true
-* uci-option = Beginner Mode=true
+* enable-revelation-leds = true
 * log-level = debug
 * log-file = /opt/picochess/picochess.log
-* uci-option = Threads = 4
 * user-voice = en:Elsie
 * computer-voice = en:Marvin
-* disable-dgt-clock-beep
+* disable-ok-message
 
 To set a particular setting, simply include the appropriate line in the picochess.ini file.
-For example, to the disable default beep on a move, include this line in picochess.ini:
+For example, to the disable default confirmation message, include this line in picochess.ini:
 
-disable-dgt-clock-beep
+disable-ok-message
 
 To remove a setting, delete the appropriate line or comment it out using the hash character (#) or set the option to false.
 For example, to turn OFF the LED's on the Revelation II chessbot, this line will do:
 
-enable-dgt-board-leds = false
+enable-revelation-leds = false
 
-UCI engine options can be set using uci-option. For example, when using jromang's modified
+UCI engine options can be set in the picochess.uci configuration file which you will find in the /opt/picochess/engines/<your_plattform> folder. To set the option, use the uci-option flag. For example, when using jromang's modified
 `Stockfish Human Player engine <https://github.com/jromang/Stockfish/tree/human_player>`_, the line
 
-uci-option = Beginner Mode=true
+Beginner Mode = true
 
 will dumb Stockfish down enough for play against children and total beginners to give
 them a chance of beating the machine. If you are using our image files, you will probably find
@@ -209,3 +249,7 @@ the stockfish_human engine already waiting for your kids in the /opt/picochess/e
 An example .ini file can be found at /opt/picochess/picochess.ini.example.
 Uncomment the appropriate options and rename the file to picochess.ini.
 
+Please keep in mind that your picochess.ini file must suit the version of picochess.
+Old picochess.ini versions might not work with newer versions of picochess (picochess.ini.example is always valid).
+If you update picochess by hand or by providing the "inet" flag please take a look for changed settings and update
+picochess.ini accordingly.

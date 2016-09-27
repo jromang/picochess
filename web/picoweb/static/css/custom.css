@@ -1,0 +1,129 @@
+
+.gameVariation {
+    font-size: 16px;
+    display: block;
+    margin-left: 3em;
+    margin-top: 0.25em;
+    margin-bottom: 0.25em;
+
+    /*padding-left: 22px ;*/
+    /*text-indent: -22px ;*/
+}
+
+.gameVariation .gameMoves {
+    font-weight: normal;
+}
+
+.comment {
+    font-size: 18px;
+    display: block;
+    /*margin-left: 3em;*/
+    margin-top: 0.25em;
+    margin-bottom: 0.25em;
+    color: green;
+    font-weight: normal;
+
+    /*padding-left: 22px ;*/
+    /*text-indent: -22px ;*/
+}
+
+.gameMoves {
+    font-size: 18px;
+    font-weight: bolder;
+    line-height: 150%;
+    font-family: Tahoma, Geneva, sans-serif;
+}
+
+.gameMoves .highlight {
+    color: darkgreen;
+    font-size: 20px
+}
+
+.gameResult {
+    font-size: 24px;
+}
+
+/*
+input[type=text] {
+    width: 100%;
+    box-sizing: border-box;
+    height: 28px;
+}
+*/
+
+.panel-heading {
+    overflow: hidden;
+}
+
+.flat-table tr:nth-of-type(even) {
+    background: transparent;
+}
+
+.flat-table a {
+    /*color: #00008b;*/
+    color: #808080;
+    /*text-decoration: underline;*/
+}
+
+.flat-table {
+    /*table-layout:fixed;*/
+
+    margin-bottom: 20px;
+    border-collapse: collapse;
+    font-family: Calibri, Arial, sans-serif;
+    /*border: none;*/
+    border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+}
+
+.flat-table th {
+    /*.a color:  -webkit-link;*/
+    font-weight: normal;
+    -webkit-font-smoothing: antialiased;
+    padding: 1em;
+    color: rgba(0, 0, 0, 0.45);
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
+    font-size: 1.3em;
+    text-align: center !important;
+}
+
+.flat-table td {
+    /*color: #f7f7f7;*/
+    padding: 0.7em 1em 0.7em 1.15em;
+    /*text-shadow: 0 0 1px rgba(255,255,255,0.1);*/
+    font-size: 1.2em;
+    font-weight: normal;
+    text-align: center !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.flat-table tr {
+    -webkit-transition: background 0.3s, box-shadow 0.3s;
+    -moz-transition: background 0.3s, box-shadow 0.3s;
+    transition: background 0.3s, box-shadow 0.3s;
+}
+
+.flat-table-1 {
+    background: #fffaf0;
+
+}
+
+.flat-table-1 tr:hover {
+    background-color: rgba(0, 0, 0, 0.19);
+}
+
+.panel-heading > .nav-tabs {
+    border-bottom: none;
+    margin-bottom: -10px;
+    overflow: visible;
+
+}
+
+.panel .panel-borderless .panel-primary {
+    border: 0;
+    box-shadow: none;
+}
+

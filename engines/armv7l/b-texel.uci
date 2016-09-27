@@ -1,0 +1,23 @@
+[Elo@0800]
+strength = 0
+
+[Elo@1100]
+strength = 142
+
+[Elo@1400]
+strength = 285
+
+[Elo@1700]
+strength = 428
+
+[Elo@2000]
+strength = 571
+
+[Elo@2300]
+strength = 714
+
+[Elo@2600]
+strength = 857
+
+[Elo@2900]
+strength = 1000

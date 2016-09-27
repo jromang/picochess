@@ -2,9 +2,6 @@
 __pycache__/
 *.py[cod]
 
-# C extensions
-*.so
-
 # Distribution / packaging
 .Python
 venv/
@@ -67,3 +64,4 @@ docs/_build/
 
 # Config file
 picochess.ini
+picochess.uci

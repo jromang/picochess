@@ -1,5 +1,6 @@
-# Copyright (C) 2013-2014 Jean-Francois Romang (jromang@posteo.de)
+# Copyright (C) 2013-2016 Jean-Francois Romang (jromang@posteo.de)
 #                         Shivkumar Shivaji ()
+#                         Jürgen Précour (LocutusOfPenguin@posteo.de)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,166 +16,122 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from chess import Board
-from dgtinterface import *
-from dgtserial import *
+from dgtiface import *
 from ctypes import *
 from utilities import *
 from threading import Lock, Timer
 
 
-class DGTPi(DGTInterface):
-    def __init__(self, device, enable_board_leds, beep_level):
-        super(DGTPi, self).__init__(enable_board_leds, beep_level)
-        self.dgtserial = DGTserial(device)
-        self.dgtserial.run()
+class DgtPi(DgtIface):
+    def __init__(self, dgtserial, dgttranslate):
+        super(DgtPi, self).__init__(dgtserial, dgttranslate)
 
-        self.lock = Lock()
-        self.lib = cdll.LoadLibrary("/opt/picochess/dgtpicom.so")
+        self.lib_lock = Lock()
+        self.lib = cdll.LoadLibrary("dgt/dgtpicom.so")
 
-        self.startup_clock()
+        self.startup_i2c_clock()
         incoming_clock_thread = Timer(0, self.process_incoming_clock_forever)
         incoming_clock_thread.start()
+        # self.dgtserial.run()
 
-    def startup_clock(self):
+    def startup_i2c_clock(self):
         while self.lib.dgtpicom_init() < 0:
             logging.warning('Init failed - Jack half connected?')
-            Display.show(Message.JACK_CONNECTED_ERROR())
+            DisplayMsg.show(Message.JACK_CONNECTED_ERROR())
             time.sleep(0.5)  # dont flood the log
         if self.lib.dgtpicom_configure() < 0:
             logging.warning('Configure failed - Jack connected back?')
-            Display.show(Message.JACK_CONNECTED_ERROR())
-        Display.show(Message.DGT_CLOCK_VERSION(main_version=2, sub_version=2, attached="i2c"))
+            DisplayMsg.show(Message.JACK_CONNECTED_ERROR())
+        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=2, sub=2, attached="i2c"))
 
     def process_incoming_clock_forever(self):
         but = c_byte(0)
         buttime = c_byte(0)
         clktime = create_string_buffer(6)
         counter = 0
+        logging.info('incoming_clock ready')
         while True:
-            with self.lock:
+            with self.lib_lock:
                 # get button events
                 res = self.lib.dgtpicom_get_button_message(pointer(but), pointer(buttime))
                 if res > 0:
                     ack3 = but.value
                     if ack3 == 0x01:
-                        logging.info("DGT clock [i2c]: button 0 pressed")
-                        Display.show(Message.DGT_BUTTON(button=0))
+                        logging.info('DGT clock [i2c]: button 0 pressed')
+                        DisplayMsg.show(Message.DGT_BUTTON(button=0))
                     if ack3 == 0x02:
-                        logging.info("DGT clock [i2c]: button 1 pressed")
-                        Display.show(Message.DGT_BUTTON(button=1))
+                        logging.info('DGT clock [i2c]: button 1 pressed')
+                        DisplayMsg.show(Message.DGT_BUTTON(button=1))
                     if ack3 == 0x04:
-                        logging.info("DGT clock [i2c]: button 2 pressed")
-                        Display.show(Message.DGT_BUTTON(button=2))
+                        logging.info('DGT clock [i2c]: button 2 pressed')
+                        DisplayMsg.show(Message.DGT_BUTTON(button=2))
                     if ack3 == 0x08:
-                        logging.info("DGT clock [i2c]: button 3 pressed")
-                        Display.show(Message.DGT_BUTTON(button=3))
+                        logging.info('DGT clock [i2c]: button 3 pressed')
+                        DisplayMsg.show(Message.DGT_BUTTON(button=3))
                     if ack3 == 0x10:
-                        logging.info("DGT clock [i2c]: button 4 pressed")
-                        Display.show(Message.DGT_BUTTON(button=4))
+                        logging.info('DGT clock [i2c]: button 4 pressed')
+                        DisplayMsg.show(Message.DGT_BUTTON(button=4))
                     if ack3 == 0x20:
-                        logging.info("DGT clock [i2c]: button on/off pressed")
+                        logging.info('DGT clock [i2c]: button on/off pressed')
                         self.lib.dgtpicom_configure()  # restart the clock - cause its OFF
-                        self.lib.dgtpicom_set_text(b'shutdown', 0x01, 0, 0)
-                        Observable.fire(Event.SHUTDOWN())
+                        DisplayMsg.show(Message.DGT_BUTTON(button=0x11))
+                    if ack3 == 0x11:
+                        logging.info('DGT clock [i2c]: button 0+4 pressed')
+                        DisplayMsg.show(Message.DGT_BUTTON(button=0x11))
                     if ack3 == 0x40:
-                        logging.info("DGT clock [i2c]: lever pressed > right side down")
+                        logging.info('DGT clock [i2c]: lever pressed > right side down')
+                        DisplayMsg.show(Message.DGT_BUTTON(button=0x40))
                     if ack3 == -0x40:
-                        logging.info("DGT clock [i2c]: lever pressed > left side down")
+                        logging.info('DGT clock [i2c]: lever pressed > left side down')
+                        DisplayMsg.show(Message.DGT_BUTTON(button=-0x40))
                 if res < 0:
-                    logging.warning('GetButton returned error %i', res)
+                    logging.warning('GetButtonMessage returned error %i', res)
 
                 # get time events
                 self.lib.dgtpicom_get_time(clktime)
 
             times = list(clktime.raw)
-            counter = (counter + 1) % 4
-            if counter == 1:
-                Display.show(Message.DGT_CLOCK_TIME(time_left=times[:3], time_right=times[3:]))
-            if counter == 3:  # issue 150 - force to write something to the board => check for alive connection!
-                self.dgtserial.write_board_command([DgtCmd.DGT_RETURN_SERIALNR])  # the code doesnt really matter ;-)
-            time.sleep(0.25)
+            counter = (counter + 1) % 8
+            if counter == 0:
+                DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=times[:3], time_right=times[3:]))
+            # if counter == 4:  # issue 150 - force to write something to the board => check for alive connection!
+            #     self.dgtserial.write_board_command([DgtCmd.DGT_RETURN_SERIALNR])  # the code doesnt really matter ;-)
+            time.sleep(0.1)
 
-    def _display_on_dgt_pi(self, text, beep=False):
+    def _display_on_dgt_pi(self, text, beep=False, left_dots=0, right_dots=0):
         if len(text) > 11:
             logging.warning('DGT PI clock message too long [%s]', text)
         logging.debug(text)
         text = bytes(text, 'utf-8')
-        with self.lock:
-            res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, 0, 0)
+        with self.lib_lock:
+            res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, left_dots, right_dots)
             if res < 0:
-                logging.warning('Display returned error %i', res)
+                logging.warning('SetText returned error %i', res)
                 res = self.lib.dgtpicom_configure()
                 if res < 0:
                     logging.warning('Configure also failed %i', res)
                 else:
-                    res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, 0, 0)
+                    res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, left_dots, right_dots)
             if res < 0:
                 logging.warning('Finally failed %i', res)
 
-    def display_text_on_clock(self, text, text_xl=None, beep=BeepLevel.CONFIG):
-        beep = self.get_beep_level(beep)
-        self._display_on_dgt_pi(text, beep)
+    def display_text_on_clock(self, text, beep=False, left_dots=0, right_dots=0):
+        self._display_on_dgt_pi(text, beep, left_dots, right_dots)
 
-    def display_move_on_clock(self, move, fen, beep=BeepLevel.CONFIG):
-        beep = self.get_beep_level(beep)
+    def display_move_on_clock(self, move, fen, side, beep=False, left_dots=0, right_dots=0):
         bit_board = Board(fen)
-        text = bit_board.san(move)
-        self._display_on_dgt_pi(text, beep)
+        move_text = bit_board.san(move)
+        if side == ClockSide.RIGHT:
+            move_text = move_text.rjust(11)
+        text = self.dgttranslate.move(move_text)
+        self._display_on_dgt_pi(text, beep, left_dots, right_dots)
 
-    def light_squares_revelation_board(self, squares):
-        pass
-
-    def clear_light_revelation_board(self):
-        pass
-
-    def stop_clock(self):
-        l_hms = self.time_left
-        r_hms = self.time_right
-        with self.lock:
-            res = self.lib.dgtpicom_set_and_run(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
-            if res < 0:
-                logging.warning('SetNRun returned error %i', res)
-                res = self.lib.dgtpicom_configure()
-                if res < 0:
-                    logging.warning('Configure also failed %i', res)
-                else:
-                    res = self.lib.dgtpicom_set_and_run(0, l_hms[0], l_hms[1], l_hms[2], 0, r_hms[0], r_hms[1], r_hms[2])
-            if res < 0:
-                logging.warning('Finally failed %i', res)
-            else:
-                self.clock_running = False
-
-    def start_clock(self, time_left, time_right, side):
-        l_hms = hours_minutes_seconds(time_left)
-        r_hms = hours_minutes_seconds(time_right)
-        if side == 0x01:
-            lr = 1
-            rr = 0
-        else:
-            lr = 0
-            rr = 1
-        self.time_left = l_hms
-        self.time_right = r_hms
-        with self.lock:
-            res = self.lib.dgtpicom_set_and_run(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
-            if res < 0:
-                logging.warning('SetNRun returned error %i', res)
-                res = self.lib.dgtpicom_configure()
-                if res < 0:
-                    logging.warning('Configure also failed %i', res)
-                else:
-                    res = self.lib.dgtpicom_set_and_run(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
-            if res < 0:
-                logging.warning('Finally failed %i', res)
-            else:
-                self.clock_running = True
-
-    def end_clock(self):
-        if self.clock_running:
-            with self.lock:
+    def display_time_on_clock(self, force=False):
+        if self.clock_running or force:
+            with self.lib_lock:
                 res = self.lib.dgtpicom_end_text()
                 if res < 0:
-                    logging.warning('EndDisplay returned error %i', res)
+                    logging.warning('EndText returned error %i', res)
                     res = self.lib.dgtpicom_configure()
                     if res < 0:
                         logging.warning('Configure also failed %i', res)
@@ -183,4 +140,70 @@ class DGTPi(DGTInterface):
                 if res < 0:
                     logging.warning('Finally failed')
         else:
-            logging.debug('DGT clock isnt running - no need for endDisplay')
+            logging.debug('DGT clock isnt running - no need for endClock')
+
+    def light_squares_revelation_board(self, squares):
+        if self.dgtserial.enable_revelation_leds:
+            for sq in squares:
+                dgt_square = (8 - int(sq[1])) * 8 + ord(sq[0]) - ord('a')
+                logging.debug("REV2 light on square %s", sq)
+                self.dgtserial.write_board_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x01, dgt_square, dgt_square])
+
+    def clear_light_revelation_board(self):
+        if self.dgtserial.enable_revelation_leds:
+            logging.debug('REV2 lights turned off')
+            self.dgtserial.write_board_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
+
+    def stop_clock(self):
+        self.resume_clock(ClockSide.NONE)
+
+    def resume_clock(self, side):
+        l_hms = self.time_left
+        r_hms = self.time_right
+        if l_hms is None or r_hms is None:
+            logging.warning('time values not set - abort function')
+            return
+
+        lr = rr = 0
+        if side == ClockSide.LEFT:
+            lr = 1
+        if side == ClockSide.RIGHT:
+            rr = 1
+        with self.lib_lock:
+            res = self.lib.dgtpicom_run(lr, rr)
+            if res < 0:
+                logging.warning('Run returned error %i', res)
+                res = self.lib.dgtpicom_configure()
+                if res < 0:
+                    logging.warning('Configure also failed %i', res)
+                else:
+                    res = self.lib.dgtpicom_run(lr, rr)
+            if res < 0:
+                logging.warning('Finally failed %i', res)
+            else:
+                self.clock_running = (side != ClockSide.NONE)
+
+    def start_clock(self, time_left, time_right, side):
+        self.time_left = hours_minutes_seconds(time_left)
+        self.time_right = hours_minutes_seconds(time_right)
+        l_hms = self.time_left
+        r_hms = self.time_right
+
+        lr = rr = 0
+        if side == ClockSide.LEFT:
+            lr = 1
+        if side == ClockSide.RIGHT:
+            rr = 1
+        with self.lib_lock:
+            res = self.lib.dgtpicom_set_and_run(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
+            if res < 0:
+                logging.warning('SetAndRun returned error %i', res)
+                res = self.lib.dgtpicom_configure()
+                if res < 0:
+                    logging.warning('Configure also failed %i', res)
+                else:
+                    res = self.lib.dgtpicom_set_and_run(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
+            if res < 0:
+                logging.warning('Finally failed %i', res)
+            else:
+                self.clock_running = (side != ClockSide.NONE)

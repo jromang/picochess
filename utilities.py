@@ -1,5 +1,6 @@
-# Copyright (C) 2013-2014 Jean-Francois Romang (jromang@posteo.de)
+# Copyright (C) 2013-2016 Jean-Francois Romang (jromang@posteo.de)
 #                         Shivkumar Shivaji ()
+#                         Jürgen Précour (LocutusOfPenguin@posteo.de)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,6 +24,10 @@ import urllib.request
 import socket
 import json
 import time
+from threading import Timer
+
+import configparser
+
 
 try:
     import enum
@@ -31,12 +36,12 @@ except ImportError:
 
 
 # picochess version
-version = '059'
+version = '075'
 
-event_queue = queue.Queue()
+evt_queue = queue.Queue()
 serial_queue = queue.Queue()
 
-display_devices = []
+msgdisplay_devices = []
 dgtdisplay_devices = []
 
 
@@ -54,17 +59,15 @@ class EventApi():
     LEVEL = 'EVT_LEVEL'  # User sets engine level (from 1 to 20)
     NEW_GAME = 'EVT_NEW_GAME'  # User starts a new game
     DRAWRESIGN = 'EVT_DRAWRESIGN'  # User declares a resignation or draw
-    USER_MOVE = 'EVT_USER_MOVE'  # User sends a move
     KEYBOARD_MOVE = 'EVT_KEYBOARD_MOVE'  # Keyboard sends a move (to be transfered to a fen)
     REMOTE_MOVE = 'EVT_REMOTE_MOVE'  # Remote player move
     SET_OPENING_BOOK = 'EVT_SET_OPENING_BOOK'  # User chooses an opening book
     NEW_ENGINE = 'EVT_NEW_ENGINE'  # Change engine
     SET_INTERACTION_MODE = 'EVT_SET_INTERACTION_MODE'  # Change interaction mode
     SETUP_POSITION = 'EVT_SETUP_POSITION'  # Setup custom position
-    STARTSTOP_THINK = 'EVT_STARTSTOP_THINK'  # Engine should start/stop thinking
-    STARTSTOP_CLOCK = 'EVT_STARTSTOP_CLOCK'  # Clock should start/stop
+    PAUSE_RESUME = 'EVT_PAUSE_RESUME'  # Stops search or halt/resume running clock
+    SWITCH_SIDES = 'EVT_SWITCH_SIDES'  # Switch the side
     SET_TIME_CONTROL = 'EVT_SET_TIME_CONTROL'  # User sets time control
-    UCI_OPTION_SET = 'EVT_UCI_OPTION_SET'  # Users sets an UCI option, contains 'name' and 'value' (strings)
     SHUTDOWN = 'EVT_SHUTDOWN'  # User wants to shutdown the machine
     REBOOT = 'EVT_REBOOT'  # User wants to reboot the machine
     ALTERNATIVE_MOVE = 'EVT_ALTERNATIVE_MOVE'  # User wants engine to recalculate the position
@@ -83,13 +86,12 @@ class MessageApi():
     COMPUTER_MOVE = 'MSG_COMPUTER_MOVE'  # Show computer move
     BOOK_MOVE = 'MSG_BOOK_MOVE'  # Show book move
     NEW_PV = 'MSG_NEW_PV'  # Show the new Principal Variation
-    REVIEW_MODE_MOVE = 'MSG_REVIEW_MODE_MOVE'  # Player is reviewing game
-    REMOTE_MODE_MOVE = 'MSG_REMOTE_MODE_MOVE'  # DGT Player is playing vs network player
+    REVIEW_MOVE = 'MSG_REVIEW_MOVE'  # Player is reviewing a game (analysis, kibitz or observe modes)
     ENGINE_READY = 'MSG_ENGINE_READY'
     ENGINE_STARTUP = 'MSG_ENGINE_STARTUP'  # first time a new engine is ready
-    ENGINE_FAIL = 'MSG_ENGINE_FAIL'
-    LEVEL = 'MSG_LEVEL'  # User sets engine level (from 1 to 20).
-    TIME_CONTROL = 'MSG_TIME_CONTROL'
+    ENGINE_FAIL = 'MSG_ENGINE_FAIL'  # Engine startup fails
+    LEVEL = 'MSG_LEVEL'  # User sets engine level (from 0 to 20).
+    TIME_CONTROL = 'MSG_TIME_CONTROL'  # New Timecontrol
     OPENING_BOOK = 'MSG_OPENING_BOOK'  # User chooses an opening book
     DGT_BUTTON = 'MSG_DGT_BUTTON'  # Clock button pressed
     DGT_FEN = 'MSG_DGT_FEN'  # DGT Board sends a fen
@@ -98,16 +100,14 @@ class MessageApi():
 
     INTERACTION_MODE = 'MSG_INTERACTON_MODE'  # Interaction mode
     PLAY_MODE = 'MSG_PLAY_MODE'  # Play mode
-    START_NEW_GAME = 'MSG_START_NEW_GAME'
+    START_NEW_GAME = 'MSG_START_NEW_GAME'  # User starts a new game
     COMPUTER_MOVE_DONE_ON_BOARD = 'MSG_COMPUTER_MOVE_DONE_ON_BOARD'  # User has done the compute move on board
-    WAIT_STATE = 'MSG_WAIT_STATE'  # picochess waits for the user
     SEARCH_STARTED = 'MSG_SEARCH_STARTED'  # Engine has started to search
     SEARCH_STOPPED = 'MSG_SEARCH_STOPPED'  # Engine has stopped the search
     USER_TAKE_BACK = 'MSG_USER_TACK_BACK'  # User takes back his move while engine is searching
-    RUN_CLOCK = 'MSG_RUN_CLOCK'  # Say to run autonomous clock, contains time_control
-    STOP_CLOCK = 'MSG_STOP_CLOCK'  # Stops the clock
+    CLOCK_START = 'MSG_CLOCK_START'  # Say to run autonomous clock, contains time_control
+    CLOCK_STOP = 'MSG_CLOCK_STOP'  # Stops the clock
     USER_MOVE = 'MSG_USER_MOVE'  # Player has done a move on board
-    UCI_OPTION_LIST = 'MSG_UCI_OPTION_LIST'  # Contains 'options', a dict of the current engine's UCI options
     GAME_ENDS = 'MSG_GAME_ENDS'  # The current game has ended, contains a 'result' (GameResult) and list of 'moves'
 
     SYSTEM_INFO = 'MSG_SYSTEM_INFO'  # Information about picochess such as version etc
@@ -118,12 +118,15 @@ class MessageApi():
     NO_CLOCK_ERROR = 'MSG_NO_CLOCK_ERROR'  # User hasnt connected a clock
     NO_EBOARD_ERROR = 'MSG_NO_EBOARD_ERROR'  # User hasnt connected an E-Board
     EBOARD_VERSION = 'MSG_EBOARD_VERSION'  # Startup Message after a successful connection to an E-Board
+    SWITCH_SIDES = 'MSG_SWITCH_SIDES'  # Forget the engines move, and let it be user's turn
+    KEYBOARD_MOVE = 'MSG_KEYBOARD_MOVE'  # Sends back the fen for a given move (needed for keyboard.py)
 
 
 class DgtApi():
-    # Commands to the DGThw/pi (or the virtual hardware)
+    # Commands to the DgtHw/Pi (or the virtual hardware)
     DISPLAY_MOVE = 'DGT_DISPLAY_MOVE'
     DISPLAY_TEXT = 'DGT_DISPLAY_TEXT'
+    DISPLAY_TIME = 'DGT_DISPLAY_TIME'
     LIGHT_CLEAR = 'DGT_LIGHT_CLEAR'
     LIGHT_SQUARES = 'DGT_LIGHT_SQUARES'
     CLOCK_STOP = 'DGT_CLOCK_STOP'
@@ -133,92 +136,253 @@ class DgtApi():
     SERIALNR = 'DGT_SERIALNR'
 
 
-class Menu(AutoNumber):
-    GAME_MENU = ()  # Default Menu
-    SETUP_POSITION_MENU = ()  # Setup position menu
-    LEVEL_MENU = ()  # Playing strength
-    TIME_MENU = () # Time controls menu
-    ENGINE_MENU = ()  # Engine menu
-    BOOK_MENU = ()  # Book menu
-    SETTINGS_MENU = ()  # Settings menu
+@enum.unique
+class Menu(enum.Enum):
+    TOP_MENU = 'B00_menu_top_menu'  # Top Level Menu
+    MODE_MENU = 'B00_menu_mode_menu'  # Default Menu
+    POSITION_MENU = 'B00_menu_position_menu'  # Setup position menu
+    TIME_MENU = 'B00_menu_time_menu'  # Time controls menu
+    BOOK_MENU = 'B00_menu_book_menu'  # Book menu
+    ENGINE_MENU = 'B00_menu_engine_menu'  # Engine menu
+    SYSTEM_MENU = 'B00_menu_system_menu'  # Settings menu
 
 
-class SetupPositionMenu(AutoNumber):
-    TO_MOVE_TOGGLE = ()
-    REVERSE_ORIENTATION = ()
-    SCAN_POSITION = ()
-    SPACER = ()
-    SWITCH_MENU = ()  # Switch Menu
+class MenuLoop(object):
+    def __init__(self):
+        super(MenuLoop, self).__init__()
 
+    @staticmethod
+    def next(m):
+        if m == Menu.MODE_MENU:
+            return Menu.POSITION_MENU
+        elif m == Menu.POSITION_MENU:
+            return Menu.TIME_MENU
+        elif m == Menu.TIME_MENU:
+            return Menu.BOOK_MENU
+        elif m == Menu.BOOK_MENU:
+            return Menu.ENGINE_MENU
+        elif m == Menu.ENGINE_MENU:
+            return Menu.SYSTEM_MENU
+        elif m == Menu.SYSTEM_MENU:
+            return Menu.MODE_MENU
+        return Menu.TOP_MENU
 
-class EngineMenu(AutoNumber):
-    LEVEL = ()
-    ENGINE = ()
-    ENG_INFO = ()
-    SWITCH_MENU = ()  # Switch Menu
-
-
-class BookMenu(AutoNumber):
-    BOOK = ()
-    BOOK_INFO = ()
-    SWITCH_MENU = ()  # Switch Menu
-
-
-class TimeMenu(AutoNumber):
-    TIME_FIXED = ()
-    TIME_BLITZ = ()
-    TIME_FISCHER = ()
-    SPACER = ()
-    SWITCH_MENU = ()
-
-
-class GameMenu(AutoNumber):
-    LAST_MOVE = ()  # Show last move
-    HINT_EVAL = ()  # Show hint/evaluation
-    START_STOP = ()  # Starts/Stops the calculation
-    CHANGE_MODE = ()  # Change Modes
-    SWITCH_MENU = ()  # Switch Menu
-
-
-class PowerMenu(AutoNumber):
-    CONFIRM_NONE = ()  # Nothing to confirm from power menu
-    CONFIRM_PWR = ()  # Confirm the PowerOff request
-    CONFIRM_RBT = ()  # Confirm the Reboot request
+    @staticmethod
+    def prev(m):
+        if m == Menu.MODE_MENU:
+            return Menu.SYSTEM_MENU
+        elif m == Menu.POSITION_MENU:
+            return Menu.MODE_MENU
+        elif m == Menu.TIME_MENU:
+            return Menu.POSITION_MENU
+        elif m == Menu.BOOK_MENU:
+            return Menu.TIME_MENU
+        elif m == Menu.ENGINE_MENU:
+            return Menu.BOOK_MENU
+        elif m == Menu.SYSTEM_MENU:
+            return Menu.ENGINE_MENU
+        return Menu.TOP_MENU
 
 
 @enum.unique
 class Mode(enum.Enum):
-    GAME = 'game'
-    ANALYSIS = 'analyse'
-    KIBITZ = 'kibitz'
-    OBSERVE = 'observe'
-    REMOTE = 'remote'
+    NORMAL = 'B00_mode_normal_menu'
+    ANALYSIS = 'B00_mode_analysis_menu'
+    KIBITZ = 'B00_mode_kibitz_menu'
+    OBSERVE = 'B00_mode_observe_menu'
+    REMOTE = 'B00_mode_remote_menu'
+
+
+class ModeLoop(object):
+    def __init__(self):
+        super(ModeLoop, self).__init__()
+
+    @staticmethod
+    def next(m):
+        if m == Mode.NORMAL:
+            return Mode.ANALYSIS
+        elif m == Mode.ANALYSIS:
+            return Mode.KIBITZ
+        elif m == Mode.KIBITZ:
+            return Mode.OBSERVE
+        elif m == Mode.OBSERVE:
+            return Mode.REMOTE
+        elif m == Mode.REMOTE:
+            return Mode.NORMAL
+        return 'error ModeLoop next'
+
+    @staticmethod
+    def prev(m):
+        if m == Mode.NORMAL:
+            return Mode.REMOTE
+        elif m == Mode.ANALYSIS:
+            return Mode.NORMAL
+        elif m == Mode.KIBITZ:
+            return Mode.ANALYSIS
+        elif m == Mode.OBSERVE:
+            return Mode.KIBITZ
+        elif m == Mode.REMOTE:
+            return Mode.OBSERVE
+        return 'error ModeLoop prev'
 
 
 @enum.unique
 class PlayMode(enum.Enum):
-    PLAY_WHITE = 'white'
-    PLAY_BLACK = 'black'
+    USER_WHITE = 'B10_playmode_white_user'
+    USER_BLACK = 'B10_playmode_black_user'
 
 
-class ClockMode(AutoNumber):
-    FIXED_TIME = ()  # Fixed seconds per move
-    BLITZ = ()  # Fixed time per game
-    FISCHER = ()  # Fischer increment
+class TimeMode(enum.Enum):
+    FIXED = 'B00_timemode_fixed_menu'  # Fixed seconds per move
+    BLITZ = 'B00_timemode_blitz_menu'  # Fixed time per game
+    FISCHER = 'B00_timemode_fischer_menu'  # Fischer increment
+
+
+class TimeModeLoop(object):
+    def __init__(self):
+        super(TimeModeLoop, self).__init__()
+
+    @staticmethod
+    def next(m):
+        if m == TimeMode.FIXED:
+            return TimeMode.BLITZ
+        elif m == TimeMode.BLITZ:
+            return TimeMode.FISCHER
+        elif m == TimeMode.FISCHER:
+            return TimeMode.FIXED
+        return 'error TimeMode next'
+
+    @staticmethod
+    def prev(m):
+        if m == TimeMode.FIXED:
+            return TimeMode.FISCHER
+        elif m == TimeMode.BLITZ:
+            return TimeMode.FIXED
+        elif m == TimeMode.FISCHER:
+            return TimeMode.BLITZ
+        return 'error TimeMode prev'
+
+
+class Settings(enum.Enum):
+    VERSION = 'B00_settings_version_menu'
+    IPADR = 'B00_settings_ipadr_menu'
+    SOUND = 'B00_settings_sound_menu'
+    LANGUAGE = 'B00_settings_language_menu'
+
+
+class SettingsLoop(object):
+    def __init__(self):
+        super(SettingsLoop, self).__init__()
+
+    @staticmethod
+    def next(m):
+        if m == Settings.VERSION:
+            return Settings.IPADR
+        elif m == Settings.IPADR:
+            return Settings.SOUND
+        elif m == Settings.SOUND:
+            return Settings.LANGUAGE
+        elif m == Settings.LANGUAGE:
+            return Settings.VERSION
+        return 'error Setting next'
+
+    @staticmethod
+    def prev(m):
+        if m == Settings.VERSION:
+            return Settings.LANGUAGE
+        if m == Settings.LANGUAGE:
+            return Settings.SOUND
+        elif m == Settings.SOUND:
+            return Settings.IPADR
+        elif m == Settings.IPADR:
+            return Settings.VERSION
+        return 'error Setting prev'
+
+
+class Language(enum.Enum):
+    EN = 'B00_language_en_menu'
+    DE = 'B00_language_de_menu'
+    NL = 'B00_language_nl_menu'
+    FR = 'B00_language_fr_menu'
+    ES = 'B00_language_es_menu'
+
+
+class LanguageLoop(object):
+    def __init__(self):
+        super(LanguageLoop, self).__init__()
+
+    @staticmethod
+    def next(m):
+        if m == Language.EN:
+            return Language.DE
+        elif m == Language.DE:
+            return Language.NL
+        elif m == Language.NL:
+            return Language.FR
+        elif m == Language.FR:
+            return Language.ES
+        elif m == Language.ES:
+            return Language.EN
+        return 'error Language next'
+
+    @staticmethod
+    def prev(m):
+        if m == Language.EN:
+            return Language.ES
+        if m == Language.ES:
+            return Language.FR
+        if m == Language.FR:
+            return Language.NL
+        elif m == Language.NL:
+            return Language.DE
+        elif m == Language.DE:
+            return Language.EN
+        return 'error Language prev'
+
+
+class Beep(enum.Enum):
+    OFF = 'B00_beep_off_menu'
+    SOME = 'B00_beep_some_menu'
+    ON = 'B00_beep_on_menu'
+
+
+class BeepLoop(object):
+    def __init__(self):
+        super(BeepLoop, self).__init__()
+
+    @staticmethod
+    def next(m):
+        if m == Beep.OFF:
+            return Beep.SOME
+        elif m == Beep.SOME:
+            return Beep.ON
+        elif m == Beep.ON:
+            return Beep.OFF
+        return 'error beep next'
+
+    @staticmethod
+    def prev(m):
+        if m == Beep.OFF:
+            return Beep.ON
+        if m == Beep.ON:
+            return Beep.SOME
+        if m == Beep.SOME:
+            return Beep.OFF
+        return 'error beep prev'
 
 
 @enum.unique
 class GameResult(enum.Enum):
-    MATE = 'mate'
-    STALEMATE = 'stalemate'
-    OUT_OF_TIME = 'time'
-    INSUFFICIENT_MATERIAL = 'material'
-    SEVENTYFIVE_MOVES = '75 moves'
-    FIVEFOLD_REPETITION = 'repetition'
-    ABORT = 'abort'
-    RESIGN_WHITE = 'W wins'
-    RESIGN_BLACK = 'B wins'
-    DRAW = 'draw'
+    MATE = 'B00_gameresult_mate_menu'
+    STALEMATE = 'B00_gameresult_stalemate_menu'
+    OUT_OF_TIME = 'B00_gameresult_time_menu'
+    INSUFFICIENT_MATERIAL = 'B00_gameresult_material_menu'
+    SEVENTYFIVE_MOVES = 'B00_gameresult_moves_menu'
+    FIVEFOLD_REPETITION = 'B00_gameresult_repetition_menu'
+    ABORT = 'B00_gameresult_abort_menu'
+    WIN_WHITE = 'B00_gameresult_white_menu'
+    WIN_BLACK = 'B00_gameresult_black_menu'
+    DRAW = 'B00_gameresult_draw_menu'
 
 
 class EngineStatus(AutoNumber):
@@ -236,6 +400,11 @@ class BeepLevel(enum.Enum):
     MAP = 0x04  # All Events coming from Queen placing at start pos (line3-6)
     OKAY = 0x08  # All Events from "ok" (confirm) messages incl. "you move"
 
+@enum.unique
+class ClockSide(enum.Enum):
+    LEFT = 0x01
+    RIGHT = 0x02
+    NONE = 0x04
 
 @enum.unique
 class DgtCmd(enum.Enum):
@@ -353,24 +522,24 @@ class Observable(object):  # Input devices are observable
 
     @staticmethod
     def fire(event):
-        event_queue.put(event)
+        evt_queue.put(event)
 
 
-class Display(object):  # Display devices (DGT XL clock, Piface LCD, pgn file...)
+class DisplayMsg(object):  # Display devices (DGT XL clock, Piface LCD, pgn file...)
     def __init__(self):
-        super(Display, self).__init__()
-        self.message_queue = queue.Queue()
-        display_devices.append(self)
+        super(DisplayMsg, self).__init__()
+        self.msg_queue = queue.Queue()
+        msgdisplay_devices.append(self)
 
     @staticmethod
     def show(message):  # Sends a message on each display device
-        for display in display_devices:
-            display.message_queue.put(message)
+        for display in msgdisplay_devices:
+            display.msg_queue.put(message)
 
 
-class DgtDisplay(object):  # Display devices (DGT XL clock, Piface LCD, pgn file...)
+class DisplayDgt(object):  # Display devices (DGT XL clock, Piface LCD, pgn file...)
     def __init__(self):
-        super(DgtDisplay, self).__init__()
+        super(DisplayDgt, self).__init__()
         self.dgt_queue = queue.Queue()
         dgtdisplay_devices.append(self)
 
@@ -412,61 +581,94 @@ class BaseClass(object):
     def __repr__(self):
         return self._type
 
+    def __hash__(self):
+        return hash(str(self.__class__) + ": " + str(self.__dict__))
+
 
 def ClassFactory(name, argnames, BaseClass=BaseClass):
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             # here, the argnames variable is the one passed to the ClassFactory call
             if key not in argnames:
-                raise TypeError("Argument %s not valid for %s" % (key, self.__class__.__name__))
+                raise TypeError("argument %s not valid for %s" % (key, self.__class__.__name__))
             setattr(self, key, value)
         BaseClass.__init__(self, name)
     newclass = type(name, (BaseClass,),{"__init__": __init__})
     return newclass
 
 
+class RepeatedTimer(object):
+    def __init__(self, interval, function, *args, **kwargs):
+        self._timer = None
+        self.interval = interval
+        self.function = function
+        self.args = args
+        self.kwargs = kwargs
+        self.timer_running = False
+
+    def _run(self):
+        self.timer_running = False
+        self.start()
+        self.function(*self.args, **self.kwargs)
+
+    def is_running(self):
+        return self.timer_running
+
+    def start(self):
+        if not self.timer_running:
+            self._timer = Timer(self.interval, self._run)
+            self._timer.start()
+            self.timer_running = True
+        else:
+            logging.info('repeated timer already running - strange!')
+
+    def stop(self):
+        if self.timer_running:
+            self._timer.cancel()
+            self.timer_running = False
+        else:
+            logging.info('repeated timer already stopped - strange!')
+
+
 class Dgt():
-    DISPLAY_MOVE = ClassFactory(DgtApi.DISPLAY_MOVE, ['move', 'fen', 'beep', 'duration', 'force'])
-    DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['text', 'xl', 'beep', 'duration', 'force'])
+    DISPLAY_MOVE = ClassFactory(DgtApi.DISPLAY_MOVE, ['move', 'fen', 'beep', 'maxtime', 'side', 'wait', 'ld', 'rd'])
+    DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['l', 'm', 's', 'beep', 'maxtime', 'wait', 'ld', 'rd'])
+    DISPLAY_TIME = ClassFactory(DgtApi.DISPLAY_TIME, ['wait', 'force'])
     LIGHT_CLEAR = ClassFactory(DgtApi.LIGHT_CLEAR, [])
     LIGHT_SQUARES = ClassFactory(DgtApi.LIGHT_SQUARES, ['squares'])
     CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, [])
     CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side'])
-    CLOCK_VERSION = ClassFactory(DgtApi.CLOCK_VERSION, ['main_version', 'sub_version', 'attached'])
+    CLOCK_VERSION = ClassFactory(DgtApi.CLOCK_VERSION, ['main', 'sub', 'attached'])
     CLOCK_TIME = ClassFactory(DgtApi.CLOCK_TIME, ['time_left', 'time_right'])
-    SERIALNR = ClassFactory(DgtApi.SERIALNR, [])
 
 
 class Message():
     # Messages to display devices
-    COMPUTER_MOVE = ClassFactory(MessageApi.COMPUTER_MOVE, ['result', 'fen', 'game', 'time_control'])
-    BOOK_MOVE = ClassFactory(MessageApi.BOOK_MOVE, ['result'])
-    NEW_PV = ClassFactory(MessageApi.NEW_PV, ['pv', 'mode', 'fen'])
-    REVIEW_MODE_MOVE = ClassFactory(MessageApi.REVIEW_MODE_MOVE, ['move', 'fen', 'game', 'mode'])
-    REMOTE_MODE_MOVE = ClassFactory(MessageApi.REMOTE_MODE_MOVE, [])
-    ENGINE_READY = ClassFactory(MessageApi.ENGINE_READY, ['eng', 'engine_name', 'has_levels'])
-    ENGINE_STARTUP = ClassFactory(MessageApi.ENGINE_STARTUP, ['path', 'has_levels'])
+    COMPUTER_MOVE = ClassFactory(MessageApi.COMPUTER_MOVE, ['move', 'ponder', 'fen', 'turn', 'game', 'time_control', 'wait'])
+    BOOK_MOVE = ClassFactory(MessageApi.BOOK_MOVE, [])
+    NEW_PV = ClassFactory(MessageApi.NEW_PV, ['pv', 'mode', 'fen', 'turn'])
+    REVIEW_MOVE = ClassFactory(MessageApi.REVIEW_MOVE, ['move', 'fen', 'turn', 'game', 'mode'])
+    ENGINE_READY = ClassFactory(MessageApi.ENGINE_READY, ['eng', 'eng_text', 'engine_name', 'has_levels', 'has_960', 'ok_text'])
+    ENGINE_STARTUP = ClassFactory(MessageApi.ENGINE_STARTUP, ['shell', 'file', 'has_levels', 'has_960'])
     ENGINE_FAIL = ClassFactory(MessageApi.ENGINE_FAIL, [])
-    LEVEL = ClassFactory(MessageApi.LEVEL, ['level', 'beep'])
-    TIME_CONTROL = ClassFactory(MessageApi.TIME_CONTROL, ['time_control_string', 'beep'])
-    OPENING_BOOK = ClassFactory(MessageApi.OPENING_BOOK, ['book_control_string', 'beep'])
+    LEVEL = ClassFactory(MessageApi.LEVEL, ['level_text'])
+    TIME_CONTROL = ClassFactory(MessageApi.TIME_CONTROL, ['time_text', 'ok_text'])
+    OPENING_BOOK = ClassFactory(MessageApi.OPENING_BOOK, ['book_text', 'ok_text'])
     DGT_BUTTON = ClassFactory(MessageApi.DGT_BUTTON, ['button'])
     DGT_FEN = ClassFactory(MessageApi.DGT_FEN, ['fen'])
-    DGT_CLOCK_VERSION = ClassFactory(MessageApi.DGT_CLOCK_VERSION, ['main_version', 'sub_version', 'attached'])
+    DGT_CLOCK_VERSION = ClassFactory(MessageApi.DGT_CLOCK_VERSION, ['main', 'sub', 'attached'])
     DGT_CLOCK_TIME = ClassFactory(MessageApi.DGT_CLOCK_TIME, ['time_left', 'time_right'])
 
-    INTERACTION_MODE = ClassFactory(MessageApi.INTERACTION_MODE, ['mode', 'beep'])
-    PLAY_MODE = ClassFactory(MessageApi.PLAY_MODE, ['play_mode'])
-    START_NEW_GAME = ClassFactory(MessageApi.START_NEW_GAME, [])
+    INTERACTION_MODE = ClassFactory(MessageApi.INTERACTION_MODE, ['mode', 'mode_text', 'ok_text'])
+    PLAY_MODE = ClassFactory(MessageApi.PLAY_MODE, ['play_mode', 'play_mode_text'])
+    START_NEW_GAME = ClassFactory(MessageApi.START_NEW_GAME, ['time_control', 'game'])
     COMPUTER_MOVE_DONE_ON_BOARD = ClassFactory(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD, [])
-    WAIT_STATE = ClassFactory(MessageApi.WAIT_STATE, [])
     SEARCH_STARTED = ClassFactory(MessageApi.SEARCH_STARTED, ['engine_status'])
     SEARCH_STOPPED = ClassFactory(MessageApi.SEARCH_STOPPED, ['engine_status'])
     USER_TAKE_BACK = ClassFactory(MessageApi.USER_TAKE_BACK, [])
-    RUN_CLOCK = ClassFactory(MessageApi.RUN_CLOCK, ['turn', 'time_control'])
-    STOP_CLOCK = ClassFactory(MessageApi.STOP_CLOCK, [])
-    USER_MOVE = ClassFactory(MessageApi.USER_MOVE, ['move', 'game'])
-    UCI_OPTION_LIST = ClassFactory(MessageApi.UCI_OPTION_LIST, ['options'])
+    CLOCK_START = ClassFactory(MessageApi.CLOCK_START, ['turn', 'time_control'])
+    CLOCK_STOP = ClassFactory(MessageApi.CLOCK_STOP, [])
+    USER_MOVE = ClassFactory(MessageApi.USER_MOVE, ['move', 'fen', 'turn', 'game'])
     GAME_ENDS = ClassFactory(MessageApi.GAME_ENDS, ['result', 'play_mode', 'game'])
 
     SYSTEM_INFO = ClassFactory(MessageApi.SYSTEM_INFO, ['info'])
@@ -474,28 +676,28 @@ class Message():
     NEW_SCORE = ClassFactory(MessageApi.NEW_SCORE, ['score', 'mate', 'mode'])
     ALTERNATIVE_MOVE = ClassFactory(MessageApi.ALTERNATIVE_MOVE, [])
     JACK_CONNECTED_ERROR = ClassFactory(MessageApi.JACK_CONNECTED_ERROR, [])
-    NO_CLOCK_ERROR = ClassFactory(MessageApi.NO_CLOCK_ERROR, ['text', 'text_xl'])
-    NO_EBOARD_ERROR = ClassFactory(MessageApi.NO_EBOARD_ERROR, ['text', 'text_xl'])
-    EBOARD_VERSION = ClassFactory(MessageApi.EBOARD_VERSION, ['text', 'text_xl', 'channel'])
+    NO_CLOCK_ERROR = ClassFactory(MessageApi.NO_CLOCK_ERROR, ['text'])
+    NO_EBOARD_ERROR = ClassFactory(MessageApi.NO_EBOARD_ERROR, ['text', 'is_pi'])
+    EBOARD_VERSION = ClassFactory(MessageApi.EBOARD_VERSION, ['text', 'channel'])
+    SWITCH_SIDES = ClassFactory(MessageApi.SWITCH_SIDES, ['move'])
+    KEYBOARD_MOVE = ClassFactory(MessageApi.KEYBOARD_MOVE, ['fen'])
 
 
 class Event():
     # User events
     FEN = ClassFactory(EventApi.FEN, ['fen'])
-    LEVEL = ClassFactory(EventApi.LEVEL, ['level', 'beep'])
-    NEW_GAME = ClassFactory(EventApi.NEW_GAME, [])
+    LEVEL = ClassFactory(EventApi.LEVEL, ['options', 'level_text'])
+    NEW_GAME = ClassFactory(EventApi.NEW_GAME, ['pos960'])
     DRAWRESIGN = ClassFactory(EventApi.DRAWRESIGN, ['result'])
-    USER_MOVE = ClassFactory(EventApi.USER_MOVE, ['move'])
-    KEYBOARD_MOVE = ClassFactory(EventApi.KEYBOARD_MOVE, ['move'])
+    KEYBOARD_MOVE = ClassFactory(EventApi.KEYBOARD_MOVE, ['move', 'flip_board'])
     REMOTE_MOVE = ClassFactory(EventApi.REMOTE_MOVE, ['move', 'fen'])
-    SET_OPENING_BOOK = ClassFactory(EventApi.SET_OPENING_BOOK, ['book', 'book_control_string', 'beep'])
-    NEW_ENGINE = ClassFactory(EventApi.NEW_ENGINE, ['eng'])
-    SET_INTERACTION_MODE = ClassFactory(EventApi.SET_INTERACTION_MODE, ['mode', 'beep'])
+    SET_OPENING_BOOK = ClassFactory(EventApi.SET_OPENING_BOOK, ['book', 'book_text', 'ok_text'])
+    NEW_ENGINE = ClassFactory(EventApi.NEW_ENGINE, ['eng', 'eng_text', 'options', 'ok_text'])
+    SET_INTERACTION_MODE = ClassFactory(EventApi.SET_INTERACTION_MODE, ['mode', 'mode_text', 'ok_text'])
     SETUP_POSITION = ClassFactory(EventApi.SETUP_POSITION, ['fen', 'uci960'])
-    STARTSTOP_THINK = ClassFactory(EventApi.STARTSTOP_THINK, [])
-    STARTSTOP_CLOCK = ClassFactory(EventApi.STARTSTOP_CLOCK, [])
-    SET_TIME_CONTROL = ClassFactory(EventApi.SET_TIME_CONTROL, ['time_control', 'time_control_string', 'beep'])
-    UCI_OPTION_SET = ClassFactory(EventApi.UCI_OPTION_SET, [])
+    PAUSE_RESUME = ClassFactory(EventApi.PAUSE_RESUME, [])
+    SWITCH_SIDES = ClassFactory(EventApi.SWITCH_SIDES, ['engine_finished'])
+    SET_TIME_CONTROL = ClassFactory(EventApi.SET_TIME_CONTROL, ['time_control', 'time_text', 'ok_text'])
     SHUTDOWN = ClassFactory(EventApi.SHUTDOWN, [])
     REBOOT = ClassFactory(EventApi.REBOOT, [])
     ALTERNATIVE_MOVE = ClassFactory(EventApi.ALTERNATIVE_MOVE, [])
@@ -510,22 +712,22 @@ class Event():
 
 
 def get_opening_books():
+    config = configparser.ConfigParser()
+    config.optionxform = str
     program_path = os.path.dirname(os.path.realpath(__file__)) + os.sep
-    book_list = sorted(os.listdir(program_path + 'books'))
-    library = []
-    for book in book_list:
-        if not os.path.isdir('books' + os.sep + book):  # Can't use isfile() as that doesn't count links
-            library.append((book[2:book.index('.')], 'books' + os.sep + book))
-    return library
+    book_path = program_path + 'books'
+    config.read(book_path + os.sep + 'books.ini')
 
-
-def get_installed_engines(engine):
-    engine_path = (engine.rsplit(os.sep, 1))[0]
-    engine_list = sorted(os.listdir(engine_path), key=str.lower)
     library = []
-    for engine in engine_list:
-        if not (('.' in engine) or os.path.isdir(engine_path + os.sep + engine)):  # Can't use isfile() as that doesn't count links
-            library.append((engine_path + os.sep + engine, engine))
+    for section in config.sections():
+        text = Dgt.DISPLAY_TEXT(l=config[section]['large'], m=config[section]['medium'], s=config[section]['small'],
+                                wait=True, beep=False, maxtime=0)
+        library.append(
+            {
+                'file': 'books' + os.sep + section,
+                'text': text
+            }
+        )
     return library
 
 
@@ -535,67 +737,46 @@ def hours_minutes_seconds(seconds):
     return h, m, s
 
 
-def which(program):
-    """ Find an executable file on the system path.
-    :param program: Name or full path of the executable file
-    :return: Full path of the executable file, or None if it was not found
-    """
-
-    def is_exe(fpath):
-        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
-
-    fpath, fname = os.path.split(program)
-    if fpath:
-        if is_exe(program):
-            return program
-    else:
-        pe = os.path.dirname(os.path.realpath(__file__))
-        for path in os.environ["PATH"].split(os.pathsep) + [pe, pe + os.sep + 'engines' + os.sep + platform.machine()]:
-            path = path.strip('"')
-            exe_file = os.path.join(path, program)
-            if is_exe(exe_file):
-                return exe_file
-    logging.warning("Engine executable [%s] not found", program)
-    return None
-
-
 def update_picochess(auto_reboot=False):
-    git = which('git.exe' if platform.system() == 'Windows' else 'git')
+    git = 'git.exe' if platform.system() == 'Windows' else 'git'
     if git:
-        branch = subprocess.Popen([git, "rev-parse", "--abbrev-ref", "HEAD"],
+        branch = subprocess.Popen([git, 'rev-parse', '--abbrev-ref', 'HEAD'],
                                   stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8').rstrip()
         if branch == 'stable' or branch == 'master':
             # Fetch remote repo
-            output = subprocess.Popen([git, "remote", "update"],
+            output = subprocess.Popen([git, 'remote', 'update'],
                                       stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
             logging.debug(output)
             # Check if update is needed
-            output = subprocess.Popen([git, "status", "-uno"],
+            output = subprocess.Popen([git, 'status', '-uno'],
                                       stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
             logging.debug(output)
             if 'up-to-date' not in output:
                 # Update
-                logging.debug('Updating picochess')
-                output = subprocess.Popen(["pip3", "install", "-r", "requirements.txt"],
+                logging.debug('updating picochess')
+                output = subprocess.Popen(['pip3', 'install', '-r', 'requirements.txt'],
                                           stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
-                output = subprocess.Popen([git, "pull", "origin", branch],
+                logging.debug(output)
+                output = subprocess.Popen([git, 'pull', 'origin', branch],
                                           stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
                 logging.debug(output)
                 if auto_reboot:
                     reboot()
 
 
-def shutdown():
-    logging.debug('Shutting down system')
+def shutdown(dgtpi):
+    logging.debug('shutting down system')
     time.sleep(1)  # give some time to send out the pgn file
     if platform.system() == 'Windows':
         os.system('shutdown /s')
+    elif dgtpi:
+        os.system('systemctl isolate dgtpistandby.target')
     else:
         os.system('shutdown -h now')
 
 
 def reboot():
-    logging.debug('Rebooting system')
+    logging.debug('rebooting system')
     time.sleep(1)  # give some time to send out the pgn file
     os.system('reboot')
 
@@ -603,12 +784,12 @@ def reboot():
 def get_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
-        s.connect(("google.com", 80))
+        s.connect(('google.com', 80))
         return s.getsockname()[0]
 
     # TODO: Better handling of exceptions of socket connect
     except socket.error:
-        logging.error("No Internet Connection!")
+        logging.error("no internet connection!")
     finally:
         s.close()
 
