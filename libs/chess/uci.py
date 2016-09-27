@@ -18,10 +18,11 @@
 
 import chess
 import signal
-import subprocess
 import logging
 import threading
 import concurrent.futures
+import os
+import sys
 
 try:
     import backport_collections as collections
@@ -32,6 +33,14 @@ try:
     import queue
 except ImportError:
     import Queue as queue
+
+if os.name == "posix" and sys.version_info[0] < 3:
+    try:
+        import subprocess32 as subprocess
+    except ImportError:
+        import subprocess
+else:
+    import subprocess
 
 
 LOGGER = logging.getLogger(__name__)
@@ -52,7 +61,7 @@ class Option(collections.namedtuple("Option", ["name", "type", "default", "min",
     pass
 
 
-class Score(collections.namedtuple("Score", ["cp", "mate", "lowerbound", "upperbound"])):
+class Score(collections.namedtuple("Score", ["cp", "mate"])):
     """A centipawns or mate score sent by an UCI engine."""
     pass
 
@@ -108,14 +117,28 @@ class OptionMap(collections.MutableMapping):
 class InfoHandler(object):
     """
     Chess engines may send information about their calculations with the
-    *info* command. You can register info handlers to be asynchronously
-    notified whenever the engine sends more information.
+    *info* command. Info handlers can be used to aggregate or react to this
+    information.
 
     >>> # Register a standard info handler.
     >>> info_handler = chess.uci.InfoHandler()
     >>> engine.info_handlers.append(info_handler)
 
-    You would usually subclass the *InfoHandler* class.
+    >>> # Start a search.
+    >>> engine.position(board)
+    >>> engine.go(movetime=1000)
+    BestMove(bestmove=Move.from_uci('e2e4'), ponder=Move.from_uci('e7e6'))
+    >>>
+    >>> # Retrieve the score of the mainline (PV 1) after search is completed.
+    >>> # Note that the score is relative to the side to move.
+    >>> info_handler.info["score"][1]
+    Score(cp=34, mate=None, lowerbound=False, upperbound=False)
+
+    See :attr:`~chess.uci.InfoHandler.info` for a way to access this dictionary
+    in a thread-safe way during search.
+
+    If you want to be notified whenever new information is available
+    you would usually subclass the *InfoHandler* class:
 
     >>> class MyHandler(chess.uci.InfoHandler):
     ...     def post_info(self):
@@ -181,7 +204,8 @@ class InfoHandler(object):
         In MultiPV mode this is related to the most recent *multipv* number
         sent by the engine.
         """
-        self.info["score"][self.info.get("multipv", 1)] = Score(cp, mate, lowerbound, upperbound)
+        if not lowerbound and not upperbound:
+            self.info["score"][self.info.get("multipv", 1)] = Score(cp, mate)
 
     def currmove(self, move):
         """
@@ -594,7 +618,7 @@ class Engine(object):
             # non-UCI_Chess960 castling moves.
             try:
                 self.ponder = chess.Move.from_uci(tokens[2])
-                if self.ponder.from_square in (chess.E1, chess.E8) and self.ponder.to_square in (chess.C1, chess.C8, chess.G1, chess.G8):
+                if self.ponder.from_square in [chess.E1, chess.E8] and self.ponder.to_square in [chess.C1, chess.C8, chess.G1, chess.G8]:
                     # Make a copy of the board to avoid race conditions.
                     board = self.board.copy()
                     board.push(self.bestmove)
@@ -685,7 +709,7 @@ class Engine(object):
         # Find multipv parameter first.
         if "multipv" in arg:
             current_parameter = None
-            for token in arg.split():
+            for token in arg.split(" "):
                 if token == "string":
                     break
 
@@ -721,7 +745,7 @@ class Engine(object):
                 if current_parameter == "pv":
                     pv = []
 
-                if current_parameter in ("refutation", "pv", "currline"):
+                if current_parameter in ["refutation", "pv", "currline"]:
                     board = self.board.copy()
             elif current_parameter == "depth":
                 handle_integer_token(token, lambda handler, val: handler.depth(val))
@@ -740,7 +764,7 @@ class Engine(object):
                 # Ignore multipv. It was already parsed before anything else.
                 pass
             elif current_parameter == "score":
-                if token in ("cp", "mate"):
+                if token in ["cp", "mate"]:
                     score_kind = token
                 elif token == "lowerbound":
                     score_lowerbound = True
@@ -1191,11 +1215,7 @@ class Engine(object):
         def command():
             with self.semaphore:
                 self.send_line(" ".join(builder))
-
-                with self.readyok_received:
-                    self.send_line("isready")
-                    self.readyok_received.wait()
-                    self.search_started.set()
+                self.search_started.set()
 
             self.bestmove_received.wait()
 
@@ -1328,7 +1348,7 @@ class Engine(object):
         return self.process.is_alive()
 
 
-def popen_engine(command, engine_cls=Engine):
+def popen_engine(command, engine_cls=Engine, _popen_lock=threading.Lock()):
     """
     Opens a local chess engine process.
 
@@ -1345,8 +1365,11 @@ def popen_engine(command, engine_cls=Engine):
     The input and input streams will be linebuffered and able both Windows
     and Unix newlines.
     """
-    process = PopenProcess(command)
-    return engine_cls(process)
+    # Work around possible race condition in Python 2 subprocess module,
+    # that can occur when concurrently opening processes.
+    with _popen_lock:
+        process = PopenProcess(command)
+        return engine_cls(process)
 
 
 def spur_spawn_engine(shell, command, engine_cls=Engine):

@@ -1690,7 +1690,7 @@ def dtm_unpack(stm, packed):
     return ret
 
 
-class TableBlock:
+class TableBlock(object):
     def __init__(self, egkey, side, offset, age):
         self.egkey = egkey
         self.side = side
@@ -1738,6 +1738,7 @@ class PythonTablebases(object):
 
     def open_directory(self, directory):
         """Loads *.gtb.cp4* tables from a directory."""
+        directory = os.path.abspath(directory)
         if not os.path.isdir(directory):
             raise IOError("not a tablebase directory: {0}".format(repr(directory)))
 
@@ -2040,7 +2041,7 @@ class PythonTablebases(object):
         return dtm
 
     def egtb_loadindexes(self, egkey, stream):
-        zipinfo = self.zipinfo.get(egkey, None)
+        zipinfo = self.zipinfo.get(egkey)
 
         if zipinfo is None:
             # Get reserved bytes, blocksize, offset.
@@ -2128,7 +2129,7 @@ class NativeTablebases(object):
         if ret:
             LOGGER.debug(ret.decode("utf-8"))
 
-        LOGGER.debug("Main path has been set to %s", self.libgtb.tbpaths_getmain().decode("utf-8"))
+        LOGGER.debug("Main path has been set to %r", self.libgtb.tbpaths_getmain().decode("utf-8"))
 
         av = self.libgtb.tb_availability()
         if av & 1:
@@ -2154,13 +2155,11 @@ class NativeTablebases(object):
         return self._probe_hard(board, wdl_only=True)
 
     def _probe_hard(self, board, wdl_only=False):
-        if chess.pop_count(board.occupied_co[chess.WHITE]) > 16:
-            return None
-        if chess.pop_count(board.occupied_co[chess.BLACK]) > 16:
-            return None
-
         if board.is_insufficient_material():
             return 0
+
+        if chess.pop_count(board.occupied) > 5:
+            return None
 
         if board.castling_rights:
             return None

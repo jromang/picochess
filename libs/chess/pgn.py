@@ -73,7 +73,7 @@ NAG_WHITE_SEVERE_TIME_PRESSURE = 138
 NAG_BLACK_SEVERE_TIME_PRESSURE = 139
 
 
-TAG_REGEX = re.compile(r"\[([A-Za-z0-9]+)\s+\"(.*)\"\]")
+TAG_REGEX = re.compile(r"\[([A-Za-z0-9_]+)\s+\"(.*)\"\]")
 
 MOVETEXT_REGEX = re.compile(r"""
     (%.*?[\n\r])
@@ -242,7 +242,37 @@ class GameNode(object):
         main variation.
         """
         node = self.add_variation(move, comment=comment)
-        self.promote_to_main(move)
+        self.variations.remove(node)
+        self.variations.insert(0, node)
+        return node
+
+    def main_line(self):
+        """Yields the moves of the main line starting in this node."""
+        node = self
+        while node.variations:
+            node = node.variations[0]
+            yield node.move
+
+    def add_line(self, moves, comment="", starting_comment="", nags=()):
+        """
+        Creates a sequence of child nodes for the given list of moves.
+        Adds *comment* and *nags* to the last node of the line and returns it.
+        """
+        node = self
+
+        # Add line.
+        for move in moves:
+            node = node.add_variation(move, starting_comment=starting_comment)
+            starting_comment = ""
+
+        # Merge comment and NAGs.
+        if node.comment:
+            node.comment +=  " " + comment
+        else:
+            node.comment = comment
+
+        node.nags.update(nags)
+
         return node
 
     def accept(self, visitor, _board=None):
@@ -358,7 +388,7 @@ class Game(GameNode):
         Unless the `SetUp` and `FEN` header tags are set this is the default
         starting position.
         """
-        if "FEN" in self.headers and "SetUp" in self.headers and self.headers["SetUp"] == "1":
+        if "FEN" in self.headers and self.headers.get("SetUp", "1") == "1":
             chess960 = self.headers.get("Variant") == "Chess960"
             board = chess.Board(self.headers["FEN"], chess960=chess960)
             board.chess960 = board.chess960 or board.has_chess960_castling_rights()
@@ -407,9 +437,31 @@ class Game(GameNode):
 
         super(Game, self).accept(visitor, _board=self.board())
 
-        visitor.visit_result(self.headers["Result"])
+        visitor.visit_result(self.headers.get("Result", "*"))
         visitor.end_game()
         return visitor.result()
+
+    @classmethod
+    def from_board(cls, board):
+        """Creates a game from the move stack of a :class:`~chess.Board()`."""
+        # Undo all moves.
+        switchyard = collections.deque()
+        while board.move_stack:
+            switchyard.append(board.pop())
+
+        # Setup initial position.
+        game = cls()
+        game.setup(board)
+        node = game
+
+        # Replay all moves.
+        while switchyard:
+            move = switchyard.pop()
+            node = node.add_variation(move)
+            board.push(move)
+
+        game.headers["Result"] = board.result()
+        return game
 
 
 class BaseVisitor(object):
@@ -536,6 +588,7 @@ class GameModelCreator(BaseVisitor):
 
     def handle_error(self, error):
         LOGGER.exception("error during pgn parsing")
+        self.game.errors.append(error)
 
     def result(self):
         """
@@ -549,8 +602,8 @@ class StringExporter(BaseVisitor):
     """
     Allows exporting a game as a string.
 
-    >>> exporter = chess.pgn.StringExporter()
-    >>> pgn_string = game.accept(exporter, headers=True, variations=True, comments=True)
+    >>> exporter = chess.pgn.StringExporter(headers=True, variations=True, comments=True)
+    >>> pgn_string = game.accept(exporter)
 
     Only *columns* characters are written per line. If *columns* is ``None``
     then the entire movetext will be on a single line. This does not affect
@@ -768,7 +821,11 @@ def read_game(handle, Visitor=GameModelCreator):
         line = handle.readline()
 
     # Movetext parser state.
-    board_stack = collections.deque([dummy_game.board()])
+    try:
+        board_stack = collections.deque([dummy_game.board()])
+    except ValueError as error:
+        visitor.handle_error(error)
+        board_stack = collections.deque([chess.Board()])
 
     # Parse movetext.
     while line:

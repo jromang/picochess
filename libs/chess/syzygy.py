@@ -17,6 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import chess
+import collections
 import mmap
 import os
 import struct
@@ -396,16 +397,8 @@ class Table(object):
         self.filename = filename
         self.suffix = suffix
 
-        self.fd = os.open(os.path.join(directory, filename) + suffix, os.O_RDONLY | os.O_BINARY if hasattr(os, "O_BINARY") else os.O_RDONLY)
-        self.data = mmap.mmap(self.fd, 0, access=mmap.ACCESS_READ)
-
-        if sys.version_info >= (3, ):
-            self.read_ubyte = self.data.__getitem__
-        else:
-            def read_ubyte(data_ptr):
-                return ord(self.data[data_ptr])
-
-            self.read_ubyte = read_ubyte
+        self.fd = None
+        self.data = None
 
         self.key = calc_key_from_filename(filename)
         self.mirrored_key = calc_key_from_filename(filename, True)
@@ -439,6 +432,24 @@ class Table(object):
                 # suicide chess.
                 # TODO: Could be implemented.
                 assert False
+
+    def init_mmap(self):
+        # Open fd.
+        if self.fd is None:
+            path = os.path.join(self.directory, self.filename) + self.suffix
+            self.fd = os.open(path, os.O_RDONLY | os.O_BINARY if hasattr(os, "O_BINARY") else os.O_RDONLY)
+
+        # Open mmap.
+        if self.data is None:
+            self.data = mmap.mmap(self.fd, 0, access=mmap.ACCESS_READ)
+
+            if sys.version_info >= (3, ):
+                self.read_ubyte = self.data.__getitem__
+            else:
+                def read_ubyte(data_ptr):
+                    return ord(self.data[data_ptr])
+
+                self.read_ubyte = read_ubyte
 
     def setup_pairs(self, data_ptr, tb_size, size_idx, wdl):
         d = PairsData()
@@ -791,12 +802,17 @@ class Table(object):
         return USHORT.unpack_from(self.data, data_ptr)[0]
 
     def close(self):
-        self.data.close()
+        if self.data is not None:
+            self.data.close()
 
-        try:
-            os.close(self.fd)
-        except OSError:
-            pass
+        if self.fd is not None:
+            try:
+                os.close(self.fd)
+            except OSError:
+                pass
+
+        self.data = None
+        self.fd = None
 
     def __enter__(self):
         return self
@@ -825,10 +841,9 @@ class WdlTable(Table):
         self.lock = threading.Lock()
 
     def init_table_wdl(self):
-        if self.initialized:
-            return
-
         with self.lock:
+            self.init_mmap()
+
             if self.initialized:
                 return
 
@@ -1031,6 +1046,10 @@ class WdlTable(Table):
 
         return res - 2
 
+    def close(self):
+        with self.lock:
+            super(WdlTable, self).close()
+
 
 class DtzTable(Table):
 
@@ -1040,10 +1059,9 @@ class DtzTable(Table):
         self.lock = threading.Lock()
 
     def init_table_dtz(self):
-        if self.initialized:
-            return
-
         with self.lock:
+            self.init_mmap()
+
             if self.initialized:
                 return
 
@@ -1228,6 +1246,10 @@ class DtzTable(Table):
         self.files[f].factor = [0, 0, 0, 0, 0, 0]
         self.tb_size[p_tb_size] = self.calc_factors_pawn(self.files[f].factor, order, order2, self.files[f].norm, f)
 
+    def close(self):
+        with self.lock:
+            super(DtzTable, self).close()
+
 
 class Tablebases(object):
     """
@@ -1238,13 +1260,33 @@ class Tablebases(object):
 
     Directly loads tables from *directory*. See
     :func:`~chess.syzygy.Tablebases.open_directory`.
+
+    If *max_fds* is not ``None``, will at most use *max_fds* open file
+    descriptors at any given time. The least recently used tables are closed,
+    if nescessary.
     """
-    def __init__(self, directory=None, load_wdl=True, load_dtz=True):
+    def __init__(self, directory=None, load_wdl=True, load_dtz=True, max_fds=128):
+        self.max_fds = max_fds
+        self.lru = collections.deque()
+
         self.wdl = {}
         self.dtz = {}
 
         if directory:
             self.open_directory(directory, load_wdl, load_dtz)
+
+    def _bump_lru(self, table):
+        if self.max_fds is None:
+            return
+
+        try:
+            self.lru.remove(table)
+            self.lru.appendleft(table)
+        except ValueError:
+            self.lru.appendleft(table)
+
+            if len(self.lru) > self.max_fds:
+                self.lru.pop().close()
 
     def open_directory(self, directory, load_wdl=True, load_dtz=True):
         """
@@ -1256,6 +1298,10 @@ class Tablebases(object):
         Returns the number of successfully openened and loaded tablebase files.
         """
         num = 0
+        directory = os.path.abspath(directory)
+
+        if not os.path.isdir(directory):
+            raise IOError("not a tablebase directory: {0}".format(repr(directory)))
 
         for filename in filenames():
             if load_wdl and os.path.isfile(os.path.join(directory, filename) + ".rtbw"):
@@ -1286,17 +1332,18 @@ class Tablebases(object):
             return 0
 
         key = calc_key(board)
-        if key not in self.wdl:
+        try:
+            table = self.wdl[key]
+        except KeyError:
             return None
 
-        return self.wdl[key].probe_wdl_table(board)
+        self._bump_lru(table)
+
+        return table.probe_wdl_table(board)
 
     def probe_ab(self, board, alpha, beta):
-        for move in board.generate_legal_moves():
-            # Only look at non-ep captures.
-            if not board.piece_type_at(move.to_square):
-                continue
-
+        # Generate non-ep captures.
+        for move in board.generate_legal_moves(to_mask=board.occupied_co[not board.turn]):
             # Do the move.
             board.push(move)
 
@@ -1360,12 +1407,8 @@ class Tablebases(object):
         # Now handle en passant.
         v1 = -3
 
-        # Look at least at all legal en passant captures.
-        for move in board.generate_legal_moves(castling=False, pawns=True, knights=False, bishops=False, rooks=False, queens=False, king=False):
-            # Filter out non-en-passant moves.
-            if not board.is_en_passant(move):
-                continue
-
+        # Look at all legal en passant captures.
+        for move in board.generate_legal_ep():
             # Do the move.
             board.push(move)
 
@@ -1393,11 +1436,14 @@ class Tablebases(object):
 
     def probe_dtz_table(self, board, wdl):
         key = calc_key(board)
-
-        if key not in self.dtz:
+        try:
+            table = self.dtz[key]
+        except KeyError:
             return None, 0
 
-        return self.dtz[key].probe_dtz_table(board, wdl)
+        self._bump_lru(table)
+
+        return table.probe_dtz_table(board, wdl)
 
     def probe_dtz_no_ep(self, board):
         wdl, success = self.probe_ab(board, -2, 2)
@@ -1412,16 +1458,17 @@ class Tablebases(object):
 
         if wdl > 0:
             # Generate all legal non-capturing pawn moves.
-            for move in board.generate_legal_moves(castling=False, pawns=True, knights=False, bishops=False, rooks=False, queens=False, king=False):
+            for move in board.generate_legal_moves(board.pawns, ~board.occupied):
                 if board.is_capture(move):
+                    # En passant.
                     continue
 
                 board.push(move)
 
-                v_plus, success = self.probe_ab(board, -2, -wdl + 1)
+                v_plus = self.probe_wdl(board)
                 board.pop()
 
-                if v_plus is None or not success:
+                if v_plus is None:
                     return None
 
                 v = -v_plus
@@ -1440,10 +1487,7 @@ class Tablebases(object):
         if wdl > 0:
             best = 0xffff
 
-            for move in board.generate_legal_moves(pawns=False):
-                if board.piece_type_at(move.to_square):
-                    continue
-
+            for move in board.generate_legal_moves(~board.pawns, ~board.occupied):
                 board.push(move)
 
                 v_plus = self.probe_dtz(board)
@@ -1493,28 +1537,56 @@ class Tablebases(object):
         """
         Probes DTZ tables for distance to zero information.
 
-        Probing is thread-safe when done with different *board* objects and
-        if *board* objects are not modified during probing.
-
         Return ``None`` if the position was not found in any of the loaded
         tables. Both DTZ and WDL tables are required in order to probe for DTZ
         values.
 
         Returns a positive value if the side to move is winning, ``0`` if the
         position is a draw and a negative value if the side to move is losing.
+        More precisely:
 
-        A non-zero distance to zero means the number of halfmoves until the
-        next pawn move or capture can be forced, keeping a won position.
+        +-----+------------------+--------------------------------------------+
+        | WDL | DTZ              |                                            |
+        +=====+==================+============================================+
+        |  -2 | -100 <= n < -1   | Unconditional loss (assuming 50-move       |
+        |     |                  | counter is zero), where a zeroing move can |
+        |     |                  | be forced in -n plies.                     |
+        +-----+------------------+--------------------------------------------+
+        |  -1 |         n < -100 | Loss, but draw under the 50-move rule.     |
+        |     |                  | A zeroing move can be forced in -n plies   |
+        |     |                  | or -n - 100 plies (if a later phase is     |
+        |     |                  | responsible for the blessed loss).         |
+        +-----+------------------+--------------------------------------------+
+        |   0 |         0        | Draw.                                      |
+        +-----+------------------+--------------------------------------------+
+        |   1 |   100 < n        | Win, but draw under the 50-move rule.      |
+        |     |                  | A zeroing move can be forced in n plies or |
+        |     |                  | n - 100 plies (if a later phase is         |
+        |     |                  | responsible for the cursed win).           |
+        +-----+------------------+--------------------------------------------+
+        |   2 |     1 < n <= 100 | Unconditional win (assuming 50-move        |
+        |     |                  | counter is zero), where a zeroing move can |
+        |     |                  | be forced in n plies.                      |
+        +-----+------------------+--------------------------------------------+
+
+        The return value can be off by one: a return value -n can mean a loss
+        in n + 1 plies and a return value +n can mean a win in n + 1 plies.
+        This is guaranteed not to happen for positions exactly on the edge of
+        the 50-move rule, so that this never impacts results of practical play.
+
         Minmaxing the DTZ values guarantees winning a won position (and drawing
         a drawn position), because it makes progress keeping the win in hand.
         However the lines are not always the most straightforward ways to win.
-        Engines like Stockfish calculate themselves, checking with DTZ, but only
-        play according to DTZ if they can not manage on their own.
+        Engines like Stockfish calculate themselves, checking with DTZ, but
+        only play according to DTZ if they can not manage on their own.
 
         >>> with chess.syzygy.open_tablebases("data/syzygy") as tablebases:
         ...     tablebases.probe_dtz(chess.Board("8/2K5/4B3/3N4/8/8/4k3/8 b - - 0 1"))
         ...
         -53
+
+        Probing is thread-safe when done with different *board* objects and
+        if *board* objects are not modified during probing.
         """
         v = self.probe_dtz_no_ep(board)
         if v is None:
@@ -1525,11 +1597,8 @@ class Tablebases(object):
 
         v1 = -3
 
-        for move in board.generate_legal_moves(castling=False, pawns=True, knights=False, bishops=False, rooks=False, queens=False, king=False):
-            # Filter out non-en-passant moves.
-            if not board.is_en_passant(move):
-                continue
-
+        # Generate all en-passant moves.
+        for move in board.generate_legal_ep():
             board.push(move)
 
             v0_plus, success = self.probe_ab(board, -2, 2)
@@ -1575,6 +1644,8 @@ class Tablebases(object):
             _, dtz = self.dtz.popitem()
             dtz.close()
 
+        self.lru.clear()
+
     def __enter__(self):
         return self
 
@@ -1582,7 +1653,7 @@ class Tablebases(object):
         self.close()
 
 
-def open_tablebases(directory=None, load_wdl=True, load_dtz=True):
+def open_tablebases(directory=None, load_wdl=True, load_dtz=True, max_fds=128):
     """
     Opens a collection of tablebases for probing. See
     :class:`~chess.syzygy.Tablebases`.
@@ -1596,4 +1667,4 @@ def open_tablebases(directory=None, load_wdl=True, load_dtz=True):
         Use :func:`~chess.syzygy.Tablebases.open_directory()` to load
         tablebases from additional directories.
     """
-    return Tablebases(directory, load_wdl, load_dtz)
+    return Tablebases(directory, load_wdl, load_dtz, max_fds)

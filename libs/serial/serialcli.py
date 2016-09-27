@@ -1,10 +1,11 @@
 #! python
-# Python Serial Port Extension for Win32, Linux, BSD, Jython and .NET/Mono
-# serial driver for .NET/Mono (IronPython), .NET >= 2
-# see __init__.py
 #
-# (C) 2008 Chris Liechti <cliechti@gmx.net>
-# this is distributed under a free software license, see license.txt
+# Backend for .NET/Mono (IronPython), .NET >= 2
+#
+# This file is part of pySerial. https://github.com/pyserial/pyserial
+# (C) 2008-2015 Chris Liechti <cliechti@gmx.net>
+#
+# SPDX-License-Identifier:    BSD-3-Clause
 
 import clr
 import System
@@ -12,9 +13,9 @@ import System.IO.Ports
 from serial.serialutil import *
 
 
-def device(portnum):
-    """Turn a port number into a device name"""
-    return System.IO.Ports.SerialPort.GetPortNames()[portnum]
+#~ def device(portnum):
+    #~ """Turn a port number into a device name"""
+    #~ return System.IO.Ports.SerialPort.GetPortNames()[portnum]
 
 
 # must invoke function with byte array, make a helper to convert strings
@@ -23,18 +24,20 @@ sab = System.Array[System.Byte]
 def as_byte_array(string):
     return sab([ord(x) for x in string])  # XXX will require adaption when run with a 3.x compatible IronPython
 
-class IronSerial(SerialBase):
-    """Serial port implemenation for .NET/Mono."""
+class Serial(SerialBase):
+    """Serial port implementation for .NET/Mono."""
 
     BAUDRATES = (50, 75, 110, 134, 150, 200, 300, 600, 1200, 1800, 2400, 4800,
                 9600, 19200, 38400, 57600, 115200)
 
     def open(self):
-        """Open port with current settings. This may throw a SerialException
-           if the port cannot be opened."""
+        """\
+        Open port with current settings. This may throw a SerialException
+        if the port cannot be opened.
+        """
         if self._port is None:
             raise SerialException("Port must be configured before it can be used.")
-        if self._isOpen:
+        if self.is_open:
             raise SerialException("Port is already open.")
         try:
             self._port_handle = System.IO.Ports.SerialPort(self.portstr)
@@ -44,12 +47,12 @@ class IronSerial(SerialBase):
 
         self._reconfigurePort()
         self._port_handle.Open()
-        self._isOpen = True
+        self.is_open = True
+        if not self._dsrdtr:
+            self._update_dtr_state()
         if not self._rtscts:
-            self.setRTS(True)
-            self.setDTR(True)
-        self.flushInput()
-        self.flushOutput()
+            self._update_rts_state()
+        self.reset_input_buffer()
 
     def _reconfigurePort(self):
         """Set communication parameters on opened port."""
@@ -66,10 +69,10 @@ class IronSerial(SerialBase):
         # if self._timeout != 0 and self._interCharTimeout is not None:
             # timeouts = (int(self._interCharTimeout * 1000),) + timeouts[1:]
 
-        if self._writeTimeout is None:
+        if self._write_timeout is None:
             self._port_handle.WriteTimeout = System.IO.Ports.SerialPort.InfiniteTimeout
         else:
-            self._port_handle.WriteTimeout = int(self._writeTimeout*1000)
+            self._port_handle.WriteTimeout = int(self._write_timeout*1000)
 
 
         # Setup the connection info.
@@ -126,7 +129,7 @@ class IronSerial(SerialBase):
 
     def close(self):
         """Close port"""
-        if self._isOpen:
+        if self.is_open:
             if self._port_handle:
                 try:
                     self._port_handle.Close()
@@ -134,26 +137,25 @@ class IronSerial(SerialBase):
                     # ignore errors. can happen for unplugged USB serial devices
                     pass
                 self._port_handle = None
-            self._isOpen = False
-
-    def makeDeviceName(self, port):
-        try:
-            return device(port)
-        except TypeError as e:
-            raise SerialException(str(e))
+            self.is_open = False
 
     #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 
-    def inWaiting(self):
+    @property
+    def in_waiting(self):
         """Return the number of characters currently in the input buffer."""
-        if not self._port_handle: raise portNotOpenError
+        if not self._port_handle:
+            raise portNotOpenError
         return self._port_handle.BytesToRead
 
     def read(self, size=1):
-        """Read size bytes from the serial port. If a timeout is set it may
-           return less characters as requested. With no timeout it will block
-           until the requested number of bytes is read."""
-        if not self._port_handle: raise portNotOpenError
+        """\
+        Read size bytes from the serial port. If a timeout is set it may
+        return less characters as requested. With no timeout it will block
+        until the requested number of bytes is read.
+        """
+        if not self._port_handle:
+            raise portNotOpenError
         # must use single byte reads as this is the only way to read
         # without applying encodings
         data = bytearray()
@@ -168,9 +170,10 @@ class IronSerial(SerialBase):
 
     def write(self, data):
         """Output the given string over the serial port."""
-        if not self._port_handle: raise portNotOpenError
-        if not isinstance(data, (bytes, bytearray)):
-            raise TypeError('expected %s or bytearray, got %s' % (bytes, type(data)))
+        if not self._port_handle:
+            raise portNotOpenError
+        #~ if not isinstance(data, (bytes, bytearray)):
+            #~ raise TypeError('expected %s or bytearray, got %s' % (bytes, type(data)))
         try:
             # must call overloaded method with byte array argument
             # as this is the only one not applying encodings
@@ -179,78 +182,72 @@ class IronSerial(SerialBase):
             raise writeTimeoutError
         return len(data)
 
-    def flushInput(self):
+    def reset_input_buffer(self):
         """Clear input buffer, discarding all that is in the buffer."""
-        if not self._port_handle: raise portNotOpenError
+        if not self._port_handle:
+            raise portNotOpenError
         self._port_handle.DiscardInBuffer()
 
-    def flushOutput(self):
-        """Clear output buffer, aborting the current output and
-        discarding all that is in the buffer."""
-        if not self._port_handle: raise portNotOpenError
+    def reset_output_buffer(self):
+        """\
+        Clear output buffer, aborting the current output and
+        discarding all that is in the buffer.
+        """
+        if not self._port_handle:
+            raise portNotOpenError
         self._port_handle.DiscardOutBuffer()
 
-    def sendBreak(self, duration=0.25):
-        """Send break condition. Timed, returns to idle state after given duration."""
-        if not self._port_handle: raise portNotOpenError
-        import time
-        self._port_handle.BreakState = True
-        time.sleep(duration)
-        self._port_handle.BreakState = False
+    def _update_break_state(self):
+        """
+        Set break: Controls TXD. When active, to transmitting is possible.
+        """
+        if not self._port_handle:
+            raise portNotOpenError
+        self._port_handle.BreakState = bool(self._break_state)
 
-    def setBreak(self, level=True):
-        """Set break: Controls TXD. When active, to transmitting is possible."""
-        if not self._port_handle: raise portNotOpenError
-        self._port_handle.BreakState = bool(level)
-
-    def setRTS(self, level=True):
+    def _update_rts_state(self):
         """Set terminal status line: Request To Send"""
-        if not self._port_handle: raise portNotOpenError
-        self._port_handle.RtsEnable = bool(level)
+        if not self._port_handle:
+            raise portNotOpenError
+        self._port_handle.RtsEnable = bool(self._rts_state)
 
-    def setDTR(self, level=True):
+    def _update_dtr_state(self):
         """Set terminal status line: Data Terminal Ready"""
-        if not self._port_handle: raise portNotOpenError
-        self._port_handle.DtrEnable = bool(level)
+        if not self._port_handle:
+            raise portNotOpenError
+        self._port_handle.DtrEnable = bool(self._dtr_state)
 
-    def getCTS(self):
+    @property
+    def cts(self):
         """Read terminal status line: Clear To Send"""
-        if not self._port_handle: raise portNotOpenError
+        if not self._port_handle:
+            raise portNotOpenError
         return self._port_handle.CtsHolding
 
-    def getDSR(self):
+    @property
+    def dsr(self):
         """Read terminal status line: Data Set Ready"""
-        if not self._port_handle: raise portNotOpenError
+        if not self._port_handle:
+            raise portNotOpenError
         return self._port_handle.DsrHolding
 
-    def getRI(self):
+    @property
+    def ri(self):
         """Read terminal status line: Ring Indicator"""
-        if not self._port_handle: raise portNotOpenError
+        if not self._port_handle:
+            raise portNotOpenError
         #~ return self._port_handle.XXX
         return False #XXX an error would be better
 
-    def getCD(self):
+    @property
+    def cd(self):
         """Read terminal status line: Carrier Detect"""
-        if not self._port_handle: raise portNotOpenError
+        if not self._port_handle:
+            raise portNotOpenError
         return self._port_handle.CDHolding
 
     # - - platform specific - - - -
     # none
-
-
-# assemble Serial class with the platform specific implementation and the base
-# for file-like behavior. for Python 2.6 and newer, that provide the new I/O
-# library, derive from io.RawIOBase
-try:
-    import io
-except ImportError:
-    # classic version with our own file-like emulation
-    class Serial(IronSerial, FileLike):
-        pass
-else:
-    # io library present
-    class Serial(IronSerial, io.RawIOBase):
-        pass
 
 
 # Nur Testfunktion!!
