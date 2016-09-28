@@ -53,20 +53,27 @@ class DgtVr(DgtIface):
         DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=self.time_left, time_right=self.time_right))
     # (END) dgtserial simulation class
 
-    def display_move_on_clock(self, move, fen, side, beep=False, left_dots=0, right_dots=0):
+    def display_move_on_clock(self, message):
         if self.enable_dgt_3000:
-            bit_board = chess.Board(fen)
-            text = bit_board.san(move)
+            bit_board = chess.Board(message.fen)
+            text = bit_board.san(message.move)
         else:
-            text = str(move)
-        if side == ClockSide.RIGHT:
+            text = str(message.move)
+        if message.side == ClockSide.RIGHT:
             text = text.rjust(8 if self.enable_dgt_3000 else 6)
         logging.debug(text)
-        print('Clock move: {} Beep: {}'. format(text, beep))
+        print('Clock move: {} Beep: {}'. format(text, message.beep))
 
-    def display_text_on_clock(self, text, beep=False, left_dots=0, right_dots=0):
+    def display_text_on_clock(self, message):
+        if self.enable_dgt_pi:
+            text = message.l
+        else:
+            text = message.m if self.enable_dgt_3000 else message.s
+        if text is None:
+            text = message.m
+
         logging.debug(text)
-        print('Clock text: {} Beep: {}'. format(text, beep))
+        print('Clock text: {} Beep: {}'. format(text, message.beep))
 
     def display_time_on_clock(self, force=False):
         if self.clock_running or force:

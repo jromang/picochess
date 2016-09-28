@@ -27,7 +27,7 @@ class DgtPi(DgtIface):
         super(DgtPi, self).__init__(dgtserial, dgttranslate)
 
         self.lib_lock = Lock()
-        self.lib = cdll.LoadLibrary("dgt/dgtpicom.so")
+        self.lib = cdll.LoadLibrary('dgt/dgtpicom.so')
 
         self.startup_i2c_clock()
         incoming_clock_thread = Timer(0, self.process_incoming_clock_forever)
@@ -115,16 +115,23 @@ class DgtPi(DgtIface):
             if res < 0:
                 logging.warning('Finally failed %i', res)
 
-    def display_text_on_clock(self, text, beep=False, left_dots=0, right_dots=0):
-        self._display_on_dgt_pi(text, beep, left_dots, right_dots)
+    def display_text_on_clock(self, message):
+        text = message.l
+        if text is None:
+            text = message.m
+        left_dots = message.ld if hasattr(message, 'ld') else 0
+        right_dots = message.rd if hasattr(message, 'rd') else 0
+        self._display_on_dgt_pi(text, message.beep, left_dots, right_dots)
 
-    def display_move_on_clock(self, move, fen, side, beep=False, left_dots=0, right_dots=0):
-        bit_board = Board(fen)
-        move_text = bit_board.san(move)
-        if side == ClockSide.RIGHT:
+    def display_move_on_clock(self, message):
+        bit_board = Board(message.fen)
+        move_text = bit_board.san(message.move)
+        if message.side == ClockSide.RIGHT:
             move_text = move_text.rjust(11)
         text = self.dgttranslate.move(move_text)
-        self._display_on_dgt_pi(text, beep, left_dots, right_dots)
+        left_dots = message.ld if hasattr(message, 'ld') else 0
+        right_dots = message.rd if hasattr(message, 'rd') else 0
+        self._display_on_dgt_pi(text, message.beep, left_dots, right_dots)
 
     def display_time_on_clock(self, force=False):
         if self.clock_running or force:

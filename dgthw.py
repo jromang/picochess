@@ -55,25 +55,36 @@ class DgtHw(DgtIface):
             if not res:
                 logging.warning('Finally failed %i', res)
 
-    def display_text_on_clock(self, text, beep=False, left_dots=0, right_dots=0):
-        if self.enable_dgt_3000:
-            self._display_on_dgt_3000(text, beep, left_dots, right_dots)
-        else:
-            self._display_on_dgt_xl(text, beep, left_dots, right_dots)
+    def display_text_on_clock(self, message):
+        display_m = self.enable_dgt_3000 and not self.dgtserial.enable_revelation_leds
+        text = message.m if display_m else message.s
 
-    def display_move_on_clock(self, move, fen, side, beep=False, left_dots=0, right_dots=0):
-        if self.enable_dgt_3000:
-            bit_board = Board(fen)
-            move_text = bit_board.san(move)
-            if side == ClockSide.RIGHT:
+        if text is None:
+            text = message.m
+        left_dots = message.ld if hasattr(message, 'ld') else 0
+        right_dots = message.rd if hasattr(message, 'rd') else 0
+
+        if display_m:
+            self._display_on_dgt_3000(text, message.beep, left_dots, right_dots)
+        else:
+            self._display_on_dgt_xl(text, message.beep, left_dots, right_dots)
+
+    def display_move_on_clock(self, message):
+        left_dots = message.ld if hasattr(message, 'ld') else 0
+        right_dots = message.rd if hasattr(message, 'rd') else 0
+        display_m = self.enable_dgt_3000 and not self.dgtserial.enable_revelation_leds
+        if display_m:
+            bit_board = Board(message.fen)
+            move_text = bit_board.san(message.move)
+            if message.side == ClockSide.RIGHT:
                 move_text = move_text.rjust(8)
             text = self.dgttranslate.move(move_text)
-            self._display_on_dgt_3000(text, beep, left_dots, right_dots)
+            self._display_on_dgt_3000(text, message.beep, left_dots, right_dots)
         else:
-            move_text = move.uci()
-            if side == ClockSide.RIGHT:
+            move_text = message.move.uci()
+            if message.side == ClockSide.RIGHT:
                 move_text = move_text.rjust(6)
-            self._display_on_dgt_xl(move_text, beep, left_dots, right_dots)
+            self._display_on_dgt_xl(move_text, message.beep, left_dots, right_dots)
 
     def display_time_on_clock(self, force=False):
         if self.clock_running or force:
