@@ -54,13 +54,21 @@ class DgtVr(DgtIface):
     # (END) dgtserial simulation class
 
     def display_move_on_clock(self, message):
-        if self.enable_dgt_3000:
+        if self.enable_dgt_3000 or self.enable_dgt_pi:
             bit_board = chess.Board(message.fen)
             text = bit_board.san(message.move)
+            text = self.dgttranslate.move(text)
+            if self.enable_dgt_pi:
+                text = text.rjust(8) if message.site == ClockSide.RIGHT else text.ljust(8)
+                text = '{0:3d}.'.format(bit_board.fullmove_number) + text
+            else:
+                text = text.rjust(6) if message.site == ClockSide.RIGHT else text.ljust(6)
+                text = '{0:2d}.'.format(bit_board.fullmove_number % 100) + text
         else:
             text = str(message.move)
-        if message.side == ClockSide.RIGHT:
-            text = text.rjust(8 if self.enable_dgt_3000 else 6)
+            if message.side == ClockSide.RIGHT:
+                text = text.rjust(6)
+
         logging.debug(text)
         print('Clock move: {} Beep: {}'. format(text, message.beep))
 

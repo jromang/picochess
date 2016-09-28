@@ -127,9 +127,10 @@ class DgtPi(DgtIface):
         bit_board = Board(message.fen)
         move_text = bit_board.san(message.move)
         if message.side == ClockSide.RIGHT:
-            move_text = move_text.rjust(11)
+            move_text = move_text.rjust(8)
         text = self.dgttranslate.move(move_text)
-        left_dots = message.ld if hasattr(message, 'ld') else 0
+        text = '{0:3d}'.format(bit_board.fullmove_number) + text
+        left_dots = message.ld if hasattr(message, 'ld') else 16
         right_dots = message.rd if hasattr(message, 'rd') else 0
         self._display_on_dgt_pi(text, message.beep, left_dots, right_dots)
 
