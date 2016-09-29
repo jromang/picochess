@@ -29,12 +29,12 @@ class DgtPi(DgtIface):
         self.lib_lock = Lock()
         self.lib = cdll.LoadLibrary('dgt/dgtpicom.so')
 
-        self.startup_i2c_clock()
-        incoming_clock_thread = Timer(0, self.process_incoming_clock_forever)
+        self._startup_i2c_clock()
+        incoming_clock_thread = Timer(0, self._process_incoming_clock_forever)
         incoming_clock_thread.start()
         # self.dgtserial.run()
 
-    def startup_i2c_clock(self):
+    def _startup_i2c_clock(self):
         while self.lib.dgtpicom_init() < 0:
             logging.warning('Init failed - Jack half connected?')
             DisplayMsg.show(Message.JACK_CONNECTED_ERROR())
@@ -44,7 +44,7 @@ class DgtPi(DgtIface):
             DisplayMsg.show(Message.JACK_CONNECTED_ERROR())
         DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=2, sub=2, attached="i2c"))
 
-    def process_incoming_clock_forever(self):
+    def _process_incoming_clock_forever(self):
         but = c_byte(0)
         buttime = c_byte(0)
         clktime = create_string_buffer(6)

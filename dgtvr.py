@@ -31,7 +31,7 @@ class DgtVr(DgtIface):
         DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=main, sub=0, attached='virtual'))
 
     # (START) dgtserial class simulation
-    def runclock(self):
+    def _runclock(self):
         if self.time_side == ClockSide.LEFT:
             h, m, s = self.time_left
             time_left = 3600*h + 60*m + s - 1
@@ -109,7 +109,7 @@ class DgtVr(DgtIface):
         if self.rt:
             self.rt.stop()
         if side != ClockSide.NONE:
-            self.rt = RepeatedTimer(1, self.runclock)
+            self.rt = RepeatedTimer(1, self._runclock)
             self.rt.start()
         self.clock_running = (side != ClockSide.NONE)
 
