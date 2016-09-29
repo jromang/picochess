@@ -253,7 +253,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 update_headers()
                 break
             if case(MessageApi.STARTUP_INFO):
-                self.shared['game_info'] = message.info
+                self.shared['game_info'] = message.info.copy()
                 if message.info['level_text'] is None:
                     del self.shared['game_info']['level_text']
                 break

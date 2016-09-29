@@ -741,7 +741,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.reset_menu_results()
                 self.engine_finished = False
                 p = message.game.chess960_pos()
-                text = self.dgttranslate.text('C10_newgame') if p is None or p == 518 else self.dgttranslate.text('C10_ucigame', str(p))
+                text = self.dgttranslate.text('C10_newgame' if p is None or p == 518 else 'C10_ucigame', str(p))
                 text.wait = True  # in case of GAME_ENDS before, wait for "abort"
                 DisplayDgt.show(text)
                 if self.mode_result in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
@@ -928,7 +928,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     break
                 self.dgt_fen = fen
                 self.drawresign_fen = self.drawresign()
-                map_bl = self.dgttranslate.bl(BeepLevel.MAP)
                 # Fire the appropriate event
                 if fen in level_map:
                     eng = self.installed_engines[self.engine_index]
@@ -991,7 +990,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 elif fen in mode_map:
                     logging.debug("Map-Fen: Interaction mode [%s]", mode_map[fen])
                     text = self.dgttranslate.text(mode_map[fen].value)
-                    text.beep = map_bl  # BeepLevel is Map not Button
+                    text.beep = self.dgttranslate.bl(BeepLevel.MAP)
                     text.maxtime = 1  # wait 1sec not forever
                     self.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], mode_text=text, ok_text=False))
                     self.reset_menu_results()
@@ -999,9 +998,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     logging.debug('Map-Fen: Time control fixed')
                     self.time_mode_index = TimeMode.FIXED
                     self.time_control_fixed_index = list(self.time_control_fixed_map.keys()).index(fen)
-                    text = self.dgttranslate.text('B00_tc_fixed', self.time_control_fixed_list[self.time_control_fixed_index])
-                    text.beep = map_bl  # BeepLevel is Map not Button
-                    text.maxtime = 1  # wait 1sec not forever
+                    text = self.dgttranslate.text('M10_tc_fixed', self.time_control_fixed_list[self.time_control_fixed_index])
                     self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_fixed_map[fen],
                                                      time_text=text, ok_text=False))
                     self.reset_menu_results()
@@ -1009,9 +1006,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     logging.debug('Map-Fen: Time control blitz')
                     self.time_mode_index = TimeMode.BLITZ
                     self.time_control_blitz_index = list(self.time_control_blitz_map.keys()).index(fen)
-                    text = self.dgttranslate.text('B00_tc_blitz', self.time_control_blitz_list[self.time_control_blitz_index])
-                    text.beep = map_bl  # BeepLevel is Map not Button
-                    text.maxtime = 1  # wait 1sec not forever
+                    text = self.dgttranslate.text('M10_tc_blitz', self.time_control_blitz_list[self.time_control_blitz_index])
                     self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_blitz_map[fen],
                                                      time_text=text, ok_text=False))
                     self.reset_menu_results()
@@ -1019,9 +1014,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     logging.debug('Map-Fen: Time control fischer')
                     self.time_mode_index = TimeMode.FISCHER
                     self.time_control_fisch_index = list(self.time_control_fisch_map.keys()).index(fen)
-                    text = self.dgttranslate.text('B00_tc_fisch', self.time_control_fisch_list[self.time_control_fisch_index])
-                    text.beep = map_bl  # BeepLevel is Map not Button
-                    text.maxtime = 1  # wait 1sec not forever
+                    text = self.dgttranslate.text('M10_tc_fisch', self.time_control_fisch_list[self.time_control_fisch_index])
                     self.fire(Event.SET_TIME_CONTROL(time_control=self.time_control_fisch_map[fen],
                                                      time_text=text, ok_text=False))
                     self.reset_menu_results()
