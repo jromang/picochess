@@ -115,7 +115,9 @@ class DgtIface(DisplayDgt, Thread):
                 break
             if case(DgtApi.CLOCK_VERSION):
                 if not self.clock_found:
-                    self.show(self.dgttranslate.text('Y20_picochess'))
+                    text = self.dgttranslate.text('Y20_picochess')
+                    text.rd = 0x10 if self.enable_dgt_pi else 0x01
+                    self.show(text)
                 self.clock_found = True
                 if message.main == 2:
                     self.enable_dgt_3000 = True
