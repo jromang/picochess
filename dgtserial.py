@@ -370,7 +370,7 @@ class DgtSerial(object):
             # check for new data from bluetoothctl
             try:
                 while True:
-                    b = read(self.btctl.stdout.fileno(), 1).decode(encoding='UTF-8')
+                    b = read(self.btctl.stdout.fileno(), 1).decode(encoding='UTF-8', errors='ignore')
                     self.bt_line += b
                     if b == '' or b == '\n':
                         break
