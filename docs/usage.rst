@@ -27,14 +27,15 @@ The position score will always be displayed in centipawns from White's perspecti
 
 Choosing skill level
 --------------------
-Put the extra **black** queen on your DGT board to select skill level. Putting it on square A6 will select level 0 (easiest), while B6 selects level 1, C6 selects level 2, etc. If no skill level is selected, PicoChess uses level 20 (the highest level) by default. Level 20 can also be selected by placing the extra black queen on square E4.
+Put the extra **black** queen on the 6th rank of your DGT board to select skill level. The skill range the current engine supports is devided by 8 meaning a6 (easiest level) towards h6 (strongest level). Some engines support not levels but ELO values other even have personalities. If no skill level is selected, PicoChess uses the highest level if nothing choosen before or your last set level by default.
 (Remove the extra white queen if it is still on the board). Please notice that not all chess engines support levels.
 
+In case of "stockfish" engine:
 * Level  0 estimates about 1100 Elo (Absolute beginner)
 * Level 10 estimates about 1750 Elo (Mediate club player )
 * Level 20 estimates about 2570 Elo (Advanced tournament player)
 
-Another way to choose the skill level is by entering the "Level" menu with the clock buttons. Detailed explanation is below.
+Another way to choose the skill level is by entering the "engine" menu with the clock buttons. Detailed explanation is below.
 
 Choosing opening books
 ----------------------
@@ -50,9 +51,14 @@ Opening books are set with the extra **black** queen.
 * **F3** - ECO E - Indian
 * **G3** - Fun
 * **H3** - Varied (Default)
-* **H4** - GM_1950 (> 2500 ELO GM games from 1950 till 2013)
-* **G4** - Performance
-* **F4** - Stockfish optimized book v 2.11 by Salvo Spitaleri
+* **A4** - GM_1950 (> 2500 ELO GM games from 1950 till 2013)
+* **B4** - Performance
+* **C4** - Stockfish optimized book v 2.11 by Salvo Spitaleri
+* **D4** - Anand
+* **E4** - Korchnoi
+* **F4** - Larsen
+* **G4** - Pro
+* **H4** - GM 2001
 
 Another way to choose the opening book is by entering the "Book" menu with the clock buttons. Detailed explanation is below.
 
@@ -76,7 +82,7 @@ Fixed time controls are set with the extra **white** queen.
 * **E6** - 15 seconds per move
 * **F6** - 30 seconds per move
 * **G6** - 60 seconds per move
-* **H6** - 120 seconds per move
+* **H6** - 90 seconds per move
 
 Blitz Levels
 ------------
@@ -99,102 +105,29 @@ Fischer Increment Blitz Levels
 These are set with the extra **white** queen.
 (Remove the extra black queen if it is still on the board)
 
-* **A3** - 3 minute game with 2 second Fischer increment
-* **B3** - 4 minute game with 2 second Fischer increment
-* **C3** - 5 minute game with 3 second Fischer increment
-* **D3** - 5 minute game with 5 second Fischer increment
-* **E3** - 15 minute game with 5 second Fischer increment
-* **F3** - 25 minute game with 5 second Fischer increment
-* **G3** - 90 minute game with 30 second Fischer increment
-
+* **A3** - 1 minute game with 1 second Fischer increment
+* **B3** - 3 minute game with 2 second Fischer increment
+* **C3** - 4 minute game with 2 second Fischer increment
+* **D3** - 5 minute game with 3 second Fischer increment
+* **E3** - 10 minute game with 5 second Fischer increment
+* **F3** - 15 minute game with 10 second Fischer increment
+* **G3** - 30 minute game with 15 second Fischer increment
+* **H3** - 60 minute game with 30 second Fischer increment
 
 Clock button support (general)
 ------------------------------
 
-The fifth (right most) button toggles between "Game", "Position", "Level", "Time", "Engine", "Book", "System" menus.
-Depending with menu you choose, the other 4 buttons have different functionality. Its explained in detail below.
-
-* **Game Menu** - Regular Menu Shows Infos during game playing
-* **Position Menu** - Setup a custom position
-* **Level Menu** - Change the skill level
-* **Time Menu** - Change time controls
-* **Engine Menu** - Change the engine
-* **Book Menu** - Change the opening book
-* **System Menu** - Shutdown/Reboot the machine
-
-Clock buttons (in Game menu)
-----------------------------
-
-* First button shows the last move
-* Second button toggles between showing the position value (or "book") and the best/ponder (or book move)
-* Third button will
-    - in **Game mode** switch sides and the computer will make next move (your turn) or stop the search and play out the best move (computer turn). When its your turn but you havent done the displayed computer move, it will calculate an alternative move (first trying to play a book move if possible). If no moves left, it starts at beginning again
-    - in **Observe mode** halt/start the clock
-    - in **Remote mode** switch sides
-    - in **Analysis/Kibitz mode** no function. An error message is displayed
-* The fourth will toggle between the playing modes (Game, Analysis, Kibitz, Observe, Remote)
-
-Clock buttons (in Position menu)
---------------------------------
-
-First setup your position.
-
-* First button chooses the side to move, Black or White
-* Second button chooses the board orientation, "b" & "w" showing the starting side for each color. So for example white pawns moving from w to b side
-* Third button scans in the position on board. Clock will respond with "scan" and "new game". Now picochess is waiting for your next move. If you want picochess to start press the third button
-* Fouth button chooses between regular chess mode and the chess960 (Fischer-Random-Chess) mode. Please note not all chess engines support chess960 mode
-
-Clock buttons (in Level menu)
------------------------------
-
-* First button shows the current selected skill level
-* Second button goes down in skill level
-* Third button chooses the current selected level
-* Fourth button goes up in skill level
-
-Clock buttons (in Time menu)
-----------------------------
-
-* First button cycles through "Fischer", "Fixed" and "Blitz" time controls
-* Second button goes down in the time control list of the type currently in use ("Fischer", "Fixed" or "Blitz")
-* Third button chooses the selected time control
-* Fourth button goes up in the time control list of the type currently in use ("Fischer", "Fixed" or "Blitz")
-
-Clock buttons (in Engine menu)
-------------------------------
-
-* First button shows the current selected engine name
-* Second button goes down in the engines list
-* Third button chooses the current selected engine
-* Fourth button goes up in the engines list
-
-It should be noted that not all engines work at the same speed. If you switch engines whilst in 'Analyze' or 'Kibitz' training modes
-and (after the 'Ok' message) picoChess seems sluggish or not updating, probably a slow engine has been selected.
-
-Clock buttons (in Book menu)
-----------------------------
-
-* First button shows the current selected book name
-* Second button goes down in the books list
-* Third button chooses the current selected book
-* Fourth button goes up in the book list
-
-It is possible to select any additional books you may have installed from the clock buttons, but the selection from the board is fixed.
-Books must be in the Polyglot (.bin) format and must be named <letter><"-"><book name>, eg "a-nobook.bin" or "m-benoni.bin". Books appear in alphabetical order in the menu. 
-Books "a" to "j" are used for setting from the board and contain the existing system books; they can be changed to make others available from the board.
-
-Clock Buttons (in System menu)
-------------------------------
-
-* First button shows the picochess version
-* Second button shows the last two parts of your IP-address
-* Third button shutdown the machine. You have to press twice to activate this shutdown (for your safety). Pressing another button cancels it
-* Fourth button reboots the machine. You have to press twice to activate this reboot (for your safety). Pressing another button cancels it
+These chapters need to be written :-) Stay tuned.
 
 System shutdown
 ---------------
 
 From the start position, replace the white king with the extra white queen; this will shut down the machine (takes a few seconds until the blue light turns off). You can also do it with only the two white queens on the board (on e1,d1).
+
+System reboot
+---------------
+
+From the start position, replace the black king with the extra black queen; this will reboot the machine (takes a few seconds until the blue light turns off). You can also do it with only the two black queens on the board (on e8,d8).
 
 PGN file support
 ----------------
