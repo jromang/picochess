@@ -60,7 +60,7 @@ class DgtHw(DgtIface):
         text = message.m if display_m else message.s
 
         if text is None:
-            text = message.m
+            text = message.l if display_m else message.m
         left_dots = message.ld if hasattr(message, 'ld') else 0
         right_dots = message.rd if hasattr(message, 'rd') else 0
 
