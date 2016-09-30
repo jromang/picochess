@@ -106,9 +106,6 @@ Manual installation
 
   * `git <http://git-scm.com/>`_ (``sudo apt-get install git``, git executable has to be in the system PATH)
 
-  * A UCI chess engine; `Stockfish <http://stockfishchess.org/>`_ is probably
-    the best choice!
-
   * zeroconf (``sudo apt-get install avahi-daemon avahi-discover libnss-mdns``, included on Mac OS X)
 
   * espeak and festival (``sudo apt-get install espeak festival``) to enable speech
@@ -237,14 +234,7 @@ For example, to turn OFF the LED's on the Revelation II chessbot, this line will
 
 enable-revelation-leds = false
 
-UCI engine options can be set in the picochess.uci configuration file which you will find in the /opt/picochess/engines/<your_plattform> folder. To set the option, use the uci-option flag. For example, when using jromang's modified
-`Stockfish Human Player engine <https://github.com/jromang/Stockfish/tree/human_player>`_, the line
-
-Beginner Mode = true
-
-will dumb Stockfish down enough for play against children and total beginners to give
-them a chance of beating the machine. If you are using our image files, you will probably find
-the stockfish_human engine already waiting for your kids in the /opt/picochess/engines folder.
+UCI engine options can be set in the engines.uci configuration file which you will find in the /opt/picochess/engines/<your_plattform> folder. To set the option, use the uci-option flag.
 
 An example .ini file can be found at /opt/picochess/picochess.ini.example.
 Uncomment the appropriate options and rename the file to picochess.ini.
