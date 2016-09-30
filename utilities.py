@@ -632,7 +632,7 @@ class RepeatedTimer(object):
 
 class Dgt():
     DISPLAY_MOVE = ClassFactory(DgtApi.DISPLAY_MOVE, ['move', 'fen', 'beep', 'maxtime', 'side', 'wait', 'ld', 'rd'])
-    DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['l', 'm', 's', 'beep', 'maxtime', 'wait', 'ld', 'rd'])
+    DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['l', 'm', 's', 'beep', 'maxtime', 'devs', 'wait', 'ld', 'rd'])
     DISPLAY_TIME = ClassFactory(DgtApi.DISPLAY_TIME, ['wait', 'force'])
     LIGHT_CLEAR = ClassFactory(DgtApi.LIGHT_CLEAR, [])
     LIGHT_SQUARES = ClassFactory(DgtApi.LIGHT_SQUARES, ['squares'])
@@ -677,7 +677,7 @@ class Message():
     ALTERNATIVE_MOVE = ClassFactory(MessageApi.ALTERNATIVE_MOVE, [])
     JACK_CONNECTED_ERROR = ClassFactory(MessageApi.JACK_CONNECTED_ERROR, [])
     NO_CLOCK_ERROR = ClassFactory(MessageApi.NO_CLOCK_ERROR, ['text'])
-    NO_EBOARD_ERROR = ClassFactory(MessageApi.NO_EBOARD_ERROR, ['text', 'is_pi'])
+    NO_EBOARD_ERROR = ClassFactory(MessageApi.NO_EBOARD_ERROR, ['text'])
     EBOARD_VERSION = ClassFactory(MessageApi.EBOARD_VERSION, ['text', 'channel'])
     SWITCH_SIDES = ClassFactory(MessageApi.SWITCH_SIDES, ['move'])
     KEYBOARD_MOVE = ClassFactory(MessageApi.KEYBOARD_MOVE, ['fen'])
@@ -721,7 +721,7 @@ def get_opening_books():
     library = []
     for section in config.sections():
         text = Dgt.DISPLAY_TEXT(l=config[section]['large'], m=config[section]['medium'], s=config[section]['small'],
-                                wait=True, beep=False, maxtime=0)
+                                wait=True, beep=False, maxtime=0, devs={'ser', 'i2c', 'web'})
         library.append(
             {
                 'file': 'books' + os.sep + section,

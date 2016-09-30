@@ -114,6 +114,8 @@ class DgtPi(DgtIface):
                 logging.warning('Finally failed %i', res)
 
     def display_text_on_clock(self, message):
+        if 'i2c' not in message.devs:
+            return
         text = message.l
         if text is None:
             text = message.m

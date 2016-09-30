@@ -33,7 +33,7 @@ class KeyboardInput(Observable, threading.Thread):
 
     def fire_no_board_connection(self):
         text = self.dgttranslate.text('N00_noboard', 'Board!')
-        DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text, is_pi=self.is_pi))
+        DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text))
 
     def run(self):
         logging.info('evt_queue ready')
@@ -106,7 +106,8 @@ class KeyboardInput(Observable, threading.Thread):
                             self.board_plugged_in = True
                             self.rt.stop()
                             text_l, text_m, text_s = 'VirtBoard  ', 'V-Board ', 'vboard'
-                            text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, wait=True, beep=False, maxtime=1)
+                            text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s,
+                                                    wait=True, beep=False, maxtime=1, devs={'ser', 'i2c', 'web'})
                             DisplayMsg.show(Message.EBOARD_VERSION(text=text, channel='console'))
                         if plug == 'off':
                             self.board_plugged_in = False

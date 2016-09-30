@@ -1057,8 +1057,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 DisplayDgt.show(message.text)
                 break
             if case(MessageApi.NO_EBOARD_ERROR):
-                if message.is_pi:
-                    DisplayDgt.show(message.text)
+                DisplayDgt.show(message.text)
                 break
             if case(MessageApi.SWITCH_SIDES):
                 self.engine_finished = False

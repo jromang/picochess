@@ -55,7 +55,7 @@ def read_engine_ini(engine_shell=None, engine_path=None):
                     level_dict[ps][option] = parser[ps][option]
 
         text = Dgt.DISPLAY_TEXT(l=config[section]['large'], m=config[section]['medium'], s=config[section]['small'],
-                                wait=True, beep=False, maxtime=0)
+                                wait=True, beep=False, maxtime=0, devs={'ser', 'i2c', 'web'})
         library.append(
             {
                 'file': engine_path + os.sep + section,

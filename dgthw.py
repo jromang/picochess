@@ -56,6 +56,8 @@ class DgtHw(DgtIface):
                 logging.warning('Finally failed %i', res)
 
     def display_text_on_clock(self, message):
+        if 'ser' not in message.devs:
+            return
         display_m = self.enable_dgt_3000 and not self.dgtserial.enable_revelation_leds
         text = message.m if display_m else message.s
 

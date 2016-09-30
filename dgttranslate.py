@@ -75,6 +75,7 @@ class DgtTranslate(object):
             beep = False
         maxtime = int(code[1:]) / 10
         wait = False
+        devs = {'ser', 'i2c', 'web'}
 
         if text_id == 'default':
             entxt = Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6])
@@ -601,6 +602,7 @@ class DgtTranslate(object):
                 txt.wait = wait
                 txt.beep = beep
                 txt.maxtime = maxtime
+                txt.devs = devs
 
         if entxt is None:
             entxt = Dgt.DISPLAY_TEXT(l=None, m=text_id, s=None, wait=False, beep=self.bl(BeepLevel.YES), maxtime=0)
