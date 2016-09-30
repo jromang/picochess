@@ -37,14 +37,14 @@ _workers = ThreadPool(5)
 client_ips = []
 
 
-class ChannelHandler(tornado.web.RequestHandler):
+class ServerRequestHandler(tornado.web.RequestHandler):
+    def data_received(self, chunk):
+        pass
+
+
+class ChannelHandler(ServerRequestHandler):
     def initialize(self, shared=None):
         self.shared = shared
-
-    def real_ip(self):
-        x_real_ip = self.request.headers.get('X-Real-IP')
-        real_ip = self.request.remote_ip if not x_real_ip else x_real_ip
-        return real_ip
 
     def post(self):
         action = self.get_argument('action')
@@ -65,6 +65,12 @@ class EventHandler(WebSocketHandler):
     def initialize(self, shared=None):
         self.shared = shared
 
+    def on_message(self, message):
+        pass
+
+    def data_received(self, chunk):
+        pass
+
     def real_ip(self):
         x_real_ip = self.request.headers.get('X-Real-IP')
         real_ip = self.request.remote_ip if not x_real_ip else x_real_ip
@@ -84,7 +90,7 @@ class EventHandler(WebSocketHandler):
             client.write_message(msg)
 
 
-class DGTHandler(tornado.web.RequestHandler):
+class DGTHandler(ServerRequestHandler):
     def initialize(self, shared=None):
         self.shared = shared
 
@@ -95,7 +101,7 @@ class DGTHandler(tornado.web.RequestHandler):
                 self.write(self.shared['last_dgt_move_msg'])
 
 
-class InfoHandler(tornado.web.RequestHandler):
+class InfoHandler(ServerRequestHandler):
     def initialize(self, shared=None):
         self.shared = shared
 
@@ -109,7 +115,7 @@ class InfoHandler(tornado.web.RequestHandler):
                 self.write(self.shared['headers'])
 
 
-class ChessBoardHandler(tornado.web.RequestHandler):
+class ChessBoardHandler(ServerRequestHandler):
     def initialize(self, shared=None):
         self.shared = shared
 

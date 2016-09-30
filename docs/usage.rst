@@ -27,7 +27,7 @@ The position score will always be displayed in centipawns from White's perspecti
 
 Choosing skill level
 --------------------
-Put the extra **black** queen on the 6th rank of your DGT board to select skill level. The skill range the current engine supports is devided by 8 meaning a6 (easiest level) towards h6 (strongest level). Some engines support not levels but ELO values other even have personalities. If no skill level is selected, PicoChess uses the highest level if nothing choosen before or your last set level by default.
+Put the extra **black** queen on the 5th rank of your DGT board to select skill level. The skill range of ​​the currently selected engine is devided by 8 meaning a5 (easiest level) towards h5 (strongest level). Some engines support ELO level or even personalities instead of skill levels. If no skill level is selected, PicoChess uses the highest level if nothing choosen before or your last selected level by default.
 (Remove the extra white queen if it is still on the board). Please notice that not all chess engines support levels.
 
 In case of "stockfish" engine:
