@@ -545,7 +545,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         if self.engine_level_index is None or len(level_dict) <= self.engine_level_index:
                             self.engine_level_index = len(level_dict)-1
                         msg = sorted(level_dict)[self.engine_level_index]
-                        text = self.dgttranslate.text('B10_level', msg)
+                        text = self.dgttranslate.text('B00_level', msg)
                         DisplayDgt.show(text)
                     else:
                         config = ConfigObj('picochess.ini')

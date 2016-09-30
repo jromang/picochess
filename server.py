@@ -165,14 +165,14 @@ class WebDisplay(DisplayMsg, threading.Thread):
             self.shared['system_info'] = {}
 
     def task(self, message):
-        def oldstyle_fen(g):
+        def oldstyle_fen(game):
             builder = []
-            builder.append(g.board_fen())
-            builder.append('w' if g.turn == chess.WHITE else 'b')
-            builder.append(g.castling_xfen())
-            builder.append(chess.SQUARE_NAMES[g.ep_square] if g.ep_square else '-')
-            builder.append(str(g.halfmove_clock))
-            builder.append(str(g.fullmove_number))
+            builder.append(game.board_fen())
+            builder.append('w' if game.turn == chess.WHITE else 'b')
+            builder.append(game.castling_xfen())
+            builder.append(chess.SQUARE_NAMES[game.ep_square] if game.ep_square else '-')
+            builder.append(str(game.halfmove_clock))
+            builder.append(str(game.fullmove_number))
             return ' '.join(builder)
 
         def create_game_header(pgn_game):
@@ -214,11 +214,11 @@ class WebDisplay(DisplayMsg, threading.Thread):
             self.shared['headers'] = pgn_game.headers
             EventHandler.write_to_clients({'event': 'header', 'headers': pgn_game.headers})
 
-        def transfer(g):
-            pgn_game = pgn.Game().from_board(g)
+        def transfer(game):
+            pgn_game = pgn.Game().from_board(game)
             create_game_header(pgn_game)
             return pgn_game.accept(pgn.StringExporter(headers=True, comments=False, variations=False))
-        
+
         for case in switch(message):
             if case(MessageApi.BOOK_MOVE):
                 EventHandler.write_to_clients({'event': 'Message', 'msg': 'Book move'})
@@ -228,9 +228,9 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 fen = message.game.fen()
                 result = {'pgn': pgn_str, 'fen': fen}
                 self.shared['last_dgt_move_msg'] = result
-                p = message.game.chess960_pos()
-                if p:
-                    code_text = '' if p == 518 else ' - chess960 code {}'.format(p)
+                code = message.game.chess960_pos()
+                if code:
+                    code_text = '' if code == 518 else ' - chess960 code {}'.format(code)
                 else:
                     code_text = ' with setup'
                 EventHandler.write_to_clients({'event': 'NewGame', 'fen': fen})
