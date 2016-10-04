@@ -1028,7 +1028,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if self.top_result is None:
                         logging.debug('Map-Fen: drawresign')
                         self.fire(Event.DRAWRESIGN(result=drawresign_map[self.drawresign_fen]))
-                elif '/pppppppp/8/8/8/8/PPPPPPPP/' in fen:  # check for the lines 2-6 cause could be an uci960 pos too
+                elif '/pppppppp/8/8/8/8/PPPPPPPP/' in fen:  # check for the lines 2-7 cause could be an uci960 pos too
                     bit_board = chess.Board(fen + ' w - - 0 1')
                     pos960 = bit_board.chess960_pos(ignore_castling=True)
                     if pos960 is not None:
@@ -1036,10 +1036,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self.show_setup_pieces_msg = False
                         self.fire(Event.NEW_GAME(pos960=pos960))
                 else:
-                    if self.show_setup_pieces_msg:
-                        DisplayDgt.show(self.dgttranslate.text('N00_setpieces'))
-                        self.show_setup_pieces_msg = False
                     if self.top_result is None:
+                        if self.show_setup_pieces_msg:
+                            DisplayDgt.show(self.dgttranslate.text('N00_setpieces'))
+                            # self.show_setup_pieces_msg = False @todo does that work?
                         self.fire(Event.FEN(fen=fen))
                     else:
                         logging.debug('inside the menu. fen "{}" ignored'.format(fen))
