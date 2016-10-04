@@ -412,10 +412,13 @@ class DgtSerial(object):
                     logging.debug("BT pairing failed, unknown device")
                 if ("DGT_BT_" in self.bt_line or "PCS-REVII" in self.bt_line) and "DEL" not in self.bt_line:
                     # New e-Board found add to list
-                    if not self.bt_line.split()[3] in self.bt_mac_list:
-                        self.bt_mac_list.append(self.bt_line.split()[3])
-                        self.bt_name_list.append(self.bt_line.split()[4])
-                        logging.debug('BT found device: %s %s', self.bt_line.split()[3], self.bt_line.split()[4])
+                    try:
+                        if not self.bt_line.split()[3] in self.bt_mac_list:
+                            self.bt_mac_list.append(self.bt_line.split()[3])
+                            self.bt_name_list.append(self.bt_line.split()[4])
+                            logging.debug('BT found device: %s %s', self.bt_line.split()[3], self.bt_line.split()[4])
+                    except IndexError:
+                        logging.error('wrong bt_line [%s]', self.bt_line)
 
                 # clear the line
                 self.bt_line = ''

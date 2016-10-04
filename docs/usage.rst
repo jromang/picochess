@@ -68,12 +68,12 @@ Another way to choose the opening book is by entering the "Book" menu with the c
 Setting up time controls
 ------------------------
 
-Picochess supports 3 variants of different time controls (Fixed, Blitz, Fischer). You can choose them by placing the extra **white** queen.
+Picochess supports 3 variants of different time controls (Move, Game, Fischer). You can choose them by placing the extra **white** queen.
 (Remove the extra black queen if it is still on the board).
 Another way to choose the time control is by entering the "Time" menu with the clock buttons. Detailed explanation is below.
 
-Fixed Levels
-------------
+Move Time
+---------
 
 Fixed time controls are set with the extra **white** queen.
 (Remove the extra black queen if it is still on the board)
@@ -87,8 +87,8 @@ Fixed time controls are set with the extra **white** queen.
 * **G6** - 60 seconds per move
 * **H6** - 90 seconds per move
 
-Blitz Levels
-------------
+Game Time
+---------
 
 Blitz time controls are set with the extra **white** queen.
 (Remove the extra black queen if it is still on the board)
@@ -102,8 +102,8 @@ Blitz time controls are set with the extra **white** queen.
 * **G4** - 60 minute game (1 hour)
 * **H4** - 90 minute game (1 hour and 30 minutes)
 
-Fischer Increment Blitz Levels
-------------------------------
+Fischer Time
+------------
 
 These are set with the extra **white** queen.
 (Remove the extra black queen if it is still on the board)
