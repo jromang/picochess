@@ -100,7 +100,7 @@ def main():
 
     def compute_legal_fens(g):
         """
-        Computes a list of legal FENs for the given game.
+        Compute a list of legal FENs for the given game.
         :param g: The game
         :return: A list of legal FENs
         """
@@ -121,7 +121,7 @@ def main():
 
     def think(game, tc):
         """
-        Starts a new search on the current game.
+        Start a new search on the current game.
         If a move is found in the opening book, fire an event in a few seconds.
         :return:
         """
@@ -142,7 +142,7 @@ def main():
 
     def analyse(game):
         """
-        Starts a new ponder search on the current game.
+        Start a new ponder search on the current game.
         :return:
         """
         probe_tablebase(game)
@@ -372,7 +372,7 @@ def main():
                 if check_game_state(game, play_mode):
                     observe(game)
                 text = Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode)
-            else: # interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ):
+            else:  # interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ):
                 if check_game_state(game, play_mode):
                     analyse(game)
                 text = Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode)
@@ -422,52 +422,52 @@ def main():
     gc.enable()
 
     # Command line argument parsing
-    parser = configargparse.ArgParser(default_config_files=[os.path.join(os.path.dirname(__file__), "picochess.ini")])
-    parser.add_argument("-e", "--engine", type=str, help="UCI engine executable path", default=None)
-    parser.add_argument("-el", "--engine-level", type=str, help="UCI engine level", default=None)
-    parser.add_argument("-d", "--dgt-port", type=str,
-                        help="enable dgt board on the given serial port such as /dev/ttyUSB0")
-    parser.add_argument("-b", "--book", type=str, help="Opening book - full name of book in 'books' folder",
+    parser = configargparse.ArgParser(default_config_files=[os.path.join(os.path.dirname(__file__), 'picochess.ini')])
+    parser.add_argument('-e', '--engine', type=str, help='UCI engine executable path', default=None)
+    parser.add_argument('-el', '--engine-level', type=str, help='UCI engine level', default=None)
+    parser.add_argument('-d', '--dgt-port', type=str,
+                        help='enable dgt board on the given serial port such as /dev/ttyUSB0')
+    parser.add_argument('-b', '--book', type=str, help='full path of book such as books/b-flank.bin',
                         default='h-varied.bin')
-    parser.add_argument("-t", "--time", type=str, default='5 0',
-                        help="Time settings <FixSec> or <StMin IncSec> like '10'(fixed) or '5 0'(blitz) '3 2'(fischer)")
-    parser.add_argument("-g", "--enable-gaviota", action='store_true', help="enable gavoita tablebase probing")
-    parser.add_argument("-leds", "--enable-revelation-leds", action='store_true', help="enable Revelation leds")
-    parser.add_argument("-l", "--log-level", choices=['notset', 'debug', 'info', 'warning', 'error', 'critical'],
-                        default='warning', help="logging level")
-    parser.add_argument("-lf", "--log-file", type=str, help="log to the given file")
-    parser.add_argument("-rs", "--remote-server", type=str, help="remote server running the engine")
-    parser.add_argument("-ru", "--remote-user", type=str, help="remote user on server running the engine")
-    parser.add_argument("-rp", "--remote-pass", type=str, help="password for the remote user")
-    parser.add_argument("-rk", "--remote-key", type=str, help="key file used to connect to the remote server")
-    parser.add_argument("-pf", "--pgn-file", type=str, help="pgn file used to store the games", default='games.pgn')
-    parser.add_argument("-pu", "--pgn-user", type=str, help="user name for the pgn file", default=None)
-    parser.add_argument("-ar", "--auto-reboot", action='store_true', help="reboot system after update")
-    parser.add_argument("-web", "--web-server", dest="web_server_port", nargs="?", const=80, type=int, metavar="PORT",
-                        help="launch web server")
-    parser.add_argument("-m", "--email", type=str, help="email used to send pgn files", default=None)
-    parser.add_argument("-ms", "--smtp-server", type=str, help="Adress of email server", default=None)
-    parser.add_argument("-mu", "--smtp-user", type=str, help="Username for email server", default=None)
-    parser.add_argument("-mp", "--smtp-pass", type=str, help="Password for email server", default=None)
-    parser.add_argument("-me", "--smtp-encryption", action='store_true',
-                        help="use ssl encryption connection to smtp-Server")
-    parser.add_argument("-mf", "--smtp-from", type=str, help="From email", default='no-reply@picochess.org')
-    parser.add_argument("-mk", "--mailgun-key", type=str, help="key used to send emails via Mailgun Webservice",
+    parser.add_argument('-t', '--time', type=str, default='5 0',
+                        help="Time settings <FixSec> or <StMin IncSec> like '10'(move) or '5 0'(game) '3 2'(fischer)")
+    parser.add_argument('-g', '--enable-gaviota', action='store_true', help='enable gavoita tablebase probing')
+    parser.add_argument('-leds', '--enable-revelation-leds', action='store_true', help='enable Revelation leds')
+    parser.add_argument('-l', '--log-level', choices=['notset', 'debug', 'info', 'warning', 'error', 'critical'],
+                        default='warning', help='logging level')
+    parser.add_argument('-lf', '--log-file', type=str, help='log to the given file')
+    parser.add_argument('-rs', '--remote-server', type=str, help='remote server running the engine')
+    parser.add_argument('-ru', '--remote-user', type=str, help='remote user on server running the engine')
+    parser.add_argument('-rp', '--remote-pass', type=str, help='password for the remote user')
+    parser.add_argument('-rk', '--remote-key', type=str, help='key file used to connect to the remote server')
+    parser.add_argument('-pf', '--pgn-file', type=str, help='pgn file used to store the games', default='games.pgn')
+    parser.add_argument('-pu', '--pgn-user', type=str, help='user name for the pgn file', default=None)
+    parser.add_argument('-ar', '--auto-reboot', action='store_true', help='reboot system after update')
+    parser.add_argument('-web', '--web-server', dest='web_server_port', nargs='?', const=80, type=int, metavar='PORT',
+                        help='launch web server')
+    parser.add_argument('-m', '--email', type=str, help='email used to send pgn files', default=None)
+    parser.add_argument('-ms', '--smtp-server', type=str, help='adress of email server', default=None)
+    parser.add_argument('-mu', '--smtp-user', type=str, help='username for email server', default=None)
+    parser.add_argument('-mp', '--smtp-pass', type=str, help='password for email server', default=None)
+    parser.add_argument('-me', '--smtp-encryption', action='store_true',
+                        help='use ssl encryption connection to smtp-Server')
+    parser.add_argument('-mf', '--smtp-from', type=str, help='From email', default='no-reply@picochess.org')
+    parser.add_argument('-mk', '--mailgun-key', type=str, help='key used to send emails via Mailgun Webservice',
                         default=None)
-    parser.add_argument("-bc", "--beep-config", choices=['none', 'some', 'all'], help="sets standard beep config",
+    parser.add_argument('-bc', '--beep-config', choices=['none', 'some', 'all'], help='sets standard beep config',
                         default='some')
-    parser.add_argument("-beep", "--beep-level", type=int, default=0x03,
-                        help="sets (some-)beep level from 0(=no beeps) to 15(=all beeps)")
-    parser.add_argument("-uvoice", "--user-voice", type=str, help="voice for user", default=None)
-    parser.add_argument("-cvoice", "--computer-voice", type=str, help="voice for computer", default=None)
-    parser.add_argument("-inet", "--enable-internet", action='store_true', help="enable internet lookups")
-    parser.add_argument("-nook", "--disable-ok-message", action='store_true', help="disable ok confirmation messages")
-    parser.add_argument("-v", "--version", action='version', version='%(prog)s version {}'.format(version),
-                        help="show current version", default=None)
-    parser.add_argument("-pi", "--dgtpi", action='store_true', help="use the dgtpi hardware")
-    parser.add_argument("-lang", "--language", choices=['en', 'de', 'nl', 'fr', 'es'], default='en',
-                        help="picochess language")
-    parser.add_argument("-c", "--console", action='store_true', help="use console interface")
+    parser.add_argument('-beep', '--beep-level', type=int, default=0x03,
+                        help='sets (some-)beep level from 0(=no beeps) to 15(=all beeps)')
+    parser.add_argument('-uvoice', '--user-voice', type=str, help='voice for user', default=None)
+    parser.add_argument('-cvoice', '--computer-voice', type=str, help='voice for computer', default=None)
+    parser.add_argument('-inet', '--enable-internet', action='store_true', help='enable internet lookups')
+    parser.add_argument('-nook', '--disable-ok-message', action='store_true', help='disable ok confirmation messages')
+    parser.add_argument('-v', '--version', action='version', version='%(prog)s version {}'.format(version),
+                        help='show current version', default=None)
+    parser.add_argument('-pi', '--dgtpi', action='store_true', help='use the dgtpi hardware')
+    parser.add_argument('-lang', '--language', choices=['en', 'de', 'nl', 'fr', 'es'], default='en',
+                        help='picochess language')
+    parser.add_argument('-c', '--console', action='store_true', help='use console interface')
 
     args = parser.parse_args()
     if args.engine is None:
@@ -801,7 +801,7 @@ def main():
                     if game.is_legal(event.pv[0]):
                         DisplayMsg.show(Message.NEW_PV(pv=event.pv, mode=interaction_mode, fen=game.fen(), turn=game.turn))
                     else:
-                        logging.info('illegal move can not be displayed. move:%s fen=%s',event.pv[0],game.fen())
+                        logging.info('illegal move can not be displayed. move:%s fen=%s', event.pv[0], game.fen())
                     break
 
                 if case(EventApi.NEW_SCORE):

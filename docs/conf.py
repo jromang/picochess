@@ -231,7 +231,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'picochess', 'PicoChess Documentation',
-     ['Jean-Francois Romang, Shivkumar Shivaji', 'Juergen Precour'], 1)
+     ['Jean-Francois Romang, Shivkumar Shivaji'], 1)
 ]
 
 # If true, show URL addresses after external links.
