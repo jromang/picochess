@@ -120,7 +120,68 @@ These are set with the extra **white** queen.
 Clock button support (general)
 ------------------------------
 
-These chapters need to be written :-) Stay tuned.
+There are now 2 states (one is the "game-playing" state, where y see the clock time or a move) and the other is the "menu" state.
+Entering the menu state can be done by pressing ">". Leaving it with "<". Entering the menu offers the last choosen top-level in menu (for example "Mode")
+
+If you are not inside the menu (clock showing moves, times), the function is as follows:
+* (<) button - showing the last move
+* (-) button - showing the last score
+* (=) button - start/stop the clock (user turn) or abort the search (engine thinking) or calculate an alternative move (engine showing its move)
+* (+) button - showing a hint move (user turn) or the current best move (engine thinking)
+* (>) button - Entering the menu
+* lever - switch sides If its users turn the engine will begin to calculate its move, otherwise the search is aborted (engine calculating) or the shown move is canceled (engine shows its move). In these cases its your turn.
+
+If you already inside the menu (clock showing you menu or value items) the function is as follows:
+* (<) button - moving up a level inside the menu tree. If you already at top exists the menu
+* (-) button - showing the previous value inside the menu tree
+* (=) button - no function
+* (+) button - showing the next value inside the menu tree
+* (>) button - moving down a level inside the menu tree. If there is none, it accepts the choosen value and exists the menu
+
+The next chapters decribe each top-level menu items in greater detail.
+
+Mode Menu
+---------
+
+See above at "Playing/Training Modes". You can cycle the modes by pressing the "-" & "+" buttons like always inside the menu.
+Choose the mode setting by pressing ">" or exit menu again with "<" (without choosing something)
+
+Postition Menu
+--------------
+
+Here you can setup a position. To enter this, picochess will answer you some questions. You can setup the position before y enter this menu or before you press >" at last step (=scan).
+Here are the list of questions to be answered:
+* side - decides with side to move first
+* origin of board - is the board flipped (which side of board is white which is black)
+* chess960 - is this a fischer random position (used for castling) Please make sure your choose engine support 960 mode (stockfish for example)
+* scan - after accepting with ">" picochess will scan in the position (last chance to setup your pieces)
+
+Time Menu
+---------
+
+See above at "Setting up time controls". First you have to choose between the 3 variants of different time controls (Move, Game, Fischer).
+Accept it with ">" then choose your time by cyling with "-" & "+" accept with ">" or go back to the time variants with "<"
+
+Book Menu
+---------
+
+See above at "Choosing opening books". Cyle with "-" & "+" accept with ">" or go back with "<"
+
+Engine Menu
+-----------
+
+Similarly to above you can cyle with "-" & "+" accept with ">" or go back to the time variants with "<". You can choose alot more engines as with the queen.
+If the engine supports levels after accepting the engine you can select its level. Some engines have standard levels (for example from 0-20), and some engines support ELO rankings.
+The provided "rodent II" engine even support personalities. But the system is always the same. Cyle thrue the options and select with ">" or go back to former step with "<".
+
+System Menu
+-----------
+
+Here you choose between the following:
+* version - showing you the current picochess version
+* ip adr - showing you the last part of your ip-adr. This is needed for example to use the picochess webserver (see below)
+* sound - controls the beeps of your dgt clock. You can change between "never", "sometimes", or "always"
+* language - sets the language of clock messages. You can choose between english, german, french, dutch and spanish
 
 System shutdown
 ---------------
