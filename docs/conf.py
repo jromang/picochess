@@ -201,7 +201,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
   ('index', 'PicoChess.tex', 'PicoChess Documentation',
-   'Jean-Francois Romang, Shivkumar Shivaji', u'Jürgen Précour', 'manual'),
+   'Jean-Francois Romang, Shivkumar Shivaji', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -231,7 +231,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'picochess', 'PicoChess Documentation',
-     ['Jean-Francois Romang, Shivkumar Shivaji', u'Jürgen Précour'], 1)
+     ['Jean-Francois Romang, Shivkumar Shivaji'], 1)
 ]
 
 # If true, show URL addresses after external links.
