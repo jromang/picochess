@@ -48,7 +48,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'PicoChess'
-copyright = '2014-2016, Jean-Francois Romang, Shivkumar Shivaji, Jürgen Précour, Jonas Znidarsic'
+copyright = u'2014-2016, Jean-Francois Romang, Shivkumar Shivaji, Jürgen Précour, Jonas Znidarsic'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -186,14 +186,14 @@ htmlhelp_basename = 'PicoChessdoc'
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
-# The paper size ('letterpaper' or 'a4paper').
-#'papersize': 'letterpaper',
+    # The paper size ('letterpaper' or 'a4paper').
+    # 'papersize': 'letterpaper',
 
-# The font size ('10pt', '11pt' or '12pt').
-#'pointsize': '10pt',
+    # The font size ('10pt', '11pt' or '12pt').
+    # 'pointsize': '10pt',
 
-# Additional stuff for the LaTeX preamble.
-#'preamble': '',
+    # Additional stuff for the LaTeX preamble.
+    # 'preamble': '',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
@@ -201,7 +201,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
   ('index', 'PicoChess.tex', 'PicoChess Documentation',
-   'Jean-Francois Romang, Shivkumar Shivaji', 'Jürgen Précour', 'manual'),
+   'Jean-Francois Romang, Shivkumar Shivaji', u'Jürgen Précour', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -231,7 +231,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'picochess', 'PicoChess Documentation',
-     ['Jean-Francois Romang, Shivkumar Shivaji', 'Jürgen Précour'], 1)
+     ['Jean-Francois Romang, Shivkumar Shivaji', u'Jürgen Précour'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -245,8 +245,8 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'PicoChess', 'PicoChess Documentation',
-   'Jean-Francois Romang, Shivkumar Shivaji', 'Jürgen Précour', 'PicoChess', 'Stand alone chess computer based on Raspberry Pi and DGT electronic chess board.',
-   'Miscellaneous'),
+   'Jean-Francois Romang, Shivkumar Shivaji', u'Jürgen Précour', 'PicoChess',
+   'Stand alone chess computer based on Raspberry Pi and DGT electronic chess board.', 'Miscellaneous'),
 ]
 
 # Documents to append as an appendix to all manuals.

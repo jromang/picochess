@@ -312,7 +312,7 @@ class DgtSerial(object):
                 if c:
                     self._read_board_message(head=c)
                 else:
-                    counter = (counter + 1) % 8
+                    counter = (counter + 1) % 10
                     if counter == 0:  # issue 150 - check for alive connection
                         self._watchdog()  # force to write something to the board
                     time.sleep(0.1)
