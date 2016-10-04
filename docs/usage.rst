@@ -6,8 +6,10 @@ Setup the starting position
 Place the pieces in starting position. It doesn't matter if you have the white or black pieces in front of you. Both ways will work. Keep in mind that with black pieces in front of you the (printed) coordinates of your dgt-board also reversed.
 You can now start a game by moving a piece or press the middle button to let picochess start.
 
-Also you can change the default settings of 5mins blitz against stockfish in strongest level by placing the white&black extra queen on the appropriate square or use the clock buttons (for detailed infomation see below).
-Please keep in mind that placing the extra queens only working if you are in the starting position whereas the clock buttons always working regardless the chess position.
+Its also possible to play a chess960 (Fischer Random Chess) game. Just set up your chess960 position. Please choose "Stockfish" as your engine, cause the other engines dont support chess960 mode.
+Before or during your game you can also change your settings like book, time, engine, and many more (see details below). These settings are safed and reloaded, so you start with your old settings first.
+Settings can be changed by placing the white & black queen at the fields a4-h6 (you must be in the starting position) or by using the clock buttons (no matter the board position).
+With the queen placing you can change some default values, whereas the clock buttons offers the complete options.
 
 Playing/Training Modes
 ----------------------
@@ -18,7 +20,7 @@ When using these modes, please be patient and don't rush moves. Allow a few seco
 * Analysis mode (enabled by **white** queen on **B5**): the computer is watching the game, it does not play itself. The clock continually displays the best move for the side to play.
 * Kibitz mode (enabled by **white** queen on **C5**): the computer is watching the game, it does not play itself. The clock continually displays the position score.
 * Observe mode (enabled by **white** queen on **D5**): the computer is watching the game, it does not play itself. The clock displays the remaining thinking time for both sides. Press the second button once to show the position evaluation, twice to show a hint.
-* Remote play mode (enabled by **white** queen on **E5**): this modus is right now not implemented (future use). It will allow you to play against someone over internet.
+* Remote mode (enabled by **white** queen on **E5**): this modus is right now not fully implemented (future use). It will allow you to play against someone over internet.
 
 Game mode is the regular mode. If you used one of the other modes, you can return back to game mode by putting the extra **white** queen on **A5**.
 You can also press the fourth button for toggling over the modes (Qa5-Qe5 only working in the starting position).
@@ -27,6 +29,7 @@ The position score will always be displayed in centipawns from White's perspecti
 
 Choosing skill level
 --------------------
+
 Put the extra **black** queen on the 5th rank of your DGT board to select skill level. The skill range of ​​the currently selected engine is devided by 8 meaning a5 (easiest level) towards h5 (strongest level). Some engines support ELO level or even personalities instead of skill levels. If no skill level is selected, PicoChess uses the highest level if nothing choosen before or your last selected level by default.
 (Remove the extra white queen if it is still on the board). Please notice that not all chess engines support levels.
 
@@ -125,7 +128,7 @@ System shutdown
 From the start position, replace the white king with the extra white queen; this will shut down the machine (takes a few seconds until the blue light turns off). You can also do it with only the two white queens on the board (on e1,d1).
 
 System reboot
----------------
+-------------
 
 From the start position, replace the black king with the extra black queen; this will reboot the machine (takes a few seconds until the blue light turns off). You can also do it with only the two black queens on the board (on e8,d8).
 
