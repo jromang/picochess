@@ -201,7 +201,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
   ('index', 'PicoChess.tex', 'PicoChess Documentation',
-   'Jean-Francois Romang, Shivkumar Shivaji', 'Juergen Precour', 'manual'),
+   'Jean-Francois Romang, Shivkumar Shivaji', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -245,7 +245,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'PicoChess', 'PicoChess Documentation',
-   'Jean-Francois Romang, Shivkumar Shivaji', 'Juergen Precour', 'PicoChess',
+   'Jean-Francois Romang, Shivkumar Shivaji', 'PicoChess',
    'Stand alone chess computer based on Raspberry Pi and DGT electronic chess board.', 'Miscellaneous'),
 ]
 
