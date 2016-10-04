@@ -34,6 +34,7 @@ Put the extra **black** queen on the 5th rank of your DGT board to select skill 
 (Remove the extra white queen if it is still on the board). Please notice that not all chess engines support levels.
 
 In case of "stockfish" engine:
+
 * Level  0 estimates about 1100 Elo (Absolute beginner)
 * Level 10 estimates about 1750 Elo (Mediate club player )
 * Level 20 estimates about 2570 Elo (Advanced tournament player)
@@ -124,19 +125,21 @@ There are now 2 states (one is the "game-playing" state, where y see the clock t
 Entering the menu state can be done by pressing ">". Leaving it with "<". Entering the menu offers the last choosen top-level in menu (for example "Mode")
 
 If you are not inside the menu (clock showing moves, times), the function is as follows:
-* (<) button - showing the last move
-* (-) button - showing the last score
-* (=) button - start/stop the clock (user turn) or abort the search (engine thinking) or calculate an alternative move (engine showing its move)
-* (+) button - showing a hint move (user turn) or the current best move (engine thinking)
-* (>) button - Entering the menu
-* lever - switch sides If its users turn the engine will begin to calculate its move, otherwise the search is aborted (engine calculating) or the shown move is canceled (engine shows its move). In these cases its your turn.
+
+* **(<) button** - showing the last move
+* **(-) button** - showing the last score
+* **(=) button** - start/stop the clock (user turn) or abort the search (engine thinking) or calculate an alternative move (engine showing its move)
+* **(+) button** - showing a hint move (user turn) or the current best move (engine thinking)
+* **(>) button** - Entering the menu
+* **lever** - switch sides If its users turn the engine will begin to calculate its move, otherwise the search is aborted (engine calculating) or the shown move is canceled (engine shows its move). In these cases its your turn.
 
 If you already inside the menu (clock showing you menu or value items) the function is as follows:
-* (<) button - moving up a level inside the menu tree. If you already at top exists the menu
-* (-) button - showing the previous value inside the menu tree
-* (=) button - no function
-* (+) button - showing the next value inside the menu tree
-* (>) button - moving down a level inside the menu tree. If there is none, it accepts the choosen value and exists the menu
+
+* **(<) button** - moving up a level inside the menu tree. If you already at top exists the menu
+* **(-) button** - showing the previous value inside the menu tree
+* **(=) button** - no function
+* **(+) button** - showing the next value inside the menu tree
+* **(>) button** - moving down a level inside the menu tree. If there is none, it accepts the choosen value and exists the menu
 
 The next chapters decribe each top-level menu items in greater detail.
 
@@ -151,10 +154,11 @@ Postition Menu
 
 Here you can setup a position. To enter this, picochess will answer you some questions. You can setup the position before y enter this menu or before you press >" at last step (=scan).
 Here are the list of questions to be answered:
-* side - decides with side to move first
-* origin of board - is the board flipped (which side of board is white which is black)
-* chess960 - is this a fischer random position (used for castling) Please make sure your choose engine support 960 mode (stockfish for example)
-* scan - after accepting with ">" picochess will scan in the position (last chance to setup your pieces)
+
+* **side** - decides with side to move first
+* **origin** - is the board flipped (which side of board is white which is black)
+* **chess960** - is this a fischer random position (used for castling) Please make sure your choose engine support 960 mode (stockfish for example)
+* **scan** - after accepting with ">" picochess will scan in the position (last chance to setup your pieces)
 
 Time Menu
 ---------
@@ -178,10 +182,11 @@ System Menu
 -----------
 
 Here you choose between the following:
-* version - showing you the current picochess version
-* ip adr - showing you the last part of your ip-adr. This is needed for example to use the picochess webserver (see below)
-* sound - controls the beeps of your dgt clock. You can change between "never", "sometimes", or "always"
-* language - sets the language of clock messages. You can choose between english, german, french, dutch and spanish
+
+* **version** - showing you the current picochess version
+* **ip adr** - showing you the last part of your ip-adr. This is needed for example to use the picochess webserver (see below)
+* **sound** - controls the beeps of your dgt clock. You can change between "never", "sometimes", or "always"
+* **language** - sets the language of clock messages. You can choose between english, german, french, dutch and spanish
 
 System shutdown
 ---------------
@@ -200,8 +205,8 @@ All moves of the played game along with engine are stored at the end of the game
 Every game played with picochess is stored in the /opt/picochess folder as "games.pgn".
 If you want to end it before and write out the pgn file including the correct result, you can do as following:
 Placing the two kings on opposite centre squares will signal a resignation:
-    - If both kings on white, the result is white wins and the game recorded 1-0
-    - If both kings on black, the result is black wins and the game recorded 0-1
+- If both kings on white, the result is white wins and the game recorded 1-0
+- If both kings on black, the result is black wins and the game recorded 0-1
 
 Placing the kings on adjacent centre squares on the same rank signals a draw and the game recorded 1/2-1/2.
 The 4 and 5 rank must be clear of other pieces - only kings.
