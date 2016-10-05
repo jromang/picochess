@@ -37,6 +37,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.ip = None
         self.drawresign_fen = None
         self.show_setup_pieces_msg = True
+        self.show_anlykbtz_move = True
 
         self._reset_moves_and_score()
 
@@ -682,7 +683,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     'rnbqkbnr/pppppppp/8/1Q6/8/8/PPPPPPPP/RNBQKBNR': Mode.ANALYSIS,
                     'rnbqkbnr/pppppppp/8/2Q5/8/8/PPPPPPPP/RNBQKBNR': Mode.KIBITZ,
                     'rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR': Mode.OBSERVE,
-                    'rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR': Mode.REMOTE}
+                    'rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR': Mode.REMOTE,
+                    'rnbqkbnr/pppppppp/8/5Q2/8/8/PPPPPPPP/RNBQKBNR': Mode.ANLYKBTZ}
 
         drawresign_map = {'8/8/8/3k4/4K3/8/8/8': GameResult.WIN_WHITE,
                           '8/8/8/3K4/4k3/8/8/8': GameResult.WIN_WHITE,
@@ -821,7 +823,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.score = message.score
                 self.mate = message.mate
                 if message.mode == Mode.KIBITZ and self.top_result is None:
-                    DisplayDgt.show(self.dgttranslate.text('N10_default', str(self.score).rjust(6)))
+                    if self.mate is None:
+                        text = self.dgttranslate.text('N10_score', self.score)
+                    else:
+                        text = self.dgttranslate.text('N10_mate', str(self.mate))
+                    DisplayDgt.show(text)
                 break
             if case(MessageApi.BOOK_MOVE):
                 self.score = None
@@ -1049,6 +1055,21 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 break
             if case(MessageApi.DGT_CLOCK_TIME):
                 DisplayDgt.show(Dgt.CLOCK_TIME(time_left=message.time_left, time_right=message.time_right))
+                break
+            if case(MessageApi.DGT_SERIAL_NR):
+                logging.debug('Serial number {}'.format(message.number))  # actually used for watchdog (=once a second)
+                if self.mode_result == Mode.ANLYKBTZ and self.top_result is None:
+                    if self.show_anlykbtz_move:
+                        side = ClockSide.LEFT if (self.hint_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
+                        DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=False,
+                                                         beep=self.dgttranslate.bl(BeepLevel.NO), maxtime=0))
+                    else:
+                        if self.mate is None:
+                            text = self.dgttranslate.text('B10_score', self.score)
+                        else:
+                            text = self.dgttranslate.text('B10_mate', str(self.mate))
+                        DisplayDgt.show(text)
+                    self.show_anlykbtz_move = not self.show_anlykbtz_move
                 break
             if case(MessageApi.JACK_CONNECTED_ERROR):  # this will only work in case of 2 clocks connected!
                 DisplayDgt.show(self.dgttranslate.text('Y00_errorjack'))

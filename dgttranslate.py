@@ -391,6 +391,12 @@ class DgtTranslate(object):
             nltxt = Dgt.DISPLAY_TEXT(l='Remote     ', m='Remote  ', s='remote')
             frtxt = Dgt.DISPLAY_TEXT(l='Remote     ', m='Remote  ', s='remote')
             estxt = Dgt.DISPLAY_TEXT(l='Remoto     ', m='Remoto  ', s='remoto')
+        if text_id == 'mode_anlykbtz_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='analy kibtz', m='anlykibz', s='anakib')
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
         if text_id == 'timemode_fixed_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Move time  ', m='Movetime', s='move t')
             detxt = Dgt.DISPLAY_TEXT(l='Zugzeit    ', m='Zugzeit ', s='zug z ')

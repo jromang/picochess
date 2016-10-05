@@ -97,6 +97,7 @@ class MessageApi():
     DGT_FEN = 'MSG_DGT_FEN'  # DGT Board sends a fen
     DGT_CLOCK_VERSION = 'MSG_DGT_CLOCK_VERSION'  # DGT Board sends the clock version
     DGT_CLOCK_TIME = 'MSG_DGT_CLOCK_TIME'  # DGT Clock time message
+    DGT_SERIAL_NR = 'MSG_DGT_SERIAL_NR'  # DGT Clock serial_nr (used for watchdog only)
 
     INTERACTION_MODE = 'MSG_INTERACTON_MODE'  # Interaction mode
     PLAY_MODE = 'MSG_PLAY_MODE'  # Play mode
@@ -191,6 +192,7 @@ class Mode(enum.Enum):
     KIBITZ = 'B00_mode_kibitz_menu'
     OBSERVE = 'B00_mode_observe_menu'
     REMOTE = 'B00_mode_remote_menu'
+    ANLYKBTZ = 'B00_mode_anlykbtz_menu'
 
 
 class ModeLoop(object):
@@ -208,13 +210,15 @@ class ModeLoop(object):
         elif m == Mode.OBSERVE:
             return Mode.REMOTE
         elif m == Mode.REMOTE:
+            return Mode.ANLYKBTZ
+        elif m == Mode.ANLYKBTZ:
             return Mode.NORMAL
         return 'error ModeLoop next'
 
     @staticmethod
     def prev(m):
         if m == Mode.NORMAL:
-            return Mode.REMOTE
+            return Mode.ANLYKBTZ
         elif m == Mode.ANALYSIS:
             return Mode.NORMAL
         elif m == Mode.KIBITZ:
@@ -223,6 +227,8 @@ class ModeLoop(object):
             return Mode.KIBITZ
         elif m == Mode.REMOTE:
             return Mode.OBSERVE
+        elif m == Mode.ANLYKBTZ:
+            return Mode.REMOTE
         return 'error ModeLoop prev'
 
 
@@ -658,6 +664,7 @@ class Message():
     DGT_FEN = ClassFactory(MessageApi.DGT_FEN, ['fen'])
     DGT_CLOCK_VERSION = ClassFactory(MessageApi.DGT_CLOCK_VERSION, ['main', 'sub', 'attached'])
     DGT_CLOCK_TIME = ClassFactory(MessageApi.DGT_CLOCK_TIME, ['time_left', 'time_right'])
+    DGT_SERIAL_NR = ClassFactory(MessageApi.DGT_SERIAL_NR, ['number'])
 
     INTERACTION_MODE = ClassFactory(MessageApi.INTERACTION_MODE, ['mode', 'mode_text', 'ok_text'])
     PLAY_MODE = ClassFactory(MessageApi.PLAY_MODE, ['play_mode', 'play_mode_text'])
