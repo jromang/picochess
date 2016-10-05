@@ -4,7 +4,7 @@ Usage
 Setup the starting position
 ---------------------------
 Place the pieces in starting position. It doesn't matter if you have the white or black pieces in front of you. Both ways will work. Keep in mind that with black pieces in front of you the (printed) coordinates of your dgt-board also reversed.
-You can now start a game by moving a piece or press the middle button to let picochess start.
+You can now start a game by moving a piece or press the lever to let picochess start as white.
 
 Its also possible to play a chess960 (Fischer Random Chess) game. Just set up your chess960 position. Please choose "Stockfish" as your engine, cause the other engines dont support chess960 mode.
 Before or during your game you can also change your settings like book, time, engine, and many more (see details below). These settings are safed and reloaded, so you start with your old settings first.
@@ -65,6 +65,21 @@ Opening books are set with the extra **black** queen.
 * **H4** - GM 2001
 
 Another way to choose the opening book is by entering the "Book" menu with the clock buttons. Detailed explanation is below.
+
+Choosing the engine
+-------------------
+
+engines are set with the extra **black** queen.
+(Remove the extra white queen if it is still on the board)
+
+* **A6** - Stockfish 7
+* **B6** - Texel 1.06
+* **C6** - Arasan 18.3
+* **D6** - Rodent II
+* **E6** - Zurichess skills
+* **F6** - Floyd 0.8 dev
+* **G6** - Cinnamon 2.0
+* **H6** - Claudia 0.5
 
 Setting up time controls
 ------------------------
