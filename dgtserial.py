@@ -131,7 +131,7 @@ class DgtSerial(object):
             if self.clock_lock:
                 logging.warning('DGT clock [ser]: already locked. Maybe a "resend"?')
             else:
-                logging.debug('DGT clock [ser]: locked')
+                logging.debug('DGT clock [ser]: now locked')
                 self.clock_lock = time.time()
         return True
 
@@ -217,18 +217,19 @@ class DgtSerial(object):
                     status = (message[6] & 0x3f)
                     if status & 0x20:
                         logging.warning('DGT clock [ser] not connected')
+                        self.lever_pos = None
                     else:
                         tr = [r_hours, r_mins, r_secs]
                         tl = [l_hours, l_mins, l_secs]
                         logging.info('DGT clock [ser]: received time from clock l:{} r:{}'.format(tl, tr))
                         DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=tl, time_right=tr))
 
-                    right_side_down = -0x40 if status & 0x02 else 0x40
-                    if self.lever_pos != right_side_down:
-                        logging.debug('button status: {} old lever_pos: {}'.format(status, self.lever_pos))
-                        if self.lever_pos is not None:
-                            DisplayMsg.show(Message.DGT_BUTTON(button=right_side_down))
-                        self.lever_pos = right_side_down
+                        right_side_down = -0x40 if status & 0x02 else 0x40
+                        if self.lever_pos != right_side_down:
+                            logging.debug('button status: {} old lever_pos: {}'.format(status, self.lever_pos))
+                            if self.lever_pos is not None:
+                                DisplayMsg.show(Message.DGT_BUTTON(button=right_side_down))
+                            self.lever_pos = right_side_down
                 else:
                     logging.debug('DGT clock [ser]: null message ignored')
                 if self.clock_lock:
