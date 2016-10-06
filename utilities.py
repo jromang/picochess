@@ -680,7 +680,7 @@ class Message():
 
     SYSTEM_INFO = ClassFactory(MessageApi.SYSTEM_INFO, ['info'])
     STARTUP_INFO = ClassFactory(MessageApi.STARTUP_INFO, ['info'])
-    NEW_SCORE = ClassFactory(MessageApi.NEW_SCORE, ['score', 'mate', 'mode'])
+    NEW_SCORE = ClassFactory(MessageApi.NEW_SCORE, ['score', 'mate', 'mode', 'turn'])
     ALTERNATIVE_MOVE = ClassFactory(MessageApi.ALTERNATIVE_MOVE, [])
     JACK_CONNECTED_ERROR = ClassFactory(MessageApi.JACK_CONNECTED_ERROR, [])
     NO_CLOCK_ERROR = ClassFactory(MessageApi.NO_CLOCK_ERROR, ['text'])

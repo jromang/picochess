@@ -139,8 +139,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.last_move = chess.Move.null()
         self.last_fen = None
         self.last_turn = None
-        self.score = None
-        self.mate = None
+        self.score = self.dgttranslate.text('N10_score', None)
 
     def _process_button0(self):
         if self.top_result is None:
@@ -218,10 +217,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
     def _process_button1(self):
         if self.top_result is None:
-            if self.mate is None:
-                text = self.dgttranslate.text('B10_score', self.score)
-            else:
-                text = self.dgttranslate.text('B10_mate', str(self.mate))
+            text = self.score
+            text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             DisplayDgt.show(text)
             self._exit_display(wait=True)
 
@@ -820,18 +817,22 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 DisplayDgt.show(message.play_mode_text)
                 break
             if case(MessageApi.NEW_SCORE):
-                self.score = message.score
-                self.mate = message.mate
-                if message.mode == Mode.KIBITZ and self.top_result is None:
-                    if self.mate is None:
-                        text = self.dgttranslate.text('N10_score', self.score)
+                if message.score == 'gaviota':
+                    text = self.dgttranslate.text('N10_gaviota', '{}'.format(message.mate))
+                else:
+                    if message.mate is None:
+                        score = int(message.score)
+                        if message.turn == chess.BLACK:
+                            score *= -1
+                        text = self.dgttranslate.text('N10_score', score)
                     else:
-                        text = self.dgttranslate.text('N10_mate', str(self.mate))
+                        text = self.dgttranslate.text('N10_mate', str(message.mate))
+                self.score = text
+                if message.mode == Mode.KIBITZ and self.top_result is None:
                     DisplayDgt.show(text)
                 break
             if case(MessageApi.BOOK_MOVE):
-                self.score = None
-                self.mate = None
+                self.score = self.dgttranslate.text('N10_score', None)
                 DisplayDgt.show(self.dgttranslate.text('N10_bookmove'))
                 break
             if case(MessageApi.NEW_PV):
@@ -1060,15 +1061,16 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 logging.debug('Serial number {}'.format(message.number))  # actually used for watchdog (=once a second)
                 if self.mode_result == Mode.ANLYKBTZ and self.top_result is None:
                     if self.show_anlykbtz_move > 1:
-                        side = ClockSide.LEFT if (self.hint_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
-                        DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=False,
-                                                         beep=self.dgttranslate.bl(BeepLevel.NO), maxtime=0))
-                    else:
-                        if self.mate is None:
-                            text = self.dgttranslate.text('N10_score', self.score)
+                        if self.hint_move:
+                            show_left = (self.hint_turn == chess.WHITE) != self.flip_board
+                            text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen,
+                                                    side=ClockSide.LEFT if show_left else ClockSide.RIGHT, wait=False,
+                                                    beep=self.dgttranslate.bl(BeepLevel.NO), maxtime=1)
                         else:
-                            text = self.dgttranslate.text('N10_mate', str(self.mate))
-                        DisplayDgt.show(text)
+                            text = self.dgttranslate.text('N10_nomove')
+                    else:
+                        text = self.score
+                    DisplayDgt.show(text)
                     self.show_anlykbtz_move = (self.show_anlykbtz_move + 1) % 4
                 break
             if case(MessageApi.JACK_CONNECTED_ERROR):  # this will only work in case of 2 clocks connected!

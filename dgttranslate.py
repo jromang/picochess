@@ -319,6 +319,12 @@ class DgtTranslate(object):
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
+        if text_id == 'gaviota':
+            entxt = Dgt.DISPLAY_TEXT(l='gaviota ' + msg, m='gavio' + msg, s='gav'+ msg)
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
         if text_id == 'menu_top_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Top menu   ', m='Top menu', s='topmen')
             detxt = Dgt.DISPLAY_TEXT(l='Haupt Menu ', m='Hpt Menu', s='topmen')

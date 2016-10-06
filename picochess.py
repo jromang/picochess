@@ -116,7 +116,7 @@ def main():
             return None
         score = gaviota.probe_dtm(game)
         if score is not None:
-            Observable.fire(Event.NEW_SCORE(score='tb', mate=score))
+            Observable.fire(Event.NEW_SCORE(score='gaviota', mate=score))
         return score
 
     def think(game, tc):
@@ -128,7 +128,6 @@ def main():
         start_clock()
         book_move = searchmoves.book(bookreader, game)
         if book_move:
-            Observable.fire(Event.NEW_SCORE(score='book', mate=None))
             Observable.fire(Event.BEST_MOVE(result=book_move, inbook=True))
         else:
             probe_tablebase(game)
@@ -805,21 +804,7 @@ def main():
                     break
 
                 if case(EventApi.NEW_SCORE):
-                    if event.score == 'book':
-                        score = 'book'
-                    elif event.score == 'tb':
-                        score = 'tb {0}'.format(event.mate)
-                    else:
-                        try:
-                            score = int(event.score)
-                            if game.turn == chess.BLACK:
-                                score *= -1
-                        except ValueError:
-                            score = event.score
-                            logging.debug('could not convert score ' + score)
-                        except TypeError:
-                            score = 'm {0}'.format(event.mate)
-                    DisplayMsg.show(Message.NEW_SCORE(score=score, mate=event.mate, mode=interaction_mode))
+                    DisplayMsg.show(Message.NEW_SCORE(score=event.score, mate=event.mate, mode=interaction_mode, turn=game.turn))
                     break
 
                 if case(EventApi.SET_INTERACTION_MODE):
