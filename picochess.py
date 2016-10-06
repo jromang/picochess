@@ -314,9 +314,9 @@ def main():
                     else:
                         legal_fens = compute_legal_fens(game)
 
-                    if interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
+                    if interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.ANLYKBTZ):
                         analyse(game)
-                    elif interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
+                    elif interaction_mode in (Mode.OBSERVE, Mode.REMOTE):
                         observe(game)
                     start_clock()
                     DisplayMsg.show(Message.USER_TAKE_BACK())
@@ -337,9 +337,9 @@ def main():
         # clock must be stoped BEFORE the "book_move" event cause SetNRun resets the clock display
         if interaction_mode == Mode.NORMAL:
             stop_clock()
-        elif interaction_mode == Mode.REMOTE or interaction_mode == Mode.OBSERVE:
+        elif interaction_mode in (Mode.REMOTE, Mode.OBSERVE):
             stop_search_and_clock()
-        elif interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
+        elif interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.ANLYKBTZ):
             stop_search()
 
         # engine or remote move
@@ -673,9 +673,9 @@ def main():
                             DisplayMsg.show(Message.ENGINE_FAIL())
                         set_wait_state()
                         # Go back to analysing or observing
-                        if interaction_mode == Mode.ANALYSIS or interaction_mode == Mode.KIBITZ:
+                        if interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.ANLYKBTZ):
                             analyse(game)
-                        if interaction_mode == Mode.OBSERVE or interaction_mode == Mode.REMOTE:
+                        if interaction_mode in (Mode.OBSERVE, Mode.REMOTE):
                             observe(game)
                     break
 

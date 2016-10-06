@@ -291,11 +291,12 @@ class ChessTalkerVoice():
     VOCAB_LEVEL = "LEVEL"
     VOCAB_OPENING_BOOK = "OPENING_BOOK"
     VOCAB_MODE = "MODE"
-    VOCAB_MODE_GAME = "MODE_GAME"
+    VOCAB_MODE_NORMAL = "MODE_NORMAL"
     VOCAB_MODE_ANALYSIS = "MODE_ANALYSIS"
     VOCAB_MODE_KIBITZ = "MODE_KIBITZ"
     VOCAB_MODE_OBSERVE = "MODE_OBSERVE"
     VOCAB_MODE_REMOTE = "MODE_REMOTE"
+    VOCAB_MODE_ANLYKBTZ = "MODE_ANLYKBTZ"
     VOCAB_MODE_PLAY_BLACK = "MODE_PLAY_BLACK"
     VOCAB_MODE_PLAY_WHITE = "MODE_PLAY_WHITE"
     VOCAB_TIME_CONTROL_FIXED_TIME = "TIME_CONTROL_FIXED_TIME"
@@ -478,7 +479,7 @@ class ChessTalkerVoice():
         """Announce an mode setting"""
         modeVocab = None
         if mode == Mode.NORMAL:
-            modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_GAME]
+            modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_NORMAL]
         elif mode == Mode.ANALYSIS:
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_ANALYSIS]
         elif mode == Mode.KIBITZ:
@@ -487,6 +488,8 @@ class ChessTalkerVoice():
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_OBSERVE]
         elif mode == Mode.REMOTE:
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_REMOTE]
+        elif mode == Mode.ANLYKBTZ:
+            modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_ANLYKBTZ]
         elif mode == PlayMode.USER_BLACK:
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_PLAY_BLACK]
         elif mode == PlayMode.USER_WHITE:
@@ -495,7 +498,6 @@ class ChessTalkerVoice():
         if modeVocab:
             text = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE].replace("$(MODE)", modeVocab)
             return self.say_text(text)
-
         return None
 
     def say_shutdown(self):

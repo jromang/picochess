@@ -315,7 +315,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.engine_finished = False  # This is not 100% ok, but for the moment better as nothing
                 self.fire(Event.ALTERNATIVE_MOVE())
             else:
-                if self.mode_result in (Mode.ANALYSIS, Mode.KIBITZ):
+                if self.mode_result in (Mode.ANALYSIS, Mode.KIBITZ, Mode.ANLYKBTZ):
                     text = self.dgttranslate.text('B00_nofunction')
                     DisplayDgt.show(text)
                 else:
