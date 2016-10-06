@@ -37,7 +37,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.ip = None
         self.drawresign_fen = None
         self.show_setup_pieces_msg = True
-        self.show_anlykbtz_move = True
+        self.show_anlykbtz_move = 0
 
         self._reset_moves_and_score()
 
@@ -1059,17 +1059,17 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if case(MessageApi.DGT_SERIAL_NR):
                 logging.debug('Serial number {}'.format(message.number))  # actually used for watchdog (=once a second)
                 if self.mode_result == Mode.ANLYKBTZ and self.top_result is None:
-                    if self.show_anlykbtz_move:
+                    if self.show_anlykbtz_move > 1:
                         side = ClockSide.LEFT if (self.hint_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
                         DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=False,
                                                          beep=self.dgttranslate.bl(BeepLevel.NO), maxtime=0))
                     else:
                         if self.mate is None:
-                            text = self.dgttranslate.text('B10_score', self.score)
+                            text = self.dgttranslate.text('N10_score', self.score)
                         else:
-                            text = self.dgttranslate.text('B10_mate', str(self.mate))
+                            text = self.dgttranslate.text('N10_mate', str(self.mate))
                         DisplayDgt.show(text)
-                    self.show_anlykbtz_move = not self.show_anlykbtz_move
+                    self.show_anlykbtz_move = (self.show_anlykbtz_move + 1) % 4
                 break
             if case(MessageApi.JACK_CONNECTED_ERROR):  # this will only work in case of 2 clocks connected!
                 DisplayDgt.show(self.dgttranslate.text('Y00_errorjack'))
