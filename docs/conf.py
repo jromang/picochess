@@ -41,7 +41,7 @@ templates_path = ['_templates']
 source_suffix = '.rst'
 
 # The encoding of source files.
-#source_encoding = 'utf-8-sig'
+# source_encoding = 'utf-8-sig'
 
 # The master toctree document.
 master_doc = 'index'
@@ -245,7 +245,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'PicoChess', 'PicoChess Documentation',
-   'Jean-Francois Romang, Shivkumar Shivaji', u'Jürgen Précour', 'PicoChess',
+   'Jean-Francois Romang, Shivkumar Shivaji', 'PicoChess',
    'Stand alone chess computer based on Raspberry Pi and DGT electronic chess board.', 'Miscellaneous'),
 ]
 
