@@ -397,8 +397,8 @@ class DgtTranslate(object):
             nltxt = Dgt.DISPLAY_TEXT(l='Remote     ', m='Remote  ', s='remote')
             frtxt = Dgt.DISPLAY_TEXT(l='Remote     ', m='Remote  ', s='remote')
             estxt = Dgt.DISPLAY_TEXT(l='Remoto     ', m='Remoto  ', s='remoto')
-        if text_id == 'mode_anlykbtz_menu':
-            entxt = Dgt.DISPLAY_TEXT(l='analy kibtz', m='anlykibz', s='anakib')
+        if text_id == 'mode_ponder_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='Ponder     ', m='Ponder  ', s='ponder')
             detxt = entxt
             nltxt = entxt
             frtxt = entxt

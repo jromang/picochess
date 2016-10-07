@@ -488,7 +488,7 @@ class ChessTalkerVoice():
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_OBSERVE]
         elif mode == Mode.REMOTE:
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_REMOTE]
-        elif mode == Mode.ANLYKBTZ:
+        elif mode == Mode.PONDER:
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_ANLYKBTZ]
         elif mode == PlayMode.USER_BLACK:
             modeVocab = self.voice_vocabulary[ChessTalkerVoice.VOCAB_MODE_PLAY_BLACK]

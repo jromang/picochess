@@ -313,7 +313,7 @@ def main():
                     else:
                         legal_fens = compute_legal_fens(game)
 
-                    if interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.ANLYKBTZ):
+                    if interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
                         analyse(game)
                     elif interaction_mode in (Mode.OBSERVE, Mode.REMOTE):
                         observe(game)
@@ -338,7 +338,7 @@ def main():
             stop_clock()
         elif interaction_mode in (Mode.REMOTE, Mode.OBSERVE):
             stop_search_and_clock()
-        elif interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.ANLYKBTZ):
+        elif interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
             stop_search()
 
         # engine or remote move
@@ -672,7 +672,7 @@ def main():
                             DisplayMsg.show(Message.ENGINE_FAIL())
                         set_wait_state()
                         # Go back to analysing or observing
-                        if interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.ANLYKBTZ):
+                        if interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
                             analyse(game)
                         if interaction_mode in (Mode.OBSERVE, Mode.REMOTE):
                             observe(game)

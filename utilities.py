@@ -194,7 +194,7 @@ class Mode(enum.Enum):
     KIBITZ = 'B00_mode_kibitz_menu'
     OBSERVE = 'B00_mode_observe_menu'
     REMOTE = 'B00_mode_remote_menu'
-    ANLYKBTZ = 'B00_mode_anlykbtz_menu'
+    PONDER = 'B00_mode_ponder_menu'
 
 
 class ModeLoop(object):
@@ -212,15 +212,15 @@ class ModeLoop(object):
         elif m == Mode.OBSERVE:
             return Mode.REMOTE
         elif m == Mode.REMOTE:
-            return Mode.ANLYKBTZ
-        elif m == Mode.ANLYKBTZ:
+            return Mode.PONDER
+        elif m == Mode.PONDER:
             return Mode.NORMAL
         return 'error ModeLoop next'
 
     @staticmethod
     def prev(m):
         if m == Mode.NORMAL:
-            return Mode.ANLYKBTZ
+            return Mode.PONDER
         elif m == Mode.ANALYSIS:
             return Mode.NORMAL
         elif m == Mode.KIBITZ:
@@ -229,7 +229,7 @@ class ModeLoop(object):
             return Mode.KIBITZ
         elif m == Mode.REMOTE:
             return Mode.OBSERVE
-        elif m == Mode.ANLYKBTZ:
+        elif m == Mode.PONDER:
             return Mode.REMOTE
         return 'error ModeLoop prev'
 

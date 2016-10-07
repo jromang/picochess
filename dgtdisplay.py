@@ -37,7 +37,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.ip = None
         self.drawresign_fen = None
         self.show_setup_pieces_msg = True
-        self.show_anlykbtz_move = 0
+        self.show_move_or_value = 0
 
         self._reset_moves_and_score()
 
@@ -326,7 +326,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.engine_finished = False  # This is not 100% ok, but for the moment better as nothing
                 self.fire(Event.ALTERNATIVE_MOVE())
             else:
-                if self.mode_result in (Mode.ANALYSIS, Mode.KIBITZ, Mode.ANLYKBTZ):
+                if self.mode_result in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
                     text = self.dgttranslate.text('B00_nofunction')
                     DisplayDgt.show(text)
                 else:
@@ -695,7 +695,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     'rnbqkbnr/pppppppp/8/2Q5/8/8/PPPPPPPP/RNBQKBNR': Mode.KIBITZ,
                     'rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR': Mode.OBSERVE,
                     'rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR': Mode.REMOTE,
-                    'rnbqkbnr/pppppppp/8/5Q2/8/8/PPPPPPPP/RNBQKBNR': Mode.ANLYKBTZ}
+                    'rnbqkbnr/pppppppp/8/5Q2/8/8/PPPPPPPP/RNBQKBNR': Mode.PONDER}
 
         drawresign_map = {'8/8/8/3k4/4K3/8/8/8': GameResult.WIN_WHITE,
                           '8/8/8/3K4/4k3/8/8/8': GameResult.WIN_WHITE,
@@ -1076,8 +1076,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 break
             if case(MessageApi.DGT_SERIAL_NR):
                 # logging.debug('Serial number {}'.format(message.number))  # actually used for watchdog (once a second)
-                if self.mode_result == Mode.ANLYKBTZ and self.top_result is None:
-                    if self.show_anlykbtz_move > 1:
+                if self.mode_result == Mode.PONDER and self.top_result is None:
+                    if self.show_move_or_value > 1:
                         if self.hint_move:
                             show_left = (self.hint_turn == chess.WHITE) != self.flip_board
                             text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen,
@@ -1088,7 +1088,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     else:
                         text = self._combine_depth_and_score()
                     DisplayDgt.show(text)
-                    self.show_anlykbtz_move = (self.show_anlykbtz_move + 1) % 4
+                    self.show_move_or_value = (self.show_move_or_value + 1) % 4
                 break
             if case(MessageApi.JACK_CONNECTED_ERROR):  # this will only work in case of 2 clocks connected!
                 DisplayDgt.show(self.dgttranslate.text('Y00_errorjack'))
