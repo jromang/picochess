@@ -143,17 +143,19 @@ def write_engine_ini(engine_path=None):
 class Informer(chess.uci.InfoHandler):
     def __init__(self):
         super(Informer, self).__init__()
-        self.dep = 0
+        self.dep = -1
         self.allow_score = True
         self.allow_pv = True
 
     def on_go(self):
-        self.dep = 0
+        self.dep = -1
         self.allow_score = True
         self.allow_pv = True
         super().on_go()
 
     def depth(self, dep):
+        if self.dep != dep:
+            Observable.fire(Event.NEW_DEPTH(depth=dep))
         self.dep = dep
         super().depth(dep)
 

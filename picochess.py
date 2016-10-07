@@ -807,6 +807,10 @@ def main():
                     DisplayMsg.show(Message.NEW_SCORE(score=event.score, mate=event.mate, mode=interaction_mode, turn=game.turn))
                     break
 
+                if case(EventApi.NEW_DEPTH):
+                    DisplayMsg.show(Message.NEW_DEPTH(depth=event.depth))
+                    break
+
                 if case(EventApi.SET_INTERACTION_MODE):
                     if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
                         stop_clock()  # only stop, if the clock is really running

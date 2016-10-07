@@ -78,6 +78,7 @@ class EventApi():
     BEST_MOVE = 'EVT_BEST_MOVE'  # Engine has found a move
     NEW_PV = 'EVT_NEW_PV'  # Engine sends a new principal variation
     NEW_SCORE = 'EVT_NEW_SCORE'  # Engine sends a new score
+    NEW_DEPTH = 'EVT_NEW_DEPTH'  # Engine sends a new depth
     OUT_OF_TIME = 'EVT_OUT_OF_TIME'  # Clock flag fallen
 
 
@@ -113,7 +114,8 @@ class MessageApi():
 
     SYSTEM_INFO = 'MSG_SYSTEM_INFO'  # Information about picochess such as version etc
     STARTUP_INFO = 'MSG_STARTUP_INFO'  # Information about the startup options
-    NEW_SCORE = 'MSG_NEW_SCORE'  # Score
+    NEW_SCORE = 'MSG_NEW_SCORE'  # Shows a new score
+    NEW_DEPTH = 'MSG_NEW_DEPTH'  # Shows a new depth
     ALTERNATIVE_MOVE = 'MSG_ALTERNATIVE_MOVE'  # User wants another move to be calculated
     JACK_CONNECTED_ERROR = 'MSG_JACK_CONNECTED_ERROR'  # User connected fully|partly the clock via jack => remove it
     NO_CLOCK_ERROR = 'MSG_NO_CLOCK_ERROR'  # User hasnt connected a clock
@@ -681,6 +683,7 @@ class Message():
     SYSTEM_INFO = ClassFactory(MessageApi.SYSTEM_INFO, ['info'])
     STARTUP_INFO = ClassFactory(MessageApi.STARTUP_INFO, ['info'])
     NEW_SCORE = ClassFactory(MessageApi.NEW_SCORE, ['score', 'mate', 'mode', 'turn'])
+    NEW_DEPTH = ClassFactory(MessageApi.NEW_DEPTH, ['depth'])
     ALTERNATIVE_MOVE = ClassFactory(MessageApi.ALTERNATIVE_MOVE, [])
     JACK_CONNECTED_ERROR = ClassFactory(MessageApi.JACK_CONNECTED_ERROR, [])
     NO_CLOCK_ERROR = ClassFactory(MessageApi.NO_CLOCK_ERROR, ['text'])
@@ -715,6 +718,7 @@ class Event():
     BEST_MOVE = ClassFactory(EventApi.BEST_MOVE, ['result', 'inbook'])
     NEW_PV = ClassFactory(EventApi.NEW_PV, ['pv'])
     NEW_SCORE = ClassFactory(EventApi.NEW_SCORE, ['score', 'mate'])
+    NEW_DEPTH = ClassFactory(EventApi.NEW_DEPTH, ['depth'])
     OUT_OF_TIME = ClassFactory(EventApi.OUT_OF_TIME, ['color'])
 
 

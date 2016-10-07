@@ -140,6 +140,17 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.last_fen = None
         self.last_turn = None
         self.score = self.dgttranslate.text('N10_score', None)
+        self.depth = None
+
+    def _combine_depth_and_score(self):
+        score = copy.copy(self.score)
+        if int(score.s) <= -1000:
+            score.s = '-999'
+        score.l = str(self.depth % 100) + score.l[-9:]
+        score.m = str(self.depth % 100) + score.m[-6:]
+        score.s = str(self.depth % 100) + score.s[-4:]
+        # score.rd = 0x10 if self.enable_dgt_pi else 0x01
+        return score
 
     def _process_button0(self):
         if self.top_result is None:
@@ -217,7 +228,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
     def _process_button1(self):
         if self.top_result is None:
-            text = self.score
+            text = self._combine_depth_and_score()
             text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             DisplayDgt.show(text)
             self._exit_display(wait=True)
@@ -829,7 +840,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         text = self.dgttranslate.text('N10_mate', str(message.mate))
                 self.score = text
                 if message.mode == Mode.KIBITZ and self.top_result is None:
-                    DisplayDgt.show(text)
+                    DisplayDgt.show(self._combine_depth_and_score())
                 break
             if case(MessageApi.BOOK_MOVE):
                 self.score = self.dgttranslate.text('N10_score', None)
@@ -843,6 +854,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     side = ClockSide.LEFT if (self.hint_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
                     DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=False,
                                                      beep=self.dgttranslate.bl(BeepLevel.NO), maxtime=0))
+                break
+            if case(MessageApi.NEW_DEPTH):
+                self.depth = message.depth
                 break
             if case(MessageApi.SYSTEM_INFO):
                 self.ip = message.info['ip']
@@ -1058,7 +1072,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 DisplayDgt.show(Dgt.CLOCK_TIME(time_left=message.time_left, time_right=message.time_right))
                 break
             if case(MessageApi.DGT_SERIAL_NR):
-                logging.debug('Serial number {}'.format(message.number))  # actually used for watchdog (=once a second)
+                # logging.debug('Serial number {}'.format(message.number))  # actually used for watchdog (once a second)
                 if self.mode_result == Mode.ANLYKBTZ and self.top_result is None:
                     if self.show_anlykbtz_move > 1:
                         if self.hint_move:
@@ -1069,7 +1083,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         else:
                             text = self.dgttranslate.text('N10_nomove')
                     else:
-                        text = self.score
+                        text = self._combine_depth_and_score()
                     DisplayDgt.show(text)
                     self.show_anlykbtz_move = (self.show_anlykbtz_move + 1) % 4
                 break
