@@ -144,12 +144,15 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
     def _combine_depth_and_score(self):
         score = copy.copy(self.score)
-        if int(score.s) <= -1000:
-            score.s = '-999'
-        score.l = str(self.depth % 100) + score.l[-9:]
-        score.m = str(self.depth % 100) + score.m[-6:]
-        score.s = str(self.depth % 100) + score.s[-4:]
-        # score.rd = 0x10 if self.enable_dgt_pi else 0x01
+        try:
+            if int(score.s) <= -1000:
+                score.s = '-999'
+            score.l = str(self.depth % 100) + score.l[-9:]
+            score.m = str(self.depth % 100) + score.m[-6:]
+            score.s = str(self.depth % 100) + score.s[-4:]
+            # score.rd = 0x10 if self.enable_dgt_pi else 0x01
+        except ValueError:
+            pass
         return score
 
     def _process_button0(self):
