@@ -275,6 +275,9 @@ class DgtSerial(object):
             if case(DgtMsg.DGT_MSG_SERIALNR):
                 DisplayMsg.show(Message.DGT_SERIAL_NR(number=''.join([chr(elem) for elem in message])))
                 break
+            if case(DgtMsg.DGT_MSG_BATTERY_STATUS):
+                logging.debug(message)
+                break
             if case():  # Default
                 logging.warning("DGT message not handled [%s]", DgtMsg(message_id))
 
@@ -333,6 +336,7 @@ class DgtSerial(object):
         self.write_board_command([DgtCmd.DGT_SEND_UPDATE_NICE])  # Set the board update mode
         self.write_board_command([DgtCmd.DGT_SEND_VERSION])  # Get board version
         self.write_board_command([DgtCmd.DGT_SEND_BRD])  # Update the board
+        self.write_board_command([DgtCmd.DGT_SEND_BATTERY_STATUS])  # Get the battery status (BT Boards) - as TEST!
 
     def _watchdog(self):
         self.write_board_command([DgtCmd.DGT_RETURN_SERIALNR])
