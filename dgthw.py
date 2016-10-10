@@ -30,7 +30,7 @@ class DgtHw(DgtIface):
         self.lib = DgtLib(self.dgtserial)
         self.dgtserial.run()
 
-    def _display_on_dgt_xl(self, text, beep=False, left_dots=0, right_dots=0):
+    def _display_on_dgt_xl(self, text, beep=False, left_dots=ClockDots.NONE, right_dots=ClockDots.NONE):
         if not self.clock_found:  # This can only happen on the XL function
             logging.debug('DGT clock (still) not found. Ignore [%s]', text)
             self.dgtserial.startup_serial_clock()
@@ -44,7 +44,7 @@ class DgtHw(DgtIface):
             if not res:
                 logging.warning('Finally failed %i', res)
 
-    def _display_on_dgt_3000(self, text, beep=False, left_dots=0, right_dots=0):
+    def _display_on_dgt_3000(self, text, beep=False, left_dots=ClockDots.NONE, right_dots=ClockDots.NONE):
         text = text.ljust(8)
         if len(text) > 8:
             logging.warning('DGT 3000 clock message too long [%s]', text)
@@ -63,8 +63,8 @@ class DgtHw(DgtIface):
 
         if text is None:
             text = message.l if display_m else message.m
-        left_dots = message.ld if hasattr(message, 'ld') else 0
-        right_dots = message.rd if hasattr(message, 'rd') else 0
+        left_dots = message.ld if hasattr(message, 'ld') else ClockDots.NONE
+        right_dots = message.rd if hasattr(message, 'rd') else ClockDots.NONE
 
         if display_m:
             self._display_on_dgt_3000(text, message.beep, left_dots, right_dots)
@@ -72,8 +72,8 @@ class DgtHw(DgtIface):
             self._display_on_dgt_xl(text, message.beep, left_dots, right_dots)
 
     def display_move_on_clock(self, message):
-        left_dots = message.ld if hasattr(message, 'ld') else 0
-        right_dots = message.rd if hasattr(message, 'rd') else 0
+        left_dots = message.ld if hasattr(message, 'ld') else ClockDots.NONE
+        right_dots = message.rd if hasattr(message, 'rd') else ClockDots.NONE
         display_m = self.enable_dgt_3000 and not self.dgtserial.enable_revelation_leds
         if display_m:
             bit_board = Board(message.fen)

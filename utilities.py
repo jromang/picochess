@@ -408,11 +408,20 @@ class BeepLevel(enum.Enum):
     MAP = 0x04  # All Events coming from Queen placing at start pos (line3-6)
     OKAY = 0x08  # All Events from "ok" (confirm) messages incl. "you move"
 
+
 @enum.unique
 class ClockSide(enum.Enum):
     LEFT = 0x01
     RIGHT = 0x02
     NONE = 0x04
+
+
+@enum.unique
+class ClockDots(enum.Enum):
+    NONE = 0x00
+    COLON = 0x08
+    DOT = 0x10
+
 
 @enum.unique
 class DgtCmd(enum.Enum):

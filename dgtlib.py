@@ -40,7 +40,7 @@ class DgtLib(object):
     def write(self, command):
         return self.dgtserial.write_board_command(command)
 
-    def set_text_3k(self, text, beep, ld, rd):
+    def set_text_3k(self, text, beep, ld=ClockDots.NONE, rd=ClockDots.NONE):
         self._wait_for_clock()
         res = self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0c, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
                           DgtClk.DGT_CMD_CLOCK_ASCII,
@@ -48,9 +48,17 @@ class DgtLib(object):
                           DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         return res
 
-    def set_text_xl(self, text, beep, ld, rd):
+    def set_text_xl(self, text, beep, ld=ClockDots.NONE, rd=ClockDots.NONE):
+        def transfer(dots):
+            result = 0
+            if dots == ClockDots.DOT:
+                result = 0x01
+            if dots == ClockDots.COLON:
+                result = 0x02
+            return result
+
         self._wait_for_clock()
-        icn = ((rd & 0x07) | (ld << 3) & 0x38)
+        icn = ((transfer(rd) & 0x07) | (transfer(ld) << 3) & 0x38)
         res = self.write([DgtCmd.DGT_CLOCK_MESSAGE, 0x0b, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
                           DgtClk.DGT_CMD_CLOCK_DISPLAY,
                           text[2], text[1], text[0], text[5], text[4], text[3], icn, beep,
