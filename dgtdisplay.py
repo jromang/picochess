@@ -147,9 +147,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         try:
             if int(score.s) <= -1000:
                 score.s = '-999'
-            score.l = '{:2d}{:s}',format(self.depth % 100, score.l[-9:])
-            score.m = '{:2d}{:s}',format(self.depth % 100, score.m[-6:])
-            score.s = '{:2d}{:s}',format(self.depth % 100, score.s[-4:])
+            score.l = '{:2d}{:s}'.format(self.depth % 100, score.l[-9:])
+            score.m = '{:2d}{:s}'.format(self.depth % 100, score.m[-6:])
+            score.s = '{:2d}{:s}'.format(self.depth % 100, score.s[-4:])
             # score.rd = 0x10 if self.enable_dgt_pi else 0x01
         except ValueError:
             pass
