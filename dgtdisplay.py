@@ -150,7 +150,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             score.l = '{:3d}{:s}'.format(self.depth, score.l[-8:])
             score.m = '{:2d}{:s}'.format(self.depth % 100, score.m[-6:])
             score.s = '{:2d}{:s}'.format(self.depth % 100, score.s[-4:])
-            score.ld = ClockDots.DOT
+            score.ld = ClockDots.DOT  # @todo This should be "NONE" on non-PI clock (cause the "." is at wrong place)
+            score.rd = ClockDots.DOT
         except ValueError:
             pass
         return score
@@ -753,8 +754,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 # self.mode_index = Mode.NORMAL  # @todo
                 self._reset_menu_results()
                 self.engine_finished = False
-                p = message.game.chess960_pos()
-                text = self.dgttranslate.text('C10_newgame' if p is None or p == 518 else 'C10_ucigame', str(p))
+                pos960 = message.game.chess960_pos()
+                text = self.dgttranslate.text('C10_newgame' if pos960 is None or pos960 == 518 else 'C10_ucigame',
+                                              str(pos960))
                 text.wait = True  # in case of GAME_ENDS before, wait for "abort"
                 DisplayDgt.show(text)
                 if self.mode_result in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):

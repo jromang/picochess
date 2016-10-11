@@ -234,9 +234,9 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 fen = message.game.fen()
                 result = {'pgn': pgn_str, 'fen': fen}
                 self.shared['last_dgt_move_msg'] = result
-                code = message.game.chess960_pos()
-                if code:
-                    code_text = '' if code == 518 else ' - chess960 code {}'.format(code)
+                pos960 = message.game.chess960_pos()
+                if pos960:
+                    code_text = '' if pos960 == 518 else ' - chess960 code {}'.format(pos960)
                 else:
                     code_text = ' with setup'
                 EventHandler.write_to_clients({'event': 'NewGame', 'fen': fen})
