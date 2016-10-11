@@ -336,7 +336,7 @@ class DgtSerial(object):
         self.write_board_command([DgtCmd.DGT_SEND_UPDATE_NICE])  # Set the board update mode
         self.write_board_command([DgtCmd.DGT_SEND_VERSION])  # Get board version
         self.write_board_command([DgtCmd.DGT_SEND_BRD])  # Update the board
-        self.write_board_command([DgtCmd.DGT_SEND_BATTERY_STATUS])  # Get the battery status (BT Boards) - as TEST!
+        # self.write_board_command([DgtCmd.DGT_SEND_BATTERY_STATUS])  # Get the battery status (BT Boards) - as TEST!
 
     def _watchdog(self):
         self.write_board_command([DgtCmd.DGT_RETURN_SERIALNR])
