@@ -285,27 +285,21 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.ENGINE_MENU:
-            if self.mode_result == Mode.REMOTE:
-                text = self.dgttranslate.text('B00_nofunction')
+            if self.engine_result is None:
+                self.engine_index = (self.engine_index-1) % len(self.installed_engines)
+                text = self.installed_engines[self.engine_index]['text']
+                text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             else:
-                if self.engine_result is None:
-                    self.engine_index = (self.engine_index-1) % len(self.installed_engines)
-                    text = self.installed_engines[self.engine_index]['text']
-                    text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
-                else:
-                    level_dict = self.installed_engines[self.engine_index]['level_dict']
-                    self.engine_level_index = (self.engine_level_index-1) % len(level_dict)
-                    msg = sorted(level_dict)[self.engine_level_index]
-                    text = self.dgttranslate.text('B00_level', msg)
+                level_dict = self.installed_engines[self.engine_index]['level_dict']
+                self.engine_level_index = (self.engine_level_index-1) % len(level_dict)
+                msg = sorted(level_dict)[self.engine_level_index]
+                text = self.dgttranslate.text('B00_level', msg)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.BOOK_MENU:
-            if self.mode_result == Mode.REMOTE:
-                text = self.dgttranslate.text('B00_nofunction')
-            else:
-                self.book_index = (self.book_index-1) % len(self.all_books)
-                text = self.all_books[self.book_index]['text']
-                text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
+            self.book_index = (self.book_index-1) % len(self.all_books)
+            text = self.all_books[self.book_index]['text']
+            text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.TIME_MENU:
@@ -392,27 +386,21 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.ENGINE_MENU:
-            if self.mode_result == Mode.REMOTE:
-                text = self.dgttranslate.text('B00_nofunction')
+            if self.engine_result is None:
+                self.engine_index = (self.engine_index+1) % len(self.installed_engines)
+                text = self.installed_engines[self.engine_index]['text']
+                text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             else:
-                if self.engine_result is None:
-                    self.engine_index = (self.engine_index+1) % len(self.installed_engines)
-                    text = self.installed_engines[self.engine_index]['text']
-                    text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
-                else:
-                    level_dict = self.installed_engines[self.engine_index]['level_dict']
-                    self.engine_level_index = (self.engine_level_index+1) % len(level_dict)
-                    msg = sorted(level_dict)[self.engine_level_index]
-                    text = self.dgttranslate.text('B00_level', msg)
+                level_dict = self.installed_engines[self.engine_index]['level_dict']
+                self.engine_level_index = (self.engine_level_index+1) % len(level_dict)
+                msg = sorted(level_dict)[self.engine_level_index]
+                text = self.dgttranslate.text('B00_level', msg)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.BOOK_MENU:
-            if self.mode_result == Mode.REMOTE:
-                text = self.dgttranslate.text('B00_nofunction')
-            else:
-                self.book_index = (self.book_index+1) % len(self.all_books)
-                text = self.all_books[self.book_index]['text']
-                text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
+            self.book_index = (self.book_index+1) % len(self.all_books)
+            text = self.all_books[self.book_index]['text']
+            text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             DisplayDgt.show(text)
 
         elif self.top_result == Menu.TIME_MENU:
@@ -455,11 +443,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text = self.all_books[self.book_index]['text']
                 text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             elif self.top_index == Menu.ENGINE_MENU:
-                if self.mode_result == Mode.REMOTE:
-                    text = self.dgttranslate.text('B00_nofunction')
-                else:
-                    text = self.installed_engines[self.engine_index]['text']
-                    text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
+                text = self.installed_engines[self.engine_index]['text']
+                text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
 
             elif self.top_index == Menu.SYSTEM_MENU:
                 text = self.dgttranslate.text(self.system_index.value)
@@ -553,51 +538,43 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self._exit_display()
 
         elif self.top_result == Menu.ENGINE_MENU:
-            if self.mode_result == Mode.REMOTE:
-                text = self.dgttranslate.text('B00_nofunction')
-                DisplayDgt.show(text)
-            else:
-                eng = self.installed_engines[self.engine_index]
-                level_dict = eng['level_dict']
-                if self.engine_result is None:
-                    if level_dict:
-                        self.engine_result = self.engine_index
-                        if self.engine_level_index is None or len(level_dict) <= self.engine_level_index:
-                            self.engine_level_index = len(level_dict)-1
-                        msg = sorted(level_dict)[self.engine_level_index]
-                        text = self.dgttranslate.text('B00_level', msg)
-                        DisplayDgt.show(text)
-                    else:
-                        config = ConfigObj('picochess.ini')
-                        config['engine-level'] = None
-                        config.write()
-                        text = self.dgttranslate.text('B10_okengine')
-                        self.fire(Event.NEW_ENGINE(eng=eng, eng_text=text, options={}, ok_text=True))
-                        self.engine_restart = True
-                        self._reset_menu_results()
+            eng = self.installed_engines[self.engine_index]
+            level_dict = eng['level_dict']
+            if self.engine_result is None:
+                if level_dict:
+                    self.engine_result = self.engine_index
+                    if self.engine_level_index is None or len(level_dict) <= self.engine_level_index:
+                        self.engine_level_index = len(level_dict)-1
+                    msg = sorted(level_dict)[self.engine_level_index]
+                    text = self.dgttranslate.text('B00_level', msg)
+                    DisplayDgt.show(text)
                 else:
-                    if level_dict:
-                        msg = sorted(level_dict)[self.engine_level_index]
-                        options = level_dict[msg]
-                        config = ConfigObj('picochess.ini')
-                        config['engine-level'] = msg
-                        config.write()
-                        self.fire(Event.LEVEL(options={}, level_text=self.dgttranslate.text('B10_level', msg)))
-                    else:
-                        options = {}
-                    eng_text = self.dgttranslate.text('B10_okengine')
-                    self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options=options, ok_text=True))
+                    config = ConfigObj('picochess.ini')
+                    config['engine-level'] = None
+                    config.write()
+                    text = self.dgttranslate.text('B10_okengine')
+                    self.fire(Event.NEW_ENGINE(eng=eng, eng_text=text, options={}, ok_text=True))
                     self.engine_restart = True
                     self._reset_menu_results()
+            else:
+                if level_dict:
+                    msg = sorted(level_dict)[self.engine_level_index]
+                    options = level_dict[msg]
+                    config = ConfigObj('picochess.ini')
+                    config['engine-level'] = msg
+                    config.write()
+                    self.fire(Event.LEVEL(options={}, level_text=self.dgttranslate.text('B10_level', msg)))
+                else:
+                    options = {}
+                eng_text = self.dgttranslate.text('B10_okengine')
+                self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options=options, ok_text=True))
+                self.engine_restart = True
+                self._reset_menu_results()
 
         elif self.top_result == Menu.BOOK_MENU:
-            if self.mode_result == Mode.REMOTE:
-                text = self.dgttranslate.text('B00_nofunction')
-                DisplayDgt.show(text)
-            else:
-                text = self.dgttranslate.text('B10_okbook')
-                self.fire(Event.SET_OPENING_BOOK(book=self.all_books[self.book_index], book_text=text, ok_text=True))
-                self._reset_menu_results()
+            text = self.dgttranslate.text('B10_okbook')
+            self.fire(Event.SET_OPENING_BOOK(book=self.all_books[self.book_index], book_text=text, ok_text=True))
+            self._reset_menu_results()
 
         elif self.top_result == Menu.TIME_MENU:
             if self.time_mode_result is None:
