@@ -64,10 +64,12 @@ class TimeControl(object):
     def reset_start_time(self):
         self.start_time = time.time()
 
-    def out_of_time(self, time_start):
+    def _out_of_time(self, time_start):
         """Fires an OUT_OF_TIME event."""
-        if self.active_color is not None:
-            txt = 'current clock time (before subtracting) is {0} and color is {1}, out of time event started from {2}'
+        if self.mode == TimeMode.FIXED:
+            logging.debug('timeout - but in "MoveTime" mode, dont fire event')
+        elif self.active_color is not None:
+            txt = 'current clock time (before subtracting) is {} and color is {}, out of time event started from {}'
             logging.debug(txt.format(self.clock_time[self.active_color], self.active_color, time_start))
             Observable.fire(Event.OUT_OF_TIME(color=self.active_color))
 
@@ -102,7 +104,7 @@ class TimeControl(object):
 
             # Only start thread if not already started for same color, and the player has not already lost on time
             if self.clock_time[color] > 0 and self.active_color is not None and self.run_color != self.active_color:
-                self.timer = threading.Timer(copy.copy(self.clock_time[color]), self.out_of_time,
+                self.timer = threading.Timer(copy.copy(self.clock_time[color]), self._out_of_time,
                                              [copy.copy(self.clock_time[color])])
                 self.timer.start()
                 self.run_color = self.active_color
