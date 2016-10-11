@@ -143,14 +143,21 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.depth = None
 
     def _combine_depth_and_score(self):
+        def score_to_string(score_val, length):
+            if length == 's':
+                return '{:5.2f}'.format(int(score_val) / 100).replace('.', '')
+            if length == 'm':
+                return '{:7.2f}'.format(int(score_val) / 100).replace('.', '')
+            if length == 'l':
+                return '{:9.2f}'.format(int(score_val) / 100).replace('.', '')
+
         score = copy.copy(self.score)
         try:
             if int(score.s) <= -1000:
                 score.s = '-999'
-            score.l = '{:3d}{:s}'.format(self.depth, score.l[-8:])
-            score.m = '{:2d}{:s}'.format(self.depth % 100, score.m[-6:])
-            score.s = '{:2d}{:s}'.format(self.depth % 100, score.s[-4:])
-            score.ld = ClockDots.DOT  # @todo This should be "NONE" on non-PI clock (cause the "." is at wrong place)
+            score.l = '{:3d}{:s}'.format(self.depth, score_to_string(score.l[-8:], 'l'))
+            score.m = '{:2d}{:s}'.format(self.depth % 100, score_to_string(score.m[-6:], 'm'))
+            score.s = '{:2d}{:s}'.format(self.depth % 100, score_to_string(score.s[-4:], 's'))
             score.rd = ClockDots.DOT
         except ValueError:
             pass
