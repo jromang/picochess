@@ -155,6 +155,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         try:
             if int(score.s) <= -1000:
                 score.s = '-999'
+            if int(score.s) >= 1000:
+                score.s = '999'
             score.l = '{:3d}{:s}'.format(self.depth, score_to_string(score.l[-8:], 'l'))
             score.m = '{:2d}{:s}'.format(self.depth % 100, score_to_string(score.m[-6:], 'm'))
             score.s = '{:2d}{:s}'.format(self.depth % 100, score_to_string(score.s[-4:], 's'))
