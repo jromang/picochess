@@ -1,13 +1,10 @@
 
 .gameVariation {
-    font-size: 16px;
+    font-size: 1.8vw;
     display: block;
     margin-left: 3em;
     margin-top: 0.25em;
     margin-bottom: 0.25em;
-
-    /*padding-left: 22px ;*/
-    /*text-indent: -22px ;*/
 }
 
 .gameVariation .gameMoves {
@@ -15,20 +12,16 @@
 }
 
 .comment {
-    font-size: 18px;
+    font-size: 2vw;
     display: block;
-    /*margin-left: 3em;*/
     margin-top: 0.25em;
     margin-bottom: 0.25em;
     color: green;
     font-weight: normal;
-
-    /*padding-left: 22px ;*/
-    /*text-indent: -22px ;*/
 }
 
 .gameMoves {
-    font-size: 18px;
+    font-size: 2vw;
     font-weight: bolder;
     line-height: 150%;
     font-family: Tahoma, Geneva, sans-serif;
@@ -36,20 +29,19 @@
 
 .gameMoves .highlight {
     color: darkgreen;
-    font-size: 20px
+    font-size: 2.2vw;
 }
 
 .gameResult {
-    font-size: 24px;
+    font-size: 2.6vw;
 }
 
-/*
-input[type=text] {
-    width: 100%;
-    box-sizing: border-box;
-    height: 28px;
+#pgn h4 {
+    font-size: 2vw;
 }
-*/
+#pgn h5 {
+    font-size: 1.5vw;
+}
 
 .panel-heading {
     overflow: hidden;
