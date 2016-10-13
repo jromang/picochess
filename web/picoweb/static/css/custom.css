@@ -32,6 +32,10 @@
     font-size: 2.2vw;
 }
 
+.gameMoves a {
+    text-decoration: none;
+}
+
 .gameResult {
     font-size: 2.6vw;
 }
@@ -133,7 +137,7 @@
     .text-break-md { white-space: normal; }
 }
 
-@media only screen and (max-width: 1200px) {
+@media only screen and (max-width: 767px) {
 	.flip-scroll .cf:after { visibility: hidden; display: block; font-size: 0; content: " "; clear: both; height: 0; }
 	.flip-scroll * html .cf { zoom: 1; }
 	.flip-scroll *:first-child+html .cf { zoom: 1; }
@@ -182,4 +186,8 @@ body {
 
 .pagination {
     margin: 0;
+}
+
+.btn {
+    margin: 5px 1px;
 }
