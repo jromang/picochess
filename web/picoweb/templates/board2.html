@@ -7,7 +7,6 @@
 
     <title>Picochess Webserver</title>
     <link rel="stylesheet" href="/static/css/ladda-themeless.min.css"/>
-    <link rel="stylesheet" href="/static/css/custom.css"/>
 
     <link rel="stylesheet" href="/static/css/bootstrap-3.3.7.min.css"/>
     <link rel="stylesheet" href="/static/css/material-design/ripples.min.css"/>
@@ -16,6 +15,7 @@
     <link rel="stylesheet" href="/static/css/normalize-4.1.1.css"/>
     <link rel="stylesheet" href="/static/css/chessboard.css"/>
     <link rel="stylesheet" href="/static/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/static/css/custom.css"/>
 
     <script src="/static/js/jquery-1.12.4.min.js"></script>
     <script src="/static/js/bootstrap-3.3.7.min.js"></script>
@@ -47,39 +47,33 @@
                     </div>
                     <div class="pull-right">
                         <div id="gameControls" class="btn-group">
-                            <button type="button" id="startBtn" class="btn btn-default btn-sm"><i class='fa fa-fast-backward'></i></button>
-                            <button type="button" id="backBtn" class="btn btn-default btn-sm"><i class='fa fa-arrow-left'></i></button>
-                            <button type="button" id="fwdBtn" class="btn btn-default btn-sm"><i class='fa fa-arrow-right'></i></button>
-                            <button type="button" id="endBtn" class="btn btn-default btn-sm"><i class='fa fa-fast-forward'></i></button>
+                            <button type="button" id="startBtn" class="btn btn-default btn-xs"><i class='fa fa-fast-backward'></i></button>
+                            <button type="button" id="backBtn" class="btn btn-default btn-xs"><i class='fa fa-arrow-left'></i></button>
+                            <button type="button" id="fwdBtn" class="btn btn-default btn-xs"><i class='fa fa-arrow-right'></i></button>
+                            <button type="button" id="endBtn" class="btn btn-default btn-xs"><i class='fa fa-fast-forward'></i></button>
                         </div>
                     </div>
+
+                    <div class="btn-group pull-left clearfix">
+                        <button type="button" id="flipOrientationBtn" class="btn btn-raised btn-default btn-xs text-break">
+                            <i class='fa fa-refresh'></i><span class="hidden-xs"> Flip</span>
+                        </button>
+                        <button type="button" id="DgtSyncBtn" class="btn btn-raised btn-warning btn-xs text-break">
+                            <i class='fa fa-delicious'></i><span class="hidden-xs"> Sync</span>
+                        </button>
+                        <button type="button" id="downloadBtn" class="btn btn-raised btn-info btn-xs text-break">
+                            <i class='fa fa-download'></i><span class="hidden-xs"> Get PGN</span>
+                        </button>
+                        <button type="button" id="broadcastBtn" class="btn btn-raised btn-success btn-xs text-break">
+                            <i class='fa fa-cloud-download'></i><span class="hidden-xs"> Broadcast</span>
+                        </button>
+                    </div>
+
                 </div>
             </div>
         </div>
 
         <div class="col-xs-6">
-            <div class="panel panel-primary">
-                <div class="panel-heading hidden-xs">
-                    <h3 class="panel-title">Actions</h3>
-                </div>
-                <div class="panel-body">
-                    <div class="btn-group pull-right">
-                        <button type="button" id="flipOrientationBtn" class="btn btn-raised btn-default btn-sm text-break">
-                            <i class='fa fa-refresh'></i><span class="hidden-xs"> Flip</span>
-                        </button>
-                        <button type="button" id="DgtSyncBtn" class="btn btn-raised btn-warning btn-sm text-break">
-                            <i class='fa fa-delicious'></i><span class="hidden-xs"> Sync</span>
-                        </button>
-                        <button type="button" id="downloadBtn" class="btn btn-raised btn-info btn-sm text-break">
-                            <i class='fa fa-download'></i><span class="hidden-xs"> Get PGN</span>
-                        </button>
-                        <button type="button" id="broadcastBtn" class="btn btn-raised btn-success btn-sm text-break">
-                            <i class='fa fa-cloud-download'></i><span class="hidden-xs"> Broadcast</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
             <div class="panel panel-primary">
                 <div class="panel-heading hidden-xs">
                     <h3 class="panel-title">Game record</h3>
