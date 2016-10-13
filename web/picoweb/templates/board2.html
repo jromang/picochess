@@ -46,15 +46,24 @@
                         <p id="DGTClockStatus"></p>
                     </div>
                     <div class="pull-right">
-                        <div id="gameControls" class="btn-group">
+                        <div id="gameControls">
                             <button type="button" id="startBtn" class="btn btn-default btn-xs"><i class='fa fa-fast-backward'></i></button>
                             <button type="button" id="backBtn" class="btn btn-default btn-xs"><i class='fa fa-arrow-left'></i></button>
                             <button type="button" id="fwdBtn" class="btn btn-default btn-xs"><i class='fa fa-arrow-right'></i></button>
                             <button type="button" id="endBtn" class="btn btn-default btn-xs"><i class='fa fa-fast-forward'></i></button>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
 
-                    <div class="btn-group pull-left clearfix">
+        <div class="col-xs-6">
+            <div class="panel panel-primary">
+                <div class="panel-heading hidden-xs">
+                    <h3 class="panel-title">Actions</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="pull-right">
                         <button type="button" id="flipOrientationBtn" class="btn btn-raised btn-default btn-xs text-break">
                             <i class='fa fa-refresh'></i><span class="hidden-xs"> Flip</span>
                         </button>
@@ -68,12 +77,9 @@
                             <i class='fa fa-cloud-download'></i><span class="hidden-xs"> Broadcast</span>
                         </button>
                     </div>
-
                 </div>
             </div>
-        </div>
 
-        <div class="col-xs-6">
             <div class="panel panel-primary">
                 <div class="panel-heading hidden-xs">
                     <h3 class="panel-title">Game record</h3>
@@ -143,32 +149,31 @@
 
             </div>
         </div>
-    </div>
 
-    <div class="col-xs-12 flip-scroll">
+        <div class="col-xs-12 flip-scroll">
 
-        <div class="well">
-            <div class="tab-content clearfix">
-                <div class="tab-pane active" id="reference">
-                    <table id="GameStatsTable" cellpadding="0" cellspacing="0" style="width: 100%; align: center; overflow: auto" class="table-condensed table-bordered table-responsive flat-table flat-table-1">
-                        <thead>
-                            <tr>
-                                <th data-dynatable-column="white">White</th>
-                                <th data-dynatable-column="white_elo">White Elo</th>
-                                <th data-dynatable-column="black">Black</th>
-                                <th data-dynatable-column="black_elo">Black Elo</th>
-                                <th data-dynatable-column="result">Result</th>
-                                <th data-dynatable-column="date">Date</th>
-                                <th data-dynatable-column="event">Event</th>
-                                <th data-dynatable-column="site">Site</th>
-                                <th data-dynatable-column="eco">ECO</th>
-                            </tr>
-                        </thead>
-                    </table>
+            <div class="well">
+                <div class="tab-content clearfix">
+                    <div class="tab-pane active" id="reference">
+                        <table id="GameStatsTable" cellpadding="0" cellspacing="0" style="width: 100%; align: center; overflow: auto" class="table-condensed table-bordered table-responsive flat-table flat-table-1">
+                            <thead>
+                                <tr>
+                                    <th data-dynatable-column="white">White</th>
+                                    <th data-dynatable-column="white_elo">White Elo</th>
+                                    <th data-dynatable-column="black">Black</th>
+                                    <th data-dynatable-column="black_elo">Black Elo</th>
+                                    <th data-dynatable-column="result">Result</th>
+                                    <th data-dynatable-column="date">Date</th>
+                                    <th data-dynatable-column="event">Event</th>
+                                    <th data-dynatable-column="site">Site</th>
+                                    <th data-dynatable-column="eco">ECO</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 

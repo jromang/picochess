@@ -171,3 +171,15 @@ body {
 #DGTClockStatus {
     font-size: 1.5vw;
 }
+
+#gameControls .btn {
+    margin: 0 1px;
+}
+
+.dynatable-record-count {
+    float: right;
+}
+
+.pagination {
+    margin: 0;
+}
