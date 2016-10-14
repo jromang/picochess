@@ -40,6 +40,10 @@
     font-size: 1.8vw;
 }
 
+#gameControls button {
+    padding: 4px 10px;
+}
+
 #pgn h4 {
     font-size: 1.8vw;
 }
