@@ -41,7 +41,7 @@
 }
 
 #gameControls button {
-    padding: 4px 10px;
+    padding: 4px 1vw;
 }
 
 #pgn h4 {
@@ -165,11 +165,11 @@ body {
 }
 
 #BoardStatus {
-    font-size: 1.4vw;
+    font-size: 1.2vw;
 }
 
 #DGTClockStatus {
-    font-size: 1.4vw;
+    font-size: 1.2vw;
 }
 
 #gameControls .btn {
