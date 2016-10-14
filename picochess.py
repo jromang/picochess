@@ -156,6 +156,15 @@ def main():
         start_clock()
         analyse(game)
 
+    def stop_search_and_clock():
+        if interaction_mode == Mode.NORMAL:
+            stop_clock()
+        elif interaction_mode in (Mode.REMOTE, Mode.OBSERVE):
+            stop_clock()
+            stop_search()
+        elif interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
+            stop_search()
+
     def stop_search():
         """
         Stop current search.
@@ -169,10 +178,6 @@ def main():
             DisplayMsg.show(Message.CLOCK_STOP())
         else:
             logging.warning('wrong mode: {}'.format(interaction_mode))
-
-    def stop_search_and_clock():
-        stop_clock()
-        stop_search()
 
     def start_clock():
         if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
@@ -340,12 +345,7 @@ def main():
         turn = game.turn
 
         # clock must be stoped BEFORE the "book_move" event cause SetNRun resets the clock display
-        if interaction_mode == Mode.NORMAL:
-            stop_clock()
-        elif interaction_mode in (Mode.REMOTE, Mode.OBSERVE):
-            stop_search_and_clock()
-        elif interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
-            stop_search()
+        stop_search_and_clock()
 
         # engine or remote move
         if (interaction_mode == Mode.NORMAL or interaction_mode == Mode.REMOTE) and \
