@@ -321,10 +321,16 @@ def main():
                     DisplayMsg.show(Message.USER_TAKE_BACK())
                     break
 
-    def set_wait_state():
+    def set_wait_state(start_search=False):
         if interaction_mode == Mode.NORMAL:
             nonlocal play_mode
             play_mode = PlayMode.USER_WHITE if game.turn == chess.WHITE else PlayMode.USER_BLACK
+        if start_search:
+            # Go back to analysing or observing
+            if interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
+                analyse(game)
+            if interaction_mode in (Mode.OBSERVE, Mode.REMOTE):
+                observe(game)
 
     def handle_move(move, ponder=None, inbook=False):
         nonlocal game
@@ -670,12 +676,7 @@ def main():
                                                                  has_960=engine.has_chess960(), ok_text=event.ok_text))
                         else:
                             DisplayMsg.show(Message.ENGINE_FAIL())
-                        set_wait_state()
-                        # Go back to analysing or observing
-                        if interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
-                            analyse(game)
-                        if interaction_mode in (Mode.OBSERVE, Mode.REMOTE):
-                            observe(game)
+                        set_wait_state(not engine_fallback)
                     break
 
                 if case(EventApi.SETUP_POSITION):
@@ -693,13 +694,13 @@ def main():
                     legal_fens = compute_legal_fens(game)
                     stop_search_and_clock()
                     time_control.reset()
-                    interaction_mode = Mode.NORMAL
+                    # interaction_mode = Mode.NORMAL @todo
                     last_computer_fen = None
                     last_legal_fens = []
                     searchmoves.reset()
                     DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, game=game.copy()))
                     game_declared = False
-                    set_wait_state()
+                    set_wait_state(True)
                     break
 
                 if case(EventApi.PAUSE_RESUME):
@@ -775,7 +776,7 @@ def main():
 
                     DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, game=game.copy()))
                     game_declared = False
-                    set_wait_state()
+                    set_wait_state(True)
                     break
 
                 if case(EventApi.DRAWRESIGN):
@@ -819,7 +820,7 @@ def main():
                         stop_search()  # dont need to stop, if pondering
                     if engine.is_pondering() and interaction_mode == Mode.NORMAL:
                         stop_search()  # if change from ponder modes to normal, also stops the pondering
-                    set_wait_state()
+                    set_wait_state(False)
                     DisplayMsg.show(Message.INTERACTION_MODE(mode=event.mode, mode_text=event.mode_text, ok_text=event.ok_text))
                     break
 
