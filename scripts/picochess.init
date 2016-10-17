@@ -27,8 +27,33 @@ case "$1" in
         dgt_port="/dev/rfcomm0"
       fi
 
+    # inserted for Laterunner - issue #200
+    ### for testing
+    # hcitool scan
+    #  rfcomm -a
+    # hciconfig
+    # hcitool scan
+
+     var_ip=`hostname -I|grep " "|cut -d " " -f1`
+     var_hci=`/usr/sbin/hciconfig|grep "^hci"|cut -d":" -f1`
+     var_mac=`rfcomm -a|grep "channel"|cut -d" " -f2`
+     var_port=`rfcomm -a|grep "channel"|cut -d" " -f1`
+     var_connection=`rfcomm -a|grep "rfc"|cut -d" " -f5`
+
+     echo ""
+     echo "IP:                                      "$var_ip
+     echo "hcix:                                    "$var_hci
+     echo "MAC Adresse eBoard:                       "$var_mac
+     echo "ACM0/ttyUSB/rfcomm0:                     "$dgt_port
+     echo "BT Port Status (clean/connected/closed): "$var_connection
+     echo "NOW PLEASE WAIT 15 secs"
+     echo ""
+     sleep 15
+     # ------------end of insertion--------------------------
+
       echo $dgt_port
-      python3 picochess.py -d $dgt_port -web -lf picochess.log -l debug
+      cd /opt/picochess
+      screen -dmUS pc python3 picochess.py -d $dgt_port -web -lf picochess.log -l debug
     ;;
   stop)
     echo "Stopping picochess"
