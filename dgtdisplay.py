@@ -1130,12 +1130,13 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         if self.hint_move:
                             show_left = (self.hint_turn == chess.WHITE) != self.flip_board
                             text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen,
-                                                    side=ClockSide.LEFT if show_left else ClockSide.RIGHT, wait=False,
+                                                    side=ClockSide.LEFT if show_left else ClockSide.RIGHT, wait=True,
                                                     beep=self.dgttranslate.bl(BeepLevel.NO), maxtime=1)
                         else:
                             text = self.dgttranslate.text('N10_nomove')
                     else:
                         text = self._combine_depth_and_score()
+                    text.wait = True
                     DisplayDgt.show(text)
                     self.show_move_or_value = (self.show_move_or_value + 1) % 4
                 break
