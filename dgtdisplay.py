@@ -1105,9 +1105,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     bit_board = chess.Board(fen + ' w - - 0 1')
                     pos960 = bit_board.chess960_pos(ignore_castling=True)
                     if pos960 is not None:
-                        logging.debug('Map-Fen: New game')
-                        self.show_setup_pieces_msg = False
-                        self.fire(Event.NEW_GAME(pos960=pos960))
+                        if pos960 == 518 or self.engine_has_960:
+                            logging.debug('Map-Fen: New game')
+                            self.show_setup_pieces_msg = False
+                            self.fire(Event.NEW_GAME(pos960=pos960))
+                        else:
+                            DisplayDgt.show(self.dgttranslate.text('Y00_error960'))
                 else:
                     if self.top_result is None:
                         if self.show_setup_pieces_msg:

@@ -680,23 +680,47 @@ def main():
                     break
 
                 if case(EventApi.SETUP_POSITION):
-                    logging.debug("setting up custom fen: {0}".format(event.fen))
-                    if engine.has_chess960():
-                        engine.option('UCI_Chess960', event.uci960)
-                        engine.send()
-                    else:  # start normal new game if engine can't handle the user wish
-                        event.uci960 = False
-                        logging.warning('engine doesnt support 960 mode')
+                    logging.debug("setting up custom fen: {}".format(event.fen))
+                    uci960 = event.uci960
+
                     if game.move_stack:
-                        if game.is_game_over() or game_declared:
+                        if not (game.is_game_over() or game_declared):
                             DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=game.copy()))
-                    game = chess.Board(event.fen, event.uci960)
-                    legal_fens = compute_legal_fens(game)
+                    game = chess.Board(event.fen, uci960)
+                    # see new_game
                     stop_search_and_clock()
-                    time_control.reset()
-                    # interaction_mode = Mode.NORMAL @todo
-                    last_computer_fen = None
+                    if engine.has_chess960():
+                        engine.option('UCI_Chess960', uci960)
+                        engine.send()
+                    legal_fens = compute_legal_fens(game)
                     last_legal_fens = []
+                    last_computer_fen = None
+                    time_control.reset()
+                    searchmoves.reset()
+                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, game=game.copy()))
+                    game_declared = False
+                    set_wait_state(True)
+                    break
+
+                if case(EventApi.NEW_GAME):
+                    logging.debug('starting a new game with code: {}'.format(event.pos960))
+                    uci960 = event.pos960 != 518
+
+                    if game.move_stack:
+                        if not (game.is_game_over() or game_declared):
+                            DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=game.copy()))
+                    game = chess.Board()
+                    if uci960:
+                        game.set_chess960_pos(event.pos960)
+                    # see setup_position
+                    stop_search_and_clock()
+                    if engine.has_chess960():
+                        engine.option('UCI_Chess960', uci960)
+                        engine.send()
+                    legal_fens = compute_legal_fens(game)
+                    last_legal_fens = []
+                    last_computer_fen = None
+                    time_control.reset()
                     searchmoves.reset()
                     DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, game=game.copy()))
                     game_declared = False
@@ -756,27 +780,6 @@ def main():
 
                         if event.engine_finished:
                             DisplayMsg.show(Message.SWITCH_SIDES(move=move))
-                    break
-
-                if case(EventApi.NEW_GAME):
-                    stop_search_and_clock()
-                    if game.move_stack:
-                        logging.debug('starting a new game with code: {}'.format(event.pos960))
-                        if not (game.is_game_over() or game_declared):
-                            DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=game.copy()))
-                    game = chess.Board()
-                    if event.pos960 != 518:  # 518 is normal game setup
-                        game.set_chess960_pos(event.pos960)
-                    legal_fens = compute_legal_fens(game)
-                    last_legal_fens = []
-                    # interaction_mode = Mode.NORMAL @todo
-                    last_computer_fen = None
-                    time_control.reset()
-                    searchmoves.reset()
-
-                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, game=game.copy()))
-                    game_declared = False
-                    set_wait_state(True)
                     break
 
                 if case(EventApi.DRAWRESIGN):
