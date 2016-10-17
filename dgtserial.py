@@ -149,6 +149,7 @@ class DgtSerial(object):
                         self.enable_revelation_leds = True
                     elif 'DGT_BT' in self.bt_name:
                         text_l, text_m, text_s = 'DGTBT ' + self.bt_name[-5:], 'BT ' + self.bt_name[-5:], self.bt_name[-5:]
+                        self.enable_revelation_leds = False
                     else:
                         text_l, text_m, text_s = 'BT e-Board', 'BT board', 'ok bt'
                     channel = 'BT'
