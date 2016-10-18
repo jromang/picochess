@@ -904,7 +904,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.hint_turn = message.turn
                 if message.mode == Mode.ANALYSIS and self.top_result is None:
                     side = ClockSide.LEFT if (self.hint_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
-                    DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=False,
+                    DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=True,
                                                      beep=self.dgttranslate.bl(BeepLevel.NO), maxtime=0))
                 break
             if case(MessageApi.NEW_DEPTH):
