@@ -326,7 +326,7 @@ def main():
                     DisplayMsg.show(Message.USER_TAKE_BACK())
                     break
 
-    def set_wait_state(start_search=False):
+    def set_wait_state(start_search=True):
         if interaction_mode == Mode.NORMAL:
             nonlocal play_mode
             play_mode = PlayMode.USER_WHITE if game.turn == chess.WHITE else PlayMode.USER_BLACK
@@ -699,7 +699,7 @@ def main():
                     searchmoves.reset()
                     DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, game=game.copy()))
                     game_declared = False
-                    set_wait_state(True)
+                    set_wait_state()
                     break
 
                 if case(EventApi.NEW_GAME):
@@ -724,7 +724,7 @@ def main():
                     searchmoves.reset()
                     DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, game=game.copy()))
                     game_declared = False
-                    set_wait_state(True)
+                    set_wait_state()
                     break
 
                 if case(EventApi.PAUSE_RESUME):
@@ -817,13 +817,13 @@ def main():
 
                 if case(EventApi.SET_INTERACTION_MODE):
                     if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
-                        stop_clock()  # only stop, if the clock is really running
+                        stop_clock()
                     interaction_mode = event.mode
                     if engine.is_thinking():
-                        stop_search()  # dont need to stop, if pondering
-                    if engine.is_pondering() and interaction_mode == Mode.NORMAL:
-                        stop_search()  # if change from ponder modes to normal, also stops the pondering
-                    set_wait_state(False)
+                        stop_search()
+                    if engine.is_pondering():
+                        stop_search()
+                    set_wait_state()
                     DisplayMsg.show(Message.INTERACTION_MODE(mode=event.mode, mode_text=event.mode_text, ok_text=event.ok_text))
                     break
 

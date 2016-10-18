@@ -1110,6 +1110,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.show_setup_pieces_msg = False
                             self.fire(Event.NEW_GAME(pos960=pos960))
                         else:
+                            # self._reset_moves_and_score()
                             DisplayDgt.show(self.dgttranslate.text('Y00_error960'))
                 else:
                     if self.top_result is None:
