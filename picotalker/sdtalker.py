@@ -19,7 +19,7 @@
 
 import logging
 
-# for this (picoctalker) to work you need to run these commands (if you haven't done before)
+# for this (picotalker) to work you need to run these commands (if you haven't done before)
 # pip3 install pysoundfile
 # pip3 install sounddevice
 # pip3 install numpy
