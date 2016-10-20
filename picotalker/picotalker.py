@@ -19,12 +19,23 @@
 
 import logging
 
+# for this (picoctalker) to work you need to run these commands (if you haven't done before)
+# pip3 install pysoundfile
+# pip3 install sounddevice
+# pip3 install numpy
+
 try:
     import sounddevice as sd
     import soundfile as sf
 
-    data, fs = sf.read('voices/en/al/goodbye.ogg', dtype='float32')
-    sd.play(data, fs)
+    data, fs = sf.read('voices/en/al/knight.ogg', dtype='float32')
+    sd.play(data, fs, blocking=True)
+    data, fs = sf.read('voices/en/al/f.ogg', dtype='float32')
+    sd.play(data, fs, blocking=True)
+    data, fs = sf.read('voices/en/al/3.ogg', dtype='float32')
+    sd.play(data, fs, blocking=True)
+    data, fs = sf.read('voices/en/al/check.ogg', dtype='float32')
+    sd.play(data, fs, blocking=True)
     status = sd.get_status()
     if status:
         logging.warning(str(status))
