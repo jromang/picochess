@@ -30,7 +30,7 @@ import copy
 import gc
 
 from engine import UciEngine, read_engine_ini
-import chesstalker.chesstalker
+import picotalker.picotalker
 
 from timecontrol import TimeControl
 from utilities import *
@@ -541,11 +541,11 @@ def main():
         else:
             user_name = 'Player'
 
-    # Create ChessTalker for speech output
+    # Create PicoTalker for speech output
     talker = None
     if args.user_voice or args.computer_voice:
-        logging.debug("initializing ChessTalker [%s, %s]", str(args.user_voice), str(args.computer_voice))
-        talker = chesstalker.chesstalker.ChessTalker(args.user_voice, args.computer_voice)
+        logging.debug("initializing PicoTalker [%s, %s]", str(args.user_voice), str(args.computer_voice))
+        talker = picotalker.picotalker.PicoTalkerDisplay(args.user_voice, args.computer_voice)
         talker.start()
     else:
         logging.debug('ChessTalker disabled')
