@@ -33,19 +33,6 @@ import sys
 from pathlib import Path
 
 
-SPOKEN_PIECE_SOUNDS = {
-    "K": " king ",
-    "B": " bishop ",
-    "N": " knight ",
-    "R": " rook ",
-    "Q": " queen ",
-    # "++": " Double Check ",
-    "+": " ",
-    "#": " ",
-    "x": " captures "
-}
-
-
 class PicoTalkerDisplay(DisplayMsg, threading.Thread):
     def __init__(self, user_voice, computer_voice):
         """
@@ -100,21 +87,21 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                         if message.move and message.game and str(message.move) != previous_move \
                                 and self.computer_picotalker is not None:
                             logging.debug('Announcing COMPUTER_MOVE [%s]', message.move)
-                            self.computer_picotalker.say_move(message.move, message.game.copy())
+                            self.computer_picotalker.say_move(message.move, message.fen, message.game.copy())
                             previous_move = str(message.move)
                         break
                     if case(MessageApi.USER_MOVE):
                         if message.move and message.game and str(message.move) != previous_move \
                                 and self.user_picotalker is not None:
                             logging.debug('Announcing USER_MOVE [%s]', message.move)
-                            self.user_picotalker.say_move(message.move, message.game.copy())
+                            self.user_picotalker.say_move(message.move, message.fen, message.game.copy())
                             previous_move = str(message.move)
                         break
                     if case(MessageApi.REVIEW_MOVE):
                         if message.move and message.game and str(message.move) != previous_move \
                                 and self.user_picotalker is not None:
                             logging.debug('Announcing REVIEW_MOVE [%s]', message.move)
-                            self.user_picotalker.say_move(message.move, message.game.copy())
+                            self.user_picotalker.say_move(message.move, message.fen, message.game.copy())
                             previous_move = str(message.move)
                         break
                     if case():  # Default
@@ -181,68 +168,6 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
 
 
 class PicoTalker():
-    COLOR_BLACK = "b"
-    COLOR_WHITE = "w"
-    PIECE_PAWN = "P"
-    PIECE_ROOK = "R"
-    PIECE_KNIGHT = "N"
-    PIECE_BISHOP = "B"
-    PIECE_QUEEN = "Q"
-    PIECE_KING = "K"
-    VOCAB_WHITE = "WHITE"
-    VOCAB_BLACK = "BLACK"
-    VOCAB_KING = "KING"
-    VOCAB_QUEEN = "QUEEN"
-    VOCAB_BISHOP = "BISHOP"
-    VOCAB_KNIGHT = "KNIGHT"
-    VOCAB_ROOK = "ROOK"
-    VOCAB_PAWN = "PAWN"
-    VOCAB_FILE_A = "FILE_A"
-    VOCAB_FILE_B = "FILE_B"
-    VOCAB_FILE_C = "FILE_C"
-    VOCAB_FILE_D = "FILE_D"
-    VOCAB_FILE_E = "FILE_E"
-    VOCAB_FILE_F = "FILE_F"
-    VOCAB_FILE_G = "FILE_G"
-    VOCAB_FILE_H = "FILE_H"
-    VOCAB_RANK_1 = "RANK_1"
-    VOCAB_RANK_2 = "RANK_2"
-    VOCAB_RANK_3 = "RANK_3"
-    VOCAB_RANK_4 = "RANK_4"
-    VOCAB_RANK_5 = "RANK_5"
-    VOCAB_RANK_6 = "RANK_6"
-    VOCAB_RANK_7 = "RANK_7"
-    VOCAB_RANK_8 = "RANK_8"
-    VOCAB_CASTLES_KINGSIDE = "CASTLES_KINGSIDE"
-    VOCAB_CASTLES_QUEENSIDE = "CASTLES_QUEENSIDE"
-    VOCAB_CAPTURES = "CAPTURES"
-    VOCAB_CHECK = "CHECK"
-    VOCAB_PROMOTION_TO = "PROMOTION_TO"
-    VOCAB_RESULT_CHECKMATE = "RESULT_CHECKMATE"
-    VOCAB_RESULT_STALEMATE = "RESULT_STALEMATE"
-    VOCAB_RESULT_DRAW = "RESULT_DRAW"
-    VOCAB_RESULT_TIME_CONTROL = "RESULT_TIME_CONTROL"
-    VOCAB_RESULT_INSUFFICIENT_MATERIAL = "RESULT_INSUFFICIENT_MATERIAL"
-    VOCAB_RESULT_SEVENTYFIVE_MOVES = "RESULT_SEVENTYFIVE_MOVES"
-    VOCAB_RESULT_FIVEFOLD_REPETITION = "RESULT_FIVEFOLD_REPETITION"
-    VOCAB_RESULT_WINNER = "RESULT_WINNER"
-    VOCAB_RESULT_ABORT = "RESULT_ABORT"
-    VOCAB_NEW_GAME = "NEW_GAME"
-    VOCAB_LEVEL = "LEVEL"
-    VOCAB_OPENING_BOOK = "OPENING_BOOK"
-    VOCAB_MODE = "MODE"
-    VOCAB_MODE_NORMAL = "MODE_NORMAL"
-    VOCAB_MODE_ANALYSIS = "MODE_ANALYSIS"
-    VOCAB_MODE_KIBITZ = "MODE_KIBITZ"
-    VOCAB_MODE_OBSERVE = "MODE_OBSERVE"
-    VOCAB_MODE_REMOTE = "MODE_REMOTE"
-    VOCAB_MODE_ANLYKBTZ = "MODE_ANLYKBTZ"
-    VOCAB_MODE_PLAY_BLACK = "MODE_PLAY_BLACK"
-    VOCAB_MODE_PLAY_WHITE = "MODE_PLAY_WHITE"
-    VOCAB_TIME_CONTROL_FIXED_TIME = "TIME_CONTROL_FIXED_TIME"
-    VOCAB_TIME_CONTROL_BLITZ = "TIME_CONTROL_BLITZ"
-    VOCAB_TIME_CONTROL_FISCHER = "TIME_CONTROL_FISCHER"
-    VOCAB_SHUTDOWN = "SHUTDOWN"
 
     def __init__(self, audio, localisation_id_voice=None):
         self.localisation_id = None
@@ -256,14 +181,6 @@ class PicoTalker():
                 logging.exception('voice path doesnt exist')
         except ValueError:
             logging.exception('not valid voice parameter')
-
-        # nf3check = [
-        #     'knight.ogg',
-        #     'f.ogg',
-        #     '3.ogg',
-        #     'check.ogg'
-        # ]
-        # self.play_sounds(nf3check)
 
     def play_sounds(self, sounds):
         sound = AudioSegment.empty()
@@ -330,10 +247,10 @@ class PicoTalker():
     def vocabulary_king(self):
         return self.voice_vocabulary[PicoTalker.VOCAB_KING]
 
-    def say_castles_kingside(self, color):
+    def say_castles_kingside(self):
         self.play_sounds(['castlekingside'])
 
-    def say_castles_queenside(self, color):
+    def say_castles_queenside(self):
         self.play_sounds(['castlequeenside'])
 
     def say_captures(self, attacking_piece, captured_piece):
@@ -438,17 +355,42 @@ class PicoTalker():
         # print("cmd=[" + cmd + "]")
         return subprocess.call(cmd, shell=True)
 
-    def say_move(self, move, game):
+    def say_move(self, move, fen, game):
         """
         Takes a chess.Move instance and a chess.BitBoard instance and speaks the move.
         """
-        moveText = move.uci()
-        from_square = moveText[0:2]
-        to_square = moveText[2:4]
-        logging.debug("say_move: Saying move [%s]", moveText)
 
-        # Game board is currently in the POST-move state
-        # get anything we need from this state before we look at the previous state.
+        # JP!
+        SPOKEN_PIECE_SOUNDS = {
+            'K': 'king.ogg',
+            'B': 'bishop.ogg',
+            'N': 'knight.ogg',
+            'R': 'rook.ogg',
+            'Q': 'queen.ogg',
+            '+': 'check.ogg',
+            '#': '',
+            'x': 'takes.ogg',
+            'a': 'a.ogg',
+            'b': 'b.ogg',
+            'c': 'c.ogg',
+            'd': 'd.ogg',
+            'e': 'e.ogg',
+            'f': 'f.ogg',
+            'g': 'g.ogg',
+            'h': 'h.ogg',
+            '1': '1.ogg',
+            '2': '2.ogg',
+            '3': '3.ogg',
+            '4': '4.ogg',
+            '5': '5.ogg',
+            '6': '6.ogg',
+            '7': '7.ogg',
+            '8': '8.ogg'
+        }
+
+        bit_board = chess.Board(fen)
+        moveTextSAN = bit_board.san(move)
+
         is_check = game.is_check()
         is_checkmate = game.is_checkmate()
         is_stalemate = game.is_stalemate()
@@ -456,56 +398,25 @@ class PicoTalker():
         is_insufficient_material = game.is_insufficient_material()
         is_seventyfive_moves = game.is_seventyfive_moves()
         is_fivefold_repetition = game.is_fivefold_repetition()
-        # logging.debug("say_move: POST-move game state: %s", str(game))
-        # Pop to the previous game state, so we can determine the pieces on the from/to squares.
-        game.pop()
-        color_moved = PicoTalker.COLOR_WHITE if game.turn == chess.WHITE else PicoTalker.COLOR_BLACK
-        moveTextSAN = game.san(move)
-        # logging.debug("say_move: PRE-move game state: %s", str(game))
-        # Find the Piece on the from-square.
-        from_square_idx = chess.SQUARE_NAMES.index(from_square)
-        from_square_piece = game.piece_at(from_square_idx)
-        # Find the Piece on the to-square (if any).
-        to_square_idx = chess.SQUARE_NAMES.index(to_square)
-        to_square_piece = game.piece_at(to_square_idx)
 
-        if moveTextSAN.startswith("O-O-O"):
-            self.say_castles_queenside(color_moved)
-        elif moveTextSAN.startswith("O-O"):
-            self.say_castles_kingside(color_moved)
+        if moveTextSAN.startswith('O-O-O'):
+            self.say_castles_queenside()
+        elif moveTextSAN.startswith('O-O'):
+            self.say_castles_kingside()
         else:
-            # Short notation speech
-            spoken_san = moveTextSAN
+            spoken_san = []
+            for c in moveTextSAN:
+                spoken_san.append(SPOKEN_PIECE_SOUNDS[c])
+            self.play_sounds(spoken_san)
 
-            for k, v in SPOKEN_PIECE_SOUNDS.items():
-                spoken_san = spoken_san.replace(k, v)
-
-            # Disambiguation for piece move
-            if 'a' <= moveTextSAN[1] <= 'h' and 'a' <= moveTextSAN[2] <= 'h':
-                spoken_san_tokens = spoken_san.split()
-                spoken_san = spoken_san_tokens[0] + ' ' + from_square + ' ' + ' '.join(spoken_san_tokens[1:])
-
-            self.say_text(spoken_san)
-
-            # Commented out code announces move in longer form
-            # if from_square_piece and to_square_piece:
-            #     # Announce capture.
-            #     self.say_captures(str(from_square_piece), str(to_square_piece))
-            # else:
-            #     # Announce piece moved.
-            #     self.say_text(self.vocabulary_piece(str(from_square_piece)))
-            # # Announce the move itself.
-            # self.say_position(from_square)
-            # self.say_position(to_square)
-
-            # Announce promotion if necessary.
-            if move.promotion:
-                self.say_promotion(moveText[4])
+        if move.promotion:
+            print('Promotion!!')
+            # self.say_promotion(moveText[4])
 
         if is_game_over:
             if is_checkmate:
                 self.say_checkmate()
-                self.say_winner(color_moved)
+                # self.say_winner(color_moved)
             elif is_stalemate:
                 self.say_stalemate()
             else:
@@ -518,5 +429,4 @@ class PicoTalker():
                 else:
                     self.say_draw()
         elif is_check:
-            # Announce check if necessary.
             self.say_check()

@@ -19,7 +19,7 @@
 
 # for this (picotalker) to work you need to run these commands (if you haven't done before)
 # pip3 install pydub
-# pip3 install pyaudio
+# apt-get install python3-pyaudio
 # apt-get install ffmpeg
 
 from pydub import AudioSegment
