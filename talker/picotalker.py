@@ -83,7 +83,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                 for case in switch(message):
                     if case(MessageApi.START_NEW_GAME):
                         if system_picotalker:
-                            logging.debug('Announcing START_NEW_GAME')
+                            logging.debug('announcing START_NEW_GAME')
                             system_picotalker.say_new_game()
                         break
                     if case(MessageApi.COMPUTER_MOVE):
@@ -106,6 +106,35 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                             logging.debug('announcing REVIEW_MOVE [%s]', message.move)
                             self.user_picotalker.say_move(message.move, message.fen, message.game.copy())
                             previous_move = str(message.move)
+                        break
+                    if case(MessageApi.GAME_ENDS):
+                        if message.result == GameResult.OUT_OF_TIME:
+                            logging.debug('announcing GAME_ENDS/TIME_CONTROL')
+                            system_picotalker.say_out_of_time(not message.game.turn)
+                        elif message.result == GameResult.INSUFFICIENT_MATERIAL:
+                            logging.debug('announcing GAME_ENDS/INSUFFICIENT_MATERIAL')
+                            system_picotalker.say_draw_insufficient_material()
+                        elif message.result == GameResult.MATE:
+                            logging.debug('announcing GAME_ENDS/MATE')
+                            system_picotalker.say_checkmate()
+                        elif message.result == GameResult.STALEMATE:
+                            logging.debug('announcing GAME_ENDS/STALEMATE')
+                            system_picotalker.say_stalemate()
+                        elif message.result == GameResult.ABORT:
+                            logging.debug('announcing GAME_ENDS/ABORT')
+                            system_picotalker.say_game_aborted()
+                        elif message.result == GameResult.DRAW:
+                            logging.debug('announcing DRAW')
+                            system_picotalker.say_draw()
+                        elif message.result == GameResult.WIN_WHITE:
+                            logging.debug('announcing WHITE WIN')
+                            system_picotalker.say_winner(chess.WHITE)
+                        elif message.result == GameResult.WIN_BLACK:
+                            logging.debug('announcing BLACK WIN')
+                            system_picotalker.say_winner(chess.BLACK)
+                        elif message.result == GameResult.FIVEFOLD_REPETITION:
+                            logging.debug('announcing GAME_ENDS/FIVEFOLD_REPETITION')
+                            system_picotalker.say_draw_fivehold_repetition()
                         break
                     if case():  # Default
                         # print(message)
@@ -159,53 +188,80 @@ class PicoTalker():
         stream.stop_stream()
         stream.close()
 
-    def say_castles_kingside(self):
+    def get_castles_kingside(self):
         return ['castlekingside.ogg']
 
-    def say_castles_queenside(self):
+    def get_castles_queenside(self):
         return ['castlequeenside.ogg']
 
-    def say_check(self):
+    def get_check(self):
         return ['check.ogg']
 
-    def say_checkmate(self):
+    def get_checkmate(self):
         return ['checkmate.ogg']
 
-    def say_stalemate(self):
+    def get_stalemate(self):
         return ['stalemate.ogg']
 
-    def say_draw(self):
+    def get_draw(self):
         return ['draw.ogg']
 
-    def say_draw_seventyfive_moves(self):
+    def get_draw_seventyfive_moves(self):
         return ['75moves.ogg', 'draw.ogg']
 
-    def say_draw_insufficient_material(self):
+    def get_draw_insufficient_material(self):
         return ['material.ogg', 'draw.ogg']
 
-    def say_draw_fivefold_repetition(self):
+    def get_draw_fivefold_repetition(self):
         return ['repetition.ogg', 'draw.ogg']
 
-    def say_winner(self, color):
+    def get_winner(self, color):
         wins = 'whitewins.ogg' if color == chess.WHITE else 'blackwins.ogg'
         return [wins]
 
-    def say_out_of_time(self, color):
+    def get_out_of_time(self, color):
         """Announce lost on time"""
         wins = 'whitewins.ogg' if color == chess.WHITE else 'blackwins.ogg'
         return ['timelost.ogg', wins]
 
-    def say_new_game(self):
+    def get_new_game(self):
         """Announce a new game"""
         return ['newgame.ogg']
 
-    def say_game_aborted(self):
+    def get_game_aborted(self):
         """Announce game aborted"""
         return ['abort.ogg']
 
-    def say_shutdown(self):
+    def get_shutdown(self):
         """Announce system shutdown"""
         return ['goodbye.ogg']
+
+    def say_new_game(self):
+        self.talk(self.get_new_game())
+
+    def say_out_of_time(self, color):
+        self.talk(self.get_out_of_time(color))
+
+    def say_draw_insufficient_material(self):
+        self.talk(self.get_draw_insufficient_material())
+
+    def say_checkmate(self):
+        self.talk(self.get_checkmate())
+
+    def say_stalemate(self):
+        self.talk(self.get_stalemate())
+
+    def say_game_aborted(self):
+        self.talk(self.get_game_aborted())
+
+    def say_draw(self):
+        self.talk(self.get_draw())
+
+    def say_winner(self, color):
+        self.talk(self.get_winner(color))
+
+    def say_draw_fivehold_repetition(self):
+        self.talk(self.get_draw_fivefold_repetition())
 
     def say_move(self, move, fen, game):
         """
@@ -245,9 +301,9 @@ class PicoTalker():
         voice_parts = []
 
         if san_move.startswith('O-O-O'):
-            voice_parts += self.say_castles_queenside()
+            voice_parts += self.get_castles_queenside()
         elif san_move.startswith('O-O'):
-            voice_parts += self.say_castles_kingside()
+            voice_parts += self.get_castles_kingside()
         else:
             for c in san_move:
                 try:
@@ -260,20 +316,20 @@ class PicoTalker():
 
         if game.is_game_over():
             if game.is_checkmate():
-                voice_parts += self.say_checkmate()
-                voice_parts += self.say_winner(not game.turn)
+                voice_parts += self.get_checkmate()
+                voice_parts += self.get_winner(not game.turn)
             elif game.is_stalemate():
-                voice_parts += self.say_stalemate()
+                voice_parts += self.get_stalemate()
             else:
                 if game.is_seventyfive_moves():
-                    voice_parts += self.say_draw_seventyfive_moves()
+                    voice_parts += self.get_draw_seventyfive_moves()
                 elif game.is_insufficient_material():
-                    voice_parts += self.say_draw_insufficient_material()
+                    voice_parts += self.get_draw_insufficient_material()
                 elif game.is_fivefold_repetition():
-                    voice_parts += self.say_draw_fivefold_repetition()
+                    voice_parts += self.get_draw_fivefold_repetition()
                 else:
-                    voice_parts += self.say_draw()
+                    voice_parts += self.get_draw()
         elif game.is_check():
-            voice_parts += self.say_check()
+            voice_parts += self.get_check()
 
         self.talk(voice_parts)

@@ -852,15 +852,11 @@ def main():
                     break
 
                 if case(EventApi.SHUTDOWN):
-                    if talker:
-                        talker.say_event(event)
                     DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=game.copy()))
                     shutdown(args.dgtpi)
                     break
 
                 if case(EventApi.REBOOT):
-                    if talker:
-                        talker.say_event(event)
                     DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=game.copy()))
                     reboot()
                     break
