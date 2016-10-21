@@ -30,7 +30,6 @@ import copy
 import gc
 
 from engine import UciEngine, read_engine_ini
-import picotalker.picotalker
 
 from timecontrol import TimeControl
 from utilities import *
@@ -47,7 +46,7 @@ from dgttranslate import DgtTranslate
 
 from logging.handlers import RotatingFileHandler
 from configobj import ConfigObj
-# from engine import get_installed_engines
+from talker.picotalker import PicoTalkerDisplay
 
 
 class AlternativeMover:
@@ -542,13 +541,11 @@ def main():
             user_name = 'Player'
 
     # Create PicoTalker for speech output
-    talker = None
     if args.user_voice or args.computer_voice:
         logging.debug("initializing PicoTalker [%s, %s]", str(args.user_voice), str(args.computer_voice))
-        talker = picotalker.picotalker.PicoTalkerDisplay(args.user_voice, args.computer_voice)
-        talker.start()
+        PicoTalkerDisplay(args.user_voice, args.computer_voice).start()
     else:
-        logging.debug('ChessTalker disabled')
+        logging.debug('PicoTalker disabled')
 
     # Gentlemen, start your engines...
     engine = UciEngine(args.engine, hostname=args.remote_server, username=args.remote_user,
