@@ -136,6 +136,24 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                             logging.debug('announcing GAME_ENDS/FIVEFOLD_REPETITION')
                             system_picotalker.say_draw_fivehold_repetition()
                         break
+                    if case(MessageApi.USER_TAKE_BACK):
+                        system_picotalker.say_takeback()
+                        break
+                    if case(MessageApi.TIME_CONTROL):
+                        system_picotalker.say_ok()
+                        break
+                    if case(MessageApi.INTERACTION_MODE):
+                        system_picotalker.say_ok()
+                        break
+                    if case(MessageApi.LEVEL):
+                        system_picotalker.say_ok()
+                        break
+                    if case(MessageApi.OPENING_BOOK):
+                        system_picotalker.say_ok()
+                        break
+                    if case(MessageApi.ENGINE_READY):
+                        system_picotalker.say_ok()
+                        break
                     if case():  # Default
                         # print(message)
                         pass
@@ -236,6 +254,14 @@ class PicoTalker():
         """Announce system shutdown"""
         return ['goodbye.ogg']
 
+    def get_takeback(self):
+        """Announce takeback"""
+        return ['takeback.ogg']
+
+    def get_ok(self):
+        """Announce takeback"""
+        return ['ok.ogg']
+
     def say_new_game(self):
         self.talk(self.get_new_game())
 
@@ -262,6 +288,12 @@ class PicoTalker():
 
     def say_draw_fivehold_repetition(self):
         self.talk(self.get_draw_fivefold_repetition())
+
+    def say_takeback(self):
+        self.talk(self.get_takeback())
+
+    def say_ok(self):
+        self.talk(self.get_ok())
 
     def say_move(self, move, fen, game):
         """
