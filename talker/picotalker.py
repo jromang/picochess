@@ -18,22 +18,22 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 # for this (picotalker) to work you need to run these commands (if you haven't done before)
-# pip3 install pydub
+# pip3 install sounddevice
+# pip3 install soundfile
 # apt-get install python3-pyaudio
 # apt-get install ffmpeg
-__author__ = "Jürgen Précour"
-__email__ = "LocutusOfPenguin@posteo.de"
-__version__ = "0.77"
-
 import threading
 import chess
 from utilities import *
 
-from pydub import AudioSegment
-from pydub.playback import *
-import pyaudio
-import sys
+import sounddevice as sd
+import soundfile as sf
+
 from pathlib import Path
+
+__author__ = "Jürgen Précour"
+__email__ = "LocutusOfPenguin@posteo.de"
+__version__ = "0.77"
 
 
 class PicoTalkerDisplay(DisplayMsg, threading.Thread):
@@ -47,24 +47,12 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
         self.user_picotalker = None
         self.computer_picotalker = None
 
-        # Hide errors
-        devnull = os.open(os.devnull, os.O_WRONLY)
-        old_stderr = os.dup(2)
-        sys.stderr.flush()
-        os.dup2(devnull, 2)
-        os.close(devnull)
-
-        self.pyaudio = pyaudio.PyAudio()
-        # Enable errors
-        os.dup2(old_stderr, 2)
-        os.close(old_stderr)
-
         if user_voice:
             logging.debug('creating user voice: [%s]', str(user_voice))
-            self.user_picotalker = PicoTalker(self.pyaudio, user_voice)
+            self.user_picotalker = PicoTalker(user_voice)
         if computer_voice:
             logging.debug('creating computer voice: [%s]', str(computer_voice))
-            self.computer_picotalker = PicoTalker(self.pyaudio, computer_voice)
+            self.computer_picotalker = PicoTalker(computer_voice)
 
     def run(self):
         """
@@ -175,36 +163,25 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
 
 
 class PicoTalker():
-    def __init__(self, audio, localisation_id_voice=None):
-        self.localisation_id = None
-        self.voice_name = None
-        self.audio = audio
+    def __init__(self, localisation_id_voice=None):
+        self.voice_path = None
 
         try:
-            (self.localisation_id, self.voice_name) = localisation_id_voice.split(':')
-            voice_path = 'talker/voices/' + self.localisation_id + '/' + self.voice_name
-            if not Path(voice_path).exists():
+            (localisation_id, voice_name) = localisation_id_voice.split(':')
+            self.voice_path = 'talker/voices/' + localisation_id + '/' + voice_name
+            if not Path(self.voice_path).exists():
                 logging.exception('voice path doesnt exist')
         except ValueError:
             logging.exception('not valid voice parameter')
 
     def talk(self, sounds):
-        sound = AudioSegment.empty()
         for part in sounds:
-            voice_file = 'talker/voices/' + self.localisation_id + '/' + self.voice_name + '/' + part
+            voice_file = self.voice_path + '/' + part
             if Path(voice_file).is_file():
-                sound += AudioSegment.from_ogg(voice_file)
+                data, fs = sf.read(voice_file, dtype='float32')
+                sd.play(data, fs, blocking=True)
             else:
                 logging.warning('voice file not found {}', format(voice_file))
-
-        p = self.audio
-        stream = p.open(format=p.get_format_from_width(sound.sample_width), channels=sound.channels,
-                        rate=sound.frame_rate, output=True)
-        # break audio into half-second chunks (to allows keyboard interrupts)
-        for chunk in make_chunks(sound, 500):
-            stream.write(chunk._data)
-        stream.stop_stream()
-        stream.close()
 
     def get_castles_kingside(self):
         return ['castlekingside.ogg']
