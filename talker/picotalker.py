@@ -35,6 +35,8 @@ __author__ = "Jürgen Précour"
 __email__ = "LocutusOfPenguin@posteo.de"
 __version__ = "0.77"
 
+sd.default.blocksize = 2048
+
 
 class PicoTalkerDisplay(DisplayMsg, threading.Thread):
     def __init__(self, user_voice, computer_voice):
@@ -175,11 +177,19 @@ class PicoTalker():
             logging.exception('not valid voice parameter')
 
     def talk(self, sounds):
+        def play(file, blocking=True):
+            d, f = sf.read(file, dtype='float32')
+            sd.play(d, f, blocking=blocking)
+            status = sd.get_status()
+            if status:
+                print(file)
+                logging.warning(str(status))
+                print(' ')
+
         for part in sounds:
             voice_file = self.voice_path + '/' + part
             if Path(voice_file).is_file():
-                data, fs = sf.read(voice_file, dtype='float32')
-                sd.play(data, fs, blocking=True)
+                play(voice_file)
             else:
                 logging.warning('voice file not found {}', format(voice_file))
 
