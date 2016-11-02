@@ -181,16 +181,14 @@ class PicoTalker():
             sd.play(d, f, blocking=blocking)
             status = sd.get_status()
             if status:
-                print(file)
                 logging.warning(str(status))
-                print(' ')
 
         for part in sounds:
             voice_file = self.voice_path + '/' + part
             if Path(voice_file).is_file():
                 play(voice_file)
             else:
-                logging.warning('voice file not found {}', format(voice_file))
+                logging.warning('voice file not found {}'.format(voice_file))
 
     def get_castles_kingside(self):
         return ['castlekingside.ogg']
