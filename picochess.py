@@ -35,7 +35,7 @@ import chesstalker.chesstalker
 from timecontrol import TimeControl
 from utilities import *
 from keyboard import KeyboardInput, TerminalDisplay
-from pgn import PgnDisplay
+from pgn import Emailer, PgnDisplay
 from server import WebServer
 
 from dgthw import DgtHw
@@ -529,10 +529,12 @@ def main():
             DgtPi(dgtserial, dgttranslate).start()
         DgtHw(dgtserial, dgttranslate).start()
     # Save to PGN
-    PgnDisplay(
-        args.pgn_file, net=args.enable_internet, email=args.email, mailgun_key=args.mailgun_key,
+    emailer = Emailer(
+        net=args.enable_internet, email=args.email, mailgun_key=args.mailgun_key,
         smtp_server=args.smtp_server, smtp_user=args.smtp_user,
-        smtp_pass=args.smtp_pass, smtp_encryption=args.smtp_encryption, smtp_from=args.smtp_from).start()
+        smtp_pass=args.smtp_pass, smtp_encryption=args.smtp_encryption, smtp_from=args.smtp_from)
+
+    PgnDisplay(args.pgn_file, emailer).start()
     if args.pgn_user:
         user_name = args.pgn_user
     else:
@@ -866,6 +868,16 @@ def main():
                         talker.say_event(event)
                     DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=game.copy()))
                     reboot()
+                    break
+
+                if case(EventApi.EMAIL_LOG):
+                    if args.log_file:
+                        email_logger = Emailer(net=args.enable_internet, email=args.email, mailgun_key=args.mailgun_key,
+                                               smtp_server=args.smtp_server, smtp_user=args.smtp_user,
+                                               smtp_pass=args.smtp_pass, smtp_encryption=args.smtp_encryption,
+                                               smtp_from=args.smtp_from)
+                        body = 'You probably want to forward this file to a picochess developer ;-)'
+                        email_logger.send('Picochess LOG', body, '/opt/picochess/logs/{}'.format(args.log_file))
                     break
 
                 if case(EventApi.DGT_BUTTON):

@@ -23,20 +23,17 @@ import datetime
 import logging
 import requests
 from utilities import *
+
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email.encoders import encode_base64
 
 
-class PgnDisplay(DisplayMsg, threading.Thread):
-    def __init__(self, pgn_file_name, net, email=None, mailgun_key=None,
+class Emailer(object):
+    def __init__(self, net, email=None, mailgun_key=None,
                  smtp_server=None, smtp_user=None,
                  smtp_pass=None, smtp_encryption=False, smtp_from=None):
-        super(PgnDisplay, self).__init__()
-        self.file_name = pgn_file_name
-        self.engine_name = ''
-        self.old_engine = ''
-        self.user_name = ''
-        self.location = ''
-        self.level_text = None
         if email and net:  # check if email address is provided by picochess.ini and network traffic is allowed
             self.email = email
         else:
@@ -52,6 +49,73 @@ class PgnDisplay(DisplayMsg, threading.Thread):
         else:
             self.mailgun_key = False
         self.smtp_from = smtp_from
+
+    def send(self, subject, body, file_name):
+        if self.email:  # check if email adress to send the pgn to is provided
+            if self.mailgun_key:  # check if we have mailgun-key available to send the pgn successful
+                out = requests.post('https://api.mailgun.net/v3/picochess.org/messages',
+                                    auth=('api', self.mailgun_key),
+                                    data={'from': 'Your PicoChess computer <no-reply@picochess.org>',
+                                          'to': self.email,
+                                          'subject': subject,
+                                          'text': body})
+                logging.debug(out)
+            if self.smtp_server:  # check if smtp server adress provided
+                # if self.smtp_server is not provided than don't try to send email via smtp service
+                logging.debug('SMTP Mail delivery: Started')
+                # change to smtp based mail delivery
+                # depending on encrypted mail delivery, we need to import the right lib
+                if self.smtp_encryption:
+                    # lib with ssl encryption
+                    logging.debug('SMTP Mail delivery: Import SSL SMTP Lib')
+                    from smtplib import SMTP_SSL as SMTP
+                else:
+                    # lib without encryption (SMTP-port 21)
+                    logging.debug('SMTP Mail delivery: Import standard SMTP Lib (no SSL encryption)')
+                    from smtplib import SMTP
+                try:
+                    msg = MIMEMultipart()
+                    msg['Subject'] = subject  # put subject to mail
+                    msg['From'] = 'Your PicoChess computer <{}>'.format(self.smtp_from)
+                    msg['To'] = self.email
+                    msg.attach(MIMEText(body, 'plain'))  # pack the pgn to Email body
+                    attachment = open(file_name, 'rb')
+                    part = MIMEBase('application', 'octet-stream')
+                    part.set_payload(attachment.read())
+                    encode_base64(part)
+                    part.add_header('Content-Disposition', 'attachment; filename= %s' % file_name)
+                    msg.attach(part)
+                    logging.debug('SMTP Mail delivery: trying to connect to ' + self.smtp_server)
+                    conn = SMTP(self.smtp_server)  # contact smtp server
+                    conn.set_debuglevel(False)  # no debug info from smtp lib
+                    logging.debug('SMTP Mail delivery: trying to log to SMTP Server')
+                    conn.login(self.smtp_user, self.smtp_pass)  # login at smtp server
+                    try:
+                        logging.debug('SMTP Mail delivery: trying to send email')
+                        conn.sendmail(self.smtp_from, self.email, msg.as_string())
+                        logging.debug('SMTP Mail delivery: successfuly delivered message to SMTP server')
+                    except Exception as e:
+                        logging.error('SMTP Mail delivery: Failed')
+                        logging.error('SMTP Mail delivery: ' + str(e))
+                    finally:
+                        conn.close()
+                        logging.debug('SMTP Mail delivery: Ended')
+                except Exception as e:
+                    logging.error('SMTP Mail delivery: Failed')
+                    logging.error('SMTP Mail delivery: ' + str(e))
+
+
+class PgnDisplay(DisplayMsg, threading.Thread):
+    def __init__(self, file_name, emailer):
+        super(PgnDisplay, self).__init__()
+        self.file_name = file_name
+        self.emailer = emailer
+
+        self.engine_name = ''
+        self.old_engine = ''
+        self.user_name = ''
+        self.location = ''
+        self.level_text = None
 
     def save_and_email_pgn(self, message):
         logging.debug('Saving game to [' + self.file_name + ']')
@@ -72,7 +136,7 @@ class PgnDisplay(DisplayMsg, threading.Thread):
         if self.level_text is None:
             engine_level = ''
         else:
-            engine_level = " ({0})".format(self.level_text.m)
+            engine_level = " ({})".format(self.level_text.m)
 
         if message.play_mode == PlayMode.USER_WHITE:
             pgn_game.headers['White'] = self.user_name
@@ -91,54 +155,7 @@ class PgnDisplay(DisplayMsg, threading.Thread):
         pgn_game.accept(exporter)
         file.flush()
         file.close()
-        # section send email
-        if self.email:  # check if email adress to send the pgn to is provided
-            if self.smtp_server: # check if smtp server adress provided
-                # if self.smtp_server is not provided than don't try to send email via smtp service
-                logging.debug('SMTP Mail delivery: Started')
-                # change to smtp based mail delivery
-                # depending on encrypted mail delivery, we need to import the right lib
-                if self.smtp_encryption:
-                    # lib with ssl encryption
-                    logging.debug('SMTP Mail delivery: Import SSL SMTP Lib')
-                    from smtplib import SMTP_SSL as SMTP
-                else:
-                    # lib without encryption (SMTP-port 21)
-                    logging.debug('SMTP Mail delivery: Import standard SMTP Lib (no SSL encryption)')
-                    from smtplib import SMTP
-                try:
-                    msg = MIMEText(str(pgn_game), 'plain')  # pack the pgn to Email body
-                    msg['Subject'] = 'Game PGN'  # put subject to mail
-                    msg['From'] = 'Your PicoChess computer <{}>'.format(self.smtp_from)
-                    msg['To'] = self.email
-                    logging.debug('SMTP Mail delivery: trying to connect to ' + self.smtp_server)
-                    conn = SMTP(self.smtp_server)  # contact smtp server
-                    conn.set_debuglevel(False)  # no debug info from smtp lib
-                    logging.debug('SMTP Mail delivery: trying to log to SMTP Server')
-                    # logging.debug('SMTP Mail delivery: Username=' + self.smtp_user + ', Pass=' + self.smtp_pass)
-                    conn.login(self.smtp_user, self.smtp_pass)  # login at smtp server
-                    try:
-                        logging.debug('SMTP Mail delivery: trying to send email')
-                        conn.sendmail(self.smtp_from, self.email, msg.as_string())
-                        logging.debug('SMTP Mail delivery: successfuly delivered message to SMTP server')
-                    except Exception as e:
-                        logging.error('SMTP Mail delivery: Failed')
-                        logging.error('SMTP Mail delivery: ' + str(e))
-                    finally:
-                        conn.close()
-                        logging.debug('SMTP Mail delivery: Ended')
-                except Exception as e:
-                    logging.error('SMTP Mail delivery: Failed')
-                    logging.error('SMTP Mail delivery: ' + str(e))
-            # smtp based system end
-            if self.mailgun_key:  # check if we have mailgun-key available to send the pgn successful
-                out = requests.post('https://api.mailgun.net/v3/picochess.org/messages',
-                                    auth=('api', self.mailgun_key),
-                                    data={'from': 'Your PicoChess computer <no-reply@picochess.org>',
-                                          'to': self.email,
-                                          'subject': 'Game PGN',
-                                          'text': str(pgn_game)})
-                logging.debug(out)
+        self.emailer.send('Game PGN', str(pgn_game), self.file_name)
 
     def run(self):
         logging.info('msg_queue ready')

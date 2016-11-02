@@ -71,6 +71,7 @@ class EventApi():
     SHUTDOWN = 'EVT_SHUTDOWN'  # User wants to shutdown the machine
     REBOOT = 'EVT_REBOOT'  # User wants to reboot the machine
     ALTERNATIVE_MOVE = 'EVT_ALTERNATIVE_MOVE'  # User wants engine to recalculate the position
+    EMAIL_LOG = 'EVT_EMAIL_LOG'  # User want to send the log file by eMail
     # dgt events
     DGT_BUTTON = 'EVT_DGT_BUTTON'  # User pressed a button at the dgt clock
     DGT_FEN = 'EVT_DGT_FEN'  # DGT board sends a fen
@@ -720,6 +721,7 @@ class Event():
     SHUTDOWN = ClassFactory(EventApi.SHUTDOWN, [])
     REBOOT = ClassFactory(EventApi.REBOOT, [])
     ALTERNATIVE_MOVE = ClassFactory(EventApi.ALTERNATIVE_MOVE, [])
+    EMAIL_LOG = ClassFactory(EventApi.EMAIL_LOG, [])
     # dgt events
     DGT_BUTTON = ClassFactory(EventApi.DGT_BUTTON, ['button'])
     DGT_FEN = ClassFactory(EventApi.DGT_FEN, ['fen'])
