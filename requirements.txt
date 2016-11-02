@@ -17,6 +17,5 @@ shellescape==3.4.1
 spur==0.3.19
 tornado==4.4.2
 configobj==5.0.6
-pydub==0.16.6
 sounddevice
 soundfile
