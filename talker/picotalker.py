@@ -20,8 +20,10 @@
 # for this (picotalker) to work you need to run these commands (if you haven't done before)
 # pip3 install sounddevice
 # pip3 install soundfile
-# apt-get install python3-pyaudio
-# apt-get install ffmpeg
+# apt-get install python3-numpy
+# apt-get install libportaudio2
+# apt-get install python3-cffi
+
 import threading
 import chess
 from utilities import *
@@ -42,8 +44,8 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
     def __init__(self, user_voice, computer_voice):
         """
         Initialize a PicoTalkerDisplay with voices for the user and/or computer players.
-        :param user_voice: The voice to use for the user (eg. en:Callie).
-        :param computer_voice:  The voice to use for the computer (eg. en:Marvin).
+        :param user_voice: The voice to use for the user (eg. en:al).
+        :param computer_voice:  The voice to use for the computer (eg. en:dgt).
         """
         super(PicoTalkerDisplay, self).__init__()
         self.user_picotalker = None
@@ -159,9 +161,6 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
             return self.computer_picotalker
         else:
             return self.user_picotalker
-
-    def say_event(self, event):
-        self.msg_queue.put(event)
 
 
 class PicoTalker():
