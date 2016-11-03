@@ -1,6 +1,8 @@
-# Copyright (C) 2013-2015 Jean-Francois Romang (jromang@posteo.de)
+#!/usr/bin/env python3
+
+# Copyright (C) 2013-2016 Jean-Francois Romang (jromang@posteo.de)
 #                         Shivkumar Shivaji ()
-#                         Charles Gamble ()
+#                         Jürgen Précour (LocutusOfPenguin@posteo.de)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,10 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-__all__ = ["chesstalker"]
-
-__author__ = "Charles Gamble"
-
-__email__ = ""
-
-__version__ = "0.1.0"
+__all__ = ['picotalker']
+__author__ = 'Jürgen Précour'
+__email__ = 'LocutusOfPenguin@posteo.de'
+__version__ = '0.77'

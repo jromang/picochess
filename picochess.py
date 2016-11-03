@@ -30,7 +30,6 @@ import copy
 import gc
 
 from engine import UciEngine, read_engine_ini
-import chesstalker.chesstalker
 
 from timecontrol import TimeControl
 from utilities import *
@@ -47,7 +46,7 @@ from dgttranslate import DgtTranslate
 
 from logging.handlers import RotatingFileHandler
 from configobj import ConfigObj
-# from engine import get_installed_engines
+from talker.picotalker import PicoTalkerDisplay
 
 
 class AlternativeMover:
@@ -543,14 +542,12 @@ def main():
         else:
             user_name = 'Player'
 
-    # Create ChessTalker for speech output
-    talker = None
+    # Create PicoTalker for speech output
     if args.user_voice or args.computer_voice:
-        logging.debug("initializing ChessTalker [%s, %s]", str(args.user_voice), str(args.computer_voice))
-        talker = chesstalker.chesstalker.ChessTalker(args.user_voice, args.computer_voice)
-        talker.start()
+        logging.debug("initializing PicoTalker [%s, %s]", str(args.user_voice), str(args.computer_voice))
+        PicoTalkerDisplay(args.user_voice, args.computer_voice).start()
     else:
-        logging.debug('ChessTalker disabled')
+        logging.debug('PicoTalker disabled')
 
     # Gentlemen, start your engines...
     engine = UciEngine(args.engine, hostname=args.remote_server, username=args.remote_user,
@@ -857,15 +854,11 @@ def main():
                     break
 
                 if case(EventApi.SHUTDOWN):
-                    if talker:
-                        talker.say_event(event)
                     DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=game.copy()))
                     shutdown(args.dgtpi)
                     break
 
                 if case(EventApi.REBOOT):
-                    if talker:
-                        talker.say_event(event)
                     DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=game.copy()))
                     reboot()
                     break
