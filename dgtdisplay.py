@@ -1103,7 +1103,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         logging.debug('Map-Fen: drawresign')
                         self.fire(Event.DRAWRESIGN(result=drawresign_map[self.drawresign_fen]))
                 elif 'rnbqkbnr/pppppppp/8/7Q/8/8/PPPPPPPP/RNBQKBNR' in fen:  # wQ h5
-                    self.fire(EventApi.EMAIL_LOG())
+                    self.fire(Event.EMAIL_LOG())
                 elif '/pppppppp/8/8/8/8/PPPPPPPP/' in fen:  # check for the lines 2-7 cause could be an uci960 pos too
                     bit_board = chess.Board(fen + ' w - - 0 1')
                     pos960 = bit_board.chess960_pos(ignore_castling=True)

@@ -24,10 +24,13 @@ import logging
 import requests
 from utilities import *
 
+from email import encoders
 from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+from email.mime.audio import MIMEAudio
 from email.mime.base import MIMEBase
-from email.encoders import encode_base64
+from email.mime.image import MIMEImage
+from email.mime.text import MIMEText
+import mimetypes
 
 
 class Emailer(object):
@@ -50,7 +53,7 @@ class Emailer(object):
             self.mailgun_key = False
         self.smtp_from = smtp_from
 
-    def send(self, subject, body, file_name):
+    def send(self, subject, body, path):
         if self.email:  # check if email adress to send the pgn to is provided
             if self.mailgun_key:  # check if we have mailgun-key available to send the pgn successful
                 out = requests.post('https://api.mailgun.net/v3/picochess.org/messages',
@@ -74,17 +77,33 @@ class Emailer(object):
                     logging.debug('SMTP Mail delivery: Import standard SMTP Lib (no SSL encryption)')
                     from smtplib import SMTP
                 try:
-                    msg = MIMEMultipart()
-                    msg['Subject'] = subject  # put subject to mail
-                    msg['From'] = 'Your PicoChess computer <{}>'.format(self.smtp_from)
-                    msg['To'] = self.email
-                    msg.attach(MIMEText(body, 'plain'))  # pack the pgn to Email body
-                    attachment = open(file_name, 'rb')
-                    part = MIMEBase('application', 'octet-stream')
-                    part.set_payload(attachment.read())
-                    encode_base64(part)
-                    part.add_header('Content-Disposition', 'attachment; filename= %s' % file_name)
-                    msg.attach(part)
+                    outer = MIMEMultipart()
+                    outer['Subject'] = subject  # put subject to mail
+                    outer['From'] = 'Your PicoChess computer <{}>'.format(self.smtp_from)
+                    outer['To'] = self.email
+                    outer.attach(MIMEText(body, 'plain'))  # pack the pgn to Email body
+
+                    ctype, encoding = mimetypes.guess_type(path)
+                    if ctype is None or encoding is not None:
+                        ctype = 'application/octet-stream'
+                    maintype, subtype = ctype.split('/', 1)
+                    if maintype == 'text':
+                        with open(path) as fp:
+                            msg = MIMEText(fp.read(), _subtype=subtype)
+                    elif maintype == 'image':
+                        with open(path, 'rb') as fp:
+                            msg = MIMEImage(fp.read(), _subtype=subtype)
+                    elif maintype == 'audio':
+                        with open(path, 'rb') as fp:
+                            msg = MIMEAudio(fp.read(), _subtype=subtype)
+                    else:
+                        with open(path, 'rb') as fp:
+                            msg = MIMEBase(maintype, subtype)
+                            msg.set_payload(fp.read())
+                        encoders.encode_base64(msg)
+                    msg.add_header('Content-Disposition', 'attachment', filename=os.path.basename(path))
+                    outer.attach(msg)
+
                     logging.debug('SMTP Mail delivery: trying to connect to ' + self.smtp_server)
                     conn = SMTP(self.smtp_server)  # contact smtp server
                     conn.set_debuglevel(False)  # no debug info from smtp lib
@@ -92,7 +111,8 @@ class Emailer(object):
                     conn.login(self.smtp_user, self.smtp_pass)  # login at smtp server
                     try:
                         logging.debug('SMTP Mail delivery: trying to send email')
-                        conn.sendmail(self.smtp_from, self.email, msg.as_string())
+                        conn.sendmail(self.smtp_from, self.email, outer.as_string())
+                        # @todo should check the result from sendmail
                         logging.debug('SMTP Mail delivery: successfuly delivered message to SMTP server')
                     except Exception as e:
                         logging.error('SMTP Mail delivery: Failed')
