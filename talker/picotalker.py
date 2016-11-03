@@ -33,10 +33,6 @@ import soundfile as sf
 
 from pathlib import Path
 
-__author__ = "Jürgen Précour"
-__email__ = "LocutusOfPenguin@posteo.de"
-__version__ = "0.77"
-
 sd.default.blocksize = 2048
 
 

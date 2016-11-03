@@ -20,4 +20,4 @@
 __all__ = ['picotalker']
 __author__ = 'Jürgen Précour'
 __email__ = 'LocutusOfPenguin@posteo.de'
-__version__ = '0.77'
+__version__ = '0.78'
