@@ -571,6 +571,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     config['language'] = language
                     config.write()
                     text = self.dgttranslate.text('B10_oklang')
+            elif self.system_index == Settings.LOGFILE:
+                self.fire(Event.EMAIL_LOG())
+                text = self.dgttranslate.text('B10_oklogfile')  # @todo give pos/neg feedback
             else:
                 logging.warning('wrong value for system_index: {}'.format(self.system_index))
                 text = self.dgttranslate.text('Y00_errormenu')
@@ -1102,8 +1105,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if self.top_result is None:
                         logging.debug('Map-Fen: drawresign')
                         self.fire(Event.DRAWRESIGN(result=drawresign_map[self.drawresign_fen]))
-                elif 'rnbqkbnr/pppppppp/8/7Q/8/8/PPPPPPPP/RNBQKBNR' in fen:  # wQ h5
-                    self.fire(Event.EMAIL_LOG())
                 elif '/pppppppp/8/8/8/8/PPPPPPPP/' in fen:  # check for the lines 2-7 cause could be an uci960 pos too
                     bit_board = chess.Board(fen + ' w - - 0 1')
                     pos960 = bit_board.chess960_pos(ignore_castling=True)

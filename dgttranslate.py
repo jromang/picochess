@@ -445,6 +445,12 @@ class DgtTranslate(object):
             nltxt = Dgt.DISPLAY_TEXT(l='Taal       ', m='Taal    ', s='taal  ')
             frtxt = Dgt.DISPLAY_TEXT(l='Langue     ', m='Langue  ', s='langue')
             estxt = Dgt.DISPLAY_TEXT(l='Idioma     ', m='Idioma  ', s='idioma')
+        if text_id == 'settings_logfile_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='Log file   ', m='Log file', s='logfil')
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
         if text_id == 'gameresult_mate_menu':
             wait = True
             entxt = Dgt.DISPLAY_TEXT(l='mate       ', m='mate    ', s='mate  ')
@@ -583,6 +589,12 @@ class DgtTranslate(object):
             nltxt = Dgt.DISPLAY_TEXT(l='ok taal    ', m='ok taal ', s='oktaal')
             frtxt = Dgt.DISPLAY_TEXT(l='ok langue  ', m='okLangue', s='oklang')
             estxt = Dgt.DISPLAY_TEXT(l='ok idioma  ', m='okIdioma', s='oklang')
+        if text_id == 'oklogfile':
+            entxt = Dgt.DISPLAY_TEXT(l='ok log file', m='oklogfil', s='ok log')
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
         if text_id == 'tc_fixed':
             entxt = Dgt.DISPLAY_TEXT(l='Move time' + msg, m='Move t' + msg, s='mov ' + msg)
             detxt = Dgt.DISPLAY_TEXT(l='Zugzeit  ' + msg, m='Zug z ' + msg, s='zug ' + msg)

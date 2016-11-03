@@ -277,6 +277,7 @@ class Settings(enum.Enum):
     IPADR = 'B00_settings_ipadr_menu'
     SOUND = 'B00_settings_sound_menu'
     LANGUAGE = 'B00_settings_language_menu'
+    LOGFILE = 'B00_settings_logfile_menu'
 
 
 class SettingsLoop(object):
@@ -292,12 +293,16 @@ class SettingsLoop(object):
         elif m == Settings.SOUND:
             return Settings.LANGUAGE
         elif m == Settings.LANGUAGE:
+            return Settings.LOGFILE
+        elif m == Settings.LOGFILE:
             return Settings.VERSION
         return 'error Setting next'
 
     @staticmethod
     def prev(m):
         if m == Settings.VERSION:
+            return Settings.LOGFILE
+        if m == Settings.LOGFILE:
             return Settings.LANGUAGE
         if m == Settings.LANGUAGE:
             return Settings.SOUND
