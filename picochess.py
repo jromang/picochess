@@ -46,7 +46,6 @@ from dgttranslate import DgtTranslate
 
 from logging.handlers import RotatingFileHandler
 from configobj import ConfigObj
-from talker.picotalker import PicoTalkerDisplay
 
 
 class AlternativeMover:
@@ -544,6 +543,7 @@ def main():
 
     # Create PicoTalker for speech output
     if args.user_voice or args.computer_voice:
+        from talker.picotalker import PicoTalkerDisplay
         logging.debug("initializing PicoTalker [%s, %s]", str(args.user_voice), str(args.computer_voice))
         PicoTalkerDisplay(args.user_voice, args.computer_voice).start()
     else:
