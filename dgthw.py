@@ -90,7 +90,8 @@ class DgtHw(DgtIface):
 
     def display_time_on_clock(self, force=False):
         if self.clock_running or force:
-            self.lib.end_text()
+            with self.lib_lock:
+                self.lib.end_text()
         else:
             logging.debug('DGT clock isnt running - no need for endClock')
 
