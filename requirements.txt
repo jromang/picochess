@@ -6,6 +6,8 @@ Naked==0.1.31
 PyYAML==3.11
 Werkzeug==0.11.11
 crypto==1.4.1
+cffi==1.8.3
+cryptography==1.5.2
 ecdsa==0.13
 itsdangerous==0.24
 paramiko==2.0.2
