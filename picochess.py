@@ -347,8 +347,8 @@ def main():
 
         # engine or remote move
         if (interaction_mode == Mode.NORMAL or interaction_mode == Mode.REMOTE) and \
-                ((play_mode == PlayMode.USER_WHITE and game.turn == chess.BLACK) or
-                     (play_mode == PlayMode.USER_BLACK and game.turn == chess.WHITE)):
+                ((play_mode == PlayMode.USER_WHITE and turn == chess.BLACK) or
+                     (play_mode == PlayMode.USER_BLACK and turn == chess.WHITE)):
             last_computer_fen = game.board_fen()
             game.push(move)
             if inbook:
@@ -801,7 +801,7 @@ def main():
                 if case(EventApi.NEW_PV):
                     # illegal moves can occur if a pv from the engine arrives at the same time as a user move.
                     if game.is_legal(event.pv[0]):
-                        DisplayMsg.show(Message.NEW_PV(pv=event.pv, mode=interaction_mode, fen=game.fen(), turn=game.turn))
+                        DisplayMsg.show(Message.NEW_PV(pv=event.pv, mode=interaction_mode, game=game.copy()))
                     else:
                         logging.info('illegal move can not be displayed. move:%s fen=%s', event.pv[0], game.fen())
                     break

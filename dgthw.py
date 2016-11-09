@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from chess import Board
-from dgtiface import *
+from dgtiface import DgtIface
 from dgtlib import *
 from utilities import *
 from threading import Lock
@@ -108,9 +108,9 @@ class DgtHw(DgtIface):
             self.lib.write([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
 
     def stop_clock(self):
-        self.resume_clock(ClockSide.NONE)
+        self._resume_clock(ClockSide.NONE)
 
-    def resume_clock(self, side):
+    def _resume_clock(self, side):
         l_hms = self.time_left
         r_hms = self.time_right
         if l_hms is None or r_hms is None:
@@ -134,4 +134,4 @@ class DgtHw(DgtIface):
     def start_clock(self, time_left, time_right, side):
         self.time_left = hours_minutes_seconds(time_left)
         self.time_right = hours_minutes_seconds(time_right)
-        self.resume_clock(side)
+        self._resume_clock(side)

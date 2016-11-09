@@ -39,7 +39,7 @@ class DgtSerial(object):
         self.is_pi = is_pi
 
         self.serial = None
-        self.lock = Lock()  # inside setup_serial()
+        self.lock = Lock()  # inside setup_serial_port()
         self.incoming_board_thread = None
         self.lever_pos = None
         # the next three are only used for "not dgtpi" mode
