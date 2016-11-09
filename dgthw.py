@@ -17,30 +17,28 @@
 
 from chess import Board
 from dgtiface import DgtIface
-from dgtlib import *
 from utilities import *
 from threading import Lock
 
 
 class DgtHw(DgtIface):
-    def __init__(self, dgtserial, dgttranslate):
-        super(DgtHw, self).__init__(dgtserial, dgttranslate)
+    def __init__(self, dgtboard, dgttranslate):
+        super(DgtHw, self).__init__(dgtboard, dgttranslate)
 
         self.lib_lock = Lock()
-        self.lib = DgtLib(self.dgtserial)
-        self.dgtserial.run()
+        self.dgtboard.run()
 
     def _display_on_dgt_xl(self, text, beep=False, left_dots=ClockDots.NONE, right_dots=ClockDots.NONE):
         if not self.clock_found:  # This can only happen on the XL function
             logging.debug('DGT clock (still) not found. Ignore [%s]', text)
-            self.dgtserial.startup_serial_clock()
+            self.dgtboard.startup_serial_clock()
             return
         text = text.ljust(6)
         if len(text) > 6:
             logging.warning('DGT XL clock message too long [%s]', text)
         logging.debug(text)
         with self.lib_lock:
-            res = self.lib.set_text_xl(text, 0x03 if beep else 0x00, left_dots, right_dots)
+            res = self.dgtboard.set_text_xl(text, 0x03 if beep else 0x00, left_dots, right_dots)
             if not res:
                 logging.warning('Finally failed %i', res)
 
@@ -51,14 +49,14 @@ class DgtHw(DgtIface):
         logging.debug(text)
         text = bytes(text, 'utf-8')
         with self.lib_lock:
-            res = self.lib.set_text_3k(text, 0x03 if beep else 0x00, left_dots, right_dots)
+            res = self.dgtboard.set_text_3k(text, 0x03 if beep else 0x00, left_dots, right_dots)
             if not res:
                 logging.warning('Finally failed %i', res)
 
     def display_text_on_clock(self, message):
         if 'ser' not in message.devs:
             return
-        display_m = self.enable_dgt_3000 and not self.dgtserial.enable_revelation_leds
+        display_m = self.enable_dgt_3000 and not self.dgtboard.enable_revelation_leds
         text = message.m if display_m else message.s
 
         if text is None:
@@ -74,7 +72,7 @@ class DgtHw(DgtIface):
     def display_move_on_clock(self, message):
         left_dots = message.ld if hasattr(message, 'ld') else ClockDots.NONE
         right_dots = message.rd if hasattr(message, 'rd') else ClockDots.NONE
-        display_m = self.enable_dgt_3000 and not self.dgtserial.enable_revelation_leds
+        display_m = self.enable_dgt_3000 and not self.dgtboard.enable_revelation_leds
         if display_m:
             bit_board = Board(message.fen)
             move_text = bit_board.san(message.move)
@@ -91,21 +89,21 @@ class DgtHw(DgtIface):
     def display_time_on_clock(self, force=False):
         if self.clock_running or force:
             with self.lib_lock:
-                self.lib.end_text()
+                self.dgtboard.end_text()
         else:
             logging.debug('DGT clock isnt running - no need for endClock')
 
     def light_squares_revelation_board(self, squares):
-        if self.dgtserial.enable_revelation_leds:
+        if self.dgtboard.enable_revelation_leds:
             for sq in squares:
                 dgt_square = (8 - int(sq[1])) * 8 + ord(sq[0]) - ord('a')
                 logging.debug("REV2 light on square %s", sq)
-                self.lib.write([DgtCmd.DGT_SET_LEDS, 0x04, 0x01, dgt_square, dgt_square])
+                self.dgtboard.write_board_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x01, dgt_square, dgt_square])
 
     def clear_light_revelation_board(self):
-        if self.dgtserial.enable_revelation_leds:
+        if self.dgtboard.enable_revelation_leds:
             logging.debug('REV2 lights turned off')
-            self.lib.write([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
+            self.dgtboard.write_board_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
 
     def stop_clock(self):
         self._resume_clock(ClockSide.NONE)
@@ -123,13 +121,13 @@ class DgtHw(DgtIface):
         if side == ClockSide.RIGHT:
             rr = 1
         with self.lib_lock:
-            res = self.lib.set_and_run(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
+            res = self.dgtboard.set_and_run(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
             if not res:
                 logging.warning('Finally failed %i', res)
             else:
                 self.clock_running = (side != ClockSide.NONE)
             # this is needed for some(!) clocks
-            self.lib.end_text()
+            self.dgtboard.end_text()
 
     def start_clock(self, time_left, time_right, side):
         self.time_left = hours_minutes_seconds(time_left)

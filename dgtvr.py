@@ -21,13 +21,13 @@ from utilities import RepeatedTimer
 
 
 class DgtVr(DgtIface):
-    def __init__(self, dgtserial, dgttranslate):
-        super(DgtVr, self).__init__(dgtserial, dgttranslate)
+    def __init__(self, dgtboard, dgttranslate):
+        super(DgtVr, self).__init__(dgtboard, dgttranslate)
         # virtual lib
         self.rt = None
         self.time_side = ClockSide.NONE
         # setup virtual clock
-        main = 2 if dgtserial.is_pi else 0
+        main = 2 if dgtboard.is_pi else 0
         DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=main, sub=0, attached='virtual'))
 
     # (START) dgtserial class simulation

@@ -23,8 +23,8 @@ from threading import Lock, Timer
 
 
 class DgtPi(DgtIface):
-    def __init__(self, dgtserial, dgttranslate):
-        super(DgtPi, self).__init__(dgtserial, dgttranslate)
+    def __init__(self, dgtboard, dgttranslate):
+        super(DgtPi, self).__init__(dgtboard, dgttranslate)
 
         self.lib_lock = Lock()
         self.lib = cdll.LoadLibrary('dgt/dgtpicom.so')
@@ -32,7 +32,6 @@ class DgtPi(DgtIface):
         self._startup_i2c_clock()
         incoming_clock_thread = Timer(0, self._process_incoming_clock_forever)
         incoming_clock_thread.start()
-        # self.dgtserial.run()
 
     def _startup_i2c_clock(self):
         while self.lib.dgtpicom_init() < 0:
@@ -151,21 +150,15 @@ class DgtPi(DgtIface):
             logging.debug('DGT clock isnt running - no need for endClock')
 
     def light_squares_revelation_board(self, squares):
-        if self.dgtserial.enable_revelation_leds:
-            for sq in squares:
-                dgt_square = (8 - int(sq[1])) * 8 + ord(sq[0]) - ord('a')
-                logging.debug("REV2 light on square %s", sq)
-                self.dgtserial.write_board_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x01, dgt_square, dgt_square])
+        pass  # called already from dgthw
 
     def clear_light_revelation_board(self):
-        if self.dgtserial.enable_revelation_leds:
-            logging.debug('REV2 lights turned off')
-            self.dgtserial.write_board_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
+        pass  # called already from dgthw
 
     def stop_clock(self):
-        self.resume_clock(ClockSide.NONE)
+        self._resume_clock(ClockSide.NONE)
 
-    def resume_clock(self, side):
+    def _resume_clock(self, side):
         l_hms = self.time_left
         r_hms = self.time_right
         if l_hms is None or r_hms is None:

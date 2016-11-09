@@ -30,9 +30,9 @@ except ImportError:
     import enum34 as enum
 
 
-class DgtSerial(object):
+class DgtBoard(object):
     def __init__(self, device, enable_revelation_leds, is_pi):
-        super(DgtSerial, self).__init__()
+        super(DgtBoard, self).__init__()
         self.given_device = device
         self.device = device
         self.enable_revelation_leds = enable_revelation_leds
@@ -526,6 +526,61 @@ class DgtSerial(object):
                                         wait=True, beep=False, maxtime=0, devs={'i2c', 'web'})
                 DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text))
                 self.wait_counter = (self.wait_counter + 1) % len(waitchars)
+
+    def _wait_for_clock(self):
+        has_to_wait = False
+        while self.clock_lock:
+            if not has_to_wait:
+                has_to_wait = True
+                logging.debug('clock is locked => waiting')
+            time.sleep(0.1)
+        if has_to_wait:
+            logging.debug('clock is released now')
+
+    def set_text_3k(self, text, beep, ld=ClockDots.NONE, rd=ClockDots.NONE):
+        self._wait_for_clock()
+        res = self.write_board_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x0c, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                                        DgtClk.DGT_CMD_CLOCK_ASCII,
+                                        text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], beep,
+                                        DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        return res
+
+    def set_text_xl(self, text, beep, ld=ClockDots.NONE, rd=ClockDots.NONE):
+        def transfer(dots):
+            result = 0
+            if dots == ClockDots.DOT:
+                result = 0x01
+            if dots == ClockDots.COLON:
+                result = 0x02
+            return result
+
+        self._wait_for_clock()
+        icn = ((transfer(rd) & 0x07) | (transfer(ld) << 3) & 0x38)
+        res = self.write_board_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x0b, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                                        DgtClk.DGT_CMD_CLOCK_DISPLAY,
+                                        text[2], text[1], text[0], text[5], text[4], text[3], icn, beep,
+                                        DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        return res
+
+    def set_and_run(self, lr, lh, lm, ls, rr, rh, rm, rs):
+        self._wait_for_clock()
+        side = ClockSide.NONE
+        if lr == 1 and rr == 0:
+            side = ClockSide.LEFT
+        if lr == 0 and rr == 1:
+            side = ClockSide.RIGHT
+        res = self.write_board_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x0a, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                                        DgtClk.DGT_CMD_CLOCK_SETNRUN,
+                                        lh, lm, ls, rh, rm, rs, side,
+                                        DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        return res
+
+    def end_text(self):
+        self._wait_for_clock()
+        res = self.write_board_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                                        DgtClk.DGT_CMD_CLOCK_END,
+                                        DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        return res
 
     def run(self):
         self.incoming_board_thread = Timer(0, self._process_incoming_board_forever)
