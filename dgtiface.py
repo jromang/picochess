@@ -20,14 +20,13 @@ from threading import Timer, Thread, Lock
 
 
 class DgtIface(DisplayDgt, Thread):
-    def __init__(self, dgtboard, dgttranslate):
+    def __init__(self, dgttranslate, dgtboard=None):
         super(DgtIface, self).__init__()
 
         self.dgtboard = dgtboard
         self.dgttranslate = dgttranslate
 
         self.enable_dgt_3000 = False
-        self.enable_dgt_pi = self.dgtboard.is_pi
         self.clock_found = False
         self.time_left = None
         self.time_right = None
