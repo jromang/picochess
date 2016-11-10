@@ -36,20 +36,20 @@ class DgtVr(DgtIface):
             h, m, s = self.time_left
             time_left = 3600*h + 60*m + s - 1
             if time_left <= 0:
-                print('Clock flag: left')
+                print('[vir] clock flag: left')
                 self.rt.stop()
             self.time_left = hours_minutes_seconds(time_left)
         if self.time_side == ClockSide.RIGHT:
             h, m, s = self.time_right
             time_right = 3600*h + 60*m + s - 1
             if time_right <= 0:
-                print('Clock flag: right')
+                print('[vir] clock flag: right')
                 self.rt.stop()
             self.time_right = hours_minutes_seconds(time_right)
         if self.maxtimer_running:
-            print('Clock maxtime not run out')
+            print('[vir] clock maxtime not run out')
         else:
-            print('Clock time: {} - {}'.format(self.time_left, self.time_right))
+            print('[vir] clock time: {} - {}'.format(self.time_left, self.time_right))
         DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=self.time_left, time_right=self.time_right))
     # (END) dgtserial simulation class
 
@@ -70,7 +70,7 @@ class DgtVr(DgtIface):
                 text = text.rjust(6)
 
         logging.debug(text)
-        print('Clock move: {} Beep: {}'. format(text, message.beep))
+        print('[vir] clock move: {} Beep: {}'. format(text, message.beep))
 
     def display_text_on_clock(self, message):
         if self.enable_dgt_pi:
@@ -81,20 +81,20 @@ class DgtVr(DgtIface):
             text = message.m
 
         logging.debug(text)
-        print('Clock text: {} Beep: {}'. format(text, message.beep))
+        print('[vir] clock text: {} Beep: {}'. format(text, message.beep))
 
     def display_time_on_clock(self, force=False):
         if self.clock_running or force:
-            print('Clock showing time again - running state: {}'. format(self.clock_running))
+            print('[vir] clock showing time again - running state: {}'. format(self.clock_running))
         else:
-            logging.debug('virtual clock isnt running - no need for endClock')
+            logging.debug('[vir] clock isnt running - no need for endText')
 
     def stop_clock(self):
         if self.rt:
-            print('Clock time stopped at {} - {}'. format(self.time_left, self.time_right))
+            print('[vir] clock time stopped at {} - {}'. format(self.time_left, self.time_right))
             self.rt.stop()
         else:
-            print('Clock not ready')
+            print('[vir] clock not ready')
         self.clock_running = False
 
     def _resume_clock(self, side):
@@ -105,7 +105,7 @@ class DgtVr(DgtIface):
         self.time_right = hours_minutes_seconds(time_right)
         self.time_side = side
 
-        print('Clock time started at {} - {} on {}'. format(self.time_left, self.time_right, side))
+        print('[vir] clock time started at {} - {} on {}'. format(self.time_left, self.time_right, side))
         if self.rt:
             self.rt.stop()
         if side != ClockSide.NONE:
