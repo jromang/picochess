@@ -427,7 +427,7 @@ def main():
     parser.add_argument('-d', '--dgt-port', type=str,
                         help='enable dgt board on the given serial port such as /dev/ttyUSB0')
     parser.add_argument('-b', '--book', type=str, help='full path of book such as books/b-flank.bin',
-                        default='h-varied.bin')
+                        default='books/h-varied.bin')
     parser.add_argument('-t', '--time', type=str, default='5 0',
                         help="Time settings <FixSec> or <StMin IncSec> like '10'(move) or '5 0'(game) '3 2'(fischer)")
     parser.add_argument('-g', '--enable-gaviota', action='store_true', help='enable gavoita tablebase probing')
@@ -441,10 +441,9 @@ def main():
     parser.add_argument('-rk', '--remote-key', type=str, help='key file used to connect to the remote server')
     parser.add_argument('-pf', '--pgn-file', type=str, help='pgn file used to store the games', default='games.pgn')
     parser.add_argument('-pu', '--pgn-user', type=str, help='user name for the pgn file', default=None)
-    parser.add_argument('-ar', '--auto-reboot', action='store_true', help='reboot system after update')
     parser.add_argument('-web', '--web-server', dest='web_server_port', nargs='?', const=80, type=int, metavar='PORT',
                         help='launch web server')
-    parser.add_argument('-m', '--email', type=str, help='email used to send pgn files', default=None)
+    parser.add_argument('-m', '--email', type=str, help='email used to send pgn/log files', default=None)
     parser.add_argument('-ms', '--smtp-server', type=str, help='adress of email server', default=None)
     parser.add_argument('-mu', '--smtp-user', type=str, help='username for email server', default=None)
     parser.add_argument('-mp', '--smtp-pass', type=str, help='password for email server', default=None)
@@ -461,6 +460,7 @@ def main():
     parser.add_argument('-cvoice', '--computer-voice', type=str, help='voice for computer', default=None)
     parser.add_argument('-inet', '--enable-internet', action='store_true', help='DEPRECATED - dont use it anymore!')
     parser.add_argument('-update', '--enable-update', action='store_true', help='enable picochess updates')
+    parser.add_argument('-ar', '--auto-reboot', action='store_true', help='reboot system after update')
     parser.add_argument('-nook', '--disable-ok-message', action='store_true', help='disable ok confirmation messages')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s version {}'.format(version),
                         help='show current version', default=None)
