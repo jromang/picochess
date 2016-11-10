@@ -87,13 +87,8 @@ class AlternativeMover:
 def main():
 
     def display_system_info():
-        if args.enable_internet:
-            place = get_location()
-            addr = get_ip()
-        else:
-            place = '?'
-            addr = None
-        DisplayMsg.show(Message.SYSTEM_INFO(info={'version': version, 'location': place, 'ip': addr,
+        location, ip = get_location()
+        DisplayMsg.show(Message.SYSTEM_INFO(info={'version': version, 'location': location, 'ip': ip,
                                                   'engine_name': engine_name, 'user_name': user_name
                                                   }))
 
@@ -464,7 +459,8 @@ def main():
                         help='sets (some-)beep level from 0(=no beeps) to 15(=all beeps)')
     parser.add_argument('-uvoice', '--user-voice', type=str, help='voice for user', default=None)
     parser.add_argument('-cvoice', '--computer-voice', type=str, help='voice for computer', default=None)
-    parser.add_argument('-inet', '--enable-internet', action='store_true', help='enable internet lookups')
+    parser.add_argument('-inet', '--enable-internet', action='store_true', help='DEPRECATED - dont use it anymore!')
+    parser.add_argument('-update', '--enable-update', action='store_true', help='enable picochess updates')
     parser.add_argument('-nook', '--disable-ok-message', action='store_true', help='disable ok confirmation messages')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s version {}'.format(version),
                         help='show current version', default=None)
@@ -493,7 +489,7 @@ def main():
     logging.debug('startup parameters: {}'.format(p))
 
     # Update
-    if args.enable_internet:
+    if args.enable_update:
         update_picochess(args.auto_reboot)
 
     gaviota = None
@@ -529,7 +525,7 @@ def main():
         DgtHw(dgtboard, dgttranslate).start()
     # Save to PGN
     emailer = Emailer(
-        net=args.enable_internet, email=args.email, mailgun_key=args.mailgun_key,
+        email=args.email, mailgun_key=args.mailgun_key,
         smtp_server=args.smtp_server, smtp_user=args.smtp_user,
         smtp_pass=args.smtp_pass, smtp_encryption=args.smtp_encryption, smtp_from=args.smtp_from)
 
@@ -866,7 +862,7 @@ def main():
 
                 if case(EventApi.EMAIL_LOG):
                     if args.log_file:
-                        email_logger = Emailer(net=args.enable_internet, email=args.email, mailgun_key=args.mailgun_key,
+                        email_logger = Emailer(email=args.email, mailgun_key=args.mailgun_key,
                                                smtp_server=args.smtp_server, smtp_user=args.smtp_user,
                                                smtp_pass=args.smtp_pass, smtp_encryption=args.smtp_encryption,
                                                smtp_from=args.smtp_from)

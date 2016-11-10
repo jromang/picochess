@@ -1,5 +1,5 @@
 ### ===============================
-### = picochess.ini.example v0.73 =
+### = picochess.ini.example v0.78 =
 ### ===============================
 ### Example and description how to configure PicoChess
 ### To use this file, simply copy this file to picochess.ini and edit the appropriate settings
@@ -82,8 +82,6 @@
 ### standard SMTP email or Mailgun Webservice
 ### Mail general
 ### if email is not set, PicoChess won't attempt to send the game at all
-### You also have to enable internet access for picochess. This option can be enabled with 
-### enable-internet (section PicoChess related options" below). 
 ## email tells PicoChess to which email address the game should be send to, it should be your email address :-)
 # email = your.mailbox@your-domain.com 
 ### =======================================
@@ -120,15 +118,15 @@
 # log-level = debug
 ### PicoChess can use a speech engine for announcement
 ## user-voice used for user moves announcement
-# user-voice = en:Elsie
+# user-voice = en:dgt
 ## computer-voice for computer moves announcement
-# computer-voice = en:Marvin
+# computer-voice = en:al
 ## PicoChess writes pgn files at end of game.
 # pgn-file = games.pgn
 # pgn-user = player
-## Picochess connects to the internet like ip adr, update of newest software etc.
+## Picochess will check for a new version at startup.
 ## This is by default not actived. If you want this feature, please uncomment the next line
-# enable-internet = True
+# enable-update = True
 ## After an update should the machine reboot automatically? If so, please uncomment the next line
 # auto-reboot = True
 ## The port of the webserver

@@ -808,26 +808,14 @@ def reboot():
     os.system('reboot')
 
 
-def get_ip():
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        s.connect(('google.com', 80))
-        return s.getsockname()[0]
-
-    # TODO: Better handling of exceptions of socket connect
-    except socket.error:
-        logging.error("no internet connection!")
-    finally:
-        s.close()
-
-
 def get_location():
     try:
-        response = urllib.request.urlopen('http://www.telize.com/geoip/')
+        response = urllib.request.urlopen('https://freegeoip.net/json/')
         j = json.loads(response.read().decode())
-        country = j['country'] + ' ' if 'country' in j else ''
+        country_name = j['country_name'] + ' ' if 'country_name' in j else ''
         country_code = j['country_code'] + ' ' if 'country_code' in j else ''
+        ip = j['ip'] if 'ip' in j else None
         city = j['city'] + ', ' if 'city' in j else ''
-        return city + country + country_code
+        return city + country_name + country_code, ip
     except:
-        return '?'
+        return '?', None

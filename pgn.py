@@ -34,10 +34,10 @@ import mimetypes
 
 
 class Emailer(object):
-    def __init__(self, net, email=None, mailgun_key=None,
+    def __init__(self, email=None, mailgun_key=None,
                  smtp_server=None, smtp_user=None,
                  smtp_pass=None, smtp_encryption=False, smtp_from=None):
-        if email and net:  # check if email address is provided by picochess.ini and network traffic is allowed
+        if email:  # check if email address is provided by picochess.ini and network traffic is allowed
             self.email = email
         else:
             self.email = False
