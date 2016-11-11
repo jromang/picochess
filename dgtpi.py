@@ -151,16 +151,10 @@ class DgtPi(DgtIface):
             logging.debug('DGT clock isnt running - no need for endClock')
 
     def light_squares_revelation_board(self, uci_move):
-        if self.dgtserial.enable_revelation_leds:
-            logging.debug("REV2 lights on move {}".format(uci_move))
-            fr = (8 - int(uci_move[1])) * 8 + ord(uci_move[0]) - ord('a')
-            to = (8 - int(uci_move[3])) * 8 + ord(uci_move[2]) - ord('a')
-            self.lib.write([DgtCmd.DGT_SET_LEDS, 0x04, 0x01, fr, to])
+        pass
 
     def clear_light_revelation_board(self):
-        if self.dgtserial.enable_revelation_leds:
-            logging.debug('REV2 lights turned off')
-            self.dgtserial.write_board_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
+        pass
 
     def stop_clock(self):
         self.resume_clock(ClockSide.NONE)
