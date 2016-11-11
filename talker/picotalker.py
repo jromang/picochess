@@ -128,19 +128,19 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                         system_picotalker.say_takeback()
                         break
                     if case(MessageApi.TIME_CONTROL):
-                        system_picotalker.say_ok()
+                        system_picotalker.say_oktime()
                         break
                     if case(MessageApi.INTERACTION_MODE):
-                        system_picotalker.say_ok()
+                        system_picotalker.say_okmode()
                         break
                     if case(MessageApi.LEVEL):
-                        system_picotalker.say_ok()
+                        system_picotalker.say_oklevel()
                         break
                     if case(MessageApi.OPENING_BOOK):
-                        system_picotalker.say_ok()
+                        system_picotalker.say_okbook()
                         break
                     if case(MessageApi.ENGINE_READY):
-                        system_picotalker.say_ok()
+                        system_picotalker.say_okengine()
                         break
                     if case():  # Default
                         # print(message)
@@ -239,8 +239,28 @@ class PicoTalker():
         return ['takeback.ogg']
 
     def get_ok(self):
-        """Announce takeback"""
+        """Announce ok"""
         return ['ok.ogg']
+
+    def get_okbook(self):
+        """Announce ok book"""
+        return ['okbook.ogg']
+
+    def get_okengine(self):
+        """Announce ok engine"""
+        return ['okengine.ogg']
+
+    def get_oklevel(self):
+        """Announce ok level"""
+        return ['oklevel.ogg']
+
+    def get_okmode(self):
+        """Announce ok mode"""
+        return ['okmode.ogg']
+
+    def get_oktime(self):
+        """Announce ok time"""
+        return ['oktime.ogg']
 
     def say_new_game(self):
         self.talk(self.get_new_game())
@@ -274,6 +294,21 @@ class PicoTalker():
 
     def say_ok(self):
         self.talk(self.get_ok())
+
+    def say_okbook(self):
+        self.talk(self.get_okbook())
+
+    def say_okengine(self):
+        self.talk(self.get_okengine())
+
+    def say_oklevel(self):
+        self.talk(self.get_oklevel())
+
+    def say_okmode(self):
+        self.talk(self.get_okmode())
+
+    def say_oktime(self):
+        self.talk(self.get_oktime())
 
     def say_move(self, move, fen, game):
         """

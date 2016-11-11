@@ -90,21 +90,22 @@ class DgtHw(DgtIface):
 
     def display_time_on_clock(self, force=False):
         if self.clock_running or force:
-            self.lib.end_text()
+            with self.lib_lock:
+                self.lib.end_text()
         else:
             logging.debug('DGT clock isnt running - no need for endClock')
 
-    def light_squares_revelation_board(self, squares):
+    def light_squares_revelation_board(self, uci_move):
         if self.dgtserial.enable_revelation_leds:
-            for sq in squares:
-                dgt_square = (8 - int(sq[1])) * 8 + ord(sq[0]) - ord('a')
-                logging.debug("REV2 light on square %s", sq)
-                self.lib.write([DgtCmd.DGT_SET_LEDS, 0x04, 0x01, dgt_square, dgt_square])
+            logging.debug("REV2 lights on move {}".format(uci_move))
+            fr = (8 - int(uci_move[1])) * 8 + ord(uci_move[0]) - ord('a')
+            to = (8 - int(uci_move[3])) * 8 + ord(uci_move[2]) - ord('a')
+            self.lib.write([DgtCmd.DGT_SET_LEDS, 0x04, 0x01, fr, to, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
 
     def clear_light_revelation_board(self):
         if self.dgtserial.enable_revelation_leds:
             logging.debug('REV2 lights turned off')
-            self.lib.write([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63])
+            self.lib.write([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
 
     def stop_clock(self):
         self.resume_clock(ClockSide.NONE)
