@@ -97,7 +97,7 @@ class DgtIface(DisplayDgt, Thread):
                 self.clear_light_revelation_board()
                 break
             if case(DgtApi.LIGHT_SQUARES):
-                self.light_squares_revelation_board(message.squares)
+                self.light_squares_revelation_board(message.uci_move)
                 break
             if case(DgtApi.CLOCK_STOP):
                 self.clock_running = False
