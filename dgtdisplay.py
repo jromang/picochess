@@ -792,11 +792,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.hint_fen = None if ponder is None else message.game.fen()
                 self.hint_turn = None if ponder is None else message.game.turn
                 # Display the move
-                uci_move = move.uci()
                 side = ClockSide.LEFT if (turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
                 DisplayDgt.show(Dgt.DISPLAY_MOVE(move=move, fen=message.fen, side=side, wait=message.wait,
                                                  beep=self.dgttranslate.bl(BeepLevel.CONFIG), maxtime=0))
-                DisplayDgt.show(Dgt.LIGHT_SQUARES(squares=(uci_move[0:2], uci_move[2:4])))
+                DisplayDgt.show(Dgt.LIGHT_SQUARES(uci_move=move.uci()))
                 break
             if case(MessageApi.START_NEW_GAME):
                 DisplayDgt.show(Dgt.LIGHT_CLEAR())
