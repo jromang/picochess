@@ -319,6 +319,7 @@ class Language(enum.Enum):
     NL = 'B00_language_nl_menu'
     FR = 'B00_language_fr_menu'
     ES = 'B00_language_es_menu'
+    IT = 'B00_language_it_menu'
 
 
 class LanguageLoop(object):
@@ -336,12 +337,16 @@ class LanguageLoop(object):
         elif m == Language.FR:
             return Language.ES
         elif m == Language.ES:
+            return Language.IT
+        elif m == Language.IT:
             return Language.EN
         return 'error Language next'
 
     @staticmethod
     def prev(m):
         if m == Language.EN:
+            return Language.IT
+        if m == Language.IT:
             return Language.ES
         if m == Language.ES:
             return Language.FR
