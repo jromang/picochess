@@ -203,7 +203,7 @@ class DgtTranslate(object):
             nltxt = Dgt.DISPLAY_TEXT(l='zw aan zet ', m='zw zet  ', s='z zet ')
             frtxt = Dgt.DISPLAY_TEXT(l='aux noirs  ', m='mvt n   ', s='mvt n ')
             estxt = Dgt.DISPLAY_TEXT(l='lado negro ', m='lado B  ', s='lado b')
-            ittxt = Dgt.DISPLAY_TEXT(l='lato nero  ', m='lato b  ', s='lato n')
+            ittxt = Dgt.DISPLAY_TEXT(l='lato nero  ', m='lato n  ', s='lato n')
         if text_id == 'scanboard':
             entxt = Dgt.DISPLAY_TEXT(l='scan board ', m='scan    ', s='scan  ')
             detxt = Dgt.DISPLAY_TEXT(l='lese Stellg', m='lese Stl', s='lese s')
