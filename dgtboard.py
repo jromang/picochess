@@ -314,7 +314,7 @@ class DgtBoard(object):
                     c = self.serial.read(1)
                 else:
                     self._startup_serial_hardware()
-                if c:
+                if c and c > 0x7f:
                     self._read_board_message(head=c)
                 else:
                     counter = (counter + 1) % 10
