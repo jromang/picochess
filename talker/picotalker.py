@@ -54,6 +54,21 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
             logging.debug('creating computer voice: [%s]', str(computer_voice))
             self.computer_picotalker = PicoTalker(computer_voice)
 
+    def talk(self, sounds, path):
+        def play(file):
+            d, f = sf.read(file, dtype='float32')
+            sd.play(d, f, blocking=True)
+            status = sd.get_status()
+            if status:
+                logging.warning(str(status))
+
+        for part in sounds:
+            voice_file = path + '/' + part
+            if Path(voice_file).is_file():
+                play(voice_file)
+            else:
+                logging.warning('voice file not found {}'.format(voice_file))
+
     def run(self):
         """
         Start listening for Messages on our queue and generate speech as appropriate.
@@ -72,75 +87,79 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                     if case(MessageApi.START_NEW_GAME):
                         if system_picotalker:
                             logging.debug('announcing START_NEW_GAME')
-                            system_picotalker.say_new_game()
+                            self.talk(['newgame.ogg'], system_picotalker.get_path())
                         break
                     if case(MessageApi.COMPUTER_MOVE):
                         if message.move and message.game and str(message.move) != previous_move \
                                 and self.computer_picotalker is not None:
                             logging.debug('announcing COMPUTER_MOVE [%s]', message.move)
-                            self.computer_picotalker.say_move(message.move, message.fen, message.game.copy())
+                            self.talk(self.say_move(message.move, message.fen, message.game.copy()),
+                                      self.computer_picotalker.get_path())
                             previous_move = str(message.move)
                         break
                     if case(MessageApi.USER_MOVE):
                         if message.move and message.game and str(message.move) != previous_move \
                                 and self.user_picotalker is not None:
                             logging.debug('announcing USER_MOVE [%s]', message.move)
-                            self.user_picotalker.say_move(message.move, message.fen, message.game.copy())
+                            self.talk(self.say_move(message.move, message.fen, message.game.copy()),
+                                      self.user_picotalker.get_path())
                             previous_move = str(message.move)
                         break
                     if case(MessageApi.REVIEW_MOVE):
                         if message.move and message.game and str(message.move) != previous_move \
                                 and self.user_picotalker is not None:
                             logging.debug('announcing REVIEW_MOVE [%s]', message.move)
-                            self.user_picotalker.say_move(message.move, message.fen, message.game.copy())
+                            self.talk(self.say_move(message.move, message.fen, message.game.copy()),
+                                      self.user_picotalker.get_path())
                             previous_move = str(message.move)
                         break
                     if case(MessageApi.GAME_ENDS):
                         if message.result == GameResult.OUT_OF_TIME:
                             logging.debug('announcing GAME_ENDS/TIME_CONTROL')
-                            system_picotalker.say_out_of_time(not message.game.turn)
+                            wins = 'whitewins.ogg' if message.game.turn == chess.BLACK else 'blackwins.ogg'
+                            self.talk(['timelost.ogg', wins], system_picotalker.get_path())
                         elif message.result == GameResult.INSUFFICIENT_MATERIAL:
                             logging.debug('announcing GAME_ENDS/INSUFFICIENT_MATERIAL')
-                            system_picotalker.say_draw_insufficient_material()
+                            self.talk(['material.ogg', 'draw.ogg'], system_picotalker.get_path())
                         elif message.result == GameResult.MATE:
                             logging.debug('announcing GAME_ENDS/MATE')
-                            system_picotalker.say_checkmate()
+                            self.talk(['checkmate.ogg'], system_picotalker.get_path())
                         elif message.result == GameResult.STALEMATE:
                             logging.debug('announcing GAME_ENDS/STALEMATE')
-                            system_picotalker.say_stalemate()
+                            self.talk(['stalemate.ogg'], system_picotalker.get_path())
                         elif message.result == GameResult.ABORT:
                             logging.debug('announcing GAME_ENDS/ABORT')
-                            system_picotalker.say_game_aborted()
+                            self.talk(['abort.ogg'], system_picotalker.get_path())
                         elif message.result == GameResult.DRAW:
                             logging.debug('announcing DRAW')
-                            system_picotalker.say_draw()
+                            self.talk(['draw.ogg'], system_picotalker.get_path())
                         elif message.result == GameResult.WIN_WHITE:
                             logging.debug('announcing WHITE WIN')
-                            system_picotalker.say_winner(chess.WHITE)
+                            self.talk(['whitewins.ogg'], system_picotalker.get_path())
                         elif message.result == GameResult.WIN_BLACK:
                             logging.debug('announcing BLACK WIN')
-                            system_picotalker.say_winner(chess.BLACK)
+                            self.talk(['blackwins.ogg'], system_picotalker.get_path())
                         elif message.result == GameResult.FIVEFOLD_REPETITION:
                             logging.debug('announcing GAME_ENDS/FIVEFOLD_REPETITION')
-                            system_picotalker.say_draw_fivehold_repetition()
+                            self.talk(['repetition.ogg', 'draw.ogg'], system_picotalker.get_path())
                         break
                     if case(MessageApi.USER_TAKE_BACK):
-                        system_picotalker.say_takeback()
+                        self.talk(['takeback.ogg'], system_picotalker.get_path())
                         break
                     if case(MessageApi.TIME_CONTROL):
-                        system_picotalker.say_oktime()
+                        self.talk(['oktime.ogg'], system_picotalker.get_path())
                         break
                     if case(MessageApi.INTERACTION_MODE):
-                        system_picotalker.say_okmode()
+                        self.talk(['okmode.ogg'], system_picotalker.get_path())
                         break
                     if case(MessageApi.LEVEL):
-                        system_picotalker.say_oklevel()
+                        self.talk(['oklevel.ogg'], system_picotalker.get_path())
                         break
                     if case(MessageApi.OPENING_BOOK):
-                        system_picotalker.say_okbook()
+                        self.talk(['okbook.ogg'], system_picotalker.get_path())
                         break
                     if case(MessageApi.ENGINE_READY):
-                        system_picotalker.say_okengine()
+                        self.talk(['okengine.ogg'], system_picotalker.get_path())
                         break
                     if case():  # Default
                         # print(message)
@@ -157,158 +176,6 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
             return self.computer_picotalker
         else:
             return self.user_picotalker
-
-
-class PicoTalker():
-    def __init__(self, localisation_id_voice=None):
-        self.voice_path = None
-
-        try:
-            (localisation_id, voice_name) = localisation_id_voice.split(':')
-            self.voice_path = 'talker/voices/' + localisation_id + '/' + voice_name
-            if not Path(self.voice_path).exists():
-                logging.exception('voice path doesnt exist')
-        except ValueError:
-            logging.exception('not valid voice parameter')
-
-    def talk(self, sounds):
-        def play(file, blocking=True):
-            d, f = sf.read(file, dtype='float32')
-            sd.play(d, f, blocking=blocking)
-            status = sd.get_status()
-            if status:
-                logging.warning(str(status))
-
-        for part in sounds:
-            voice_file = self.voice_path + '/' + part
-            if Path(voice_file).is_file():
-                play(voice_file)
-            else:
-                logging.warning('voice file not found {}'.format(voice_file))
-
-    def get_castles_kingside(self):
-        return ['castlekingside.ogg']
-
-    def get_castles_queenside(self):
-        return ['castlequeenside.ogg']
-
-    def get_check(self):
-        return ['check.ogg']
-
-    def get_checkmate(self):
-        return ['checkmate.ogg']
-
-    def get_stalemate(self):
-        return ['stalemate.ogg']
-
-    def get_draw(self):
-        return ['draw.ogg']
-
-    def get_draw_seventyfive_moves(self):
-        return ['75moves.ogg', 'draw.ogg']
-
-    def get_draw_insufficient_material(self):
-        return ['material.ogg', 'draw.ogg']
-
-    def get_draw_fivefold_repetition(self):
-        return ['repetition.ogg', 'draw.ogg']
-
-    def get_winner(self, color):
-        wins = 'whitewins.ogg' if color == chess.WHITE else 'blackwins.ogg'
-        return [wins]
-
-    def get_out_of_time(self, color):
-        """Announce lost on time"""
-        wins = 'whitewins.ogg' if color == chess.WHITE else 'blackwins.ogg'
-        return ['timelost.ogg', wins]
-
-    def get_new_game(self):
-        """Announce a new game"""
-        return ['newgame.ogg']
-
-    def get_game_aborted(self):
-        """Announce game aborted"""
-        return ['abort.ogg']
-
-    def get_shutdown(self):
-        """Announce system shutdown"""
-        return ['goodbye.ogg']
-
-    def get_takeback(self):
-        """Announce takeback"""
-        return ['takeback.ogg']
-
-    def get_ok(self):
-        """Announce ok"""
-        return ['ok.ogg']
-
-    def get_okbook(self):
-        """Announce ok book"""
-        return ['okbook.ogg']
-
-    def get_okengine(self):
-        """Announce ok engine"""
-        return ['okengine.ogg']
-
-    def get_oklevel(self):
-        """Announce ok level"""
-        return ['oklevel.ogg']
-
-    def get_okmode(self):
-        """Announce ok mode"""
-        return ['okmode.ogg']
-
-    def get_oktime(self):
-        """Announce ok time"""
-        return ['oktime.ogg']
-
-    def say_new_game(self):
-        self.talk(self.get_new_game())
-
-    def say_out_of_time(self, color):
-        self.talk(self.get_out_of_time(color))
-
-    def say_draw_insufficient_material(self):
-        self.talk(self.get_draw_insufficient_material())
-
-    def say_checkmate(self):
-        self.talk(self.get_checkmate())
-
-    def say_stalemate(self):
-        self.talk(self.get_stalemate())
-
-    def say_game_aborted(self):
-        self.talk(self.get_game_aborted())
-
-    def say_draw(self):
-        self.talk(self.get_draw())
-
-    def say_winner(self, color):
-        self.talk(self.get_winner(color))
-
-    def say_draw_fivehold_repetition(self):
-        self.talk(self.get_draw_fivefold_repetition())
-
-    def say_takeback(self):
-        self.talk(self.get_takeback())
-
-    def say_ok(self):
-        self.talk(self.get_ok())
-
-    def say_okbook(self):
-        self.talk(self.get_okbook())
-
-    def say_okengine(self):
-        self.talk(self.get_okengine())
-
-    def say_oklevel(self):
-        self.talk(self.get_oklevel())
-
-    def say_okmode(self):
-        self.talk(self.get_okmode())
-
-    def say_oktime(self):
-        self.talk(self.get_oktime())
 
     def say_move(self, move, fen, game):
         """
@@ -348,9 +215,9 @@ class PicoTalker():
         voice_parts = []
 
         if san_move.startswith('O-O-O'):
-            voice_parts += self.get_castles_queenside()
+            voice_parts += ['castlequeenside.ogg']
         elif san_move.startswith('O-O'):
-            voice_parts += self.get_castles_kingside()
+            voice_parts += ['castlekingside.ogg']
         else:
             for c in san_move:
                 try:
@@ -363,20 +230,37 @@ class PicoTalker():
 
         if game.is_game_over():
             if game.is_checkmate():
-                voice_parts += self.get_checkmate()
-                voice_parts += self.get_winner(not game.turn)
+                wins = 'whitewins.ogg' if game.turn == chess.BLACK else 'blackwins.ogg'
+                voice_parts += ['checkmate.ogg', wins]
             elif game.is_stalemate():
-                voice_parts += self.get_stalemate()
+                voice_parts += ['stalemate.ogg']
             else:
                 if game.is_seventyfive_moves():
-                    voice_parts += self.get_draw_seventyfive_moves()
+                    voice_parts += ['75moves.ogg', 'draw.ogg']
                 elif game.is_insufficient_material():
-                    voice_parts += self.get_draw_insufficient_material()
+                    voice_parts += ['material.ogg', 'draw.ogg']
                 elif game.is_fivefold_repetition():
-                    voice_parts += self.get_draw_fivefold_repetition()
+                    voice_parts += ['repetition.ogg', 'draw.ogg']
                 else:
-                    voice_parts += self.get_draw()
+                    voice_parts += ['draw.ogg']
         elif game.is_check():
-            voice_parts += self.get_check()
+            voice_parts += ['check.ogg']
 
-        self.talk(voice_parts)
+        return voice_parts
+
+
+class PicoTalker():
+    def __init__(self, localisation_id_voice=None):
+        self.voice_path = None
+
+        try:
+            (localisation_id, voice_name) = localisation_id_voice.split(':')
+            self.voice_path = 'talker/voices/' + localisation_id + '/' + voice_name
+            if not Path(self.voice_path).exists():
+                logging.exception('voice path doesnt exist')
+        except ValueError:
+            logging.exception('not valid voice parameter')
+
+    def get_path(self):
+        return self.voice_path
+

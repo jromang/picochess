@@ -41,7 +41,8 @@ from dgthw import DgtHw
 from dgtpi import DgtPi
 from dgtvr import DgtVr
 from dgtdisplay import DgtDisplay
-from dgtserial import DgtSerial
+# from dgtserial import DgtSerial
+from dgtboard import DgtBoard
 from dgttranslate import DgtTranslate
 
 from logging.handlers import RotatingFileHandler
@@ -86,13 +87,8 @@ class AlternativeMover:
 def main():
 
     def display_system_info():
-        if args.enable_internet:
-            place = get_location()
-            addr = get_ip()
-        else:
-            place = '?'
-            addr = None
-        DisplayMsg.show(Message.SYSTEM_INFO(info={'version': version, 'location': place, 'ip': addr,
+        location, ip = get_location()
+        DisplayMsg.show(Message.SYSTEM_INFO(info={'version': version, 'location': location, 'ip': ip,
                                                   'engine_name': engine_name, 'user_name': user_name
                                                   }))
 
@@ -347,8 +343,8 @@ def main():
 
         # engine or remote move
         if (interaction_mode == Mode.NORMAL or interaction_mode == Mode.REMOTE) and \
-                ((play_mode == PlayMode.USER_WHITE and game.turn == chess.BLACK) or
-                     (play_mode == PlayMode.USER_BLACK and game.turn == chess.WHITE)):
+                ((play_mode == PlayMode.USER_WHITE and turn == chess.BLACK) or
+                     (play_mode == PlayMode.USER_BLACK and turn == chess.WHITE)):
             last_computer_fen = game.board_fen()
             game.push(move)
             if inbook:
@@ -431,7 +427,7 @@ def main():
     parser.add_argument('-d', '--dgt-port', type=str,
                         help='enable dgt board on the given serial port such as /dev/ttyUSB0')
     parser.add_argument('-b', '--book', type=str, help='full path of book such as books/b-flank.bin',
-                        default='h-varied.bin')
+                        default='books/h-varied.bin')
     parser.add_argument('-t', '--time', type=str, default='5 0',
                         help="Time settings <FixSec> or <StMin IncSec> like '10'(move) or '5 0'(game) '3 2'(fischer)")
     parser.add_argument('-g', '--enable-gaviota', action='store_true', help='enable gavoita tablebase probing')
@@ -445,10 +441,9 @@ def main():
     parser.add_argument('-rk', '--remote-key', type=str, help='key file used to connect to the remote server')
     parser.add_argument('-pf', '--pgn-file', type=str, help='pgn file used to store the games', default='games.pgn')
     parser.add_argument('-pu', '--pgn-user', type=str, help='user name for the pgn file', default=None)
-    parser.add_argument('-ar', '--auto-reboot', action='store_true', help='reboot system after update')
     parser.add_argument('-web', '--web-server', dest='web_server_port', nargs='?', const=80, type=int, metavar='PORT',
                         help='launch web server')
-    parser.add_argument('-m', '--email', type=str, help='email used to send pgn files', default=None)
+    parser.add_argument('-m', '--email', type=str, help='email used to send pgn/log files', default=None)
     parser.add_argument('-ms', '--smtp-server', type=str, help='adress of email server', default=None)
     parser.add_argument('-mu', '--smtp-user', type=str, help='username for email server', default=None)
     parser.add_argument('-mp', '--smtp-pass', type=str, help='password for email server', default=None)
@@ -463,12 +458,14 @@ def main():
                         help='sets (some-)beep level from 0(=no beeps) to 15(=all beeps)')
     parser.add_argument('-uvoice', '--user-voice', type=str, help='voice for user', default=None)
     parser.add_argument('-cvoice', '--computer-voice', type=str, help='voice for computer', default=None)
-    parser.add_argument('-inet', '--enable-internet', action='store_true', help='enable internet lookups')
+    parser.add_argument('-inet', '--enable-internet', action='store_true', help='DEPRECATED - dont use it anymore!')
+    parser.add_argument('-update', '--enable-update', action='store_true', help='enable picochess updates')
+    parser.add_argument('-ar', '--auto-reboot', action='store_true', help='reboot system after update')
     parser.add_argument('-nook', '--disable-ok-message', action='store_true', help='disable ok confirmation messages')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s version {}'.format(version),
                         help='show current version', default=None)
     parser.add_argument('-pi', '--dgtpi', action='store_true', help='use the dgtpi hardware')
-    parser.add_argument('-lang', '--language', choices=['en', 'de', 'nl', 'fr', 'es'], default='en',
+    parser.add_argument('-lang', '--language', choices=['en', 'de', 'nl', 'fr', 'es', 'it'], default='en',
                         help='picochess language')
     parser.add_argument('-c', '--console', action='store_true', help='use console interface')
 
@@ -492,7 +489,7 @@ def main():
     logging.debug('startup parameters: {}'.format(p))
 
     # Update
-    if args.enable_internet:
+    if args.enable_update:
         update_picochess(args.auto_reboot)
 
     gaviota = None
@@ -512,23 +509,23 @@ def main():
     if args.web_server_port:
         WebServer(args.web_server_port).start()
 
-    dgtserial = DgtSerial(args.dgt_port, args.enable_revelation_leds, args.dgtpi)
+    dgtboard = DgtBoard(args.dgt_port, args.enable_revelation_leds, args.dgtpi)
 
     if args.console:
         # Enable keyboard input and terminal display
         logging.debug('starting picochess in virtual mode')
         KeyboardInput(dgttranslate, args.dgtpi).start()
         TerminalDisplay().start()
-        DgtVr(dgtserial, dgttranslate).start()
+        DgtVr(dgttranslate, dgtboard).start()
     else:
         # Connect to DGT board
         logging.debug('starting picochess in board mode')
         if args.dgtpi:
-            DgtPi(dgtserial, dgttranslate).start()
-        DgtHw(dgtserial, dgttranslate).start()
+            DgtPi(dgttranslate).start()
+        DgtHw(dgttranslate, dgtboard).start()
     # Save to PGN
     emailer = Emailer(
-        net=args.enable_internet, email=args.email, mailgun_key=args.mailgun_key,
+        email=args.email, mailgun_key=args.mailgun_key,
         smtp_server=args.smtp_server, smtp_user=args.smtp_user,
         smtp_pass=args.smtp_pass, smtp_encryption=args.smtp_encryption, smtp_from=args.smtp_from)
 
@@ -801,7 +798,7 @@ def main():
                 if case(EventApi.NEW_PV):
                     # illegal moves can occur if a pv from the engine arrives at the same time as a user move.
                     if game.is_legal(event.pv[0]):
-                        DisplayMsg.show(Message.NEW_PV(pv=event.pv, mode=interaction_mode, fen=game.fen(), turn=game.turn))
+                        DisplayMsg.show(Message.NEW_PV(pv=event.pv, mode=interaction_mode, game=game.copy()))
                     else:
                         logging.info('illegal move can not be displayed. move:%s fen=%s', event.pv[0], game.fen())
                     break
@@ -865,7 +862,7 @@ def main():
 
                 if case(EventApi.EMAIL_LOG):
                     if args.log_file:
-                        email_logger = Emailer(net=args.enable_internet, email=args.email, mailgun_key=args.mailgun_key,
+                        email_logger = Emailer(email=args.email, mailgun_key=args.mailgun_key,
                                                smtp_server=args.smtp_server, smtp_user=args.smtp_user,
                                                smtp_pass=args.smtp_pass, smtp_encryption=args.smtp_encryption,
                                                smtp_from=args.smtp_from)
