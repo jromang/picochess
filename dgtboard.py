@@ -299,6 +299,11 @@ class DgtBoard(object):
             if not message_id == DgtMsg.DGT_MSG_SERIALNR:
                 logging.debug("get [ser] board [%s], length: %i", DgtMsg(message_id), message_length)
             message = struct.unpack('>' + str(message_length) + 'B', self.serial.read(message_length))
+            for c in message:
+                if c & 0x80:
+                    logging.warning('illegal data in message %i found', message_id)
+                    break
+
             self._process_board_message(message_id, message)
         except ValueError:
             logging.warning("unknown DGT message value: %i length: %i", message_id, message_length)
