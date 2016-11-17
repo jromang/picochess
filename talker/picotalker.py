@@ -66,8 +66,9 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
             voice_file = path + '/' + part
             if Path(voice_file).is_file():
                 cmd = 'ogg123 ' + voice_file
-                subprocess.call(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                # play(voice_file)
+                ret = subprocess.call(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                if ret:  # fallback in case "vorbis-tools" isnt installed
+                    play(voice_file)
             else:
                 logging.warning('voice file not found {}'.format(voice_file))
 

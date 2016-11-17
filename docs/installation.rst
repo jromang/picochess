@@ -108,7 +108,9 @@ Manual installation
 
   * zeroconf (``sudo apt-get install avahi-daemon avahi-discover libnss-mdns``, included on Mac OS X)
 
-  * espeak and festival (``sudo apt-get install espeak festival``) to enable speech
+  * espeak and festival (``sudo apt-get install espeak festival``) to enable speech for versions < 0.79
+
+  * vorbis-tools (``sudo apt-get install vorbis-tools``) to enable speech for versions >= 0.79
 
 2. **Get a copy of the source code**
 
