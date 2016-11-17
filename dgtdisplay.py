@@ -68,7 +68,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.system_sound_index = self.dgttranslate.beep
 
         self.system_language_result = None
-        langs = {'en': Language.EN, 'de': Language.DE, 'nl': Language.NL, 'fr': Language.FR, 'es': Language.ES}
+        langs = {'en': Language.EN, 'de': Language.DE, 'nl': Language.NL,
+                 'fr': Language.FR, 'es': Language.ES, 'it': Language.IT}
         self.system_language_index = langs[self.dgttranslate.language]
 
         self.time_mode_result = None
@@ -564,7 +565,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     text = self.dgttranslate.text(self.system_language_result.value)
                     exit_menu = False
                 else:
-                    langs = {Language.EN: 'en', Language.DE: 'de', Language.NL: 'nl', Language.FR: 'fr', Language.ES: 'es'}
+                    langs = {Language.EN: 'en', Language.DE: 'de', Language.NL: 'nl',
+                             Language.FR: 'fr', Language.ES: 'es', Language.IT: 'it'}
                     language = langs[self.system_language_index]
                     self.dgttranslate.set_language(language)
                     config = ConfigObj('picochess.ini')

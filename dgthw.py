@@ -98,12 +98,12 @@ class DgtHw(DgtIface):
             logging.debug("REV2 lights on move {}".format(uci_move))
             fr = (8 - int(uci_move[1])) * 8 + ord(uci_move[0]) - ord('a')
             to = (8 - int(uci_move[3])) * 8 + ord(uci_move[2]) - ord('a')
-            self.dgtboard.write([DgtCmd.DGT_SET_LEDS, 0x04, 0x01, fr, to, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+            self.dgtboard.write_board_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x01, fr, to, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
 
     def clear_light_revelation_board(self):
         if self.dgtboard.enable_revelation_leds:
             logging.debug('REV2 lights turned off')
-            self.dgtboard.write([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+            self.dgtboard.write_board_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
 
     def stop_clock(self):
         self._resume_clock(ClockSide.NONE)
