@@ -65,7 +65,9 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
         for part in sounds:
             voice_file = path + '/' + part
             if Path(voice_file).is_file():
-                play(voice_file)
+                cmd = 'ogg123 ' + voice_file
+                subprocess.call(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                # play(voice_file)
             else:
                 logging.warning('voice file not found {}'.format(voice_file))
 
