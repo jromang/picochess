@@ -160,7 +160,7 @@ class Informer(chess.uci.InfoHandler):
         self.allow_pv = True
 
     def _reset_allow_depth(self):
-        self.allow_fire_depth = True
+        self.allow_depth = True
 
     def _allow_fire_score(self):
         if self.allow_score:
