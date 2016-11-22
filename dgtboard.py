@@ -282,45 +282,50 @@ class DgtBoard(object):
             if case():  # Default
                 logging.warning("DGT message not handled [%s]", DgtMsg(message_id))
 
-    def _read_board_message(self, head=None):
+    def _read_board_message(self, head):
+        message = ()
         header_len = 3
-        if head:
-            header = head + self.serial.read(header_len - 1)
-        else:
-            header = self.serial.read(header_len)
-
-        pattern = '>' + 'B' * header_len
-        header = struct.unpack(pattern, header)
-        # header = struct.unpack('>BBB', (self.serial.read(3)))
+        header = head + self.serial.read(header_len - 1)
+        try:
+            header = struct.unpack('>BBB', header)
+        except struct.error:
+            logging.warning('timeout in header reading')
+            return message
         message_id = header[0]
         message_length = (header[1] << 7) + header[2] - 3
 
         try:
             if not message_id == DgtMsg.DGT_MSG_SERIALNR:
                 logging.debug("get [ser] board [%s], length: %i", DgtMsg(message_id), message_length)
-            message = struct.unpack('>' + str(message_length) + 'B', self.serial.read(message_length))
-            for c in message:
-                if c & 0x80:
-                    logging.warning('illegal data in message %i found', message_id)
-                    break
+
+            while message_length:
+                byte = self.serial.read(1)
+                if byte:
+                    data = struct.unpack('>B', byte)
+                    message_length -= 1
+                    if data[0] & 0x80:
+                        logging.warning('illegal data in message %i found', message_id)
+                        logging.warning('ignore collected message data %s', format(message))
+                        return self._read_board_message(byte)
+                    message += data
 
             self._process_board_message(message_id, message)
         except ValueError:
             logging.warning("unknown DGT message value: %i length: %i", message_id, message_length)
-        return message_id
+        return message
 
     def _process_incoming_board_forever(self):
         counter = 0
         logging.info('incoming_board ready')
         while True:
             try:
-                c = None
+                byte = None
                 if self.serial:
-                    c = self.serial.read(1)
+                    byte = self.serial.read(1)
                 else:
                     self._startup_serial_hardware()
-                if c and c[0] & 0x80:
-                    self._read_board_message(head=c)
+                if byte and byte[0] & 0x80:
+                    self._read_board_message(head=byte)
                 else:
                     counter = (counter + 1) % 10
                     if counter == 0:  # issue 150 - check for alive connection
