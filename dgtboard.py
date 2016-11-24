@@ -135,9 +135,11 @@ class DgtBoard(object):
                 self.clock_lock = time.time()
         return True
 
-    def _process_board_message(self, message_id, message):
+    def _process_board_message(self, message_id, message, message_length):
         for case in switch(message_id):
-            if case(DgtMsg.DGT_MSG_VERSION):  # Get the DGT board version
+            if case(DgtMsg.DGT_MSG_VERSION):
+                if message_length != 2:
+                    logging.warning('illegal length in data')
                 board_version = str(message[0]) + '.' + str(message[1])
                 logging.debug("DGT board version %0.2f", float(board_version))
                 if self.device.find('rfc') == -1:
@@ -162,6 +164,8 @@ class DgtBoard(object):
                     self.rt.start()
                 break
             if case(DgtMsg.DGT_MSG_BWTIME):
+                if message_length != 7:
+                    logging.warning('illegal length in data')
                 if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
                     # Construct the ack message
                     ack0 = ((message[1]) & 0x7f) | ((message[3] << 3) & 0x80)
@@ -238,6 +242,8 @@ class DgtBoard(object):
                     self.clock_lock = False
                 break
             if case(DgtMsg.DGT_MSG_BOARD_DUMP):
+                if message_length != 64:
+                    logging.warning('illegal length in data')
                 piece_to_char = {
                     0x01: 'P', 0x02: 'R', 0x03: 'N', 0x04: 'B', 0x05: 'K', 0x06: 'Q',
                     0x07: 'p', 0x08: 'r', 0x09: 'n', 0x0a: 'b', 0x0b: 'k', 0x0c: 'q',
@@ -264,19 +270,24 @@ class DgtBoard(object):
                             empty = 0
                         if sq < 63:
                             fen += '/'
-                        # empty = 0
 
                 # Attention! This fen is NOT flipped
                 logging.debug("Raw-Fen [%s]", fen)
                 DisplayMsg.show(Message.DGT_FEN(fen=fen))
                 break
             if case(DgtMsg.DGT_MSG_FIELD_UPDATE):
+                if message_length != 2:
+                    logging.warning('illegal length in data')
                 self.write_board_command([DgtCmd.DGT_SEND_BRD])  # Ask for the board when a piece moved
                 break
             if case(DgtMsg.DGT_MSG_SERIALNR):
+                if message_length != 5:
+                    logging.warning('illegal length in data')
                 DisplayMsg.show(Message.DGT_SERIAL_NR(number=''.join([chr(elem) for elem in message])))
                 break
             if case(DgtMsg.DGT_MSG_BATTERY_STATUS):
+                if message_length != 9:
+                    logging.warning('illegal length in data')
                 logging.debug(message)
                 break
             if case():  # Default
@@ -292,26 +303,31 @@ class DgtBoard(object):
             logging.warning('timeout in header reading')
             return message
         message_id = header[0]
-        message_length = (header[1] << 7) + header[2] - 3
+        message_length = counter = (header[1] << 7) + header[2] - header_len
 
         try:
+            if message_length <= 0 or message_length > 64:
+                raise ValueError('wrong length')
             if not message_id == DgtMsg.DGT_MSG_SERIALNR:
                 logging.debug("get [ser] board [%s], length: %i", DgtMsg(message_id), message_length)
-
-            while message_length:
-                byte = self.serial.read(1)
-                if byte:
-                    data = struct.unpack('>B', byte)
-                    message_length -= 1
-                    if data[0] & 0x80:
-                        logging.warning('illegal data in message %i found', message_id)
-                        logging.warning('ignore collected message data %s', format(message))
-                        return self._read_board_message(byte)
-                    message += data
-
-            self._process_board_message(message_id, message)
         except ValueError:
-            logging.warning("unknown DGT message value: %i length: %i", message_id, message_length)
+            logging.warning("illegal header in message %i length: %i", message_id, message_length)
+            return message
+
+        while counter:
+            byte = self.serial.read(1)
+            if byte:
+                data = struct.unpack('>B', byte)
+                counter -= 1
+                if data[0] & 0x80:
+                    logging.warning('illegal data in message %i found', message_id)
+                    logging.warning('ignore collected message data %s', format(message))
+                    return self._read_board_message(byte)
+                message += data
+            else:
+                logging.warning('timeout in data reading')
+
+        self._process_board_message(message_id, message, message_length)
         return message
 
     def _process_incoming_board_forever(self):
