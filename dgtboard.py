@@ -219,22 +219,25 @@ class DgtBoard(object):
                     l_hours = message[3] & 0x0f
                     l_mins = (message[4] >> 4) * 10 + (message[4] & 0x0f)
                     l_secs = (message[5] >> 4) * 10 + (message[5] & 0x0f)
-                    status = (message[6] & 0x3f)
-                    if status & 0x20:
-                        logging.warning('[ser] clock not connected')
-                        self.lever_pos = None
+                    if r_hours > 9 or l_hours > 9 or r_mins > 59 or l_mins > 59 or r_secs > 59 or l_secs > 59:
+                        logging.warning('illegal time received {}'.format(message))
                     else:
-                        tr = [r_hours, r_mins, r_secs]
-                        tl = [l_hours, l_mins, l_secs]
-                        logging.info('[ser] clock: received time from clock l:{} r:{}'.format(tl, tr))
-                        DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=tl, time_right=tr))
+                        status = (message[6] & 0x3f)
+                        if status & 0x20:
+                            logging.warning('[ser] clock not connected')
+                            self.lever_pos = None
+                        else:
+                            tr = [r_hours, r_mins, r_secs]
+                            tl = [l_hours, l_mins, l_secs]
+                            logging.info('[ser] clock: received time from clock l:{} r:{}'.format(tl, tr))
+                            DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=tl, time_right=tr))
 
-                        right_side_down = -0x40 if status & 0x02 else 0x40
-                        if self.lever_pos != right_side_down:
-                            logging.debug('button status: {} old lever_pos: {}'.format(status, self.lever_pos))
-                            if self.lever_pos is not None:
-                                DisplayMsg.show(Message.DGT_BUTTON(button=right_side_down))
-                            self.lever_pos = right_side_down
+                            right_side_down = -0x40 if status & 0x02 else 0x40
+                            if self.lever_pos != right_side_down:
+                                logging.debug('button status: {} old lever_pos: {}'.format(status, self.lever_pos))
+                                if self.lever_pos is not None:
+                                    DisplayMsg.show(Message.DGT_BUTTON(button=right_side_down))
+                                self.lever_pos = right_side_down
                 else:
                     logging.debug('[ser] clock: null message ignored')
                 if self.clock_lock:
