@@ -175,7 +175,7 @@ class DgtBoard(object):
                     if ack0 != 0x10:
                         logging.warning("[ser] clock: ACK error %s", (ack0, ack1, ack2, ack3))
                         if self.last_clock_command:
-                            logging.debug('resending failed [ser] clock message [%s]', self.last_clock_command)
+                            logging.debug('[ser] clock: resending failed message [%s]', self.last_clock_command)
                             self.write_board_command(self.last_clock_command)
                             self.last_clock_command = []  # only resend once
                         break
@@ -220,11 +220,11 @@ class DgtBoard(object):
                     l_mins = (message[4] >> 4) * 10 + (message[4] & 0x0f)
                     l_secs = (message[5] >> 4) * 10 + (message[5] & 0x0f)
                     if r_hours > 9 or l_hours > 9 or r_mins > 59 or l_mins > 59 or r_secs > 59 or l_secs > 59:
-                        logging.warning('illegal time received {}'.format(message))
+                        logging.warning('[ser] clock: illegal time received {}'.format(message))
                     else:
                         status = (message[6] & 0x3f)
                         if status & 0x20:
-                            logging.warning('[ser] clock not connected')
+                            logging.warning('[ser] clock: not connected')
                             self.lever_pos = None
                         else:
                             tr = [r_hours, r_mins, r_secs]
@@ -234,7 +234,7 @@ class DgtBoard(object):
 
                             right_side_down = -0x40 if status & 0x02 else 0x40
                             if self.lever_pos != right_side_down:
-                                logging.debug('button status: {} old lever_pos: {}'.format(status, self.lever_pos))
+                                logging.debug('[ser] clock: button status: {} old lever_pos: {}'.format(status, self.lever_pos))
                                 if self.lever_pos is not None:
                                     DisplayMsg.show(Message.DGT_BUTTON(button=right_side_down))
                                 self.lever_pos = right_side_down
