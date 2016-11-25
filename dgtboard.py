@@ -56,6 +56,9 @@ class DgtBoard(object):
         self.bt_name_list = []
         self.bt_name = ''
         self.wait_counter = 0
+        # keep the old time for finding out errorous DGT_MSG_BWTIME messages (=> new time < old time)
+        self.r_time = 3600 * 10  # max value cause 10h cant be reached by clock
+        self.l_time = 3600 * 10  # max value cause 10h cant be reached by clock
 
     def _startup_serial_hardware(self):
         self._setup_serial_port()
@@ -212,6 +215,9 @@ class DgtBoard(object):
                         sub = ack2 & 0x0f
                         logging.debug("[ser] clock: version %0.2f", float(str(main) + '.' + str(sub)))
                         DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=main, sub=sub, attached='serial'))
+                    if ack1 == 0x0a:  # clock ack SETNRUN => set the time values to max for sure! override lateron
+                        self.r_time = 3600 * 10
+                        self.l_time = 3600 * 10
                 elif any(message[:6]):
                     r_hours = message[0] & 0x0f
                     r_mins = (message[1] >> 4) * 10 + (message[1] & 0x0f)
@@ -219,8 +225,14 @@ class DgtBoard(object):
                     l_hours = message[3] & 0x0f
                     l_mins = (message[4] >> 4) * 10 + (message[4] & 0x0f)
                     l_secs = (message[5] >> 4) * 10 + (message[5] & 0x0f)
-                    if r_hours > 9 or l_hours > 9 or r_mins > 59 or l_mins > 59 or r_secs > 59 or l_secs > 59:
+                    r_time = r_hours * 3600 + r_mins * 60 + r_secs
+                    l_time = l_hours * 3600 + l_mins * 60 + l_secs
+                    errtim = r_hours > 9 or l_hours > 9 or r_mins > 59 or l_mins > 59 or r_secs > 59 or l_secs > 59
+                    if errtim:  # complete illegal package received
                         logging.warning('[ser] clock: illegal time received {}'.format(message))
+                    elif r_time > self.r_time or l_time > self.l_time:  # the new time is higher as the old => ignore
+                        logging.warning('[ser] clock: strange time received {} l:{} r:{}'.format(
+                            message, hours_minutes_seconds(self.l_time), hours_minutes_seconds(self.r_time)))
                     else:
                         status = (message[6] & 0x3f)
                         if status & 0x20:
@@ -234,10 +246,14 @@ class DgtBoard(object):
 
                             right_side_down = -0x40 if status & 0x02 else 0x40
                             if self.lever_pos != right_side_down:
-                                logging.debug('[ser] clock: button status: {} old lever_pos: {}'.format(status, self.lever_pos))
+                                logging.debug('[ser] clock: button status: {} old lever_pos: {}'.format(
+                                    status, self.lever_pos))
                                 if self.lever_pos is not None:
                                     DisplayMsg.show(Message.DGT_BUTTON(button=right_side_down))
                                 self.lever_pos = right_side_down
+                    if not errtim:
+                        self.r_time = r_time
+                        self.l_time = l_time
                 else:
                     logging.debug('[ser] clock: null message ignored')
                 if self.clock_lock:
