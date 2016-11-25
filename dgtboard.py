@@ -63,6 +63,7 @@ class DgtBoard(object):
     def _startup_serial_hardware(self):
         self._setup_serial_port()
         if self.serial:
+            logging.debug('sleeping for 1.5 secs. Afterwards startup the [ser] hardware')
             time.sleep(1.5)
             if not self.is_pi:  # can this "if" be removed for example for a RevII board?!?
                 self.clock_lock = False
@@ -164,6 +165,7 @@ class DgtBoard(object):
                 if self.rt.is_running():
                     logging.warning('watchdog timer is already running')
                 else:
+                    logging.debug('watchdog timer is started')
                     self.rt.start()
                 break
             if case(DgtMsg.DGT_MSG_BWTIME):
@@ -547,6 +549,7 @@ class DgtBoard(object):
         waitchars = ['/', '-', '\\', '|']
 
         if self.rt.is_running():
+            logging.debug('watchdog timer is stopped')
             self.rt.stop()
         with self.lock:
             if not self.serial:
