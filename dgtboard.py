@@ -324,6 +324,8 @@ class DgtBoard(object):
             logging.warning('timeout in header reading')
             return message
         message_id = header[0]
+        if header[1]:  # should be zero => cause we not have long messages
+            logging.warning('illegal length in header {}'.format(header))
         message_length = counter = (header[1] << 7) + header[2] - header_len
 
         try:
