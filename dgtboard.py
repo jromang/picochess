@@ -60,16 +60,6 @@ class DgtBoard(object):
         self.r_time = 3600 * 10  # max value cause 10h cant be reached by clock
         self.l_time = 3600 * 10  # max value cause 10h cant be reached by clock
 
-    def _startup_serial_hardware(self):
-        self._setup_serial_port()
-        if self.serial:
-            logging.debug('sleeping for 1.5 secs. Afterwards startup the [ser] hardware')
-            time.sleep(1.5)
-            if not self.is_pi:  # can this "if" be removed for example for a RevII board?!?
-                self.clock_lock = False
-                self.startup_serial_clock()
-            self._startup_serial_board()
-
     def write_board_command(self, message):
         mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
         if not mes == DgtCmd.DGT_RETURN_SERIALNR:
@@ -375,6 +365,16 @@ class DgtBoard(object):
                 pass
             except struct.error:  # can happen, when plugin board-cable again
                 pass
+
+    def _startup_serial_hardware(self):
+        self._setup_serial_port()
+        if self.serial:
+            logging.debug('sleeping for 1.5 secs. Afterwards startup the [ser] hardware')
+            time.sleep(1.5)
+            if not self.is_pi:  # can this "if" be removed for example for a RevII board?!?
+                self.clock_lock = False
+                self.startup_serial_clock()
+            self._startup_serial_board()
 
     def startup_serial_clock(self):
         command = [DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,

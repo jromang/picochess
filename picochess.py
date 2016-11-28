@@ -553,6 +553,8 @@ def main():
         engine_name = engine.get().name
     except AttributeError:
         logging.error('no engines started')
+        DisplayMsg.show(Message.ENGINE_FAIL())
+        time.sleep(3)
         sys.exit(-1)
 
     # Startup - internal
@@ -660,6 +662,8 @@ def main():
                             except AttributeError:
                                 # Help - old engine failed to restart. There is no engine
                                 logging.error('no engines started')
+                                DisplayMsg.show(Message.ENGINE_FAIL())
+                                time.sleep(3)
                                 sys.exit(-1)
                         # Schedule cleanup of old objects
                         gc.collect()
