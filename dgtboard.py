@@ -324,17 +324,16 @@ class DgtBoard(object):
             logging.warning('timeout in header reading')
             return message
         message_id = header[0]
-        if header[1]:  # should be zero => cause we not have long messages
-            logging.warning('illegal length in header {}'.format(header))
         message_length = counter = (header[1] << 7) + header[2] - header_len
+        if message_length <= 0 or message_length > 64:
+            logging.warning("illegal length in message header %i length: %i", message_id, message_length)
+            return message
 
         try:
-            if message_length <= 0 or message_length > 64:
-                raise ValueError('wrong length')
             if not message_id == DgtMsg.DGT_MSG_SERIALNR:
                 logging.debug("get [ser] board [%s], length: %i", DgtMsg(message_id), message_length)
         except ValueError:
-            logging.warning("illegal header in message %i length: %i", message_id, message_length)
+            logging.warning("illegal id in message header %i length: %i", message_id, message_length)
             return message
 
         while counter:
