@@ -27,13 +27,7 @@
 import threading
 import chess
 from utilities import *
-
-import sounddevice as sd
-import soundfile as sf
-
 from pathlib import Path
-
-sd.default.blocksize = 2048
 
 
 class PicoTalkerDisplay(DisplayMsg, threading.Thread):
@@ -56,6 +50,10 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
 
     def talk(self, sounds, path):
         def play(file):
+            import sounddevice as sd
+            import soundfile as sf
+            sd.default.blocksize = 2048
+
             d, f = sf.read(file, dtype='float32')
             sd.play(d, f, blocking=True)
             status = sd.get_status()
