@@ -153,6 +153,8 @@ def main():
     def stop_search_and_clock():
         if interaction_mode == Mode.NORMAL:
             stop_clock()
+            if not engine.is_waiting():
+                stop_search()
         elif interaction_mode in (Mode.REMOTE, Mode.OBSERVE):
             stop_clock()
             stop_search()
