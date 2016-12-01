@@ -428,7 +428,7 @@ class ClockSide(enum.Enum):
 
 
 @enum.unique
-class ClockDots(enum.Enum):
+class ClockIcons(enum.Enum):
     NONE = 0x00
     COLON = 0x08
     DOT = 0x10

@@ -70,7 +70,6 @@ class DgtIface(DisplayDgt, Thread):
         self.maxtimer_running = False
         if self.clock_running:
             logging.debug('showing the running clock again')
-            # self.display_time_on_clock(force=False)
             self.show(Dgt.DISPLAY_TIME(force=False, wait=True))
         else:
             logging.debug('clock not running - ignored maxtime')
@@ -115,7 +114,7 @@ class DgtIface(DisplayDgt, Thread):
             if case(DgtApi.CLOCK_VERSION):
                 if not self.clock_found:
                     text = self.dgttranslate.text('Y20_picochess')
-                    text.rd = ClockDots.DOT
+                    text.rd = ClockIcons.DOT
                     self.show(text)
                 self.clock_found = True
                 if message.main == 2:
@@ -130,7 +129,7 @@ class DgtIface(DisplayDgt, Thread):
 
     def _process_message(self, message):
         do_handle = True
-        if repr(message) in (DgtApi.CLOCK_START, DgtApi.CLOCK_STOP):
+        if repr(message) in (DgtApi.CLOCK_START, DgtApi.CLOCK_STOP, DgtApi.CLOCK_TIME):
             self.display_hash = None  # Cant know the clock display if command changing the running status
         else:
             if repr(message) in (DgtApi.DISPLAY_MOVE, DgtApi.DISPLAY_TEXT):
