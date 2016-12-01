@@ -161,7 +161,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             score.l = '{:3d}{:s}'.format(self.depth, score_to_string(score.l[-8:], 'l'))
             score.m = '{:2d}{:s}'.format(self.depth % 100, score_to_string(score.m[-6:], 'm'))
             score.s = '{:2d}{:s}'.format(self.depth % 100, score_to_string(score.s[-4:], 's'))
-            score.rd = ClockDots.DOT
+            score.rd = ClockIcons.DOT
         except ValueError:
             pass
         return score
@@ -540,7 +540,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             exit_menu = True
             if self.system_index == Settings.VERSION:
                 text = self.dgttranslate.text('B10_picochess')
-                text.rd = ClockDots.DOT
+                text.rd = ClockIcons.DOT
                 text.wait = False
             elif self.system_index == Settings.IPADR:
                 if self.ip:

@@ -95,20 +95,20 @@ class DgtPi(DgtIface):
                 DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=times[:3], time_right=times[3:]))
             time.sleep(0.1)
 
-    def _display_on_dgt_pi(self, text, beep=False, left_dots=ClockDots.NONE, right_dots=ClockDots.NONE):
+    def _display_on_dgt_pi(self, text, beep=False, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
         if len(text) > 11:
             logging.warning('[i2c] clock message too long [%s]', text)
         logging.debug(text)
         text = bytes(text, 'utf-8')
         with self.lib_lock:
-            res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, left_dots.value, right_dots.value)
+            res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, left_icons.value, right_icons.value)
             if res < 0:
                 logging.warning('SetText returned error %i', res)
                 res = self.lib.dgtpicom_configure()
                 if res < 0:
                     logging.warning('Configure also failed %i', res)
                 else:
-                    res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, left_dots.value, right_dots.value)
+                    res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, left_icons.value, right_icons.value)
             if res < 0:
                 logging.warning('Finally failed %i', res)
 
@@ -118,9 +118,9 @@ class DgtPi(DgtIface):
         text = message.l
         if text is None:
             text = message.m
-        left_dots = message.ld if hasattr(message, 'ld') else ClockDots.NONE
-        right_dots = message.rd if hasattr(message, 'rd') else ClockDots.NONE
-        self._display_on_dgt_pi(text, message.beep, left_dots, right_dots)
+        left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE
+        right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
+        self._display_on_dgt_pi(text, message.beep, left_icons, right_icons)
 
     def display_move_on_clock(self, message):
         bit_board = Board(message.fen)
@@ -129,9 +129,9 @@ class DgtPi(DgtIface):
             move_text = move_text.rjust(8)
         text = self.dgttranslate.move(move_text)
         text = '{:3d}{:s}'.format(bit_board.fullmove_number, text)
-        left_dots = message.ld if hasattr(message, 'ld') else ClockDots.DOT
-        right_dots = message.rd if hasattr(message, 'rd') else ClockDots.NONE
-        self._display_on_dgt_pi(text, message.beep, left_dots, right_dots)
+        left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.DOT
+        right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
+        self._display_on_dgt_pi(text, message.beep, left_icons, right_icons)
 
     def display_time_on_clock(self, force=False):
         if self.clock_running or force:

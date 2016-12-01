@@ -594,7 +594,7 @@ class DgtBoard(object):
         if has_to_wait:
             logging.debug('[ser] clock is released now')
 
-    def set_text_3k(self, text, beep, ld=ClockDots.NONE, rd=ClockDots.NONE):
+    def set_text_3k(self, text, beep, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
         self._wait_for_clock()
         res = self.write_board_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x0c, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
                                         DgtClk.DGT_CMD_CLOCK_ASCII,
@@ -602,17 +602,17 @@ class DgtBoard(object):
                                         DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         return res
 
-    def set_text_xl(self, text, beep, ld=ClockDots.NONE, rd=ClockDots.NONE):
-        def transfer(dots):
+    def set_text_xl(self, text, beep, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
+        def transfer(icons):
             result = 0
-            if dots == ClockDots.DOT:
+            if icons == ClockIcons.DOT:
                 result = 0x01
-            if dots == ClockDots.COLON:
+            if icons == ClockIcons.COLON:
                 result = 0x02
             return result
 
         self._wait_for_clock()
-        icn = ((transfer(rd) & 0x07) | (transfer(ld) << 3) & 0x38)
+        icn = ((transfer(right_icons) & 0x07) | (transfer(left_icons) << 3) & 0x38)
         res = self.write_board_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x0b, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
                                         DgtClk.DGT_CMD_CLOCK_DISPLAY,
                                         text[2], text[1], text[0], text[5], text[4], text[3], icn, beep,
