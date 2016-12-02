@@ -16,16 +16,17 @@ Playing/Training Modes
 
 When using these modes, please be patient and don't rush moves. Allow a few seconds for the scores and moves to appear. If you see any bug when rushing moves, let us know on the mailing list.
 
-* Game mode is enabled by putting the **white** queen on the **A5** square. This is the default mode. You can play against the computer. The clock displays the remaining thinking time for both sides. Press the second button to show the position evaluation, expressed in centipawns. Press again to show a hint ("ponder move").
+* Game mode (enabled by **white** queen on **A5**). This is the default mode. You can play against the computer. The clock displays the remaining thinking time for both sides. Press the second button to show the position evaluation, expressed in centipawns. Press again to show a hint ("ponder move").
 * Analysis mode (enabled by **white** queen on **B5**): the computer is watching the game, it does not play itself. The clock continually displays the best move for the side to play.
-* Kibitz mode (enabled by **white** queen on **C5**): the computer is watching the game, it does not play itself. The clock continually displays the position score.
+* Kibitz mode (enabled by **white** queen on **C5**): the computer is watching the game, it does not play itself. The clock continually displays the position score (right aligned) with the search depth (left aligned).
 * Observe mode (enabled by **white** queen on **D5**): the computer is watching the game, it does not play itself. The clock displays the remaining thinking time for both sides. Press the second button once to show the position evaluation, twice to show a hint.
-* Remote mode (enabled by **white** queen on **E5**): this modus is right now not fully implemented (future use). It will allow you to play against someone over internet.
+* Remote mode (enabled by **white** queen on **E5**): this mode will allow you to play against someone over internet. The remote player using the webserver whereas the other player using the pieces as normal to enter moves. A detailed documentation will be provided lateron.
+* Ponder mode (enabled by **white** queen on **F5**): the computer is watching the game, it does not play itself. The clock displays the best move for the side to play in a 2 secs rotation with the position score together with the depth. So, this mode is a combination of "Analysis" & "Kibitz"
 
 Game mode is the regular mode. If you used one of the other modes, you can return back to game mode by putting the extra **white** queen on **A5**.
-You can also press the fourth button for toggling over the modes (Qa5-Qe5 only working in the starting position).
+You can also press the fourth button to enter the menu (afterwards choose the Mode submenu) to toggle over the modes (Qa5-Qf5 only working in the starting position) see below.
 
-The position score will always be displayed in centipawns from White's perspective. For example when the clock displays 33, then White is ahead 33 centipawns (or 0.33 pawns). A negative score means black is ahead.
+The position score will always be displayed in centipawns from White's perspective. A negative score means black is ahead. If you have a DGT XL clock (or a Revelation II) the maximum score displayed it +/- 9.99
 
 Choosing skill level
 --------------------
@@ -142,7 +143,7 @@ Entering the menu state can be done by pressing ">". Leaving it with "<". Enteri
 If you are not inside the menu (clock showing moves, times), the function is as follows:
 
 * **(<) button** - showing the last move
-* **(-) button** - showing the last score
+* **(-) button** - showing the last score (right aligned) together with the search depth (left aligned)
 * **(=) button** - start/stop the clock (user turn) or abort the search (engine thinking) or calculate an alternative move (engine showing its move)
 * **(+) button** - showing a hint move (user turn) or the current best move (engine thinking)
 * **(>) button** - Entering the menu
@@ -172,8 +173,8 @@ Here are the list of questions to be answered:
 
 * **side** - decides with side to move first
 * **origin** - is the board flipped (which side of board is white which is black)
-* **chess960** - is this a fischer random position (used for castling) Please make sure your choose engine support 960 mode (stockfish for example)
-* **scan** - after accepting with ">" picochess will scan in the position (last chance to setup your pieces)
+* **chess960** - is this a fischer random position (used for castling) Please make sure your choose engine support 960 mode (right now only stockfish)
+* **scan** - after accepting with ">" picochess will scan in the position (last chance to setup your pieces) and a new game will start
 
 Time Menu
 ---------
@@ -202,6 +203,7 @@ Here you choose between the following:
 * **ip adr** - showing you the last part of your ip-adr. This is needed for example to use the picochess webserver (see below)
 * **sound** - controls the beeps of your dgt clock. You can change between "never", "sometimes", or "always"
 * **language** - sets the language of clock messages. You can choose between english, german, french, dutch and spanish
+* **logfile** - sends a debug log file to your eMail box. Thats for us developers to have a clue what is going on at picochess. Please use this only if you asked for it.
 
 System shutdown
 ---------------

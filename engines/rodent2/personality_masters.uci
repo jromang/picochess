@@ -1,35 +1,34 @@
-[Mark]
-; Mark personality for Rodent II
+[Nancy]
+; Nancy personality for Rodent II
 ; author: Pawel Koziol
-; 1500 Elo defensive player who likes own mobility
-;
+; attacking player who likes closed positions, approx. elo 2300
 PawnValue = 100
 KnightValue = 325
 BishopValue = 335
 RookValue = 500
 QueenValue = 1000
-KeepPawn = 0
+KeepPawn = 1
 KeepKnight = 0
 KeepBishop = 0
 KeepRook = 0
 KeepQueen = 0
-BishopPair = 50
+BishopPair = 40
 KnightPair = -10
 ExchangeImbalance = 25
-KnightLikesClosed = 6
+KnightLikesClosed = 8
 RookLikesOpen = 3
 Material = 100
-OwnAttack = 100
-OppAttack = 120
-OwnMobility = 120
-OppMobility = 100
+OwnAttack = 120
+OppAttack = 100
+OwnMobility = 100
+OppMobility = 120
 KingTropism = 20
 PiecePlacement = 100
 PiecePressure = 100
 PassedPawns = 100
 PawnStructure = 100
 Lines = 100
-Outposts = 100
+Outposts = 120
 PawnShield = 120
 PawnStorm = 100
 Forwardness = 0
@@ -43,50 +42,49 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 PstStyle = 0
 MobilityStyle = 0
-NpsLimit = 450
-EvalBlur = 50
+NpsLimit = 30000
+EvalBlur = 0
 Contempt = 0
 SlowMover = 100
 Selectivity = 175
 BookFilter = 20
-GuideBookFile = books/guide/mini.bin
-MainBookFile = books/mini.bin
+GuideBookFile = books/guide/solid.bin
+MainBookFile = books/rodent.bin
 
-[Sam]
-; Sam personality for Rodent II
+[Victor]
+; victor personality for Rodent II
 ; author: Pawel Koziol
-; sacrificial 1500 Elo attacker
-;
+; violent 2250 Elo player who likes to sacrifice and plays gambits
 PawnValue = 100
 KnightValue = 325
 BishopValue = 335
 RookValue = 500
 QueenValue = 1000
-KeepPawn = 0
+KeepPawn = 1
 KeepKnight = 0
 KeepBishop = 0
 KeepRook = 0
 KeepQueen = 0
 BishopPair = 50
 KnightPair = -10
-ExchangeImbalance = 25
+ExchangeImbalance = 0
 KnightLikesClosed = 6
 RookLikesOpen = 3
-Material = 75
+Material = 90
 OwnAttack = 120
 OppAttack = 100
 OwnMobility = 120
 OppMobility = 100
-KingTropism = 20
+KingTropism = 50
 PiecePlacement = 100
 PiecePressure = 100
 PassedPawns = 100
 PawnStructure = 100
-Lines = 100
+Lines = 120
 Outposts = 100
 PawnShield = 120
 PawnStorm = 100
-Forwardness = 100
+Forwardness = 50
 DoubledPawnMg = -12
 DoubledPawnEg = -24
 IsolatedPawnMg = -10
@@ -95,11 +93,13 @@ IsolatedOnOpenMg = -10
 BackwardPawnMg = -8
 BackwardPawnEg = -10
 BackwardOnOpenMg = -8
-PstStyle = 0
+PstStyle = 2
 MobilityStyle = 0
-NpsLimit = 450
-EvalBlur = 50
+NpsLimit = 28000
+EvalBlur = 0
 Contempt = 0
 SlowMover = 100
 Selectivity = 175
 BookFilter = 20
+GuideBookFile = books/ph-gambitbook.bin
+MainBookFile = books/rodent.bin
