@@ -637,7 +637,7 @@ Contempt = 20
 SlowMover = 100
 Selectivity = 125
 BookFilter = 20
-GuideBookFile = books/guide/steinitz.bin
+; GuideBookFile = books/guide/steinitz.bin JP! doesnt exist
 MainBookFile = books/hist/_pre30.bin
 
 [Tarrasch]

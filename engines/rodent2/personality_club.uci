@@ -49,7 +49,7 @@ Contempt = 0
 SlowMover = 100
 Selectivity = 175
 BookFilter = 20
-GuideBookFile = books/guide/mini.bin
+; GuideBookFile = books/guide/mini.bin JP! doesnt exist
 MainBookFile = books/mini.bin
 
 [Sam]
