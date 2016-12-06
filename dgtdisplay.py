@@ -38,6 +38,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.drawresign_fen = None
         self.show_setup_pieces_msg = True
         self.show_move_or_value = 0
+        self.leds_are_on = False
 
         self._reset_moves_and_score()
 
@@ -798,9 +799,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 DisplayDgt.show(Dgt.DISPLAY_MOVE(move=move, fen=message.fen, side=side, wait=message.wait,
                                                  beep=self.dgttranslate.bl(BeepLevel.CONFIG), maxtime=0))
                 DisplayDgt.show(Dgt.LIGHT_SQUARES(uci_move=move.uci()))
+                self.leds_are_on = True
                 break
             if case(MessageApi.START_NEW_GAME):
-                DisplayDgt.show(Dgt.LIGHT_CLEAR())
+                if self.leds_are_on:
+                    DisplayDgt.show(Dgt.LIGHT_CLEAR())
+                    self.leds_are_on = False
                 self._reset_moves_and_score()
                 # self.mode_index = Mode.NORMAL  # @todo
                 self._reset_menu_results()
@@ -815,7 +819,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE))
                 break
             if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
-                DisplayDgt.show(Dgt.LIGHT_CLEAR())
+                if self.leds_are_on:
+                    DisplayDgt.show(Dgt.LIGHT_CLEAR())
+                    self.leds_are_on = False
                 self.last_move = self.play_move
                 self.last_fen = self.play_fen
                 self.last_turn = self.play_turn
@@ -828,6 +834,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self._reset_menu_results()
                 break
             if case(MessageApi.USER_MOVE):
+                if self.leds_are_on:  # can happen in case of a sliding move
+                    DisplayDgt.show(Dgt.LIGHT_CLEAR())
+                    self.leds_are_on = False
                 self.last_move = message.move
                 self.last_fen = message.fen
                 self.last_turn = message.turn
@@ -836,6 +845,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     DisplayDgt.show(self.dgttranslate.text('K05_okuser'))
                 break
             if case(MessageApi.REVIEW_MOVE):
+                if self.leds_are_on:  # can happen in case of a sliding move
+                    DisplayDgt.show(Dgt.LIGHT_CLEAR())
+                    self.leds_are_on = False
                 self.last_move = message.move
                 self.last_fen = message.fen
                 self.last_turn = message.turn
@@ -863,7 +875,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self._exit_display(force=message.ok_text)
                 break
             if case(MessageApi.USER_TAKE_BACK):
-                DisplayDgt.show(Dgt.LIGHT_CLEAR())
+                if self.leds_are_on:
+                    DisplayDgt.show(Dgt.LIGHT_CLEAR())
+                    self.leds_are_on = False
                 self._reset_moves_and_score()
                 self.engine_finished = False
                 DisplayDgt.show(self.dgttranslate.text('C00_takeback'))
