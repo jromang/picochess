@@ -63,9 +63,9 @@ class DgtBoard(object):
     def write_board_command(self, message):
         mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
         if not mes == DgtCmd.DGT_RETURN_SERIALNR:
-            logging.debug('put [ser] board [%s], length: %i', mes, len(message))
+            logging.debug('put (ser) board [%s], length: %i', mes, len(message))
             if mes.value == DgtClk.DGT_CMD_CLOCK_ASCII.value:
-                logging.debug('sending text [{}] to [ser] clock'.format(''.join([chr(elem) for elem in message[4:12]])))
+                logging.debug('sending text [{}] to (ser) clock'.format(''.join([chr(elem) for elem in message[4:12]])))
 
         array = []
         char_to_xl = {
@@ -123,9 +123,9 @@ class DgtBoard(object):
         if message[0] == DgtCmd.DGT_CLOCK_MESSAGE:
             self.last_clock_command = message
             if self.clock_lock:
-                logging.warning('[ser] clock: already locked. Maybe a "resend"?')
+                logging.warning('(ser) clock: already locked. Maybe a "resend"?')
             else:
-                logging.debug('[ser] clock: now locked')
+                logging.debug('(ser) clock: now locked')
                 self.clock_lock = time.time()
         return True
 
@@ -168,14 +168,14 @@ class DgtBoard(object):
                     ack2 = ((message[4]) & 0x7f) | ((message[0] << 3) & 0x80)
                     ack3 = ((message[5]) & 0x7f) | ((message[0] << 2) & 0x80)
                     if ack0 != 0x10:
-                        logging.warning("[ser] clock: ACK error %s", (ack0, ack1, ack2, ack3))
+                        logging.warning("(ser) clock: ACK error %s", (ack0, ack1, ack2, ack3))
                         if self.last_clock_command:
-                            logging.debug('[ser] clock: resending failed message [%s]', self.last_clock_command)
+                            logging.debug('(ser) clock: resending failed message [%s]', self.last_clock_command)
                             self.write_board_command(self.last_clock_command)
                             self.last_clock_command = []  # only resend once
                         break
                     else:
-                        logging.debug("[ser] clock: ACK okay [%s]", DgtClk(ack1))
+                        logging.debug("(ser) clock: ACK okay [%s]", DgtClk(ack1))
                     if ack1 == 0x88:
                         # this are the other (ack2-ack3) codes
                         # 05-49 33-52 17-51 09-50 65-53 | button 0-4 (single)
@@ -184,28 +184,28 @@ class DgtBoard(object):
                         #                   25-50 81-53 | button 2 + 3-4
                         #                         73-53 | button 3 + 4
                         if ack3 == 49:
-                            logging.info("[ser] clock: button 0 pressed - ack2: %i", ack2)
+                            logging.info("(ser) clock: button 0 pressed - ack2: %i", ack2)
                             DisplayMsg.show(Message.DGT_BUTTON(button=0))
                         if ack3 == 52:
-                            logging.info("[ser] clock: button 1 pressed - ack2: %i", ack2)
+                            logging.info("(ser) clock: button 1 pressed - ack2: %i", ack2)
                             DisplayMsg.show(Message.DGT_BUTTON(button=1))
                         if ack3 == 51:
-                            logging.info("[ser] clock: button 2 pressed - ack2: %i", ack2)
+                            logging.info("(ser) clock: button 2 pressed - ack2: %i", ack2)
                             DisplayMsg.show(Message.DGT_BUTTON(button=2))
                         if ack3 == 50:
-                            logging.info("[ser] clock: button 3 pressed - ack2: %i", ack2)
+                            logging.info("(ser) clock: button 3 pressed - ack2: %i", ack2)
                             DisplayMsg.show(Message.DGT_BUTTON(button=3))
                         if ack3 == 53:
                             if ack2 == 69:
-                                logging.info("[ser] clock: button 0+4 pressed - ack2: %i", ack2)
+                                logging.info("(ser) clock: button 0+4 pressed - ack2: %i", ack2)
                                 DisplayMsg.show(Message.DGT_BUTTON(button=0x11))
                             else:
-                                logging.info("[ser] clock: button 4 pressed - ack2: %i", ack2)
+                                logging.info("(ser) clock: button 4 pressed - ack2: %i", ack2)
                                 DisplayMsg.show(Message.DGT_BUTTON(button=4))
                     if ack1 == 0x09:
                         main = ack2 >> 4
                         sub = ack2 & 0x0f
-                        logging.debug("[ser] clock: version %0.2f", float(str(main) + '.' + str(sub)))
+                        logging.debug("(ser) clock: version %0.2f", float(str(main) + '.' + str(sub)))
                         DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=main, sub=sub, attached='serial'))
                     if ack1 == 0x0a:  # clock ack SETNRUN => set the time values to max for sure! override lateron
                         self.r_time = 3600 * 10
@@ -221,24 +221,24 @@ class DgtBoard(object):
                     l_time = l_hours * 3600 + l_mins * 60 + l_secs
                     errtim = r_hours > 9 or l_hours > 9 or r_mins > 59 or l_mins > 59 or r_secs > 59 or l_secs > 59
                     if errtim:  # complete illegal package received
-                        logging.warning('[ser] clock: illegal time received {}'.format(message))
+                        logging.warning('(ser) clock: illegal time received {}'.format(message))
                     elif r_time > self.r_time or l_time > self.l_time:  # the new time is higher as the old => ignore
-                        logging.warning('[ser] clock: strange time received {} l:{} r:{}'.format(
+                        logging.warning('(ser) clock: strange time received {} l:{} r:{}'.format(
                             message, hours_minutes_seconds(self.l_time), hours_minutes_seconds(self.r_time)))
                     else:
                         status = (message[6] & 0x3f)
                         if status & 0x20:
-                            logging.warning('[ser] clock: not connected')
+                            logging.warning('(ser) clock: not connected')
                             self.lever_pos = None
                         else:
                             tr = [r_hours, r_mins, r_secs]
                             tl = [l_hours, l_mins, l_secs]
-                            logging.info('[ser] clock: received time from clock l:{} r:{}'.format(tl, tr))
+                            logging.info('(ser) clock: received time from clock l:{} r:{}'.format(tl, tr))
                             DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=tl, time_right=tr))
 
                             right_side_down = -0x40 if status & 0x02 else 0x40
                             if self.lever_pos != right_side_down:
-                                logging.debug('[ser] clock: button status: {} old lever_pos: {}'.format(
+                                logging.debug('(ser) clock: button status: {} old lever_pos: {}'.format(
                                     status, self.lever_pos))
                                 if self.lever_pos is not None:
                                     DisplayMsg.show(Message.DGT_BUTTON(button=right_side_down))
@@ -247,9 +247,9 @@ class DgtBoard(object):
                         self.r_time = r_time
                         self.l_time = l_time
                 else:
-                    logging.debug('[ser] clock: null message ignored')
+                    logging.debug('(ser) clock: null message ignored')
                 if self.clock_lock:
-                    logging.debug('[ser] clock: unlocked after {0:.3f} secs'.format(time.time() - self.clock_lock))
+                    logging.debug('(ser) clock: unlocked after {0:.3f} secs'.format(time.time() - self.clock_lock))
                     self.clock_lock = False
                 break
             if case(DgtMsg.DGT_MSG_BOARD_DUMP):
@@ -321,7 +321,7 @@ class DgtBoard(object):
 
         try:
             if not message_id == DgtMsg.DGT_MSG_SERIALNR:
-                logging.debug("get [ser] board [%s], length: %i", DgtMsg(message_id), message_length)
+                logging.debug("get (ser) board [%s], length: %i", DgtMsg(message_id), message_length)
         except ValueError:
             logging.warning("illegal id in message header %i length: %i", message_id, message_length)
             return message
@@ -369,7 +369,7 @@ class DgtBoard(object):
     def _startup_serial_hardware(self):
         self._setup_serial_port()
         if self.serial:
-            logging.debug('sleeping for 1.5 secs. Afterwards startup the [ser] hardware')
+            logging.debug('sleeping for 1.5 secs. Afterwards startup the (ser) hardware')
             time.sleep(1.5)
             if not self.is_pi:  # can this "if" be removed for example for a RevII board?!?
                 self.clock_lock = False
@@ -582,17 +582,17 @@ class DgtBoard(object):
         while self.clock_lock:
             if not has_to_wait:
                 has_to_wait = True
-                logging.debug('[ser] clock is locked => waiting')
+                logging.debug('(ser) clock is locked => waiting')
             time.sleep(0.1)
             counter += 1
             if counter > 20:
-                logging.warning('[ser] clock is locked over 2secs')
-                logging.debug('resending locked [ser] clock message [%s]', self.last_clock_command)
+                logging.warning('(ser) clock is locked over 2secs')
+                logging.debug('resending locked (ser) clock message [%s]', self.last_clock_command)
                 has_to_wait = False
                 counter = 0
                 self.write_board_command(self.last_clock_command)
         if has_to_wait:
-            logging.debug('[ser] clock is released now')
+            logging.debug('(ser) clock is released now')
 
     def set_text_3k(self, text, beep, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
         self._wait_for_clock()

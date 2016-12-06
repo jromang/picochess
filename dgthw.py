@@ -30,12 +30,12 @@ class DgtHw(DgtIface):
 
     def _display_on_dgt_xl(self, text, beep=False, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
         if not self.clock_found:  # This can only happen on the XL function
-            logging.debug('[ser] clock (still) not found. Ignore [%s]', text)
+            logging.debug('(ser) clock (still) not found. Ignore [%s]', text)
             self.dgtboard.startup_serial_clock()
             return
         text = text.ljust(6)
         if len(text) > 6:
-            logging.warning('[ser] clock message too long [%s]', text)
+            logging.warning('(ser) clock message too long [%s]', text)
         logging.debug(text)
         with self.lib_lock:
             res = self.dgtboard.set_text_xl(text, 0x03 if beep else 0x00, left_icons, right_icons)
@@ -45,7 +45,7 @@ class DgtHw(DgtIface):
     def _display_on_dgt_3000(self, text, beep=False, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
         text = text.ljust(8)
         if len(text) > 8:
-            logging.warning('[ser] clock message too long [%s]', text)
+            logging.warning('(ser) clock message too long [%s]', text)
         logging.debug(text)
         text = bytes(text, 'utf-8')
         with self.lib_lock:
@@ -91,7 +91,7 @@ class DgtHw(DgtIface):
             with self.lib_lock:
                 self.dgtboard.end_text()
         else:
-            logging.debug('[ser] clock isnt running - no need for endText')
+            logging.debug('(ser) clock isnt running - no need for endText')
 
     def light_squares_revelation_board(self, uci_move):
         if self.dgtboard.enable_revelation_leds:
