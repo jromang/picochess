@@ -776,8 +776,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if eng['file'] == message.file:
                         self.engine_index = index
                         self.engine_has_960 = message.has_960
-                        # @todo preset correct startup level (which needs a message.engine_index parameter)
-                        self.engine_level_index = len(eng['level_dict'])-1 if eng['level_dict'] else None
+                        self.engine_level_index = message.engine_index
                 break
             if case(MessageApi.ENGINE_FAIL):
                 DisplayDgt.show(self.dgttranslate.text('Y00_erroreng'))
