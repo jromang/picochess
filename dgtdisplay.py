@@ -1135,6 +1135,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         else:
                             # self._reset_moves_and_score()
                             DisplayDgt.show(self.dgttranslate.text('Y00_error960'))
+                elif fen == 'rnbqkbnr/pppppppp/8/7Q/8/8/PPPPPPPP/RNBQKBNR':  # wQ h5 (to be deleted => only for now)
+                    self.fire(Event.EMAIL_LOG())
+                    DisplayDgt.show(self.dgttranslate.text('B10_oklogfile'))  # @todo give pos/neg feedback
                 else:
                     if self.top_result is None:
                         if self.show_setup_pieces_msg:
