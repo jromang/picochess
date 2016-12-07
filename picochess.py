@@ -577,7 +577,7 @@ def main():
     last_legal_fens = []
     game_declared = False  # User declared resignation or draw
 
-    engine_opt, engine_idx = get_engine_level_dict(args.engine_level)
+    engine_opt, level_index = get_engine_level_dict(args.engine_level)
     engine.startup(engine_opt)
 
     # Startup - external
@@ -591,7 +591,7 @@ def main():
     DisplayMsg.show(Message.STARTUP_INFO(info={'interaction_mode': interaction_mode, 'play_mode': play_mode,
                                                'books': all_books, 'book_index': book_index, 'level_text': level_text,
                                                'time_control': time_control, 'time_text': time_text}))
-    DisplayMsg.show(Message.ENGINE_STARTUP(shell=engine.get_shell(), file=engine.get_file(), engine_index=engine_idx,
+    DisplayMsg.show(Message.ENGINE_STARTUP(shell=engine.get_shell(), file=engine.get_file(), level_index=level_index,
                                            has_levels=engine.has_levels(), has_960=engine.has_chess960()))
 
     system_info_thread = threading.Timer(0, display_system_info)

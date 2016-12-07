@@ -776,12 +776,15 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if eng['file'] == message.file:
                         self.engine_index = index
                         self.engine_has_960 = message.has_960
-                        self.engine_level_index = message.engine_index
+                        self.engine_level_index = message.level_index
                 break
             if case(MessageApi.ENGINE_FAIL):
                 DisplayDgt.show(self.dgttranslate.text('Y00_erroreng'))
                 break
             if case(MessageApi.COMPUTER_MOVE):
+                if self.leds_are_on:  # can happen in case of a book move
+                    logging.warning('REV2 lights still on')
+                    DisplayDgt.show(Dgt.LIGHT_CLEAR())
                 move = message.move
                 ponder = message.ponder
                 fen = message.fen
@@ -834,6 +837,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 break
             if case(MessageApi.USER_MOVE):
                 if self.leds_are_on:  # can happen in case of a sliding move
+                    logging.warning('REV2 lights still on')
                     DisplayDgt.show(Dgt.LIGHT_CLEAR())
                     self.leds_are_on = False
                 self.last_move = message.move
@@ -845,6 +849,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 break
             if case(MessageApi.REVIEW_MOVE):
                 if self.leds_are_on:  # can happen in case of a sliding move
+                    logging.warning('REV2 lights still on')
                     DisplayDgt.show(Dgt.LIGHT_CLEAR())
                     self.leds_are_on = False
                 self.last_move = message.move
