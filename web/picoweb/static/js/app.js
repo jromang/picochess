@@ -77,8 +77,11 @@ function getSystemInfo() {
     $.get('/info', {action: 'get_system_info'}, function(data) {
         window.system_info = data;
         var ip = '';
-        if (window.system_info.ip) {
-            ip = ' - IP: ' + window.system_info.ip;
+        if (window.system_info.ext_ip) {
+            ip += ' ExtIP: ' + window.system_info.ext_ip;
+        }
+        if (window.system_info.int_ip) {
+            ip += ' IntIP: ' + window.system_info.int_ip
         }
         document.title = 'Webserver Picochess ' + window.system_info.version + ip;
     }).fail(function(jqXHR, textStatus) {

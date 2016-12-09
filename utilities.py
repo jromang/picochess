@@ -815,12 +815,17 @@ def reboot():
 
 def get_location():
     try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('8.8.8.8', 80))
+        int_ip = s.getsockname()[0]
+        s.close()
+
         response = urllib.request.urlopen('https://freegeoip.net/json/')
         j = json.loads(response.read().decode())
         country_name = j['country_name'] + ' ' if 'country_name' in j else ''
         country_code = j['country_code'] + ' ' if 'country_code' in j else ''
-        ip = j['ip'] if 'ip' in j else None
+        ext_ip = j['ip'] if 'ip' in j else None
         city = j['city'] + ', ' if 'city' in j else ''
-        return city + country_name + country_code, ip
+        return city + country_name + country_code, ext_ip, int_ip
     except:
-        return '?', None
+        return '?', None, None

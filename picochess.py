@@ -87,8 +87,9 @@ class AlternativeMover:
 def main():
 
     def display_system_info():
-        location, ip = get_location()
-        DisplayMsg.show(Message.SYSTEM_INFO(info={'version': version, 'location': location, 'ip': ip,
+        location, ext_ip, int_ip = get_location()
+        DisplayMsg.show(Message.SYSTEM_INFO(info={'version': version, 'location': location,
+                                                  'ext_ip': ext_ip, 'int_ip': int_ip,
                                                   'engine_name': engine_name, 'user_name': user_name
                                                   }))
 

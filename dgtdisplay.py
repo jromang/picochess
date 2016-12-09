@@ -547,6 +547,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 if self.ip:
                     msg = ' '.join(self.ip.split('.')[2:])
                     text = self.dgttranslate.text('B10_default', msg)
+                    if len(msg) == 7:  # delete the " " for XL incase its "123 456"
+                        text.s = msg[:3] + msg[4:]
                 else:
                     text = self.dgttranslate.text('B10_noipadr')
             elif self.system_index == Settings.SOUND:
@@ -934,7 +936,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.depth = message.depth
                 break
             if case(MessageApi.SYSTEM_INFO):
-                self.ip = message.info['ip']
+                self.ip = message.info['int_ip']
                 break
             if case(MessageApi.STARTUP_INFO):
                 self.mode_index = message.info['interaction_mode']
