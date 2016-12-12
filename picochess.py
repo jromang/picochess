@@ -363,21 +363,21 @@ def main():
                 DisplayMsg.show(Message.BOOK_MOVE())
             searchmoves.reset()
             if interaction_mode == Mode.NORMAL:
+                text = Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy())
                 if check_game_state(game, play_mode):
                     think(game, time_control)
-                text = Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy())
             elif interaction_mode == Mode.REMOTE:
-                if check_game_state(game, play_mode):
-                    observe(game)
                 text = Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy())
-            elif interaction_mode == Mode.OBSERVE:
                 if check_game_state(game, play_mode):
                     observe(game)
+            elif interaction_mode == Mode.OBSERVE:
                 text = Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode)
+                if check_game_state(game, play_mode):
+                    observe(game)
             else:  # interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ):
+                text = Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode)
                 if check_game_state(game, play_mode):
                     analyse(game)
-                text = Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode)
             DisplayMsg.show(text)
 
     def transfer_time(time_list):

@@ -95,7 +95,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                         if message.move and message.game and str(message.move) != previous_move \
                                 and self.computer_picotalker is not None:
                             logging.debug('announcing COMPUTER_MOVE [%s]', message.move)
-                            self.talk(self.say_move(message.move, message.fen, message.game.copy()),
+                            self.talk(self.say_move(message.move, message.fen, message.game),
                                       self.computer_picotalker.get_path())
                             previous_move = str(message.move)
                         break
@@ -103,7 +103,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                         if message.move and message.game and str(message.move) != previous_move \
                                 and self.user_picotalker is not None:
                             logging.debug('announcing USER_MOVE [%s]', message.move)
-                            self.talk(self.say_move(message.move, message.fen, message.game.copy()),
+                            self.talk(self.say_move(message.move, message.fen, message.game),
                                       self.user_picotalker.get_path())
                             previous_move = str(message.move)
                         break
@@ -111,7 +111,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                         if message.move and message.game and str(message.move) != previous_move \
                                 and self.user_picotalker is not None:
                             logging.debug('announcing REVIEW_MOVE [%s]', message.move)
-                            self.talk(self.say_move(message.move, message.fen, message.game.copy()),
+                            self.talk(self.say_move(message.move, message.fen, message.game),
                                       self.user_picotalker.get_path())
                             previous_move = str(message.move)
                         break
