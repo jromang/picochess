@@ -86,6 +86,11 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                 logging.debug("received message from msg_queue: %s", message)
 
                 for case in switch(message):
+                    if case(MessageApi.ENGINE_FAIL):
+                        if system_picotalker:
+                            logging.debug('announcing ENGINE_FAIL')
+                            self.talk(['error.ogg'], system_picotalker.get_path())
+                        break
                     if case(MessageApi.START_NEW_GAME):
                         if system_picotalker:
                             logging.debug('announcing START_NEW_GAME')
@@ -162,6 +167,12 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                         break
                     if case(MessageApi.ENGINE_READY):
                         self.talk(['okengine.ogg'], system_picotalker.get_path())
+                        break
+                    if case(MessageApi.PLAY_MODE):
+                        if system_picotalker:
+                            logging.debug('announcing PLAY_MODE')
+                            userplay = 'moveblack.ogg' if message.play_mode == PlayMode.USER_BLACK else 'movewhite.ogg'
+                            self.talk([userplay], system_picotalker.get_path())
                         break
                     if case():  # Default
                         # print(message)
