@@ -546,10 +546,17 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text.wait = False
             elif self.system_index == Settings.IPADR:
                 if self.ip:
+                    msg = ' '.join(self.ip.split('.')[:2])
+                    text = self.dgttranslate.text('B10_default', msg)
+                    if len(msg) == 7:  # delete the " " for XL incase its "123 456"
+                        text.s = msg[:3] + msg[4:]
+                    DisplayDgt.show(text)
                     msg = ' '.join(self.ip.split('.')[2:])
                     text = self.dgttranslate.text('B10_default', msg)
                     if len(msg) == 7:  # delete the " " for XL incase its "123 456"
                         text.s = msg[:3] + msg[4:]
+                    text.beep = False
+                    text.wait = True
                 else:
                     text = self.dgttranslate.text('B10_noipadr')
             elif self.system_index == Settings.SOUND:
