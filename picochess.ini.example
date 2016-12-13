@@ -1,5 +1,5 @@
 ### ===============================
-### = picochess.ini.example v0.78 =
+### = picochess.ini.example v0.80 =
 ### ===============================
 ### Example and description how to configure PicoChess
 ### To use this file, simply copy this file to picochess.ini and edit the appropriate settings
@@ -118,9 +118,9 @@
 # log-level = debug
 ### PicoChess can use a speech engine for announcement
 ## user-voice used for user moves announcement
-# user-voice = en:dgt
+# user-voice = en:al
 ## computer-voice for computer moves announcement
-# computer-voice = en:al
+# computer-voice = en:christina
 ## PicoChess writes pgn files at end of game.
 # pgn-file = games.pgn
 # pgn-user = player
@@ -139,3 +139,6 @@
 ## You can set the language with the "language" option. Default is English.
 ## en = English; de = German; nl = Dutch; fr = French; es = Spanish
 # language = en
+## When in ponder mode decides how long each info is displayed. Default is 2 secs.
+## Must be between 1 to 10 secs.
+# ponder-time = 2
