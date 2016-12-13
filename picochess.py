@@ -475,8 +475,6 @@ def main():
     parser.add_argument('-c', '--console', action='store_true', help='use console interface')
 
     args, unknown = parser.parse_known_args()
-    if unknown:
-        logging.error('invalid parameter given {}'.format(unknown))
 
     if args.engine is None:
         el = read_engine_ini()
@@ -495,7 +493,8 @@ def main():
     p = copy.copy(vars(args))
     p['mailgun_key'] = p['remote_key'] = p['remote_pass'] = p['smtp_pass'] = '*****'
     logging.debug('startup parameters: {}'.format(p))
-
+    if unknown:
+        logging.error('invalid parameter given {}'.format(unknown))
     # Update
     if args.enable_update:
         update_picochess(args.auto_reboot)
