@@ -461,7 +461,6 @@ def main():
                         help='sets (some-)beep level from 0(=no beeps) to 15(=all beeps)')
     parser.add_argument('-uvoice', '--user-voice', type=str, help='voice for user', default=None)
     parser.add_argument('-cvoice', '--computer-voice', type=str, help='voice for computer', default=None)
-    parser.add_argument('-inet', '--enable-internet', action='store_true', help='DEPRECATED - dont use it anymore!')
     parser.add_argument('-update', '--enable-update', action='store_true', help='enable picochess updates')
     parser.add_argument('-ar', '--auto-reboot', action='store_true', help='reboot system after update')
     parser.add_argument('-nook', '--disable-ok-message', action='store_true', help='disable ok confirmation messages')
