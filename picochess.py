@@ -468,11 +468,16 @@ def main():
     parser.add_argument('-v', '--version', action='version', version='%(prog)s version {}'.format(version),
                         help='show current version', default=None)
     parser.add_argument('-pi', '--dgtpi', action='store_true', help='use the dgtpi hardware')
+    parser.add_argument('-pt', '--ponder-time', type=int, default=2, choices=range(1,11),
+                        help='how long each part of ponder display should be visible (default=2secs)')
     parser.add_argument('-lang', '--language', choices=['en', 'de', 'nl', 'fr', 'es', 'it'], default='en',
                         help='picochess language')
     parser.add_argument('-c', '--console', action='store_true', help='use console interface')
 
-    args = parser.parse_args()
+    args, unknown = parser.parse_known_args()
+    if unknown:
+        logging.error('invalid parameter given {}'.format(unknown))
+
     if args.engine is None:
         el = read_engine_ini()
         args.engine = el[0]['file']  # read the first engine filename and use it as standard
@@ -506,7 +511,7 @@ def main():
 
     # The class dgtDisplay talks to DgtHw/DgtPi or DgtVr
     dgttranslate = DgtTranslate(args.beep_config, args.beep_level, args.language)
-    DgtDisplay(args.disable_ok_message, dgttranslate).start()
+    DgtDisplay(args.disable_ok_message, args.ponder_time, dgttranslate).start()
 
     # Launch web server
     if args.web_server_port:

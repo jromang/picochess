@@ -26,9 +26,10 @@ from configobj import ConfigObj
 
 
 class DgtDisplay(Observable, DisplayMsg, threading.Thread):
-    def __init__(self, disable_ok_message, dgttranslate):
+    def __init__(self, disable_ok_message, ponder_time, dgttranslate):
         super(DgtDisplay, self).__init__()
         self.show_ok_message = not disable_ok_message
+        self.ponder_time = ponder_time
         self.dgttranslate = dgttranslate
 
         self.flip_board = False
@@ -1158,7 +1159,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if case(MessageApi.DGT_SERIAL_NR):
                 # logging.debug('Serial number {}'.format(message.number))  # actually used for watchdog (once a second)
                 if self.mode_result == Mode.PONDER and self.top_result is None:
-                    if self.show_move_or_value > 1:
+                    if self.show_move_or_value >= self.ponder_time:
                         if self.hint_move:
                             show_left = (self.hint_turn == chess.WHITE) != self.flip_board
                             text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen,
@@ -1170,7 +1171,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         text = self._combine_depth_and_score()
                     text.wait = True
                     DisplayDgt.show(text)
-                    self.show_move_or_value = (self.show_move_or_value + 1) % 4
+                    self.show_move_or_value = (self.show_move_or_value + 1) % (self.ponder_time * 2)
                 break
             if case(MessageApi.JACK_CONNECTED_ERROR):  # this will only work in case of 2 clocks connected!
                 DisplayDgt.show(self.dgttranslate.text('Y00_errorjack'))
