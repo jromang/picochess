@@ -172,7 +172,8 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                         if system_picotalker:
                             logging.debug('announcing PLAY_MODE')
                             userplay = 'moveblack.ogg' if message.play_mode == PlayMode.USER_BLACK else 'movewhite.ogg'
-                            self.talk([userplay], system_picotalker.get_path())
+                            # self.talk([userplay], system_picotalker.get_path())
+                            logging.debug('ignored sound {}'.format(userplay))  # this is a wrong sound
                         break
                     if case():  # Default
                         # print(message)
