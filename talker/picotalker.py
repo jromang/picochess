@@ -260,6 +260,9 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
         elif game.is_check():
             voice_parts += ['check.ogg']
 
+        if bit_board.is_en_passant(move):
+            voice_parts += ['enpassant.ogg']
+
         return voice_parts
 
 
