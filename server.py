@@ -203,7 +203,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
             if 'game_info' in self.shared:
                 if 'play_mode' in self.shared['game_info']:
                     if 'level_text' in self.shared['game_info']:
-                        engine_name += ' /{0}\\'.format(self.shared['game_info']['level_text'].m)
+                        engine_name += ' [{0}]'.format(self.shared['game_info']['level_text'].m)
                     pgn_game.headers['Black'] = \
                         engine_name if self.shared['game_info']['play_mode'] == PlayMode.USER_WHITE else user_name
                     pgn_game.headers['White'] = \
