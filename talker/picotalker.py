@@ -87,14 +87,12 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
 
                 for case in switch(message):
                     if case(MessageApi.ENGINE_FAIL):
-                        if system_picotalker:
-                            logging.debug('announcing ENGINE_FAIL')
-                            self.talk(['error.ogg'], system_picotalker.get_path())
+                        logging.debug('announcing ENGINE_FAIL')
+                        self.talk(['error.ogg'], system_picotalker.get_path())
                         break
                     if case(MessageApi.START_NEW_GAME):
-                        if system_picotalker:
-                            logging.debug('announcing START_NEW_GAME')
-                            self.talk(['newgame.ogg'], system_picotalker.get_path())
+                        logging.debug('announcing START_NEW_GAME')
+                        self.talk(['newgame.ogg'], system_picotalker.get_path())
                         break
                     if case(MessageApi.COMPUTER_MOVE):
                         if message.move and message.game and str(message.move) != previous_move \
@@ -138,13 +136,13 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                             logging.debug('announcing GAME_ENDS/ABORT')
                             self.talk(['abort.ogg'], system_picotalker.get_path())
                         elif message.result == GameResult.DRAW:
-                            logging.debug('announcing DRAW')
+                            logging.debug('announcing GAME_ENDS/DRAW')
                             self.talk(['draw.ogg'], system_picotalker.get_path())
                         elif message.result == GameResult.WIN_WHITE:
-                            logging.debug('announcing WHITE WIN')
+                            logging.debug('announcing GAME_ENDS/WHITE_WIN')
                             self.talk(['whitewins.ogg'], system_picotalker.get_path())
                         elif message.result == GameResult.WIN_BLACK:
-                            logging.debug('announcing BLACK WIN')
+                            logging.debug('announcing GAME_ENDS/BLACK_WIN')
                             self.talk(['blackwins.ogg'], system_picotalker.get_path())
                         elif message.result == GameResult.FIVEFOLD_REPETITION:
                             logging.debug('announcing GAME_ENDS/FIVEFOLD_REPETITION')
@@ -175,11 +173,9 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                         self.talk(['okengine.ogg'], system_picotalker.get_path())
                         break
                     if case(MessageApi.PLAY_MODE):
-                        if system_picotalker:
-                            logging.debug('announcing PLAY_MODE')
-                            userplay = 'moveblack.ogg' if message.play_mode == PlayMode.USER_BLACK else 'movewhite.ogg'
-                            # self.talk([userplay], system_picotalker.get_path())
-                            logging.debug('ignored sound {}'.format(userplay))  # this is a wrong sound
+                        logging.debug('announcing PLAY_MODE')
+                        userplay = 'userblack.ogg' if message.play_mode == PlayMode.USER_BLACK else 'userwhite.ogg'
+                        self.talk([userplay], system_picotalker.get_path())
                         break
                     if case(MessageApi.DGT_CLOCK_VERSION):
                         logging.debug('announcing PICOCHESS')
