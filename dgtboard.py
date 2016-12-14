@@ -206,7 +206,7 @@ class DgtBoard(object):
                         main = ack2 >> 4
                         sub = ack2 & 0x0f
                         logging.debug("(ser) clock: version %0.2f", float(str(main) + '.' + str(sub)))
-                        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=main, sub=sub, attached='serial'))
+                        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=main, sub=sub, attached='ser'))
                     if ack1 == 0x0a:  # clock ack SETNRUN => set the time values to max for sure! override lateron
                         self.r_time = 3600 * 10
                         self.l_time = 3600 * 10
@@ -547,27 +547,29 @@ class DgtBoard(object):
         return True
 
     def _setup_serial_port(self):
+        def success(dev):
+            self.device = dev
+            logging.debug('DGT board connected to %s', self.device)
+            return True
+
         waitchars = ['/', '-', '\\', '|']
 
         if self.rt.is_running():
-            logging.debug('watchdog timer is stopped')
+            logging.debug('watchdog timer is stopped now')
             self.rt.stop()
         with self.lock:
             if not self.serial:
                 if self.given_device:
-                    self._open_serial(self.given_device)
+                    if self._open_serial(self.given_device):
+                        return success(self.given_device)
                 else:
                     for file in os.listdir('/dev'):
                         if file.startswith('ttyACM') or file.startswith('ttyUSB') or file == 'rfcomm0':
                             dev = os.path.join('/dev', file)
                             if self._open_serial(dev):
-                                self.device = dev
-                                logging.debug('DGT board connected to %s', self.device)
-                                return
+                                return success(dev)
                     if self._open_bluetooth():
-                        self.device = '/dev/rfcomm123'
-                        logging.debug('DGT board connected to %s', self.device)
-                        return
+                        return success('/dev/rfcomm123')
 
                 # text = self.dgttranslate.text('N00_noboard', 'Board' + waitchars[self.wait_counter])
                 s = 'Board' + waitchars[self.wait_counter]
@@ -575,6 +577,7 @@ class DgtBoard(object):
                                         wait=True, beep=False, maxtime=0, devs={'i2c', 'web'})
                 DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text))
                 self.wait_counter = (self.wait_counter + 1) % len(waitchars)
+        return False
 
     def _wait_for_clock(self):
         has_to_wait = False

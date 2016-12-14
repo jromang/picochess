@@ -300,7 +300,13 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.DGT_CLOCK_VERSION):
-                result = {'event': 'Message', 'msg': 'DGT clock connected through ' + message.attached}
+                if message.attached == 'ser':
+                    attached = 'serial'
+                elif message.attached == 'i2c':
+                    attached = 'i2c'
+                else:
+                    attached = 'virtual'
+                result = {'event': 'Message', 'msg': 'DGT clock connected through ' + attached}
                 EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.COMPUTER_MOVE):

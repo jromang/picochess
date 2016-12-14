@@ -29,7 +29,7 @@ class DgtVr(DgtIface):
         # setup virtual clock
         self.enable_dgt_pi = dgtboard.is_pi
         main = 2 if dgtboard.is_pi else 0
-        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=main, sub=0, attached='virtual'))
+        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=main, sub=0, attached='web'))
 
     # (START) dgtserial class simulation
     def _runclock(self):

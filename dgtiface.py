@@ -112,13 +112,13 @@ class DgtIface(DisplayDgt, Thread):
                 self.start_clock(message.time_left, message.time_right, message.side)
                 break
             if case(DgtApi.CLOCK_VERSION):
-                if not self.clock_found:
-                    text = self.dgttranslate.text('Y20_picochess')
-                    text.rd = ClockIcons.DOT
-                    self.show(text)
-                self.clock_found = True
-                if message.main == 2:
-                    self.enable_dgt_3000 = True
+                text = self.dgttranslate.text('Y20_picochess', devs={message.attached})
+                text.rd = ClockIcons.DOT
+                self.show(text)
+                if message.attached != 'i2c':
+                    self.clock_found = True
+                    if message.main == 2:
+                        self.enable_dgt_3000 = True
                 break
             if case(DgtApi.CLOCK_TIME):
                 self.time_left = message.time_left

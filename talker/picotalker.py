@@ -175,6 +175,10 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                             # self.talk([userplay], system_picotalker.get_path())
                             logging.debug('ignored sound {}'.format(userplay))  # this is a wrong sound
                         break
+                    if case(MessageApi.DGT_CLOCK_VERSION):
+                        logging.debug('anouncing PicoChess')
+                        self.talk(['picoChess.ogg'], system_picotalker.get_path())
+                        break
                     if case():  # Default
                         # print(message)
                         pass

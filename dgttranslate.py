@@ -51,11 +51,13 @@ class DgtTranslate(object):
             directory = {'R': 'T', 'N': 'C', 'B': 'F', 'Q': 'D', 'K': 'R'}
         if self.language == 'es':
             directory = {'R': 'T', 'N': 'C', 'B': 'A', 'Q': 'D', 'K': 'R'}
+        if self.language == 'it':
+            directory = {'R': 'T', 'N': 'C', 'B': 'A', 'Q': 'D', 'K': 'R'}
         for i, j in directory.items():
             text = text.replace(i, j)
         return text
 
-    def text(self, str_code, msg=''):
+    def text(self, str_code, msg='', devs={'ser', 'i2c', 'web'}):
         entxt = detxt = nltxt = frtxt = estxt = ittxt = None  # error case
 
         (code, text_id) = str_code.split('_', 1)
@@ -75,7 +77,6 @@ class DgtTranslate(object):
             beep = False
         maxtime = int(code[1:]) / 10
         wait = False
-        devs = {'ser', 'i2c', 'web'}
 
         if text_id == 'default':
             entxt = Dgt.DISPLAY_TEXT(l=msg, m=msg[:8], s=msg[:6])
