@@ -151,21 +151,27 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                             self.talk(['repetition.ogg', 'draw.ogg'], system_picotalker.get_path())
                         break
                     if case(MessageApi.USER_TAKE_BACK):
+                        logging.debug('announcing TAKE_BACK')
                         self.talk(['takeback.ogg'], system_picotalker.get_path())
                         break
                     if case(MessageApi.TIME_CONTROL):
+                        logging.debug('announcing TIME_CONTROL')
                         self.talk(['oktime.ogg'], system_picotalker.get_path())
                         break
                     if case(MessageApi.INTERACTION_MODE):
+                        logging.debug('announcing INTERACTION_MODE')
                         self.talk(['okmode.ogg'], system_picotalker.get_path())
                         break
                     if case(MessageApi.LEVEL):
+                        logging.debug('announcing LEVEL')
                         self.talk(['oklevel.ogg'], system_picotalker.get_path())
                         break
                     if case(MessageApi.OPENING_BOOK):
+                        logging.debug('announcing OPENING_BOOK')
                         self.talk(['okbook.ogg'], system_picotalker.get_path())
                         break
                     if case(MessageApi.ENGINE_READY):
+                        logging.debug('announcing ENGINE_READY')
                         self.talk(['okengine.ogg'], system_picotalker.get_path())
                         break
                     if case(MessageApi.PLAY_MODE):
@@ -176,8 +182,16 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                             logging.debug('ignored sound {}'.format(userplay))  # this is a wrong sound
                         break
                     if case(MessageApi.DGT_CLOCK_VERSION):
-                        logging.debug('anouncing PicoChess')
+                        logging.debug('announcing PICOCHESS')
                         self.talk(['picoChess.ogg'], system_picotalker.get_path())
+                        break
+                    if case(MessageApi.SYSTEM_SHUTDOWN):
+                        logging.debug('announcing SHUTDOWN')
+                        self.talk(['goodbye.ogg'], system_picotalker.get_path())
+                        break
+                    if case(MessageApi.SYSTEM_REBOOT):
+                        logging.debug('announcing REBOOT')
+                        self.talk(['pleasewait.ogg'], system_picotalker.get_path())
                         break
                     if case():  # Default
                         # print(message)

@@ -124,6 +124,8 @@ class MessageApi():
     EBOARD_VERSION = 'MSG_EBOARD_VERSION'  # Startup Message after a successful connection to an E-Board
     SWITCH_SIDES = 'MSG_SWITCH_SIDES'  # Forget the engines move, and let it be user's turn
     KEYBOARD_MOVE = 'MSG_KEYBOARD_MOVE'  # Sends back the fen for a given move (needed for keyboard.py)
+    SYSTEM_SHUTDOWN = 'MSG_SYSTEM_SHUTDOWN'  # Sends a Shutdown
+    SYSTEM_REBOOT = 'MSG_SYSTEM_REBOOT'  # Sends a Reboot
 
 
 class DgtApi():
@@ -711,6 +713,8 @@ class Message():
     EBOARD_VERSION = ClassFactory(MessageApi.EBOARD_VERSION, ['text', 'channel'])
     SWITCH_SIDES = ClassFactory(MessageApi.SWITCH_SIDES, ['move'])
     KEYBOARD_MOVE = ClassFactory(MessageApi.KEYBOARD_MOVE, ['fen'])
+    SYSTEM_SHUTDOWN = ClassFactory(MessageApi.SYSTEM_SHUTDOWN, [])
+    SYSTEM_REBOOT = ClassFactory(MessageApi.SYSTEM_REBOOT, [])
 
 
 class Event():
@@ -798,7 +802,8 @@ def update_picochess(auto_reboot=False):
 
 def shutdown(dgtpi):
     logging.debug('shutting down system')
-    time.sleep(1)  # give some time to send out the pgn file
+    DisplayMsg.show(Message.SYSTEM_SHUTDOWN())
+    time.sleep(2)  # give some time to send out the pgn file or speak the event
     if platform.system() == 'Windows':
         os.system('shutdown /s')
     elif dgtpi:
@@ -809,7 +814,8 @@ def shutdown(dgtpi):
 
 def reboot():
     logging.debug('rebooting system')
-    time.sleep(1)  # give some time to send out the pgn file
+    DisplayMsg.show(Message.SYSTEM_REBOOT())
+    time.sleep(2)  # give some time to send out the pgn file or speak the event
     os.system('reboot')
 
 
