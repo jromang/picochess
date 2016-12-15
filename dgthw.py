@@ -28,11 +28,14 @@ class DgtHw(DgtIface):
         self.lib_lock = Lock()
         self.dgtboard.run()
 
-    def _display_on_dgt_xl(self, text, beep=False, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
-        if not self.clock_found:  # This can only happen on the XL function
+    def check_clock(self, text):
+        if not self.clock_found:
             logging.debug('(ser) clock (still) not found. Ignore [%s]', text)
             self.dgtboard.startup_serial_clock()
-            return
+            return False
+        return True
+
+    def _display_on_dgt_xl(self, text, beep=False, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
         text = text.ljust(6)
         if len(text) > 6:
             logging.warning('(ser) clock message too long [%s]', text)
@@ -64,6 +67,8 @@ class DgtHw(DgtIface):
         left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE
         right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
 
+        if not self.check_clock(text):
+            return
         if display_m:
             self._display_on_dgt_3000(text, message.beep, left_icons, right_icons)
         else:
@@ -78,18 +83,21 @@ class DgtHw(DgtIface):
             move_text = bit_board.san(message.move)
             if message.side == ClockSide.RIGHT:
                 move_text = move_text.rjust(8)
-            text = self.dgttranslate.move(move_text)
-            self._display_on_dgt_3000(text, message.beep, left_icons, right_icons)
+            move_text = self.dgttranslate.move(move_text)
+            if self.check_clock(move_text):
+                self._display_on_dgt_3000(move_text, message.beep, left_icons, right_icons)
         else:
             move_text = message.move.uci()
             if message.side == ClockSide.RIGHT:
                 move_text = move_text.rjust(6)
-            self._display_on_dgt_xl(move_text, message.beep, left_icons, right_icons)
+            if self.check_clock(move_text):
+                self._display_on_dgt_xl(move_text, message.beep, left_icons, right_icons)
 
     def display_time_on_clock(self, force=False):
         if self.clock_running or force:
             with self.lib_lock:
-                self.dgtboard.end_text()
+                if self.check_clock('END_TEXT'):
+                    self.dgtboard.end_text()
         else:
             logging.debug('(ser) clock isnt running - no need for endText')
 
@@ -109,6 +117,8 @@ class DgtHw(DgtIface):
         self._resume_clock(ClockSide.NONE)
 
     def _resume_clock(self, side):
+        if not self.check_clock('RESUME_CLOCK'):
+            return
         l_hms = self.time_left
         r_hms = self.time_right
         if l_hms is None or r_hms is None:
