@@ -57,13 +57,13 @@ class DgtHw(DgtIface):
                 logging.warning('Finally failed %i', res)
 
     def display_text_on_clock(self, message):
-        if 'ser' not in message.devs:
-            return
         display_m = self.enable_dgt_3000 and not self.dgtboard.enable_revelation_leds
         text = message.m if display_m else message.s
-
         if text is None:
             text = message.l if display_m else message.m
+        if 'ser' not in message.devs:
+            logging.debug('ignored message cause of devs [{}]'.format(text))
+            return
         left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE
         right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
 

@@ -296,7 +296,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 EventHandler.write_to_clients({'event': 'Message', 'msg': 'Connect an E-Board please!'})
                 break
             if case(MessageApi.EBOARD_VERSION):
-                result = {'event': 'Message', 'msg': 'DGT board connected through ' + message.channel}
+                result = {'event': 'Message', 'msg': message.text.l + ' connected through ' + message.channel}
                 EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.DGT_CLOCK_VERSION):

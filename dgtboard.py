@@ -143,17 +143,18 @@ class DgtBoard(object):
                     text_l, text_m, text_s = 'USB e-Board', 'USBboard', 'ok usb'
                     channel = 'USB'
                 else:
+                    btname5 = self.bt_name[-5:]
                     if 'REVII' in self.bt_name:
-                        text_l, text_m, text_s = 'RevII ' + self.bt_name[-5:], 'Rev' + self.bt_name[-5:], self.bt_name[-6:]
+                        text_l, text_m, text_s = 'RevII ' + btname5, 'Rev' + btname5, self.bt_name[-6:]
                         self.enable_revelation_leds = True
                     elif 'DGT_BT' in self.bt_name:
-                        text_l, text_m, text_s = 'DGTBT ' + self.bt_name[-5:], 'BT ' + self.bt_name[-5:], self.bt_name[-5:]
+                        text_l, text_m, text_s = 'DGTBT ' + btname5, 'BT ' + btname5, btname5
                         self.enable_revelation_leds = False
                     else:
                         text_l, text_m, text_s = 'BT e-Board', 'BT board', 'ok bt'
                     channel = 'BT'
-                    self.board_connected_text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, wait=True, beep=False,
-                                                                 maxtime=1, devs={'i2c', 'web'})  # serial clock lateron
+                self.board_connected_text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, wait=True, beep=False,
+                                                             maxtime=1, devs={'i2c', 'web'})  # serial clock lateron
                 DisplayMsg.show(Message.EBOARD_VERSION(text=self.board_connected_text, channel=channel))
                 self.startup_serial_clock()  # now ask the serial clock to answer
                 if self.rt.is_running():
