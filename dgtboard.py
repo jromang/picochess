@@ -372,11 +372,11 @@ class DgtBoard(object):
             logging.debug('sleeping for 1.5 secs. Afterwards startup the (ser) hardware')
             time.sleep(1.5)
             if not self.is_pi:  # can this "if" be removed for example for a RevII board?!?
-                self.clock_lock = False
                 self.startup_serial_clock()
             self._startup_serial_board()
 
     def startup_serial_clock(self):
+        self.clock_lock = False
         command = [DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
                    DgtClk.DGT_CMD_CLOCK_VERSION, DgtClk.DGT_CMD_CLOCK_END_MESSAGE]
         self.write_board_command(command)  # Get clock version
