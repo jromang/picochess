@@ -60,6 +60,8 @@ class DgtBoard(object):
         self.r_time = 3600 * 10  # max value cause 10h cant be reached by clock
         self.l_time = 3600 * 10  # max value cause 10h cant be reached by clock
 
+        self.board_connected_text = None
+
     def write_board_command(self, message):
         mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
         if not mes == DgtCmd.DGT_RETURN_SERIALNR:
@@ -136,6 +138,7 @@ class DgtBoard(object):
                     logging.warning('illegal length in data')
                 board_version = str(message[0]) + '.' + str(message[1])
                 logging.debug("DGT board version %0.2f", float(board_version))
+                self.write_board_command([DgtCmd.DGT_SEND_BRD])  # Update the board => get first FEN
                 if self.device.find('rfc') == -1:
                     text_l, text_m, text_s = 'USB e-Board', 'USBboard', 'ok usb'
                     channel = 'USB'
@@ -149,9 +152,10 @@ class DgtBoard(object):
                     else:
                         text_l, text_m, text_s = 'BT e-Board', 'BT board', 'ok bt'
                     channel = 'BT'
-                text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s,
-                                        wait=True, beep=False, maxtime=1, devs={'ser', 'i2c', 'web'})
-                DisplayMsg.show(Message.EBOARD_VERSION(text=text, channel=channel))
+                    self.board_connected_text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, wait=True, beep=False,
+                                                                 maxtime=1, devs={'i2c', 'web'})  # serial clock lateron
+                DisplayMsg.show(Message.EBOARD_VERSION(text=self.board_connected_text, channel=channel))
+                self.startup_serial_clock()  # now ask the serial clock to answer
                 if self.rt.is_running():
                     logging.warning('watchdog timer is already running')
                 else:
@@ -206,7 +210,7 @@ class DgtBoard(object):
                         main = ack2 >> 4
                         sub = ack2 & 0x0f
                         logging.debug("(ser) clock: version %0.2f", float(str(main) + '.' + str(sub)))
-                        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=main, sub=sub, attached='ser'))
+                        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=main, sub=sub, attached='ser', text=self.board_connected_text))
                     if ack1 == 0x0a:  # clock ack SETNRUN => set the time values to max for sure! override lateron
                         self.r_time = 3600 * 10
                         self.l_time = 3600 * 10
@@ -371,8 +375,8 @@ class DgtBoard(object):
         if self.serial:
             logging.debug('sleeping for 1.5 secs. Afterwards startup the (ser) hardware')
             time.sleep(1.5)
-            if not self.is_pi:  # can this "if" be removed for example for a RevII board?!?
-                self.startup_serial_clock()
+            # if not self.is_pi:  # can this "if" be removed for example for a RevII board?!?
+            #     self.startup_serial_clock()
             self._startup_serial_board()
 
     def startup_serial_clock(self):
@@ -384,8 +388,6 @@ class DgtBoard(object):
     def _startup_serial_board(self):
         self.write_board_command([DgtCmd.DGT_SEND_UPDATE_NICE])  # Set the board update mode
         self.write_board_command([DgtCmd.DGT_SEND_VERSION])  # Get board version
-        self.write_board_command([DgtCmd.DGT_SEND_BRD])  # Update the board
-        # self.write_board_command([DgtCmd.DGT_SEND_BATTERY_STATUS])  # Get the battery status (BT Boards) - as TEST!
 
     def _watchdog(self):
         self.write_board_command([DgtCmd.DGT_RETURN_SERIALNR])

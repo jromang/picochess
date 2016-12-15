@@ -552,10 +552,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         text.s = msg[:3] + msg[4:]
                     DisplayDgt.show(text)
                     msg = ' '.join(self.ip.split('.')[2:])
-                    text = self.dgttranslate.text('B10_default', msg)
+                    text = self.dgttranslate.text('N10_default', msg)
                     if len(msg) == 7:  # delete the " " for XL incase its "123 456"
                         text.s = msg[:3] + msg[4:]
-                    text.beep = False
                     text.wait = True
                 else:
                     text = self.dgttranslate.text('B10_noipadr')
@@ -1158,6 +1157,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         logging.debug('inside the menu. fen "{}" ignored'.format(fen))
                 break
             if case(MessageApi.DGT_CLOCK_VERSION):
+                if message.attached == 'ser':  # send the "board connected message" to serial clock
+                    DisplayDgt.show(message.text)
                 DisplayDgt.show(Dgt.CLOCK_VERSION(main=message.main, sub=message.sub, attached=message.attached))
                 break
             if case(MessageApi.DGT_CLOCK_TIME):
