@@ -145,10 +145,10 @@ class DgtBoard(object):
                 else:
                     btname5 = self.bt_name[-5:]
                     if 'REVII' in self.bt_name:
-                        text_l, text_m, text_s = 'RevII ' + btname5, 'Rev' + btname5, self.bt_name[-6:]
+                        text_l, text_m, text_s = 'RevII ' + btname5, 'Rev' + btname5, 'b' + btname5
                         self.enable_revelation_leds = True
                     elif 'DGT_BT' in self.bt_name:
-                        text_l, text_m, text_s = 'DGTBT ' + btname5, 'BT ' + btname5, btname5
+                        text_l, text_m, text_s = 'DGTBT ' + btname5, 'BT ' + btname5, 'b' + btname5
                         self.enable_revelation_leds = False
                     else:
                         text_l, text_m, text_s = 'BT e-Board', 'BT board', 'ok bt'
