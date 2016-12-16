@@ -211,6 +211,7 @@ class DgtBoard(object):
                         main = ack2 >> 4
                         sub = ack2 & 0x0f
                         logging.debug("(ser) clock: version %0.2f", float(str(main) + '.' + str(sub)))
+                        self.board_connected_text.devs = {'ser'}  # Now send the (delayed) message to serial clock
                         DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=main, sub=sub, attached='ser', text=self.board_connected_text))
                     if ack1 == 0x0a:  # clock ack SETNRUN => set the time values to max for sure! override lateron
                         self.r_time = 3600 * 10
