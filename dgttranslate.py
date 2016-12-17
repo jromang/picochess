@@ -48,14 +48,14 @@ class DgtTranslate(object):
         if self.language == 'nl':
             directory = {'R': 'T', 'N': 'P', 'B': 'L', 'Q': 'D'}
         if self.language == 'fr':
-            directory = {'R': 'T', 'N': 'C', 'B': 'F', 'Q': 'D', 'K': 'R'}
+            directory = {'R': 'T', 'N': 'C', 'B': 'F', 'Q': 'D', 'K': '@'}
         if self.language == 'es':
-            directory = {'R': 'T', 'N': 'C', 'B': 'A', 'Q': 'D', 'K': 'R'}
+            directory = {'R': 'T', 'N': 'C', 'B': 'A', 'Q': 'D', 'K': '@'}
         if self.language == 'it':
-            directory = {'R': 'T', 'N': 'C', 'B': 'A', 'Q': 'D', 'K': 'R'}
+            directory = {'R': 'T', 'N': 'C', 'B': 'A', 'Q': 'D', 'K': '@'}
         for i, j in directory.items():
             text = text.replace(i, j)
-        return text
+        return text.replace('@', 'R')  # replace the King "@" from fr, es, it languages
 
     def text(self, str_code, msg='', devs={'ser', 'i2c', 'web'}):
         entxt = detxt = nltxt = frtxt = estxt = ittxt = None  # error case
