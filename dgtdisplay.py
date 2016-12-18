@@ -547,15 +547,15 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             elif self.system_index == Settings.IPADR:
                 if self.ip:
                     msg = ' '.join(self.ip.split('.')[:2])
-                    text = self.dgttranslate.text('B10_default', msg)
+                    text = self.dgttranslate.text('B07_default', msg)
                     if len(msg) == 7:  # delete the " " for XL incase its "123 456"
                         text.s = msg[:3] + msg[4:]
                     DisplayDgt.show(text)
                     msg = ' '.join(self.ip.split('.')[2:])
-                    text = self.dgttranslate.text('N10_default', msg)
+                    text = self.dgttranslate.text('N07_default', msg)
                     if len(msg) == 7:  # delete the " " for XL incase its "123 456"
                         text.s = msg[:3] + msg[4:]
-                    # text.wait = True
+                    text.wait = True
                 else:
                     text = self.dgttranslate.text('B10_noipadr')
             elif self.system_index == Settings.SOUND:
@@ -592,7 +592,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             DisplayDgt.show(text)
             if exit_menu:
                 self._reset_menu_results()
-                self._exit_display()
+                self._exit_display(wait=True)
 
         def engine4():
             eng = self.installed_engines[self.engine_index]
