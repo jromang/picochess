@@ -898,7 +898,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if case(MessageApi.GAME_ENDS):
                 if not self.engine_restart:  # filter out the shutdown/reboot process
                     ge = message.result.value
-                    DisplayDgt.show(self.dgttranslate.text(ge))
+                    text = self.dgttranslate.text(ge)
+                    text.beep = self.dgttranslate.bl(BeepLevel.CONFIG)
+                    text.maxtime = 0.5
+                    DisplayDgt.show(text)
                 break
             if case(MessageApi.INTERACTION_MODE):
                 self.mode_index = message.mode
