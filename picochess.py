@@ -315,11 +315,15 @@ def main():
                     else:
                         legal_fens = compute_legal_fens(game)
 
-                    if interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
-                        analyse(game)
+                    # changed cause dont want to autostart clock here too
+                    if interaction_mode == Mode.NORMAL:
+                        # start_clock()
+                        pass
                     elif interaction_mode in (Mode.OBSERVE, Mode.REMOTE):
-                        observe(game)
-                    start_clock()
+                        # observe(game)
+                        analyse(game)
+                    elif interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
+                        analyse(game)
                     DisplayMsg.show(Message.USER_TAKE_BACK())
                     break
 
@@ -332,7 +336,8 @@ def main():
             if interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
                 analyse(game)
             if interaction_mode in (Mode.OBSERVE, Mode.REMOTE):
-                observe(game)
+                # observe(game)  # dont want to autostart the clock => we are in newgame situation
+                analyse(game)
 
     def handle_move(move, ponder=None, inbook=False):
         nonlocal game

@@ -357,7 +357,11 @@ class DgtBoard(object):
                 if self.serial:
                     byte = self.serial.read(1)
                 else:
-                    self._startup_serial_hardware()
+                    self._setup_serial_port()
+                    if self.serial:
+                        logging.debug('sleeping for 1.5 secs. Afterwards startup the (ser) hardware')
+                        time.sleep(1.5)
+                        self._startup_serial_board()
                 if byte and byte[0] & 0x80:
                     self._read_board_message(head=byte)
                 else:
@@ -371,15 +375,6 @@ class DgtBoard(object):
                 pass
             except struct.error:  # can happen, when plugin board-cable again
                 pass
-
-    def _startup_serial_hardware(self):
-        self._setup_serial_port()
-        if self.serial:
-            logging.debug('sleeping for 1.5 secs. Afterwards startup the (ser) hardware')
-            time.sleep(1.5)
-            # if not self.is_pi:  # can this "if" be removed for example for a RevII board?!?
-            #     self.startup_serial_clock()
-            self._startup_serial_board()
 
     def startup_serial_clock(self):
         self.clock_lock = False

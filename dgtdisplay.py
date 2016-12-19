@@ -821,10 +821,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self._reset_menu_results()
                 self.engine_finished = False
                 pos960 = message.game.chess960_pos()
-                text = self.dgttranslate.text('C10_newgame' if pos960 is None or pos960 == 518 else 'C10_ucigame',
-                                              str(pos960))
-                text.wait = True  # in case of GAME_ENDS before, wait for "abort"
-                DisplayDgt.show(text)
+                game_text = 'C10_newgame' if pos960 is None or pos960 == 518 else 'C10_ucigame'
+                DisplayDgt.show(self.dgttranslate.text(game_text, str(pos960)))
                 if self.mode_result in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
                     time_left, time_right = message.time_control.current_clock_time(flip_board=self.flip_board)
                     DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE))

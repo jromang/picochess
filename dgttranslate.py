@@ -272,6 +272,7 @@ class DgtTranslate(object):
             estxt = Dgt.DISPLAY_TEXT(l='altn jugada', m='altjugad', s='altjug')
             ittxt = Dgt.DISPLAY_TEXT(l='mossa alter', m='mossa al', s='mosalt')
         if text_id == 'newgame':
+            wait = True  # in case of GAME_ENDS before, wait for "abort"
             entxt = Dgt.DISPLAY_TEXT(l='new Game   ', m='new Game', s='newgam')
             detxt = Dgt.DISPLAY_TEXT(l='neues Spiel', m='neuesSpl', s='neuspl')
             nltxt = Dgt.DISPLAY_TEXT(l='nieuw party', m='nw party', s='nwpart')
@@ -279,6 +280,7 @@ class DgtTranslate(object):
             estxt = Dgt.DISPLAY_TEXT(l='nuev partid', m='nuevpart', s='n part')
             ittxt = Dgt.DISPLAY_TEXT(l='nuova parti', m='nuo part', s='nupart')
         if text_id == 'ucigame':
+            wait = True
             msg = msg.rjust(3)
             entxt = Dgt.DISPLAY_TEXT(l='new Game' + msg, m='Game ' + msg, s='gam' + msg)
             detxt = Dgt.DISPLAY_TEXT(l='neuSpiel' + msg, m='Spiel' + msg, s='spl' + msg)
