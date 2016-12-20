@@ -714,28 +714,31 @@ def main():
                     break
 
                 if case(EventApi.NEW_GAME):
-                    logging.debug('starting a new game with code: {}'.format(event.pos960))
-                    uci960 = event.pos960 != 518
+                    if game.move_stack or (game.chess960_pos() != event.pos960):
+                        logging.debug('starting a new game with code: {}'.format(event.pos960))
+                        uci960 = event.pos960 != 518
 
-                    if game.move_stack:
                         if not (game.is_game_over() or game_declared):
                             DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=game.copy()))
-                    game = chess.Board()
-                    if uci960:
-                        game.set_chess960_pos(event.pos960)
-                    # see setup_position
-                    stop_search_and_clock()
-                    if engine.has_chess960():
-                        engine.option('UCI_Chess960', uci960)
-                        engine.send()
-                    legal_fens = compute_legal_fens(game)
-                    last_legal_fens = []
-                    last_computer_fen = None
-                    time_control.reset()
-                    searchmoves.reset()
-                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, game=game.copy()))
-                    game_declared = False
-                    set_wait_state()
+
+                        game = chess.Board()
+                        if uci960:
+                            game.set_chess960_pos(event.pos960)
+                        # see setup_position
+                        stop_search_and_clock()
+                        if engine.has_chess960():
+                            engine.option('UCI_Chess960', uci960)
+                            engine.send()
+                        legal_fens = compute_legal_fens(game)
+                        last_legal_fens = []
+                        last_computer_fen = None
+                        time_control.reset()
+                        searchmoves.reset()
+                        DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, game=game.copy()))
+                        game_declared = False
+                        set_wait_state()
+                    else:
+                        logging.debug('no need to start a new game')
                     break
 
                 if case(EventApi.PAUSE_RESUME):
