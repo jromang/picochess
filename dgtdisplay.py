@@ -826,6 +826,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 if self.mode_result in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
                     time_left, time_right = message.time_control.current_clock_time(flip_board=self.flip_board)
                     DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE))
+                    DisplayDgt.show(Dgt.DISPLAY_TIME(force=True, wait=True))  # clock is stopped, force time display
                 break
             if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
                 if self.leds_are_on:
@@ -1145,9 +1146,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         else:
                             # self._reset_moves_and_score()
                             DisplayDgt.show(self.dgttranslate.text('Y00_error960'))
-                elif fen == 'rnbqkbnr/pppppppp/8/7Q/8/8/PPPPPPPP/RNBQKBNR':  # wQ h5 (to be deleted => only for now)
-                    self.fire(Event.EMAIL_LOG())
-                    DisplayDgt.show(self.dgttranslate.text('B10_oklogfile'))  # @todo give pos/neg feedback
                 else:
                     if self.top_result is None:
                         if self.show_setup_pieces_msg:

@@ -346,7 +346,7 @@ def main():
         fen = game.fen()
         turn = game.turn
 
-        # clock must be stoped BEFORE the "book_move" event cause SetNRun resets the clock display
+        # clock must be stopped BEFORE the "book_move" event cause SetNRun resets the clock display
         stop_search_and_clock()
 
         # engine or remote move
