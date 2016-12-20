@@ -839,8 +839,6 @@ def main():
                         stop_search()
                     set_wait_state()
                     DisplayMsg.show(Message.INTERACTION_MODE(mode=event.mode, mode_text=event.mode_text, ok_text=event.ok_text))
-                    if interaction_mode == Mode.NORMAL:
-                        DisplayMsg.show(Dgt.DISPLAY_TIME(force=True, wait=True))  # since clock stopped, show time
                     break
 
                 if case(EventApi.SET_OPENING_BOOK):
