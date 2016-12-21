@@ -975,6 +975,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.tc_fisch_index = index
                             break
                         index += 1
+                # @todo activate this?
+                # time_left, time_right = tc.current_clock_time(flip_board=self.flip_board)
+                # DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE))
                 break
             if case(MessageApi.SEARCH_STARTED):
                 logging.debug('Search started')
