@@ -519,6 +519,14 @@ def main():
     if args.web_server_port:
         WebServer(args.web_server_port).start()
 
+    # Create PicoTalker for speech output
+    if args.user_voice or args.computer_voice:
+        from talker.picotalker import PicoTalkerDisplay
+        logging.debug("initializing PicoTalker [%s, %s]", str(args.user_voice), str(args.computer_voice))
+        PicoTalkerDisplay(args.user_voice, args.computer_voice).start()
+    else:
+        logging.debug('PicoTalker disabled')
+
     dgtboard = DgtBoard(args.dgt_port, args.enable_revelation_leds, args.dgtpi)
 
     if args.console:
@@ -547,14 +555,6 @@ def main():
             user_name = args.email.split('@')[0]
         else:
             user_name = 'Player'
-
-    # Create PicoTalker for speech output
-    if args.user_voice or args.computer_voice:
-        from talker.picotalker import PicoTalkerDisplay
-        logging.debug("initializing PicoTalker [%s, %s]", str(args.user_voice), str(args.computer_voice))
-        PicoTalkerDisplay(args.user_voice, args.computer_voice).start()
-    else:
-        logging.debug('PicoTalker disabled')
 
     # Gentlemen, start your engines...
     engine = UciEngine(args.engine, hostname=args.remote_server, username=args.remote_user,
