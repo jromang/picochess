@@ -29,8 +29,8 @@ class DgtHw(DgtIface):
         self.dgtboard.run()
 
     def check_clock(self, text):
-        if not self.clock_found:
-            logging.debug('(ser) clock (still) not found. Ignore [%s]', text)
+        if not self.enable_ser_clock:
+            logging.debug('(ser) clock still not found. Ignore [%s]', text)
             self.dgtboard.startup_serial_clock()
             return False
         return True
@@ -97,7 +97,10 @@ class DgtHw(DgtIface):
         if self.clock_running or force:
             with self.lib_lock:
                 if self.check_clock('END_TEXT'):
-                    self.dgtboard.end_text()
+                    if self.time_left is None or self.time_right is None:
+                        logging.debug('time values not set - abort function')
+                    else:
+                        self.dgtboard.end_text()
         else:
             logging.debug('(ser) clock isnt running - no need for endText')
 

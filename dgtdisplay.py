@@ -1185,6 +1185,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 break
             if case(MessageApi.EBOARD_VERSION):
                 DisplayDgt.show(message.text)
+                # @todo if activated, does it work? Check for "time-not-set" error and check the serial clocks
+                # DisplayDgt.show(Dgt.DISPLAY_TIME(force=True, wait=True))  # clock is stopped, force time display
                 break
             if case(MessageApi.NO_EBOARD_ERROR):
                 DisplayDgt.show(message.text)

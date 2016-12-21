@@ -27,7 +27,7 @@ class DgtIface(DisplayDgt, Thread):
         self.dgttranslate = dgttranslate
 
         self.enable_dgt_3000 = False
-        self.clock_found = False
+        self.enable_ser_clock = False
         self.time_left = None
         self.time_right = None
 
@@ -116,7 +116,7 @@ class DgtIface(DisplayDgt, Thread):
                 text.rd = ClockIcons.DOT
                 self.show(text)
                 if message.attached != 'i2c':
-                    self.clock_found = True
+                    self.enable_ser_clock = True
                     if message.main == 2:
                         self.enable_dgt_3000 = True
                 break
