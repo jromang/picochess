@@ -99,8 +99,11 @@ class DgtIface(DisplayDgt, Thread):
                 self.light_squares_revelation_board(message.uci_move)
                 break
             if case(DgtApi.CLOCK_STOP):
-                self.clock_running = False
-                self.stop_clock()
+                if self.clock_running:
+                    self.stop_clock()
+                    self.clock_running = False
+                else:
+                    logging.debug('clock is already stopped')
                 break
             if case(DgtApi.CLOCK_START):
                 self.clock_running = (message.side != ClockSide.NONE)
@@ -115,6 +118,7 @@ class DgtIface(DisplayDgt, Thread):
                 text = self.dgttranslate.text('Y20_picochess', devs={message.attached})
                 text.rd = ClockIcons.DOT
                 self.show(text)
+                self.show(Dgt.DISPLAY_TIME(force=True, wait=True))
                 if message.attached != 'i2c':
                     self.enable_ser_clock = True
                     if message.main == 2:

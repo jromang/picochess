@@ -860,7 +860,7 @@ def main():
                     elif time_control.mode == TimeMode.FIXED:
                         config['time'] = '{:d}'.format(time_control.seconds_per_move)
                     config.write()
-                    DisplayMsg.show(Message.TIME_CONTROL(time_text=event.time_text, ok_text=event.ok_text))
+                    DisplayMsg.show(Message.TIME_CONTROL(time_text=event.time_text, ok_text=event.ok_text, time_control=time_control))
                     break
 
                 if case(EventApi.OUT_OF_TIME):

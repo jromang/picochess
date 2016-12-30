@@ -659,10 +659,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     text = self.dgttranslate.text('Y00_errormenu')
                     DisplayDgt.show(text)
                     return
-                time_left, time_right = time_control.current_clock_time(self.flip_board)
                 text = self.dgttranslate.text('B10_oktime')
                 self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=text, ok_text=True))
-                DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE))
                 self._reset_menu_results()
 
         if self.top_result is None:
@@ -776,7 +774,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 if self.show_ok_message or not message.ok_text:
                     DisplayDgt.show(message.eng_text)
                 self.engine_restart = False
-                self._exit_display(force=message.ok_text)
+                self._exit_display(force=True)
                 break
             if case(MessageApi.ENGINE_STARTUP):
                 self.installed_engines = get_installed_engines(message.shell, message.file)
@@ -874,17 +872,21 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     pass
                 else:
                     DisplayDgt.show(message.level_text)
-                    self._exit_display(force=False)
+                    # self._exit_display(force=False)
+                    self._exit_display(force=True)
                 break
             if case(MessageApi.TIME_CONTROL):
                 if self.show_ok_message or not message.ok_text:
                     DisplayDgt.show(message.time_text)
-                self._exit_display(force=message.ok_text)
+                tc = message.time_control
+                time_left, time_right = tc.current_clock_time(flip_board=self.flip_board)
+                DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE))
+                self._exit_display(force=True)
                 break
             if case(MessageApi.OPENING_BOOK):
                 if self.show_ok_message or not message.ok_text:
                     DisplayDgt.show(message.book_text)
-                self._exit_display(force=message.ok_text)
+                self._exit_display(force=True)
                 break
             if case(MessageApi.USER_TAKE_BACK):
                 if self.leds_are_on:
@@ -908,7 +910,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.engine_finished = False
                 if self.show_ok_message or not message.ok_text:
                     DisplayDgt.show(message.mode_text)
-                self._exit_display(force=message.ok_text)
+                self._exit_display(force=True)
                 break
             if case(MessageApi.PLAY_MODE):
                 DisplayDgt.show(message.play_mode_text)
@@ -975,9 +977,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.tc_fisch_index = index
                             break
                         index += 1
-                # @todo activate this?
-                # time_left, time_right = tc.current_clock_time(flip_board=self.flip_board)
-                # DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE))
+                time_left, time_right = tc.current_clock_time(flip_board=self.flip_board)
+                DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE))
                 break
             if case(MessageApi.SEARCH_STARTED):
                 logging.debug('Search started')
