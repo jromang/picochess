@@ -179,10 +179,10 @@ class DgtPi(DgtIface):
                     logging.warning('Configure also failed %i', res)
                 else:
                     res = self.lib.dgtpicom_run(lr, rr)
-            if res < 0:
-                logging.warning('Finally failed %i', res)
-            else:
-                self.clock_running = (side != ClockSide.NONE)
+        if res < 0:
+            logging.warning('Finally failed %i', res)
+        else:
+            self.clock_running = (side != ClockSide.NONE)
 
     def start_clock(self, time_left, time_right, side):
         self.time_left = hours_minutes_seconds(time_left)
@@ -204,7 +204,7 @@ class DgtPi(DgtIface):
                     logging.warning('Configure also failed %i', res)
                 else:
                     res = self.lib.dgtpicom_set_and_run(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
-            if res < 0:
-                logging.warning('Finally failed %i', res)
-            else:
-                self.clock_running = (side != ClockSide.NONE)
+        if res < 0:
+            logging.warning('Finally failed %i', res)
+        else:
+            self.clock_running = (side != ClockSide.NONE)
