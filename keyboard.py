@@ -33,7 +33,7 @@ class KeyboardInput(Observable, threading.Thread):
 
     def fire_no_board_connection(self):
         text = self.dgttranslate.text('N00_noboard', 'Board!')
-        DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text))
+        DisplayMsg.show(Message.DGT_NO_EBOARD_ERROR(text=text))
 
     def run(self):
         logging.info('evt_queue ready')
@@ -64,10 +64,10 @@ class KeyboardInput(Observable, threading.Thread):
                         side = cmd.split(':')[1]
                         if side == 'w':
                             self.flip_board = False
-                            self.fire(Event.DGT_FEN(fen='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'))
+                            self.fire(Event.KEYBOARD_FEN(fen='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'))
                         elif side == 'b':
                             self.flip_board = True
-                            self.fire(Event.DGT_FEN(fen='RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr'))
+                            self.fire(Event.KEYBOARD_FEN(fen='RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr'))
                         else:
                             raise ValueError(side)
                     elif cmd.startswith('setup:'):
@@ -84,20 +84,20 @@ class KeyboardInput(Observable, threading.Thread):
                         fen = raw.split(':')[1]
                         # dgt board only sends the basic fen => be sure
                         # it's same no matter what fen the user entered
-                        self.fire(Event.DGT_FEN(fen=fen.split(' ')[0]))
+                        self.fire(Event.KEYBOARD_FEN(fen=fen.split(' ')[0]))
                     elif cmd.startswith('button:'):
                         button = int(cmd.split(':')[1])
                         if button not in range(6):
                             raise ValueError(button)
                         if button == 5:  # make it to power button
                             button = 0x11
-                        self.fire(Event.DGT_BUTTON(button=button))
+                        self.fire(Event.KEYBOARD_BUTTON(button=button))
                     elif cmd.startswith('lever:'):
                         lever = cmd.split(':')[1]
                         if lever not in ('l', 'r'):
                             raise ValueError(lever)
                         button = 0x40 if lever == 'r' else -0x40
-                        self.fire(Event.DGT_BUTTON(button=button))
+                        self.fire(Event.KEYBOARD_BUTTON(button=button))
                     elif cmd.startswith('plug:'):
                         plug = cmd.split(':')[1]
                         if plug not in ('in', 'off'):
@@ -108,13 +108,13 @@ class KeyboardInput(Observable, threading.Thread):
                             text_l, text_m, text_s = 'VirtBoard  ', 'V-Board ', 'vboard'
                             text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s,
                                                     wait=True, beep=False, maxtime=1, devs={'ser', 'i2c', 'web'})
-                            DisplayMsg.show(Message.EBOARD_VERSION(text=text, channel='console'))
+                            DisplayMsg.show(Message.DGT_EBOARD_VERSION(text=text, channel='console'))
                         if plug == 'off':
                             self.board_plugged_in = False
                             self.rt.start()
                     elif cmd.startswith('go'):
                         if keyboard_last_fen is not None:
-                            self.fire(Event.DGT_FEN(fen=keyboard_last_fen))
+                            self.fire(Event.KEYBOARD_FEN(fen=keyboard_last_fen))
                         else:
                             print('last move already send to virtual board')
                     # end simulation code

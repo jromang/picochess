@@ -324,7 +324,7 @@ def main():
                         analyse(game)
                     elif interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
                         analyse(game)
-                    DisplayMsg.show(Message.USER_TAKE_BACK())
+                    DisplayMsg.show(Message.TAKE_BACK())
                     break
 
     def set_wait_state(start_search=True):
@@ -888,11 +888,11 @@ def main():
                         email_logger.send('Picochess LOG', body, '/opt/picochess/logs/{}'.format(args.log_file))
                     break
 
-                if case(EventApi.DGT_BUTTON):
+                if case(EventApi.KEYBOARD_BUTTON):
                     DisplayMsg.show(Message.DGT_BUTTON(button=event.button))
                     break
 
-                if case(EventApi.DGT_FEN):
+                if case(EventApi.KEYBOARD_FEN):
                     DisplayMsg.show(Message.DGT_FEN(fen=event.fen))
                     break
 

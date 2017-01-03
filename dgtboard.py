@@ -155,7 +155,7 @@ class DgtBoard(object):
                     channel = 'BT'
                 self.board_connected_text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, wait=True, beep=False,
                                                              maxtime=1, devs={'i2c', 'web'})  # serial clock lateron
-                DisplayMsg.show(Message.EBOARD_VERSION(text=self.board_connected_text, channel=channel))
+                DisplayMsg.show(Message.DGT_EBOARD_VERSION(text=self.board_connected_text, channel=channel))
                 self.startup_serial_clock()  # now ask the serial clock to answer
                 if self.rt.is_running():
                     logging.warning('watchdog timer is already running')
@@ -578,7 +578,7 @@ class DgtBoard(object):
                 s = 'Board' + waitchars[self.wait_counter]
                 text = Dgt.DISPLAY_TEXT(l='no e-' + s, m='no' + s, s=s,
                                         wait=True, beep=False, maxtime=0, devs={'i2c', 'web'})
-                DisplayMsg.show(Message.NO_EBOARD_ERROR(text=text))
+                DisplayMsg.show(Message.DGT_NO_EBOARD_ERROR(text=text))
                 self.wait_counter = (self.wait_counter + 1) % len(waitchars)
         return False
 

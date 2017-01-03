@@ -289,13 +289,13 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 self.shared['game_info']['level_text'] = message.level_text
                 update_headers()
                 break
-            if case(MessageApi.JACK_CONNECTED_ERROR):
+            if case(MessageApi.DGT_JACK_CONNECTED_ERROR):
                 EventHandler.write_to_clients({'event': 'Message', 'msg': 'Unplug the jack cable please!'})
                 break
-            if case(MessageApi.NO_EBOARD_ERROR):
+            if case(MessageApi.DGT_NO_EBOARD_ERROR):
                 EventHandler.write_to_clients({'event': 'Message', 'msg': 'Connect an E-Board please!'})
                 break
-            if case(MessageApi.EBOARD_VERSION):
+            if case(MessageApi.DGT_EBOARD_VERSION):
                 result = {'event': 'Message', 'msg': message.text.l + ' connected through ' + message.channel}
                 EventHandler.write_to_clients(result)
                 break
