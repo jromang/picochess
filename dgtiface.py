@@ -101,7 +101,7 @@ class DgtIface(DisplayDgt, Thread):
             if case(DgtApi.CLOCK_STOP):
                 if self.clock_running:
                     self.stop_clock()
-                    self.clock_running = False
+                    # self.clock_running = False
                 else:
                     logging.debug('clock is already stopped')
                 break

@@ -888,7 +888,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     DisplayDgt.show(message.book_text)
                 self._exit_display(force=True)
                 break
-            if case(MessageApi.USER_TAKE_BACK):
+            if case(MessageApi.TAKE_BACK):
                 if self.leds_are_on:
                     DisplayDgt.show(Dgt.LIGHT_CLEAR())
                     self.leds_are_on = False
@@ -1184,15 +1184,15 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     DisplayDgt.show(text)
                     self.show_move_or_value = (self.show_move_or_value + 1) % (self.ponder_time * 2)
                 break
-            if case(MessageApi.JACK_CONNECTED_ERROR):  # this will only work in case of 2 clocks connected!
+            if case(MessageApi.DGT_JACK_CONNECTED_ERROR):  # this will only work in case of 2 clocks connected!
                 DisplayDgt.show(self.dgttranslate.text('Y00_errorjack'))
                 break
-            if case(MessageApi.EBOARD_VERSION):
+            if case(MessageApi.DGT_EBOARD_VERSION):
                 DisplayDgt.show(message.text)
                 # @todo if activated, does it work? Check for "time-not-set" error and check the serial clocks
                 # DisplayDgt.show(Dgt.DISPLAY_TIME(force=True, wait=True))  # clock is stopped, force time display
                 break
-            if case(MessageApi.NO_EBOARD_ERROR):
+            if case(MessageApi.DGT_NO_EBOARD_ERROR):
                 DisplayDgt.show(message.text)
                 break
             if case(MessageApi.SWITCH_SIDES):

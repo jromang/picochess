@@ -148,7 +148,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                             logging.debug('announcing GAME_ENDS/FIVEFOLD_REPETITION')
                             self.talk(['repetition.ogg', 'draw.ogg'], system_picotalker.get_path())
                         break
-                    if case(MessageApi.USER_TAKE_BACK):
+                    if case(MessageApi.TAKE_BACK):
                         logging.debug('announcing TAKE_BACK')
                         self.talk(['takeback.ogg'], system_picotalker.get_path())
                         break
