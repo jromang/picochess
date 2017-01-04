@@ -917,7 +917,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 break
             if case(MessageApi.NEW_SCORE):
                 if message.score == 'gaviota':
-                    text = self.dgttranslate.text('N10_gaviota', '{}'.format(message.mate))
+                    text = self.dgttranslate.text('N10_gaviota', str(message.mate))
                 else:
                     if message.mate is None:
                         score = int(message.score)

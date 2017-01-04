@@ -756,8 +756,8 @@ def main():
                     if last_computer_fen:
                         last_computer_fen = None
                         game.pop()
-                        DisplayMsg.show(Message.ALTERNATIVE_MOVE())
                         think(game, time_control)
+                        DisplayMsg.show(Message.ALTERNATIVE_MOVE())
                     break
 
                 if case(EventApi.SWITCH_SIDES):
