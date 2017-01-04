@@ -823,8 +823,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 DisplayDgt.show(self.dgttranslate.text(game_text, str(pos960)))
                 if self.mode_result in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
                     time_left, time_right = message.time_control.current_clock_time(flip_board=self.flip_board)
-                    DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE))
-                    DisplayDgt.show(Dgt.DISPLAY_TIME(force=True, wait=True))  # clock is stopped, force time display
+                    DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE, wait=True))
+                    # DisplayDgt.show(Dgt.DISPLAY_TIME(force=True, wait=True))  # clock is stopped, force time display
                 break
             if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
                 if self.leds_are_on:
@@ -880,7 +880,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     DisplayDgt.show(message.time_text)
                 tc = message.time_control
                 time_left, time_right = tc.current_clock_time(flip_board=self.flip_board)
-                DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE))
+                DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE, wait=True))
                 self._exit_display(force=True)
                 break
             if case(MessageApi.OPENING_BOOK):
@@ -978,7 +978,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             break
                         index += 1
                 time_left, time_right = tc.current_clock_time(flip_board=self.flip_board)
-                DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE))
+                DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE, wait=True))
                 break
             if case(MessageApi.SEARCH_STARTED):
                 logging.debug('Search started')
@@ -997,7 +997,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if time_right < 0:
                         time_right = 0
                 side = ClockSide.LEFT if (message.turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
-                DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side))
+                DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side, wait=False))
                 break
             if case(MessageApi.CLOCK_STOP):
                 DisplayDgt.show(Dgt.CLOCK_STOP())

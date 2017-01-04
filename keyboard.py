@@ -37,6 +37,7 @@ class KeyboardInput(Observable, threading.Thread):
 
     def run(self):
         logging.info('evt_queue ready')
+        print('\033[1;37;40m')
         print('#' * 42 + ' PicoChess v' + version + ' ' + '#' * 42)
         print('To play a move enter the from-to squares like "e2e4". To play this move on board, enter "go".')
         print('When the computer displays its move, also type "go" to actually do it on the board (see above).')
@@ -45,9 +46,9 @@ class KeyboardInput(Observable, threading.Thread):
         print('')
         print('This console mode is mainly for development. Better activate picochess together with a DGT-Board ;-)')
         print('#' * 100)
-        print('')
+        print('\033[1;37;40m')
         while True:
-            raw = input('PicoChess v'+version+':>').strip()
+            raw = input('PicoChess v'+version+'$').strip()
             if not raw:
                 continue
             cmd = raw.lower()
@@ -58,7 +59,7 @@ class KeyboardInput(Observable, threading.Thread):
                     print(chess.Board(fen))
                 else:
                     if not self.board_plugged_in and not cmd.startswith('plug:'):
-                        print('The command isnt accepted cause the virtual board is not plugged in')
+                        print('\033[1;31;40mThe command isnt accepted cause the virtual board is not plugged in\033[1;37;40m')
                         continue
                     if cmd.startswith('newgame:'):
                         side = cmd.split(':')[1]
@@ -116,7 +117,7 @@ class KeyboardInput(Observable, threading.Thread):
                         if keyboard_last_fen is not None:
                             self.fire(Event.KEYBOARD_FEN(fen=keyboard_last_fen))
                         else:
-                            print('last move already send to virtual board')
+                            print('\033[1;31;40mlast move already send to virtual board\033[1;37;40m')
                     # end simulation code
                     else:
                         # move => fen => virtual board sends fen
@@ -138,18 +139,18 @@ class TerminalDisplay(DisplayMsg, threading.Thread):
             message = self.msg_queue.get()
             for case in switch(message):
                 if case(MessageApi.COMPUTER_MOVE):
-                    print('\n' + message.fen)
+                    print('\033[1;37;40m\n' + message.fen)
                     print(message.game)
-                    print(message.game.fen() + '\n')
+                    print(message.game.fen() + '\n\033[1;37;40m')
                     keyboard_last_fen = message.game.fen().split(' ')[0]
                     break
                 if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
                     keyboard_last_fen = None
                     break
                 if case(MessageApi.USER_MOVE):
-                    print('\n' + message.fen)
+                    print('\033[1;37;40m\n' + message.fen)
                     print(message.game)
-                    print(message.game.fen() + '\n')
+                    print(message.game.fen() + '\n\033[1;37;40m')
                     keyboard_last_fen = None
                     break
                 if case(MessageApi.START_NEW_GAME):
@@ -157,19 +158,19 @@ class TerminalDisplay(DisplayMsg, threading.Thread):
                     break
                 if case(MessageApi.SEARCH_STARTED):
                     if message.engine_status == EngineStatus.THINK:
-                        print('Computer starts thinking')
+                        print('\033[1;33;40mComputer starts thinking\033[1;37;40m')
                     if message.engine_status == EngineStatus.PONDER:
-                        print('Computer starts pondering')
+                        print('\033[1;33;40mComputer starts pondering\033[1;37;40m')
                     if message.engine_status == EngineStatus.WAIT:
-                        print('Computer starts waiting - hmmm')
+                        print('\033[1;31;40mComputer starts waiting - hmmm\033[1;37;40m')
                     break
                 if case(MessageApi.SEARCH_STOPPED):
                     if message.engine_status == EngineStatus.THINK:
-                        print('Computer stops thinking')
+                        print('\033[1;33;40mComputer stops thinking\033[1;37;40m')
                     if message.engine_status == EngineStatus.PONDER:
-                        print('Computer stops pondering')
+                        print('\033[1;33;40mComputer stops pondering\033[1;37;40m')
                     if message.engine_status == EngineStatus.WAIT:
-                        print('Computer stops waiting - hmmm')
+                        print('\033[1;31;40mComputer stops waiting - hmmm\033[1;37;40m')
                     break
                 if case(MessageApi.KEYBOARD_MOVE):
                     keyboard_last_fen = message.fen

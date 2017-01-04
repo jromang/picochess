@@ -101,12 +101,10 @@ class DgtIface(DisplayDgt, Thread):
             if case(DgtApi.CLOCK_STOP):
                 if self.clock_running:
                     self.stop_clock()
-                    # self.clock_running = False
                 else:
                     logging.debug('clock is already stopped')
                 break
             if case(DgtApi.CLOCK_START):
-                # self.clock_running = (message.side != ClockSide.NONE)
                 # log times
                 l_hms = hours_minutes_seconds(message.time_left)
                 r_hms = hours_minutes_seconds(message.time_right)
@@ -133,8 +131,6 @@ class DgtIface(DisplayDgt, Thread):
 
     def _process_message(self, message):
         do_handle = True
-        # if repr(message) == DgtApi.CLOCK_WAIT: # @todo
-        #     print((message))
         if repr(message) in (DgtApi.CLOCK_START, DgtApi.CLOCK_STOP, DgtApi.CLOCK_TIME):
             self.display_hash = None  # Cant know the clock display if command changing the running status
         else:

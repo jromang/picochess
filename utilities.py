@@ -669,7 +669,7 @@ class Dgt():
     LIGHT_CLEAR = ClassFactory(DgtApi.LIGHT_CLEAR, [])
     LIGHT_SQUARES = ClassFactory(DgtApi.LIGHT_SQUARES, ['uci_move'])
     CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, [])
-    CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side'])
+    CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side', 'wait'])
     CLOCK_VERSION = ClassFactory(DgtApi.CLOCK_VERSION, ['main', 'sub', 'attached'])
     CLOCK_TIME = ClassFactory(DgtApi.CLOCK_TIME, ['time_left', 'time_right'])
 
