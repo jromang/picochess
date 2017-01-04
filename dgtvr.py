@@ -96,10 +96,10 @@ class DgtVr(DgtIface):
             self.rt.stop()
         else:
             print('[vir] clock not ready')
-        self.clock_running = False
+        self._resume_clock(ClockSide.NONE)
 
     def _resume_clock(self, side):
-        pass
+        self.clock_running = (side != ClockSide.NONE)
 
     def start_clock(self, time_left, time_right, side):
         self.time_left = hours_minutes_seconds(time_left)
@@ -112,7 +112,7 @@ class DgtVr(DgtIface):
         if side != ClockSide.NONE:
             self.rt = RepeatedTimer(1, self._runclock)
             self.rt.start()
-        self.clock_running = (side != ClockSide.NONE)
+        self._resume_clock(side)
 
     def light_squares_revelation_board(self, squares):
         pass
