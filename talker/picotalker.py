@@ -83,7 +83,8 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
             try:
                 # Check if we have something to say.
                 message = self.msg_queue.get()
-                logging.debug("received message from msg_queue: %s", message)
+                if repr(message) != MessageApi.DGT_SERIAL_NR:
+                    logging.debug("received message from msg_queue: %s", message)
 
                 for case in switch(message):
                     if case(MessageApi.ENGINE_FAIL):

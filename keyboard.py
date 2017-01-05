@@ -137,6 +137,8 @@ class TerminalDisplay(DisplayMsg, threading.Thread):
         while True:
             # Check if we have something to display
             message = self.msg_queue.get()
+            if repr(message) != MessageApi.DGT_SERIAL_NR:
+                logging.debug("received message from msg_queue: %s", message)
             for case in switch(message):
                 if case(MessageApi.COMPUTER_MOVE):
                     print('\033[1;37;40m\n' + message.fen)
