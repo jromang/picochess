@@ -3,19 +3,52 @@ Jean-Francois Romang
 Shivkumar Shivaji
 Jürgen Précour
 
-Opening books by Gabriel Leperlier :
+DGTPi C-lib:
+Lucas van der Ploeg
+
+Python chess lib:
+Niklas Fiekas
+
+Chess engines:
+Tord Romstad, Marco Costalba, Joona Kiiski and Gary Linscott
+Peter Österlund
+Jon Dart
+Paweł Kozioł
+Alexandru Moșoi
+Marcel van Kervinck
+Giuseppe Cannella
+Antonio Garro
+
+Opening books by Gabriel Leperlier:
 fun.bin
 anand.bin
 korchnoi.bin
 larsen.bin
 pro.bin
 
-Opening book by Olivier Deville :
+Opening book by Olivier Deville:
 gm2001.bin
 
-Opening book by Marc Lacrosse :
+Opening book by Marc Lacrosse:
 performance.bin
 varied.bin
 
-Opening book by Shivkumar Shivaji :
+Opening book by Shivkumar Shivaji:
 gm1950.bin
+
+Opening book by Dirk-Jan Dekker:
+flank
+semiopen
+open
+closed
+indian
+
+Tablebases:
+Ronald de Man
+Miguel A. Ballicora
+
+Voices:
+Alan Cooper
+Christina ten Thij-Mucciaccio
+Jan Niclas
+Luigi Vogliobene
