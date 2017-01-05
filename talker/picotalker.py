@@ -178,7 +178,8 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                         userplay = 'userblack.ogg' if message.play_mode == PlayMode.USER_BLACK else 'userwhite.ogg'
                         self.talk([userplay], system_picotalker.get_path())
                         break
-                    if case(MessageApi.DGT_CLOCK_VERSION):
+                    # if case(MessageApi.DGT_CLOCK_VERSION):  # moved => with multi clocks happened too often
+                    if case(MessageApi.STARTUP_INFO):
                         logging.debug('announcing PICOCHESS')
                         self.talk(['picoChess.ogg'], system_picotalker.get_path())
                         break
