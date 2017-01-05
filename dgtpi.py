@@ -118,6 +118,7 @@ class DgtPi(DgtIface):
             text = message.m
         if 'i2c' not in message.devs:
             logging.debug('ignored message cause of devs [{}]'.format(text))
+            return
         left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE
         right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
         self._display_on_dgt_pi(text, message.beep, left_icons, right_icons)

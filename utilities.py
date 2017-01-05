@@ -220,7 +220,7 @@ class ModeLoop(object):
             return Mode.PONDER
         elif m == Mode.PONDER:
             return Mode.NORMAL
-        return 'error ModeLoop next'
+        return 'errMoLoNext'
 
     @staticmethod
     def prev(m):
@@ -236,7 +236,7 @@ class ModeLoop(object):
             return Mode.OBSERVE
         elif m == Mode.PONDER:
             return Mode.REMOTE
-        return 'error ModeLoop prev'
+        return 'errMoLoPrev'
 
 
 @enum.unique
@@ -263,7 +263,7 @@ class TimeModeLoop(object):
             return TimeMode.FISCHER
         elif m == TimeMode.FISCHER:
             return TimeMode.FIXED
-        return 'error TimeMode next'
+        return 'errTiMoNext'
 
     @staticmethod
     def prev(m):
@@ -273,7 +273,7 @@ class TimeModeLoop(object):
             return TimeMode.FIXED
         elif m == TimeMode.FISCHER:
             return TimeMode.BLITZ
-        return 'error TimeMode prev'
+        return 'errTiMoPrev'
 
 
 class Settings(enum.Enum):
@@ -300,7 +300,7 @@ class SettingsLoop(object):
             return Settings.LOGFILE
         elif m == Settings.LOGFILE:
             return Settings.VERSION
-        return 'error Setting next'
+        return 'errSetgNext'
 
     @staticmethod
     def prev(m):
@@ -314,7 +314,7 @@ class SettingsLoop(object):
             return Settings.IPADR
         elif m == Settings.IPADR:
             return Settings.VERSION
-        return 'error Setting prev'
+        return 'errSetgPrev'
 
 
 class Language(enum.Enum):
@@ -344,7 +344,7 @@ class LanguageLoop(object):
             return Language.IT
         elif m == Language.IT:
             return Language.EN
-        return 'error Language next'
+        return 'errLangNext'
 
     @staticmethod
     def prev(m):
@@ -360,7 +360,7 @@ class LanguageLoop(object):
             return Language.DE
         elif m == Language.DE:
             return Language.EN
-        return 'error Language prev'
+        return 'errLangPrev'
 
 
 class Beep(enum.Enum):
@@ -381,7 +381,7 @@ class BeepLoop(object):
             return Beep.ON
         elif m == Beep.ON:
             return Beep.OFF
-        return 'error beep next'
+        return 'errBeepNext'
 
     @staticmethod
     def prev(m):
@@ -391,7 +391,7 @@ class BeepLoop(object):
             return Beep.SOME
         if m == Beep.SOME:
             return Beep.OFF
-        return 'error beep prev'
+        return 'errBeepPrev'
 
 
 @enum.unique
