@@ -865,6 +865,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     DisplayDgt.show(self.dgttranslate.text('K05_okmove'))
                 break
             if case(MessageApi.ALTERNATIVE_MOVE):
+                DisplayDgt.show(Dgt.LIGHT_CLEAR())
                 DisplayDgt.show(self.dgttranslate.text('B05_altmove'))
                 break
             if case(MessageApi.LEVEL):
