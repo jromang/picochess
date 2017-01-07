@@ -358,8 +358,7 @@ def main():
             if inbook:
                 DisplayMsg.show(Message.BOOK_MOVE())
             searchmoves.add(move)
-            text = Message.COMPUTER_MOVE(move=move, ponder=ponder, fen=fen, turn=turn, game=game.copy(),
-                                         time_control=time_control, wait=inbook)
+            text = Message.COMPUTER_MOVE(move=move, ponder=ponder, fen=fen, turn=turn, game=game.copy(), wait=inbook)
             DisplayMsg.show(text)
         else:
             last_computer_fen = None

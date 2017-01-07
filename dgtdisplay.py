@@ -77,6 +77,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.time_mode_result = None
         self.time_mode_index = TimeMode.BLITZ
 
+        self.tc = None  # save the time_control for lateron
         self.tc_fixed_index = 0
         self.tc_blitz_index = 2  # Default time control: Blitz, 5min
         self.tc_fisch_index = 0
@@ -881,7 +882,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if case(MessageApi.TIME_CONTROL):
                 if self.show_ok_message or not message.ok_text:
                     DisplayDgt.show(message.time_text)
-                tc = message.time_control
+                tc = self.tc = message.time_control
                 time_left, time_right = tc.current_clock_time(flip_board=self.flip_board)
                 DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE, wait=True))
                 self._exit_display(force=True)
@@ -957,7 +958,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.mode_result = message.info['interaction_mode']
                 self.book_index = message.info['book_index']
                 self.all_books = message.info['books']
-                tc = message.info['time_control']
+                tc = self.tc = message.info['time_control']
                 self.time_mode_index = tc.mode
                 # try to find the index from the given time_control (tc)
                 # if user gave a non-existent tc value stay at standard
@@ -980,8 +981,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.tc_fisch_index = index
                             break
                         index += 1
-                time_left, time_right = tc.current_clock_time(flip_board=self.flip_board)
-                DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE, wait=True))
                 break
             if case(MessageApi.SEARCH_STARTED):
                 logging.debug('Search started')
@@ -990,7 +989,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 logging.debug('Search stopped')
                 break
             if case(MessageApi.CLOCK_START):
-                tc = message.time_control
+                tc = self.tc = message.time_control
                 if tc.mode == TimeMode.FIXED:
                     time_left = time_right = tc.seconds_per_move
                 else:
@@ -1165,6 +1164,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if case(MessageApi.DGT_CLOCK_VERSION):
                 if message.attached == 'ser':  # send the "board connected message" to serial clock
                     DisplayDgt.show(message.text)
+                time_left, time_right = self.tc.current_clock_time(flip_board=self.flip_board)
+                DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE, wait=True))
                 DisplayDgt.show(Dgt.CLOCK_VERSION(main=message.main, sub=message.sub, attached=message.attached))
                 break
             if case(MessageApi.DGT_CLOCK_TIME):
