@@ -127,12 +127,12 @@ def write_engine_ini(engine_path=None):
                     name_medium = name_build(name_parts, 8, name_small)
                     name_large = name_build(name_parts, 11, name_medium)
 
-                    config[engine_file_name] = {
-                        'name': engine_name,
-                        'small': name_small,
-                        'medium': name_medium,
-                        'large': name_large
-                    }
+                    config[engine_file_name] = {}
+                    config[engine_file_name]['name'] = engine_name
+                    config[engine_file_name]['small'] = name_small
+                    config[engine_file_name]['medium'] = name_medium
+                    config[engine_file_name]['large'] = name_large
+
                 except AttributeError:
                     pass
                 engine.quit()
