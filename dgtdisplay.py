@@ -26,11 +26,12 @@ from configobj import ConfigObj
 
 
 class DgtDisplay(Observable, DisplayMsg, threading.Thread):
-    def __init__(self, disable_ok_message, ponder_time, dgttranslate):
+    def __init__(self, disable_ok_message, ponder_time, dgttranslate, time_control):
         super(DgtDisplay, self).__init__()
         self.show_ok_message = not disable_ok_message
         self.ponder_time = ponder_time
         self.dgttranslate = dgttranslate
+        self.tc = time_control
 
         self.flip_board = False
         self.dgt_fen = None
@@ -77,7 +78,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.time_mode_result = None
         self.time_mode_index = TimeMode.BLITZ
 
-        self.tc = None  # save the time_control for lateron
         self.tc_fixed_index = 0
         self.tc_blitz_index = 2  # Default time control: Blitz, 5min
         self.tc_fisch_index = 0

@@ -510,9 +510,11 @@ def main():
             logging.error('Tablebases gaviota doesnt exist')
             gaviota = None
 
-    # The class dgtDisplay talks to DgtHw/DgtPi or DgtVr
     dgttranslate = DgtTranslate(args.beep_config, args.beep_level, args.language)
-    DgtDisplay(args.disable_ok_message, args.ponder_time, dgttranslate).start()
+    time_control, time_text = transfer_time(args.time.split())
+    time_text.beep = False
+    # The class dgtDisplay talks to DgtHw/DgtPi or DgtVr
+    DgtDisplay(args.disable_ok_message, args.ponder_time, dgttranslate, time_control).start()
 
     # Launch web server
     if args.web_server_port:
@@ -588,8 +590,6 @@ def main():
     engine.startup(engine_opt)
 
     # Startup - external
-    time_control, time_text = transfer_time(args.time.split())
-    time_text.beep = False
     if args.engine_level:
         level_text = dgttranslate.text('B00_level', args.engine_level)
         level_text.beep = False
