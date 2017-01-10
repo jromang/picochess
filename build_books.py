@@ -36,8 +36,8 @@ def write_book_ini():
             book = book_file_name[2:-4]
             config[book_file_name] = {}
             config[book_file_name]['small'] = book[:6]
-            config[book_file_name]['medium'] = book[:8]
-            config[book_file_name]['large'] = book[:11]
+            config[book_file_name]['medium'] = book[:8].title()
+            config[book_file_name]['large'] = book[:11].title()
     with open(books_path + os.sep + 'books.ini', 'w') as configfile:
         config.write(configfile)
 

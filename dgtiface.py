@@ -34,7 +34,7 @@ class DgtIface(DisplayDgt, Thread):
         self.maxtimer = None
         self.maxtimer_running = False
         self.clock_running = False
-        self.time_factor = 3  # This is for testing the duration - remove it lateron!
+        self.time_factor = 1  # This is for testing the duration - remove it lateron!
         # delayed task array
         self.tasks = []
         self.do_process = True
