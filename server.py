@@ -360,6 +360,6 @@ class WebDisplay(DisplayMsg, threading.Thread):
         while True:
             # Check if we have something to display
             message = self.msg_queue.get()
-            if repr(message) != MessageApi.DGT_SERIAL_NR:
-                logging.debug("received message from msg_queue: %s", message)
+            # if repr(message) != MessageApi.DGT_SERIAL_NR:
+            #     logging.debug("received message from msg_queue: %s", message)
             self.create_task(message)

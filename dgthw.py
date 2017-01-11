@@ -121,7 +121,6 @@ class DgtHw(DgtIface):
 
     def _resume_clock(self, side):
         if not self.check_clock('RESUME_CLOCK'):
-            self.time_left = self.time_right = None  # @todo better find a way from STARTUP_INFO to DGT_CLOCK_VERSION
             return
         l_hms = self.time_left
         r_hms = self.time_right
