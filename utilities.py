@@ -28,12 +28,10 @@ from threading import Timer
 
 import configparser
 
-
 try:
     import enum
 except ImportError:
     import enum34 as enum
-
 
 # picochess version
 version = '081'
@@ -322,52 +320,6 @@ class SettingsLoop(object):
         return 'errSetgPrev'
 
 
-class Voice(enum.Enum):
-    EN = 'B00_language_en_menu'
-    DE = 'B00_language_de_menu'
-    NL = 'B00_language_nl_menu'
-    FR = 'B00_language_fr_menu'
-    ES = 'B00_language_es_menu'
-    IT = 'B00_language_it_menu'
-
-
-class VoiceLoop(object):
-    def __init__(self):
-        super(VoiceLoop, self).__init__()
-
-    @staticmethod
-    def next(m):
-        if m == Voice.EN:
-            return Voice.DE
-        elif m == Voice.DE:
-            return Voice.NL
-        elif m == Voice.NL:
-            return Voice.FR
-        elif m == Voice.FR:
-            return Voice.ES
-        elif m == Voice.ES:
-            return Voice.IT
-        elif m == Voice.IT:
-            return Voice.EN
-        return 'errVoicNext'
-
-    @staticmethod
-    def prev(m):
-        if m == Voice.EN:
-            return Voice.IT
-        if m == Voice.IT:
-            return Voice.ES
-        if m == Voice.ES:
-            return Voice.FR
-        if m == Voice.FR:
-            return Voice.NL
-        elif m == Voice.NL:
-            return Voice.DE
-        elif m == Voice.DE:
-            return Voice.EN
-        return 'errVoicPrev'
-    
-    
 class Language(enum.Enum):
     EN = 'B00_language_en_menu'
     DE = 'B00_language_de_menu'
@@ -676,7 +628,8 @@ def ClassFactory(name, argnames, BaseClass=BaseClass):
                 raise TypeError("argument %s not valid for %s" % (key, self.__class__.__name__))
             setattr(self, key, value)
         BaseClass.__init__(self, name)
-    newclass = type(name, (BaseClass,),{"__init__": __init__})
+
+    newclass = type(name, (BaseClass,), {"__init__": __init__})
     return newclass
 
 

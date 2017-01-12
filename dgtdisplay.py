@@ -31,7 +31,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.show_ok_message = not disable_ok_message
         self.ponder_time = ponder_time
         self.dgttranslate = dgttranslate
-        self.tc = time_control
+        self.time_control = time_control
 
         self.flip_board = False
         self.dgt_fen = None
@@ -75,8 +75,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                  'fr': Language.FR, 'es': Language.ES, 'it': Language.IT}
         self.system_language_index = langs[self.dgttranslate.language]
 
-        self.system_voice_result = None
-        self.system_voice_index = 0
+        self.voices_conf = ConfigObj('talker' + os.sep + 'voices' + os.sep + 'voices.ini')
+        self.system_voice_lang_result = None
+        try:
+            self.system_voice_lang_index = self.voices_conf.keys().index(self.dgttranslate.language)
+        except ValueError:
+            self.system_voice_lang_index = 0
 
         self.time_mode_result = None
         self.time_mode_index = TimeMode.BLITZ
@@ -125,7 +129,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.engine_result = None
         self.system_sound_result = None
         self.system_language_result = None
-        self.system_voice_result = None
+        self.system_voice_lang_result = None
 
     def _power_off(self):
         DisplayDgt.show(self.dgttranslate.text('Y10_goodbye'))
@@ -201,13 +205,13 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             DisplayDgt.show(text)
 
         def system0():
-            if self.system_sound_result is None and self.system_language_result is None and self.system_voice_result is None:
+            if self.system_sound_result is None and self.system_language_result is None and self.system_voice_lang_result is None:
                 self.top_result = Menu.TOP_MENU
                 text = self.dgttranslate.text(self.top_index.value)
             else:
                 self.system_sound_result = None
                 self.system_language_result = None
-                self.system_voice_result = None
+                self.system_voice_lang_result = None
                 text = self.dgttranslate.text(self.system_index.value)
             DisplayDgt.show(text)
 
@@ -290,16 +294,20 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 DisplayDgt.show(text)
 
         def system1():
-            if self.system_sound_result is None and self.system_language_result is None and self.system_voice_result is None:
+            if self.system_sound_result is None and self.system_language_result is None and self.system_voice_lang_result is None:
                 self.system_index = SettingsLoop.prev(self.system_index)
                 text = self.dgttranslate.text(self.system_index.value)
             else:
-                if self.system_language_result is None:
-                    self.system_sound_index = BeepLoop.prev(self.system_sound_index)
-                    text = self.dgttranslate.text(self.system_sound_index.value)
-                else:
+                if self.system_voice_lang_result:
+                    self.system_voice_lang_index = (self.system_voice_lang_index - 1) % len(self.voices_conf)
+                    text = self.dgttranslate.text(
+                        'B00_language_' + self.voices_conf.keys()[self.system_voice_lang_index] + '_menu')
+                if self.system_language_result:
                     self.system_language_index = LanguageLoop.prev(self.system_language_index)
                     text = self.dgttranslate.text(self.system_language_index.value)
+                if self.system_sound_result:
+                    self.system_sound_index = BeepLoop.prev(self.system_sound_index)
+                    text = self.dgttranslate.text(self.system_sound_index.value)
             DisplayDgt.show(text)
 
         def engine1():
@@ -402,16 +410,20 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 DisplayDgt.show(text)
 
         def system3():
-            if self.system_sound_result is None and self.system_language_result is None and self.system_voice_result is None:
+            if self.system_sound_result is None and self.system_language_result is None and self.system_voice_lang_result is None:
                 self.system_index = SettingsLoop.next(self.system_index)
                 text = self.dgttranslate.text(self.system_index.value)
             else:
-                if self.system_language_result is None:
-                    self.system_sound_index = BeepLoop.next(self.system_sound_index)
-                    text = self.dgttranslate.text(self.system_sound_index.value)
-                else:
+                if self.system_voice_lang_result:
+                    self.system_voice_lang_index = (self.system_voice_lang_index + 1) % len(self.voices_conf)
+                    text = self.dgttranslate.text(
+                        'B00_language_' + self.voices_conf.keys()[self.system_voice_lang_index] + '_menu')
+                if self.system_language_result:
                     self.system_language_index = LanguageLoop.next(self.system_language_index)
                     text = self.dgttranslate.text(self.system_language_index.value)
+                if self.system_sound_result:
+                    self.system_sound_index = BeepLoop.next(self.system_sound_index)
+                    text = self.dgttranslate.text(self.system_sound_index.value)
             DisplayDgt.show(text)
 
         def engine3():
@@ -493,7 +505,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             elif self.top_index == Menu.ENGINE_MENU:
                 text = self.installed_engines[self.engine_index]['text']
                 text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
-
             elif self.top_index == Menu.SYSTEM_MENU:
                 text = self.dgttranslate.text(self.system_index.value)
             else:
@@ -591,9 +602,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.fire(Event.EMAIL_LOG())
                 text = self.dgttranslate.text('B10_oklogfile')  # @todo give pos/neg feedback
             elif self.system_index == Settings.VOICE:  # @todo here comes the action!
-                if self.system_voice_result is None:
-                    self.system_voice_result = self.system_voice_index
-                    text = self.dgttranslate.text(self.system_voice_result.value)
+                if self.system_voice_lang_result is None:
+                    self.system_voice_lang_result = self.system_voice_lang_index
+                    text = self.dgttranslate.text(
+                        'B00_language_' + self.voices_conf.keys()[self.system_voice_lang_index] + '_menu')
                     exit_menu = False
                 else:
                     text = self.dgttranslate.text('Y00_errormenu')
@@ -892,7 +904,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if case(MessageApi.TIME_CONTROL):
                 if self.show_ok_message or not message.ok_text:
                     DisplayDgt.show(message.time_text)
-                tc = self.tc = message.time_control
+                tc = self.time_control = message.time_control
                 time_left, time_right = tc.current_clock_time(flip_board=self.flip_board)
                 DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE, wait=True))
                 self._exit_display(force=True)
@@ -968,7 +980,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.mode_result = message.info['interaction_mode']
                 self.book_index = message.info['book_index']
                 self.all_books = message.info['books']
-                tc = self.tc = message.info['time_control']
+                tc = self.time_control = message.info['time_control']
                 self.time_mode_index = tc.mode
                 # try to find the index from the given time_control (tc)
                 # if user gave a non-existent tc value stay at standard
@@ -999,7 +1011,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 logging.debug('Search stopped')
                 break
             if case(MessageApi.CLOCK_START):
-                tc = self.tc = message.time_control
+                tc = self.time_control = message.time_control
                 if tc.mode == TimeMode.FIXED:
                     time_left = time_right = tc.seconds_per_move
                 else:
@@ -1174,7 +1186,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if case(MessageApi.DGT_CLOCK_VERSION):
                 if message.attached == 'ser':  # send the "board connected message" to serial clock
                     DisplayDgt.show(message.text)
-                time_left, time_right = self.tc.current_clock_time(flip_board=self.flip_board)
+                time_left, time_right = self.time_control.current_clock_time(flip_board=self.flip_board)
                 DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE, wait=True))
                 DisplayDgt.show(Dgt.CLOCK_VERSION(main=message.main, sub=message.sub, attached=message.attached))
                 break
