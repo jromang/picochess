@@ -109,7 +109,7 @@ def main():
     def probe_tablebase(game):
         if not gaviota:
             return None
-        score = gaviota.probe_dtm(game)
+        score = gaviota.get_dtm(game)
         if score is not None:
             Observable.fire(Event.NEW_SCORE(score='gaviota', mate=score))
         return score
