@@ -129,10 +129,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.setup_reverse_result = None
         self.setup_uci960_result = None
         self.top_result = None
+        self.system_result = None
         self.engine_result = None
         self.system_sound_result = None
         self.system_language_result = None
         self.system_voice_lang_result = None
+        self.system_voice_speak_result = None
 
     def _power_off(self):
         DisplayDgt.show(self.dgttranslate.text('Y10_goodbye'))
@@ -358,11 +360,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.system_index = SettingsLoop.prev(self.system_index)
                 text = self.dgttranslate.text(self.system_index.value)
             elif self.inside_system_voice_menu():
-                vkey = self.voices_conf.keys()[self.system_voice_lang_index]
                 if self.system_voice_speak_result is None:
                     self.system_voice_lang_index = (self.system_voice_lang_index - 1) % len(self.voices_conf)
+                    vkey = self.voices_conf.keys()[self.system_voice_lang_index]
                     text = self.dgttranslate.text('B00_language_' + vkey + '_menu')  # voice using the same as language
                 else:
+                    vkey = self.voices_conf.keys()[self.system_voice_lang_index]
                     speakers = self.voices_conf[vkey]
                     self.system_voice_speak_index = (self.system_voice_speak_index - 1) % len(speakers)
                     speaker = speakers[list(speakers)[self.system_voice_speak_index]]
@@ -485,11 +488,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.system_index = SettingsLoop.next(self.system_index)
                 text = self.dgttranslate.text(self.system_index.value)
             elif self.inside_system_voice_menu():
-                vkey = self.voices_conf.keys()[self.system_voice_lang_index]
                 if self.system_voice_speak_result is None:
                     self.system_voice_lang_index = (self.system_voice_lang_index + 1) % len(self.voices_conf)
+                    vkey = self.voices_conf.keys()[self.system_voice_lang_index]
                     text = self.dgttranslate.text('B00_language_' + vkey + '_menu')  # voice using the same as language
                 else:
+                    vkey = self.voices_conf.keys()[self.system_voice_lang_index]
                     speakers = self.voices_conf[vkey]
                     self.system_voice_speak_index = (self.system_voice_speak_index + 1) % len(speakers)
                     speaker = speakers[list(speakers)[self.system_voice_speak_index]]
@@ -696,6 +700,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if self.system_voice_speak_result is None:
                         self.system_voice_speak_result = self.system_voice_speak_index
                         speakers = self.voices_conf[vkey]
+                        if self.system_voice_speak_index >= len(speakers):
+                            self.system_voice_speak_index = 0
                         speaker = speakers[list(speakers)[self.system_voice_speak_index]]
                         text = Dgt.DISPLAY_TEXT(l=speaker['large'], m=speaker['medium'], s=speaker['small'])
                         text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
@@ -703,9 +709,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         text.maxtime = 0
                         exit_menu = False
                     else:
-                        vkey = self.voices_conf.keys()[self.system_voice_lang_result]
+                        vkey = self.voices_conf.keys()[self.system_voice_lang_index]
                         speakers = self.voices_conf[vkey]
-                        speaker = speakers[list(speakers)[self.system_voice_speak_result]]
+                        speaker = speakers[list(speakers)[self.system_voice_speak_index]]
                         print('')
                         print(speakers.keys())
                         print(vkey, ':', speaker['large'])
