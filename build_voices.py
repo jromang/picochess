@@ -37,9 +37,9 @@ def write_voice_ini():
         speak_list = get_immediate_subdirectories(voices_path + os.sep + lang_dir_name)
         for speak_dir_name in speak_list:
             config[lang_dir_name][speak_dir_name] = {}
-            config[lang_dir_name][speak_dir_name]['s'] = speak_dir_name[:6]
-            config[lang_dir_name][speak_dir_name]['m'] = speak_dir_name[:8].title()
-            config[lang_dir_name][speak_dir_name]['l'] = speak_dir_name[:11].title()
+            config[lang_dir_name][speak_dir_name]['small'] = speak_dir_name[:6]
+            config[lang_dir_name][speak_dir_name]['medium'] = speak_dir_name[:8].title()
+            config[lang_dir_name][speak_dir_name]['large'] = speak_dir_name[:11].title()
     config.write()
 
 

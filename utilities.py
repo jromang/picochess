@@ -398,6 +398,12 @@ class BeepLoop(object):
 
 
 @enum.unique
+class VoiceType(enum.Enum):
+    USER_VOICE = 'B10_voicetype_user_menu'
+    COMP_VOICE = 'B10_voicetype_comp_menu'
+
+
+@enum.unique
 class GameResult(enum.Enum):
     MATE = 'B00_gameresult_mate_menu'
     STALEMATE = 'B00_gameresult_stalemate_menu'

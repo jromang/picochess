@@ -694,6 +694,28 @@ class DgtTranslate(object):
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
+        if text_id == 'voicetype_user_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='user voice ', m='uservoic', s='user v')
+            detxt = Dgt.DISPLAY_TEXT(l='Spieler Stm', m='SpStimme', s='splr s')
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
+        if text_id == 'voicetype_comp_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='pico voice ', m='picovoic', s='pico v')
+            detxt = Dgt.DISPLAY_TEXT(l='picoChs Stm', m='pico Stm', s='pico v')
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
+        if text_id == 'okvoice':
+            wait = True
+            entxt = Dgt.DISPLAY_TEXT(l='ok Voice   ', m='ok voice', s='ok voi')
+            detxt = Dgt.DISPLAY_TEXT(l='ok Stimme  ', m='okStimme', s='ok stm')
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
         if text_id == 'tc_fixed':
             entxt = Dgt.DISPLAY_TEXT(l='Move time' + msg, m='Move t' + msg, s='mov ' + msg)
             detxt = Dgt.DISPLAY_TEXT(l='Zugzeit  ' + msg, m='Zug z ' + msg, s='zug ' + msg)
