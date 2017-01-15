@@ -1,5 +1,5 @@
 ### ===============================
-### = picochess.ini.example v0.80 =
+### = picochess.ini.example v0.82 =
 ### ===============================
 ### Example and description how to configure PicoChess
 ### To use this file, simply copy this file to picochess.ini and edit the appropriate settings
@@ -16,7 +16,7 @@
 ### =======================
 ## enable-revelation-leds turn ON or OFF the LED's on the Revelation II board. If so, please uncomment the next line
 # enable-revelation-leds = True
-## beep-level changes the occurrence of beeps. Minimum value is 0 (no beeps), maximum is 15 (all beeps).
+## beep-some-level changes the occurrence of beeps. Minimum value is 0 (no beeps), maximum is 15 (all beeps).
 ## inside the clock menu you can choose between "always", "never" and "some". The value you give inside here, is
 ## the value of "some". Each part of beeps has a special number and you have to add them to get the beep-level
 ## CONFIG = 1 Takeback, GameEnd, NewGame and ComputerMove
@@ -24,7 +24,7 @@
 ## MAP = 4    All Events coming from Queen placing at start pos (line3-6)
 ## OKAY = 8   All Events from "ok" (confirm) messages
 ## For example to beep on "ok messages" and "button press" would result in 8+2=10 as beep-level
-# beep-level = 3
+# beep-some-level = 3
 ## Should a confirmation message (after moves) be displayed? If not, please active the next line
 # disable-ok-message = True
 ## Specify the serial port your dgt-board is connected to.
@@ -34,7 +34,7 @@
 ## If so, please uncomment the next line
 # console = True
 ## If you have a new DGT Pi Clock please uncomment the next line and change "False" to "True".
-## Handle with care. Picochess won't work if you have a DGT XL or DGT3000 clock (standard case).
+## Handle with care. Picochess won't work if you have a DGT XL or DGT3000 clock (standard case)!
 # dgtpi = False
 
 ### ========================
@@ -49,13 +49,13 @@
 # engine-level = Level@20
 ### Parameters for a remote engine (server) - good chances you do not need them ;-)
 ## Where is the server with the engine
-# remote-server = engine.remote-domain.com
+# engine-remote-server = engine.remote-domain.com
 ## What user to use for connect to the remote-engine server
-# remote-user = user@remote-domain.com
+# engine-remote-user = user@remote-domain.com
 ## What password for the remote-engine-server
-# remote-pass = your_secret_password
+# engine-remote-pass = your_secret_password
 ## The secret server-key for the remote-engine-server
-# remote-key = your_secret_key
+# engine-remote-key = your_secret_key
 
 ### ==========================
 ### = Opening book selection =
@@ -128,7 +128,7 @@
 ## This is by default not actived. If you want this feature, please uncomment the next line
 # enable-update = True
 ## After an update should the machine reboot automatically? If so, please uncomment the next line
-# auto-reboot = True
+# enable-update-reboot = True
 ## The port of the webserver
 # web-server = 8080
 ## Do tablebase probing using gaviota? The database files must be in 'tablebases/gaviota/'

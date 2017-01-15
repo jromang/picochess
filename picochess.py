@@ -430,6 +430,10 @@ def main():
     parser = configargparse.ArgParser(default_config_files=[os.path.join(os.path.dirname(__file__), 'picochess.ini')])
     parser.add_argument('-e', '--engine', type=str, help='UCI engine executable path', default=None)
     parser.add_argument('-el', '--engine-level', type=str, help='UCI engine level', default=None)
+    parser.add_argument('-ers', '--engine-remote-server', type=str, help='adress of the remote engine server')
+    parser.add_argument('-eru', '--engine-remote-user', type=str, help='username for the remote engine server')
+    parser.add_argument('-erp', '--engine-remote-pass', type=str, help='password for the remote engine server')
+    parser.add_argument('-erk', '--engine-remote-key', type=str, help='key file for the remote engine server')
     parser.add_argument('-d', '--dgt-port', type=str,
                         help='enable dgt board on the given serial port such as /dev/ttyUSB0')
     parser.add_argument('-b', '--book', type=str, help='full path of book such as books/b-flank.bin',
@@ -437,17 +441,13 @@ def main():
     parser.add_argument('-t', '--time', type=str, default='5 0',
                         help="Time settings <FixSec> or <StMin IncSec> like '10'(move) or '5 0'(game) '3 2'(fischer)")
     parser.add_argument('-g', '--enable-gaviota', action='store_true', help='enable gavoita tablebase probing')
-    parser.add_argument('-leds', '--enable-revelation-leds', action='store_true', help='enable Revelation leds')
+    parser.add_argument('-rl', '--enable-revelation-leds', action='store_true', help='enable Revelation leds')
     parser.add_argument('-l', '--log-level', choices=['notset', 'debug', 'info', 'warning', 'error', 'critical'],
                         default='warning', help='logging level')
     parser.add_argument('-lf', '--log-file', type=str, help='log to the given file')
-    parser.add_argument('-rs', '--remote-server', type=str, help='remote server running the engine')
-    parser.add_argument('-ru', '--remote-user', type=str, help='remote user on server running the engine')
-    parser.add_argument('-rp', '--remote-pass', type=str, help='password for the remote user')
-    parser.add_argument('-rk', '--remote-key', type=str, help='key file used to connect to the remote server')
     parser.add_argument('-pf', '--pgn-file', type=str, help='pgn file used to store the games', default='games.pgn')
     parser.add_argument('-pu', '--pgn-user', type=str, help='user name for the pgn file', default=None)
-    parser.add_argument('-web', '--web-server', dest='web_server_port', nargs='?', const=80, type=int, metavar='PORT',
+    parser.add_argument('-w', '--web-server', dest='web_server_port', nargs='?', const=80, type=int, metavar='PORT',
                         help='launch web server')
     parser.add_argument('-m', '--email', type=str, help='email used to send pgn/log files', default=None)
     parser.add_argument('-ms', '--smtp-server', type=str, help='adress of email server', default=None)
@@ -460,12 +460,12 @@ def main():
                         default=None)
     parser.add_argument('-bc', '--beep-config', choices=['none', 'some', 'all'], help='sets standard beep config',
                         default='some')
-    parser.add_argument('-beep', '--beep-level', type=int, default=0x03,
+    parser.add_argument('-bs', '--beep-some-level', type=int, default=0x03,
                         help='sets (some-)beep level from 0(=no beeps) to 15(=all beeps)')
-    parser.add_argument('-uvoice', '--user-voice', type=str, help='voice for user', default=None)
-    parser.add_argument('-cvoice', '--computer-voice', type=str, help='voice for computer', default=None)
-    parser.add_argument('-update', '--enable-update', action='store_true', help='enable picochess updates')
-    parser.add_argument('-ar', '--auto-reboot', action='store_true', help='reboot system after update')
+    parser.add_argument('-uv', '--user-voice', type=str, help='voice for user', default=None)
+    parser.add_argument('-cv', '--computer-voice', type=str, help='voice for computer', default=None)
+    parser.add_argument('-u', '--enable-update', action='store_true', help='enable picochess updates')
+    parser.add_argument('-ur', '--enable-update-reboot', action='store_true', help='reboot system after update')
     parser.add_argument('-nook', '--disable-ok-message', action='store_true', help='disable ok confirmation messages')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s version {}'.format(version),
                         help='show current version', default=None)
@@ -493,13 +493,13 @@ def main():
     logging.debug('#'*20 + ' PicoChess v' + version + ' ' + '#'*20)
     # log the startup parameters but hide the password fields
     p = copy.copy(vars(args))
-    p['mailgun_key'] = p['remote_key'] = p['remote_pass'] = p['smtp_pass'] = '*****'
+    p['mailgun_key'] = p['engine_remote_key'] = p['engine_remote_pass'] = p['smtp_pass'] = '*****'
     logging.debug('startup parameters: {}'.format(p))
     if unknown:
         logging.error('invalid parameter given {}'.format(unknown))
     # Update
     if args.enable_update:
-        update_picochess(args.auto_reboot)
+        update_picochess(args.enable_update_reboot)
 
     gaviota = None
     if args.enable_gaviota:
@@ -510,7 +510,7 @@ def main():
             logging.error('Tablebases gaviota doesnt exist')
             gaviota = None
 
-    dgttranslate = DgtTranslate(args.beep_config, args.beep_level, args.language)
+    dgttranslate = DgtTranslate(args.beep_config, args.beep_some_level, args.language)
     time_control, time_text = transfer_time(args.time.split())
     time_text.beep = False
     # The class dgtDisplay talks to DgtHw/DgtPi or DgtVr
@@ -558,8 +558,8 @@ def main():
             user_name = 'Player'
 
     # Gentlemen, start your engines...
-    engine = UciEngine(args.engine, hostname=args.remote_server, username=args.remote_user,
-                       key_file=args.remote_key, password=args.remote_pass)
+    engine = UciEngine(args.engine, hostname=args.engine_remote_server, username=args.engine_remote_user,
+                       key_file=args.engine_remote_key, password=args.engine_remote_pass)
     try:
         engine_name = engine.get().name
     except AttributeError:
