@@ -516,11 +516,11 @@ class DgtTranslate(object):
             ittxt = entxt
         if text_id == 'settings_voice_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Voice      ', m='Voice   ', s='voice ')
-            detxt = entxt
-            nltxt = entxt
-            frtxt = entxt
-            estxt = entxt
-            ittxt = entxt
+            detxt = Dgt.DISPLAY_TEXT(l='Sprache    ', m='Sprache ', s='sprach')
+            nltxt = Dgt.DISPLAY_TEXT(l='Stem       ', m='Stem    ', s='stem  ')
+            frtxt = Dgt.DISPLAY_TEXT(l='Voix       ', m='Voix    ', s='voix  ')
+            estxt = Dgt.DISPLAY_TEXT(l='Voz        ', m='Voz     ', s='voz   ')
+            ittxt = Dgt.DISPLAY_TEXT(l='Voce       ', m='Voce    ', s='voce  ')
         if text_id == 'gameresult_mate_menu':
             wait = True
             entxt = Dgt.DISPLAY_TEXT(l='mate       ', m='mate    ', s='mate  ')
@@ -696,26 +696,26 @@ class DgtTranslate(object):
             ittxt = entxt
         if text_id == 'voicetype_user_menu':
             entxt = Dgt.DISPLAY_TEXT(l='user voice ', m='uservoic', s='user v')
-            detxt = Dgt.DISPLAY_TEXT(l='Spieler Stm', m='SpStimme', s='splr s')
-            nltxt = entxt
-            frtxt = entxt
-            estxt = entxt
-            ittxt = entxt
+            detxt = Dgt.DISPLAY_TEXT(l='Spieler Stm', m='Splr Stm', s='splr s')
+            nltxt = Dgt.DISPLAY_TEXT(l='speler Stem', m='splrStem', s='splr s')
+            frtxt = Dgt.DISPLAY_TEXT(l='joueur Voix', m='jourVoix', s='jour v')
+            estxt = Dgt.DISPLAY_TEXT(l='jugador Voz', m='jugadVoz', s='juga v')
+            ittxt = Dgt.DISPLAY_TEXT(l='giocat Voce', m='giocVoce', s='gioc v')
         if text_id == 'voicetype_comp_menu':
             entxt = Dgt.DISPLAY_TEXT(l='pico voice ', m='picovoic', s='pico v')
             detxt = Dgt.DISPLAY_TEXT(l='picoChs Stm', m='pico Stm', s='pico v')
-            nltxt = entxt
-            frtxt = entxt
-            estxt = entxt
-            ittxt = entxt
+            nltxt = Dgt.DISPLAY_TEXT(l='picoChsStem', m='picoStem', s='pico s')
+            frtxt = Dgt.DISPLAY_TEXT(l='picoChsVoix', m='picoVoix', s='pico v')
+            estxt = Dgt.DISPLAY_TEXT(l='picoChs Voz', m='pico Voz', s='pico v')
+            ittxt = Dgt.DISPLAY_TEXT(l='picoChsVoce', m='picoVoce', s='pico v')
         if text_id == 'okvoice':
             wait = True
             entxt = Dgt.DISPLAY_TEXT(l='ok Voice   ', m='ok voice', s='ok voi')
             detxt = Dgt.DISPLAY_TEXT(l='ok Stimme  ', m='okStimme', s='ok stm')
-            nltxt = entxt
-            frtxt = entxt
-            estxt = entxt
-            ittxt = entxt
+            nltxt = Dgt.DISPLAY_TEXT(l='ok Stem    ', m='ok Stem ', s='okstem')
+            frtxt = Dgt.DISPLAY_TEXT(l='ok Voix    ', m='ok Voix ', s='okvoix')
+            estxt = Dgt.DISPLAY_TEXT(l='ok Voz     ', m='ok Voz  ', s='ok voz')
+            ittxt = Dgt.DISPLAY_TEXT(l='ok Voce    ', m='ok Voce ', s='okvoce')
         if text_id == 'tc_fixed':
             entxt = Dgt.DISPLAY_TEXT(l='Move time' + msg, m='Move t' + msg, s='mov ' + msg)
             detxt = Dgt.DISPLAY_TEXT(l='Zugzeit  ' + msg, m='Zug z ' + msg, s='zug ' + msg)
