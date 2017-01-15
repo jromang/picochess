@@ -742,8 +742,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             # print('')
                             config = ConfigObj('picochess.ini')
                             ckey = 'user' if self.system_voice_type_index == VoiceType.USER_VOICE else 'computer'
-                            config[ckey + '-voice'] = vkey + ':' + speakers[self.system_voice_speak_index]
+                            skey = speakers[self.system_voice_speak_index]
+                            config[ckey + '-voice'] = vkey + ':' + skey
                             config.write()
+                            self.fire(Event.SET_VOICE(type=self.system_voice_type_index, lang=vkey, speaker=skey))
                             text = self.dgttranslate.text('B10_okvoice')
             else:
                 logging.warning('wrong value for system_index: {}'.format(self.system_index))

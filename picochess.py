@@ -887,6 +887,10 @@ def main():
                         email_logger.send('Picochess LOG', body, '/opt/picochess/logs/{}'.format(args.log_file))
                     break
 
+                if case(EventApi.SET_VOICE):
+                    DisplayMsg.show(Message.SET_VOICE(type=event.type, lang=event.lang, speaker=event.speaker))
+                    break
+
                 if case(EventApi.KEYBOARD_BUTTON):
                     DisplayMsg.show(Message.DGT_BUTTON(button=event.button))
                     break

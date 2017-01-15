@@ -28,25 +28,22 @@ from utilities import *
 from pathlib import Path
 
 
-class PicoTalkerDisplay(DisplayMsg, threading.Thread):
-    def __init__(self, user_voice, computer_voice):
-        """
-        Initialize a PicoTalkerDisplay with voices for the user and/or computer players.
-        :param user_voice: The voice to use for the user (eg. en:al).
-        :param computer_voice:  The voice to use for the computer (eg. en:dgt).
-        """
-        super(PicoTalkerDisplay, self).__init__()
-        self.user_picotalker = None
-        self.computer_picotalker = None
+class PicoTalker():
+    def __init__(self, localisation_id_voice=None):
+        self.voice_path = None
 
-        if user_voice:
-            logging.debug('creating user voice: [%s]', str(user_voice))
-            self.user_picotalker = PicoTalker(user_voice)
-        if computer_voice:
-            logging.debug('creating computer voice: [%s]', str(computer_voice))
-            self.computer_picotalker = PicoTalker(computer_voice)
+        try:
+            (localisation_id, voice_name) = localisation_id_voice.split(':')
+            self.voice_path = 'talker/voices/' + localisation_id + '/' + voice_name
+            if not Path(self.voice_path).exists():
+                logging.exception('voice path doesnt exist')
+        except ValueError:
+            logging.exception('not valid voice parameter')
 
-    def talk(self, sounds, path):
+    def get_path(self):
+        return self.voice_path
+
+    def talk(self, sounds):
         def play(file):
             import sounddevice as sd
             import soundfile as sf
@@ -59,7 +56,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                 logging.warning(str(status))
 
         for part in sounds:
-            voice_file = path + '/' + part
+            voice_file = self.voice_path + '/' + part
             if Path(voice_file).is_file():
                 try:
                     subprocess.call(['ogg123', voice_file], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -69,6 +66,31 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
             else:
                 logging.warning('voice file not found {}'.format(voice_file))
 
+
+class PicoTalkerDisplay(DisplayMsg, threading.Thread):
+    def __init__(self, user_voice, computer_voice):
+        """
+        Initialize a PicoTalkerDisplay with voices for the user and/or computer players.
+        :param user_voice: The voice to use for the user (eg. en:al).
+        :param computer_voice:  The voice to use for the computer (eg. en:christina).
+        """
+        super(PicoTalkerDisplay, self).__init__()
+        self.user_picotalker = None
+        self.computer_picotalker = None
+
+        if user_voice:
+            logging.debug('creating user voice: [%s]', str(user_voice))
+            self.set_user(PicoTalker(user_voice))
+        if computer_voice:
+            logging.debug('creating computer voice: [%s]', str(computer_voice))
+            self.set_computer(PicoTalker(computer_voice))
+
+    def set_computer(self, picotalker):
+        self.computer_picotalker = picotalker
+
+    def set_user(self, picotalker):
+        self.user_picotalker = picotalker
+
     def run(self):
         """
         Start listening for Messages on our queue and generate speech as appropriate.
@@ -76,8 +98,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
         previous_move = ''  # Ignore repeated broadcasts of a move.
         system_picotalker = self.system_voice()
         logging.info('msg_queue ready')
-        # Only run if we have any voices configured for user/computer
-        while self.user_picotalker or self.computer_picotalker:
+        while True:
             try:
                 # Check if we have something to say.
                 message = self.msg_queue.get()
@@ -87,107 +108,111 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                 for case in switch(message):
                     if case(MessageApi.ENGINE_FAIL):
                         logging.debug('announcing ENGINE_FAIL')
-                        self.talk(['error.ogg'], system_picotalker.get_path())
+                        system_picotalker.talk(['error.ogg'])
                         break
                     if case(MessageApi.START_NEW_GAME):
                         logging.debug('announcing START_NEW_GAME')
-                        self.talk(['newgame.ogg'], system_picotalker.get_path())
+                        system_picotalker.talk(['newgame.ogg'])
                         break
                     if case(MessageApi.COMPUTER_MOVE):
                         if message.move and message.game and str(message.move) != previous_move \
                                 and self.computer_picotalker is not None:
                             logging.debug('announcing COMPUTER_MOVE [%s]', message.move)
-                            self.talk(self.say_move(message.move, message.fen, message.game),
-                                      self.computer_picotalker.get_path())
+                            self.computer_picotalker.talk(self.say_move(message.move, message.fen, message.game))
                             previous_move = str(message.move)
                         break
                     if case(MessageApi.USER_MOVE):
                         if message.move and message.game and str(message.move) != previous_move \
                                 and self.user_picotalker is not None:
                             logging.debug('announcing USER_MOVE [%s]', message.move)
-                            self.talk(self.say_move(message.move, message.fen, message.game),
-                                      self.user_picotalker.get_path())
+                            self.user_picotalker.talk(self.say_move(message.move, message.fen, message.game))
                             previous_move = str(message.move)
                         break
                     if case(MessageApi.REVIEW_MOVE):
                         if message.move and message.game and str(message.move) != previous_move \
                                 and self.user_picotalker is not None:
                             logging.debug('announcing REVIEW_MOVE [%s]', message.move)
-                            self.talk(self.say_move(message.move, message.fen, message.game),
-                                      self.user_picotalker.get_path())
+                            self.user_picotalker.talk(self.say_move(message.move, message.fen, message.game))
                             previous_move = str(message.move)
                         break
                     if case(MessageApi.GAME_ENDS):
                         if message.result == GameResult.OUT_OF_TIME:
                             logging.debug('announcing GAME_ENDS/TIME_CONTROL')
                             wins = 'whitewins.ogg' if message.game.turn == chess.BLACK else 'blackwins.ogg'
-                            self.talk(['timelost.ogg', wins], system_picotalker.get_path())
+                            system_picotalker.talk(['timelost.ogg', wins])
                         elif message.result == GameResult.INSUFFICIENT_MATERIAL:
                             logging.debug('announcing GAME_ENDS/INSUFFICIENT_MATERIAL')
-                            self.talk(['material.ogg', 'draw.ogg'], system_picotalker.get_path())
+                            system_picotalker.talk(['material.ogg', 'draw.ogg'])
                         elif message.result == GameResult.MATE:
                             logging.debug('announcing GAME_ENDS/MATE')
-                            self.talk(['checkmate.ogg'], system_picotalker.get_path())
+                            system_picotalker.talk(['checkmate.ogg'])
                         elif message.result == GameResult.STALEMATE:
                             logging.debug('announcing GAME_ENDS/STALEMATE')
-                            self.talk(['stalemate.ogg'], system_picotalker.get_path())
+                            system_picotalker.talk(['stalemate.ogg'], system_picotalker.get_path())
                         elif message.result == GameResult.ABORT:
                             logging.debug('announcing GAME_ENDS/ABORT')
-                            self.talk(['abort.ogg'], system_picotalker.get_path())
+                            system_picotalker.talk(['abort.ogg'])
                         elif message.result == GameResult.DRAW:
                             logging.debug('announcing GAME_ENDS/DRAW')
-                            self.talk(['draw.ogg'], system_picotalker.get_path())
+                            system_picotalker.talk(['draw.ogg'])
                         elif message.result == GameResult.WIN_WHITE:
                             logging.debug('announcing GAME_ENDS/WHITE_WIN')
-                            self.talk(['whitewins.ogg'], system_picotalker.get_path())
+                            system_picotalker.talk(['whitewins.ogg'])
                         elif message.result == GameResult.WIN_BLACK:
                             logging.debug('announcing GAME_ENDS/BLACK_WIN')
-                            self.talk(['blackwins.ogg'], system_picotalker.get_path())
+                            system_picotalker.talk(['blackwins.ogg'])
                         elif message.result == GameResult.FIVEFOLD_REPETITION:
                             logging.debug('announcing GAME_ENDS/FIVEFOLD_REPETITION')
-                            self.talk(['repetition.ogg', 'draw.ogg'], system_picotalker.get_path())
+                            system_picotalker.talk(['repetition.ogg', 'draw.ogg'])
                         break
                     if case(MessageApi.TAKE_BACK):
                         logging.debug('announcing TAKE_BACK')
-                        self.talk(['takeback.ogg'], system_picotalker.get_path())
+                        system_picotalker.talk(['takeback.ogg'])
                         break
                     if case(MessageApi.TIME_CONTROL):
                         logging.debug('announcing TIME_CONTROL')
-                        self.talk(['oktime.ogg'], system_picotalker.get_path())
+                        system_picotalker.talk(['oktime.ogg'])
                         break
                     if case(MessageApi.INTERACTION_MODE):
                         logging.debug('announcing INTERACTION_MODE')
-                        self.talk(['okmode.ogg'], system_picotalker.get_path())
+                        system_picotalker.talk(['okmode.ogg'])
                         break
                     if case(MessageApi.LEVEL):
                         logging.debug('announcing LEVEL')
-                        self.talk(['oklevel.ogg'], system_picotalker.get_path())
+                        system_picotalker.talk(['oklevel.ogg'])
                         break
                     if case(MessageApi.OPENING_BOOK):
                         logging.debug('announcing OPENING_BOOK')
-                        self.talk(['okbook.ogg'], system_picotalker.get_path())
+                        system_picotalker.talk(['okbook.ogg'])
                         break
                     if case(MessageApi.ENGINE_READY):
                         logging.debug('announcing ENGINE_READY')
-                        self.talk(['okengine.ogg'], system_picotalker.get_path())
+                        system_picotalker.talk(['okengine.ogg'])
                         break
                     if case(MessageApi.PLAY_MODE):
                         logging.debug('announcing PLAY_MODE')
                         userplay = 'userblack.ogg' if message.play_mode == PlayMode.USER_BLACK else 'userwhite.ogg'
-                        self.talk([userplay], system_picotalker.get_path())
+                        system_picotalker.talk([userplay])
                         break
-                    # if case(MessageApi.DGT_CLOCK_VERSION):  # moved => with multi clocks happened too often
                     if case(MessageApi.STARTUP_INFO):
                         logging.debug('announcing PICOCHESS')
-                        self.talk(['picoChess.ogg'], system_picotalker.get_path())
+                        system_picotalker.talk(['picoChess.ogg'])
                         break
                     if case(MessageApi.SYSTEM_SHUTDOWN):
                         logging.debug('announcing SHUTDOWN')
-                        self.talk(['goodbye.ogg'], system_picotalker.get_path())
+                        system_picotalker.talk(['goodbye.ogg'])
                         break
                     if case(MessageApi.SYSTEM_REBOOT):
                         logging.debug('announcing REBOOT')
-                        self.talk(['pleasewait.ogg'], system_picotalker.get_path())
+                        system_picotalker.talk(['pleasewait.ogg'])
+                        break
+                    if case(MessageApi.SET_VOICE):
+                        picotalker = PicoTalker(message.lang + ':' + message.speaker)
+                        if message.type == VoiceType.USER_VOICE:
+                            self.set_user(picotalker)
+                        else:
+                            self.set_computer(picotalker)
+                        system_picotalker = self.system_voice()
                         break
                     if case():  # Default
                         # print(message)
@@ -278,20 +303,3 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
             voice_parts += ['enpassant.ogg']
 
         return voice_parts
-
-
-class PicoTalker():
-    def __init__(self, localisation_id_voice=None):
-        self.voice_path = None
-
-        try:
-            (localisation_id, voice_name) = localisation_id_voice.split(':')
-            self.voice_path = 'talker/voices/' + localisation_id + '/' + voice_name
-            if not Path(self.voice_path).exists():
-                logging.exception('voice path doesnt exist')
-        except ValueError:
-            logging.exception('not valid voice parameter')
-
-    def get_path(self):
-        return self.voice_path
-

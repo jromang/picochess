@@ -70,6 +70,7 @@ class EventApi():
     REBOOT = 'EVT_REBOOT'  # User wants to reboot the machine
     ALTERNATIVE_MOVE = 'EVT_ALTERNATIVE_MOVE'  # User wants engine to recalculate the position
     EMAIL_LOG = 'EVT_EMAIL_LOG'  # User want to send the log file by eMail
+    SET_VOICE = 'EVT_SET_VOICE'  # User sets a new voice
     # Keyboard events
     KEYBOARD_BUTTON = 'EVT_KEYBOARD_BUTTON'  # User pressed a button at the virtual clock
     KEYBOARD_FEN = 'EVT_KEYBOARD_FEN'  # Virtual board sends a fen
@@ -126,6 +127,7 @@ class MessageApi():
     KEYBOARD_MOVE = 'MSG_KEYBOARD_MOVE'  # Sends back the fen for a given move (needed for keyboard.py)
     SYSTEM_SHUTDOWN = 'MSG_SYSTEM_SHUTDOWN'  # Sends a Shutdown
     SYSTEM_REBOOT = 'MSG_SYSTEM_REBOOT'  # Sends a Reboot
+    SET_VOICE = 'MSG_SET_VOICE'  # User chooses a new voice
 
 
 class DgtApi():
@@ -728,6 +730,7 @@ class Message():
     KEYBOARD_MOVE = ClassFactory(MessageApi.KEYBOARD_MOVE, ['fen'])
     SYSTEM_SHUTDOWN = ClassFactory(MessageApi.SYSTEM_SHUTDOWN, [])
     SYSTEM_REBOOT = ClassFactory(MessageApi.SYSTEM_REBOOT, [])
+    SET_VOICE = ClassFactory(MessageApi.SET_VOICE, ['type', 'lang', 'speaker'])
 
 
 class Event():
@@ -749,6 +752,7 @@ class Event():
     REBOOT = ClassFactory(EventApi.REBOOT, [])
     ALTERNATIVE_MOVE = ClassFactory(EventApi.ALTERNATIVE_MOVE, [])
     EMAIL_LOG = ClassFactory(EventApi.EMAIL_LOG, [])
+    SET_VOICE = ClassFactory(EventApi.SET_VOICE, ['type', 'lang', 'speaker'])
     # Keyboard events
     KEYBOARD_BUTTON = ClassFactory(EventApi.KEYBOARD_BUTTON, ['button'])
     KEYBOARD_FEN = ClassFactory(EventApi.KEYBOARD_FEN, ['fen'])
