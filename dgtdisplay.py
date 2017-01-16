@@ -233,6 +233,15 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
     def inside_system_voice_menu(self):
         return self.inside_system_menu() and self.system_result == Settings.VOICE
 
+    def inside_position_menu(self):
+        return self.top_result == Menu.POSITION_MENU
+
+    def inside_mode_menu(self):
+        return self.top_result == Menu.MODE_MENU
+
+    def inside_top_menu(self):
+        return self.top_result == Menu.TOP_MENU
+
     def _process_button0(self):
         def enter_top_menu():
             self.top_result = Menu.TOP_MENU
@@ -321,11 +330,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             DisplayDgt.show(text)
             self._exit_display(wait=True)
 
-        if self.top_result == Menu.TOP_MENU:
+        if self.inside_top_menu():
             top0()
-        elif self.top_result == Menu.MODE_MENU:
+        elif self.inside_mode_menu():
             mode0()
-        elif self.top_result == Menu.POSITION_MENU:
+        elif self.inside_position_menu():
             position0()
         elif self.inside_system_menu():
             system0()
@@ -441,11 +450,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             DisplayDgt.show(text)
             self._exit_display(wait=True)
 
-        if self.top_result == Menu.TOP_MENU:
+        if self.inside_top_menu():
             top1()
-        elif self.top_result == Menu.MODE_MENU:
+        elif self.inside_mode_menu():
             mode1()
-        elif self.top_result == Menu.POSITION_MENU:
+        elif self.inside_position_menu():
             position1()
         elif self.inside_system_menu():
             system1()
@@ -578,11 +587,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             DisplayDgt.show(text)
             self._exit_display(wait=True)
 
-        if self.top_result == Menu.TOP_MENU:
+        if self.inside_top_menu():
             top3()
-        elif self.top_result == Menu.MODE_MENU:
+        elif self.inside_mode_menu():
             mode3()
-        elif self.top_result == Menu.POSITION_MENU:
+        elif self.inside_position_menu():
             position3()
         elif self.inside_system_menu():
             system3()
@@ -825,11 +834,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             text = self.dgttranslate.text(self.top_index.value)
             DisplayDgt.show(text)
 
-        elif self.top_result == Menu.TOP_MENU:
+        elif self.inside_top_menu():
             top4()
-        elif self.top_result == Menu.MODE_MENU:
+        elif self.inside_mode_menu():
             mode4()
-        elif self.top_result == Menu.POSITION_MENU:
+        elif self.inside_position_menu():
             position4()
         elif self.inside_system_menu():
             system4()
