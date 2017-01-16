@@ -735,11 +735,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         else:
                             vkey = self.voices_conf.keys()[self.system_voice_lang_index]
                             speakers = self.voices_conf[vkey].keys()
-                            # print('')
-                            # print(speakers)
-                            # print(self.system_voice_type_index, self.system_voice_type_result)
-                            # print(vkey + ':' + speakers[self.system_voice_speak_index])
-                            # print('')
                             config = ConfigObj('picochess.ini')
                             ckey = 'user' if self.system_voice_type_index == VoiceType.USER_VOICE else 'computer'
                             skey = speakers[self.system_voice_speak_index]

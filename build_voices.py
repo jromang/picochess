@@ -28,7 +28,7 @@ def write_voice_ini():
 
     program_path = os.path.dirname(os.path.realpath(__file__)) + os.sep
     voices_path = program_path + 'talker' + os.sep + 'voices'
-    config = ConfigObj(voices_path + os.sep + 'voices.ini')
+    config = ConfigObj(voices_path + os.sep + 'voices.ini', indent_type='    ')
 
     lang_list = get_immediate_subdirectories(voices_path)
     for lang_dir_name in lang_list:

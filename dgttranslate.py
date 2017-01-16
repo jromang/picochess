@@ -516,7 +516,7 @@ class DgtTranslate(object):
             ittxt = entxt
         if text_id == 'settings_voice_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Voice      ', m='Voice   ', s='voice ')
-            detxt = Dgt.DISPLAY_TEXT(l='Sprache    ', m='Sprache ', s='sprach')
+            detxt = Dgt.DISPLAY_TEXT(l='Stimme     ', m='Stimme  ', s='stimme')
             nltxt = Dgt.DISPLAY_TEXT(l='Stem       ', m='Stem    ', s='stem  ')
             frtxt = Dgt.DISPLAY_TEXT(l='Voix       ', m='Voix    ', s='voix  ')
             estxt = Dgt.DISPLAY_TEXT(l='Voz        ', m='Voz     ', s='voz   ')
