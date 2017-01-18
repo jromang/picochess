@@ -529,19 +529,20 @@ def main():
         logging.debug('PicoTalker disabled')
 
     dgtboard = DgtBoard(args.dgt_port, args.enable_revelation_leds, args.dgtpi)
+    my_lock = threading.Lock()
 
     if args.console:
         # Enable keyboard input and terminal display
         logging.debug('starting picochess in virtual mode')
         KeyboardInput(dgttranslate, args.dgtpi).start()
         TerminalDisplay().start()
-        DgtVr(dgttranslate, dgtboard).start()
+        DgtVr(dgttranslate, my_lock, dgtboard).start()
     else:
         # Connect to DGT board
         logging.debug('starting picochess in board mode')
         if args.dgtpi:
-            DgtPi(dgttranslate).start()
-        DgtHw(dgttranslate, dgtboard).start()
+            DgtPi(dgttranslate, my_lock).start()
+        DgtHw(dgttranslate, my_lock, dgtboard).start()
     # Save to PGN
     emailer = Emailer(
         email=args.email, mailgun_key=args.mailgun_key,

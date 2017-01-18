@@ -23,8 +23,8 @@ from threading import Lock, Timer
 
 
 class DgtPi(DgtIface):
-    def __init__(self, dgttranslate):
-        super(DgtPi, self).__init__(dgttranslate)
+    def __init__(self, dgttranslate, msg_lock):
+        super(DgtPi, self).__init__(dgttranslate, msg_lock)
 
         self.lib_lock = Lock()
         self.lib = cdll.LoadLibrary('dgt/dgtpicom.so')

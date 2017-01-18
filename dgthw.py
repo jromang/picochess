@@ -22,8 +22,8 @@ from threading import Lock
 
 
 class DgtHw(DgtIface):
-    def __init__(self, dgttranslate, dgtboard):
-        super(DgtHw, self).__init__(dgttranslate, dgtboard)
+    def __init__(self, dgttranslate, msg_lock, dgtboard):
+        super(DgtHw, self).__init__(dgttranslate, msg_lock, dgtboard)
 
         self.lib_lock = Lock()
         self.dgtboard.run()

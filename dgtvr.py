@@ -22,8 +22,8 @@ import time
 
 
 class DgtVr(DgtIface):
-    def __init__(self, dgttranslate, dgtboard):
-        super(DgtVr, self).__init__(dgttranslate, dgtboard)
+    def __init__(self, dgttranslate, msg_lock, dgtboard):
+        super(DgtVr, self).__init__(dgttranslate, msg_lock, dgtboard)
         # virtual lib
         self.rt = None
         self.time_side = ClockSide.NONE

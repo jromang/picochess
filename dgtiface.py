@@ -20,7 +20,7 @@ from threading import Timer, Thread, Lock
 
 
 class DgtIface(DisplayDgt, Thread):
-    def __init__(self, dgttranslate, dgtboard=None):
+    def __init__(self, dgttranslate, msg_lock, dgtboard=None):
         super(DgtIface, self).__init__()
 
         self.dgtboard = dgtboard
@@ -38,7 +38,7 @@ class DgtIface(DisplayDgt, Thread):
         # delayed task array
         self.tasks = []
         self.do_process = True
-        self.msg_lock = Lock()
+        self.msg_lock = msg_lock
 
         self.display_hash = None  # Hash value of clock's display
 
