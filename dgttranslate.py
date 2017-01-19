@@ -709,7 +709,7 @@ class DgtTranslate(object):
             estxt = Dgt.DISPLAY_TEXT(l='picoChs Voz', m='pico Voz', s='pico v')
             ittxt = Dgt.DISPLAY_TEXT(l='picoChsVoce', m='picoVoce', s='pico v')
         if text_id == 'okvoice':
-            wait = True
+            # wait = True
             entxt = Dgt.DISPLAY_TEXT(l='ok Voice   ', m='ok voice', s='ok voi')
             detxt = Dgt.DISPLAY_TEXT(l='ok Stimme  ', m='okStimme', s='ok stm')
             nltxt = Dgt.DISPLAY_TEXT(l='ok Stem    ', m='ok Stem ', s='okstem')

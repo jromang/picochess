@@ -447,6 +447,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         if self.top_result is None:
             text = self._combine_depth_and_score()
             text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
+            # text.maxtime = 0
             DisplayDgt.show(text)
             self._exit_display(wait=True)
 
