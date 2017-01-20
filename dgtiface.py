@@ -141,7 +141,7 @@ class DgtIface(DisplayDgt, Thread):
                     self.display_hash = hash(message)
 
         if do_handle:
-            logging.debug("handle DgtApi: %s", message)
+            logging.debug("handle DgtApi: {} at {}".format(message, self.__class__.__name__))
             if hasattr(message, 'maxtime') and message.maxtime > 0:
                 self.maxtimer = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer)
                 self.maxtimer.start()
@@ -153,7 +153,7 @@ class DgtIface(DisplayDgt, Thread):
                 self._handle_message(message)
                 logging.info('handled at {}'.format(self.__class__.__name__))
         else:
-            logging.debug("ignore DgtApi: %s", message)
+            logging.debug("ignore DgtApi: {} at {}".format(message, self.__class__.__name__))
 
     def run(self):
         logging.info('dgt_queue ready')

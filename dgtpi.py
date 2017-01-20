@@ -16,10 +16,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from chess import Board
-from dgtiface import *
-from ctypes import *
+from dgtiface import DgtIface
 from utilities import *
 from threading import Lock, Timer
+from ctypes import *
 
 
 class DgtPi(DgtIface):
