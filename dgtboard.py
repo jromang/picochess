@@ -190,33 +190,33 @@ class DgtBoard(object):
                         #                         73-53 | button 3 + 4
                         if ack3 == 49:
                             logging.info("(ser) clock: button 0 pressed - ack2: %i", ack2)
-                            DisplayMsg.show(Message.DGT_BUTTON(button=0))
+                            DisplayMsg.show(Message.DGT_BUTTON(button=0, dev='ser'))
                         if ack3 == 52:
                             logging.info("(ser) clock: button 1 pressed - ack2: %i", ack2)
-                            DisplayMsg.show(Message.DGT_BUTTON(button=1))
+                            DisplayMsg.show(Message.DGT_BUTTON(button=1, dev='ser'))
                         if ack3 == 51:
                             logging.info("(ser) clock: button 2 pressed - ack2: %i", ack2)
-                            DisplayMsg.show(Message.DGT_BUTTON(button=2))
+                            DisplayMsg.show(Message.DGT_BUTTON(button=2, dev='ser'))
                         if ack3 == 50:
                             logging.info("(ser) clock: button 3 pressed - ack2: %i", ack2)
-                            DisplayMsg.show(Message.DGT_BUTTON(button=3))
+                            DisplayMsg.show(Message.DGT_BUTTON(button=3, dev='ser'))
                         if ack3 == 53:
                             if ack2 == 69:
                                 logging.info("(ser) clock: button 0+4 pressed - ack2: %i", ack2)
-                                DisplayMsg.show(Message.DGT_BUTTON(button=0x11))
+                                DisplayMsg.show(Message.DGT_BUTTON(button=0x11, dev='ser'))
                             else:
                                 logging.info("(ser) clock: button 4 pressed - ack2: %i", ack2)
-                                DisplayMsg.show(Message.DGT_BUTTON(button=4))
+                                DisplayMsg.show(Message.DGT_BUTTON(button=4, dev='ser'))
                     if ack1 == 0x09:
                         main = ack2 >> 4
                         sub = ack2 & 0x0f
                         logging.debug("(ser) clock: version %0.2f", float(str(main) + '.' + str(sub)))
                         if self.board_connected_text:
                             self.board_connected_text.devs = {'ser'}  # Now send the (delayed) message to serial clock
-                            attached = 'ser'
+                            dev = 'ser'
                         else:
-                            attached = 'err'
-                        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=main, sub=sub, attached=attached, text=self.board_connected_text))
+                            dev = 'err'
+                        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=main, sub=sub, dev=dev, text=self.board_connected_text))
                     if ack1 == 0x0a:  # clock ack SETNRUN => set the time values to max for sure! override lateron
                         self.r_time = 3600 * 10
                         self.l_time = 3600 * 10
@@ -244,14 +244,14 @@ class DgtBoard(object):
                             tr = [r_hours, r_mins, r_secs]
                             tl = [l_hours, l_mins, l_secs]
                             logging.info('(ser) clock: received time from clock l:{} r:{}'.format(tl, tr))
-                            DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=tl, time_right=tr))
+                            DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=tl, time_right=tr, dev='ser'))
 
                             right_side_down = -0x40 if status & 0x02 else 0x40
                             if self.lever_pos != right_side_down:
                                 logging.debug('(ser) clock: button status: {} old lever_pos: {}'.format(
                                     status, self.lever_pos))
                                 if self.lever_pos is not None:
-                                    DisplayMsg.show(Message.DGT_BUTTON(button=right_side_down))
+                                    DisplayMsg.show(Message.DGT_BUTTON(button=right_side_down, dev='ser'))
                                 self.lever_pos = right_side_down
                     if not errtim:
                         self.r_time = r_time

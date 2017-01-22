@@ -663,15 +663,15 @@ class RepeatedTimer(object):
 
 
 class Dgt():
-    DISPLAY_MOVE = ClassFactory(DgtApi.DISPLAY_MOVE, ['move', 'fen', 'beep', 'maxtime', 'side', 'wait', 'ld', 'rd'])
+    DISPLAY_MOVE = ClassFactory(DgtApi.DISPLAY_MOVE, ['move', 'fen', 'side', 'beep', 'maxtime', 'devs', 'wait', 'ld', 'rd'])
     DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['l', 'm', 's', 'beep', 'maxtime', 'devs', 'wait', 'ld', 'rd'])
-    DISPLAY_TIME = ClassFactory(DgtApi.DISPLAY_TIME, ['wait', 'force'])
+    DISPLAY_TIME = ClassFactory(DgtApi.DISPLAY_TIME, ['wait', 'force', 'devs'])
     LIGHT_CLEAR = ClassFactory(DgtApi.LIGHT_CLEAR, [])
     LIGHT_SQUARES = ClassFactory(DgtApi.LIGHT_SQUARES, ['uci_move'])
-    CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, [])
-    CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side', 'wait'])
-    CLOCK_VERSION = ClassFactory(DgtApi.CLOCK_VERSION, ['main', 'sub', 'attached'])
-    CLOCK_TIME = ClassFactory(DgtApi.CLOCK_TIME, ['time_left', 'time_right'])
+    CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, ['devs'])
+    CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side', 'devs', 'wait'])
+    CLOCK_VERSION = ClassFactory(DgtApi.CLOCK_VERSION, ['main', 'sub', 'dev'])
+    CLOCK_TIME = ClassFactory(DgtApi.CLOCK_TIME, ['time_left', 'time_right', 'dev'])
 
 
 class Message():
@@ -687,10 +687,10 @@ class Message():
     TIME_CONTROL = ClassFactory(MessageApi.TIME_CONTROL, ['time_text', 'ok_text', 'time_control'])
     OPENING_BOOK = ClassFactory(MessageApi.OPENING_BOOK, ['book_text', 'ok_text'])
 
-    DGT_BUTTON = ClassFactory(MessageApi.DGT_BUTTON, ['button'])
+    DGT_BUTTON = ClassFactory(MessageApi.DGT_BUTTON, ['button', 'dev'])
     DGT_FEN = ClassFactory(MessageApi.DGT_FEN, ['fen'])
-    DGT_CLOCK_VERSION = ClassFactory(MessageApi.DGT_CLOCK_VERSION, ['main', 'sub', 'attached', 'text'])
-    DGT_CLOCK_TIME = ClassFactory(MessageApi.DGT_CLOCK_TIME, ['time_left', 'time_right'])
+    DGT_CLOCK_VERSION = ClassFactory(MessageApi.DGT_CLOCK_VERSION, ['main', 'sub', 'dev', 'text'])
+    DGT_CLOCK_TIME = ClassFactory(MessageApi.DGT_CLOCK_TIME, ['time_left', 'time_right', 'dev'])
     DGT_SERIAL_NR = ClassFactory(MessageApi.DGT_SERIAL_NR, ['number'])
     DGT_JACK_CONNECTED_ERROR = ClassFactory(MessageApi.DGT_JACK_CONNECTED_ERROR, [])
     DGT_NO_CLOCK_ERROR = ClassFactory(MessageApi.DGT_NO_CLOCK_ERROR, ['text'])
@@ -704,8 +704,8 @@ class Message():
     SEARCH_STARTED = ClassFactory(MessageApi.SEARCH_STARTED, ['engine_status'])
     SEARCH_STOPPED = ClassFactory(MessageApi.SEARCH_STOPPED, ['engine_status'])
     TAKE_BACK = ClassFactory(MessageApi.TAKE_BACK, [])
-    CLOCK_START = ClassFactory(MessageApi.CLOCK_START, ['turn', 'time_control'])
-    CLOCK_STOP = ClassFactory(MessageApi.CLOCK_STOP, [])
+    CLOCK_START = ClassFactory(MessageApi.CLOCK_START, ['turn', 'time_control', 'devs'])
+    CLOCK_STOP = ClassFactory(MessageApi.CLOCK_STOP, ['devs'])
     USER_MOVE = ClassFactory(MessageApi.USER_MOVE, ['move', 'fen', 'turn', 'game'])
     GAME_ENDS = ClassFactory(MessageApi.GAME_ENDS, ['result', 'play_mode', 'game'])
 
@@ -735,12 +735,12 @@ class Event():
     PAUSE_RESUME = ClassFactory(EventApi.PAUSE_RESUME, [])
     SWITCH_SIDES = ClassFactory(EventApi.SWITCH_SIDES, ['engine_finished'])
     SET_TIME_CONTROL = ClassFactory(EventApi.SET_TIME_CONTROL, ['time_control', 'time_text', 'ok_text'])
-    SHUTDOWN = ClassFactory(EventApi.SHUTDOWN, [])
-    REBOOT = ClassFactory(EventApi.REBOOT, [])
+    SHUTDOWN = ClassFactory(EventApi.SHUTDOWN, ['dev'])
+    REBOOT = ClassFactory(EventApi.REBOOT, ['dev'])
     ALTERNATIVE_MOVE = ClassFactory(EventApi.ALTERNATIVE_MOVE, [])
     EMAIL_LOG = ClassFactory(EventApi.EMAIL_LOG, [])
     # Keyboard events
-    KEYBOARD_BUTTON = ClassFactory(EventApi.KEYBOARD_BUTTON, ['button'])
+    KEYBOARD_BUTTON = ClassFactory(EventApi.KEYBOARD_BUTTON, ['button', 'dev'])
     KEYBOARD_FEN = ClassFactory(EventApi.KEYBOARD_FEN, ['fen'])
     # Engine events
     BEST_MOVE = ClassFactory(EventApi.BEST_MOVE, ['result', 'inbook'])
@@ -801,12 +801,11 @@ def update_picochess(auto_reboot=False):
                                           stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
                 logging.debug(output)
                 if auto_reboot:
-                    reboot()
+                    reboot(dev='web')
 
 
-def shutdown(dgtpi):
-    logging.debug('shutting down system')
-    DisplayMsg.show(Message.SYSTEM_SHUTDOWN())
+def shutdown(dgtpi, dev):
+    logging.debug('shutting down system requested by ({})'.format(dev))
     time.sleep(2)  # give some time to send out the pgn file or speak the event
     if platform.system() == 'Windows':
         os.system('shutdown /s')
@@ -816,9 +815,8 @@ def shutdown(dgtpi):
         os.system('shutdown -h now')
 
 
-def reboot():
-    logging.debug('rebooting system')
-    DisplayMsg.show(Message.SYSTEM_REBOOT())
+def reboot(dev):
+    logging.debug('rebooting system requested by ({})'.format(dev))
     time.sleep(2)  # give some time to send out the pgn file or speak the event
     os.system('reboot')
 

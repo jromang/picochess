@@ -172,14 +172,14 @@ def main():
     def stop_clock():
         if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
             time_control.stop()
-            DisplayMsg.show(Message.CLOCK_STOP())
+            DisplayMsg.show(Message.CLOCK_STOP(devs={'ser', 'i2c', 'web'}))
         else:
             logging.warning('wrong mode: {}'.format(interaction_mode))
 
     def start_clock():
         if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
             time_control.start(game.turn)
-            DisplayMsg.show(Message.CLOCK_START(turn=game.turn, time_control=time_control))
+            DisplayMsg.show(Message.CLOCK_START(turn=game.turn, time_control=time_control, devs={'ser', 'i2c', 'web'}))
         else:
             logging.warning('wrong mode: {}'.format(interaction_mode))
 
@@ -870,12 +870,14 @@ def main():
 
                 if case(EventApi.SHUTDOWN):
                     DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=game.copy()))
-                    shutdown(args.dgtpi)
+                    DisplayMsg.show(Message.SYSTEM_SHUTDOWN())
+                    shutdown(args.dgtpi, dev=event.dev)
                     break
 
                 if case(EventApi.REBOOT):
                     DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=game.copy()))
-                    reboot()
+                    DisplayMsg.show(Message.SYSTEM_REBOOT())
+                    reboot(dev=event.dev)
                     break
 
                 if case(EventApi.EMAIL_LOG):
@@ -889,7 +891,7 @@ def main():
                     break
 
                 if case(EventApi.KEYBOARD_BUTTON):
-                    DisplayMsg.show(Message.DGT_BUTTON(button=event.button))
+                    DisplayMsg.show(Message.DGT_BUTTON(button=event.button, dev=event.dev))
                     break
 
                 if case(EventApi.KEYBOARD_FEN):
