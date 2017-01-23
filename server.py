@@ -300,9 +300,9 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.DGT_CLOCK_VERSION):
-                if message.attached == 'ser':
+                if message.dev == 'ser':
                     attached = 'serial'
-                elif message.attached == 'i2c':
+                elif message.dev == 'i2c':
                     attached = 'i2c'
                 else:
                     attached = 'virtual'

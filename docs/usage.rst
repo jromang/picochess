@@ -200,10 +200,11 @@ System Menu
 Here you choose between the following:
 
 * **version** - showing you the current picochess version
-* **ip adr** - showing you the last part of your ip-adr. This is needed for example to use the picochess webserver (see below)
+* **ip adr** - showing you the ip-adr. This is needed for example to use the picochess webserver (see below)
 * **sound** - controls the beeps of your dgt clock. You can change between "never", "sometimes", or "always"
 * **language** - sets the language of clock messages. You can choose between english, german, french, dutch and spanish
 * **logfile** - sends a debug log file to your eMail box. Thats for us developers to have a clue what is going on at picochess. Please use this only if you asked for it.
+* **voice** - selects the voice for the computer and user. If you don't want voice please choose "mute".
 
 System shutdown
 ---------------

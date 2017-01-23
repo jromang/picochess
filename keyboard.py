@@ -92,13 +92,13 @@ class KeyboardInput(Observable, threading.Thread):
                             raise ValueError(button)
                         if button == 5:  # make it to power button
                             button = 0x11
-                        self.fire(Event.KEYBOARD_BUTTON(button=button))
+                        self.fire(Event.KEYBOARD_BUTTON(button=button, dev='i2c' if self.is_pi else 'ser'))
                     elif cmd.startswith('lever:'):
                         lever = cmd.split(':')[1]
                         if lever not in ('l', 'r'):
                             raise ValueError(lever)
                         button = 0x40 if lever == 'r' else -0x40
-                        self.fire(Event.KEYBOARD_BUTTON(button=button))
+                        self.fire(Event.KEYBOARD_BUTTON(button=button, dev='i2c' if self.is_pi else 'ser'))
                     elif cmd.startswith('plug:'):
                         plug = cmd.split(':')[1]
                         if plug not in ('in', 'off'):
