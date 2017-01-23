@@ -172,14 +172,14 @@ def main():
     def stop_clock():
         if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
             time_control.stop()
-            DisplayMsg.show(Message.CLOCK_STOP())
+            DisplayMsg.show(Message.CLOCK_STOP(devs={'ser', 'i2c', 'web'}))
         else:
             logging.warning('wrong mode: {}'.format(interaction_mode))
 
     def start_clock():
         if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
             time_control.start(game.turn)
-            DisplayMsg.show(Message.CLOCK_START(turn=game.turn, time_control=time_control))
+            DisplayMsg.show(Message.CLOCK_START(turn=game.turn, time_control=time_control, devs={'ser', 'i2c', 'web'}))
         else:
             logging.warning('wrong mode: {}'.format(interaction_mode))
 
@@ -529,19 +529,20 @@ def main():
         logging.debug('PicoTalker disabled')
 
     dgtboard = DgtBoard(args.dgt_port, args.enable_revelation_leds, args.dgtpi)
+    my_lock = threading.Lock()
 
     if args.console:
         # Enable keyboard input and terminal display
         logging.debug('starting picochess in virtual mode')
         KeyboardInput(dgttranslate, args.dgtpi).start()
         TerminalDisplay().start()
-        DgtVr(dgttranslate, dgtboard).start()
+        DgtVr(dgttranslate, my_lock, dgtboard).start()
     else:
         # Connect to DGT board
         logging.debug('starting picochess in board mode')
         if args.dgtpi:
-            DgtPi(dgttranslate).start()
-        DgtHw(dgttranslate, dgtboard).start()
+            DgtPi(dgttranslate, my_lock).start()
+        DgtHw(dgttranslate, my_lock, dgtboard).start()
     # Save to PGN
     emailer = Emailer(
         email=args.email, mailgun_key=args.mailgun_key,
@@ -869,12 +870,14 @@ def main():
 
                 if case(EventApi.SHUTDOWN):
                     DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=game.copy()))
-                    shutdown(args.dgtpi)
+                    DisplayMsg.show(Message.SYSTEM_SHUTDOWN())
+                    shutdown(args.dgtpi, dev=event.dev)
                     break
 
                 if case(EventApi.REBOOT):
                     DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=game.copy()))
-                    reboot()
+                    DisplayMsg.show(Message.SYSTEM_REBOOT())
+                    reboot(dev=event.dev)
                     break
 
                 if case(EventApi.EMAIL_LOG):
@@ -892,7 +895,7 @@ def main():
                     break
 
                 if case(EventApi.KEYBOARD_BUTTON):
-                    DisplayMsg.show(Message.DGT_BUTTON(button=event.button))
+                    DisplayMsg.show(Message.DGT_BUTTON(button=event.button, dev=event.dev))
                     break
 
                 if case(EventApi.KEYBOARD_FEN):

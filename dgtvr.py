@@ -16,21 +16,21 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import chess
-from dgtiface import *
-from utilities import RepeatedTimer
+from dgtiface import DgtIface
+from utilities import *
 import time
 
 
 class DgtVr(DgtIface):
-    def __init__(self, dgttranslate, dgtboard):
-        super(DgtVr, self).__init__(dgttranslate, dgtboard)
+    def __init__(self, dgttranslate, msg_lock, dgtboard):
+        super(DgtVr, self).__init__(dgttranslate, msg_lock, dgtboard)
         # virtual lib
         self.rt = None
         self.time_side = ClockSide.NONE
         # setup virtual clock
         self.enable_dgt_pi = dgtboard.is_pi
         main = 2 if dgtboard.is_pi else 0
-        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=main, sub=0, attached='web', text=None))
+        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=main, sub=0, dev='web', text=None))
 
     # (START) dgtserial class simulation
     def _runclock(self):
@@ -52,7 +52,7 @@ class DgtVr(DgtIface):
             print('\033[1;32;40m<{}> [vir] clock maxtime not run out\033[1;37;40m'. format(time.time()))
         else:
             print('\033[1;34;40m<{}> [vir] clock time: {} - {}\033[1;37;40m'.format(time.time(), self.time_left, self.time_right))
-        DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=self.time_left, time_right=self.time_right))
+        DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=self.time_left, time_right=self.time_right, dev='web'))
     # (END) dgtserial simulation class
 
     def display_move_on_clock(self, message):
@@ -91,7 +91,7 @@ class DgtVr(DgtIface):
         else:
             logging.debug('[vir] clock isnt running - no need for endText')
 
-    def stop_clock(self):
+    def stop_clock(self, devs):
         if self.rt:
             print('\033[1;32;40m<{}> [vir] clock time stopped at {} - {}\033[1;37;40m'. format(time.time(), self.time_left, self.time_right))
             self.rt.stop()
@@ -102,7 +102,7 @@ class DgtVr(DgtIface):
     def _resume_clock(self, side):
         self.clock_running = (side != ClockSide.NONE)
 
-    def start_clock(self, time_left, time_right, side):
+    def start_clock(self, time_left, time_right, side, devs):
         self.time_left = hours_minutes_seconds(time_left)
         self.time_right = hours_minutes_seconds(time_right)
         self.time_side = side
