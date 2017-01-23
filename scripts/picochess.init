@@ -53,7 +53,7 @@ case "$1" in
 
       echo $dgt_port
       cd /opt/picochess
-      screen -dmUS pc python3 picochess.py -d $dgt_port -web -lf picochess.log -l debug
+      screen -dmUS pc python3 picochess.py -d $dgt_port -w -lf picochess.log -l debug
     ;;
   stop)
     echo "Stopping picochess"
