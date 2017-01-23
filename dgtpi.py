@@ -196,7 +196,7 @@ class DgtPi(DgtIface):
 
     def start_clock(self, time_left, time_right, side, devs):
         if 'i2c' not in devs:
-            logging.debug('ignored message cause of devs [stopClock]')
+            logging.debug('ignored message cause of devs [startClock]')
             return
         self.time_left = hours_minutes_seconds(time_left)
         self.time_right = hours_minutes_seconds(time_right)

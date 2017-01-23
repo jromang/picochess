@@ -126,7 +126,7 @@ class DgtHw(DgtIface):
 
     def stop_clock(self, devs):
         if 'ser' not in devs:
-            logging.debug('ignored message cause of devs [stopClock')
+            logging.debug('ignored message cause of devs [stopClock]')
             return
         self._resume_clock(ClockSide.NONE)
 
