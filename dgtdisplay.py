@@ -745,6 +745,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
                             text.wait = False
                             text.maxtime = 0
+                            text.devs = {'ser', 'i2c', 'web'}
                             exit_menu = False
                         else:
                             vkey = self.voices_conf.keys()[self.system_voice_lang_index]
