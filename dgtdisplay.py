@@ -397,6 +397,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
                     text.wait = False
                     text.maxtime = 0
+                    text.devs = {'ser', 'i2c', 'web'}
             elif self.inside_system_language_menu():
                 self.system_language_index = LanguageLoop.prev(self.system_language_index)
                 text = self.dgttranslate.text(self.system_language_index.value)
@@ -533,6 +534,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
                     text.wait = False
                     text.maxtime = 0
+                    text.devs = {'ser', 'i2c', 'web'}
             elif self.inside_system_language_menu():
                 self.system_language_index = LanguageLoop.next(self.system_language_index)
                 text = self.dgttranslate.text(self.system_language_index.value)
