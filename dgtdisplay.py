@@ -1369,6 +1369,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 break
             if case(MessageApi.DGT_EBOARD_VERSION):
                 DisplayDgt.show(message.text)
+                DisplayDgt.show(Dgt.DISPLAY_TIME(force=True, wait=True, devs={'i2c'}))
                 break
             if case(MessageApi.DGT_NO_EBOARD_ERROR):
                 DisplayDgt.show(message.text)

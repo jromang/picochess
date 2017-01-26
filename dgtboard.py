@@ -431,7 +431,7 @@ class DgtBoard(object):
                     self.bt_line += b
                     if b == '' or b == '\n':
                         break
-            except OSError as e:
+            except OSError:
                 time.sleep(0.1)
 
             # complete line
