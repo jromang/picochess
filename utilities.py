@@ -34,7 +34,7 @@ except ImportError:
     import enum34 as enum
 
 # picochess version
-version = '081'
+version = '082'
 
 evt_queue = queue.Queue()
 serial_queue = queue.Queue()
