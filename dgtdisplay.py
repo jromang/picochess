@@ -1322,7 +1322,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if pos960 is not None:
                         if pos960 == 518 or self.engine_has_960:
                             logging.debug('Map-Fen: New game')
-                            self.show_setup_pieces_msg = False
+                            if self.show_setup_pieces_msg:
+                                game_text = 'C10_newgame' if pos960 is None or pos960 == 518 else 'C10_ucigame'
+                                DisplayDgt.show(self.dgttranslate.text(game_text, str(pos960)))
+                                self.show_setup_pieces_msg = False
                             self.fire(Event.NEW_GAME(pos960=pos960))
                         else:
                             # self._reset_moves_and_score()
