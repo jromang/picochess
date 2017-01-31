@@ -17,18 +17,19 @@
 ## enable-revelation-leds turn ON or OFF the LED's on the Revelation II board. If so, please uncomment the next line
 # enable-revelation-leds = True
 ## beep-some-level changes the occurrence of beeps. Minimum value is 0 (no beeps), maximum is 15 (all beeps).
+## Please keep in mind: values 0 and 15 making no sense (but allowed) since they are the same as "never" & "always"
 ## inside the clock menu you can choose between "always", "never" and "some". The value you give inside here, is
-## the value of "some". Each part of beeps has a special number and you have to add them to get the beep-level
+## the value of "some". Each part of beeps has a special number and you have to add them to get the beep-some-level
 ## CONFIG = 1 Takeback, GameEnd, NewGame and ComputerMove
 ## BUTTON = 2 All Events coming from button press
 ## MAP = 4    All Events coming from Queen placing at start pos (line3-6)
 ## OKAY = 8   All Events from "ok" (confirm) messages
-## For example to beep on "ok messages" and "button press" would result in 8+2=10 as beep-level
+## For example to beep on "ok messages" and "button press" would result in 8+2=10 as beep-some-level
 # beep-some-level = 3
 ## Should a confirmation message (after moves) be displayed? If not, please active the next line
 # disable-ok-message = True
 ## Specify the serial port your dgt-board is connected to.
-## If you dont give a parameter picochess tries to find the board automatically.
+## If you dont give a parameter picochess tries to find the board automatically (prefered usage).
 # dgt-port = /dev/ttyACM0
 ## Instead of connecting to a dgt board, you can also start picochess with a command line.
 ## If so, please uncomment the next line
@@ -42,10 +43,12 @@
 ### ========================
 ### Options for the UCI-Chess engine
 ## Sets the UCI engine used at startup
-## Path to the engine relative to the 'picochess' folder
+## handle with care. If you setup this section wrong, picochess wont start.
+## Path to the engine relative to the 'picochess' folder (local engine - standard case)
+## or the full path to an engine at the remote engine server (special case - see below)
 # engine = engines/armv7l/a-stockf
 ## What level the engine should have at startup?
-## For the value please see the engines/<your_plattform>/<engine_name>.uci
+## For a (correct) value please take a look at 'engines/<your_plattform>/<engine_name>.uci'
 # engine-level = Level@20
 ### Parameters for a remote engine (server) - good chances you do not need them ;-)
 ## Where is the server with the engine
@@ -71,7 +74,7 @@
 ## Sets the startup time. If you give something like "5 0" that means 5mins blitz (default value)
 ## Fischer time can be set by changing this "0" (increment value) to a positive number like "3 2"
 ## Fixed time can be set by just giving one number like "10" meaning 10 secs/move
-## You can also give non-standard values (like "4 6"), but then you cant change them inside the menu.
+## You can also give non-standard values (like "4 6"), but then you cant change them inside the (time) menu.
 # time = 5 0
 
 ### ================
@@ -116,7 +119,8 @@
 ## What log level should be used 
 ## Loglevel options are [debug, info, warning, error, critical]
 # log-level = debug
-### PicoChess can use a speech engine for announcement
+## PicoChess can use human voices for announcement
+## If you dont want voice output, please comment these settings out or choose a 'mute' value like 'en:mute'
 ## user-voice used for user moves announcement
 # user-voice = en:al
 ## computer-voice for computer moves announcement
@@ -135,9 +139,9 @@
 ## This isn't used inside the chess engine. Just show the tb-value at dgt clock (for your info)
 ## If so, uncomment the next line
 # enable-gaviota = True
-## PicoChess messages can be displayed in English, German, Dutch, French or Spanish.
+## PicoChess messages can be displayed in English, German, Dutch, French, Spanish or Italian.
 ## You can set the language with the "language" option. Default is English.
-## en = English; de = German; nl = Dutch; fr = French; es = Spanish
+## en = English; de = German; nl = Dutch; fr = French; es = Spanish; it = Italian
 # language = en
 ## When in ponder mode decides how long each info is displayed. Default is 2 secs.
 ## Must be between 1 to 10 secs.
