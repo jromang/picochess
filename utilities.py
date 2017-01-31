@@ -497,7 +497,10 @@ class DgtClk(enum.Enum):
     # can be displayed only by the DGT3000.
     DGT_CMD_CLOCK_START_MESSAGE = 0x03
     DGT_CMD_CLOCK_END_MESSAGE = 0x00
+    DGT_ACK_CLOCK_READY = 0x81
     DGT_ACK_CLOCK_BUTTON = 0x88  # Ack of a clock button
+    DGT_ACK_CLOCK_MODE = 0x8a
+    DGT_ACK_CLOCK_NOT_IN_MODE = 0x90
 
 
 class DgtMsg(enum.IntEnum):
