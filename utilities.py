@@ -659,7 +659,7 @@ class RepeatedTimer(object):
         self.function(*self.args, **self.kwargs)
 
     def is_running(self):
-        return self._timer.is_alive()
+        return self._timer and self._timer.is_alive()
 
     def start(self):
         if not self.is_running():
