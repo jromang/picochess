@@ -32,7 +32,7 @@ class DgtIface(DisplayDgt, Thread):
         self.time_right = None
 
         self.maxtimer = None
-        # self.maxtimer_running = False
+        self.maxtimer_running = False
         self.clock_running = False
         self.time_factor = 1  # This is for testing the duration - remove it lateron!
         # delayed task array
@@ -67,7 +67,7 @@ class DgtIface(DisplayDgt, Thread):
         raise NotImplementedError()
 
     def _stopped_maxtimer(self):
-        # self.maxtimer_running = False
+        self.maxtimer_running = False
         if self.clock_running:
             logging.debug('showing the running clock again')
             self.show(Dgt.DISPLAY_TIME(force=False, wait=True, devs={'ser', 'i2c', 'web'}))
@@ -78,7 +78,7 @@ class DgtIface(DisplayDgt, Thread):
         while self.tasks:
             message = self.tasks.pop(0)
             self._process_message(message)
-            if self.maxtimer.is_alive():  # run over the task list until a maxtime command was processed
+            if self.maxtimer_running:  # run over the task list until a maxtime command was processed
                 break
 
     def _handle_message(self, message):
@@ -147,9 +147,12 @@ class DgtIface(DisplayDgt, Thread):
                 self.maxtimer = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer)
                 self.maxtimer.start()
                 logging.debug('showing {} for {} secs'.format(message, message.maxtime * self.time_factor))
-                # self.maxtimer_running = True
+                self.maxtimer_running = True
+            # logging.info('wait for msg_lock at {}'.format(self.__class__.__name__))
             with self.msg_lock:
+                # logging.info('done for msg_lock at {}'.format(self.__class__.__name__))
                 self._handle_message(message)
+                # logging.info('handled at {}'.format(self.__class__.__name__))
         else:
             logging.debug("ignore DgtApi: {} at {}".format(message, self.__class__.__name__))
 
@@ -162,7 +165,7 @@ class DgtIface(DisplayDgt, Thread):
                 logging.debug("received command from dgt_queue: %s", message)
 
                 self.do_process = True
-                if self.maxtimer.is_alive():
+                if self.maxtimer_running:
                     if hasattr(message, 'wait'):
                         if message.wait:
                             self.tasks.append(message)
@@ -171,8 +174,7 @@ class DgtIface(DisplayDgt, Thread):
                         else:
                             logging.debug('ignore former maxtime')
                             self.maxtimer.cancel()
-                            self.maxtimer.join()
-                            # self.maxtimer_running = False
+                            self.maxtimer_running = False
                             if self.tasks:
                                 logging.debug('delete following tasks: {}'.format(self.tasks))
                                 self.tasks = []
