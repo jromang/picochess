@@ -78,7 +78,7 @@ class DgtIface(DisplayDgt, Thread):
         while self.tasks:
             message = self.tasks.pop(0)
             self._process_message(message)
-            if self.maxtimer and self.maxtimer.is_alive():  # run over task list until a maxtime command was processed
+            if self.maxtimer.is_alive():  # run over the task list until a maxtime command was processed
                 break
 
     def _handle_message(self, message):
@@ -162,7 +162,7 @@ class DgtIface(DisplayDgt, Thread):
                 logging.debug("received command from dgt_queue: %s", message)
 
                 self.do_process = True
-                if self.maxtimer and self.maxtimer.is_alive():
+                if self.maxtimer.is_alive():
                     if hasattr(message, 'wait'):
                         if message.wait:
                             self.tasks.append(message)
