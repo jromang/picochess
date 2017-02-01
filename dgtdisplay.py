@@ -1377,6 +1377,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if case(MessageApi.DGT_NO_EBOARD_ERROR):
                 DisplayDgt.show(message.text)
                 break
+            if case(MessageApi.DGT_NO_CLOCK_ERROR):
+                break
             if case(MessageApi.SWITCH_SIDES):
                 self.engine_finished = False
                 self.hint_move = chess.Move.null()

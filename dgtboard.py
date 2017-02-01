@@ -220,7 +220,7 @@ class DgtBoard(object):
                     if ack1 == 0x0a:  # clock ack SETNRUN => set the time values to max for sure! override lateron
                         self.r_time = 3600 * 10
                         self.l_time = 3600 * 10
-                elif any(message[:6]):
+                elif any(message[:7]):
                     r_hours = message[0] & 0x0f
                     r_mins = (message[1] >> 4) * 10 + (message[1] & 0x0f)
                     r_secs = (message[2] >> 4) * 10 + (message[2] & 0x0f)
@@ -236,9 +236,11 @@ class DgtBoard(object):
                         logging.warning('(ser) clock: strange time received {} l:{} r:{}'.format(
                             message, hours_minutes_seconds(self.l_time), hours_minutes_seconds(self.r_time)))
                     else:
-                        status = (message[6] & 0x3f)
+                        status = message[6] & 0x3f
                         if status & 0x20:
-                            logging.warning('(ser) clock: not connected')
+                            logging.info('(ser) clock: not connected')
+                            if not self.is_pi:
+                                DisplayMsg.show(Message.DGT_NO_CLOCK_ERROR(text='dont_use'))
                             self.lever_pos = None
                         else:
                             tr = [r_hours, r_mins, r_secs]

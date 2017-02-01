@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from utilities import *
-from threading import Timer, Thread, Lock
+from threading import Timer, Thread
 
 
 class DgtIface(DisplayDgt, Thread):
@@ -148,11 +148,8 @@ class DgtIface(DisplayDgt, Thread):
                 self.maxtimer.start()
                 logging.debug('showing {} for {} secs'.format(message, message.maxtime * self.time_factor))
                 self.maxtimer_running = True
-            # logging.info('wait for msg_lock at {}'.format(self.__class__.__name__))
             with self.msg_lock:
-                # logging.info('done for msg_lock at {}'.format(self.__class__.__name__))
                 self._handle_message(message)
-                # logging.info('handled at {}'.format(self.__class__.__name__))
         else:
             logging.debug("ignore DgtApi: {} at {}".format(message, self.__class__.__name__))
 

@@ -292,6 +292,9 @@ class WebDisplay(DisplayMsg, threading.Thread):
             if case(MessageApi.DGT_JACK_CONNECTED_ERROR):
                 EventHandler.write_to_clients({'event': 'Message', 'msg': 'Unplug the jack cable please!'})
                 break
+            if case(MessageApi.DGT_NO_CLOCK_ERROR):
+                EventHandler.write_to_clients({'event': 'Message', 'msg': 'Connect a clock please!'})
+                break
             if case(MessageApi.DGT_NO_EBOARD_ERROR):
                 EventHandler.write_to_clients({'event': 'Message', 'msg': 'Connect an E-Board please!'})
                 break
