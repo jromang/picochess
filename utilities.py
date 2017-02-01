@@ -651,29 +651,28 @@ class RepeatedTimer(object):
         self.function = function
         self.args = args
         self.kwargs = kwargs
-        # self.timer_running = False
+        self.timer_running = False
 
     def _run(self):
-        # self.timer_running = False
+        self.timer_running = False
         self.start()
         self.function(*self.args, **self.kwargs)
 
     def is_running(self):
-        return self._timer.is_alive()
+        return self.timer_running
 
     def start(self):
-        if not self.is_running():
+        if not self.timer_running:
             self._timer = Timer(self.interval, self._run)
             self._timer.start()
-            # self.timer_running = True
+            self.timer_running = True
         else:
             logging.info('repeated timer already running - strange!')
 
     def stop(self):
-        if self.is_running():
+        if self.timer_running:
             self._timer.cancel()
-            self._timer.join()
-            # self.timer_running = False
+            self.timer_running = False
         else:
             logging.info('repeated timer already stopped - strange!')
 
