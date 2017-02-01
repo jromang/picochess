@@ -185,6 +185,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             pass
         return score
 
+    def hint_side(self):
+        side = ClockSide.LEFT if (self.hint_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
+        return side
+
     def inside_time_menu(self):
         return self.top_result == Menu.TIME_MENU
 
@@ -411,18 +415,18 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
         def engine1():
             if self.inside_engine_choose_menu():
-                self.engine_index = (self.engine_index-1) % len(self.installed_engines)
+                self.engine_index = (self.engine_index - 1) % len(self.installed_engines)
                 text = self.installed_engines[self.engine_index]['text']
                 text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             else:
                 level_dict = self.installed_engines[self.engine_index]['level_dict']
-                self.engine_level_index = (self.engine_level_index-1) % len(level_dict)
+                self.engine_level_index = (self.engine_level_index - 1) % len(level_dict)
                 msg = sorted(level_dict)[self.engine_level_index]
                 text = self.dgttranslate.text('B00_level', msg)
             DisplayDgt.show(text)
 
         def book1():
-            self.book_index = (self.book_index-1) % len(self.all_books)
+            self.book_index = (self.book_index - 1) % len(self.all_books)
             text = self.all_books[self.book_index]['text']
             text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             DisplayDgt.show(text)
@@ -548,12 +552,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
         def engine3():
             if self.inside_engine_choose_menu():
-                self.engine_index = (self.engine_index+1) % len(self.installed_engines)
+                self.engine_index = (self.engine_index + 1) % len(self.installed_engines)
                 text = self.installed_engines[self.engine_index]['text']
                 text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             else:
                 level_dict = self.installed_engines[self.engine_index]['level_dict']
-                self.engine_level_index = (self.engine_level_index+1) % len(level_dict)
+                self.engine_level_index = (self.engine_level_index + 1) % len(level_dict)
                 msg = sorted(level_dict)[self.engine_level_index]
                 text = self.dgttranslate.text('B00_level', msg)
             DisplayDgt.show(text)
@@ -586,7 +590,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         logging.debug('({}) clock: handle button 3 press'.format(dev))
         if self.top_result is None:
             if self.hint_move:
-                side = ClockSide.LEFT if (self.hint_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
+                side = self.hint_side()
                 text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=False, maxtime=1,
                                         beep=self.dgttranslate.bl(BeepLevel.BUTTON), devs={'ser', 'i2c', 'web'})
             else:
@@ -1117,7 +1121,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.hint_fen = message.game.fen()
                 self.hint_turn = message.game.turn
                 if message.mode == Mode.ANALYSIS and self.top_result is None:
-                    side = ClockSide.LEFT if (self.hint_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
+                    side = self.hint_side()
                     DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=True, maxtime=0,
                                                      beep=self.dgttranslate.bl(BeepLevel.NO), devs={'ser', 'i2c', 'web'}))
                 break
@@ -1222,7 +1226,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     level_dict = eng['level_dict']
                     if level_dict:
                         inc = math.ceil(len(level_dict) / 8)
-                        self.engine_level_index = min(inc * level_map.index(fen), len(level_dict)-1)
+                        self.engine_level_index = min(inc * level_map.index(fen), len(level_dict) - 1)
                         msg = sorted(level_dict)[self.engine_level_index]
                         text = self.dgttranslate.text('M10_level', msg)
                         logging.debug("Map-Fen: New level {}".format(msg))
@@ -1355,9 +1359,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 if self.mode_result == Mode.PONDER and self.top_result is None:
                     if self.show_move_or_value >= self.ponder_time:
                         if self.hint_move:
-                            show_left = (self.hint_turn == chess.WHITE) != self.flip_board
-                            text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen,
-                                                    side=ClockSide.LEFT if show_left else ClockSide.RIGHT, wait=True, maxtime=1,
+                            side = self.hint_side()
+                            text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=True, maxtime=1,
                                                     beep=self.dgttranslate.bl(BeepLevel.NO), devs={'ser', 'i2c', 'web'})
                         else:
                             text = self.dgttranslate.text('N10_nomove')
