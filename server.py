@@ -244,7 +244,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 update_headers()
                 break
             if case(MessageApi.SEARCH_STARTED):
-                EventHandler.write_to_clients({'event': 'Message', 'msg': 'Thinking..'})
+                EventHandler.write_to_clients({'event': 'Message', 'msg': 'Thinking...'})
                 break
             if case(MessageApi.SYSTEM_INFO):
                 self.shared['system_info'] = message.info
@@ -260,12 +260,18 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 break
             if case(MessageApi.STARTUP_INFO):
                 self.shared['game_info'] = message.info.copy()
+                # change book_index to book_text
+                books = message.info['books']
+                book_index = message.info['book_index']
+                self.shared['game_info']['book_text'] = books[book_index]['text']
+                del self.shared['game_info']['book_index']
+
                 if message.info['level_text'] is None:
                     del self.shared['game_info']['level_text']
                 break
             if case(MessageApi.OPENING_BOOK):
                 self.create_game_info()
-                self.shared['game_info']['book_index'] = message.book_text  # @todo fixit
+                self.shared['game_info']['book_text'] = message.book_text
                 break
             if case(MessageApi.INTERACTION_MODE):
                 self.create_game_info()
@@ -290,13 +296,16 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 update_headers()
                 break
             if case(MessageApi.DGT_JACK_CONNECTED_ERROR):
-                EventHandler.write_to_clients({'event': 'Message', 'msg': 'Unplug the jack cable please!'})
+                result = {'event': 'Message', 'msg': 'Unplug the jack cable please!'}
+                EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.DGT_NO_CLOCK_ERROR):
-                EventHandler.write_to_clients({'event': 'Message', 'msg': 'Connect a clock please!'})
+                result = {'event': 'Message', 'msg': 'Connect a clock please!'}
+                EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.DGT_NO_EBOARD_ERROR):
-                EventHandler.write_to_clients({'event': 'Message', 'msg': 'Connect an E-Board please!'})
+                result = {'event': 'Message', 'msg': 'Connect an E-Board please!'}
+                EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.DGT_EBOARD_VERSION):
                 result = {'event': 'Message', 'msg': message.text.l + ' connected through ' + message.channel}

@@ -563,7 +563,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             DisplayDgt.show(text)
 
         def book3():
-            self.book_index = (self.book_index+1) % len(self.all_books)
+            self.book_index = (self.book_index + 1) % len(self.all_books)
             text = self.all_books[self.book_index]['text']
             text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             DisplayDgt.show(text)
@@ -1262,7 +1262,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             eng_text.maxtime = 1
                             if level_dict:
                                 if self.engine_level_index is None or len(level_dict) <= self.engine_level_index:
-                                    self.engine_level_index = len(level_dict)-1
+                                    self.engine_level_index = len(level_dict) - 1
                                 msg = sorted(level_dict)[self.engine_level_index]
                                 options = level_dict[msg]  # cause of "new-engine", send options lateron - now only {}
                                 self.fire(Event.LEVEL(options={}, level_text=self.dgttranslate.text('M10_level', msg)))

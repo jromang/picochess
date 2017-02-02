@@ -587,6 +587,7 @@ def main():
     last_legal_fens = []
     game_declared = False  # User declared resignation or draw
 
+    args.engine_level = None if args.engine_level == 'None' else args.engine_level
     engine_opt, level_index = get_engine_level_dict(args.engine_level)
     engine.startup(engine_opt)
 
