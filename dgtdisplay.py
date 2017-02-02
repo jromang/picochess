@@ -51,10 +51,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.setup_uci960_index = None
         self.setup_uci960_result = None
 
+        self.inside_menu_flag = False
         self.top_result = None
-        self.top_index = None
+        self.top_index = Menu.MODE_MENU
         self.mode_result = None
-        self.mode_index = None
+        self.mode_index = Mode.NORMAL
 
         self.engine_level_index = None
         self.engine_has_960 = False  # Not all engines support 960 mode - assume not
@@ -138,6 +139,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.system_voice_type_result = None
         self.system_voice_lang_result = None
         self.system_voice_speak_result = None
+        self.inside_menu_flag = False
 
     def _power_off(self, dev='web'):
         DisplayDgt.show(self.dgttranslate.text('Y10_goodbye'))
@@ -189,8 +191,17 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         side = ClockSide.LEFT if (self.hint_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
         return side
 
+    def inside_menu(self):
+        return self.inside_menu_flag
+
+    def inside_top_menu(self):
+        return self.inside_menu() and self.top_result is None
+
+    def inside_mode_menu(self):
+        return self.inside_menu() and self.top_result == Menu.MODE_MENU
+
     def inside_time_menu(self):
-        return self.top_result == Menu.TIME_MENU
+        return self.inside_menu() and self.top_result == Menu.TIME_MENU
 
     def inside_time_mode_menu(self):
         return self.inside_time_menu() and self.time_mode_result is None
@@ -205,16 +216,16 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         return self.inside_time_menu() and self.time_mode_result == TimeMode.FISCHER
 
     def inside_engine_menu(self):
-        return self.top_result == Menu.ENGINE_MENU
+        return self.inside_menu() and self.top_result == Menu.ENGINE_MENU
 
     def inside_engine_choose_menu(self):
         return self.inside_engine_menu() and self.engine_result is None
 
     def inside_book_menu(self):
-        return self.top_result == Menu.BOOK_MENU
+        return self.inside_menu() and self.top_result == Menu.BOOK_MENU
 
     def inside_system_menu(self):
-        return self.top_result == Menu.SYSTEM_MENU
+        return self.inside_menu() and self.top_result == Menu.SYSTEM_MENU
 
     def inside_system_choose_menu(self):
         return self.inside_system_menu() and self.system_result is None
@@ -238,36 +249,68 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         return self.inside_system_menu() and self.system_result == Settings.VOICE
 
     def inside_position_menu(self):
-        return self.top_result == Menu.POSITION_MENU
-
-    def inside_mode_menu(self):
-        return self.top_result == Menu.MODE_MENU
-
-    def inside_top_menu(self):
-        return self.top_result == Menu.TOP_MENU
+        return self.inside_menu() and self.top_result == Menu.POSITION_MENU
 
     def _process_button0(self, dev):
         def enter_top_menu():
-            self.top_result = Menu.TOP_MENU
-            return self.dgttranslate.text(self.top_index.value)
+            text = self.dgttranslate.text(self.top_index.value)
+            return text
 
-        def enter_time_mode_menu():
-            text = self.dgttranslate.text(self.time_mode_result.value)
-            self.time_mode_result = None
+        def enter_time_menu():
+            text = self.dgttranslate.text(self.time_mode_index.value)
             return text
 
         def enter_engine_menu():
-            text = self.installed_engines[self.engine_result]['text']
+            text = self.installed_engines[self.engine_index]['text']
             text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
-            self.engine_result = None
             return text
+
+        def enter_system_menu():
+            text = self.dgttranslate.text(self.system_index.value)
+            return text
+
+        def exit_mode_menu():
+            self.top_result = None
+            return enter_top_menu()
+
+        def exit_book_menu():
+            self.top_result = None
+            return enter_top_menu()
+
+        def exit_system_menu():
+            self.top_result = None
+            return enter_top_menu()
+
+        def exit_system_sound_menu():
+            self.system_result = None
+            return enter_system_menu()
+
+        def exit_system_language_menu():
+            self.system_result = None
+            return enter_system_menu()
+
+        def exit_time_menu():
+            self.top_result = None
+            return enter_top_menu()
+
+        def exit_time_mode_menu():
+            self.time_mode_result = None
+            return enter_time_menu()
+
+        def exit_engine_menu():
+            self.top_result = None
+            return enter_top_menu()
+
+        def exit_engine_level_menu():
+            self.engine_result = None
+            return enter_engine_menu()
 
         def top0():
             self._reset_menu_results()
             self._exit_display()
 
         def mode0():
-            DisplayDgt.show(enter_top_menu())
+            DisplayDgt.show(exit_mode_menu())
 
         def position0():
             if self.setup_uci960_result is None:
@@ -301,31 +344,48 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     self.system_voice_speak_result = None
                     vkey = self.voices_conf.keys()[self.system_voice_lang_index]
                     text = self.dgttranslate.text('B00_language_' + vkey + '_menu')  # voice using same as language
+            elif self.inside_system_language_menu():
+                text = exit_system_language_menu()
+            elif self.inside_system_sound_menu():
+                text = exit_system_sound_menu()
             else:
-                self.system_language_result = None
-                self.system_sound_result = None
-                text = enter_top_menu()
+                text = exit_system_menu()
             DisplayDgt.show(text)
 
         def engine0():
             if self.inside_engine_choose_menu():
-                text = enter_top_menu()
+                text = exit_engine_menu()
             else:
-                text = enter_engine_menu()
+                text = exit_engine_level_menu()
             DisplayDgt.show(text)
 
         def book0():
-            DisplayDgt.show(enter_top_menu())
+            DisplayDgt.show(exit_book_menu())
 
         def time0():
             if self.inside_time_mode_menu():
-                text = enter_top_menu()
+                text = exit_time_menu()
             else:
-                text = enter_time_mode_menu()
+                text = exit_time_mode_menu()
             DisplayDgt.show(text)
 
         logging.debug('({}) clock: handle button 0 press'.format(dev))
-        if self.top_result is None:
+        if self.inside_menu():
+            if self.inside_top_menu():
+                top0()
+            elif self.inside_mode_menu():
+                mode0()
+            elif self.inside_position_menu():
+                position0()
+            elif self.inside_system_menu():
+                system0()
+            elif self.inside_engine_menu():
+                engine0()
+            elif self.inside_book_menu():
+                book0()
+            elif self.inside_time_menu():
+                time0()
+        else:
             if self.last_move:
                 side = ClockSide.LEFT if (self.last_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
                 text = Dgt.DISPLAY_MOVE(move=self.last_move, fen=self.last_fen, side=side, wait=False, maxtime=1,
@@ -334,21 +394,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text = self.dgttranslate.text('B10_nomove')
             DisplayDgt.show(text)
             self._exit_display(wait=True)
-
-        if self.inside_top_menu():
-            top0()
-        elif self.inside_mode_menu():
-            mode0()
-        elif self.inside_position_menu():
-            position0()
-        elif self.inside_system_menu():
-            system0()
-        elif self.inside_engine_menu():
-            engine0()
-        elif self.inside_book_menu():
-            book0()
-        elif self.inside_time_menu():
-            time0()
 
     def _process_button1(self, dev):
         def top1():
@@ -451,31 +496,33 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             DisplayDgt.show(text)
 
         logging.debug('({}) clock: handle button 1 press'.format(dev))
-        if self.top_result is None:
+        if self.inside_menu():
+            if self.inside_top_menu():
+                top1()
+            elif self.inside_mode_menu():
+                mode1()
+            elif self.inside_position_menu():
+                position1()
+            elif self.inside_system_menu():
+                system1()
+            elif self.inside_engine_menu():
+                engine1()
+            elif self.inside_book_menu():
+                book1()
+            elif self.inside_time_menu():
+                time1()
+        else:
             text = self._combine_depth_and_score()
             text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             # text.maxtime = 0
             DisplayDgt.show(text)
             self._exit_display(wait=True)
 
-        if self.inside_top_menu():
-            top1()
-        elif self.inside_mode_menu():
-            mode1()
-        elif self.inside_position_menu():
-            position1()
-        elif self.inside_system_menu():
-            system1()
-        elif self.inside_engine_menu():
-            engine1()
-        elif self.inside_book_menu():
-            book1()
-        elif self.inside_time_menu():
-            time1()
-
     def _process_button2(self, dev):
         logging.debug('({}) clock: handle button 2 press'.format(dev))
-        if self.top_result is None:
+        if self.inside_menu():
+            pass
+        else:
             if self.engine_finished:
                 # @todo Protect against multi entrance of Alt-move
                 self.engine_finished = False  # This is not 100% ok, but for the moment better as nothing
@@ -588,7 +635,22 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             DisplayDgt.show(text)
 
         logging.debug('({}) clock: handle button 3 press'.format(dev))
-        if self.top_result is None:
+        if self.inside_menu():
+            if self.inside_top_menu():
+                top3()
+            elif self.inside_mode_menu():
+                mode3()
+            elif self.inside_position_menu():
+                position3()
+            elif self.inside_system_menu():
+                system3()
+            elif self.inside_engine_menu():
+                engine3()
+            elif self.inside_book_menu():
+                book3()
+            elif self.inside_time_menu():
+                time3()
+        else:
             if self.hint_move:
                 side = self.hint_side()
                 text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=False, maxtime=1,
@@ -597,21 +659,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text = self.dgttranslate.text('B10_nomove')
             DisplayDgt.show(text)
             self._exit_display(wait=True)
-
-        if self.inside_top_menu():
-            top3()
-        elif self.inside_mode_menu():
-            mode3()
-        elif self.inside_position_menu():
-            position3()
-        elif self.inside_system_menu():
-            system3()
-        elif self.inside_engine_menu():
-            engine3()
-        elif self.inside_book_menu():
-            book3()
-        elif self.inside_time_menu():
-            time3()
 
     def _process_button4(self, dev):
         def top4():
@@ -841,26 +888,25 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self._reset_menu_results()
 
         logging.debug('({}) clock: handle button 4 press'.format(dev))
-        if self.top_result is None:
-            self.top_result = Menu.TOP_MENU
-            self.top_index = Menu.MODE_MENU
+        if self.inside_menu():
+            if self.inside_top_menu():
+                top4()
+            elif self.inside_mode_menu():
+                mode4()
+            elif self.inside_position_menu():
+                position4()
+            elif self.inside_system_menu():
+                system4()
+            elif self.inside_engine_menu():
+                engine4()
+            elif self.inside_book_menu():
+                book4()
+            elif self.inside_time_menu():
+                time4()
+        else:
+            self.inside_menu_flag = True
             text = self.dgttranslate.text(self.top_index.value)
             DisplayDgt.show(text)
-
-        elif self.inside_top_menu():
-            top4()
-        elif self.inside_mode_menu():
-            mode4()
-        elif self.inside_position_menu():
-            position4()
-        elif self.inside_system_menu():
-            system4()
-        elif self.inside_engine_menu():
-            engine4()
-        elif self.inside_book_menu():
-            book4()
-        elif self.inside_time_menu():
-            time4()
 
     def _process_lever(self, right_side_down, dev):
         logging.debug('({}) clock: handle lever press - right_side_down: {}'.format(dev, right_side_down))
