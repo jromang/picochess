@@ -248,6 +248,21 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
     def inside_system_voice_menu(self):
         return self.inside_system_menu() and self.system_result == Settings.VOICE
 
+    # def inside_system_voice_choose_menu(self):
+    #     return self.inside_system_voice_menu() and self.system_voice_type_result is None
+
+    def inside_system_voice_type_menu(self):
+        return self.inside_system_voice_menu() and self.system_voice_type_result is None and \
+                self.system_voice_lang_result is None and self.system_voice_speak_result is None
+
+    def inside_system_voice_type_language_menu(self):
+        return self.inside_system_voice_menu() and self.system_voice_type_result is not None and \
+                self.system_voice_lang_result is None and self.system_voice_speak_result is None
+
+    def inside_system_voice_type_language_speaker_menu(self):
+        return self.inside_system_voice_menu() and self.system_voice_type_result is not None and \
+               self.system_voice_lang_result is not None and self.system_voice_speak_result is None
+
     def inside_position_menu(self):
         return self.inside_menu() and self.top_result == Menu.POSITION_MENU
 
@@ -330,7 +345,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
         def system0():
             if self.inside_system_voice_menu():
-                if self.system_voice_speak_result is None:
+                if self.inside_system_voice_choose_menu():
                     if self.system_voice_lang_result is None:
                         if self.system_voice_type_result is None:
                             text = enter_top_menu()
