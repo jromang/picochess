@@ -147,7 +147,7 @@ class DgtApi():
 @enum.unique
 class Menu(enum.Enum):
     TOP_MENU = 'B00_menu_top_menu'  # Top Level Menu
-    MODE_MENU = 'B00_menu_mode_menu'  # Default Menu
+    MODE_MENU = 'B00_menu_mode_menu'  # Mode Menu
     POSITION_MENU = 'B00_menu_position_menu'  # Setup position menu
     TIME_MENU = 'B00_menu_time_menu'  # Time controls menu
     BOOK_MENU = 'B00_menu_book_menu'  # Book menu

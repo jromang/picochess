@@ -203,7 +203,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
     def inside_time_menu(self):
         return self.inside_menu() and self.top_result == Menu.TIME_MENU
 
-    def inside_time_mode_menu(self):
+    def inside_time_mode_choose_menu(self):
         return self.inside_time_menu() and self.time_mode_result is None
 
     def inside_time_mode_fixed_menu(self):
@@ -248,9 +248,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
     def inside_system_voice_menu(self):
         return self.inside_system_menu() and self.system_result == Settings.VOICE
 
-    # def inside_system_voice_choose_menu(self):
-    #     return self.inside_system_voice_menu() and self.system_voice_type_result is None
-
     def inside_system_voice_type_menu(self):
         return self.inside_system_voice_menu() and self.system_voice_type_result is None and \
                 self.system_voice_lang_result is None and self.system_voice_speak_result is None
@@ -284,6 +281,19 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             text = self.dgttranslate.text(self.system_index.value)
             return text
 
+        def enter_system_voice_menu():
+            text = self.dgttranslate.text(self.system_index.value)
+            return text
+
+        def enter_system_voice_type_menu():
+            text = self.dgttranslate.text(self.system_voice_type_index.value)
+            return text
+
+        def enter_system_voice_type_language_menu():
+            vkey = self.voices_conf.keys()[self.system_voice_lang_index]
+            text = self.dgttranslate.text('B00_language_' + vkey + '_menu')  # voice using same as language
+            return text
+
         def exit_mode_menu():
             self.top_result = None
             return enter_top_menu()
@@ -303,6 +313,22 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         def exit_system_language_menu():
             self.system_result = None
             return enter_system_menu()
+
+        def exit_system_voice_menu():
+            self.system_result = None
+            return enter_system_menu()
+
+        def exit_system_voice_type_menu():
+            self.system_voice_type_result = None
+            return enter_system_voice_menu()
+
+        def exit_system_voice_type_language_menu():
+            self.system_voice_lang_result = None
+            return enter_system_voice_type_menu()
+
+        def exit_system_voice_type_language_speaker_menu():
+            self.system_voice_speak_result = None
+            return enter_system_voice_type_language_menu()
 
         def exit_time_menu():
             self.top_result = None
@@ -345,26 +371,25 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
         def system0():
             if self.inside_system_voice_menu():
-                if self.inside_system_voice_choose_menu():
-                    if self.system_voice_lang_result is None:
-                        if self.system_voice_type_result is None:
-                            text = enter_top_menu()
-                        else:
-                            self.system_voice_type_result = None
-                            text = self.dgttranslate.text(self.system_index.value)
-                    else:
-                        self.system_voice_lang_result = None
-                        text = self.dgttranslate.text(self.system_voice_type_index.value)
+                if self.inside_system_voice_type_language_speaker_menu():
+                    text = exit_system_voice_type_language_menu()
                 else:
-                    self.system_voice_speak_result = None
-                    vkey = self.voices_conf.keys()[self.system_voice_lang_index]
-                    text = self.dgttranslate.text('B00_language_' + vkey + '_menu')  # voice using same as language
+                    if self.inside_system_voice_type_language_menu():
+                        text = exit_system_voice_type_menu()
+                    else:
+                        if self.inside_system_voice_type_menu():
+                            text = exit_system_menu()
+                        else:
+                            text = exit_system_voice_type_language_speaker_menu()
             elif self.inside_system_language_menu():
                 text = exit_system_language_menu()
             elif self.inside_system_sound_menu():
                 text = exit_system_sound_menu()
-            else:
+            elif self.system_result in (Settings.VERSION, Settings.IPADR, Settings.LOGFILE):
                 text = exit_system_menu()
+            else:
+                logging.warning('wrong value for system_result: {}'.format(self.system_result))
+                text = self.dgttranslate.text('Y00_errormenu')
             DisplayDgt.show(text)
 
         def engine0():
@@ -378,7 +403,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             DisplayDgt.show(exit_book_menu())
 
         def time0():
-            if self.inside_time_mode_menu():
+            if self.inside_time_mode_choose_menu():
                 text = exit_time_menu()
             else:
                 text = exit_time_mode_menu()
@@ -492,22 +517,21 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             DisplayDgt.show(text)
 
         def time1():
-            if self.inside_time_mode_menu():
+            if self.inside_time_mode_choose_menu():
                 self.time_mode_index = TimeModeLoop.prev(self.time_mode_index)
                 text = self.dgttranslate.text(self.time_mode_index.value)
+            elif self.inside_time_mode_fixed_menu():
+                self.tc_fixed_index = (self.tc_fixed_index - 1) % len(self.tc_fixed_map)
+                text = self.dgttranslate.text('B00_tc_fixed', self.tc_fixed_list[self.tc_fixed_index])
+            elif self.inside_time_mode_blitz_menu():
+                self.tc_blitz_index = (self.tc_blitz_index - 1) % len(self.tc_blitz_map)
+                text = self.dgttranslate.text('B00_tc_blitz', self.tc_blitz_list[self.tc_blitz_index])
+            elif self.inside_time_mode_fisch_menu():
+                self.tc_fisch_index = (self.tc_fisch_index - 1) % len(self.tc_fisch_map)
+                text = self.dgttranslate.text('B00_tc_fisch', self.tc_fisch_list[self.tc_fisch_index])
             else:
-                if self.inside_time_mode_fixed_menu():
-                    self.tc_fixed_index = (self.tc_fixed_index - 1) % len(self.tc_fixed_map)
-                    text = self.dgttranslate.text('B00_tc_fixed', self.tc_fixed_list[self.tc_fixed_index])
-                elif self.inside_time_mode_blitz_menu():
-                    self.tc_blitz_index = (self.tc_blitz_index - 1) % len(self.tc_blitz_map)
-                    text = self.dgttranslate.text('B00_tc_blitz', self.tc_blitz_list[self.tc_blitz_index])
-                elif self.inside_time_mode_fisch_menu():
-                    self.tc_fisch_index = (self.tc_fisch_index - 1) % len(self.tc_fisch_map)
-                    text = self.dgttranslate.text('B00_tc_fisch', self.tc_fisch_list[self.tc_fisch_index])
-                else:
-                    logging.warning('wrong value for time_mode_index: {}'.format(self.time_mode_index))
-                    text = self.dgttranslate.text('Y00_errormenu')
+                logging.warning('wrong value for time_mode_index: {}'.format(self.time_mode_index))
+                text = self.dgttranslate.text('Y00_errormenu')
             DisplayDgt.show(text)
 
         logging.debug('({}) clock: handle button 1 press'.format(dev))
@@ -631,22 +655,21 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             DisplayDgt.show(text)
 
         def time3():
-            if self.inside_time_mode_menu():
+            if self.inside_time_mode_choose_menu():
                 self.time_mode_index = TimeModeLoop.next(self.time_mode_index)
                 text = self.dgttranslate.text(self.time_mode_index.value)
+            elif self.inside_time_mode_fixed_menu():
+                self.tc_fixed_index = (self.tc_fixed_index + 1) % len(self.tc_fixed_map)
+                text = self.dgttranslate.text('B00_tc_fixed', self.tc_fixed_list[self.tc_fixed_index])
+            elif self.inside_time_mode_blitz_menu():
+                self.tc_blitz_index = (self.tc_blitz_index + 1) % len(self.tc_blitz_map)
+                text = self.dgttranslate.text('B00_tc_blitz', self.tc_blitz_list[self.tc_blitz_index])
+            elif self.inside_time_mode_fisch_menu():
+                self.tc_fisch_index = (self.tc_fisch_index + 1) % len(self.tc_fisch_map)
+                text = self.dgttranslate.text('B00_tc_fisch', self.tc_fisch_list[self.tc_fisch_index])
             else:
-                if self.inside_time_mode_fixed_menu():
-                    self.tc_fixed_index = (self.tc_fixed_index + 1) % len(self.tc_fixed_map)
-                    text = self.dgttranslate.text('B00_tc_fixed', self.tc_fixed_list[self.tc_fixed_index])
-                elif self.inside_time_mode_blitz_menu():
-                    self.tc_blitz_index = (self.tc_blitz_index + 1) % len(self.tc_blitz_map)
-                    text = self.dgttranslate.text('B00_tc_blitz', self.tc_blitz_list[self.tc_blitz_index])
-                elif self.inside_time_mode_fisch_menu():
-                    self.tc_fisch_index = (self.tc_fisch_index + 1) % len(self.tc_fisch_map)
-                    text = self.dgttranslate.text('B00_tc_fisch', self.tc_fisch_list[self.tc_fisch_index])
-                else:
-                    logging.warning('wrong value for time_mode_index: {}'.format(self.time_mode_index))
-                    text = self.dgttranslate.text('Y00_errormenu')
+                logging.warning('wrong value for time_mode_index: {}'.format(self.time_mode_index))
+                text = self.dgttranslate.text('Y00_errormenu')
             DisplayDgt.show(text)
 
         logging.debug('({}) clock: handle button 3 press'.format(dev))
@@ -695,7 +718,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             elif self.top_index == Menu.SYSTEM_MENU:
                 text = self.dgttranslate.text(self.system_index.value)
             else:
-                logging.warning('wrong value for topindex: {}'.format(self.top_index))
+                logging.warning('wrong value for top_index: {}'.format(self.top_index))
                 text = self.dgttranslate.text('Y00_errormenu')
             DisplayDgt.show(text)
 
@@ -792,19 +815,20 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.fire(Event.EMAIL_LOG())
                 text = self.dgttranslate.text('B10_oklogfile')  # @todo give pos/neg feedback
             elif self.inside_system_voice_menu():
-                if self.system_voice_type_result is None:
+                if self.inside_system_voice_type_menu():
                     self.system_voice_type_result = self.system_voice_type_index
                     text = self.dgttranslate.text(self.system_voice_type_index.value)
                     exit_menu = False
                 else:
-                    vkey = self.voices_conf.keys()[self.system_voice_lang_index]
-                    if self.system_voice_lang_result is None:
+                    if self.inside_system_voice_type_language_menu():
+                        vkey = self.voices_conf.keys()[self.system_voice_lang_index]
                         self.system_voice_lang_result = self.system_voice_lang_index
                         text = self.dgttranslate.text('B00_language_' + vkey + '_menu')
                         exit_menu = False
                     else:
-                        if self.system_voice_speak_result is None:
+                        if self.inside_system_voice_type_language_speaker_menu():
                             self.system_voice_speak_result = self.system_voice_speak_index
+                            vkey = self.voices_conf.keys()[self.system_voice_lang_index]
                             speakers = self.voices_conf[vkey]
                             if self.system_voice_speak_index >= len(speakers):
                                 self.system_voice_speak_index = 0
@@ -826,7 +850,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             self.fire(Event.SET_VOICE(type=self.system_voice_type_index, lang=vkey, speaker=skey))
                             text = self.dgttranslate.text('B10_okvoice')
             else:
-                logging.warning('wrong value for system_index: {}'.format(self.system_index))
+                logging.warning('wrong value for system_result: {}'.format(self.system_result))
                 text = self.dgttranslate.text('Y00_errormenu')
             DisplayDgt.show(text)
             if exit_menu:
@@ -873,7 +897,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             self._reset_menu_results()
 
         def time4():
-            if self.inside_time_mode_menu():
+            if self.inside_time_mode_choose_menu():
                 self.time_mode_result = self.time_mode_index
                 # display first entry of the submenu "time_mode"
                 if self.time_mode_index == TimeMode.FIXED:
