@@ -260,6 +260,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         return self.inside_system_voice_menu() and self.system_voice_type_result is not None and \
                self.system_voice_lang_result is not None and self.system_voice_speak_result is None
 
+    def inside_system_voice_type_language_speaker_super_menu(self):
+        return self.inside_system_voice_menu() and self.system_voice_type_result is not None and \
+               self.system_voice_lang_result is not None and self.system_voice_speak_result is not None
+
     def inside_position_menu(self):
         return self.inside_menu() and self.top_result == Menu.POSITION_MENU
 
@@ -371,16 +375,16 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
         def system0():
             if self.inside_system_voice_menu():
-                if self.inside_system_voice_type_language_speaker_menu():
+                if self.inside_system_voice_type_language_speaker_super_menu():
+                    text = exit_system_voice_type_language_speaker_menu()
+                elif self.inside_system_voice_type_language_speaker_menu():
                     text = exit_system_voice_type_language_menu()
+                elif self.inside_system_voice_type_language_menu():
+                    text = exit_system_voice_type_menu()
+                elif self.inside_system_voice_type_menu():
+                    text = exit_system_menu()
                 else:
-                    if self.inside_system_voice_type_language_menu():
-                        text = exit_system_voice_type_menu()
-                    else:
-                        if self.inside_system_voice_type_menu():
-                            text = exit_system_menu()
-                        else:
-                            text = exit_system_voice_type_language_speaker_menu()
+                    text = self.dgttranslate.text('Y00_errormenu')
             elif self.inside_system_language_menu():
                 text = exit_system_language_menu()
             elif self.inside_system_sound_menu():
