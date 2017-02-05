@@ -34,7 +34,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.time_control = time_control
 
         self.flip_board = False
-        self.dgt_fen = None
+        self.dgt_fen = '8/8/8/8/8/8/8/8'
         self.engine_finished = False
         self.ip = None
         self.drawresign_fen = None
@@ -273,6 +273,22 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
     def inside_position_menu(self):
         return self.inside_menu() and self.menu_top_result == Menu.POSITION_MENU
 
+    def inside_position_move_menu(self):
+        return self.inside_position_menu() and self.menu_setup_whitetomove_result is None and \
+               self.menu_setup_reverse_result is None and self.menu_setup_uci960_result is None
+
+    def inside_position_move_reverse_menu(self):
+        return self.inside_position_menu() and self.menu_setup_whitetomove_result is not None and \
+               self.menu_setup_reverse_result is None and self.menu_setup_uci960_result is None
+
+    def inside_position_move_reverse_uci_menu(self):
+        return self.inside_position_menu() and self.menu_setup_whitetomove_result is not None and \
+               self.menu_setup_reverse_result is not None and self.menu_setup_uci960_result is None
+
+    def inside_position_move_reverse_uci_super_menu(self):
+        return self.inside_position_menu() and self.menu_setup_whitetomove_result is not None and \
+               self.menu_setup_reverse_result is not None and self.menu_setup_uci960_result is not None
+
     def _process_button0(self, dev):
         def enter_top_menu():
             text = self.dgttranslate.text(self.menu_top_index.value)
@@ -309,6 +325,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             return enter_top_menu()
 
         def exit_book_menu():
+            self.menu_top_result = None
+            return enter_top_menu()
+
+        def exit_position_menu():
             self.menu_top_result = None
             return enter_top_menu()
 
@@ -364,19 +384,19 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             DisplayDgt.show(exit_mode_menu())
 
         def position0():
-            if self.menu_setup_uci960_result is None:
-                if self.menu_setup_reverse_result is None:
-                    if self.menu_setup_whitetomove_result is None:
-                        text = enter_top_menu()
-                    else:
-                        self.menu_setup_whitetomove_result = None
-                        text = self.dgttranslate.text('B00_sidewhite' if self.menu_setup_whitetomove_index else 'B00_sideblack')
-                else:
-                    self.menu_setup_reverse_result = None
-                    text = self.dgttranslate.text('B00_bw' if self.menu_setup_reverse_index else 'B00_wb')
-            else:
+            if self.inside_position_move_reverse_uci_super_menu():
                 self.menu_setup_uci960_result = None
                 text = self.dgttranslate.text('B00_960yes' if self.menu_setup_uci960_index else 'B00_960no')
+            elif self.inside_position_move_reverse_uci_menu():
+                self.menu_setup_reverse_result = None
+                text = self.dgttranslate.text('B00_bw' if self.menu_setup_reverse_index else 'B00_wb')
+            elif self.inside_position_move_reverse_menu():
+                self.menu_setup_whitetomove_result = None
+                text = self.dgttranslate.text('B00_sidewhite' if self.menu_setup_whitetomove_index else 'B00_sideblack')
+            elif self.inside_position_move_menu():
+                text = exit_position_menu()
+            else:
+                text = self.dgttranslate.text('Y00_errormenu')
             DisplayDgt.show(text)
 
         def system0():
@@ -457,20 +477,21 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             DisplayDgt.show(text)
 
         def position1():
-            if self.menu_setup_uci960_result is None:
-                if self.menu_setup_reverse_result is None:
-                    if self.menu_setup_whitetomove_result is None:
-                        self.menu_setup_whitetomove_index = not self.menu_setup_whitetomove_index
-                        text = self.dgttranslate.text('B00_sidewhite' if self.menu_setup_whitetomove_index else 'B00_sideblack')
-                    else:
-                        self.menu_setup_reverse_index = not self.menu_setup_reverse_index
-                        text = self.dgttranslate.text('B00_bw' if self.menu_setup_reverse_index else 'B00_wb')
-                else:
+            if self.menu_setup_uci960_result is None:  # not on "scan" level
+                if self.inside_position_move_reverse_uci_menu():
                     if self.engine_has_960:
                         self.menu_setup_uci960_index = not self.menu_setup_uci960_index
                         text = self.dgttranslate.text('B00_960yes' if self.menu_setup_uci960_index else 'B00_960no')
                     else:
                         text = self.dgttranslate.text('Y00_error960')
+                elif self.inside_position_move_reverse_menu():
+                    self.menu_setup_reverse_index = not self.menu_setup_reverse_index
+                    text = self.dgttranslate.text('B00_bw' if self.menu_setup_reverse_index else 'B00_wb')
+                elif self.inside_position_move_menu():
+                    self.menu_setup_whitetomove_index = not self.menu_setup_whitetomove_index
+                    text = self.dgttranslate.text('B00_sidewhite' if self.menu_setup_whitetomove_index else 'B00_sideblack')
+                else:
+                    text = self.dgttranslate.text('Y00_errormenu')
                 DisplayDgt.show(text)
 
         def system1():
@@ -595,20 +616,21 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             DisplayDgt.show(text)
 
         def position3():
-            if self.menu_setup_uci960_result is None:
-                if self.menu_setup_reverse_result is None:
-                    if self.menu_setup_whitetomove_result is None:
-                        self.menu_setup_whitetomove_index = not self.menu_setup_whitetomove_index
-                        text = self.dgttranslate.text('B00_sidewhite' if self.menu_setup_whitetomove_index else 'B00_sideblack')
-                    else:
-                        self.menu_setup_reverse_index = not self.menu_setup_reverse_index
-                        text = self.dgttranslate.text('B00_bw' if self.menu_setup_reverse_index else 'B00_wb')
-                else:
+            if self.menu_setup_uci960_result is None:  # not on "scan" level
+                if self.inside_position_move_reverse_uci_menu():
                     if self.engine_has_960:
                         self.menu_setup_uci960_index = not self.menu_setup_uci960_index
                         text = self.dgttranslate.text('B00_960yes' if self.menu_setup_uci960_index else 'B00_960no')
                     else:
                         text = self.dgttranslate.text('Y00_error960')
+                elif self.inside_position_move_reverse_menu():
+                    self.menu_setup_reverse_index = not self.menu_setup_reverse_index
+                    text = self.dgttranslate.text('B00_bw' if self.menu_setup_reverse_index else 'B00_wb')
+                elif self.inside_position_move_menu():
+                    self.menu_setup_whitetomove_index = not self.menu_setup_whitetomove_index
+                    text = self.dgttranslate.text('B00_sidewhite' if self.menu_setup_whitetomove_index else 'B00_sideblack')
+                else:
+                    text = self.dgttranslate.text('Y00_errormenu')
                 DisplayDgt.show(text)
 
         def system3():
@@ -739,38 +761,38 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             self._reset_menu_results()
 
         def position4():
-            if self.menu_setup_whitetomove_result is None:
+            if self.inside_position_move_reverse_uci_super_menu():
+                to_move = 'w' if self.menu_setup_whitetomove_index else 'b'
+                fen = self.dgt_fen
+                if self.flip_board != self.menu_setup_reverse_result:
+                    logging.debug('flipping the board')
+                    fen = fen[::-1]
+                fen += " {0} KQkq - 0 1".format(to_move)
+                bit_board = chess.Board(fen, self.menu_setup_uci960_result)
+                # ask python-chess to correct the castling string
+                bit_board.set_fen(bit_board.fen())
+                if bit_board.is_valid():
+                    self.flip_board = self.menu_setup_reverse_result
+                    self.fire(Event.SETUP_POSITION(fen=bit_board.fen(), uci960=self.menu_setup_uci960_result))
+                    self._reset_moves_and_score()
+                    self._reset_menu_results()
+                    return
+                else:
+                    DisplayDgt.show(self.dgttranslate.text('Y05_illegalpos'))
+                    text = self.dgttranslate.text('B00_scanboard')
+            elif self.inside_position_move_reverse_uci_menu():
+                self.menu_setup_uci960_result = self.menu_setup_uci960_index
+                text = self.dgttranslate.text('B00_scanboard')
+            elif self.inside_position_move_reverse_menu():
+                self.menu_setup_reverse_result = self.menu_setup_reverse_index
+                self.menu_setup_uci960_index = False
+                text = self.dgttranslate.text('B00_960yes' if self.menu_setup_uci960_index else 'B00_960no')
+            elif self.inside_position_move_menu():
                 self.menu_setup_whitetomove_result = self.menu_setup_whitetomove_index
                 self.menu_setup_reverse_index = self.flip_board
                 text = self.dgttranslate.text('B00_bw' if self.menu_setup_reverse_index else 'B00_wb')
             else:
-                if self.menu_setup_reverse_result is None:
-                    self.menu_setup_reverse_result = self.menu_setup_reverse_index
-                    self.menu_setup_uci960_index = False
-                    text = self.dgttranslate.text('B00_960yes' if self.menu_setup_uci960_index else 'B00_960no')
-                else:
-                    if self.menu_setup_uci960_result is None:
-                        self.menu_setup_uci960_result = self.menu_setup_uci960_index
-                        text = self.dgttranslate.text('B00_scanboard')
-                    else:
-                        to_move = 'w' if self.menu_setup_whitetomove_index else 'b'
-                        fen = self.dgt_fen
-                        if self.flip_board != self.menu_setup_reverse_result:
-                            logging.debug('flipping the board')
-                            fen = fen[::-1]
-                        fen += " {0} KQkq - 0 1".format(to_move)
-                        bit_board = chess.Board(fen, self.menu_setup_uci960_result)
-                        # ask python-chess to correct the castling string
-                        bit_board.set_fen(bit_board.fen())
-                        if bit_board.is_valid():
-                            self.flip_board = self.menu_setup_reverse_result
-                            self.fire(Event.SETUP_POSITION(fen=bit_board.fen(), uci960=self.menu_setup_uci960_result))
-                            self._reset_moves_and_score()
-                            self._reset_menu_results()
-                            return
-                        else:
-                            DisplayDgt.show(self.dgttranslate.text('Y05_illegalpos'))
-                            text = self.dgttranslate.text('B00_scanboard')
+                text = self.dgttranslate.text('Y00_errormenu')
             DisplayDgt.show(text)
 
         def system4():
