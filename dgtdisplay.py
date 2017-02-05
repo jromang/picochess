@@ -44,52 +44,52 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
         self._reset_moves_and_score()
 
-        self.setup_whitetomove_index = None
-        self.setup_whitetomove_result = None
-        self.setup_reverse_index = None
-        self.setup_reverse_result = None
-        self.setup_uci960_index = None
-        self.setup_uci960_result = None
+        self.menu_setup_whitetomove_index = None
+        self.menu_setup_whitetomove_result = None
+        self.menu_setup_reverse_index = None
+        self.menu_setup_reverse_result = None
+        self.menu_setup_uci960_index = None
+        self.menu_setup_uci960_result = None
 
-        self.inside_menu_flag = False
-        self.top_result = None
-        self.top_index = Menu.MODE_MENU
-        self.mode_result = None
-        self.mode_index = Mode.NORMAL
+        self.menu_inside_flag = False
+        self.menu_top_result = None
+        self.menu_top_index = Menu.MODE_MENU
+        self.menu_mode_result = None
+        self.menu_mode_index = Mode.NORMAL
 
         self.engine_level_index = None
         self.engine_has_960 = False  # Not all engines support 960 mode - assume not
         self.engine_restart = False
-        self.engine_result = None
-        self.engine_index = 0
+        self.menu_engine_name_result = None
+        self.menu_engine_name_index = 0
         self.installed_engines = None
 
-        self.book_index = 0
+        self.menu_book_index = 0
         self.all_books = None
 
-        self.system_result = None
-        self.system_index = Settings.VERSION
-        self.system_sound_result = None
-        self.system_sound_index = self.dgttranslate.beep
+        self.menu_system_result = None
+        self.menu_system_index = Settings.VERSION
+        self.menu_system_sound_beep_result = None
+        self.menu_system_sound_beep_index = self.dgttranslate.beep
 
-        self.system_language_result = None
+        self.menu_system_language_lang_result = None
         langs = {'en': Language.EN, 'de': Language.DE, 'nl': Language.NL,
                  'fr': Language.FR, 'es': Language.ES, 'it': Language.IT}
-        self.system_language_index = langs[self.dgttranslate.language]
+        self.menu_system_language_lang_index = langs[self.dgttranslate.language]
 
         self.voices_conf = ConfigObj('talker' + os.sep + 'voices' + os.sep + 'voices.ini')
-        self.system_voice_type_result = None
-        self.system_voice_type_index = VoiceType.COMP_VOICE
-        self.system_voice_lang_result = None
+        self.menu_system_voice_type_result = None
+        self.menu_system_voice_type_index = VoiceType.COMP_VOICE
+        self.menu_system_voice_lang_result = None
         try:
-            self.system_voice_lang_index = self.voices_conf.keys().index(self.dgttranslate.language)
+            self.menu_system_voice_lang_index = self.voices_conf.keys().index(self.dgttranslate.language)
         except ValueError:
-            self.system_voice_lang_index = 0
-        self.system_voice_speak_result = None
-        self.system_voice_speak_index = 0
+            self.menu_system_voice_lang_index = 0
+        self.menu_system_voice_speak_result = None
+        self.menu_system_voice_speak_index = 0
 
-        self.time_mode_result = None
-        self.time_mode_index = TimeMode.BLITZ
+        self.menu_time_mode_result = None
+        self.menu_time_mode_index = TimeMode.BLITZ
 
         self.tc_fixed_index = 0
         self.tc_blitz_index = 2  # Default time control: Blitz, 5min
@@ -126,20 +126,20 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             ('rnbqkbnr/pppppppp/8/8/8/7Q/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FISCHER, minutes_per_game=60, fischer_increment=30))])
 
     def _reset_menu_results(self):
-        # dont override "mode_result", otherwise wQ a5-f5 wont work anymore (=> if's)
-        self.time_mode_result = None
-        self.setup_whitetomove_result = None
-        self.setup_reverse_result = None
-        self.setup_uci960_result = None
-        self.top_result = None
-        self.system_result = None
-        self.engine_result = None
-        self.system_sound_result = None
-        self.system_language_result = None
-        self.system_voice_type_result = None
-        self.system_voice_lang_result = None
-        self.system_voice_speak_result = None
-        self.inside_menu_flag = False
+        # dont override "menu_mode_result", otherwise wQ a5-f5 wont work anymore (=> if's)
+        self.menu_time_mode_result = None
+        self.menu_setup_whitetomove_result = None
+        self.menu_setup_reverse_result = None
+        self.menu_setup_uci960_result = None
+        self.menu_top_result = None
+        self.menu_system_result = None
+        self.menu_engine_name_result = None
+        self.menu_system_sound_beep_result = None
+        self.menu_system_language_lang_result = None
+        self.menu_system_voice_type_result = None
+        self.menu_system_voice_lang_result = None
+        self.menu_system_voice_speak_result = None
+        self.menu_inside_flag = False
 
     def _power_off(self, dev='web'):
         DisplayDgt.show(self.dgttranslate.text('Y10_goodbye'))
@@ -192,162 +192,168 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         return side
 
     def inside_menu(self):
-        return self.inside_menu_flag
+        return self.menu_inside_flag
 
     def inside_top_menu(self):
-        return self.inside_menu() and self.top_result is None
+        return self.inside_menu() and self.menu_top_result is None
 
     def inside_mode_menu(self):
-        return self.inside_menu() and self.top_result == Menu.MODE_MENU
+        return self.inside_menu() and self.menu_top_result == Menu.MODE_MENU
 
     def inside_time_menu(self):
-        return self.inside_menu() and self.top_result == Menu.TIME_MENU
+        return self.inside_menu() and self.menu_top_result == Menu.TIME_MENU
 
     def inside_time_mode_choose_menu(self):
-        return self.inside_time_menu() and self.time_mode_result is None
+        return self.inside_time_menu() and self.menu_time_mode_result is None
 
     def inside_time_mode_fixed_menu(self):
-        return self.inside_time_menu() and self.time_mode_result == TimeMode.FIXED
+        return self.inside_time_menu() and self.menu_time_mode_result == TimeMode.FIXED
 
     def inside_time_mode_blitz_menu(self):
-        return self.inside_time_menu() and self.time_mode_result == TimeMode.BLITZ
+        return self.inside_time_menu() and self.menu_time_mode_result == TimeMode.BLITZ
 
     def inside_time_mode_fisch_menu(self):
-        return self.inside_time_menu() and self.time_mode_result == TimeMode.FISCHER
+        return self.inside_time_menu() and self.menu_time_mode_result == TimeMode.FISCHER
 
     def inside_engine_menu(self):
-        return self.inside_menu() and self.top_result == Menu.ENGINE_MENU
+        return self.inside_menu() and self.menu_top_result == Menu.ENGINE_MENU
 
-    def inside_engine_choose_menu(self):
-        return self.inside_engine_menu() and self.engine_result is None
+    def inside_engine_name_menu(self):
+        return self.inside_engine_menu() and self.menu_engine_name_result is None
 
     def inside_book_menu(self):
-        return self.inside_menu() and self.top_result == Menu.BOOK_MENU
+        return self.inside_menu() and self.menu_top_result == Menu.BOOK_MENU
 
     def inside_system_menu(self):
-        return self.inside_menu() and self.top_result == Menu.SYSTEM_MENU
+        return self.inside_menu() and self.menu_top_result == Menu.SYSTEM_MENU
 
     def inside_system_choose_menu(self):
-        return self.inside_system_menu() and self.system_result is None
+        return self.inside_system_menu() and self.menu_system_result is None
 
     def inside_system_version_menu(self):
-        return self.inside_system_menu() and self.system_result == Settings.VERSION
+        return self.inside_system_menu() and self.menu_system_result == Settings.VERSION
 
     def inside_system_ipadr_menu(self):
-        return self.inside_system_menu() and self.system_result == Settings.IPADR
+        return self.inside_system_menu() and self.menu_system_result == Settings.IPADR
 
     def inside_system_sound_menu(self):
-        return self.inside_system_menu() and self.system_result == Settings.SOUND
+        return self.inside_system_menu() and self.menu_system_result == Settings.SOUND
+
+    def inside_system_sound_beep_menu(self):
+        return self.inside_system_sound_menu() and self.menu_system_sound_beep_result is None
 
     def inside_system_language_menu(self):
-        return self.inside_system_menu() and self.system_result == Settings.LANGUAGE
+        return self.inside_system_menu() and self.menu_system_result == Settings.LANGUAGE
+
+    def inside_system_language_lang_menu(self):
+        return self.inside_system_language_menu() and self.menu_system_language_lang_result is None
 
     def inside_system_logfile_menu(self):
-        return self.inside_system_menu() and self.system_result == Settings.LOGFILE
+        return self.inside_system_menu() and self.menu_system_result == Settings.LOGFILE
 
     def inside_system_voice_menu(self):
-        return self.inside_system_menu() and self.system_result == Settings.VOICE
+        return self.inside_system_menu() and self.menu_system_result == Settings.VOICE
 
     def inside_system_voice_type_menu(self):
-        return self.inside_system_voice_menu() and self.system_voice_type_result is None and \
-                self.system_voice_lang_result is None and self.system_voice_speak_result is None
+        return self.inside_system_voice_menu() and self.menu_system_voice_type_result is None and \
+               self.menu_system_voice_lang_result is None and self.menu_system_voice_speak_result is None
 
     def inside_system_voice_type_language_menu(self):
-        return self.inside_system_voice_menu() and self.system_voice_type_result is not None and \
-                self.system_voice_lang_result is None and self.system_voice_speak_result is None
+        return self.inside_system_voice_menu() and self.menu_system_voice_type_result is not None and \
+               self.menu_system_voice_lang_result is None and self.menu_system_voice_speak_result is None
 
     def inside_system_voice_type_language_speaker_menu(self):
-        return self.inside_system_voice_menu() and self.system_voice_type_result is not None and \
-               self.system_voice_lang_result is not None and self.system_voice_speak_result is None
+        return self.inside_system_voice_menu() and self.menu_system_voice_type_result is not None and \
+               self.menu_system_voice_lang_result is not None and self.menu_system_voice_speak_result is None
 
     def inside_system_voice_type_language_speaker_super_menu(self):
-        return self.inside_system_voice_menu() and self.system_voice_type_result is not None and \
-               self.system_voice_lang_result is not None and self.system_voice_speak_result is not None
+        return self.inside_system_voice_menu() and self.menu_system_voice_type_result is not None and \
+               self.menu_system_voice_lang_result is not None and self.menu_system_voice_speak_result is not None
 
     def inside_position_menu(self):
-        return self.inside_menu() and self.top_result == Menu.POSITION_MENU
+        return self.inside_menu() and self.menu_top_result == Menu.POSITION_MENU
 
     def _process_button0(self, dev):
         def enter_top_menu():
-            text = self.dgttranslate.text(self.top_index.value)
+            text = self.dgttranslate.text(self.menu_top_index.value)
             return text
 
         def enter_time_menu():
-            text = self.dgttranslate.text(self.time_mode_index.value)
+            text = self.dgttranslate.text(self.menu_time_mode_index.value)
             return text
 
         def enter_engine_menu():
-            text = self.installed_engines[self.engine_index]['text']
+            text = self.installed_engines[self.menu_engine_name_index]['text']
             text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             return text
 
         def enter_system_menu():
-            text = self.dgttranslate.text(self.system_index.value)
+            text = self.dgttranslate.text(self.menu_system_index.value)
             return text
 
         def enter_system_voice_menu():
-            text = self.dgttranslate.text(self.system_index.value)
+            text = self.dgttranslate.text(self.menu_system_index.value)
             return text
 
         def enter_system_voice_type_menu():
-            text = self.dgttranslate.text(self.system_voice_type_index.value)
+            text = self.dgttranslate.text(self.menu_system_voice_type_index.value)
             return text
 
         def enter_system_voice_type_language_menu():
-            vkey = self.voices_conf.keys()[self.system_voice_lang_index]
+            vkey = self.voices_conf.keys()[self.menu_system_voice_lang_index]
             text = self.dgttranslate.text('B00_language_' + vkey + '_menu')  # voice using same as language
             return text
 
         def exit_mode_menu():
-            self.top_result = None
+            self.menu_top_result = None
             return enter_top_menu()
 
         def exit_book_menu():
-            self.top_result = None
+            self.menu_top_result = None
             return enter_top_menu()
 
         def exit_system_menu():
-            self.top_result = None
+            self.menu_top_result = None
             return enter_top_menu()
 
         def exit_system_sound_menu():
-            self.system_result = None
+            self.menu_system_result = None
             return enter_system_menu()
 
         def exit_system_language_menu():
-            self.system_result = None
+            self.menu_system_result = None
             return enter_system_menu()
 
         def exit_system_voice_menu():
-            self.system_result = None
+            self.menu_system_result = None
             return enter_system_menu()
 
         def exit_system_voice_type_menu():
-            self.system_voice_type_result = None
+            self.menu_system_voice_type_result = None
             return enter_system_voice_menu()
 
         def exit_system_voice_type_language_menu():
-            self.system_voice_lang_result = None
+            self.menu_system_voice_lang_result = None
             return enter_system_voice_type_menu()
 
         def exit_system_voice_type_language_speaker_menu():
-            self.system_voice_speak_result = None
+            self.menu_system_voice_speak_result = None
             return enter_system_voice_type_language_menu()
 
         def exit_time_menu():
-            self.top_result = None
+            self.menu_top_result = None
             return enter_top_menu()
 
         def exit_time_mode_menu():
-            self.time_mode_result = None
+            self.menu_time_mode_result = None
             return enter_time_menu()
 
-        def exit_engine_menu():
-            self.top_result = None
+        def exit_engine_name_menu():
+            self.menu_top_result = None
             return enter_top_menu()
 
         def exit_engine_level_menu():
-            self.engine_result = None
+            self.menu_engine_name_result = None
             return enter_engine_menu()
 
         def top0():
@@ -358,23 +364,25 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             DisplayDgt.show(exit_mode_menu())
 
         def position0():
-            if self.setup_uci960_result is None:
-                if self.setup_reverse_result is None:
-                    if self.setup_whitetomove_result is None:
+            if self.menu_setup_uci960_result is None:
+                if self.menu_setup_reverse_result is None:
+                    if self.menu_setup_whitetomove_result is None:
                         text = enter_top_menu()
                     else:
-                        self.setup_whitetomove_result = None
-                        text = self.dgttranslate.text('B00_sidewhite' if self.setup_whitetomove_index else 'B00_sideblack')
+                        self.menu_setup_whitetomove_result = None
+                        text = self.dgttranslate.text('B00_sidewhite' if self.menu_setup_whitetomove_index else 'B00_sideblack')
                 else:
-                    self.setup_reverse_result = None
-                    text = self.dgttranslate.text('B00_bw' if self.setup_reverse_index else 'B00_wb')
+                    self.menu_setup_reverse_result = None
+                    text = self.dgttranslate.text('B00_bw' if self.menu_setup_reverse_index else 'B00_wb')
             else:
-                self.setup_uci960_result = None
-                text = self.dgttranslate.text('B00_960yes' if self.setup_uci960_index else 'B00_960no')
+                self.menu_setup_uci960_result = None
+                text = self.dgttranslate.text('B00_960yes' if self.menu_setup_uci960_index else 'B00_960no')
             DisplayDgt.show(text)
 
         def system0():
-            if self.inside_system_voice_menu():
+            if self.inside_system_choose_menu():
+                text = exit_system_menu()
+            elif self.inside_system_voice_menu():
                 if self.inside_system_voice_type_language_speaker_super_menu():
                     text = exit_system_voice_type_language_speaker_menu()
                 elif self.inside_system_voice_type_language_speaker_menu():
@@ -389,16 +397,14 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text = exit_system_language_menu()
             elif self.inside_system_sound_menu():
                 text = exit_system_sound_menu()
-            elif self.system_result in (Settings.VERSION, Settings.IPADR, Settings.LOGFILE):
-                text = exit_system_menu()
             else:
-                logging.warning('wrong value for system_result: {}'.format(self.system_result))
+                logging.warning('wrong value for menu_system_result: {}'.format(self.menu_system_result))
                 text = self.dgttranslate.text('Y00_errormenu')
             DisplayDgt.show(text)
 
         def engine0():
-            if self.inside_engine_choose_menu():
-                text = exit_engine_menu()
+            if self.inside_engine_name_menu():
+                text = exit_engine_name_menu()
             else:
                 text = exit_engine_level_menu()
             DisplayDgt.show(text)
@@ -441,90 +447,89 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
     def _process_button1(self, dev):
         def top1():
-            self.top_index = MenuLoop.prev(self.top_index)
-            text = self.dgttranslate.text(self.top_index.value)
+            self.menu_top_index = MenuLoop.prev(self.menu_top_index)
+            text = self.dgttranslate.text(self.menu_top_index.value)
             DisplayDgt.show(text)
 
         def mode1():
-            self.mode_index = ModeLoop.prev(self.mode_index)
-            text = self.dgttranslate.text(self.mode_index.value)
+            self.menu_mode_index = ModeLoop.prev(self.menu_mode_index)
+            text = self.dgttranslate.text(self.menu_mode_index.value)
             DisplayDgt.show(text)
 
         def position1():
-            if self.setup_uci960_result is None:
-                if self.setup_reverse_result is None:
-                    if self.setup_whitetomove_result is None:
-                        self.setup_whitetomove_index = not self.setup_whitetomove_index
-                        text = self.dgttranslate.text('B00_sidewhite' if self.setup_whitetomove_index else 'B00_sideblack')
+            if self.menu_setup_uci960_result is None:
+                if self.menu_setup_reverse_result is None:
+                    if self.menu_setup_whitetomove_result is None:
+                        self.menu_setup_whitetomove_index = not self.menu_setup_whitetomove_index
+                        text = self.dgttranslate.text('B00_sidewhite' if self.menu_setup_whitetomove_index else 'B00_sideblack')
                     else:
-                        self.setup_reverse_index = not self.setup_reverse_index
-                        text = self.dgttranslate.text('B00_bw' if self.setup_reverse_index else 'B00_wb')
+                        self.menu_setup_reverse_index = not self.menu_setup_reverse_index
+                        text = self.dgttranslate.text('B00_bw' if self.menu_setup_reverse_index else 'B00_wb')
                 else:
                     if self.engine_has_960:
-                        self.setup_uci960_index = not self.setup_uci960_index
-                        text = self.dgttranslate.text('B00_960yes' if self.setup_uci960_index else 'B00_960no')
+                        self.menu_setup_uci960_index = not self.menu_setup_uci960_index
+                        text = self.dgttranslate.text('B00_960yes' if self.menu_setup_uci960_index else 'B00_960no')
                     else:
                         text = self.dgttranslate.text('Y00_error960')
                 DisplayDgt.show(text)
 
         def system1():
             if self.inside_system_choose_menu():
-                self.system_index = SettingsLoop.prev(self.system_index)
-                text = self.dgttranslate.text(self.system_index.value)
+                self.menu_system_index = SettingsLoop.prev(self.menu_system_index)
+                text = self.dgttranslate.text(self.menu_system_index.value)
             elif self.inside_system_voice_menu():
                 if self.inside_system_voice_type_language_speaker_super_menu():
-                    vkey = self.voices_conf.keys()[self.system_voice_lang_index]
+                    vkey = self.voices_conf.keys()[self.menu_system_voice_lang_index]
                     speakers = self.voices_conf[vkey]
-                    self.system_voice_speak_index = (self.system_voice_speak_index - 1) % len(speakers)
-                    speaker = speakers[list(speakers)[self.system_voice_speak_index]]
+                    self.menu_system_voice_speak_index = (self.menu_system_voice_speak_index - 1) % len(speakers)
+                    speaker = speakers[list(speakers)[self.menu_system_voice_speak_index]]
                     text = Dgt.DISPLAY_TEXT(l=speaker['large'], m=speaker['medium'], s=speaker['small'])
                     text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
                     text.wait = False
                     text.maxtime = 0
                     text.devs = {'ser', 'i2c', 'web'}
                 elif self.inside_system_voice_type_language_speaker_menu():
-                    self.system_voice_lang_index = (self.system_voice_lang_index - 1) % len(self.voices_conf)
-                    vkey = self.voices_conf.keys()[self.system_voice_lang_index]
+                    self.menu_system_voice_lang_index = (self.menu_system_voice_lang_index - 1) % len(self.voices_conf)
+                    vkey = self.voices_conf.keys()[self.menu_system_voice_lang_index]
                     text = self.dgttranslate.text('B00_language_' + vkey + '_menu')  # voice using same as language
                 elif self.inside_system_voice_type_language_menu():
-                    self.system_voice_type_index = VoiceType.USER_VOICE \
-                        if self.system_voice_type_index == VoiceType.COMP_VOICE else VoiceType.COMP_VOICE
-                    text = self.dgttranslate.text(self.system_voice_type_index.value)
+                    self.menu_system_voice_type_index = VoiceTypeLoop.prev(self.menu_system_voice_type_index)
+                    text = self.dgttranslate.text(self.menu_system_voice_type_index.value)
                 else:
                     text = self.dgttranslate.text('Y00_errormenu')
             elif self.inside_system_language_menu():
-                self.system_language_index = LanguageLoop.prev(self.system_language_index)
-                text = self.dgttranslate.text(self.system_language_index.value)
+                self.menu_system_language_lang_index = LanguageLoop.prev(self.menu_system_language_lang_index)
+                text = self.dgttranslate.text(self.menu_system_language_lang_index.value)
             elif self.inside_system_sound_menu():
-                self.system_sound_index = BeepLoop.prev(self.system_sound_index)
-                text = self.dgttranslate.text(self.system_sound_index.value)
+                self.menu_system_sound_beep_index = BeepLoop.prev(self.menu_system_sound_beep_index)
+                text = self.dgttranslate.text(self.menu_system_sound_beep_index.value)
             else:
-                logging.warning('wrong value for system_result: {}'.format(self.system_result))
+                logging.warning('wrong value for menu_system_result: {}'.format(self.menu_system_result))
                 text = self.dgttranslate.text('Y00_errormenu')
             DisplayDgt.show(text)
 
         def engine1():
-            if self.inside_engine_choose_menu():
-                self.engine_index = (self.engine_index - 1) % len(self.installed_engines)
-                text = self.installed_engines[self.engine_index]['text']
+            if self.inside_engine_name_menu():
+                self.menu_engine_name_index = (self.menu_engine_name_index - 1) % len(self.installed_engines)
+                text = self.installed_engines[self.menu_engine_name_index]['text']
                 text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             else:
-                level_dict = self.installed_engines[self.engine_index]['level_dict']
+                level_dict = self.installed_engines[self.menu_engine_name_index]['level_dict']
                 self.engine_level_index = (self.engine_level_index - 1) % len(level_dict)
                 msg = sorted(level_dict)[self.engine_level_index]
                 text = self.dgttranslate.text('B00_level', msg)
             DisplayDgt.show(text)
 
         def book1():
-            self.book_index = (self.book_index - 1) % len(self.all_books)
-            text = self.all_books[self.book_index]['text']
+            self.menu_book_index = (self.menu_book_index - 1) % len(self.all_books)
+            text = self.all_books[self.menu_book_index]['text']
             text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             DisplayDgt.show(text)
 
         def time1():
             if self.inside_time_mode_choose_menu():
-                self.time_mode_index = TimeModeLoop.prev(self.time_mode_index)
-                text = self.dgttranslate.text(self.time_mode_index.value)
+                self.menu_time_mode_index = TimeModeLoop.prev(self.menu_time_mode_index)
+                text = self.dgttranslate.text(self.menu_time_mode_index.value)
             elif self.inside_time_mode_fixed_menu():
                 self.tc_fixed_index = (self.tc_fixed_index - 1) % len(self.tc_fixed_map)
                 text = self.dgttranslate.text('B00_tc_fixed', self.tc_fixed_list[self.tc_fixed_index])
@@ -535,7 +540,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.tc_fisch_index = (self.tc_fisch_index - 1) % len(self.tc_fisch_map)
                 text = self.dgttranslate.text('B00_tc_fisch', self.tc_fisch_list[self.tc_fisch_index])
             else:
-                logging.warning('wrong value for time_mode_index: {}'.format(self.time_mode_index))
+                logging.warning('wrong value for menu_time_mode_index: {}'.format(self.menu_time_mode_index))
                 text = self.dgttranslate.text('Y00_errormenu')
             DisplayDgt.show(text)
 
@@ -572,7 +577,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.engine_finished = False  # This is not 100% ok, but for the moment better as nothing
                 self.fire(Event.ALTERNATIVE_MOVE())
             else:
-                if self.mode_result in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
+                if self.menu_mode_result in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
                     text = self.dgttranslate.text('B00_nofunction')
                     DisplayDgt.show(text)
                 else:
@@ -580,90 +585,89 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
     def _process_button3(self, dev):
         def top3():
-            self.top_index = MenuLoop.next(self.top_index)
-            text = self.dgttranslate.text(self.top_index.value)
+            self.menu_top_index = MenuLoop.next(self.menu_top_index)
+            text = self.dgttranslate.text(self.menu_top_index.value)
             DisplayDgt.show(text)
 
         def mode3():
-            self.mode_index = ModeLoop.next(self.mode_index)
-            text = self.dgttranslate.text(self.mode_index.value)
+            self.menu_mode_index = ModeLoop.next(self.menu_mode_index)
+            text = self.dgttranslate.text(self.menu_mode_index.value)
             DisplayDgt.show(text)
 
         def position3():
-            if self.setup_uci960_result is None:
-                if self.setup_reverse_result is None:
-                    if self.setup_whitetomove_result is None:
-                        self.setup_whitetomove_index = not self.setup_whitetomove_index
-                        text = self.dgttranslate.text('B00_sidewhite' if self.setup_whitetomove_index else 'B00_sideblack')
+            if self.menu_setup_uci960_result is None:
+                if self.menu_setup_reverse_result is None:
+                    if self.menu_setup_whitetomove_result is None:
+                        self.menu_setup_whitetomove_index = not self.menu_setup_whitetomove_index
+                        text = self.dgttranslate.text('B00_sidewhite' if self.menu_setup_whitetomove_index else 'B00_sideblack')
                     else:
-                        self.setup_reverse_index = not self.setup_reverse_index
-                        text = self.dgttranslate.text('B00_bw' if self.setup_reverse_index else 'B00_wb')
+                        self.menu_setup_reverse_index = not self.menu_setup_reverse_index
+                        text = self.dgttranslate.text('B00_bw' if self.menu_setup_reverse_index else 'B00_wb')
                 else:
                     if self.engine_has_960:
-                        self.setup_uci960_index = not self.setup_uci960_index
-                        text = self.dgttranslate.text('B00_960yes' if self.setup_uci960_index else 'B00_960no')
+                        self.menu_setup_uci960_index = not self.menu_setup_uci960_index
+                        text = self.dgttranslate.text('B00_960yes' if self.menu_setup_uci960_index else 'B00_960no')
                     else:
                         text = self.dgttranslate.text('Y00_error960')
                 DisplayDgt.show(text)
 
         def system3():
             if self.inside_system_choose_menu():
-                self.system_index = SettingsLoop.next(self.system_index)
-                text = self.dgttranslate.text(self.system_index.value)
+                self.menu_system_index = SettingsLoop.next(self.menu_system_index)
+                text = self.dgttranslate.text(self.menu_system_index.value)
             elif self.inside_system_voice_menu():
                 if self.inside_system_voice_type_language_speaker_super_menu():
-                    vkey = self.voices_conf.keys()[self.system_voice_lang_index]
+                    vkey = self.voices_conf.keys()[self.menu_system_voice_lang_index]
                     speakers = self.voices_conf[vkey]
-                    self.system_voice_speak_index = (self.system_voice_speak_index + 1) % len(speakers)
-                    speaker = speakers[list(speakers)[self.system_voice_speak_index]]
+                    self.menu_system_voice_speak_index = (self.menu_system_voice_speak_index + 1) % len(speakers)
+                    speaker = speakers[list(speakers)[self.menu_system_voice_speak_index]]
                     text = Dgt.DISPLAY_TEXT(l=speaker['large'], m=speaker['medium'], s=speaker['small'])
                     text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
                     text.wait = False
                     text.maxtime = 0
                     text.devs = {'ser', 'i2c', 'web'}
                 elif self.inside_system_voice_type_language_speaker_menu():
-                    self.system_voice_lang_index = (self.system_voice_lang_index + 1) % len(self.voices_conf)
-                    vkey = self.voices_conf.keys()[self.system_voice_lang_index]
+                    self.menu_system_voice_lang_index = (self.menu_system_voice_lang_index + 1) % len(self.voices_conf)
+                    vkey = self.voices_conf.keys()[self.menu_system_voice_lang_index]
                     text = self.dgttranslate.text('B00_language_' + vkey + '_menu')  # voice using same as language
                 elif self.inside_system_voice_type_language_menu():
-                    self.system_voice_type_index = VoiceType.USER_VOICE \
-                        if self.system_voice_type_index == VoiceType.COMP_VOICE else VoiceType.COMP_VOICE
-                    text = self.dgttranslate.text(self.system_voice_type_index.value)
+                    self.menu_system_voice_type_index = VoiceTypeLoop.next(self.menu_system_voice_type_index)
+                    text = self.dgttranslate.text(self.menu_system_voice_type_index.value)
                 else:
                     text = self.dgttranslate.text('Y00_errormenu')
             elif self.inside_system_language_menu():
-                self.system_language_index = LanguageLoop.next(self.system_language_index)
-                text = self.dgttranslate.text(self.system_language_index.value)
+                self.menu_system_language_lang_index = LanguageLoop.next(self.menu_system_language_lang_index)
+                text = self.dgttranslate.text(self.menu_system_language_lang_index.value)
             elif self.inside_system_sound_menu():
-                self.system_sound_index = BeepLoop.next(self.system_sound_index)
-                text = self.dgttranslate.text(self.system_sound_index.value)
+                self.menu_system_sound_beep_index = BeepLoop.next(self.menu_system_sound_beep_index)
+                text = self.dgttranslate.text(self.menu_system_sound_beep_index.value)
             else:
-                logging.warning('wrong value for system_result: {}'.format(self.system_result))
+                logging.warning('wrong value for menu_system_result: {}'.format(self.menu_system_result))
                 text = self.dgttranslate.text('Y00_errormenu')
             DisplayDgt.show(text)
 
         def engine3():
-            if self.inside_engine_choose_menu():
-                self.engine_index = (self.engine_index + 1) % len(self.installed_engines)
-                text = self.installed_engines[self.engine_index]['text']
+            if self.inside_engine_name_menu():
+                self.menu_engine_name_index = (self.menu_engine_name_index + 1) % len(self.installed_engines)
+                text = self.installed_engines[self.menu_engine_name_index]['text']
                 text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             else:
-                level_dict = self.installed_engines[self.engine_index]['level_dict']
+                level_dict = self.installed_engines[self.menu_engine_name_index]['level_dict']
                 self.engine_level_index = (self.engine_level_index + 1) % len(level_dict)
                 msg = sorted(level_dict)[self.engine_level_index]
                 text = self.dgttranslate.text('B00_level', msg)
             DisplayDgt.show(text)
 
         def book3():
-            self.book_index = (self.book_index + 1) % len(self.all_books)
-            text = self.all_books[self.book_index]['text']
+            self.menu_book_index = (self.menu_book_index + 1) % len(self.all_books)
+            text = self.all_books[self.menu_book_index]['text']
             text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             DisplayDgt.show(text)
 
         def time3():
             if self.inside_time_mode_choose_menu():
-                self.time_mode_index = TimeModeLoop.next(self.time_mode_index)
-                text = self.dgttranslate.text(self.time_mode_index.value)
+                self.menu_time_mode_index = TimeModeLoop.next(self.menu_time_mode_index)
+                text = self.dgttranslate.text(self.menu_time_mode_index.value)
             elif self.inside_time_mode_fixed_menu():
                 self.tc_fixed_index = (self.tc_fixed_index + 1) % len(self.tc_fixed_map)
                 text = self.dgttranslate.text('B00_tc_fixed', self.tc_fixed_list[self.tc_fixed_index])
@@ -674,7 +678,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.tc_fisch_index = (self.tc_fisch_index + 1) % len(self.tc_fisch_map)
                 text = self.dgttranslate.text('B00_tc_fisch', self.tc_fisch_list[self.tc_fisch_index])
             else:
-                logging.warning('wrong value for time_mode_index: {}'.format(self.time_mode_index))
+                logging.warning('wrong value for menu_time_mode_index: {}'.format(self.menu_time_mode_index))
                 text = self.dgttranslate.text('Y00_errormenu')
             DisplayDgt.show(text)
 
@@ -706,61 +710,61 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
     def _process_button4(self, dev):
         def top4():
-            self.top_result = self.top_index
+            self.menu_top_result = self.menu_top_index
             # display first entry of the submenu "top"
-            if self.top_index == Menu.MODE_MENU:
-                text = self.dgttranslate.text(self.mode_index.value)
-            elif self.top_index == Menu.POSITION_MENU:
-                self.setup_whitetomove_index = True
-                text = self.dgttranslate.text('B00_sidewhite' if self.setup_whitetomove_index else 'B00_sideblack')
-            elif self.top_index == Menu.TIME_MENU:
-                text = self.dgttranslate.text(self.time_mode_index.value)
-            elif self.top_index == Menu.BOOK_MENU:
-                text = self.all_books[self.book_index]['text']
+            if self.menu_top_index == Menu.MODE_MENU:
+                text = self.dgttranslate.text(self.menu_mode_index.value)
+            elif self.menu_top_index == Menu.POSITION_MENU:
+                self.menu_setup_whitetomove_index = True
+                text = self.dgttranslate.text('B00_sidewhite' if self.menu_setup_whitetomove_index else 'B00_sideblack')
+            elif self.menu_top_index == Menu.TIME_MENU:
+                text = self.dgttranslate.text(self.menu_time_mode_index.value)
+            elif self.menu_top_index == Menu.BOOK_MENU:
+                text = self.all_books[self.menu_book_index]['text']
                 text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
-            elif self.top_index == Menu.ENGINE_MENU:
-                text = self.installed_engines[self.engine_index]['text']
+            elif self.menu_top_index == Menu.ENGINE_MENU:
+                text = self.installed_engines[self.menu_engine_name_index]['text']
                 text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
-            elif self.top_index == Menu.SYSTEM_MENU:
-                text = self.dgttranslate.text(self.system_index.value)
+            elif self.menu_top_index == Menu.SYSTEM_MENU:
+                text = self.dgttranslate.text(self.menu_system_index.value)
             else:
-                logging.warning('wrong value for top_index: {}'.format(self.top_index))
+                logging.warning('wrong value for menu_top_index: {}'.format(self.menu_top_index))
                 text = self.dgttranslate.text('Y00_errormenu')
             DisplayDgt.show(text)
 
         def mode4():
-            self.mode_result = self.mode_index
+            self.menu_mode_result = self.menu_mode_index
             text = self.dgttranslate.text('B10_okmode')
-            self.fire(Event.SET_INTERACTION_MODE(mode=self.mode_result, mode_text=text, ok_text=True))
+            self.fire(Event.SET_INTERACTION_MODE(mode=self.menu_mode_result, mode_text=text, ok_text=True))
             self._reset_menu_results()
 
         def position4():
-            if self.setup_whitetomove_result is None:
-                self.setup_whitetomove_result = self.setup_whitetomove_index
-                self.setup_reverse_index = self.flip_board
-                text = self.dgttranslate.text('B00_bw' if self.setup_reverse_index else 'B00_wb')
+            if self.menu_setup_whitetomove_result is None:
+                self.menu_setup_whitetomove_result = self.menu_setup_whitetomove_index
+                self.menu_setup_reverse_index = self.flip_board
+                text = self.dgttranslate.text('B00_bw' if self.menu_setup_reverse_index else 'B00_wb')
             else:
-                if self.setup_reverse_result is None:
-                    self.setup_reverse_result = self.setup_reverse_index
-                    self.setup_uci960_index = False
-                    text = self.dgttranslate.text('B00_960yes' if self.setup_uci960_index else 'B00_960no')
+                if self.menu_setup_reverse_result is None:
+                    self.menu_setup_reverse_result = self.menu_setup_reverse_index
+                    self.menu_setup_uci960_index = False
+                    text = self.dgttranslate.text('B00_960yes' if self.menu_setup_uci960_index else 'B00_960no')
                 else:
-                    if self.setup_uci960_result is None:
-                        self.setup_uci960_result = self.setup_uci960_index
+                    if self.menu_setup_uci960_result is None:
+                        self.menu_setup_uci960_result = self.menu_setup_uci960_index
                         text = self.dgttranslate.text('B00_scanboard')
                     else:
-                        to_move = 'w' if self.setup_whitetomove_index else 'b'
+                        to_move = 'w' if self.menu_setup_whitetomove_index else 'b'
                         fen = self.dgt_fen
-                        if self.flip_board != self.setup_reverse_result:
+                        if self.flip_board != self.menu_setup_reverse_result:
                             logging.debug('flipping the board')
                             fen = fen[::-1]
                         fen += " {0} KQkq - 0 1".format(to_move)
-                        bit_board = chess.Board(fen, self.setup_uci960_result)
+                        bit_board = chess.Board(fen, self.menu_setup_uci960_result)
                         # ask python-chess to correct the castling string
                         bit_board.set_fen(bit_board.fen())
                         if bit_board.is_valid():
-                            self.flip_board = self.setup_reverse_result
-                            self.fire(Event.SETUP_POSITION(fen=bit_board.fen(), uci960=self.setup_uci960_result))
+                            self.flip_board = self.menu_setup_reverse_result
+                            self.fire(Event.SETUP_POSITION(fen=bit_board.fen(), uci960=self.menu_setup_uci960_result))
                             self._reset_moves_and_score()
                             self._reset_menu_results()
                             return
@@ -772,7 +776,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         def system4():
             exit_menu = True
             if self.inside_system_choose_menu():
-                self.system_result = self.system_index
+                self.menu_system_result = self.menu_system_index
 
             if self.inside_system_version_menu():
                 text = self.dgttranslate.text('B10_picochess')
@@ -793,25 +797,25 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 else:
                     text = self.dgttranslate.text('B10_noipadr')
             elif self.inside_system_sound_menu():
-                if self.system_sound_result is None:
-                    self.system_sound_result = self.system_sound_index
-                    text = self.dgttranslate.text(self.system_sound_result.value)
+                if self.inside_system_sound_beep_menu():
+                    self.menu_system_sound_beep_result = self.menu_system_sound_beep_index
+                    text = self.dgttranslate.text(self.menu_system_sound_beep_result.value)
                     exit_menu = False
                 else:
-                    self.dgttranslate.set_beep(self.system_sound_index)
+                    self.dgttranslate.set_beep(self.menu_system_sound_beep_index)
                     config = ConfigObj('picochess.ini')
-                    config['beep-config'] = self.dgttranslate.beep_to_config(self.system_sound_index)
+                    config['beep-config'] = self.dgttranslate.beep_to_config(self.menu_system_sound_beep_index)
                     config.write()
                     text = self.dgttranslate.text('B10_okbeep')
             elif self.inside_system_language_menu():
-                if self.system_language_result is None:
-                    self.system_language_result = self.system_language_index
-                    text = self.dgttranslate.text(self.system_language_result.value)
+                if self.inside_system_language_lang_menu():
+                    self.menu_system_language_lang_result = self.menu_system_language_lang_index
+                    text = self.dgttranslate.text(self.menu_system_language_lang_result.value)
                     exit_menu = False
                 else:
                     langs = {Language.EN: 'en', Language.DE: 'de', Language.NL: 'nl',
                              Language.FR: 'fr', Language.ES: 'es', Language.IT: 'it'}
-                    language = langs[self.system_language_index]
+                    language = langs[self.menu_system_language_lang_index]
                     self.dgttranslate.set_language(language)
                     config = ConfigObj('picochess.ini')
                     config['language'] = language
@@ -821,42 +825,42 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.fire(Event.EMAIL_LOG())
                 text = self.dgttranslate.text('B10_oklogfile')  # @todo give pos/neg feedback
             elif self.inside_system_voice_menu():
-                if self.inside_system_voice_type_menu():
-                    self.system_voice_type_result = self.system_voice_type_index
-                    text = self.dgttranslate.text(self.system_voice_type_index.value)
+                if self.inside_system_voice_type_language_speaker_super_menu():
+                    vkey = self.voices_conf.keys()[self.menu_system_voice_lang_index]
+                    speakers = self.voices_conf[vkey].keys()
+                    config = ConfigObj('picochess.ini')
+                    ckey = 'user' if self.menu_system_voice_type_index == VoiceType.USER_VOICE else 'computer'
+                    skey = speakers[self.menu_system_voice_speak_index]
+                    config[ckey + '-voice'] = vkey + ':' + skey
+                    config.write()
+                    self.fire(Event.SET_VOICE(type=self.menu_system_voice_type_index, lang=vkey, speaker=skey))
+                    text = self.dgttranslate.text('B10_okvoice')
+                elif self.inside_system_voice_type_language_speaker_menu():
+                    self.menu_system_voice_speak_result = self.menu_system_voice_speak_index
+                    vkey = self.voices_conf.keys()[self.menu_system_voice_lang_index]
+                    speakers = self.voices_conf[vkey]
+                    if self.menu_system_voice_speak_index >= len(speakers):
+                        self.menu_system_voice_speak_index = 0
+                    speaker = speakers[list(speakers)[self.menu_system_voice_speak_index]]
+                    text = Dgt.DISPLAY_TEXT(l=speaker['large'], m=speaker['medium'], s=speaker['small'])
+                    text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
+                    text.wait = False
+                    text.maxtime = 0
+                    text.devs = {'ser', 'i2c', 'web'}
+                    exit_menu = False
+                elif self.inside_system_voice_type_language_menu():
+                    vkey = self.voices_conf.keys()[self.menu_system_voice_lang_index]
+                    self.menu_system_voice_lang_result = self.menu_system_voice_lang_index
+                    text = self.dgttranslate.text('B00_language_' + vkey + '_menu')
+                    exit_menu = False
+                elif self.inside_system_voice_type_menu():
+                    self.menu_system_voice_type_result = self.menu_system_voice_type_index
+                    text = self.dgttranslate.text(self.menu_system_voice_type_index.value)
                     exit_menu = False
                 else:
-                    if self.inside_system_voice_type_language_menu():
-                        vkey = self.voices_conf.keys()[self.system_voice_lang_index]
-                        self.system_voice_lang_result = self.system_voice_lang_index
-                        text = self.dgttranslate.text('B00_language_' + vkey + '_menu')
-                        exit_menu = False
-                    else:
-                        if self.inside_system_voice_type_language_speaker_menu():
-                            self.system_voice_speak_result = self.system_voice_speak_index
-                            vkey = self.voices_conf.keys()[self.system_voice_lang_index]
-                            speakers = self.voices_conf[vkey]
-                            if self.system_voice_speak_index >= len(speakers):
-                                self.system_voice_speak_index = 0
-                            speaker = speakers[list(speakers)[self.system_voice_speak_index]]
-                            text = Dgt.DISPLAY_TEXT(l=speaker['large'], m=speaker['medium'], s=speaker['small'])
-                            text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
-                            text.wait = False
-                            text.maxtime = 0
-                            text.devs = {'ser', 'i2c', 'web'}
-                            exit_menu = False
-                        else:
-                            vkey = self.voices_conf.keys()[self.system_voice_lang_index]
-                            speakers = self.voices_conf[vkey].keys()
-                            config = ConfigObj('picochess.ini')
-                            ckey = 'user' if self.system_voice_type_index == VoiceType.USER_VOICE else 'computer'
-                            skey = speakers[self.system_voice_speak_index]
-                            config[ckey + '-voice'] = vkey + ':' + skey
-                            config.write()
-                            self.fire(Event.SET_VOICE(type=self.system_voice_type_index, lang=vkey, speaker=skey))
-                            text = self.dgttranslate.text('B10_okvoice')
+                    text = self.dgttranslate.text('Y00_errormenu')
             else:
-                logging.warning('wrong value for system_result: {}'.format(self.system_result))
+                logging.warning('wrong value for menu_system_result: {}'.format(self.menu_system_result))
                 text = self.dgttranslate.text('Y00_errormenu')
             DisplayDgt.show(text)
             if exit_menu:
@@ -864,11 +868,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self._exit_display(wait=True)
 
         def engine4():
-            eng = self.installed_engines[self.engine_index]
+            eng = self.installed_engines[self.menu_engine_name_index]
             level_dict = eng['level_dict']
-            if self.inside_engine_choose_menu():
+            if self.inside_engine_name_menu():
                 if level_dict:
-                    self.engine_result = self.engine_index
+                    self.menu_engine_name_result = self.menu_engine_name_index
                     if self.engine_level_index is None or len(level_dict) <= self.engine_level_index:
                         self.engine_level_index = len(level_dict) - 1
                     msg = sorted(level_dict)[self.engine_level_index]
@@ -878,8 +882,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     config = ConfigObj('picochess.ini')
                     config['engine-level'] = None
                     config.write()
-                    text = self.dgttranslate.text('B10_okengine')
-                    self.fire(Event.NEW_ENGINE(eng=eng, eng_text=text, options={}, ok_text=True))
+                    eng_text = self.dgttranslate.text('B10_okengine')
+                    self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options={}, ok_text=True))
                     self.engine_restart = True
                     self._reset_menu_results()
             else:
@@ -899,21 +903,21 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
         def book4():
             text = self.dgttranslate.text('B10_okbook')
-            self.fire(Event.SET_OPENING_BOOK(book=self.all_books[self.book_index], book_text=text, ok_text=True))
+            self.fire(Event.SET_OPENING_BOOK(book=self.all_books[self.menu_book_index], book_text=text, ok_text=True))
             self._reset_menu_results()
 
         def time4():
             if self.inside_time_mode_choose_menu():
-                self.time_mode_result = self.time_mode_index
+                self.menu_time_mode_result = self.menu_time_mode_index
                 # display first entry of the submenu "time_mode"
-                if self.time_mode_index == TimeMode.FIXED:
+                if self.menu_time_mode_index == TimeMode.FIXED:
                     text = self.dgttranslate.text('B00_tc_fixed', self.tc_fixed_list[self.tc_fixed_index])
-                elif self.time_mode_index == TimeMode.BLITZ:
+                elif self.menu_time_mode_index == TimeMode.BLITZ:
                     text = self.dgttranslate.text('B00_tc_blitz', self.tc_blitz_list[self.tc_blitz_index])
-                elif self.time_mode_index == TimeMode.FISCHER:
+                elif self.menu_time_mode_index == TimeMode.FISCHER:
                     text = self.dgttranslate.text('B00_tc_fisch', self.tc_fisch_list[self.tc_fisch_index])
                 else:
-                    logging.warning('wrong value for time_mode_index: {}'.format(self.time_mode_index))
+                    logging.warning('wrong value for menu_time_mode_index: {}'.format(self.menu_time_mode_index))
                     text = self.dgttranslate.text('Y00_errormenu')
                 DisplayDgt.show(text)
             else:
@@ -924,7 +928,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 elif self.inside_time_mode_fisch_menu():
                     time_control = self.tc_fisch_map[list(self.tc_fisch_map)[self.tc_fisch_index]]
                 else:
-                    logging.warning('wrong value for time_mode_index: {}'.format(self.time_mode_index))
+                    logging.warning('wrong value for menu_time_mode_index: {}'.format(self.menu_time_mode_index))
                     text = self.dgttranslate.text('Y00_errormenu')
                     DisplayDgt.show(text)
                     return
@@ -949,13 +953,13 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             elif self.inside_time_menu():
                 time4()
         else:
-            self.inside_menu_flag = True
-            text = self.dgttranslate.text(self.top_index.value)
+            self.menu_inside_flag = True
+            text = self.dgttranslate.text(self.menu_top_index.value)
             DisplayDgt.show(text)
 
     def _process_lever(self, right_side_down, dev):
         logging.debug('({}) clock: handle lever press - right_side_down: {}'.format(dev, right_side_down))
-        if self.top_result is None:
+        if not self.inside_menu():
             self.play_move = chess.Move.null()
             self.play_fen = None
             self.play_turn = None
@@ -966,7 +970,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         return '8/8/8/' + rnk_5 + '/' + rnk_4 + '/8/8/8'
 
     def _exit_display(self, wait=False, force=True):
-        if self.play_move and self.mode_result in (Mode.NORMAL, Mode.REMOTE):
+        if self.play_move and self.menu_mode_result in (Mode.NORMAL, Mode.REMOTE):
             side = ClockSide.LEFT if (self.play_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
             text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side, wait=wait, maxtime=1,
                                     beep=self.dgttranslate.bl(BeepLevel.BUTTON), devs={'ser', 'i2c', 'web'})
@@ -1038,7 +1042,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
         for case in switch(message):
             if case(MessageApi.ENGINE_READY):
-                self.engine_index = self.installed_engines.index(message.eng)
+                self.menu_engine_name_index = self.installed_engines.index(message.eng)
                 self.engine_has_960 = message.has_960
                 if self.show_ok_message or not message.ok_text:
                     DisplayDgt.show(message.eng_text)
@@ -1050,7 +1054,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 for index in range(0, len(self.installed_engines)):
                     eng = self.installed_engines[index]
                     if eng['file'] == message.file:
-                        self.engine_index = index
+                        self.menu_engine_name_index = index
                         self.engine_has_960 = message.has_960
                         self.engine_level_index = message.level_index
                 break
@@ -1090,7 +1094,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 pos960 = message.game.chess960_pos()
                 game_text = 'C10_newgame' if pos960 is None or pos960 == 518 else 'C10_ucigame'
                 DisplayDgt.show(self.dgttranslate.text(game_text, str(pos960)))
-                if self.mode_result in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
+                self.show_setup_pieces_msg = False
+                if self.menu_mode_result in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
                     time_left, time_right = message.time_control.current_clock_time(flip_board=self.flip_board)
                     DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE,
                                                     wait=True, devs={'ser', 'i2c', 'web'}))
@@ -1176,10 +1181,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     text.beep = self.dgttranslate.bl(BeepLevel.CONFIG)
                     text.maxtime = 0.5
                     DisplayDgt.show(text)
+                    # self.show_setup_pieces_msg = True @todo Does that work?
                 break
             if case(MessageApi.INTERACTION_MODE):
-                self.mode_index = message.mode
-                self.mode_result = message.mode  # needed, otherwise Q-placing wont work correctly
+                self.menu_mode_index = message.mode
+                self.menu_mode_result = message.mode  # needed, otherwise Q-placing wont work correctly
                 self.engine_finished = False
                 if self.show_ok_message or not message.ok_text:
                     DisplayDgt.show(message.mode_text)
@@ -1200,7 +1206,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     else:
                         text = self.dgttranslate.text('N10_mate', str(message.mate))
                 self.score = text
-                if message.mode == Mode.KIBITZ and self.top_result is None:
+                if message.mode == Mode.KIBITZ and not self.inside_menu():
                     DisplayDgt.show(self._combine_depth_and_score())
                 break
             if case(MessageApi.BOOK_MOVE):
@@ -1211,7 +1217,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.hint_move = message.pv[0]
                 self.hint_fen = message.game.fen()
                 self.hint_turn = message.game.turn
-                if message.mode == Mode.ANALYSIS and self.top_result is None:
+                if message.mode == Mode.ANALYSIS and not self.inside_menu():
                     side = self.hint_side()
                     DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=True, maxtime=0,
                                                      beep=self.dgttranslate.bl(BeepLevel.NO), devs={'ser', 'i2c', 'web'}))
@@ -1223,12 +1229,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.ip = message.info['int_ip']
                 break
             if case(MessageApi.STARTUP_INFO):
-                self.mode_index = message.info['interaction_mode']
-                self.mode_result = message.info['interaction_mode']
-                self.book_index = message.info['book_index']
+                self.menu_mode_index = message.info['interaction_mode']
+                self.menu_mode_result = message.info['interaction_mode']
+                self.menu_book_index = message.info['book_index']
                 self.all_books = message.info['books']
                 tc = self.time_control = message.info['time_control']
-                self.time_mode_index = tc.mode
+                self.menu_time_mode_index = tc.mode
                 # try to find the index from the given time_control (tc)
                 # if user gave a non-existent tc value stay at standard
                 index = 0
@@ -1303,7 +1309,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     # Flip the board
                     self.flip_board = not self.flip_board
                     # set standard for setup orientation too
-                    self.setup_reverse_index = self.flip_board
+                    self.menu_setup_reverse_index = self.flip_board
                     fen = fen[::-1]
                 logging.debug("DGT-Fen [%s]", fen)
                 if fen == self.dgt_fen:
@@ -1313,7 +1319,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.drawresign_fen = self._drawresign()
                 # Fire the appropriate event
                 if fen in level_map:
-                    eng = self.installed_engines[self.engine_index]
+                    eng = self.installed_engines[self.menu_engine_name_index]
                     level_dict = eng['level_dict']
                     if level_dict:
                         inc = math.ceil(len(level_dict) / 8)
@@ -1331,7 +1337,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     book_index = book_map.index(fen)
                     try:
                         b = self.all_books[book_index]
-                        self.book_index = book_index
+                        self.menu_book_index = book_index
                         logging.debug("Map-Fen: Opening book [%s]", b['file'])
                         text = b['text']
                         text.beep = self.dgttranslate.bl(BeepLevel.MAP)
@@ -1344,8 +1350,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if self.installed_engines:
                         engine_index = engine_map.index(fen)
                         try:
-                            self.engine_index = engine_index
-                            eng = self.installed_engines[self.engine_index]
+                            self.menu_engine_name_index = engine_index
+                            eng = self.installed_engines[self.menu_engine_name_index]
                             level_dict = eng['level_dict']
                             logging.debug("Map-Fen: Engine name [%s]", eng['name'])
                             eng_text = eng['text']
@@ -1379,7 +1385,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     self._reset_menu_results()
                 elif fen in self.tc_fixed_map:
                     logging.debug('Map-Fen: Time control fixed')
-                    self.time_mode_index = TimeMode.FIXED
+                    self.menu_time_mode_index = TimeMode.FIXED
                     self.tc_fixed_index = list(self.tc_fixed_map.keys()).index(fen)
                     text = self.dgttranslate.text('M10_tc_fixed', self.tc_fixed_list[self.tc_fixed_index])
                     self.fire(Event.SET_TIME_CONTROL(time_control=self.tc_fixed_map[fen],
@@ -1387,7 +1393,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     self._reset_menu_results()
                 elif fen in self.tc_blitz_map:
                     logging.debug('Map-Fen: Time control blitz')
-                    self.time_mode_index = TimeMode.BLITZ
+                    self.menu_time_mode_index = TimeMode.BLITZ
                     self.tc_blitz_index = list(self.tc_blitz_map.keys()).index(fen)
                     text = self.dgttranslate.text('M10_tc_blitz', self.tc_blitz_list[self.tc_blitz_index])
                     self.fire(Event.SET_TIME_CONTROL(time_control=self.tc_blitz_map[fen],
@@ -1395,7 +1401,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     self._reset_menu_results()
                 elif fen in self.tc_fisch_map:
                     logging.debug('Map-Fen: Time control fischer')
-                    self.time_mode_index = TimeMode.FISCHER
+                    self.menu_time_mode_index = TimeMode.FISCHER
                     self.tc_fisch_index = list(self.tc_fisch_map.keys()).index(fen)
                     text = self.dgttranslate.text('M10_tc_fisch', self.tc_fisch_list[self.tc_fisch_index])
                     self.fire(Event.SET_TIME_CONTROL(time_control=self.tc_fisch_map[fen],
@@ -1408,7 +1414,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     logging.debug('Map-Fen: reboot')
                     self._reboot()
                 elif self.drawresign_fen in drawresign_map:
-                    if self.top_result is None:
+                    if not self.inside_menu():
                         logging.debug('Map-Fen: drawresign')
                         self.fire(Event.DRAWRESIGN(result=drawresign_map[self.drawresign_fen]))
                 elif '/pppppppp/8/8/8/8/PPPPPPPP/' in fen:  # check for the lines 2-7 cause could be an uci960 pos too
@@ -1417,21 +1423,21 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if pos960 is not None:
                         if pos960 == 518 or self.engine_has_960:
                             logging.debug('Map-Fen: New game')
-                            if self.show_setup_pieces_msg:
-                                game_text = 'C10_newgame' if pos960 is None or pos960 == 518 else 'C10_ucigame'
-                                DisplayDgt.show(self.dgttranslate.text(game_text, str(pos960)))
-                                self.show_setup_pieces_msg = False
+                            # if self.show_setup_pieces_msg:
+                            #     game_text = 'C10_newgame' if pos960 is None or pos960 == 518 else 'C10_ucigame'
+                            #     DisplayDgt.show(self.dgttranslate.text(game_text, str(pos960)))
+                            #     self.show_setup_pieces_msg = False
                             self.fire(Event.NEW_GAME(pos960=pos960))
                         else:
                             # self._reset_moves_and_score()
                             DisplayDgt.show(self.dgttranslate.text('Y00_error960'))
                 else:
-                    if self.top_result is None:
+                    if not self.inside_menu():
                         if self.show_setup_pieces_msg:
                             DisplayDgt.show(self.dgttranslate.text('N00_setpieces'))
-                            # self.show_setup_pieces_msg = False @todo does that work?
                         self.fire(Event.FEN(fen=fen))
                     else:
+                        # @todo perhaps resent this fen after menu exit?
                         logging.debug('inside the menu. fen "{}" ignored'.format(fen))
                 break
             if case(MessageApi.DGT_CLOCK_VERSION):
@@ -1447,7 +1453,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 break
             if case(MessageApi.DGT_SERIAL_NR):
                 # logging.debug('Serial number {}'.format(message.number))  # actually used for watchdog (once a second)
-                if self.mode_result == Mode.PONDER and self.top_result is None:
+                if self.menu_mode_result == Mode.PONDER and not self.inside_menu():
                     if self.show_move_or_value >= self.ponder_time:
                         if self.hint_move:
                             side = self.hint_side()

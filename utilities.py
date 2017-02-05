@@ -146,7 +146,7 @@ class DgtApi():
 
 @enum.unique
 class Menu(enum.Enum):
-    TOP_MENU = 'B00_menu_top_menu'  # Top Level Menu
+    # TOP_MENU = 'B00_menu_top_menu'  # Top Level Menu
     MODE_MENU = 'B00_menu_mode_menu'  # Mode Menu
     POSITION_MENU = 'B00_menu_position_menu'  # Setup position menu
     TIME_MENU = 'B00_menu_time_menu'  # Time controls menu
@@ -173,7 +173,7 @@ class MenuLoop(object):
             return Menu.SYSTEM_MENU
         elif m == Menu.SYSTEM_MENU:
             return Menu.MODE_MENU
-        return Menu.TOP_MENU
+        return 'errMenuNext'
 
     @staticmethod
     def prev(m):
@@ -189,7 +189,7 @@ class MenuLoop(object):
             return Menu.BOOK_MENU
         elif m == Menu.SYSTEM_MENU:
             return Menu.ENGINE_MENU
-        return Menu.TOP_MENU
+        return 'errMenuPrev'
 
 
 @enum.unique
@@ -220,7 +220,7 @@ class ModeLoop(object):
             return Mode.PONDER
         elif m == Mode.PONDER:
             return Mode.NORMAL
-        return 'errMoLoNext'
+        return 'errModeNext'
 
     @staticmethod
     def prev(m):
@@ -236,7 +236,7 @@ class ModeLoop(object):
             return Mode.OBSERVE
         elif m == Mode.PONDER:
             return Mode.REMOTE
-        return 'errMoLoPrev'
+        return 'errModePrev'
 
 
 @enum.unique
@@ -405,18 +405,39 @@ class VoiceType(enum.Enum):
     COMP_VOICE = 'B00_voicetype_comp_menu'
 
 
+class VoiceTypeLoop(object):
+    def __init__(self):
+        super(VoiceTypeLoop, self).__init__()
+
+    @staticmethod
+    def next(m):
+        if m == VoiceType.USER_VOICE:
+            return VoiceType.COMP_VOICE
+        elif m == VoiceType.COMP_VOICE:
+            return VoiceType.USER_VOICE
+        return 'errVoTyNext'
+
+    @staticmethod
+    def prev(m):
+        if m == VoiceType.USER_VOICE:
+            return VoiceType.COMP_VOICE
+        elif m == VoiceType.COMP_VOICE:
+            return VoiceType.USER_VOICE
+        return 'errVoTyPrev'
+
+
 @enum.unique
 class GameResult(enum.Enum):
-    MATE = 'B00_gameresult_mate_menu'
-    STALEMATE = 'B00_gameresult_stalemate_menu'
-    OUT_OF_TIME = 'B00_gameresult_time_menu'
-    INSUFFICIENT_MATERIAL = 'B00_gameresult_material_menu'
-    SEVENTYFIVE_MOVES = 'B00_gameresult_moves_menu'
-    FIVEFOLD_REPETITION = 'B00_gameresult_repetition_menu'
-    ABORT = 'B00_gameresult_abort_menu'
-    WIN_WHITE = 'B00_gameresult_white_menu'
-    WIN_BLACK = 'B00_gameresult_black_menu'
-    DRAW = 'B00_gameresult_draw_menu'
+    MATE = 'B00_gameresult_mate'
+    STALEMATE = 'B00_gameresult_stalemate'
+    OUT_OF_TIME = 'B00_gameresult_time'
+    INSUFFICIENT_MATERIAL = 'B00_gameresult_material'
+    SEVENTYFIVE_MOVES = 'B00_gameresult_moves'
+    FIVEFOLD_REPETITION = 'B00_gameresult_repetition'
+    ABORT = 'B00_gameresult_abort'
+    WIN_WHITE = 'B00_gameresult_white'
+    WIN_BLACK = 'B00_gameresult_black'
+    DRAW = 'B00_gameresult_draw'
 
 
 class EngineStatus(AutoNumber):
