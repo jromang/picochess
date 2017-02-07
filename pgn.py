@@ -190,6 +190,8 @@ class PgnDisplay(DisplayMsg, threading.Thread):
                         self.engine_name = message.info['engine_name']
                         self.old_engine = self.engine_name
                         self.user_name = message.info['user_name']
+                        break
+                    if case(MessageApi.IP_INFO):
                         self.location = message.info['location']
                         break
                     if case(MessageApi.STARTUP_INFO):

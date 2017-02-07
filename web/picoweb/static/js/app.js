@@ -73,17 +73,14 @@ function load_nacl_stockfish() {
     listener.addEventListener('crash', handleCrash, true);
 }
 
-function getSystemInfo() {
+function getAllInfo() {
     $.get('/info', {action: 'get_system_info'}, function(data) {
         window.system_info = data;
-        var ip = '';
-        if (window.system_info.ext_ip) {
-            ip += ' ExtIP: ' + window.system_info.ext_ip;
-        }
-        if (window.system_info.int_ip) {
-            ip += ' IntIP: ' + window.system_info.int_ip
-        }
-        document.title = 'Webserver Picochess ' + window.system_info.version + ip;
+    }).fail(function(jqXHR, textStatus) {
+        dgtClockStatusEl.html(textStatus);
+    });
+    $.get('/info', {action: 'get_ip_info'}, function(data) {
+        setTitle(data);
     }).fail(function(jqXHR, textStatus) {
         dgtClockStatusEl.html(textStatus);
     });
@@ -92,6 +89,22 @@ function getSystemInfo() {
     }).fail(function(jqXHR, textStatus) {
         dgtClockStatusEl.html(textStatus);
     });
+}
+
+function setTitle(data) {
+    window.ip_info = data;
+    var ip = '';
+    if (window.ip_info.ext_ip) {
+        ip += ' ExtIP: ' + window.ip_info.ext_ip;
+    }
+    if (window.ip_info.int_ip) {
+        ip += ' IntIP: ' + window.ip_info.int_ip
+    }
+    var version = '';
+    if (window.ip_info.version) {
+        version = window.ip_info.version;
+    }
+    document.title = 'Webserver Picochess ' + version + ip;
 }
 
 // copied from loadGame()
@@ -118,7 +131,7 @@ function goToDGTFen() {
 }
 
 $(function() {
-    getSystemInfo();
+    getAllInfo();
     // JP! is this really needed?!?
     $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
         window.activedb = e.target.hash;
@@ -259,6 +272,9 @@ $(function() {
                     break;
                 case 'header':
                     setHeaders(data['headers']);
+                    break;
+                case 'title':
+                    setTitle(data);
                     break;
                 default:
                     console.warn(data);

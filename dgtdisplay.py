@@ -1247,7 +1247,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if case(MessageApi.NEW_DEPTH):
                 self.depth = message.depth
                 break
-            if case(MessageApi.SYSTEM_INFO):
+            if case(MessageApi.IP_INFO):
                 self.ip = message.info['int_ip']
                 break
             if case(MessageApi.STARTUP_INFO):

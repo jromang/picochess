@@ -110,6 +110,9 @@ class InfoHandler(ServerRequestHandler):
         if action == 'get_system_info':
             if 'system_info' in self.shared:
                 self.write(self.shared['system_info'])
+        if action == 'get_ip_info':
+            if 'ip_info' in self.shared:
+                self.write(self.shared['ip_info'])
         if action == 'get_headers':
             if 'headers' in self.shared:
                 self.write(self.shared['headers'])
@@ -170,6 +173,10 @@ class WebDisplay(DisplayMsg, threading.Thread):
         if 'system_info' not in self.shared:
             self.shared['system_info'] = {}
 
+    def create_ip_info(self):
+        if 'ip_info' not in self.shared:
+            self.shared['ip_info'] = {}
+
     def task(self, message):
         def oldstyle_fen(game):
             builder = []
@@ -193,8 +200,6 @@ class WebDisplay(DisplayMsg, threading.Thread):
             user_name = 'User'
             engine_name = 'Picochess'
             if 'system_info' in self.shared:
-                if 'location' in self.shared['system_info']:
-                    pgn_game.headers['Site'] = self.shared['system_info']['location']
                 if 'user_name' in self.shared['system_info']:
                     user_name = self.shared['system_info']['user_name']
                 if 'engine_name' in self.shared['system_info']:
@@ -213,6 +218,10 @@ class WebDisplay(DisplayMsg, threading.Thread):
                     user_color = 'Black' if self.shared['game_info']['play_mode'] == PlayMode.USER_BLACK else 'White'
                     pgn_game.headers[comp_color + 'Elo'] = '2900'
                     pgn_game.headers[user_color + 'Elo'] = '-'
+
+            if 'ip_info' in self.shared:
+                if 'location' in self.shared['ip_info']:
+                    pgn_game.headers['Site'] = self.shared['ip_info']['location']
 
         def update_headers():
             pgn_game = pgn.Game()
@@ -245,6 +254,10 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 break
             if case(MessageApi.SEARCH_STARTED):
                 EventHandler.write_to_clients({'event': 'Message', 'msg': 'Thinking...'})
+                break
+            if case(MessageApi.IP_INFO):
+                self.shared['ip_info'] = message.info
+                update_headers()
                 break
             if case(MessageApi.SYSTEM_INFO):
                 self.shared['system_info'] = message.info

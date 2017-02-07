@@ -120,6 +120,7 @@ class MessageApi():
 
     SYSTEM_INFO = 'MSG_SYSTEM_INFO'  # Information about picochess such as version etc
     STARTUP_INFO = 'MSG_STARTUP_INFO'  # Information about the startup options
+    IP_INFO = 'MSG_IP_INFO'  # Information about the IP adr
     NEW_SCORE = 'MSG_NEW_SCORE'  # Shows a new score
     NEW_DEPTH = 'MSG_NEW_DEPTH'  # Shows a new depth
     ALTERNATIVE_MOVE = 'MSG_ALTERNATIVE_MOVE'  # User wants another move to be calculated
@@ -747,6 +748,7 @@ class Message():
 
     SYSTEM_INFO = ClassFactory(MessageApi.SYSTEM_INFO, ['info'])
     STARTUP_INFO = ClassFactory(MessageApi.STARTUP_INFO, ['info'])
+    IP_INFO = ClassFactory(MessageApi.IP_INFO, ['info'])
     NEW_SCORE = ClassFactory(MessageApi.NEW_SCORE, ['score', 'mate', 'mode', 'turn'])
     NEW_DEPTH = ClassFactory(MessageApi.NEW_DEPTH, ['depth'])
     ALTERNATIVE_MOVE = ClassFactory(MessageApi.ALTERNATIVE_MOVE, [])

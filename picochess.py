@@ -86,12 +86,10 @@ class AlternativeMover:
 
 def main():
 
-    def display_system_info():
+    def display_ip_info():
         location, ext_ip, int_ip = get_location()
-        DisplayMsg.show(Message.SYSTEM_INFO(info={'version': version, 'location': location,
-                                                  'ext_ip': ext_ip, 'int_ip': int_ip,
-                                                  'engine_name': engine_name, 'user_name': user_name
-                                                  }))
+        info = {'location': location, 'ext_ip': ext_ip, 'int_ip': int_ip, 'version': version}
+        DisplayMsg.show(Message.IP_INFO(info=info))
 
     def compute_legal_fens(g):
         """
@@ -602,9 +600,10 @@ def main():
                                                'time_control': time_control, 'time_text': time_text}))
     DisplayMsg.show(Message.ENGINE_STARTUP(shell=engine.get_shell(), file=engine.get_file(), level_index=level_index,
                                            has_levels=engine.has_levels(), has_960=engine.has_chess960()))
+    DisplayMsg.show(Message.SYSTEM_INFO(info={'version': version, 'engine_name': engine_name, 'user_name': user_name}))
 
-    system_info_thread = threading.Timer(0, display_system_info)
-    system_info_thread.start()
+    ip_info_thread = threading.Timer(10, display_ip_info)
+    ip_info_thread.start()
 
     # Event loop
     logging.info('evt_queue ready')
