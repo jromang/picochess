@@ -736,7 +736,7 @@ class Message():
 
     INTERACTION_MODE = ClassFactory(MessageApi.INTERACTION_MODE, ['mode', 'mode_text', 'ok_text'])
     PLAY_MODE = ClassFactory(MessageApi.PLAY_MODE, ['play_mode', 'play_mode_text'])
-    START_NEW_GAME = ClassFactory(MessageApi.START_NEW_GAME, ['time_control', 'game'])
+    START_NEW_GAME = ClassFactory(MessageApi.START_NEW_GAME, ['time_control', 'game', 'newgame'])
     COMPUTER_MOVE_DONE_ON_BOARD = ClassFactory(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD, [])
     SEARCH_STARTED = ClassFactory(MessageApi.SEARCH_STARTED, ['engine_status'])
     SEARCH_STOPPED = ClassFactory(MessageApi.SEARCH_STOPPED, ['engine_status'])

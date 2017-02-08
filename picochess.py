@@ -714,7 +714,8 @@ def main():
                     break
 
                 if case(EventApi.NEW_GAME):
-                    if game.move_stack or (game.chess960_pos() != event.pos960):
+                    newgame = game.move_stack or (game.chess960_pos() != event.pos960)
+                    if newgame:
                         logging.debug('starting a new game with code: {}'.format(event.pos960))
                         uci960 = event.pos960 != 518
 
@@ -734,11 +735,11 @@ def main():
                         last_computer_fen = None
                         time_control.reset()
                         searchmoves.reset()
-                        DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, game=game.copy()))
                         game_declared = False
                         set_wait_state()
                     else:
                         logging.debug('no need to start a new game')
+                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, game=game.copy(), newgame=newgame))
                     break
 
                 if case(EventApi.PAUSE_RESUME):

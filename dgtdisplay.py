@@ -1100,8 +1100,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.hint_turn = None if ponder is None else message.game.turn
                 # Display the move
                 side = ClockSide.LEFT if (turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
-                DisplayDgt.show(Dgt.DISPLAY_MOVE(move=move, fen=message.fen, side=side, wait=message.wait, maxtime=0,
-                                                 beep=self.dgttranslate.bl(BeepLevel.CONFIG), devs={'ser', 'i2c', 'web'}))
+                disp = Dgt.DISPLAY_MOVE(move=move, fen=message.fen, side=side, wait=message.wait, maxtime=0,
+                                        beep=self.dgttranslate.bl(BeepLevel.CONFIG), devs={'ser', 'i2c', 'web'})
+                DisplayDgt.show(disp)
                 DisplayDgt.show(Dgt.LIGHT_SQUARES(uci_move=move.uci()))
                 self.leds_are_on = True
                 break
@@ -1113,10 +1114,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 # self.mode_index = Mode.NORMAL  # @todo
                 self._reset_menu_results()
                 self.engine_finished = False
-                pos960 = message.game.chess960_pos()
-                game_text = 'C10_newgame' if pos960 is None or pos960 == 518 else 'C10_ucigame'
-                DisplayDgt.show(self.dgttranslate.text(game_text, str(pos960)))
                 self.show_setup_pieces_msg = False
+                if message.newgame:
+                    pos960 = message.game.chess960_pos()
+                    game_text = 'C10_newgame' if pos960 is None or pos960 == 518 else 'C10_ucigame'
+                    DisplayDgt.show(self.dgttranslate.text(game_text, str(pos960)))
                 if self.menu_mode_result in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
                     time_left, time_right = message.time_control.current_clock_time(flip_board=self.flip_board)
                     DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE,
@@ -1241,8 +1243,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.hint_turn = message.game.turn
                 if message.mode == Mode.ANALYSIS and not self.inside_menu():
                     side = self.hint_side()
-                    DisplayDgt.show(Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=True, maxtime=0,
-                                                     beep=self.dgttranslate.bl(BeepLevel.NO), devs={'ser', 'i2c', 'web'}))
+                    disp = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=True, maxtime=0,
+                                            beep=self.dgttranslate.bl(BeepLevel.NO), devs={'ser', 'i2c', 'web'})
+                    DisplayDgt.show(disp)
                 break
             if case(MessageApi.NEW_DEPTH):
                 self.depth = message.depth
@@ -1445,10 +1448,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     if pos960 is not None:
                         if pos960 == 518 or self.engine_has_960:
                             logging.debug('Map-Fen: New game')
-                            # if self.show_setup_pieces_msg:
-                            #     game_text = 'C10_newgame' if pos960 is None or pos960 == 518 else 'C10_ucigame'
-                            #     DisplayDgt.show(self.dgttranslate.text(game_text, str(pos960)))
-                            #     self.show_setup_pieces_msg = False
                             self.fire(Event.NEW_GAME(pos960=pos960))
                         else:
                             # self._reset_moves_and_score()

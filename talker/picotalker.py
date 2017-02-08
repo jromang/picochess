@@ -111,8 +111,9 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                         system_picotalker.talk(['error.ogg'])
                         break
                     if case(MessageApi.START_NEW_GAME):
-                        logging.debug('announcing START_NEW_GAME')
-                        system_picotalker.talk(['newgame.ogg'])
+                        if message.newgame:
+                            logging.debug('announcing START_NEW_GAME')
+                            system_picotalker.talk(['newgame.ogg'])
                         break
                     if case(MessageApi.COMPUTER_MOVE):
                         if message.move and message.game and str(message.move) != previous_move \
