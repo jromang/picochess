@@ -274,7 +274,7 @@ $(function() {
                     setHeaders(data['headers']);
                     break;
                 case 'title':
-                    setTitle(data);
+                    setTitle(data['ip-info']);
                     break;
                 default:
                     console.warn(data);

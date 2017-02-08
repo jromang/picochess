@@ -229,6 +229,9 @@ class WebDisplay(DisplayMsg, threading.Thread):
             self.shared['headers'] = pgn_game.headers
             EventHandler.write_to_clients({'event': 'header', 'headers': pgn_game.headers})
 
+        def update_title():
+            EventHandler.write_to_clients({'event': 'title', 'ip-info': self.shared['ip-info']})
+
         def transfer(game):
             pgn_game = pgn.Game().from_board(game)
             create_game_header(pgn_game)
@@ -258,6 +261,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
             if case(MessageApi.IP_INFO):
                 self.shared['ip_info'] = message.info
                 update_headers()
+                update_title()
                 break
             if case(MessageApi.SYSTEM_INFO):
                 self.shared['system_info'] = message.info
@@ -313,8 +317,8 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.DGT_NO_CLOCK_ERROR):
-                result = {'event': 'Message', 'msg': 'Connect a clock please!'}
-                EventHandler.write_to_clients(result)
+                # result = {'event': 'Message', 'msg': 'Connect a clock please!'}
+                # EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.DGT_NO_EBOARD_ERROR):
                 result = {'event': 'Message', 'msg': 'Connect an E-Board please!'}
