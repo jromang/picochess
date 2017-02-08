@@ -230,7 +230,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
             EventHandler.write_to_clients({'event': 'header', 'headers': pgn_game.headers})
 
         def update_title():
-            EventHandler.write_to_clients({'event': 'title', 'ip-info': self.shared['ip-info']})
+            EventHandler.write_to_clients({'event': 'title', 'ip_info': self.shared['ip_info']})
 
         def transfer(game):
             pgn_game = pgn.Game().from_board(game)
