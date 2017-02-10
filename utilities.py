@@ -830,29 +830,31 @@ def hours_minutes_seconds(seconds):
 
 def update_picochess(auto_reboot=False):
     git = 'git.exe' if platform.system() == 'Windows' else 'git'
-    if git:
-        branch = subprocess.Popen([git, 'rev-parse', '--abbrev-ref', 'HEAD'],
-                                  stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8').rstrip()
-        if branch == 'stable' or branch == 'master':
-            # Fetch remote repo
-            output = subprocess.Popen([git, 'remote', 'update'],
+
+    branch = subprocess.Popen([git, 'rev-parse', '--abbrev-ref', 'HEAD'],
+                              stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8').rstrip()
+    if branch == 'stable' or branch == 'master':
+        # Fetch remote repo
+        output = subprocess.Popen([git, 'remote', 'update'],
+                                  stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
+        logging.debug(output)
+        # Check if update is needed - but first force an english environment for it
+        force_en_env = os.environ.copy()
+        force_en_env['LC_ALL'] = 'C'
+        output = subprocess.Popen([git, 'status', '-uno'],
+                                  stdout=subprocess.PIPE, env=force_en_env).communicate()[0].decode(encoding='UTF-8')
+        logging.debug(output)
+        if 'up-to-date' not in output:
+            # Update
+            logging.debug('updating picochess')
+            output = subprocess.Popen(['pip3', 'install', '-r', 'requirements.txt'],
                                       stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
             logging.debug(output)
-            # Check if update is needed
-            output = subprocess.Popen([git, 'status', '-uno'],
+            output = subprocess.Popen([git, 'pull', 'origin', branch],
                                       stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
             logging.debug(output)
-            if 'up-to-date' not in output:
-                # Update
-                logging.debug('updating picochess')
-                output = subprocess.Popen(['pip3', 'install', '-r', 'requirements.txt'],
-                                          stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
-                logging.debug(output)
-                output = subprocess.Popen([git, 'pull', 'origin', branch],
-                                          stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
-                logging.debug(output)
-                if auto_reboot:
-                    reboot(dev='web')
+            if auto_reboot:
+                reboot(dev='web')
 
 
 def shutdown(dgtpi, dev):
