@@ -127,7 +127,7 @@
 # user-voice = en:al
 ## computer-voice for computer moves announcement
 # computer-voice = en:christina
-## PicoChess writes pgn files at end of game.
+## PicoChess writes pgn files at end of game. This file is created in the games folder
 # pgn-file = games.pgn
 # pgn-user = player
 ## Picochess will check for a new version at startup.

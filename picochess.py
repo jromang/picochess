@@ -547,7 +547,7 @@ def main():
         smtp_server=args.smtp_server, smtp_user=args.smtp_user,
         smtp_pass=args.smtp_pass, smtp_encryption=args.smtp_encryption, smtp_from=args.smtp_from)
 
-    PgnDisplay(args.pgn_file, emailer).start()
+    PgnDisplay('games' + os.sep + args.pgn_file, emailer).start()
     if args.pgn_user:
         user_name = args.pgn_user
     else:
@@ -712,9 +712,9 @@ def main():
                     last_computer_fen = None
                     time_control.reset()
                     searchmoves.reset()
-                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, game=game.copy()))
                     game_declared = False
                     set_wait_state()
+                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, game=game.copy(), newgame=True))
                     break
 
                 if case(EventApi.NEW_GAME):

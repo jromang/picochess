@@ -367,13 +367,6 @@ class DgtTranslate(object):
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
-        # if text_id == 'menu_top_menu':
-        #     entxt = Dgt.DISPLAY_TEXT(l='Top menu   ', m='Top menu', s='topmen')
-        #     detxt = Dgt.DISPLAY_TEXT(l='Haupt Menu ', m='Hpt Menu', s='topmen')
-        #     nltxt = Dgt.DISPLAY_TEXT(l='Top menu   ', m='Top menu', s='topmen')
-        #     frtxt = Dgt.DISPLAY_TEXT(l='Top menu   ', m='Top menu', s='topmen')
-        #     estxt = Dgt.DISPLAY_TEXT(l='Top menu   ', m='Top menu', s='topmen')
-        #     ittxt = Dgt.DISPLAY_TEXT(l='Top menu   ', m='Top menu', s='topmen')
         if text_id == 'menu_mode_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Mode       ', m='Mode    ', s='mode  ')
             detxt = Dgt.DISPLAY_TEXT(l='Modus      ', m='Modus   ', s='modus ')
@@ -740,6 +733,13 @@ class DgtTranslate(object):
         if text_id == 'noboard':
             wait = True
             entxt = Dgt.DISPLAY_TEXT(l='no e-' + msg, m='no' + msg, s=msg)
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
+        if text_id == 'update':
+            entxt = Dgt.DISPLAY_TEXT(l='updating pc', m='updating', s='update')
             detxt = entxt
             nltxt = entxt
             frtxt = entxt

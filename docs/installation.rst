@@ -222,8 +222,8 @@ At start PicoChess looks at the file
 * enable-revelation-leds = true
 * log-level = debug
 * log-file = /opt/picochess/picochess.log
-* user-voice = en:Elsie
-* computer-voice = en:Marvin
+* user-voice = en:al
+* computer-voice = en:christina
 * disable-ok-message
 
 To set a particular setting, simply include the appropriate line in the picochess.ini file.

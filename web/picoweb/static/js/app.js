@@ -95,16 +95,18 @@ function setTitle(data) {
     window.ip_info = data;
     var ip = '';
     if (window.ip_info.ext_ip) {
-        ip += ' ExtIP: ' + window.ip_info.ext_ip;
+        ip += ' ExtIP: ' + window.ip_info.ext_ip
     }
     if (window.ip_info.int_ip) {
         ip += ' IntIP: ' + window.ip_info.int_ip
     }
     var version = '';
     if (window.ip_info.version) {
-        version = window.ip_info.version;
+        version = window.ip_info.version
+    } else if (window.system_info.version) {
+        version = window.system_info.version
     }
-    document.title = 'Webserver Picochess ' + version + ip;
+    document.title = 'Webserver Picochess ' + version + ip
 }
 
 // copied from loadGame()
