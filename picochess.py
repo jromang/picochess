@@ -426,15 +426,18 @@ def main():
 
     # Command line argument parsing
     parser = configargparse.ArgParser(default_config_files=[os.path.join(os.path.dirname(__file__), 'picochess.ini')])
-    parser.add_argument('-e', '--engine', type=str, help='UCI engine executable path', default=None)
+    parser.add_argument('-e', '--engine', type=str, help="UCI engine executable path such as 'engines/armv7l/a-stockf'",
+                        default=None)
     parser.add_argument('-el', '--engine-level', type=str, help='UCI engine level', default=None)
     parser.add_argument('-ers', '--engine-remote-server', type=str, help='adress of the remote engine server')
     parser.add_argument('-eru', '--engine-remote-user', type=str, help='username for the remote engine server')
     parser.add_argument('-erp', '--engine-remote-pass', type=str, help='password for the remote engine server')
     parser.add_argument('-erk', '--engine-remote-key', type=str, help='key file for the remote engine server')
+    parser.add_argument('-erh', '--engine-remote-home', type=str, help='engine home path for the remote engine server',
+                        default='/opt/picochess')
     parser.add_argument('-d', '--dgt-port', type=str,
                         help='enable dgt board on the given serial port such as /dev/ttyUSB0')
-    parser.add_argument('-b', '--book', type=str, help='full path of book such as books/b-flank.bin',
+    parser.add_argument('-b', '--book', type=str, help="path of book such as 'books/b-flank.bin'",
                         default='books/h-varied.bin')
     parser.add_argument('-t', '--time', type=str, default='5 0',
                         help="Time settings <FixSec> or <StMin IncSec> like '10'(move) or '5 0'(game) '3 2'(fischer)")
@@ -452,7 +455,7 @@ def main():
     parser.add_argument('-mu', '--smtp-user', type=str, help='username for email server', default=None)
     parser.add_argument('-mp', '--smtp-pass', type=str, help='password for email server', default=None)
     parser.add_argument('-me', '--smtp-encryption', action='store_true',
-                        help='use ssl encryption connection to smtp-Server')
+                        help='use ssl encryption connection to email server')
     parser.add_argument('-mf', '--smtp-from', type=str, help='From email', default='no-reply@picochess.org')
     parser.add_argument('-mk', '--mailgun-key', type=str, help='key used to send emails via Mailgun Webservice',
                         default=None)
@@ -494,10 +497,7 @@ def main():
     p['mailgun_key'] = p['engine_remote_key'] = p['engine_remote_pass'] = p['smtp_pass'] = '*****'
     logging.debug('startup parameters: {}'.format(p))
     if unknown:
-        logging.error('invalid parameter given {}'.format(unknown))
-    # Update
-    if args.enable_update:
-        update_picochess(args.enable_update_reboot)
+        logging.warning('invalid parameter given {}'.format(unknown))
 
     gaviota = None
     if args.enable_gaviota:
@@ -505,7 +505,7 @@ def main():
             gaviota = chess.gaviota.open_tablebases('tablebases/gaviota')
             logging.debug('Tablebases gaviota loaded')
         except OSError:
-            logging.error('Tablebases gaviota doesnt exist')
+            logging.warning('Tablebases gaviota doesnt exist')
             gaviota = None
 
     dgttranslate = DgtTranslate(args.beep_config, args.beep_some_level, args.language)
@@ -527,7 +527,7 @@ def main():
         logging.debug('PicoTalker disabled')
 
     dgtboard = DgtBoard(args.dgt_port, args.enable_revelation_leds, args.dgtpi)
-    my_lock = threading.Lock()
+    my_lock = threading.Lock()  # @todo this is not the correct way (DgtPi & DgtHw are independent)
 
     if args.console:
         # Enable keyboard input and terminal display
@@ -556,9 +556,13 @@ def main():
         else:
             user_name = 'Player'
 
+    # Update
+    if args.enable_update:
+        update_picochess(args.enable_update_reboot, dgttranslate)
+
     # Gentlemen, start your engines...
     engine = UciEngine(args.engine, hostname=args.engine_remote_server, username=args.engine_remote_user,
-                       key_file=args.engine_remote_key, password=args.engine_remote_pass)
+                       key_file=args.engine_remote_key, password=args.engine_remote_pass, home=args.engine_remote_home)
     try:
         engine_name = engine.get().name
     except AttributeError:
@@ -878,7 +882,7 @@ def main():
                 if case(EventApi.REBOOT):
                     DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=game.copy()))
                     DisplayMsg.show(Message.SYSTEM_REBOOT())
-                    reboot(dev=event.dev)
+                    reboot(args.dgtpi, dev=event.dev)
                     break
 
                 if case(EventApi.EMAIL_LOG):

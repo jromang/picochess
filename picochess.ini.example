@@ -1,5 +1,5 @@
 ### ===============================
-### = picochess.ini.example v0.82 =
+### = picochess.ini.example v0.83 =
 ### ===============================
 ### Example and description how to configure PicoChess
 ### To use this file, simply copy this file to picochess.ini and edit the appropriate settings
@@ -45,7 +45,7 @@
 ## Sets the UCI engine used at startup
 ## handle with care. If you setup this section wrong, picochess wont start.
 ## Path to the engine relative to the 'picochess' folder (local engine - standard case)
-## or the full path to an engine at the remote engine server (special case - see below)
+## If you use a remote engine server, please make sure that you also set 'engine-remote-host' accordingly
 # engine = engines/armv7l/a-stockf
 ## What level the engine should have at startup?
 ## For a (correct) value please take a look at 'engines/<your_plattform>/<engine_name>.uci'
@@ -59,6 +59,8 @@
 # engine-remote-pass = your_secret_password
 ## The secret server-key for the remote-engine-server
 # engine-remote-key = your_secret_key
+## The home path (where the engines live) for the remote-engine-server
+# engine-remote-home = /opt/picochess
 
 ### ==========================
 ### = Opening book selection =

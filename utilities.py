@@ -828,7 +828,7 @@ def hours_minutes_seconds(seconds):
     return h, m, s
 
 
-def update_picochess(auto_reboot=False):
+def update_picochess(dgtpi, auto_reboot, dgttranslate):
     git = 'git.exe' if platform.system() == 'Windows' else 'git'
 
     branch = subprocess.Popen([git, 'rev-parse', '--abbrev-ref', 'HEAD'],
@@ -845,6 +845,7 @@ def update_picochess(auto_reboot=False):
                                   stdout=subprocess.PIPE, env=force_en_env).communicate()[0].decode(encoding='UTF-8')
         logging.debug(output)
         if 'up-to-date' not in output:
+            DisplayDgt.show(dgttranslate.text('Y00_default', 'update'))
             # Update
             logging.debug('updating picochess')
             output = subprocess.Popen(['pip3', 'install', '-r', 'requirements.txt'],
@@ -854,7 +855,9 @@ def update_picochess(auto_reboot=False):
                                       stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
             logging.debug(output)
             if auto_reboot:
-                reboot(dev='web')
+                reboot(dgtpi, dev='web')
+            else:
+                time.sleep(1)  # give time to display the "update" message
 
 
 def shutdown(dgtpi, dev):
@@ -868,10 +871,15 @@ def shutdown(dgtpi, dev):
         os.system('shutdown -h now')
 
 
-def reboot(dev):
+def reboot(dgtpi, dev):
     logging.debug('rebooting system requested by ({})'.format(dev))
     time.sleep(2)  # give some time to send out the pgn file or speak the event
-    os.system('reboot')
+    if platform.system() == 'Windows':
+        os.system('shutdown /r')
+    elif dgtpi:
+        os.system('systemctl service picochess restart')
+    else:
+        os.system('reboot')
 
 
 def get_location():

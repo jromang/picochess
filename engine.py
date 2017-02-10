@@ -203,7 +203,7 @@ class Informer(chess.uci.InfoHandler):
 
 
 class UciEngine(object):
-    def __init__(self, file, hostname=None, username=None, key_file=None, password=None):
+    def __init__(self, file, hostname=None, username=None, key_file=None, password=None, home=''):
         super(UciEngine, self).__init__()
         try:
             self.shell = None
@@ -216,7 +216,7 @@ class UciEngine(object):
                     shell = spur.SshShell(hostname=hostname, username=username, password=password,
                                           missing_host_key=paramiko.AutoAddPolicy())
                 self.shell = shell
-                self.engine = chess.uci.spur_spawn_engine(shell, [file])
+                self.engine = chess.uci.spur_spawn_engine(shell, [home + os.sep + file])
             else:
                 self.engine = chess.uci.popen_engine(file)
 
