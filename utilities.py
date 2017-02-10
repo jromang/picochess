@@ -523,10 +523,13 @@ class DgtClk(enum.Enum):
 
 class DgtAck(enum.Enum):
     DGT_ACK_CLOCK_DISPLAY = 0x01  # Display ack
+    DGT_ACK_CLOCK_ICON = 0x02
+    DGT_ACK_CLOCK_END = 0x03
     DGT_ACK_CLOCK_BUTTON_NONE = 0x08  # Buttons ack, but no button information is returned though
     DGT_ACK_CLOCK_VERSION = 0x09  # Version ack. ack2>>4 is main version, ack2&0x0f is sub version
     DGT_ACK_CLOCK_SETNRUN = 0x0a  # SetNRun ack
     DGT_ACK_CLOCK_BEEP = 0x0b  # Beep ack
+    DGT_ACK_CLOCK_ASCII = 0x0c
     DGT_ACK_CLOCK_READY = 0x81
     DGT_ACK_CLOCK_BUTTON = 0x88  # Ack of a clock button
     DGT_ACK_CLOCK_MODE = 0x8a

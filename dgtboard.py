@@ -182,9 +182,9 @@ class DgtBoard(object):
                     else:
                         logging.debug("(ser) clock: ACK okay [%s]", DgtAck(ack1))
                         if self.last_clock_command:
-                            cmd = self.last_clock_command[3]
-                            # @todo check if the ack suits the last command
-                            logging.debug("(ser) clock: Last command [%s]", cmd)
+                            cmd = self.last_clock_command[3]  # cmd = type(DgtClk)
+                            if cmd.value != ack1 and ack1 < 0x80:
+                                logging.warning("(ser) clock: ACK [%s] out of sync last: [%s]", DgtAck(ack1), cmd)
 
                     if ack1 == DgtAck.DGT_ACK_CLOCK_BUTTON.value:
                         # this are the other (ack2-ack3) codes
