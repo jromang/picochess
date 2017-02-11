@@ -558,7 +558,7 @@ def main():
 
     # Update
     if args.enable_update:
-        update_picochess(args.enable_update_reboot, dgttranslate)
+        update_picochess(args.dgtpi, args.enable_update_reboot, dgttranslate)
 
     # Gentlemen, start your engines...
     engine = UciEngine(args.engine, hostname=args.engine_remote_server, username=args.engine_remote_user,
