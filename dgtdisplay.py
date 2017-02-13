@@ -80,6 +80,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.voices_conf = ConfigObj('talker' + os.sep + 'voices' + os.sep + 'voices.ini')
         self.menu_system_voice_type_result = None
         self.menu_system_voice_type_index = VoiceType.COMP_VOICE
+        self.menu_system_voice_mute_index = False  # @todo set this to 'True' if mute voice choosen
+        self.menu_system_voice_mute_result = None
         self.menu_system_voice_lang_result = None
         try:
             self.menu_system_voice_lang_index = self.voices_conf.keys().index(self.dgttranslate.language)
@@ -137,6 +139,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.menu_system_sound_beep_result = None
         self.menu_system_language_lang_result = None
         self.menu_system_voice_type_result = None
+        self.menu_system_voice_mute_result = None
         self.menu_system_voice_lang_result = None
         self.menu_system_voice_speak_result = None
         self.menu_inside_flag = False
@@ -256,18 +259,27 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
     def inside_system_voice_type_menu(self):
         return self.inside_system_voice_menu() and self.menu_system_voice_type_result is None and \
+               self.menu_system_voice_mute_result is None and \
                self.menu_system_voice_lang_result is None and self.menu_system_voice_speak_result is None
 
-    def inside_system_voice_type_language_menu(self):
+    def inside_system_voice_type_mute_menu(self):
         return self.inside_system_voice_menu() and self.menu_system_voice_type_result is not None and \
+               self.menu_system_voice_mute_result is None and \
                self.menu_system_voice_lang_result is None and self.menu_system_voice_speak_result is None
 
-    def inside_system_voice_type_language_speaker_menu(self):
+    def inside_system_voice_type_mute_language_menu(self):
         return self.inside_system_voice_menu() and self.menu_system_voice_type_result is not None and \
+               self.menu_system_voice_mute_result is not None and \
+               self.menu_system_voice_lang_result is None and self.menu_system_voice_speak_result is None
+
+    def inside_system_voice_type_mute_language_speaker_menu(self):
+        return self.inside_system_voice_menu() and self.menu_system_voice_type_result is not None and \
+               self.menu_system_voice_mute_result is not None and \
                self.menu_system_voice_lang_result is not None and self.menu_system_voice_speak_result is None
 
-    def inside_system_voice_type_language_speaker_super_menu(self):
+    def inside_system_voice_type_mute_language_speaker_super_menu(self):
         return self.inside_system_voice_menu() and self.menu_system_voice_type_result is not None and \
+               self.menu_system_voice_mute_result is not None and \
                self.menu_system_voice_lang_result is not None and self.menu_system_voice_speak_result is not None
 
     def inside_position_menu(self):
@@ -315,7 +327,13 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             text = self.dgttranslate.text(self.menu_system_voice_type_index.value)
             return text
 
-        def enter_system_voice_type_language_menu():
+        def enter_system_voice_type_mute_menu():
+            # text = self.dgttranslate.text(self.menu_system_voice_mute_index.value)
+            msg = 'on' if self.menu_system_voice_mute_index else 'off'
+            text = self.dgttranslate.text('B00_voice_' + msg)
+            return text
+
+        def enter_system_voice_type_mute_language_menu():
             vkey = self.voices_conf.keys()[self.menu_system_voice_lang_index]
             text = self.dgttranslate.text('B00_language_' + vkey + '_menu')  # voice using same as language
             return text
@@ -352,13 +370,17 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             self.menu_system_voice_type_result = None
             return enter_system_voice_menu()
 
-        def exit_system_voice_type_language_menu():
-            self.menu_system_voice_lang_result = None
+        def exit_system_voice_type_mute_menu():
+            self.menu_system_voice_mute_result = None
             return enter_system_voice_type_menu()
 
-        def exit_system_voice_type_language_speaker_menu():
+        def exit_system_voice_type_mute_language_menu():
+            self.menu_system_voice_lang_result = None
+            return enter_system_voice_type_mute_menu()
+
+        def exit_system_voice_type_mute_language_speaker_menu():
             self.menu_system_voice_speak_result = None
-            return enter_system_voice_type_language_menu()
+            return enter_system_voice_type_mute_language_menu()
 
         def exit_time_menu():
             self.menu_top_result = None
@@ -403,14 +425,14 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if self.inside_system_choose_menu():
                 text = exit_system_menu()
             elif self.inside_system_voice_menu():
-                if self.inside_system_voice_type_language_speaker_super_menu():
-                    text = exit_system_voice_type_language_speaker_menu()
-                elif self.inside_system_voice_type_language_speaker_menu():
-                    text = exit_system_voice_type_language_menu()
-                elif self.inside_system_voice_type_language_menu():
+                if self.inside_system_voice_type_mute_language_speaker_super_menu():
+                    text = exit_system_voice_type_mute_language_speaker_menu()
+                elif self.inside_system_voice_type_mute_language_speaker_menu():
+                    text = exit_system_voice_type_mute_language_menu()
+                elif self.inside_system_voice_type_mute_language_menu():
+                    text = exit_system_voice_type_mute_menu()
+                elif self.inside_system_voice_type_mute_menu():
                     text = exit_system_voice_type_menu()
-                elif self.inside_system_voice_type_menu():
-                    text = exit_system_menu()
                 else:
                     text = self.dgttranslate.text('Y00_errormenu')
             elif self.inside_system_language_menu():
@@ -499,7 +521,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.menu_system_index = SettingsLoop.prev(self.menu_system_index)
                 text = self.dgttranslate.text(self.menu_system_index.value)
             elif self.inside_system_voice_menu():
-                if self.inside_system_voice_type_language_speaker_super_menu():
+                if self.inside_system_voice_type_mute_language_speaker_super_menu():
                     vkey = self.voices_conf.keys()[self.menu_system_voice_lang_index]
                     speakers = self.voices_conf[vkey]
                     self.menu_system_voice_speak_index = (self.menu_system_voice_speak_index - 1) % len(speakers)
@@ -509,11 +531,15 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     text.wait = False
                     text.maxtime = 0
                     text.devs = {'ser', 'i2c', 'web'}
-                elif self.inside_system_voice_type_language_speaker_menu():
+                elif self.inside_system_voice_type_mute_language_speaker_menu():
                     self.menu_system_voice_lang_index = (self.menu_system_voice_lang_index - 1) % len(self.voices_conf)
                     vkey = self.voices_conf.keys()[self.menu_system_voice_lang_index]
                     text = self.dgttranslate.text('B00_language_' + vkey + '_menu')  # voice using same as language
-                elif self.inside_system_voice_type_language_menu():
+                elif self.inside_system_voice_type_mute_language_menu():
+                    self.menu_system_voice_mute_index = not self.menu_system_voice_mute_index
+                    msg = 'on' if self.menu_system_voice_mute_index else 'off'
+                    text = self.dgttranslate.text('B00_voice_' + msg)
+                elif self.inside_system_voice_type_mute_menu():
                     self.menu_system_voice_type_index = VoiceTypeLoop.prev(self.menu_system_voice_type_index)
                     text = self.dgttranslate.text(self.menu_system_voice_type_index.value)
                 else:
@@ -638,7 +664,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.menu_system_index = SettingsLoop.next(self.menu_system_index)
                 text = self.dgttranslate.text(self.menu_system_index.value)
             elif self.inside_system_voice_menu():
-                if self.inside_system_voice_type_language_speaker_super_menu():
+                if self.inside_system_voice_type_mute_language_speaker_super_menu():
                     vkey = self.voices_conf.keys()[self.menu_system_voice_lang_index]
                     speakers = self.voices_conf[vkey]
                     self.menu_system_voice_speak_index = (self.menu_system_voice_speak_index + 1) % len(speakers)
@@ -648,11 +674,15 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     text.wait = False
                     text.maxtime = 0
                     text.devs = {'ser', 'i2c', 'web'}
-                elif self.inside_system_voice_type_language_speaker_menu():
+                elif self.inside_system_voice_type_mute_language_speaker_menu():
                     self.menu_system_voice_lang_index = (self.menu_system_voice_lang_index + 1) % len(self.voices_conf)
                     vkey = self.voices_conf.keys()[self.menu_system_voice_lang_index]
                     text = self.dgttranslate.text('B00_language_' + vkey + '_menu')  # voice using same as language
-                elif self.inside_system_voice_type_language_menu():
+                elif self.inside_system_voice_type_mute_language_menu():
+                    self.menu_system_voice_mute_index = not self.menu_system_voice_mute_index
+                    msg = 'on' if self.menu_system_voice_mute_index else 'off'
+                    text = self.dgttranslate.text('B00_voice_' + msg)
+                elif self.inside_system_voice_type_mute_menu():
                     self.menu_system_voice_type_index = VoiceTypeLoop.next(self.menu_system_voice_type_index)
                     text = self.dgttranslate.text(self.menu_system_voice_type_index.value)
                 else:
@@ -847,7 +877,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.fire(Event.EMAIL_LOG())
                 text = self.dgttranslate.text('B10_oklogfile')  # @todo give pos/neg feedback
             elif self.inside_system_voice_menu():
-                if self.inside_system_voice_type_language_speaker_super_menu():
+                if self.inside_system_voice_type_mute_language_speaker_super_menu():
                     vkey = self.voices_conf.keys()[self.menu_system_voice_lang_index]
                     speakers = self.voices_conf[vkey].keys()
                     config = ConfigObj('picochess.ini')
@@ -857,7 +887,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     config.write()
                     self.fire(Event.SET_VOICE(type=self.menu_system_voice_type_index, lang=vkey, speaker=skey))
                     text = self.dgttranslate.text('B10_okvoice')
-                elif self.inside_system_voice_type_language_speaker_menu():
+                elif self.inside_system_voice_type_mute_language_speaker_menu():
                     self.menu_system_voice_speak_result = self.menu_system_voice_speak_index
                     vkey = self.voices_conf.keys()[self.menu_system_voice_lang_index]
                     speakers = self.voices_conf[vkey]
@@ -870,10 +900,25 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     text.maxtime = 0
                     text.devs = {'ser', 'i2c', 'web'}
                     exit_menu = False
-                elif self.inside_system_voice_type_language_menu():
-                    vkey = self.voices_conf.keys()[self.menu_system_voice_lang_index]
+                elif self.inside_system_voice_type_mute_language_menu():
                     self.menu_system_voice_lang_result = self.menu_system_voice_lang_index
-                    text = self.dgttranslate.text('B00_language_' + vkey + '_menu')
+                    vkey = self.voices_conf.keys()[self.menu_system_voice_lang_index]
+                    if self.menu_system_voice_mute_index:
+                        text = self.dgttranslate.text('B00_language_' + vkey + '_menu')
+                        exit_menu = False
+                    else:
+                        config = ConfigObj('picochess.ini')
+                        ckey = 'user' if self.menu_system_voice_type_index == VoiceType.USER_VOICE else 'computer'
+                        if hasattr(config, ckey + '-voice'):
+                            del(config[ckey + '-voice'])
+                            config.write()
+                        self.fire(Event.SET_VOICE(type=self.menu_system_voice_type_index, lang=vkey, speaker='mute'))
+                        text = self.dgttranslate.text('B10_okvoice')
+                        exit_menu = True
+                elif self.inside_system_voice_type_mute_menu():
+                    self.menu_system_voice_mute_result = self.menu_system_voice_mute_index
+                    msg = 'on' if self.menu_system_voice_mute_index else 'off'
+                    text = self.dgttranslate.text('B00_voice_' + msg)
                     exit_menu = False
                 elif self.inside_system_voice_type_menu():
                     self.menu_system_voice_type_result = self.menu_system_voice_type_index

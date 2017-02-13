@@ -34,14 +34,13 @@ class PicoTalker():
 
         try:
             (localisation_id, voice_name) = localisation_id_voice.split(':')
-            self.voice_path = 'talker/voices/' + localisation_id + '/' + voice_name
-            if not Path(self.voice_path).exists():
-                logging.exception('voice path doesnt exist')
+            voice_path = 'talker/voices/' + localisation_id + '/' + voice_name
+            if Path(voice_path).exists():
+                self.voice_path = voice_path
+            else:
+                logging.warning('voice path doesnt exist')
         except ValueError:
-            logging.exception('not valid voice parameter')
-
-    def get_path(self):
-        return self.voice_path
+            logging.warning('not valid voice parameter')
 
     def talk(self, sounds):
         def play(file):
@@ -55,16 +54,19 @@ class PicoTalker():
             if status:
                 logging.warning(str(status))
 
-        for part in sounds:
-            voice_file = self.voice_path + '/' + part
-            if Path(voice_file).is_file():
-                try:
-                    subprocess.call(['ogg123', voice_file], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                except OSError as e:  # fallback in case "vorbis-tools" isnt installed
-                    logging.info('using sounddevice for [{}] Error: {}'.format(voice_file, e))
-                    play(voice_file)
-            else:
-                logging.warning('voice file not found {}'.format(voice_file))
+        if self.voice_path:
+            for part in sounds:
+                voice_file = self.voice_path + '/' + part
+                if Path(voice_file).is_file():
+                    try:
+                        subprocess.call(['ogg123', voice_file], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    except OSError as e:  # fallback in case "vorbis-tools" isnt installed
+                        logging.info('using sounddevice for [{}] Error: {}'.format(voice_file, e))
+                        play(voice_file)
+                else:
+                    logging.warning('voice file not found {}'.format(voice_file))
+        else:
+            logging.debug('Picotalker turned off')
 
 
 class PicoTalkerDisplay(DisplayMsg, threading.Thread):
@@ -149,7 +151,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                             system_picotalker.talk(['checkmate.ogg'])
                         elif message.result == GameResult.STALEMATE:
                             logging.debug('announcing GAME_ENDS/STALEMATE')
-                            system_picotalker.talk(['stalemate.ogg'], system_picotalker.get_path())
+                            system_picotalker.talk(['stalemate.ogg'])
                         elif message.result == GameResult.ABORT:
                             logging.debug('announcing GAME_ENDS/ABORT')
                             system_picotalker.talk(['abort.ogg'])

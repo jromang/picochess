@@ -709,6 +709,20 @@ class DgtTranslate(object):
             frtxt = Dgt.DISPLAY_TEXT(l='ok Voix    ', m='ok Voix ', s='okvoix')
             estxt = Dgt.DISPLAY_TEXT(l='ok Voz     ', m='ok Voz  ', s='ok voz')
             ittxt = Dgt.DISPLAY_TEXT(l='ok Voce    ', m='ok Voce ', s='okvoce')
+        if text_id == 'voice_on':
+            entxt = Dgt.DISPLAY_TEXT(l='Voice on   ', m='voice on', s='vc on ')
+            detxt = Dgt.DISPLAY_TEXT(l='Stimme eing', m='Stim ein', s='st ein')
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
+        if text_id == 'voice_off':
+            entxt = Dgt.DISPLAY_TEXT(l='Voice  off ', m='voiceoff', s='vc off')
+            detxt = Dgt.DISPLAY_TEXT(l='Stimme ausg', m='Stim aus', s='st aus')
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
         if text_id == 'tc_fixed':
             entxt = Dgt.DISPLAY_TEXT(l='Move time' + msg, m='Move t' + msg, s='mov ' + msg)
             detxt = Dgt.DISPLAY_TEXT(l='Zugzeit  ' + msg, m='Zug z ' + msg, s='zug ' + msg)
