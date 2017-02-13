@@ -606,7 +606,7 @@ def main():
                                            has_levels=engine.has_levels(), has_960=engine.has_chess960()))
     DisplayMsg.show(Message.SYSTEM_INFO(info={'version': version, 'engine_name': engine_name, 'user_name': user_name}))
 
-    ip_info_thread = threading.Timer(10, display_ip_info)
+    ip_info_thread = threading.Timer(10, display_ip_info)  # give RaspberyPi 10sec time to startup its network devices
     ip_info_thread.start()
 
     # Event loop
