@@ -282,6 +282,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                self.menu_system_voice_mute_result is not None and \
                self.menu_system_voice_lang_result is not None and self.menu_system_voice_speak_result is not None
 
+    def inside_system_display_menu(self):
+        return self.inside_system_menu() and self.menu_system_result == Settings.DISPLAY
+
     def inside_position_menu(self):
         return self.inside_menu() and self.menu_top_result == Menu.POSITION_MENU
 
@@ -439,6 +442,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 text = exit_system_language_menu()
             elif self.inside_system_sound_menu():
                 text = exit_system_sound_menu()
+            elif self.inside_system_display_menu():
+                text = self.dgttranslate.text('Y00_errormenu')  # @todo
             else:
                 logging.warning('wrong value for menu_system_result: {}'.format(self.menu_system_result))
                 text = self.dgttranslate.text('Y00_errormenu')
@@ -550,6 +555,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             elif self.inside_system_sound_menu():
                 self.menu_system_sound_beep_index = BeepLoop.prev(self.menu_system_sound_beep_index)
                 text = self.dgttranslate.text(self.menu_system_sound_beep_index.value)
+            elif self.inside_system_display_menu():
+                text = self.dgttranslate.text('Y00_errormenu')  # @todo
             else:
                 logging.warning('wrong value for menu_system_result: {}'.format(self.menu_system_result))
                 text = self.dgttranslate.text('Y00_errormenu')
@@ -693,6 +700,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             elif self.inside_system_sound_menu():
                 self.menu_system_sound_beep_index = BeepLoop.next(self.menu_system_sound_beep_index)
                 text = self.dgttranslate.text(self.menu_system_sound_beep_index.value)
+            elif self.inside_system_display_menu():
+                text = self.dgttranslate.text('Y00_errormenu')  # @todo
             else:
                 logging.warning('wrong value for menu_system_result: {}'.format(self.menu_system_result))
                 text = self.dgttranslate.text('Y00_errormenu')
@@ -926,6 +935,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     exit_menu = False
                 else:
                     text = self.dgttranslate.text('Y00_errormenu')
+            elif self.inside_system_display_menu():
+                text = self.dgttranslate.text('Y00_errormenu')  # @todo
             else:
                 logging.warning('wrong value for menu_system_result: {}'.format(self.menu_system_result))
                 text = self.dgttranslate.text('Y00_errormenu')

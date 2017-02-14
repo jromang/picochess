@@ -507,6 +507,13 @@ class DgtTranslate(object):
             frtxt = Dgt.DISPLAY_TEXT(l='Voix       ', m='Voix    ', s='voix  ')
             estxt = Dgt.DISPLAY_TEXT(l='Voz        ', m='Voz     ', s='voz   ')
             ittxt = Dgt.DISPLAY_TEXT(l='Voce       ', m='Voce    ', s='voce  ')
+        if text_id == 'settings_display_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='Display    ', m='Display ', s='dsplay')
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
         if text_id == 'gameresult_mate':
             wait = True
             entxt = Dgt.DISPLAY_TEXT(l='mate       ', m='mate    ', s='mate  ')

@@ -284,6 +284,7 @@ class Settings(enum.Enum):
     LANGUAGE = 'B00_settings_language_menu'
     LOGFILE = 'B00_settings_logfile_menu'
     VOICE = 'B00_settings_voice_menu'
+    DISPLAY = 'B00_settings_display_menu'
 
 
 class SettingsLoop(object):
@@ -303,12 +304,16 @@ class SettingsLoop(object):
         elif m == Settings.LOGFILE:
             return Settings.VOICE
         elif m == Settings.VOICE:
+            return Settings.DISPLAY
+        elif m == Settings.DISPLAY:
             return Settings.VERSION
         return 'errSetgNext'
 
     @staticmethod
     def prev(m):
         if m == Settings.VERSION:
+            return Settings.DISPLAY
+        if m == Settings.DISPLAY:
             return Settings.VOICE
         if m == Settings.VOICE:
             return Settings.LOGFILE

@@ -151,7 +151,7 @@ class DgtBoard(object):
                             self.use_revelation_leds = True
                     elif 'DGT_BT' in self.bt_name:
                         text_l, text_m, text_s = 'DGTBT ' + btname5, 'BT ' + btname5, 'b' + btname5
-                        self.enable_revelation_leds = False
+                        self.use_revelation_leds = False
                     else:
                         text_l, text_m, text_s = 'BT e-Board', 'BT board', 'ok bt'
                     channel = 'BT'
