@@ -909,7 +909,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     else:
                         config = ConfigObj('picochess.ini')
                         ckey = 'user' if self.menu_system_voice_type_index == VoiceType.USER_VOICE else 'computer'
-                        if hasattr(config, ckey + '-voice'):
+                        if ckey + '-voice' in config:
                             del(config[ckey + '-voice'])
                             config.write()
                         self.fire(Event.SET_VOICE(type=self.menu_system_voice_type_index, lang=vkey, speaker='mute'))
