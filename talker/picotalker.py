@@ -16,11 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 # for this (picotalker) to work you need to run these commands (if you haven't done before)
-# pip3 install sounddevice
-# pip3 install soundfile
-# apt-get install python3-numpy
-# apt-get install libportaudio2
-# apt-get install python3-cffi
+# apt-get install vorbis-tools
 
 import threading
 import chess
@@ -43,30 +39,19 @@ class PicoTalker():
             logging.warning('not valid voice parameter')
 
     def talk(self, sounds):
-        def play(file):
-            import sounddevice as sd
-            import soundfile as sf
-            sd.default.blocksize = 2048
-
-            d, f = sf.read(file, dtype='float32')
-            sd.play(d, f, blocking=True)
-            status = sd.get_status()
-            if status:
-                logging.warning(str(status))
-
         if self.voice_path:
             for part in sounds:
                 voice_file = self.voice_path + '/' + part
                 if Path(voice_file).is_file():
                     try:
                         subprocess.call(['ogg123', voice_file], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                    except OSError as e:  # fallback in case "vorbis-tools" isnt installed
-                        logging.info('using sounddevice for [{}] Error: {}'.format(voice_file, e))
-                        play(voice_file)
+                    except OSError as e:
+                        logging.warning('OSError: {} => turn voice OFF'.format(voice_file, e))
+                        self.voice_path = None
                 else:
                     logging.warning('voice file not found {}'.format(voice_file))
         else:
-            logging.debug('Picotalker turned off')
+            logging.debug('picotalker turned off')
 
 
 class PicoTalkerDisplay(DisplayMsg, threading.Thread):

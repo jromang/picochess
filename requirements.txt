@@ -19,5 +19,3 @@ shellescape==3.4.1
 spur==0.3.20
 tornado==4.4.2
 configobj==5.0.6
-sounddevice==0.3.5
-soundfile==0.8.1
