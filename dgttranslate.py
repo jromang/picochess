@@ -360,13 +360,6 @@ class DgtTranslate(object):
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
-        if text_id == 'gaviota':
-            entxt = Dgt.DISPLAY_TEXT(l='gaviota ' + msg, m='gavio' + msg, s='gav'+ msg)
-            detxt = entxt
-            nltxt = entxt
-            frtxt = entxt
-            estxt = entxt
-            ittxt = entxt
         if text_id == 'menu_mode_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Mode       ', m='Mode    ', s='mode  ')
             detxt = Dgt.DISPLAY_TEXT(l='Modus      ', m='Modus   ', s='modus ')

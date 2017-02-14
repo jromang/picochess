@@ -1264,16 +1264,13 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 DisplayDgt.show(message.play_mode_text)
                 break
             if case(MessageApi.NEW_SCORE):
-                if message.score == 'gaviota':
-                    text = self.dgttranslate.text('N10_gaviota', str(message.mate))
+                if message.mate is None:
+                    score = int(message.score)
+                    if message.turn == chess.BLACK:
+                        score *= -1
+                    text = self.dgttranslate.text('N10_score', score)
                 else:
-                    if message.mate is None:
-                        score = int(message.score)
-                        if message.turn == chess.BLACK:
-                            score *= -1
-                        text = self.dgttranslate.text('N10_score', score)
-                    else:
-                        text = self.dgttranslate.text('N10_mate', str(message.mate))
+                    text = self.dgttranslate.text('N10_mate', str(message.mate))
                 self.score = text
                 if message.mode == Mode.KIBITZ and not self.inside_menu():
                     DisplayDgt.show(self._combine_depth_and_score())

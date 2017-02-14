@@ -23,7 +23,6 @@ import os
 import configargparse
 import chess
 import chess.polyglot
-import chess.gaviota
 import chess.uci
 import threading
 import copy
@@ -104,14 +103,6 @@ def main():
             g.pop()
         return fens
 
-    def probe_tablebase(game):
-        if not gaviota:
-            return None
-        score = gaviota.get_dtm(game)
-        if score is not None:
-            Observable.fire(Event.NEW_SCORE(score='gaviota', mate=score))
-        return score
-
     def think(game, tc):
         """
         Start a new search on the current game.
@@ -123,7 +114,6 @@ def main():
         if book_move:
             Observable.fire(Event.BEST_MOVE(result=book_move, inbook=True))
         else:
-            probe_tablebase(game)
             while not engine.is_waiting():
                 time.sleep(0.1)
                 logging.warning('engine is still not waiting')
@@ -137,7 +127,6 @@ def main():
         Start a new ponder search on the current game.
         :return:
         """
-        probe_tablebase(game)
         engine.position(copy.deepcopy(game))
         engine.ponder()
 
@@ -441,7 +430,6 @@ def main():
                         default='books/h-varied.bin')
     parser.add_argument('-t', '--time', type=str, default='5 0',
                         help="Time settings <FixSec> or <StMin IncSec> like '10'(move) or '5 0'(game) '3 2'(fischer)")
-    parser.add_argument('-g', '--enable-gaviota', action='store_true', help='enable gavoita tablebase probing')
     parser.add_argument('-rl', '--enable-revelation-leds', action='store_true', help='enable Revelation leds')
     parser.add_argument('-l', '--log-level', choices=['notset', 'debug', 'info', 'warning', 'error', 'critical'],
                         default='warning', help='logging level')
@@ -498,15 +486,6 @@ def main():
     logging.debug('startup parameters: {}'.format(p))
     if unknown:
         logging.warning('invalid parameter given {}'.format(unknown))
-
-    gaviota = None
-    if args.enable_gaviota:
-        try:
-            gaviota = chess.gaviota.open_tablebases('tablebases/gaviota')
-            logging.debug('Tablebases gaviota loaded')
-        except OSError:
-            logging.warning('Tablebases gaviota doesnt exist')
-            gaviota = None
 
     dgttranslate = DgtTranslate(args.beep_config, args.beep_some_level, args.language)
     time_control, time_text = transfer_time(args.time.split())

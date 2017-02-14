@@ -137,10 +137,6 @@
 # enable-update-reboot = True
 ## The port of the webserver
 # web-server = 8080
-## Do tablebase probing using gaviota? The database files must be in 'tablebases/gaviota/'
-## This isn't used inside the chess engine. Just show the tb-value at dgt clock (for your info)
-## If so, uncomment the next line
-# enable-gaviota = True
 ## PicoChess messages can be displayed in English, German, Dutch, French, Spanish or Italian.
 ## You can set the language with the "language" option. Default is English.
 ## en = English; de = German; nl = Dutch; fr = French; es = Spanish; it = Italian
