@@ -31,11 +31,12 @@ except ImportError:
 
 
 class DgtBoard(object):
-    def __init__(self, device, enable_revelation_leds, is_pi):
+    def __init__(self, device, disable_revelation_leds, is_pi):
         super(DgtBoard, self).__init__()
         self.given_device = device
         self.device = device
-        self.enable_revelation_leds = enable_revelation_leds
+        self.use_revelation_leds = False
+        self.disable_revelation_leds = disable_revelation_leds
         self.is_pi = is_pi
 
         self.serial = None
@@ -146,7 +147,8 @@ class DgtBoard(object):
                     btname5 = self.bt_name[-5:]
                     if 'REVII' in self.bt_name:
                         text_l, text_m, text_s = 'RevII ' + btname5, 'Rev' + btname5, 'b' + btname5
-                        self.enable_revelation_leds = True
+                        if not self.disable_revelation_leds:
+                            self.use_revelation_leds = True
                     elif 'DGT_BT' in self.bt_name:
                         text_l, text_m, text_s = 'DGTBT ' + btname5, 'BT ' + btname5, 'b' + btname5
                         self.enable_revelation_leds = False

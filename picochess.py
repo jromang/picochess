@@ -430,7 +430,7 @@ def main():
                         default='books/h-varied.bin')
     parser.add_argument('-t', '--time', type=str, default='5 0',
                         help="Time settings <FixSec> or <StMin IncSec> like '10'(move) or '5 0'(game) '3 2'(fischer)")
-    parser.add_argument('-rl', '--enable-revelation-leds', action='store_true', help='enable Revelation leds')
+    parser.add_argument('-norl', '--disable-revelation-leds', action='store_true', help='disable Revelation leds')
     parser.add_argument('-l', '--log-level', choices=['notset', 'debug', 'info', 'warning', 'error', 'critical'],
                         default='warning', help='logging level')
     parser.add_argument('-lf', '--log-file', type=str, help='log to the given file')
@@ -505,7 +505,7 @@ def main():
     else:
         logging.debug('PicoTalker disabled')
 
-    dgtboard = DgtBoard(args.dgt_port, args.enable_revelation_leds, args.dgtpi)
+    dgtboard = DgtBoard(args.dgt_port, args.disable_revelation_leds, args.dgtpi)
     my_lock = threading.Lock()  # @todo this is not the correct way (DgtPi & DgtHw are independent)
 
     if args.console:

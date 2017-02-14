@@ -57,7 +57,7 @@ class DgtHw(DgtIface):
                 logging.warning('Finally failed %i', res)
 
     def display_text_on_clock(self, message):
-        display_m = self.enable_dgt_3000 and not self.dgtboard.enable_revelation_leds
+        display_m = self.enable_dgt_3000 and not self.dgtboard.use_revelation_leds
         text = message.m if display_m else message.s
         if text is None:
             text = message.l if display_m else message.m
@@ -77,7 +77,7 @@ class DgtHw(DgtIface):
     def display_move_on_clock(self, message):
         left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE
         right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
-        display_m = self.enable_dgt_3000 and not self.dgtboard.enable_revelation_leds
+        display_m = self.enable_dgt_3000 and not self.dgtboard.use_revelation_leds
         if display_m:
             bit_board = Board(message.fen)
             move_text = bit_board.san(message.move)
@@ -113,14 +113,14 @@ class DgtHw(DgtIface):
             logging.debug('(ser) clock isnt running - no need for endText')
 
     def light_squares_revelation_board(self, uci_move):
-        if self.dgtboard.enable_revelation_leds:
+        if self.dgtboard.use_revelation_leds:
             logging.debug("REV2 lights on move {}".format(uci_move))
             fr = (8 - int(uci_move[1])) * 8 + ord(uci_move[0]) - ord('a')
             to = (8 - int(uci_move[3])) * 8 + ord(uci_move[2]) - ord('a')
             self.dgtboard.write_board_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x01, fr, to, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
 
     def clear_light_revelation_board(self):
-        if self.dgtboard.enable_revelation_leds:
+        if self.dgtboard.use_revelation_leds:
             logging.debug('REV2 lights turned off')
             self.dgtboard.write_board_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
 
