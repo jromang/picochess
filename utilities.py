@@ -877,7 +877,7 @@ def reboot(dgtpi, dev):
     if platform.system() == 'Windows':
         os.system('shutdown /r')
     elif dgtpi:
-        os.system('systemctl service picochess restart')
+        os.system('systemctl restart picochess')
     else:
         os.system('reboot')
 
