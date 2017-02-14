@@ -436,6 +436,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     text = exit_system_voice_type_mute_menu()
                 elif self.inside_system_voice_type_mute_menu():
                     text = exit_system_voice_type_menu()
+                elif self.inside_system_voice_type_menu():
+                    text = exit_system_menu()
                 else:
                     text = self.dgttranslate.text('Y00_errormenu')
             elif self.inside_system_language_menu():
