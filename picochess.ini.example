@@ -14,8 +14,8 @@
 ### =======================
 ### = DGT related options =
 ### =======================
-## enable-revelation-leds turn ON or OFF the LED's on the Revelation II board. If so, please uncomment the next line
-# enable-revelation-leds = True
+## disable-revelation-leds turns OFF the leds on the Revelation II board. If so, please uncomment the next line
+# disable-revelation-leds = True
 ## beep-some-level changes the occurrence of beeps. Minimum value is 0 (no beeps), maximum is 15 (all beeps).
 ## Please keep in mind: values 0 and 15 making no sense (but allowed) since they are the same as "never" & "always"
 ## inside the clock menu you can choose between "always", "never" and "some". The value you give inside here, is
