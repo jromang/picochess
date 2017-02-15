@@ -723,6 +723,27 @@ class DgtTranslate(object):
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
+        if text_id == 'pondertime':
+            entxt = Dgt.DISPLAY_TEXT(l='pondertime' + msg, m='p time ' + msg, s='ptime' + msg)
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
+        if text_id == 'okmessage_on':
+            entxt = Dgt.DISPLAY_TEXT(l='OkMessg on ', m='OkMg on ', s='ok on ')
+            detxt = Dgt.DISPLAY_TEXT(l='OkMessg ein', m='OkMg ein', s='ok ein')
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
+        if text_id == 'okmessage_off':
+            entxt = Dgt.DISPLAY_TEXT(l='OkMessg off', m='OkMg off', s='ok off')
+            detxt = Dgt.DISPLAY_TEXT(l='OkMessg aus', m='OkMg aus', s='ok aus')
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
         if text_id == 'tc_fixed':
             entxt = Dgt.DISPLAY_TEXT(l='Move time' + msg, m='Move t' + msg, s='mov ' + msg)
             detxt = Dgt.DISPLAY_TEXT(l='Zugzeit  ' + msg, m='Zug z ' + msg, s='zug ' + msg)

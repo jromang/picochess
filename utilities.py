@@ -145,9 +145,453 @@ class DgtApi():
     SERIALNR = 'DGT_SERIALNR'
 
 
+class MenuState():
+    TOP = 100000
+
+    MODE = 200000
+    MODE_TYPE = 210000  # normal, observe, ...
+
+    POS = 300000
+    POS_COLOR = 310000
+    POS_REV = 311000
+    POS_UCI = 311100
+    POS_READ = 311110
+
+    TIME = 400000
+    TIME_TYPE = 410000  # blitz, fischer, fixed
+    TIME_TYPE_CTRL = 411000  # time_control objs
+
+    BOOK = 500000
+    BOOK_NAME = 510000
+
+    ENG = 600000
+    ENG_NAME = 610000
+    ENG_NAME_LEVEL = 611000
+
+    SYS = 700000
+    SYS_VERS = 710000
+    SYS_IP = 720000
+    SYS_SOUND = 730000
+    SYS_SOUND_TYPE = 731000  # never, always, some
+    SYS_LANG = 740000
+    SYS_LANG_NAME = 741000  # de, en, ...
+    SYS_LOG = 750000
+    SYS_VOICE = 760000
+    SYS_VOICE_TYPE = 761000
+    SYS_VOICE_TYPE_MUTE = 761100  # on, off
+    SYS_VOICE_TYPE_MUTE_LANG = 761110
+    SYS_VOICE_TYPE_MUTE_LANG_SPEAK = 761111  # al, christina, ...
+    SYS_DISP = 770000
+    SYS_DISP_OKMSG = 771000
+    SYS_DISP_OKMSG_YESNO = 771100  # yes,no
+    SYS_DISP_PONDER = 772000
+    SYS_DISP_PONDER_TIME = 772100  # 1-8
+
+
+class MenuStateMachine(object):
+    def __init__(self):
+        super(MenuStateMachine, self).__init__()
+        self.state = MenuState.TOP
+
+    def get(self):
+        return self.state
+
+    def enter_top_menu(self):
+        self.state = MenuState.TOP
+        # print new menu entry!
+
+    def enter_mode_menu(self):
+        self.state = MenuState.MODE
+        # print new menu entry!
+
+    def enter_mode_type_menu(self):
+        self.state = MenuState.MODE_TYPE
+        # print new menu entry!
+
+    def enter_pos_menu(self):
+        self.state = MenuState.POS
+        # print new menu entry!
+
+    def enter_pos_color_menu(self):
+        self.state = MenuState.POS_COLOR
+        # print new menu entry!
+
+    def enter_pos_rev_menu(self):
+        self.state = MenuState.POS_REV
+        # print new menu entry!
+
+    def enter_pos_uci_menu(self):
+        self.state = MenuState.POS_UCI
+        # print new menu entry!
+
+    def enter_pos_read_menu(self):
+        self.state = MenuState.POS_READ
+        # print new menu entry!
+
+    def enter_time_menu(self):
+        self.state = MenuState.TIME
+        # print new menu entry!
+
+    def enter_time_type_menu(self):
+        self.state = MenuState.TIME_TYPE
+        # print new menu entry!
+
+    def enter_time_type_ctrl_menu(self):
+        self.state = MenuState.TIME_TYPE_CTRL
+        # print new menu entry!
+
+    def enter_book_menu(self):
+        self.state = MenuState.BOOK
+        # print new menu entry!
+
+    def enter_book_name_menu(self):
+        self.state = MenuState.BOOK_NAME
+        # print new menu entry!
+
+    def enter_eng_menu(self):
+        self.state = MenuState.ENG
+        # print new menu entry!
+
+    def enter_eng_name_menu(self):
+        self.state = MenuState.ENG_NAME
+        # print new menu entry!
+
+    def enter_eng_name_level_menu(self):
+        self.state = MenuState.ENG_NAME_LEVEL
+        # print new menu entry!
+
+    def enter_sys_menu(self):
+        self.state = MenuState.SYS
+        # print new menu entry!
+
+    def enter_sys_vers_menu(self):
+        self.state = MenuState.SYS_VERS
+        # print new menu entry!
+
+    def enter_sys_ip_menu(self):
+        self.state = MenuState.SYS_IP
+        # print new menu entry!
+
+    def enter_sys_sound_menu(self):
+        self.state = MenuState.SYS_SOUND
+        # print new menu entry!
+
+    def enter_sys_sound_type_menu(self):
+        self.state = MenuState.SYS_SOUND_TYPE
+        # print new menu entry!
+
+    def enter_sys_lang_menu(self):
+        self.state = MenuState.SYS_LANG
+        # print new menu entry!
+
+    def enter_sys_lang_name_menu(self):
+        self.state = MenuState.SYS_LANG_NAME
+        # print new menu entry!
+
+    def enter_sys_log_menu(self):
+        self.state = MenuState.SYS_LOG
+        # print new menu entry!
+
+    def enter_sys_voice_menu(self):
+        self.state = MenuState.SYS_VOICE
+        # print new menu entry!
+
+    def enter_sys_voice_type_menu(self):
+        self.state = MenuState.SYS_VOICE_TYPE
+        # print new menu entry!
+
+    def enter_sys_voice_type_mute_menu(self):
+        self.state = MenuState.SYS_VOICE_TYPE_MUTE
+        # print new menu entry!
+
+    def enter_sys_voice_type_mute_lang_menu(self):
+        self.state = MenuState.SYS_VOICE_TYPE_MUTE_LANG
+        # print new menu entry!
+
+    def enter_sys_voice_type_mute_lang_speak_menu(self):
+        self.state = MenuState.SYS_VOICE_TYPE_MUTE_LANG_SPEAK
+        # print new menu entry!
+
+    def enter_sys_disp_menu(self):
+        self.state = MenuState.SYS_DISP
+        # print new menu entry!
+
+    def enter_sys_disp_okmsg_menu(self):
+        self.state = MenuState.SYS_DISP_OKMSG
+        # print new menu entry!
+
+    def enter_sys_disp_okmsg_yesno_menu(self):
+        self.state = MenuState.SYS_DISP_OKMSG_YESNO
+        # print new menu entry!
+
+    def enter_sys_disp_ponder_menu(self):
+        self.state = MenuState.SYS_DISP_PONDER
+        # print new menu entry!
+
+    def enter_sys_disp_ponder_time_menu(self):
+        self.state = MenuState.SYS_DISP_PONDER_TIME
+        # print new menu entry!
+
+    def up(self):
+        for case in switch(self.state):
+            if case(MenuState.TOP):
+                print('error')
+                break
+            if case(MenuState.MODE):
+                self.enter_top_menu()
+                break
+            if case(MenuState.MODE_TYPE):
+                self.enter_mode_menu()
+                break
+            if case(MenuState.POS):
+                self.enter_top_menu()
+                break
+            if case(MenuState.POS_COLOR):
+                self.enter_pos_menu()
+                break
+            if case(MenuState.POS_REV):
+                self.enter_pos_color_menu()
+                break
+            if case(MenuState.POS_UCI):
+                self.enter_pos_rev_menu()
+                break
+            if case(MenuState.POS_READ):
+                self.enter_pos_uci_menu()
+                break
+            if case(MenuState.TIME):
+                self.enter_top_menu()
+                break
+            if case(MenuState.TIME_TYPE):
+                self.enter_time_menu()
+                break
+            if case(MenuState.TIME_TYPE_CTRL):
+                self.enter_time_type_menu()
+                break
+            if case(MenuState.BOOK):
+                self.enter_top_menu()
+                break
+            if case(MenuState.BOOK_NAME):
+                self.enter_book_menu()
+                break
+            if case(MenuState.ENG):
+                self.enter_top_menu()
+                break
+            if case(MenuState.ENG_NAME):
+                self.enter_eng_menu()
+                break
+            if case(MenuState.ENG_NAME_LEVEL):
+                self.enter_eng_name_menu()
+                break
+            if case(MenuState.SYS):
+                self.enter_top_menu()
+                break
+            if case(MenuState.SYS_VERS):
+                self.enter_sys_menu()
+                break
+            if case(MenuState.SYS_IP):
+                self.enter_sys_menu()
+                break
+            if case(MenuState.SYS_SOUND):
+                self.enter_sys_menu()
+                break
+            if case(MenuState.SYS_SOUND_TYPE):
+                self.enter_sys_sound_menu()
+                break
+            if case(MenuState.SYS_LANG):
+                self.enter_sys_menu()
+                break
+            if case(MenuState.SYS_LANG_NAME):
+                self.enter_sys_lang_menu()
+                break
+            if case(MenuState.SYS_LOG):
+                self.enter_sys_menu()
+                break
+            if case(MenuState.SYS_VOICE):
+                self.enter_sys_menu()
+                break
+            if case(MenuState.SYS_VOICE_TYPE):
+                self.enter_sys_voice_menu()
+                break
+            if case(MenuState.SYS_VOICE_TYPE_MUTE):
+                self.enter_sys_voice_type_menu()
+                break
+            if case(MenuState.SYS_VOICE_TYPE_MUTE_LANG):
+                self.enter_sys_voice_type_mute_menu()
+                break
+            if case(MenuState.SYS_VOICE_TYPE_MUTE_LANG_SPEAK):
+                self.enter_sys_voice_type_mute_lang_menu()
+                break
+            if case(MenuState.SYS_DISP):
+                self.enter_sys_menu()
+                break
+            if case(MenuState.SYS_DISP_OKMSG):
+                self.enter_sys_disp_menu()
+                break
+            if case(MenuState.SYS_DISP_OKMSG_YESNO):
+                self.enter_sys_disp_okmsg_menu()
+                break
+            if case(MenuState.SYS_DISP_PONDER):
+                self.enter_sys_disp_menu()
+                break
+            if case(MenuState.SYS_DISP_PONDER_TIME):
+                self.enter_sys_disp_ponder_menu()
+                break
+            if case():  # Default
+                print('error')
+                break
+
+    def down(self):
+        for case in switch(self.state):
+            if case(MenuState.TOP):
+                self.enter_mode_menu()
+                break
+            if case(MenuState.MODE):
+                # decide the correct submenu
+                self.enter_mode_type_menu()
+                break
+            if case(MenuState.MODE_TYPE):
+                # do action!
+                self.enter_top_menu()
+                break
+            if case(MenuState.POS):
+                self.enter_pos_color_menu()
+                break
+            if case(MenuState.POS_COLOR):
+                self.enter_pos_rev_menu()
+                break
+            if case(MenuState.POS_REV):
+                self.enter_pos_uci_menu()
+                break
+            if case(MenuState.POS_UCI):
+                self.enter_pos_read_menu()
+                break
+            if case(MenuState.POS_READ):
+                # do action!
+                self.enter_top_menu()
+                break
+            if case(MenuState.TIME):
+                self.enter_time_type_menu()
+                break
+            if case(MenuState.TIME_TYPE):
+                self.enter_time_type_ctrl_menu()
+                break
+            if case(MenuState.TIME_TYPE_CTRL):
+                # do action!
+                self.enter_top_menu()
+                break
+            if case(MenuState.BOOK):
+                self.enter_book_name_menu()
+                break
+            if case(MenuState.BOOK_NAME):
+                # do action!
+                self.enter_top_menu()
+                break
+            if case(MenuState.ENG):
+                self.enter_eng_name_menu()
+                break
+            if case(MenuState.ENG_NAME):
+                # maybe do action!
+                # self.enter_top_menu()
+                # next line only if engine has level support
+                self.enter_eng_name_level_menu()
+                break
+            if case(MenuState.ENG_NAME_LEVEL):
+                # do action!
+                self.enter_top_menu()
+                break
+            if case(MenuState.SYS):
+                # decide the correct submenu
+                self.enter_sys_vers_menu()
+                break
+            if case(MenuState.SYS_VERS):
+                # do action!
+                self.enter_top_menu()
+                break
+            if case(MenuState.SYS_IP):
+                # do action!
+                self.enter_top_menu()
+                break
+            if case(MenuState.SYS_SOUND):
+                self.enter_sys_sound_type_menu()
+                break
+            if case(MenuState.SYS_SOUND_TYPE):
+                # do action!
+                self.enter_top_menu()
+                break
+            if case(MenuState.SYS_LANG):
+                self.enter_sys_lang_name_menu()
+                break
+            if case(MenuState.SYS_LANG_NAME):
+                # do action!
+                self.enter_top_menu()
+                break
+            if case(MenuState.SYS_LOG):
+                # do action!
+                self.enter_top_menu()
+                break
+            if case(MenuState.SYS_VOICE):
+                self.enter_sys_voice_type_menu()
+                break
+            if case(MenuState.SYS_VOICE_TYPE):
+                self.enter_sys_voice_type_mute_menu()
+                break
+            if case(MenuState.SYS_VOICE_TYPE_MUTE):
+                self.enter_sys_voice_type_mute_lang_menu()
+                break
+            if case(MenuState.SYS_VOICE_TYPE_MUTE_LANG):
+                self.enter_sys_voice_type_mute_lang_speak_menu()
+                break
+            if case(MenuState.SYS_VOICE_TYPE_MUTE_LANG_SPEAK):
+                # do action!
+                self.enter_top_menu()
+                break
+            if case(MenuState.SYS_DISP):
+                # decide the correct submenu
+                self.enter_sys_disp_okmsg_menu()
+                break
+            if case(MenuState.SYS_DISP_OKMSG):
+                self.enter_sys_disp_okmsg_yesno_menu()
+                break
+            if case(MenuState.SYS_DISP_OKMSG_YESNO):
+                # do action!
+                self.enter_top_menu()
+                break
+            if case(MenuState.SYS_DISP_PONDER):
+                self.enter_sys_disp_ponder_time_menu()
+                break
+            if case(MenuState.SYS_DISP_PONDER_TIME):
+                # do action!
+                self.enter_top_menu()
+                break
+            if case():  # Default
+                print('error')
+                break
+
+    def inside_menu(self):
+        return self.state != MenuState.TOP
+
+    def inside_mode(self):
+        return self.state in (MenuState.MODE, MenuState.MODE_TYPE)
+
+    def inside_position(self):
+        return self.state in (MenuState.POS, MenuState.POS_COLOR, MenuState.POS_READ, MenuState.POS_REV, MenuState.POS_UCI)
+
+    def inside_time(self):
+        return self.state in (MenuState.TIME, MenuState.TIME_TYPE, MenuState.TIME_TYPE_CTRL)
+
+    def inside_book(self):
+        return self.state in (MenuState.BOOK, MenuState.BOOK_NAME)
+
+    def inside_engine(self):
+        return self.state in (MenuState.ENG, MenuState.ENG_NAME, MenuState.ENG_NAME_LEVEL)
+
+    def inside_system(self):
+        return self.inside_menu() and not self.inside_mode() and not self.inside_position() and not self.inside_time() \
+               and not self.inside_book() and not self.inside_engine()
+
+
 @enum.unique
 class Menu(enum.Enum):
-    # TOP_MENU = 'B00_menu_top_menu'  # Top Level Menu
     MODE_MENU = 'B00_menu_mode_menu'  # Mode Menu
     POSITION_MENU = 'B00_menu_position_menu'  # Setup position menu
     TIME_MENU = 'B00_menu_time_menu'  # Time controls menu
@@ -432,6 +876,33 @@ class VoiceTypeLoop(object):
         return 'errVoTyPrev'
 
 
+@enum.unique
+class SystemDisplay(enum.Enum):
+    PONDER_TIME = 'B00_systemdisplay_pondertime_menu'
+    OK_MESSAGE = 'B00_systemdisplay_okmessage_menu'
+    
+    
+class SystemDisplayLoop(object):
+    def __init__(self):
+        super(SystemDisplayLoop, self).__init__()
+
+    @staticmethod
+    def next(m):
+        if m == SystemDisplay.PONDER_TIME:
+            return SystemDisplay.OK_MESSAGE
+        elif m == SystemDisplay.OK_MESSAGE:
+            return SystemDisplay.PONDER_TIME
+        return 'errSyDiNext'
+
+    @staticmethod
+    def prev(m):
+        if m == SystemDisplay.PONDER_TIME:
+            return SystemDisplay.OK_MESSAGE
+        elif m == SystemDisplay.OK_MESSAGE:
+            return SystemDisplay.PONDER_TIME
+        return 'errSyDiPrev'
+    
+    
 @enum.unique
 class GameResult(enum.Enum):
     MATE = 'B00_gameresult_mate'

@@ -90,6 +90,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.menu_system_voice_speak_result = None
         self.menu_system_voice_speak_index = 0
 
+        self.menu_system_display_okmessage_result = None
+        self.menu_system_display_okmessage_index = False
+        self.menu_system_display_pondertime_result = None
+        self.menu_system_display_pondertime_index = self.ponder_time
+
         self.menu_time_mode_result = None
         self.menu_time_mode_index = TimeMode.BLITZ
 
@@ -142,6 +147,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.menu_system_voice_mute_result = None
         self.menu_system_voice_lang_result = None
         self.menu_system_voice_speak_result = None
+        self.menu_system_display_pondertime_result = None
+        self.menu_system_display_okmessage_result = None
         self.menu_inside_flag = False
 
     def _power_off(self, dev='web'):
@@ -285,6 +292,18 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
     def inside_system_display_menu(self):
         return self.inside_system_menu() and self.menu_system_result == Settings.DISPLAY
 
+    def inside_system_display_choose_menu(self):
+        return self.inside_system_display_menu() and self.menu_system_display_pondertime_result is None and \
+               self.menu_system_display_okmessage_result is None
+
+    def inside_system_display_pondertime_menu(self):
+        return self.inside_system_display_menu() and self.menu_system_display_pondertime_result is not None and \
+               self.menu_system_display_okmessage_result is None
+
+    def inside_system_display_okmessage_menu(self):
+        return self.inside_system_display_menu() and self.menu_system_display_pondertime_result is None and \
+               self.menu_system_display_okmessage_result is not None
+
     def inside_position_menu(self):
         return self.inside_menu() and self.menu_top_result == Menu.POSITION_MENU
 
@@ -331,7 +350,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             return text
 
         def enter_system_voice_type_mute_menu():
-            # text = self.dgttranslate.text(self.menu_system_voice_mute_index.value)
             msg = 'on' if self.menu_system_voice_mute_index else 'off'
             text = self.dgttranslate.text('B00_voice_' + msg)
             return text
@@ -339,6 +357,19 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         def enter_system_voice_type_mute_language_menu():
             vkey = self.voices_conf.keys()[self.menu_system_voice_lang_index]
             text = self.dgttranslate.text('B00_language_' + vkey + '_menu')  # voice using same as language
+            return text
+
+        def enter_system_display_choose_menu():
+            text = self.dgttranslate.text(self.menu_system_index.value)
+            return text
+
+        def enter_system_display_pondertime_menu():
+            text = self.dgttranslate.text('B00_pondertime', str(self.menu_system_display_pondertime_index))
+            return text
+
+        def enter_system_display_okmessage_menu():
+            msg = 'on' if self.menu_system_display_pondertime_index else 'off'
+            text = self.dgttranslate.text('B00_okmessage_' + msg)
             return text
 
         def exit_mode_menu():
@@ -384,6 +415,18 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         def exit_system_voice_type_mute_language_speaker_menu():
             self.menu_system_voice_speak_result = None
             return enter_system_voice_type_mute_language_menu()
+
+        def exit_system_display_menu():
+            self.menu_system_result = None
+            return enter_system_menu()
+
+        def exit_system_display_pondertime_menu():
+            self.menu_system_display_pondertime_result = None
+            return enter_system_display_choose_menu()
+
+        def exit_system_display_okmessage_menu():
+            self.menu_system_display_okmessage_result = None
+            return enter_system_display_choose_menu()
 
         def exit_time_menu():
             self.menu_top_result = None
@@ -445,7 +488,14 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             elif self.inside_system_sound_menu():
                 text = exit_system_sound_menu()
             elif self.inside_system_display_menu():
-                text = self.dgttranslate.text('Y00_errormenu')  # @todo
+                if self.inside_system_display_choose_menu():
+                    text = exit_system_menu()
+                elif self.inside_system_display_pondertime_menu():
+                    text = exit_system_display_pondertime_menu()
+                elif self.inside_system_display_okmessage_menu():
+                    text = exit_system_display_okmessage_menu()
+                else:
+                    text = self.dgttranslate.text('Y00_errormenu')
             else:
                 logging.warning('wrong value for menu_system_result: {}'.format(self.menu_system_result))
                 text = self.dgttranslate.text('Y00_errormenu')
@@ -558,7 +608,18 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.menu_system_sound_beep_index = BeepLoop.prev(self.menu_system_sound_beep_index)
                 text = self.dgttranslate.text(self.menu_system_sound_beep_index.value)
             elif self.inside_system_display_menu():
-                text = self.dgttranslate.text('Y00_errormenu')  # @todo
+                if self.inside_system_display_choose_menu():
+                    print('choose')
+                    text = self.dgttranslate.text('Y00_errormenu')
+                elif self.inside_system_display_pondertime_menu():
+                    print('pondt')
+                    text = self.dgttranslate.text('Y00_errormenu')
+                elif self.inside_system_display_okmessage_menu():
+                    print('okmsg')
+                    text = self.dgttranslate.text('Y00_errormenu')
+                else:
+                    print('displ')
+                    text = self.dgttranslate.text('Y00_errormenu')
             else:
                 logging.warning('wrong value for menu_system_result: {}'.format(self.menu_system_result))
                 text = self.dgttranslate.text('Y00_errormenu')
@@ -938,7 +999,24 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 else:
                     text = self.dgttranslate.text('Y00_errormenu')
             elif self.inside_system_display_menu():
-                text = self.dgttranslate.text('Y00_errormenu')  # @todo
+                if self.inside_system_display_choose_menu():
+                    self.menu_system_display_pondertime_result = self.menu_system_display_pondertime_index
+                    text = self.dgttranslate.text('B00_pondertime', str(self.menu_system_display_pondertime_index))
+                    exit_menu = False
+                elif self.inside_system_display_pondertime_menu():
+                    config = ConfigObj('picochess.ini')
+                    config['ponder-time'] = self.menu_system_display_pondertime_index
+                    config.write()
+                    self.ponder_time = self.menu_system_display_pondertime_index
+                    text = self.dgttranslate.text('B10_okpondertime')
+                elif self.inside_system_display_okmessage_menu():
+                    config = ConfigObj('picochess.ini')
+                    config['disable-ok-message'] = self.menu_system_display_okmessage_index
+                    config.write()
+                    self.show_ok_message = self.menu_system_display_okmessage_index
+                    text = self.dgttranslate.text('B10_okmessage')
+                else:
+                    text = self.dgttranslate.text('Y00_errormenu')
             else:
                 logging.warning('wrong value for menu_system_result: {}'.format(self.menu_system_result))
                 text = self.dgttranslate.text('Y00_errormenu')
