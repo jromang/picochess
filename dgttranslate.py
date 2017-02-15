@@ -711,14 +711,14 @@ class DgtTranslate(object):
             ittxt = Dgt.DISPLAY_TEXT(l='ok Voce    ', m='ok Voce ', s='okvoce')
         if text_id == 'voice_on':
             entxt = Dgt.DISPLAY_TEXT(l='Voice on   ', m='voice on', s='vc on ')
-            detxt = Dgt.DISPLAY_TEXT(l='Stimme eing', m='Stim ein', s='st ein')
+            detxt = Dgt.DISPLAY_TEXT(l='Stimme ein ', m='Stim ein', s='st ein')
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
         if text_id == 'voice_off':
             entxt = Dgt.DISPLAY_TEXT(l='Voice  off ', m='voiceoff', s='vc off')
-            detxt = Dgt.DISPLAY_TEXT(l='Stimme ausg', m='Stim aus', s='st aus')
+            detxt = Dgt.DISPLAY_TEXT(l='Stimme aus ', m='Stim aus', s='st aus')
             nltxt = entxt
             frtxt = entxt
             estxt = entxt

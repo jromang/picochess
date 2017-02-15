@@ -156,7 +156,12 @@ class DgtIface(DisplayDgt, Thread):
 
     def get_san(self, message, is_xl=False):
         bit_board = Board(message.fen)
-        move_text = bit_board.san(message.move)
+        if bit_board.is_legal(message.move):
+            move_text = bit_board.san(message.move)
+        else:
+            logging.warning('illegal move found fen: {} move: {}'.format(message.fen, message.move))
+            move_text = 'err {}'.format(message.move.uci()[:4])
+
         if message.side == ClockSide.RIGHT:
             move_text = move_text.rjust(6 if is_xl else 8)
         text = self.dgttranslate.move(move_text)

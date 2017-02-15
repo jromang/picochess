@@ -141,6 +141,6 @@
 ## You can set the language with the "language" option. Default is English.
 ## en = English; de = German; nl = Dutch; fr = French; es = Spanish; it = Italian
 # language = en
-## When in ponder mode decides how long each info is displayed. Default is 2 secs.
-## Must be between 1 to 10 secs.
-# ponder-time = 2
+## When in ponder mode decides how long each info is displayed. Default is 3 secs.
+## Must be between 1 to 8 secs.
+# ponder-time = 3

@@ -459,8 +459,8 @@ def main():
     parser.add_argument('-v', '--version', action='version', version='%(prog)s version {}'.format(version),
                         help='show current version', default=None)
     parser.add_argument('-pi', '--dgtpi', action='store_true', help='use the dgtpi hardware')
-    parser.add_argument('-pt', '--ponder-time', type=int, default=2, choices=range(1,11),
-                        help='how long each part of ponder display should be visible (default=2secs)')
+    parser.add_argument('-pt', '--ponder-time', type=int, default=3, choices=range(1,9),
+                        help='how long each part of ponder display should be visible (default=3secs)')
     parser.add_argument('-lang', '--language', choices=['en', 'de', 'nl', 'fr', 'es', 'it'], default='en',
                         help='picochess language')
     parser.add_argument('-c', '--console', action='store_true', help='use console interface')
