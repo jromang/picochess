@@ -28,6 +28,9 @@ from threading import Timer
 
 import configparser
 
+# for State test!
+from configobj import ConfigObj
+
 try:
     import enum
 except ImportError:
@@ -158,8 +161,12 @@ class MenuState():
     POS_READ = 311110
 
     TIME = 400000
-    TIME_TYPE = 410000  # blitz, fischer, fixed
-    TIME_TYPE_CTRL = 411000  # time_control objs
+    TIME_BLITZ = 410000  # blitz, fischer, fixed
+    TIME_BLITZ_CTRL = 411000  # time_control objs
+    TIME_FISCH = 420000
+    TIME_FISCH_CTRL = 421000
+    TIME_FIXED = 430000
+    TIME_FIXED_CTRL = 431000
 
     BOOK = 500000
     BOOK_NAME = 510000
@@ -189,9 +196,49 @@ class MenuState():
 
 
 class MenuStateMachine(object):
-    def __init__(self):
+    def __init__(self, dgttranslate):
         super(MenuStateMachine, self).__init__()
         self.state = MenuState.TOP
+        self.dgttranslate = dgttranslate
+
+        self.menu_setup_whitetomove_index = None
+        self.menu_setup_reverse_index = None
+        self.menu_setup_uci960_index = None
+
+        self.menu_inside_flag = False
+        self.menu_top_index = Menu.MODE_MENU
+        self.menu_mode_index = Mode.NORMAL
+
+        self.engine_level_index = None
+        self.engine_has_960 = False  # Not all engines support 960 mode - assume not
+        self.engine_restart = False
+        self.menu_engine_name_index = 0
+        self.installed_engines = None
+
+        self.menu_book_index = 0
+        self.all_books = None
+
+        self.menu_system_index = Settings.VERSION
+        self.menu_system_sound_beep_index = self.dgttranslate.beep
+
+        langs = {'en': Language.EN, 'de': Language.DE, 'nl': Language.NL,
+                 'fr': Language.FR, 'es': Language.ES, 'it': Language.IT}
+        self.menu_system_language_lang_index = langs[self.dgttranslate.language]
+
+        self.voices_conf = ConfigObj('talker' + os.sep + 'voices' + os.sep + 'voices.ini')
+        self.menu_system_voice_type_result = None
+        self.menu_system_voice_type_index = VoiceType.COMP_VOICE
+        self.menu_system_voice_mute_index = False  # @todo set this to 'True' if mute voice choosen
+        try:
+            self.menu_system_voice_lang_index = self.voices_conf.keys().index(self.dgttranslate.language)
+        except ValueError:
+            self.menu_system_voice_lang_index = 0
+        self.menu_system_voice_speak_index = 0
+
+        self.menu_system_display_okmessage_index = False
+        self.menu_system_display_pondertime_index = 3 # self.ponder_time
+
+        self.menu_time_mode_index = TimeMode.BLITZ
 
     def get(self):
         return self.state
@@ -232,12 +279,28 @@ class MenuStateMachine(object):
         self.state = MenuState.TIME
         # print new menu entry!
 
-    def enter_time_type_menu(self):
-        self.state = MenuState.TIME_TYPE
+    def enter_time_blitz_menu(self):
+        self.state = MenuState.TIME_BLITZ
         # print new menu entry!
 
-    def enter_time_type_ctrl_menu(self):
-        self.state = MenuState.TIME_TYPE_CTRL
+    def enter_time_blitz_ctrl_menu(self):
+        self.state = MenuState.TIME_BLITZ_CTRL
+        # print new menu entry!
+
+    def enter_time_fisch_menu(self):
+        self.state = MenuState.TIME_FISCH
+        # print new menu entry!
+
+    def enter_time_fisch_ctrl_menu(self):
+        self.state = MenuState.TIME_FISCH_CTRL
+        # print new menu entry!
+
+    def enter_time_fixed_menu(self):
+        self.state = MenuState.TIME_FIXED
+        # print new menu entry!
+
+    def enter_time_fixed_ctrl_menu(self):
+        self.state = MenuState.TIME_FIXED_CTRL
         # print new menu entry!
 
     def enter_book_menu(self):
@@ -361,11 +424,23 @@ class MenuStateMachine(object):
             if case(MenuState.TIME):
                 self.enter_top_menu()
                 break
-            if case(MenuState.TIME_TYPE):
+            if case(MenuState.TIME_BLITZ):
                 self.enter_time_menu()
                 break
-            if case(MenuState.TIME_TYPE_CTRL):
-                self.enter_time_type_menu()
+            if case(MenuState.TIME_BLITZ_CTRL):
+                self.enter_time_blitz_menu()
+                break
+            if case(MenuState.TIME_FISCH):
+                self.enter_time_menu()
+                break
+            if case(MenuState.TIME_FISCH_CTRL):
+                self.enter_time_fisch_menu()
+                break
+            if case(MenuState.TIME_FIXED):
+                self.enter_time_menu()
+                break
+            if case(MenuState.TIME_FIXED_CTRL):
+                self.enter_time_fixed_menu()
                 break
             if case(MenuState.BOOK):
                 self.enter_top_menu()
@@ -470,12 +545,27 @@ class MenuStateMachine(object):
                 self.enter_top_menu()
                 break
             if case(MenuState.TIME):
-                self.enter_time_type_menu()
+                # decide the correct submenu
+                self.enter_time_blitz_menu()
                 break
-            if case(MenuState.TIME_TYPE):
-                self.enter_time_type_ctrl_menu()
+            if case(MenuState.TIME_BLITZ):
+                self.enter_time_blitz_ctrl_menu()
                 break
-            if case(MenuState.TIME_TYPE_CTRL):
+            if case(MenuState.TIME_BLITZ_CTRL):
+                # do action!
+                self.enter_top_menu()
+                break
+            if case(MenuState.TIME_FISCH):
+                self.enter_time_fisch_ctrl_menu()
+                break
+            if case(MenuState.TIME_FISCH_CTRL):
+                # do action!
+                self.enter_top_menu()
+                break
+            if case(MenuState.TIME_FIXED):
+                self.enter_time_fixed_ctrl_menu()
+                break
+            if case(MenuState.TIME_FIXED_CTRL):
                 # do action!
                 self.enter_top_menu()
                 break
@@ -577,7 +667,7 @@ class MenuStateMachine(object):
         return self.state in (MenuState.POS, MenuState.POS_COLOR, MenuState.POS_READ, MenuState.POS_REV, MenuState.POS_UCI)
 
     def inside_time(self):
-        return self.state in (MenuState.TIME, MenuState.TIME_TYPE, MenuState.TIME_TYPE_CTRL)
+        return self.state in (MenuState.TIME, MenuState.TIME_BLITZ, MenuState.TIME_BLITZ_CTRL)  # @todo other times!
 
     def inside_book(self):
         return self.state in (MenuState.BOOK, MenuState.BOOK_NAME)
