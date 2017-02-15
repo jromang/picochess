@@ -57,15 +57,11 @@ class DgtVr(DgtIface):
 
     def display_move_on_clock(self, message):
         if self.enable_dgt_3000 or self.enable_dgt_pi:
-            bit_board = chess.Board(message.fen)
-            text = bit_board.san(message.move)
-            text = self.dgttranslate.move(text)
+            bit_board, text = self.get_san(message, not self.enable_dgt_pi)
             if self.enable_dgt_pi:
-                text = text.rjust(8) if message.side == ClockSide.RIGHT else text.ljust(8)
-                text = '{0:3d}.'.format(bit_board.fullmove_number) + text
+                text = '{:3d}.{:s}'.format(bit_board.fullmove_number, text)
             else:
-                text = text.rjust(6) if message.side == ClockSide.RIGHT else text.ljust(6)
-                text = '{0:2d}.'.format(bit_board.fullmove_number % 100) + text
+                text = '{:2d}.{:s}'.format(bit_board.fullmove_number % 100, text)
         else:
             text = str(message.move)
             if message.side == ClockSide.RIGHT:

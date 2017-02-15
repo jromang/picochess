@@ -27,7 +27,7 @@ class DgtPi(DgtIface):
         super(DgtPi, self).__init__(dgttranslate, msg_lock)
 
         self.lib_lock = Lock()
-        self.lib = cdll.LoadLibrary('dgt/dgtpicom.so')
+        self.lib = cdll.LoadLibrary('etc/dgtpicom.so')
 
         self._startup_i2c_clock()
         incoming_clock_thread = Timer(0, self._process_incoming_clock_forever)
@@ -124,11 +124,12 @@ class DgtPi(DgtIface):
         self._display_on_dgt_pi(text, message.beep, left_icons, right_icons)
 
     def display_move_on_clock(self, message):
-        bit_board = Board(message.fen)
-        move_text = bit_board.san(message.move)
-        if message.side == ClockSide.RIGHT:
-            move_text = move_text.rjust(8)
-        text = self.dgttranslate.move(move_text)
+        # bit_board = Board(message.fen)
+        # move_text = bit_board.san(message.move)
+        # if message.side == ClockSide.RIGHT:
+        #     move_text = move_text.rjust(8)
+        # text = self.dgttranslate.move(move_text)
+        bit_board, text = self.get_san(message)
         text = '{:3d}{:s}'.format(bit_board.fullmove_number, text)
         if 'i2c' not in message.devs:
             logging.debug('ignored message cause of devs [{}]'.format(text))

@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from chess import Board
 from utilities import *
 from threading import Timer, Thread
 
@@ -152,6 +153,14 @@ class DgtIface(DisplayDgt, Thread):
                 self._handle_message(message)
         else:
             logging.debug("ignore DgtApi: {} at {}".format(message, self.__class__.__name__))
+
+    def get_san(self, message, is_xl=False):
+        bit_board = Board(message.fen)
+        move_text = bit_board.san(message.move)
+        if message.side == ClockSide.RIGHT:
+            move_text = move_text.rjust(6 if is_xl else 8)
+        text = self.dgttranslate.move(move_text)
+        return bit_board, text
 
     def run(self):
         logging.info('dgt_queue ready')

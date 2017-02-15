@@ -79,11 +79,12 @@ class DgtHw(DgtIface):
         right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
         display_m = self.enable_dgt_3000 and not self.dgtboard.use_revelation_leds
         if display_m:
-            bit_board = Board(message.fen)
-            move_text = bit_board.san(message.move)
-            if message.side == ClockSide.RIGHT:
-                move_text = move_text.rjust(8)
-            move_text = self.dgttranslate.move(move_text)
+            # bit_board = Board(message.fen)
+            # move_text = bit_board.san(message.move)
+            # if message.side == ClockSide.RIGHT:
+            #     move_text = move_text.rjust(8)
+            # move_text = self.dgttranslate.move(move_text)
+            bit_board, move_text = self.get_san(message)
         else:
             move_text = message.move.uci()
             if message.side == ClockSide.RIGHT:
