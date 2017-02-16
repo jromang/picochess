@@ -40,9 +40,9 @@ from dgthw import DgtHw
 from dgtpi import DgtPi
 from dgtvr import DgtVr
 from dgtdisplay import DgtDisplay
-# from dgtserial import DgtSerial
 from dgtboard import DgtBoard
 from dgttranslate import DgtTranslate
+from dgtmenu import MenuStateMachine
 
 from logging.handlers import RotatingFileHandler
 from configobj import ConfigObj
@@ -488,10 +488,11 @@ def main():
         logging.warning('invalid parameter given {}'.format(unknown))
 
     dgttranslate = DgtTranslate(args.beep_config, args.beep_some_level, args.language)
+    dgtmenu = MenuStateMachine(dgttranslate)
     time_control, time_text = transfer_time(args.time.split())
     time_text.beep = False
     # The class dgtDisplay talks to DgtHw/DgtPi or DgtVr
-    DgtDisplay(args.disable_ok_message, args.ponder_time, dgttranslate, time_control).start()
+    DgtDisplay(args.disable_ok_message, args.ponder_time, dgttranslate, dgtmenu, time_control).start()
 
     # Launch web server
     if args.web_server_port:

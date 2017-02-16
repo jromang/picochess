@@ -18,9 +18,12 @@
 from configobj import ConfigObj
 from collections import OrderedDict
 from utilities import TimeMode, TimeModeLoop, BeepLevel, BeepLoop, Menu, MenuLoop, Mode, ModeLoop, Language, LanguageLoop
-from utilities import Settings, SettingsLoop, VoiceType, VoiceTypeLoop, SystemDisplay, SystemDisplayLoop, switch, Dgt
+from utilities import Settings, SettingsLoop, VoiceType, VoiceTypeLoop, SystemDisplay, SystemDisplayLoop
+from utilities import Observable, DisplayDgt, switch, Dgt, Event, ClockIcons
 from timecontrol import TimeControl
+import chess
 import os
+import logging
 
 
 class MenuState(object):
@@ -70,7 +73,7 @@ class MenuState(object):
     SYS_DISP_PONDER_TIME = 772100  # 1-8
 
 
-class MenuStateMachine(object):
+class MenuStateMachine(Observable):
     def __init__(self, dgttranslate):
         super(MenuStateMachine, self).__init__()
         self.state = MenuState.TOP
@@ -86,7 +89,7 @@ class MenuStateMachine(object):
 
         self.engine_level_index = None
         self.engine_has_960 = False  # Not all engines support 960 mode - assume not
-        self.engine_restart = False
+        # self.engine_restart = False @todo Its inside the dgtdisplay function!
         self.menu_engine_name_index = 0
         self.installed_engines = None
 
@@ -506,7 +509,10 @@ class MenuStateMachine(object):
                 break
             if case(MenuState.MODE_TYPE):
                 # do action!
-                text = self.enter_top_menu()
+                text = self.dgttranslate.text('B10_okmode')
+                self.menu_mode_result = self.menu_mode_index
+                self.fire(Event.SET_INTERACTION_MODE(mode=self.menu_mode_result, mode_text=text, ok_text=True))
+                self._reset_menu_results()
                 break
             if case(MenuState.POS):
                 text = self.enter_pos_color_menu()
@@ -522,7 +528,24 @@ class MenuStateMachine(object):
                 break
             if case(MenuState.POS_READ):
                 # do action!
-                text = self.enter_top_menu()
+                to_move = 'w' if self.menu_setup_whitetomove_index else 'b'
+                fen = self.dgt_fen
+                if self.flip_board != self.menu_setup_reverse_index:
+                    logging.debug('flipping the board')
+                    fen = fen[::-1]
+                fen += " {0} KQkq - 0 1".format(to_move)
+                bit_board = chess.Board(fen, self.menu_setup_uci960_index)
+                # ask python-chess to correct the castling string
+                bit_board.set_fen(bit_board.fen())
+                if bit_board.is_valid():
+                    self.flip_board = self.menu_setup_reverse_index
+                    self.fire(Event.SETUP_POSITION(fen=bit_board.fen(), uci960=self.menu_setup_uci960_index))
+                    self._reset_moves_and_score()
+                    self._reset_menu_results()
+                    return
+                else:
+                    DisplayDgt.show(self.dgttranslate.text('Y05_illegalpos'))
+                    text = self.dgttranslate.text('B00_scanboard')
                 break
             if case(MenuState.TIME):
                 if self.menu_time_mode_index == TimeMode.BLITZ:
@@ -537,41 +560,80 @@ class MenuStateMachine(object):
                 break
             if case(MenuState.TIME_BLITZ_CTRL):
                 # do action!
-                text = self.enter_top_menu()
+                text = self.dgttranslate.text('B10_oktime')
+                time_control = self.tc_blitz_map[list(self.tc_blitz_map)[self.tc_blitz_index]]
+                self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=text, ok_text=True))
+                self._reset_menu_results()
                 break
             if case(MenuState.TIME_FISCH):
                 text = self.enter_time_fisch_ctrl_menu()
                 break
             if case(MenuState.TIME_FISCH_CTRL):
                 # do action!
-                text = self.enter_top_menu()
+                text = self.dgttranslate.text('B10_oktime')
+                time_control = self.tc_fisch_map[list(self.tc_fisch_map)[self.tc_fisch_index]]
+                self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=text, ok_text=True))
+                self._reset_menu_results()
                 break
             if case(MenuState.TIME_FIXED):
                 text = self.enter_time_fixed_ctrl_menu()
                 break
             if case(MenuState.TIME_FIXED_CTRL):
                 # do action!
-                text = self.enter_top_menu()
+                text = self.dgttranslate.text('B10_oktime')
+                time_control = self.tc_fixed_map[list(self.tc_fixed_map)[self.tc_fixed_index]]
+                self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=text, ok_text=True))
+                self._reset_menu_results()
                 break
             if case(MenuState.BOOK):
                 text = self.enter_book_name_menu()
                 break
             if case(MenuState.BOOK_NAME):
                 # do action!
-                text = self.enter_top_menu()
+                text = self.dgttranslate.text('B10_okbook')
+                self.fire(Event.SET_OPENING_BOOK(book=self.all_books[self.menu_book_index], book_text=text, ok_text=True))
+                self._reset_menu_results()
                 break
             if case(MenuState.ENG):
                 text = self.enter_eng_name_menu()
                 break
             if case(MenuState.ENG_NAME):
                 # maybe do action!
-                # text = self.enter_top_menu()
-                # next line only if engine has level support
-                text = self.enter_eng_name_level_menu()
+                eng = self.installed_engines[self.menu_engine_name_index]
+                level_dict = eng['level_dict']
+                if level_dict:
+                    self.menu_engine_name_result = self.menu_engine_name_index
+                    if self.engine_level_index is None or len(level_dict) <= self.engine_level_index:
+                        self.engine_level_index = len(level_dict) - 1
+                    msg = sorted(level_dict)[self.engine_level_index]
+                    text = self.dgttranslate.text('B00_level', msg)
+                    DisplayDgt.show(text)
+                else:
+                    config = ConfigObj('picochess.ini')
+                    config['engine-level'] = None
+                    config.write()
+                    eng_text = self.dgttranslate.text('B10_okengine')
+                    self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options={}, ok_text=True))
+                    self.engine_restart = True
+                    self._reset_menu_results()
                 break
             if case(MenuState.ENG_NAME_LEVEL):
                 # do action!
-                text = self.enter_top_menu()
+                eng = self.installed_engines[self.menu_engine_name_index]
+                level_dict = eng['level_dict']
+                if level_dict:
+                    msg = sorted(level_dict)[self.engine_level_index]
+                    options = level_dict[msg]
+                    config = ConfigObj('picochess.ini')
+                    config['engine-level'] = msg
+                    config.write()
+                    self.fire(Event.LEVEL(options={}, level_text=self.dgttranslate.text('B10_level', msg)))
+                else:
+                    options = {}
+                eng_text = self.dgttranslate.text('B10_okengine')
+                self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options=options, ok_text=True))
+                self.engine_restart = True
+                self._reset_menu_results()
                 break
             if case(MenuState.SYS):
                 if self.menu_system_index == Settings.VERSION:
@@ -591,29 +653,55 @@ class MenuStateMachine(object):
                 break
             if case(MenuState.SYS_VERS):
                 # do action!
-                text = self.enter_top_menu()
+                text = self.dgttranslate.text('B10_picochess')
+                text.rd = ClockIcons.DOT
+                text.wait = False
                 break
             if case(MenuState.SYS_IP):
                 # do action!
-                text = self.enter_top_menu()
+                if self.ip:
+                    msg = ' '.join(self.ip.split('.')[:2])
+                    text = self.dgttranslate.text('B07_default', msg)
+                    if len(msg) == 7:  # delete the " " for XL incase its "123 456"
+                        text.s = msg[:3] + msg[4:]
+                    DisplayDgt.show(text)
+                    msg = ' '.join(self.ip.split('.')[2:])
+                    text = self.dgttranslate.text('N07_default', msg)
+                    if len(msg) == 7:  # delete the " " for XL incase its "123 456"
+                        text.s = msg[:3] + msg[4:]
+                    text.wait = True
+                else:
+                    text = self.dgttranslate.text('B10_noipadr')
                 break
             if case(MenuState.SYS_SOUND):
                 text = self.enter_sys_sound_type_menu()
                 break
             if case(MenuState.SYS_SOUND_TYPE):
                 # do action!
-                text = self.enter_top_menu()
+                self.dgttranslate.set_beep(self.menu_system_sound_beep_index)
+                config = ConfigObj('picochess.ini')
+                config['beep-config'] = self.dgttranslate.beep_to_config(self.menu_system_sound_beep_index)
+                config.write()
+                text = self.dgttranslate.text('B10_okbeep')
                 break
             if case(MenuState.SYS_LANG):
                 text = self.enter_sys_lang_name_menu()
                 break
             if case(MenuState.SYS_LANG_NAME):
                 # do action!
-                text = self.enter_top_menu()
+                langs = {Language.EN: 'en', Language.DE: 'de', Language.NL: 'nl',
+                         Language.FR: 'fr', Language.ES: 'es', Language.IT: 'it'}
+                language = langs[self.menu_system_language_lang_index]
+                self.dgttranslate.set_language(language)
+                config = ConfigObj('picochess.ini')
+                config['language'] = language
+                config.write()
+                text = self.dgttranslate.text('B10_oklang')
                 break
             if case(MenuState.SYS_LOG):
                 # do action!
-                text = self.enter_top_menu()
+                self.fire(Event.EMAIL_LOG())
+                text = self.dgttranslate.text('B10_oklogfile')  # @todo give pos/neg feedback
                 break
             if case(MenuState.SYS_VOICE):
                 text = self.enter_sys_voice_type_menu()
@@ -622,6 +710,14 @@ class MenuStateMachine(object):
                 text = self.enter_sys_voice_type_mute_menu()
                 break
             if case(MenuState.SYS_VOICE_TYPE_MUTE):
+                # maybe do action!
+                # config = ConfigObj('picochess.ini')
+                # ckey = 'user' if self.menu_system_voice_type_index == VoiceType.USER_VOICE else 'computer'
+                # if ckey + '-voice' in config:
+                #     del (config[ckey + '-voice'])
+                #     config.write()
+                # self.fire(Event.SET_VOICE(type=self.menu_system_voice_type_index, lang=vkey, speaker='mute'))
+                # text = self.dgttranslate.text('B10_okvoice')
                 text = self.enter_sys_voice_type_mute_lang_menu()
                 break
             if case(MenuState.SYS_VOICE_TYPE_MUTE_LANG):
@@ -629,7 +725,15 @@ class MenuStateMachine(object):
                 break
             if case(MenuState.SYS_VOICE_TYPE_MUTE_LANG_SPEAK):
                 # do action!
-                text = self.enter_top_menu()
+                vkey = self.voices_conf.keys()[self.menu_system_voice_lang_index]
+                speakers = self.voices_conf[vkey].keys()
+                config = ConfigObj('picochess.ini')
+                ckey = 'user' if self.menu_system_voice_type_index == VoiceType.USER_VOICE else 'computer'
+                skey = speakers[self.menu_system_voice_speak_index]
+                config[ckey + '-voice'] = vkey + ':' + skey
+                config.write()
+                self.fire(Event.SET_VOICE(type=self.menu_system_voice_type_index, lang=vkey, speaker=skey))
+                text = self.dgttranslate.text('B10_okvoice')
                 break
             if case(MenuState.SYS_DISP):
                 if self.menu_system_display_index == SystemDisplay.PONDER_TIME:
@@ -642,14 +746,22 @@ class MenuStateMachine(object):
                 break
             if case(MenuState.SYS_DISP_OKMSG_YESNO):
                 # do action!
-                text = self.enter_top_menu()
+                config = ConfigObj('picochess.ini')
+                config['disable-ok-message'] = self.menu_system_display_okmessage_index
+                config.write()
+                self.show_ok_message = self.menu_system_display_okmessage_index
+                text = self.dgttranslate.text('B10_okmessage')
                 break
             if case(MenuState.SYS_DISP_PONDER):
                 text = self.enter_sys_disp_ponder_time_menu()
                 break
             if case(MenuState.SYS_DISP_PONDER_TIME):
                 # do action!
-                text = self.enter_top_menu()
+                config = ConfigObj('picochess.ini')
+                config['ponder-time'] = self.menu_system_display_pondertime_index
+                config.write()
+                self.ponder_time = self.menu_system_display_pondertime_index
+                text = self.dgttranslate.text('B10_okpondertime')
                 break
             if case():  # Default
                 break
@@ -1041,34 +1153,3 @@ class MenuStateMachine(object):
 
     def inside_menu(self):
         return self.state != MenuState.TOP
-
-    def inside_mode(self):
-        return self.inside_menu() and self.state in (MenuState.MODE, MenuState.MODE_TYPE)
-
-    def inside_position(self):
-        ins = self.state in (MenuState.POS, MenuState.POS_COL, MenuState.POS_READ, MenuState.POS_REV, MenuState.POS_UCI)
-        return self.inside_menu() and ins
-
-    def inside_time(self):
-        blitz = self.state in (MenuState.TIME_BLITZ, MenuState.TIME_BLITZ_CTRL)
-        fisch = self.state in (MenuState.TIME_FISCH, MenuState.TIME_FISCH_CTRL)
-        fixed = self.state in (MenuState.TIME_FIXED, MenuState.TIME_FIXED_CTRL)
-        return self.inside_menu() and (blitz or fisch or fixed or self.state == MenuState.TIME)
-
-    def inside_book(self):
-        return self.inside_menu() and self.state in (MenuState.BOOK, MenuState.BOOK_NAME)
-
-    def inside_engine(self):
-        return self.inside_menu() and self.state in (MenuState.ENG, MenuState.ENG_NAME, MenuState.ENG_NAME_LEVEL)
-
-    def inside_system(self):
-        versn = self.state == MenuState.SYS_VERS
-        ipadr = self.state == MenuState.SYS_IP
-        sound = self.state in (MenuState.SYS_SOUND, MenuState.SYS_SOUND_TYPE)
-        langu = self.state in (MenuState.SYS_LANG, MenuState.SYS_LANG_NAME)
-        lfile = self.state == MenuState.SYS_LOG
-        voice = self.state in (MenuState.SYS_VOICE, MenuState.SYS_VOICE_TYPE, MenuState.SYS_VOICE_TYPE_MUTE,
-                               MenuState.SYS_VOICE_TYPE_MUTE_LANG, MenuState.SYS_VOICE_TYPE_MUTE_LANG_SPEAK)
-        displ = self.state in (MenuState.SYS_DISP, MenuState.SYS_DISP_OKMSG, MenuState.SYS_DISP_OKMSG_YESNO,
-                               MenuState.SYS_DISP_PONDER, MenuState.SYS_DISP_PONDER_TIME)
-        return self.inside_menu() and (versn or ipadr or sound or langu or lfile or voice or displ or self.state == MenuState.SYS)
