@@ -923,7 +923,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             elif self.inside_system_sound_menu():
                 if self.inside_system_sound_beep_menu():
                     self.menu_system_sound_beep_result = self.menu_system_sound_beep_index
-                    text = self.dgttranslate.text(self.menu_system_sound_beep_result.value)
+                    text = self.dgttranslate.text(self.menu_system_sound_beep_index.value)
                     exit_menu = False
                 else:
                     self.dgttranslate.set_beep(self.menu_system_sound_beep_index)
@@ -934,7 +934,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             elif self.inside_system_language_menu():
                 if self.inside_system_language_lang_menu():
                     self.menu_system_language_lang_result = self.menu_system_language_lang_index
-                    text = self.dgttranslate.text(self.menu_system_language_lang_result.value)
+                    text = self.dgttranslate.text(self.menu_system_language_lang_index.value)
                     exit_menu = False
                 else:
                     langs = {Language.EN: 'en', Language.DE: 'de', Language.NL: 'nl',

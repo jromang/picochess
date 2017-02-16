@@ -724,8 +724,22 @@ class DgtTranslate(object):
             estxt = entxt
             ittxt = entxt
         if text_id == 'pondertime':
+            entxt = Dgt.DISPLAY_TEXT(l='ponder time', m='pondtime ', s='pond t')
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
+        if text_id == 'pondertime_time':
             entxt = Dgt.DISPLAY_TEXT(l='pondertime' + msg, m='p time ' + msg, s='ptime' + msg)
             detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
+        if text_id == 'okmessage':
+            entxt = Dgt.DISPLAY_TEXT(l='Okay Message', m='Okay Msg', s='ok msg')
+            detxt = Dgt.DISPLAY_TEXT(l='Okay Message', m='Okay Msg', s='ok msg')
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
