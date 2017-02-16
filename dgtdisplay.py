@@ -47,22 +47,23 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
     def _reset_menu_results(self):
         # dont override "menu_mode_result", otherwise wQ a5-f5 wont work anymore (=> if's)
-        self.menu_time_mode_result = None
-        self.menu_setup_whitetomove_result = None
-        self.menu_setup_reverse_result = None
-        self.menu_setup_uci960_result = None
-        self.menu_top_result = None
-        self.menu_system_result = None
-        self.menu_engine_name_result = None
-        self.menu_system_sound_beep_result = None
-        self.menu_system_language_lang_result = None
-        self.menu_system_voice_type_result = None
-        self.menu_system_voice_mute_result = None
-        self.menu_system_voice_lang_result = None
-        self.menu_system_voice_speak_result = None
-        self.menu_system_display_pondertime_result = None
-        self.menu_system_display_okmessage_result = None
-        self.menu_inside_flag = False
+        pass
+        # self.menu_time_mode_result = None
+        # self.menu_setup_whitetomove_result = None
+        # self.menu_setup_reverse_result = None
+        # self.menu_setup_uci960_result = None
+        # self.menu_top_result = None
+        # self.menu_system_result = None
+        # self.menu_engine_name_result = None
+        # self.menu_system_sound_beep_result = None
+        # self.menu_system_language_lang_result = None
+        # self.menu_system_voice_type_result = None
+        # self.menu_system_voice_mute_result = None
+        # self.menu_system_voice_lang_result = None
+        # self.menu_system_voice_speak_result = None
+        # self.menu_system_display_pondertime_result = None
+        # self.menu_system_display_okmessage_result = None
+        # self.menu_inside_flag = False
 
     def _power_off(self, dev='web'):
         DisplayDgt.show(self.dgttranslate.text('Y10_goodbye'))
@@ -120,7 +121,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
     def _process_button0(self, dev):
         logging.debug('({}) clock: handle button 0 press'.format(dev))
         if self.inside_menu():
-            DgtDisplay.show(self.dgtmenu.up())
+            DisplayDgt.show(self.dgtmenu.up())
         else:
             if self.last_move:
                 side = ClockSide.LEFT if (self.last_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
@@ -129,18 +130,18 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 text = self.dgttranslate.text('B10_nomove')
             DisplayDgt.show(text)
-            self._exit_display(wait=True)
+            self.exit_display(wait=True)
 
     def _process_button1(self, dev):
         logging.debug('({}) clock: handle button 1 press'.format(dev))
         if self.inside_menu():
-            DgtDisplay.show(self.dgtmenu.left())
+            DisplayDgt.show(self.dgtmenu.left())
         else:
             text = self._combine_depth_and_score()
             text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             # text.maxtime = 0
             DisplayDgt.show(text)
-            self._exit_display(wait=True)
+            self.exit_display(wait=True)
 
     def _process_button2(self, dev):
         logging.debug('({}) clock: handle button 2 press'.format(dev))
@@ -161,7 +162,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
     def _process_button3(self, dev):
         logging.debug('({}) clock: handle button 3 press'.format(dev))
         if self.inside_menu():
-            DgtDisplay.show(self.dgtmenu.right())
+            DisplayDgt.show(self.dgtmenu.right())
         else:
             if self.hint_move:
                 side = self.hint_side()
@@ -170,16 +171,17 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 text = self.dgttranslate.text('B10_nomove')
             DisplayDgt.show(text)
-            self._exit_display(wait=True)
+            self.exit_display(wait=True)
 
     def _process_button4(self, dev):
         logging.debug('({}) clock: handle button 4 press'.format(dev))
-        if self.inside_menu():
-            DgtDisplay.show(self.dgtmenu.down())
-        else:
-            self.menu_inside_flag = True
-            text = self.dgttranslate.text(self.dgtmenu.menu_top_index.value)
-            DisplayDgt.show(text)
+        DisplayDgt.show(self.dgtmenu.down())
+        # if self.inside_menu():
+        #     DisplayDgt.show(self.dgtmenu.down())
+        # else:
+        #     self.menu_inside_flag = True
+        #     text = self.dgttranslate.text(self.dgtmenu.menu_top_index.value)
+        #     DisplayDgt.show(text)
 
     def _process_lever(self, right_side_down, dev):
         logging.debug('({}) clock: handle lever press - right_side_down: {}'.format(dev, right_side_down))
@@ -193,7 +195,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         _, _, _, rnk_5, rnk_4, _, _, _ = self.dgt_fen.split('/')
         return '8/8/8/' + rnk_5 + '/' + rnk_4 + '/8/8/8'
 
-    def _exit_display(self, wait=False, force=True):
+    def exit_display(self, wait=False, force=True):
         if self.play_move and self.menu_mode_result in (Mode.NORMAL, Mode.REMOTE):
             side = ClockSide.LEFT if (self.play_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
             text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side, wait=wait, maxtime=1,
@@ -271,7 +273,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 if self.show_ok_message or not message.ok_text:
                     DisplayDgt.show(message.eng_text)
                 self.engine_restart = False
-                self._exit_display(force=True)
+                self.exit_display(force=True)
                 break
             if case(MessageApi.ENGINE_STARTUP):
                 self.installed_engines = get_installed_engines(message.shell, message.file)
@@ -376,7 +378,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 else:
                     DisplayDgt.show(message.level_text)
                     # self._exit_display(force=False)
-                    self._exit_display(force=True)
+                    self.exit_display(force=True)
                 break
             if case(MessageApi.TIME_CONTROL):
                 if self.show_ok_message or not message.ok_text:
@@ -385,12 +387,12 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 time_left, time_right = tc.current_clock_time(flip_board=self.flip_board)
                 DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE,
                                                 wait=True, devs={'ser', 'i2c', 'web'}))
-                self._exit_display(force=True)
+                self.exit_display(force=True)
                 break
             if case(MessageApi.OPENING_BOOK):
                 if self.show_ok_message or not message.ok_text:
                     DisplayDgt.show(message.book_text)
-                self._exit_display(force=True)
+                self.exit_display(force=True)
                 break
             if case(MessageApi.TAKE_BACK):
                 if self.leds_are_on:
@@ -415,7 +417,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.engine_finished = False
                 if self.show_ok_message or not message.ok_text:
                     DisplayDgt.show(message.mode_text)
-                self._exit_display(force=True)
+                self.exit_display(force=True)
                 break
             if case(MessageApi.PLAY_MODE):
                 DisplayDgt.show(message.play_mode_text)

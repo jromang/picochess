@@ -526,7 +526,7 @@ BookFilter = 20
 GuideBookFile = books/micro.bin
 MainBookFile = books/micro.bin
 
-[Toby]
+[Sue]
 ; Sue personality for Rodent II
 ; author: Pawel Koziol
 ; weak to moderate, likes to sacrifice

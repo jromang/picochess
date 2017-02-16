@@ -153,6 +153,9 @@ class MenuStateMachine(Observable):
             ('rnbqkbnr/pppppppp/8/8/8/6Q1/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FISCHER, minutes_per_game=30, fischer_increment=15)),
             ('rnbqkbnr/pppppppp/8/8/8/7Q/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FISCHER, minutes_per_game=60, fischer_increment=30))])
 
+    def _reset_menu_results(self):
+        self.state = MenuState.TOP
+
     def get(self):
         return self.state
 
@@ -540,7 +543,7 @@ class MenuStateMachine(Observable):
                 if bit_board.is_valid():
                     self.flip_board = self.menu_setup_reverse_index
                     self.fire(Event.SETUP_POSITION(fen=bit_board.fen(), uci960=self.menu_setup_uci960_index))
-                    self._reset_moves_and_score()
+                    # self._reset_moves_and_score() done in "START_NEW_GAME"
                     self._reset_menu_results()
                     return
                 else:
@@ -602,7 +605,6 @@ class MenuStateMachine(Observable):
                 eng = self.installed_engines[self.menu_engine_name_index]
                 level_dict = eng['level_dict']
                 if level_dict:
-                    self.menu_engine_name_result = self.menu_engine_name_index
                     if self.engine_level_index is None or len(level_dict) <= self.engine_level_index:
                         self.engine_level_index = len(level_dict) - 1
                     msg = sorted(level_dict)[self.engine_level_index]
