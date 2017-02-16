@@ -17,7 +17,8 @@
 
 from configobj import ConfigObj
 from collections import OrderedDict
-from utilities import TimeMode, BeepLevel, Menu, Mode, Language, Settings, VoiceType, switch, Dgt
+from utilities import TimeMode, TimeModeLoop, BeepLevel, BeepLoop, Menu, MenuLoop, Mode, ModeLoop, Language, LanguageLoop
+from utilities import Settings, SettingsLoop, VoiceType, VoiceTypeLoop, SystemDisplay, SystemDisplayLoop, switch, Dgt
 from timecontrol import TimeControl
 import os
 
@@ -109,6 +110,7 @@ class MenuStateMachine(object):
             self.menu_system_voice_lang_index = 0
         self.menu_system_voice_speak_index = 0
 
+        self.menu_system_display_index = SystemDisplay.PONDER_TIME
         self.menu_system_display_okmessage_index = False
         self.menu_system_display_pondertime_index = 3 # self.ponder_time
 
@@ -343,7 +345,7 @@ class MenuStateMachine(object):
 
     def enter_sys_disp_okmsg_menu(self):
         self.state = MenuState.SYS_DISP_OKMSG
-        text = self.dgttranslate.text('B00_okmessage')
+        text = self.dgttranslate.text(SystemDisplay.OK_MESSAGE.value)
         return text
 
     def enter_sys_disp_okmsg_yesno_menu(self):
@@ -354,7 +356,7 @@ class MenuStateMachine(object):
 
     def enter_sys_disp_ponder_menu(self):
         self.state = MenuState.SYS_DISP_PONDER
-        text = self.dgttranslate.text('B00_pondertime')
+        text = self.dgttranslate.text(SystemDisplay.PONDER_TIME.value)
         return text
 
     def enter_sys_disp_ponder_time_menu(self):
@@ -486,10 +488,20 @@ class MenuStateMachine(object):
         text = self.dgttranslate.text('Y00_errormenu')
         for case in switch(self.state):
             if case(MenuState.TOP):
-                text = self.enter_mode_menu()
+                if self.menu_top_index == Menu.MODE_MENU:
+                    text = self.enter_mode_menu()
+                if self.menu_top_index == Menu.POSITION_MENU:
+                    text = self.enter_pos_menu()
+                if self.menu_top_index == Menu.TIME_MENU:
+                    text = self.enter_time_menu()
+                if self.menu_top_index == Menu.BOOK_MENU:
+                    text = self.enter_book_menu()
+                if self.menu_top_index == Menu.ENGINE_MENU:
+                    text = self.enter_eng_menu()
+                if self.menu_top_index == Menu.SYSTEM_MENU:
+                    text = self.enter_sys_menu()
                 break
             if case(MenuState.MODE):
-                # decide the correct submenu
                 text = self.enter_mode_type_menu()
                 break
             if case(MenuState.MODE_TYPE):
@@ -513,8 +525,12 @@ class MenuStateMachine(object):
                 text = self.enter_top_menu()
                 break
             if case(MenuState.TIME):
-                # decide the correct submenu
-                text = self.enter_time_blitz_menu()
+                if self.menu_time_mode_index == TimeMode.BLITZ:
+                    text = self.enter_time_blitz_menu()
+                if self.menu_time_mode_index == TimeMode.FISCHER:
+                    text = self.enter_time_fisch_menu()
+                if self.menu_time_mode_index == TimeMode.FIXED:
+                    text = self.enter_time_fixed_menu()
                 break
             if case(MenuState.TIME_BLITZ):
                 text = self.enter_time_blitz_ctrl_menu()
@@ -558,8 +574,20 @@ class MenuStateMachine(object):
                 text = self.enter_top_menu()
                 break
             if case(MenuState.SYS):
-                # decide the correct submenu
-                text = self.enter_sys_vers_menu()
+                if self.menu_system_index == Settings.VERSION:
+                    text = self.enter_sys_vers_menu()
+                if self.menu_system_index == Settings.IPADR:
+                    text = self.enter_sys_ip_menu()
+                if self.menu_system_index == Settings.SOUND:
+                    text = self.enter_sys_sound_menu()
+                if self.menu_system_index == Settings.LANGUAGE:
+                    text = self.enter_sys_lang_menu()
+                if self.menu_system_index == Settings.LOGFILE:
+                    text = self.enter_sys_log_menu()
+                if self.menu_system_index == Settings.VOICE:
+                    text = self.enter_sys_voice_menu()
+                if self.menu_system_index == Settings.DISPLAY:
+                    text = self.enter_sys_disp_menu()
                 break
             if case(MenuState.SYS_VERS):
                 # do action!
@@ -604,8 +632,10 @@ class MenuStateMachine(object):
                 text = self.enter_top_menu()
                 break
             if case(MenuState.SYS_DISP):
-                # decide the correct submenu
-                text = self.enter_sys_disp_okmsg_menu()
+                if self.menu_system_display_index == SystemDisplay.PONDER_TIME:
+                    text = self.enter_sys_disp_ponder_menu()
+                if self.menu_system_display_index == SystemDisplay.OK_MESSAGE:
+                    text = self.enter_sys_disp_okmsg_menu()
                 break
             if case(MenuState.SYS_DISP_OKMSG):
                 text = self.enter_sys_disp_okmsg_yesno_menu()
@@ -620,6 +650,390 @@ class MenuStateMachine(object):
             if case(MenuState.SYS_DISP_PONDER_TIME):
                 # do action!
                 text = self.enter_top_menu()
+                break
+            if case():  # Default
+                break
+        return text
+
+    def left(self):
+        text = self.dgttranslate.text('Y00_errormenu')
+        for case in switch(self.state):
+            if case(MenuState.TOP):
+                break
+            if case(MenuState.MODE):
+                self.state = MenuState.SYS
+                self.menu_top_index = MenuLoop.prev(self.menu_top_index)
+                text = self.dgttranslate.text(self.menu_top_index.value)
+                break
+            if case(MenuState.MODE_TYPE):
+                self.menu_mode_index = ModeLoop.prev(self.menu_mode_index)
+                text = self.dgttranslate.text(self.menu_mode_index.value)
+                break
+            if case(MenuState.POS):
+                self.state = MenuState.MODE
+                self.menu_top_index = MenuLoop.prev(self.menu_top_index)
+                text = self.dgttranslate.text(self.menu_top_index.value)
+                break
+            if case(MenuState.POS_COL):
+                self.menu_setup_whitetomove_index = not self.menu_setup_whitetomove_index
+                text = self.dgttranslate.text('B00_sidewhite' if self.menu_setup_whitetomove_index else 'B00_sideblack')
+                break
+            if case(MenuState.POS_REV):
+                self.menu_setup_reverse_index = not self.menu_setup_reverse_index
+                text = self.dgttranslate.text('B00_bw' if self.menu_setup_reverse_index else 'B00_wb')
+                break
+            if case(MenuState.POS_UCI):
+                if self.engine_has_960:
+                    self.menu_setup_uci960_index = not self.menu_setup_uci960_index
+                    text = self.dgttranslate.text('B00_960yes' if self.menu_setup_uci960_index else 'B00_960no')
+                else:
+                    text = self.dgttranslate.text('Y00_error960')
+                break
+            if case(MenuState.POS_READ):
+                break
+            if case(MenuState.TIME):
+                self.state = MenuState.POS
+                self.menu_top_index = MenuLoop.prev(self.menu_top_index)
+                text = self.dgttranslate.text(self.menu_top_index.value)
+                break
+            if case(MenuState.TIME_BLITZ):
+                self.state = MenuState.TIME_FIXED
+                self.menu_time_mode_index = TimeModeLoop.prev(self.menu_time_mode_index)
+                text = self.dgttranslate.text(self.menu_time_mode_index.value)
+                break
+            if case(MenuState.TIME_BLITZ_CTRL):
+                self.tc_blitz_index = (self.tc_blitz_index - 1) % len(self.tc_blitz_map)
+                text = self.dgttranslate.text('B00_tc_blitz', self.tc_blitz_list[self.tc_blitz_index])
+                break
+            if case(MenuState.TIME_FISCH):
+                self.state = MenuState.TIME_BLITZ
+                self.menu_time_mode_index = TimeModeLoop.prev(self.menu_time_mode_index)
+                text = self.dgttranslate.text(self.menu_time_mode_index.value)
+                break
+            if case(MenuState.TIME_FISCH_CTRL):
+                self.tc_fisch_index = (self.tc_fisch_index - 1) % len(self.tc_fisch_map)
+                text = self.dgttranslate.text('B00_tc_fisch', self.tc_fisch_list[self.tc_fisch_index])
+                break
+            if case(MenuState.TIME_FIXED):
+                self.state = MenuState.TIME_FISCH
+                self.menu_time_mode_index = TimeModeLoop.prev(self.menu_time_mode_index)
+                text = self.dgttranslate.text(self.menu_time_mode_index.value)
+                break
+            if case(MenuState.TIME_FIXED_CTRL):
+                self.tc_fixed_index = (self.tc_fixed_index - 1) % len(self.tc_fixed_map)
+                text = self.dgttranslate.text('B00_tc_fixed', self.tc_fixed_list[self.tc_fixed_index])
+                break
+            if case(MenuState.BOOK):
+                self.state = MenuState.TIME
+                self.menu_top_index = MenuLoop.prev(self.menu_top_index)
+                text = self.dgttranslate.text(self.menu_top_index.value)
+                break
+            if case(MenuState.BOOK_NAME):
+                self.menu_book_index = (self.menu_book_index - 1) % len(self.all_books)
+                text = self.all_books[self.menu_book_index]['text']
+                text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
+                break
+            if case(MenuState.ENG):
+                self.state = MenuState.BOOK
+                self.menu_top_index = MenuLoop.prev(self.menu_top_index)
+                text = self.dgttranslate.text(self.menu_top_index.value)
+                break
+            if case(MenuState.ENG_NAME):
+                self.menu_engine_name_index = (self.menu_engine_name_index - 1) % len(self.installed_engines)
+                text = self.installed_engines[self.menu_engine_name_index]['text']
+                text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
+                break
+            if case(MenuState.ENG_NAME_LEVEL):
+                level_dict = self.installed_engines[self.menu_engine_name_index]['level_dict']
+                self.engine_level_index = (self.engine_level_index - 1) % len(level_dict)
+                msg = sorted(level_dict)[self.engine_level_index]
+                text = self.dgttranslate.text('B00_level', msg)
+                break
+            if case(MenuState.SYS):
+                self.state = MenuState.ENG
+                self.menu_top_index = MenuLoop.prev(self.menu_top_index)
+                text = self.dgttranslate.text(self.menu_top_index.value)
+                break
+            if case(MenuState.SYS_VERS):
+                self.state = MenuState.SYS_DISP
+                self.menu_system_index = SettingsLoop.prev(self.menu_system_index)
+                text = self.dgttranslate.text(self.menu_system_index.value)
+                break
+            if case(MenuState.SYS_IP):
+                self.state = MenuState.SYS_VERS
+                self.menu_system_index = SettingsLoop.prev(self.menu_system_index)
+                text = self.dgttranslate.text(self.menu_system_index.value)
+                break
+            if case(MenuState.SYS_SOUND):
+                self.state = MenuState.SYS_IP
+                self.menu_system_index = SettingsLoop.prev(self.menu_system_index)
+                text = self.dgttranslate.text(self.menu_system_index.value)
+                break
+            if case(MenuState.SYS_SOUND_TYPE):
+                self.menu_system_sound_beep_index = BeepLoop.prev(self.menu_system_sound_beep_index)
+                text = self.dgttranslate.text(self.menu_system_sound_beep_index.value)
+                break
+            if case(MenuState.SYS_LANG):
+                self.state = MenuState.SYS_SOUND
+                self.menu_system_index = SettingsLoop.prev(self.menu_system_index)
+                text = self.dgttranslate.text(self.menu_system_index.value)
+                break
+            if case(MenuState.SYS_LANG_NAME):
+                self.menu_system_language_lang_index = LanguageLoop.prev(self.menu_system_language_lang_index)
+                text = self.dgttranslate.text(self.menu_system_language_lang_index.value)
+                break
+            if case(MenuState.SYS_LOG):
+                self.state = MenuState.SYS_LANG
+                self.menu_system_index = SettingsLoop.prev(self.menu_system_index)
+                text = self.dgttranslate.text(self.menu_system_index.value)
+                break
+            if case(MenuState.SYS_VOICE):
+                self.state = MenuState.SYS_LOG
+                self.menu_system_index = SettingsLoop.prev(self.menu_system_index)
+                text = self.dgttranslate.text(self.menu_system_index.value)
+                break
+            if case(MenuState.SYS_VOICE_TYPE):
+                self.menu_system_voice_type_index = VoiceTypeLoop.prev(self.menu_system_voice_type_index)
+                text = self.dgttranslate.text(self.menu_system_voice_type_index.value)
+                break
+            if case(MenuState.SYS_VOICE_TYPE_MUTE):
+                self.menu_system_voice_mute_index = not self.menu_system_voice_mute_index
+                msg = 'on' if self.menu_system_voice_mute_index else 'off'
+                text = self.dgttranslate.text('B00_voice_' + msg)
+                break
+            if case(MenuState.SYS_VOICE_TYPE_MUTE_LANG):
+                self.menu_system_voice_lang_index = (self.menu_system_voice_lang_index - 1) % len(self.voices_conf)
+                vkey = self.voices_conf.keys()[self.menu_system_voice_lang_index]
+                text = self.dgttranslate.text('B00_language_' + vkey + '_menu')  # voice using same as language
+                break
+            if case(MenuState.SYS_VOICE_TYPE_MUTE_LANG_SPEAK):
+                vkey = self.voices_conf.keys()[self.menu_system_voice_lang_index]
+                speakers = self.voices_conf[vkey]
+                self.menu_system_voice_speak_index = (self.menu_system_voice_speak_index - 1) % len(speakers)
+                speaker = speakers[list(speakers)[self.menu_system_voice_speak_index]]
+                text = Dgt.DISPLAY_TEXT(l=speaker['large'], m=speaker['medium'], s=speaker['small'])
+                text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
+                text.wait = False
+                text.maxtime = 0
+                text.devs = {'ser', 'i2c', 'web'}
+                break
+            if case(MenuState.SYS_DISP):
+                self.state = MenuState.SYS_VOICE
+                self.menu_system_index = SettingsLoop.prev(self.menu_system_index)
+                text = self.dgttranslate.text(self.menu_system_index.value)
+                break
+            if case(MenuState.SYS_DISP_OKMSG):
+                self.state = MenuState.SYS_DISP_PONDER
+                self.menu_system_display_index = SystemDisplayLoop.prev(self.menu_system_display_index)
+                text = self.dgttranslate.text(self.menu_system_display_index.value)
+                break
+            if case(MenuState.SYS_DISP_OKMSG_YESNO):
+                self.menu_system_display_okmessage_index = not self.menu_system_display_okmessage_index
+                msg = 'on' if self.menu_system_display_okmessage_index else 'off'
+                text = self.dgttranslate.text('B00_okmessage_' + msg)
+                break
+            if case(MenuState.SYS_DISP_PONDER):
+                self.state = MenuState.SYS_DISP_OKMSG
+                self.menu_system_display_index = SystemDisplayLoop.prev(self.menu_system_display_index)
+                text = self.dgttranslate.text(self.menu_system_display_index.value)
+                break
+            if case(MenuState.SYS_DISP_PONDER_TIME):
+                self.menu_system_display_pondertime_index -= 1
+                if self.menu_system_display_pondertime_index < 1:
+                    self.menu_system_display_pondertime_index = 8
+                text = self.dgttranslate.text('B00_pondertime_time', str(self.menu_system_display_pondertime_index))
+                break
+            if case():  # Default
+                break
+        return text
+
+    def right(self):
+        text = self.dgttranslate.text('Y00_errormenu')
+        for case in switch(self.state):
+            if case(MenuState.TOP):
+                break
+            if case(MenuState.MODE):
+                self.state = MenuState.POS
+                self.menu_top_index = MenuLoop.next(self.menu_top_index)
+                text = self.dgttranslate.text(self.menu_top_index.value)
+                break
+            if case(MenuState.MODE_TYPE):
+                self.menu_mode_index = ModeLoop.next(self.menu_mode_index)
+                text = self.dgttranslate.text(self.menu_mode_index.value)
+                break
+            if case(MenuState.POS):
+                self.state = MenuState.TIME
+                self.menu_top_index = MenuLoop.next(self.menu_top_index)
+                text = self.dgttranslate.text(self.menu_top_index.value)
+                break
+            if case(MenuState.POS_COL):
+                self.menu_setup_whitetomove_index = not self.menu_setup_whitetomove_index
+                text = self.dgttranslate.text('B00_sidewhite' if self.menu_setup_whitetomove_index else 'B00_sideblack')
+                break
+            if case(MenuState.POS_REV):
+                self.menu_setup_reverse_index = not self.menu_setup_reverse_index
+                text = self.dgttranslate.text('B00_bw' if self.menu_setup_reverse_index else 'B00_wb')
+                break
+            if case(MenuState.POS_UCI):
+                if self.engine_has_960:
+                    self.menu_setup_uci960_index = not self.menu_setup_uci960_index
+                    text = self.dgttranslate.text('B00_960yes' if self.menu_setup_uci960_index else 'B00_960no')
+                else:
+                    text = self.dgttranslate.text('Y00_error960')
+                break
+            if case(MenuState.POS_READ):
+                break
+            if case(MenuState.TIME):
+                self.state = MenuState.BOOK
+                self.menu_top_index = MenuLoop.next(self.menu_top_index)
+                text = self.dgttranslate.text(self.menu_top_index.value)
+                break
+            if case(MenuState.TIME_BLITZ):
+                self.state = MenuState.TIME_FIXED
+                self.menu_time_mode_index = TimeModeLoop.next(self.menu_time_mode_index)
+                text = self.dgttranslate.text(self.menu_time_mode_index.value)
+                break
+            if case(MenuState.TIME_BLITZ_CTRL):
+                self.tc_blitz_index = (self.tc_blitz_index + 1) % len(self.tc_blitz_map)
+                text = self.dgttranslate.text('B00_tc_blitz', self.tc_blitz_list[self.tc_blitz_index])
+                break
+            if case(MenuState.TIME_FISCH):
+                self.state = MenuState.TIME_BLITZ
+                self.menu_time_mode_index = TimeModeLoop.next(self.menu_time_mode_index)
+                text = self.dgttranslate.text(self.menu_time_mode_index.value)
+                break
+            if case(MenuState.TIME_FISCH_CTRL):
+                self.tc_fisch_index = (self.tc_fisch_index + 1) % len(self.tc_fisch_map)
+                text = self.dgttranslate.text('B00_tc_fisch', self.tc_fisch_list[self.tc_fisch_index])
+                break
+            if case(MenuState.TIME_FIXED):
+                self.state = MenuState.TIME_FISCH
+                self.menu_time_mode_index = TimeModeLoop.next(self.menu_time_mode_index)
+                text = self.dgttranslate.text(self.menu_time_mode_index.value)
+                break
+            if case(MenuState.TIME_FIXED_CTRL):
+                self.tc_fixed_index = (self.tc_fixed_index + 1) % len(self.tc_fixed_map)
+                text = self.dgttranslate.text('B00_tc_fixed', self.tc_fixed_list[self.tc_fixed_index])
+                break
+            if case(MenuState.BOOK):
+                self.state = MenuState.ENG
+                self.menu_top_index = MenuLoop.next(self.menu_top_index)
+                text = self.dgttranslate.text(self.menu_top_index.value)
+                break
+            if case(MenuState.BOOK_NAME):
+                self.menu_book_index = (self.menu_book_index + 1) % len(self.all_books)
+                text = self.all_books[self.menu_book_index]['text']
+                text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
+                break
+            if case(MenuState.ENG):
+                self.state = MenuState.SYS
+                self.menu_top_index = MenuLoop.next(self.menu_top_index)
+                text = self.dgttranslate.text(self.menu_top_index.value)
+                break
+            if case(MenuState.ENG_NAME):
+                self.menu_engine_name_index = (self.menu_engine_name_index + 1) % len(self.installed_engines)
+                text = self.installed_engines[self.menu_engine_name_index]['text']
+                text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
+                break
+            if case(MenuState.ENG_NAME_LEVEL):
+                level_dict = self.installed_engines[self.menu_engine_name_index]['level_dict']
+                self.engine_level_index = (self.engine_level_index + 1) % len(level_dict)
+                msg = sorted(level_dict)[self.engine_level_index]
+                text = self.dgttranslate.text('B00_level', msg)
+                break
+            if case(MenuState.SYS):
+                self.state = MenuState.MODE
+                self.menu_top_index = MenuLoop.next(self.menu_top_index)
+                text = self.dgttranslate.text(self.menu_top_index.value)
+                break
+            if case(MenuState.SYS_VERS):
+                self.state = MenuState.SYS_IP
+                self.menu_system_index = SettingsLoop.next(self.menu_system_index)
+                text = self.dgttranslate.text(self.menu_system_index.value)
+                break
+            if case(MenuState.SYS_IP):
+                self.state = MenuState.SYS_SOUND
+                self.menu_system_index = SettingsLoop.next(self.menu_system_index)
+                text = self.dgttranslate.text(self.menu_system_index.value)
+                break
+            if case(MenuState.SYS_SOUND):
+                self.state = MenuState.SYS_LANG
+                self.menu_system_index = SettingsLoop.next(self.menu_system_index)
+                text = self.dgttranslate.text(self.menu_system_index.value)
+                break
+            if case(MenuState.SYS_SOUND_TYPE):
+                self.menu_system_sound_beep_index = BeepLoop.next(self.menu_system_sound_beep_index)
+                text = self.dgttranslate.text(self.menu_system_sound_beep_index.value)
+                break
+            if case(MenuState.SYS_LANG):
+                self.state = MenuState.SYS_LOG
+                self.menu_system_index = SettingsLoop.next(self.menu_system_index)
+                text = self.dgttranslate.text(self.menu_system_index.value)
+                break
+            if case(MenuState.SYS_LANG_NAME):
+                self.menu_system_language_lang_index = LanguageLoop.next(self.menu_system_language_lang_index)
+                text = self.dgttranslate.text(self.menu_system_language_lang_index.value)
+                break
+            if case(MenuState.SYS_LOG):
+                self.state = MenuState.SYS_VOICE
+                self.menu_system_index = SettingsLoop.next(self.menu_system_index)
+                text = self.dgttranslate.text(self.menu_system_index.value)
+                break
+            if case(MenuState.SYS_VOICE):
+                self.state = MenuState.SYS_DISP
+                self.menu_system_index = SettingsLoop.next(self.menu_system_index)
+                text = self.dgttranslate.text(self.menu_system_index.value)
+                break
+            if case(MenuState.SYS_VOICE_TYPE):
+                self.menu_system_voice_type_index = VoiceTypeLoop.next(self.menu_system_voice_type_index)
+                text = self.dgttranslate.text(self.menu_system_voice_type_index.value)
+                break
+            if case(MenuState.SYS_VOICE_TYPE_MUTE):
+                self.menu_system_voice_mute_index = not self.menu_system_voice_mute_index
+                msg = 'on' if self.menu_system_voice_mute_index else 'off'
+                text = self.dgttranslate.text('B00_voice_' + msg)
+                break
+            if case(MenuState.SYS_VOICE_TYPE_MUTE_LANG):
+                self.menu_system_voice_lang_index = (self.menu_system_voice_lang_index + 1) % len(self.voices_conf)
+                vkey = self.voices_conf.keys()[self.menu_system_voice_lang_index]
+                text = self.dgttranslate.text('B00_language_' + vkey + '_menu')  # voice using same as language
+                break
+            if case(MenuState.SYS_VOICE_TYPE_MUTE_LANG_SPEAK):
+                vkey = self.voices_conf.keys()[self.menu_system_voice_lang_index]
+                speakers = self.voices_conf[vkey]
+                self.menu_system_voice_speak_index = (self.menu_system_voice_speak_index + 1) % len(speakers)
+                speaker = speakers[list(speakers)[self.menu_system_voice_speak_index]]
+                text = Dgt.DISPLAY_TEXT(l=speaker['large'], m=speaker['medium'], s=speaker['small'])
+                text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
+                text.wait = False
+                text.maxtime = 0
+                text.devs = {'ser', 'i2c', 'web'}
+                break
+            if case(MenuState.SYS_DISP):
+                self.state = MenuState.SYS_VERS
+                self.menu_system_index = SettingsLoop.next(self.menu_system_index)
+                text = self.dgttranslate.text(self.menu_system_index.value)
+                break
+            if case(MenuState.SYS_DISP_OKMSG):
+                self.state = MenuState.SYS_DISP_PONDER
+                self.menu_system_display_index = SystemDisplayLoop.next(self.menu_system_display_index)
+                text = self.dgttranslate.text(self.menu_system_display_index.value)
+                break
+            if case(MenuState.SYS_DISP_OKMSG_YESNO):
+                self.menu_system_display_okmessage_index = not self.menu_system_display_okmessage_index
+                msg = 'on' if self.menu_system_display_okmessage_index else 'off'
+                text = self.dgttranslate.text('B00_okmessage_' + msg)
+                break
+            if case(MenuState.SYS_DISP_PONDER):
+                self.state = MenuState.SYS_DISP_OKMSG
+                self.menu_system_display_index = SystemDisplayLoop.next(self.menu_system_display_index)
+                text = self.dgttranslate.text(self.menu_system_display_index.value)
+                break
+            if case(MenuState.SYS_DISP_PONDER_TIME):
+                self.menu_system_display_pondertime_index += 1
+                if self.menu_system_display_pondertime_index > 8:
+                    self.menu_system_display_pondertime_index = 1
+                text = self.dgttranslate.text('B00_pondertime_time', str(self.menu_system_display_pondertime_index))
                 break
             if case():  # Default
                 break

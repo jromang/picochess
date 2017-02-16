@@ -433,8 +433,8 @@ class VoiceTypeLoop(object):
 
 @enum.unique
 class SystemDisplay(enum.Enum):
-    PONDER_TIME = 'B00_systemdisplay_pondertime_menu'
-    OK_MESSAGE = 'B00_systemdisplay_okmessage_menu'
+    PONDER_TIME = 'B00_display_pondertime_menu'
+    OK_MESSAGE = 'B00_display_okmessage_menu'
     
     
 class SystemDisplayLoop(object):

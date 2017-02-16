@@ -723,8 +723,8 @@ class DgtTranslate(object):
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
-        if text_id == 'pondertime':
-            entxt = Dgt.DISPLAY_TEXT(l='ponder time', m='pondtime ', s='pond t')
+        if text_id == 'display_pondertime_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='ponder time', m='Ponder T', s='pond t')
             detxt = entxt
             nltxt = entxt
             frtxt = entxt
@@ -737,7 +737,7 @@ class DgtTranslate(object):
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
-        if text_id == 'okmessage':
+        if text_id == 'display_okmessage_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Okay Message', m='Okay Msg', s='ok msg')
             detxt = Dgt.DISPLAY_TEXT(l='Okay Message', m='Okay Msg', s='ok msg')
             nltxt = entxt
