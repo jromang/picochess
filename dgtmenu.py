@@ -78,18 +78,20 @@ class MenuStateMachine(Observable):
         super(MenuStateMachine, self).__init__()
         self.state = MenuState.TOP
         self.dgttranslate = dgttranslate
+        self.dgt_fen = '8/8/8/8/8/8/8/8'
+        self.ip = None
+        self.flip_board = False
 
         self.menu_setup_whitetomove_index = None
         self.menu_setup_reverse_index = None
         self.menu_setup_uci960_index = None
 
-        self.menu_inside_flag = False
         self.menu_top_index = Menu.MODE_MENU
         self.menu_mode_index = Mode.NORMAL
 
-        self.engine_level_index = None
+        self.menu_engine_level_index = None
         self.engine_has_960 = False  # Not all engines support 960 mode - assume not
-        # self.engine_restart = False @todo Its inside the dgtdisplay function!
+        self.engine_restart = False
         self.menu_engine_name_index = 0
         self.installed_engines = None
 
@@ -104,7 +106,6 @@ class MenuStateMachine(Observable):
         self.menu_system_language_lang_index = langs[self.dgttranslate.language]
 
         self.voices_conf = ConfigObj('talker' + os.sep + 'voices' + os.sep + 'voices.ini')
-        self.menu_system_voice_type_result = None
         self.menu_system_voice_type_index = VoiceType.COMP_VOICE
         self.menu_system_voice_mute_index = False  # @todo set this to 'True' if mute voice choosen
         try:
@@ -119,9 +120,9 @@ class MenuStateMachine(Observable):
 
         self.menu_time_mode_index = TimeMode.BLITZ
 
-        self.tc_fixed_index = 0
-        self.tc_blitz_index = 2  # Default time control: Blitz, 5min
-        self.tc_fisch_index = 0
+        self.menu_time_fixed_ctrl_index = 0
+        self.menu_time_blitz_ctrl_index = 2  # Default time control: Blitz, 5min
+        self.menu_time_fisch_ctrl_index = 0
         self.tc_fixed_list = [' 1', ' 3', ' 5', '10', '15', '30', '60', '90']
         self.tc_blitz_list = [' 1', ' 3', ' 5', '10', '15', '30', '60', '90']
         self.tc_fisch_list = [' 1  1', ' 3  2', ' 4  2', ' 5  3', '10  5', '15 10', '30 15', '60 30']
@@ -211,7 +212,7 @@ class MenuStateMachine(Observable):
 
     def enter_time_blitz_ctrl_menu(self):
         self.state = MenuState.TIME_BLITZ_CTRL
-        text = self.dgttranslate.text('B00_tc_blitz', self.tc_blitz_list[self.tc_blitz_index])
+        text = self.dgttranslate.text('B00_tc_blitz', self.tc_blitz_list[self.menu_time_blitz_ctrl_index])
         return text
 
     def enter_time_fisch_menu(self):
@@ -221,7 +222,7 @@ class MenuStateMachine(Observable):
 
     def enter_time_fisch_ctrl_menu(self):
         self.state = MenuState.TIME_FISCH_CTRL
-        text = self.dgttranslate.text('B00_tc_fisch', self.tc_fisch_list[self.tc_fisch_index])
+        text = self.dgttranslate.text('B00_tc_fisch', self.tc_fisch_list[self.menu_time_fisch_ctrl_index])
         return text
 
     def enter_time_fixed_menu(self):
@@ -231,7 +232,7 @@ class MenuStateMachine(Observable):
 
     def enter_time_fixed_ctrl_menu(self):
         self.state = MenuState.TIME_FIXED_CTRL
-        text = self.dgttranslate.text('B00_tc_fixed', self.tc_fixed_list[self.tc_fixed_index])
+        text = self.dgttranslate.text('B00_tc_fixed', self.tc_fixed_list[self.menu_time_fixed_ctrl_index])
         return text
 
     def enter_book_menu(self):
@@ -261,9 +262,9 @@ class MenuStateMachine(Observable):
         eng = self.installed_engines[self.menu_engine_name_index]
         level_dict = eng['level_dict']
         if level_dict:
-            if self.engine_level_index is None or len(level_dict) <= self.engine_level_index:
-                self.engine_level_index = len(level_dict) - 1
-            msg = sorted(level_dict)[self.engine_level_index]
+            if self.menu_engine_level_index is None or len(level_dict) <= self.menu_engine_level_index:
+                self.menu_engine_level_index = len(level_dict) - 1
+            msg = sorted(level_dict)[self.menu_engine_level_index]
             text = self.dgttranslate.text('B00_level', msg)
         else:
             text = self.dgttranslate.text('Y00_errormenu')
@@ -512,8 +513,7 @@ class MenuStateMachine(Observable):
             if case(MenuState.MODE_TYPE):
                 # do action!
                 text = self.dgttranslate.text('B10_okmode')
-                self.menu_mode_result = self.menu_mode_index
-                self.fire(Event.SET_INTERACTION_MODE(mode=self.menu_mode_result, mode_text=text, ok_text=True))
+                self.fire(Event.SET_INTERACTION_MODE(mode=self.menu_mode_index, mode_text=text, ok_text=True))
                 text = self._reset_menu_results()
                 break
             if case(MenuState.POS):
@@ -562,7 +562,7 @@ class MenuStateMachine(Observable):
             if case(MenuState.TIME_BLITZ_CTRL):
                 # do action!
                 time_text = self.dgttranslate.text('B10_oktime')
-                time_control = self.tc_blitz_map[list(self.tc_blitz_map)[self.tc_blitz_index]]
+                time_control = self.tc_blitz_map[list(self.tc_blitz_map)[self.menu_time_blitz_ctrl_index]]
                 self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=time_text, ok_text=True))
                 text = self._reset_menu_results()
                 break
@@ -572,7 +572,7 @@ class MenuStateMachine(Observable):
             if case(MenuState.TIME_FISCH_CTRL):
                 # do action!
                 time_text = self.dgttranslate.text('B10_oktime')
-                time_control = self.tc_fisch_map[list(self.tc_fisch_map)[self.tc_fisch_index]]
+                time_control = self.tc_fisch_map[list(self.tc_fisch_map)[self.menu_time_fisch_ctrl_index]]
                 self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=time_text, ok_text=True))
                 text = self._reset_menu_results()
                 break
@@ -582,7 +582,7 @@ class MenuStateMachine(Observable):
             if case(MenuState.TIME_FIXED_CTRL):
                 # do action!
                 time_text = self.dgttranslate.text('B10_oktime')
-                time_control = self.tc_fixed_map[list(self.tc_fixed_map)[self.tc_fixed_index]]
+                time_control = self.tc_fixed_map[list(self.tc_fixed_map)[self.menu_time_fixed_ctrl_index]]
                 self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=time_text, ok_text=True))
                 text = self._reset_menu_results()
                 break
@@ -603,9 +603,9 @@ class MenuStateMachine(Observable):
                 eng = self.installed_engines[self.menu_engine_name_index]
                 level_dict = eng['level_dict']
                 if level_dict:
-                    if self.engine_level_index is None or len(level_dict) <= self.engine_level_index:
-                        self.engine_level_index = len(level_dict) - 1
-                    msg = sorted(level_dict)[self.engine_level_index]
+                    if self.menu_engine_level_index is None or len(level_dict) <= self.menu_engine_level_index:
+                        self.menu_engine_level_index = len(level_dict) - 1
+                    msg = sorted(level_dict)[self.menu_engine_level_index]
                     text = self.dgttranslate.text('B00_level', msg)
                     DisplayDgt.show(text)
                 else:
@@ -622,7 +622,7 @@ class MenuStateMachine(Observable):
                 eng = self.installed_engines[self.menu_engine_name_index]
                 level_dict = eng['level_dict']
                 if level_dict:
-                    msg = sorted(level_dict)[self.engine_level_index]
+                    msg = sorted(level_dict)[self.menu_engine_level_index]
                     options = level_dict[msg]
                     config = ConfigObj('picochess.ini')
                     config['engine-level'] = msg
@@ -818,8 +818,8 @@ class MenuStateMachine(Observable):
                 text = self.dgttranslate.text(self.menu_time_mode_index.value)
                 break
             if case(MenuState.TIME_BLITZ_CTRL):
-                self.tc_blitz_index = (self.tc_blitz_index - 1) % len(self.tc_blitz_map)
-                text = self.dgttranslate.text('B00_tc_blitz', self.tc_blitz_list[self.tc_blitz_index])
+                self.menu_time_blitz_ctrl_index = (self.menu_time_blitz_ctrl_index - 1) % len(self.tc_blitz_map)
+                text = self.dgttranslate.text('B00_tc_blitz', self.tc_blitz_list[self.menu_time_blitz_ctrl_index])
                 break
             if case(MenuState.TIME_FISCH):
                 self.state = MenuState.TIME_BLITZ
@@ -827,8 +827,8 @@ class MenuStateMachine(Observable):
                 text = self.dgttranslate.text(self.menu_time_mode_index.value)
                 break
             if case(MenuState.TIME_FISCH_CTRL):
-                self.tc_fisch_index = (self.tc_fisch_index - 1) % len(self.tc_fisch_map)
-                text = self.dgttranslate.text('B00_tc_fisch', self.tc_fisch_list[self.tc_fisch_index])
+                self.menu_time_fisch_ctrl_index = (self.menu_time_fisch_ctrl_index - 1) % len(self.tc_fisch_map)
+                text = self.dgttranslate.text('B00_tc_fisch', self.tc_fisch_list[self.menu_time_fisch_ctrl_index])
                 break
             if case(MenuState.TIME_FIXED):
                 self.state = MenuState.TIME_FISCH
@@ -836,8 +836,8 @@ class MenuStateMachine(Observable):
                 text = self.dgttranslate.text(self.menu_time_mode_index.value)
                 break
             if case(MenuState.TIME_FIXED_CTRL):
-                self.tc_fixed_index = (self.tc_fixed_index - 1) % len(self.tc_fixed_map)
-                text = self.dgttranslate.text('B00_tc_fixed', self.tc_fixed_list[self.tc_fixed_index])
+                self.menu_time_fixed_ctrl_index = (self.menu_time_fixed_ctrl_index - 1) % len(self.tc_fixed_map)
+                text = self.dgttranslate.text('B00_tc_fixed', self.tc_fixed_list[self.menu_time_fixed_ctrl_index])
                 break
             if case(MenuState.BOOK):
                 self.state = MenuState.TIME
@@ -861,8 +861,8 @@ class MenuStateMachine(Observable):
                 break
             if case(MenuState.ENG_NAME_LEVEL):
                 level_dict = self.installed_engines[self.menu_engine_name_index]['level_dict']
-                self.engine_level_index = (self.engine_level_index - 1) % len(level_dict)
-                msg = sorted(level_dict)[self.engine_level_index]
+                self.menu_engine_level_index = (self.menu_engine_level_index - 1) % len(level_dict)
+                msg = sorted(level_dict)[self.menu_engine_level_index]
                 text = self.dgttranslate.text('B00_level', msg)
                 break
             if case(MenuState.SYS):
@@ -1010,8 +1010,8 @@ class MenuStateMachine(Observable):
                 text = self.dgttranslate.text(self.menu_time_mode_index.value)
                 break
             if case(MenuState.TIME_BLITZ_CTRL):
-                self.tc_blitz_index = (self.tc_blitz_index + 1) % len(self.tc_blitz_map)
-                text = self.dgttranslate.text('B00_tc_blitz', self.tc_blitz_list[self.tc_blitz_index])
+                self.menu_time_blitz_ctrl_index = (self.menu_time_blitz_ctrl_index + 1) % len(self.tc_blitz_map)
+                text = self.dgttranslate.text('B00_tc_blitz', self.tc_blitz_list[self.menu_time_blitz_ctrl_index])
                 break
             if case(MenuState.TIME_FISCH):
                 self.state = MenuState.TIME_BLITZ
@@ -1019,8 +1019,8 @@ class MenuStateMachine(Observable):
                 text = self.dgttranslate.text(self.menu_time_mode_index.value)
                 break
             if case(MenuState.TIME_FISCH_CTRL):
-                self.tc_fisch_index = (self.tc_fisch_index + 1) % len(self.tc_fisch_map)
-                text = self.dgttranslate.text('B00_tc_fisch', self.tc_fisch_list[self.tc_fisch_index])
+                self.menu_time_fisch_ctrl_index = (self.menu_time_fisch_ctrl_index + 1) % len(self.tc_fisch_map)
+                text = self.dgttranslate.text('B00_tc_fisch', self.tc_fisch_list[self.menu_time_fisch_ctrl_index])
                 break
             if case(MenuState.TIME_FIXED):
                 self.state = MenuState.TIME_FISCH
@@ -1028,8 +1028,8 @@ class MenuStateMachine(Observable):
                 text = self.dgttranslate.text(self.menu_time_mode_index.value)
                 break
             if case(MenuState.TIME_FIXED_CTRL):
-                self.tc_fixed_index = (self.tc_fixed_index + 1) % len(self.tc_fixed_map)
-                text = self.dgttranslate.text('B00_tc_fixed', self.tc_fixed_list[self.tc_fixed_index])
+                self.menu_time_fixed_ctrl_index = (self.menu_time_fixed_ctrl_index + 1) % len(self.tc_fixed_map)
+                text = self.dgttranslate.text('B00_tc_fixed', self.tc_fixed_list[self.menu_time_fixed_ctrl_index])
                 break
             if case(MenuState.BOOK):
                 self.state = MenuState.ENG
@@ -1053,8 +1053,8 @@ class MenuStateMachine(Observable):
                 break
             if case(MenuState.ENG_NAME_LEVEL):
                 level_dict = self.installed_engines[self.menu_engine_name_index]['level_dict']
-                self.engine_level_index = (self.engine_level_index + 1) % len(level_dict)
-                msg = sorted(level_dict)[self.engine_level_index]
+                self.menu_engine_level_index = (self.menu_engine_level_index + 1) % len(level_dict)
+                msg = sorted(level_dict)[self.menu_engine_level_index]
                 text = self.dgttranslate.text('B00_level', msg)
                 break
             if case(MenuState.SYS):
