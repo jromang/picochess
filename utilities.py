@@ -433,8 +433,8 @@ class VoiceTypeLoop(object):
 
 @enum.unique
 class SystemDisplay(enum.Enum):
-    PONDER_TIME = 'B00_display_pondertime_menu'
-    OK_MESSAGE = 'B00_display_okmessage_menu'
+    PONDER_INTERVAL = 'B00_display_ponderinterval_menu'
+    CONFIRM_MOVE = 'B00_display_confirm_menu'
     
     
 class SystemDisplayLoop(object):
@@ -443,18 +443,18 @@ class SystemDisplayLoop(object):
 
     @staticmethod
     def next(m):
-        if m == SystemDisplay.PONDER_TIME:
-            return SystemDisplay.OK_MESSAGE
-        elif m == SystemDisplay.OK_MESSAGE:
-            return SystemDisplay.PONDER_TIME
+        if m == SystemDisplay.PONDER_INTERVAL:
+            return SystemDisplay.CONFIRM_MOVE
+        elif m == SystemDisplay.CONFIRM_MOVE:
+            return SystemDisplay.PONDER_INTERVAL
         return 'errSyDiNext'
 
     @staticmethod
     def prev(m):
-        if m == SystemDisplay.PONDER_TIME:
-            return SystemDisplay.OK_MESSAGE
-        elif m == SystemDisplay.OK_MESSAGE:
-            return SystemDisplay.PONDER_TIME
+        if m == SystemDisplay.PONDER_INTERVAL:
+            return SystemDisplay.CONFIRM_MOVE
+        elif m == SystemDisplay.CONFIRM_MOVE:
+            return SystemDisplay.PONDER_INTERVAL
         return 'errSyDiPrev'
     
     

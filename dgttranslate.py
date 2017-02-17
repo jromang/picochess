@@ -723,37 +723,51 @@ class DgtTranslate(object):
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
-        if text_id == 'display_pondertime_menu':
-            entxt = Dgt.DISPLAY_TEXT(l='ponder time', m='Ponder T', s='pond t')
+        if text_id == 'display_ponderinterval_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='ponder intv', m='PondIntv', s='po int')
             detxt = entxt
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
-        if text_id == 'pondertime_time':
-            entxt = Dgt.DISPLAY_TEXT(l='pondertime' + msg, m='p time ' + msg, s='ptime' + msg)
+        if text_id == 'okponderinterval':
+            entxt = Dgt.DISPLAY_TEXT(l='ok pondIntv', m='okPondIv', s='ok int')
             detxt = entxt
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
-        if text_id == 'display_okmessage_menu':
-            entxt = Dgt.DISPLAY_TEXT(l='Okay Message', m='Okay Msg', s='ok msg')
-            detxt = Dgt.DISPLAY_TEXT(l='Okay Message', m='Okay Msg', s='ok msg')
+        if text_id == 'ponderinterval_time':
+            entxt = Dgt.DISPLAY_TEXT(l='pondr intv' + msg, m='pondrIv' + msg, s='p int' + msg)
+            detxt = entxt
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
-        if text_id == 'okmessage_on':
-            entxt = Dgt.DISPLAY_TEXT(l='OkMessg on ', m='OkMg on ', s='ok on ')
-            detxt = Dgt.DISPLAY_TEXT(l='OkMessg ein', m='OkMg ein', s='ok ein')
+        if text_id == 'display_confirm_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='Confirm Msg', m='Confirm ', s='confrm')
+            detxt = Dgt.DISPLAY_TEXT(l='Confirm Msg', m='Confirm ', s='confrm')
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
-        if text_id == 'okmessage_off':
-            entxt = Dgt.DISPLAY_TEXT(l='OkMessg off', m='OkMg off', s='ok off')
-            detxt = Dgt.DISPLAY_TEXT(l='OkMessg aus', m='OkMg aus', s='ok aus')
+        if text_id == 'okconfirm':
+            entxt = Dgt.DISPLAY_TEXT(l='ok Confirm ', m='okConfrm', s='okconf')
+            detxt = Dgt.DISPLAY_TEXT(l='ok Confirm ', m='okConfrm', s='okconf')
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
+        if text_id == 'confirm_on':
+            entxt = Dgt.DISPLAY_TEXT(l='Confirm  on', m='Conf  on', s='cnf on')
+            detxt = Dgt.DISPLAY_TEXT(l='Confirm ein', m='Conf ein', s='cnfein')
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
+        if text_id == 'confirm_off':
+            entxt = Dgt.DISPLAY_TEXT(l='Confirm off', m='Conf off', s='cnfoff')
+            detxt = Dgt.DISPLAY_TEXT(l='Confirm aus', m='Conf aus', s='cnfaus')
             nltxt = entxt
             frtxt = entxt
             estxt = entxt

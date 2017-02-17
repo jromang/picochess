@@ -25,12 +25,8 @@ from configobj import ConfigObj
 
 
 class DgtDisplay(Observable, DisplayMsg, threading.Thread):
-    def __init__(self, disable_ok_message, ponder_time, dgttranslate, dgtmenu, time_control):
+    def __init__(self, dgttranslate, dgtmenu, time_control):
         super(DgtDisplay, self).__init__()
-        # @todo these two vars should be part of dgtmenu
-        self.show_ok_message = not disable_ok_message
-        self.ponder_time = ponder_time
-
         self.dgttranslate = dgttranslate
         self.dgtmenu = dgtmenu
         self.time_control = time_control
@@ -270,7 +266,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if case(MessageApi.ENGINE_READY):
                 self.dgtmenu.menu_engine_name_index = self.dgtmenu.installed_engines.index(message.eng)
                 self.dgtmenu.engine_has_960 = message.has_960
-                if self.show_ok_message or not message.ok_text:
+                if not self.dgtmenu.menu_system_display_confirm_index or not message.ok_text:
                     DisplayDgt.show(message.eng_text)
                 self.dgtmenu.engine_restart = False
                 self.exit_display(force=True)
@@ -339,7 +335,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.play_fen = None
                 self.play_turn = None
                 self.engine_finished = False
-                if self.show_ok_message:
+                if not self.dgtmenu.menu_system_display_confirm_index:
                     DisplayDgt.show(self.dgttranslate.text('K05_okpico'))
                 self._reset_menu_results()
                 break
@@ -352,7 +348,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.last_fen = message.fen
                 self.last_turn = message.turn
                 self.engine_finished = False
-                if self.show_ok_message:
+                if not self.dgtmenu.menu_system_display_confirm_index:
                     DisplayDgt.show(self.dgttranslate.text('K05_okuser'))
                 break
             if case(MessageApi.REVIEW_MOVE):
@@ -363,7 +359,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.last_move = message.move
                 self.last_fen = message.fen
                 self.last_turn = message.turn
-                if self.show_ok_message:
+                if not self.dgtmenu.menu_system_display_confirm_index:
                     DisplayDgt.show(self.dgttranslate.text('K05_okmove'))
                 break
             if case(MessageApi.ALTERNATIVE_MOVE):
@@ -381,7 +377,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     self.exit_display(force=True)
                 break
             if case(MessageApi.TIME_CONTROL):
-                if self.show_ok_message or not message.ok_text:
+                if not self.dgtmenu.menu_system_display_confirm_index or not message.ok_text:
                     DisplayDgt.show(message.time_text)
                 tc = self.time_control = message.time_control
                 time_left, time_right = tc.current_clock_time(flip_board=self.dgtmenu.flip_board)
@@ -390,7 +386,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.exit_display(force=True)
                 break
             if case(MessageApi.OPENING_BOOK):
-                if self.show_ok_message or not message.ok_text:
+                if not self.dgtmenu.menu_system_display_confirm_index or not message.ok_text:
                     DisplayDgt.show(message.book_text)
                 self.exit_display(force=True)
                 break
@@ -412,7 +408,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if case(MessageApi.INTERACTION_MODE):
                 self.dgtmenu.menu_mode_index = message.mode
                 self.engine_finished = False
-                if self.show_ok_message or not message.ok_text:
+                if not self.dgtmenu.menu_system_display_confirm_index or not message.ok_text:
                     DisplayDgt.show(message.mode_text)
                 self.exit_display(force=True)
                 break
@@ -669,7 +665,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if case(MessageApi.DGT_SERIAL_NR):
                 # logging.debug('Serial number {}'.format(message.number))  # actually used for watchdog (once a second)
                 if self.dgtmenu.menu_mode_index == Mode.PONDER and not self.inside_menu():
-                    if self.show_move_or_value >= self.ponder_time:
+                    if self.show_move_or_value >= self.dgtmenu.menu_system_display_ponderinterval_index:
                         if self.hint_move:
                             side = self.hint_side()
                             text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=True, maxtime=1,
@@ -680,7 +676,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         text = self._combine_depth_and_score()
                     text.wait = True
                     DisplayDgt.show(text)
-                    self.show_move_or_value = (self.show_move_or_value + 1) % (self.ponder_time * 2)
+                    self.show_move_or_value = (self.show_move_or_value + 1) % (self.dgtmenu.menu_system_display_ponderinterval_index * 2)
                 break
             if case(MessageApi.DGT_JACK_CONNECTED_ERROR):  # this will only work in case of 2 clocks connected!
                 DisplayDgt.show(self.dgttranslate.text('Y00_errorjack'))

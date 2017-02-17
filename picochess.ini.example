@@ -26,8 +26,8 @@
 ## OKAY = 8   All Events from "ok" (confirm) messages
 ## For example to beep on "ok messages" and "button press" would result in 8+2=10 as beep-some-level
 # beep-some-level = 3
-## Should a confirmation message (after moves) be displayed? If not, please active the next line
-# disable-ok-message = True
+## Should a confirmation message be displayed? If not, please active the next line
+# disable-confirm-message = True
 ## Specify the serial port your dgt-board is connected to.
 ## If you dont give a parameter picochess tries to find the board automatically (prefered usage).
 # dgt-port = /dev/ttyACM0
@@ -143,4 +143,4 @@
 # language = en
 ## When in ponder mode decides how long each info is displayed. Default is 3 secs.
 ## Must be between 1 to 8 secs.
-# ponder-time = 3
+# ponder-interval = 3

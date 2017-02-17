@@ -455,11 +455,11 @@ def main():
     parser.add_argument('-cv', '--computer-voice', type=str, help='voice for computer', default='en:mute')
     parser.add_argument('-u', '--enable-update', action='store_true', help='enable picochess updates')
     parser.add_argument('-ur', '--enable-update-reboot', action='store_true', help='reboot system after update')
-    parser.add_argument('-nook', '--disable-ok-message', action='store_true', help='disable ok confirmation messages')
+    parser.add_argument('-nocm', '--disable-confirm-message', action='store_true', help='disable confirmation messages')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s version {}'.format(version),
                         help='show current version', default=None)
     parser.add_argument('-pi', '--dgtpi', action='store_true', help='use the dgtpi hardware')
-    parser.add_argument('-pt', '--ponder-time', type=int, default=3, choices=range(1,9),
+    parser.add_argument('-pt', '--ponder-interval', type=int, default=3, choices=range(1,9),
                         help='how long each part of ponder display should be visible (default=3secs)')
     parser.add_argument('-lang', '--language', choices=['en', 'de', 'nl', 'fr', 'es', 'it'], default='en',
                         help='picochess language')
@@ -488,11 +488,11 @@ def main():
         logging.warning('invalid parameter given {}'.format(unknown))
 
     dgttranslate = DgtTranslate(args.beep_config, args.beep_some_level, args.language)
-    dgtmenu = MenuStateMachine(dgttranslate)
+    dgtmenu = MenuStateMachine(args.disable_confirm_message, args.ponder_interval, dgttranslate)
     time_control, time_text = transfer_time(args.time.split())
     time_text.beep = False
     # The class dgtDisplay talks to DgtHw/DgtPi or DgtVr
-    DgtDisplay(args.disable_ok_message, args.ponder_time, dgttranslate, dgtmenu, time_control).start()
+    DgtDisplay(dgttranslate, dgtmenu, time_control).start()
 
     # Launch web server
     if args.web_server_port:

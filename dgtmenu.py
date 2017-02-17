@@ -67,17 +67,21 @@ class MenuState(object):
     SYS_VOICE_TYPE_MUTE_LANG = 761110
     SYS_VOICE_TYPE_MUTE_LANG_SPEAK = 761111  # al, christina, ...
     SYS_DISP = 770000
-    SYS_DISP_OKMSG = 771000
-    SYS_DISP_OKMSG_YESNO = 771100  # yes,no
+    SYS_DISP_CNFRM = 771000
+    SYS_DISP_CNFRM_YESNO = 771100  # yes,no
     SYS_DISP_PONDER = 772000
-    SYS_DISP_PONDER_TIME = 772100  # 1-8
+    SYS_DISP_PONDER_INTERVAL = 772100  # 1-8
 
 
 class MenuStateMachine(Observable):
-    def __init__(self, dgttranslate):
+    def __init__(self, disable_confirm_message, ponder_interval, dgttranslate):
         super(MenuStateMachine, self).__init__()
         self.state = MenuState.TOP
+
+        self.menu_system_display_confirm_index = disable_confirm_message
+        self.menu_system_display_ponderinterval_index = ponder_interval
         self.dgttranslate = dgttranslate
+
         self.dgt_fen = '8/8/8/8/8/8/8/8'
         self.ip = None
         self.flip_board = False
@@ -114,9 +118,7 @@ class MenuStateMachine(Observable):
             self.menu_system_voice_lang_index = 0
         self.menu_system_voice_speak_index = 0
 
-        self.menu_system_display_index = SystemDisplay.PONDER_TIME
-        self.menu_system_display_okmessage_index = False
-        self.menu_system_display_pondertime_index = 3 # self.ponder_time
+        self.menu_system_display_index = SystemDisplay.PONDER_INTERVAL
 
         self.menu_time_mode_index = TimeMode.BLITZ
 
@@ -349,25 +351,25 @@ class MenuStateMachine(Observable):
         text = self.dgttranslate.text(self.menu_system_index.value)
         return text
 
-    def enter_sys_disp_okmsg_menu(self):
-        self.state = MenuState.SYS_DISP_OKMSG
-        text = self.dgttranslate.text(SystemDisplay.OK_MESSAGE.value)
+    def enter_sys_disp_cnfrm_menu(self):
+        self.state = MenuState.SYS_DISP_CNFRM
+        text = self.dgttranslate.text(SystemDisplay.CONFIRM_MOVE.value)
         return text
 
-    def enter_sys_disp_okmsg_yesno_menu(self):
-        self.state = MenuState.SYS_DISP_OKMSG_YESNO
-        msg = 'on' if self.menu_system_display_okmessage_index else 'off'
-        text = self.dgttranslate.text('B00_okmessage_' + msg)
+    def enter_sys_disp_cnfrm_yesno_menu(self):
+        self.state = MenuState.SYS_DISP_CNFRM_YESNO
+        msg = 'off' if self.menu_system_display_confirm_index else 'on'
+        text = self.dgttranslate.text('B00_confirm_' + msg)
         return text
 
     def enter_sys_disp_ponder_menu(self):
         self.state = MenuState.SYS_DISP_PONDER
-        text = self.dgttranslate.text(SystemDisplay.PONDER_TIME.value)
+        text = self.dgttranslate.text(SystemDisplay.PONDER_INTERVAL.value)
         return text
 
-    def enter_sys_disp_ponder_time_menu(self):
-        self.state = MenuState.SYS_DISP_PONDER_TIME
-        text = self.dgttranslate.text('B00_pondertime_time', str(self.menu_system_display_pondertime_index))
+    def enter_sys_disp_ponder_interval_menu(self):
+        self.state = MenuState.SYS_DISP_PONDER_INTERVAL
+        text = self.dgttranslate.text('B00_ponderinterval_time', str(self.menu_system_display_ponderinterval_index))
         return text
 
     def up(self):
@@ -474,16 +476,16 @@ class MenuStateMachine(Observable):
             if case(MenuState.SYS_DISP):
                 text = self.enter_sys_menu()
                 break
-            if case(MenuState.SYS_DISP_OKMSG):
+            if case(MenuState.SYS_DISP_CNFRM):
                 text = self.enter_sys_disp_menu()
                 break
-            if case(MenuState.SYS_DISP_OKMSG_YESNO):
-                text = self.enter_sys_disp_okmsg_menu()
+            if case(MenuState.SYS_DISP_CNFRM_YESNO):
+                text = self.enter_sys_disp_cnfrm_menu()
                 break
             if case(MenuState.SYS_DISP_PONDER):
                 text = self.enter_sys_disp_menu()
                 break
-            if case(MenuState.SYS_DISP_PONDER_TIME):
+            if case(MenuState.SYS_DISP_PONDER_INTERVAL):
                 text = self.enter_sys_disp_ponder_menu()
                 break
             if case():  # Default
@@ -609,7 +611,6 @@ class MenuStateMachine(Observable):
                     eng_text = self.dgttranslate.text('B10_okengine')
                     self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options={}, ok_text=True))
                     self.engine_restart = True
-
                 # eng = self.installed_engines[self.menu_engine_name_index]
                 # level_dict = eng['level_dict']
                 # if level_dict:
@@ -762,34 +763,32 @@ class MenuStateMachine(Observable):
                 text = self._reset_menu_results()
                 break
             if case(MenuState.SYS_DISP):
-                if self.menu_system_display_index == SystemDisplay.PONDER_TIME:
+                if self.menu_system_display_index == SystemDisplay.PONDER_INTERVAL:
                     text = self.enter_sys_disp_ponder_menu()
-                if self.menu_system_display_index == SystemDisplay.OK_MESSAGE:
-                    text = self.enter_sys_disp_okmsg_menu()
+                if self.menu_system_display_index == SystemDisplay.CONFIRM_MOVE:
+                    text = self.enter_sys_disp_cnfrm_menu()
                 break
-            if case(MenuState.SYS_DISP_OKMSG):
-                text = self.enter_sys_disp_okmsg_yesno_menu()
+            if case(MenuState.SYS_DISP_CNFRM):
+                text = self.enter_sys_disp_cnfrm_yesno_menu()
                 break
-            if case(MenuState.SYS_DISP_OKMSG_YESNO):
+            if case(MenuState.SYS_DISP_CNFRM_YESNO):
                 # do action!
                 config = ConfigObj('picochess.ini')
-                config['disable-ok-message'] = self.menu_system_display_okmessage_index
+                config['disable-confirm-message'] = self.menu_system_display_confirm_index
                 config.write()
-                self.show_ok_message = self.menu_system_display_okmessage_index
-                text = self.dgttranslate.text('B10_okmessage')
+                text = self.dgttranslate.text('B10_okconfirm')
                 DisplayDgt.show(text)
                 text = self._reset_menu_results()
                 break
             if case(MenuState.SYS_DISP_PONDER):
-                text = self.enter_sys_disp_ponder_time_menu()
+                text = self.enter_sys_disp_ponder_interval_menu()
                 break
-            if case(MenuState.SYS_DISP_PONDER_TIME):
+            if case(MenuState.SYS_DISP_PONDER_INTERVAL):
                 # do action!
                 config = ConfigObj('picochess.ini')
-                config['ponder-time'] = self.menu_system_display_pondertime_index
+                config['ponder-interval'] = self.menu_system_display_ponderinterval_index
                 config.write()
-                self.ponder_time = self.menu_system_display_pondertime_index
-                text = self.dgttranslate.text('B10_okpondertime')
+                text = self.dgttranslate.text('B10_okponderinterval')
                 DisplayDgt.show(text)
                 text = self._reset_menu_results()
                 break
@@ -964,26 +963,26 @@ class MenuStateMachine(Observable):
                 self.menu_system_index = SettingsLoop.prev(self.menu_system_index)
                 text = self.dgttranslate.text(self.menu_system_index.value)
                 break
-            if case(MenuState.SYS_DISP_OKMSG):
+            if case(MenuState.SYS_DISP_CNFRM):
                 self.state = MenuState.SYS_DISP_PONDER
                 self.menu_system_display_index = SystemDisplayLoop.prev(self.menu_system_display_index)
                 text = self.dgttranslate.text(self.menu_system_display_index.value)
                 break
-            if case(MenuState.SYS_DISP_OKMSG_YESNO):
-                self.menu_system_display_okmessage_index = not self.menu_system_display_okmessage_index
-                msg = 'on' if self.menu_system_display_okmessage_index else 'off'
-                text = self.dgttranslate.text('B00_okmessage_' + msg)
+            if case(MenuState.SYS_DISP_CNFRM_YESNO):
+                self.menu_system_display_confirm_index = not self.menu_system_display_confirm_index
+                msg = 'off' if self.menu_system_display_confirm_index else 'on'
+                text = self.dgttranslate.text('B00_confirm_' + msg)
                 break
             if case(MenuState.SYS_DISP_PONDER):
-                self.state = MenuState.SYS_DISP_OKMSG
+                self.state = MenuState.SYS_DISP_CNFRM
                 self.menu_system_display_index = SystemDisplayLoop.prev(self.menu_system_display_index)
                 text = self.dgttranslate.text(self.menu_system_display_index.value)
                 break
-            if case(MenuState.SYS_DISP_PONDER_TIME):
-                self.menu_system_display_pondertime_index -= 1
-                if self.menu_system_display_pondertime_index < 1:
-                    self.menu_system_display_pondertime_index = 8
-                text = self.dgttranslate.text('B00_pondertime_time', str(self.menu_system_display_pondertime_index))
+            if case(MenuState.SYS_DISP_PONDER_INTERVAL):
+                self.menu_system_display_ponderinterval_index -= 1
+                if self.menu_system_display_ponderinterval_index < 1:
+                    self.menu_system_display_ponderinterval_index = 8
+                text = self.dgttranslate.text('B00_ponderinterval_time', str(self.menu_system_display_ponderinterval_index))
                 break
             if case():  # Default
                 break
@@ -1156,26 +1155,26 @@ class MenuStateMachine(Observable):
                 self.menu_system_index = SettingsLoop.next(self.menu_system_index)
                 text = self.dgttranslate.text(self.menu_system_index.value)
                 break
-            if case(MenuState.SYS_DISP_OKMSG):
+            if case(MenuState.SYS_DISP_CNFRM):
                 self.state = MenuState.SYS_DISP_PONDER
                 self.menu_system_display_index = SystemDisplayLoop.next(self.menu_system_display_index)
                 text = self.dgttranslate.text(self.menu_system_display_index.value)
                 break
-            if case(MenuState.SYS_DISP_OKMSG_YESNO):
-                self.menu_system_display_okmessage_index = not self.menu_system_display_okmessage_index
-                msg = 'on' if self.menu_system_display_okmessage_index else 'off'
-                text = self.dgttranslate.text('B00_okmessage_' + msg)
+            if case(MenuState.SYS_DISP_CNFRM_YESNO):
+                self.menu_system_display_confirm_index = not self.menu_system_display_confirm_index
+                msg = 'off' if self.menu_system_display_confirm_index else 'on'
+                text = self.dgttranslate.text('B00_confirm_' + msg)
                 break
             if case(MenuState.SYS_DISP_PONDER):
-                self.state = MenuState.SYS_DISP_OKMSG
+                self.state = MenuState.SYS_DISP_CNFRM
                 self.menu_system_display_index = SystemDisplayLoop.next(self.menu_system_display_index)
                 text = self.dgttranslate.text(self.menu_system_display_index.value)
                 break
-            if case(MenuState.SYS_DISP_PONDER_TIME):
-                self.menu_system_display_pondertime_index += 1
-                if self.menu_system_display_pondertime_index > 8:
-                    self.menu_system_display_pondertime_index = 1
-                text = self.dgttranslate.text('B00_pondertime_time', str(self.menu_system_display_pondertime_index))
+            if case(MenuState.SYS_DISP_PONDER_INTERVAL):
+                self.menu_system_display_ponderinterval_index += 1
+                if self.menu_system_display_ponderinterval_index > 8:
+                    self.menu_system_display_ponderinterval_index = 1
+                text = self.dgttranslate.text('B00_ponderinterval_time', str(self.menu_system_display_ponderinterval_index))
                 break
             if case():  # Default
                 break
