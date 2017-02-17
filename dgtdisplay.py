@@ -121,7 +121,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
     def _process_button0(self, dev):
         logging.debug('({}) clock: handle button 0 press'.format(dev))
         if self.inside_menu():
-            DisplayDgt.show(self.dgtmenu.up())
+            text = self.dgtmenu.up()  # button0 can exit the menu, so check
+            if text:
+                DisplayDgt.show(text)
+            else:
+                self.exit_display()
         else:
             if self.last_move:
                 side = ClockSide.LEFT if (self.last_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
@@ -135,7 +139,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
     def _process_button1(self, dev):
         logging.debug('({}) clock: handle button 1 press'.format(dev))
         if self.inside_menu():
-            DisplayDgt.show(self.dgtmenu.left())
+            DisplayDgt.show(self.dgtmenu.left())  # button1 cant exit the menu
         else:
             text = self._combine_depth_and_score()
             text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
@@ -146,14 +150,14 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
     def _process_button2(self, dev):
         logging.debug('({}) clock: handle button 2 press'.format(dev))
         if self.inside_menu():
-            pass
+            pass  # button2 doesnt have any function in menu
         else:
             if self.engine_finished:
                 # @todo Protect against multi entrance of Alt-move
                 self.engine_finished = False  # This is not 100% ok, but for the moment better as nothing
                 self.fire(Event.ALTERNATIVE_MOVE())
             else:
-                if self.menu_mode_result in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
+                if self.dgtmenu.menu_mode_result in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
                     text = self.dgttranslate.text('B00_nofunction')
                     DisplayDgt.show(text)
                 else:
@@ -162,7 +166,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
     def _process_button3(self, dev):
         logging.debug('({}) clock: handle button 3 press'.format(dev))
         if self.inside_menu():
-            DisplayDgt.show(self.dgtmenu.right())
+            DisplayDgt.show(self.dgtmenu.right())  # button3 cant exit the menu
         else:
             if self.hint_move:
                 side = self.hint_side()
@@ -175,7 +179,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
     def _process_button4(self, dev):
         logging.debug('({}) clock: handle button 4 press'.format(dev))
-        DisplayDgt.show(self.dgtmenu.down())
+        text = self.dgtmenu.down()
+        if text:
+            DisplayDgt.show(text)
+        else:
+            pass
         # if self.inside_menu():
         #     DisplayDgt.show(self.dgtmenu.down())
         # else:
@@ -196,7 +204,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         return '8/8/8/' + rnk_5 + '/' + rnk_4 + '/8/8/8'
 
     def exit_display(self, wait=False, force=True):
-        if self.play_move and self.menu_mode_result in (Mode.NORMAL, Mode.REMOTE):
+        if self.play_move and self.dgtmenu.menu_mode_result in (Mode.NORMAL, Mode.REMOTE):
             side = ClockSide.LEFT if (self.play_turn == chess.WHITE) != self.flip_board else ClockSide.RIGHT
             text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side, wait=wait, maxtime=1,
                                     beep=self.dgttranslate.bl(BeepLevel.BUTTON), devs={'ser', 'i2c', 'web'})
@@ -323,7 +331,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     pos960 = message.game.chess960_pos()
                     game_text = 'C10_newgame' if pos960 is None or pos960 == 518 else 'C10_ucigame'
                     DisplayDgt.show(self.dgttranslate.text(game_text, str(pos960)))
-                if self.menu_mode_result in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
+                if self.dgtmenu.menu_mode_result in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
                     time_left, time_right = message.time_control.current_clock_time(flip_board=self.flip_board)
                     DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE,
                                                     wait=True, devs={'ser', 'i2c', 'web'}))
@@ -413,7 +421,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 break
             if case(MessageApi.INTERACTION_MODE):
                 self.menu_mode_index = message.mode
-                self.menu_mode_result = message.mode  # needed, otherwise Q-placing wont work correctly
+                self.dgtmenu.menu_mode_result = message.mode  # needed, otherwise Q-placing wont work correctly
                 self.engine_finished = False
                 if self.show_ok_message or not message.ok_text:
                     DisplayDgt.show(message.mode_text)
@@ -456,11 +464,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 break
             if case(MessageApi.STARTUP_INFO):
                 self.menu_mode_index = message.info['interaction_mode']
-                self.menu_mode_result = message.info['interaction_mode']
-                self.menu_book_index = message.info['book_index']
+                self.dgtmenu.menu_mode_result = message.info['interaction_mode']
+                self.dgtmenu.menu_book_index = message.info['book_index']
                 self.all_books = message.info['books']
                 tc = self.time_control = message.info['time_control']
-                self.menu_time_mode_index = tc.mode
+                self.dgtmenu.menu_time_mode_index = tc.mode
                 # try to find the index from the given time_control (tc)
                 # if user gave a non-existent tc value stay at standard
                 index = 0
@@ -675,7 +683,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 break
             if case(MessageApi.DGT_SERIAL_NR):
                 # logging.debug('Serial number {}'.format(message.number))  # actually used for watchdog (once a second)
-                if self.menu_mode_result == Mode.PONDER and not self.inside_menu():
+                if self.dgtmenu.menu_mode_result == Mode.PONDER and not self.inside_menu():
                     if self.show_move_or_value >= self.ponder_time:
                         if self.hint_move:
                             side = self.hint_side()

@@ -155,15 +155,14 @@ class MenuStateMachine(Observable):
 
     def _reset_menu_results(self):
         self.state = MenuState.TOP
+        return None
 
     def get(self):
         return self.state
 
     def enter_top_menu(self):
         self.state = MenuState.TOP
-        text = self.dgttranslate.text(self.menu_top_index.value)
-        print('enter_TOP_menu')
-        return text
+        return None
 
     def enter_mode_menu(self):
         self.state = MenuState.MODE
@@ -515,7 +514,7 @@ class MenuStateMachine(Observable):
                 text = self.dgttranslate.text('B10_okmode')
                 self.menu_mode_result = self.menu_mode_index
                 self.fire(Event.SET_INTERACTION_MODE(mode=self.menu_mode_result, mode_text=text, ok_text=True))
-                self._reset_menu_results()
+                text = self._reset_menu_results()
                 break
             if case(MenuState.POS):
                 text = self.enter_pos_color_menu()
@@ -544,8 +543,7 @@ class MenuStateMachine(Observable):
                     self.flip_board = self.menu_setup_reverse_index
                     self.fire(Event.SETUP_POSITION(fen=bit_board.fen(), uci960=self.menu_setup_uci960_index))
                     # self._reset_moves_and_score() done in "START_NEW_GAME"
-                    self._reset_menu_results()
-                    return
+                    text = self._reset_menu_results()
                 else:
                     DisplayDgt.show(self.dgttranslate.text('Y05_illegalpos'))
                     text = self.dgttranslate.text('B00_scanboard')
@@ -563,39 +561,39 @@ class MenuStateMachine(Observable):
                 break
             if case(MenuState.TIME_BLITZ_CTRL):
                 # do action!
-                text = self.dgttranslate.text('B10_oktime')
+                time_text = self.dgttranslate.text('B10_oktime')
                 time_control = self.tc_blitz_map[list(self.tc_blitz_map)[self.tc_blitz_index]]
-                self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=text, ok_text=True))
-                self._reset_menu_results()
+                self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=time_text, ok_text=True))
+                text = self._reset_menu_results()
                 break
             if case(MenuState.TIME_FISCH):
                 text = self.enter_time_fisch_ctrl_menu()
                 break
             if case(MenuState.TIME_FISCH_CTRL):
                 # do action!
-                text = self.dgttranslate.text('B10_oktime')
+                time_text = self.dgttranslate.text('B10_oktime')
                 time_control = self.tc_fisch_map[list(self.tc_fisch_map)[self.tc_fisch_index]]
-                self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=text, ok_text=True))
-                self._reset_menu_results()
+                self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=time_text, ok_text=True))
+                text = self._reset_menu_results()
                 break
             if case(MenuState.TIME_FIXED):
                 text = self.enter_time_fixed_ctrl_menu()
                 break
             if case(MenuState.TIME_FIXED_CTRL):
                 # do action!
-                text = self.dgttranslate.text('B10_oktime')
+                time_text = self.dgttranslate.text('B10_oktime')
                 time_control = self.tc_fixed_map[list(self.tc_fixed_map)[self.tc_fixed_index]]
-                self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=text, ok_text=True))
-                self._reset_menu_results()
+                self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=time_text, ok_text=True))
+                text = self._reset_menu_results()
                 break
             if case(MenuState.BOOK):
                 text = self.enter_book_name_menu()
                 break
             if case(MenuState.BOOK_NAME):
                 # do action!
-                text = self.dgttranslate.text('B10_okbook')
-                self.fire(Event.SET_OPENING_BOOK(book=self.all_books[self.menu_book_index], book_text=text, ok_text=True))
-                self._reset_menu_results()
+                book_text = self.dgttranslate.text('B10_okbook')
+                self.fire(Event.SET_OPENING_BOOK(book=self.all_books[self.menu_book_index], book_text=book_text, ok_text=True))
+                text = self._reset_menu_results()
                 break
             if case(MenuState.ENG):
                 text = self.enter_eng_name_menu()
@@ -617,7 +615,7 @@ class MenuStateMachine(Observable):
                     eng_text = self.dgttranslate.text('B10_okengine')
                     self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options={}, ok_text=True))
                     self.engine_restart = True
-                    self._reset_menu_results()
+                    text = self._reset_menu_results()
                 break
             if case(MenuState.ENG_NAME_LEVEL):
                 # do action!
@@ -635,7 +633,7 @@ class MenuStateMachine(Observable):
                 eng_text = self.dgttranslate.text('B10_okengine')
                 self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options=options, ok_text=True))
                 self.engine_restart = True
-                self._reset_menu_results()
+                text = self._reset_menu_results()
                 break
             if case(MenuState.SYS):
                 if self.menu_system_index == Settings.VERSION:
@@ -658,6 +656,8 @@ class MenuStateMachine(Observable):
                 text = self.dgttranslate.text('B10_picochess')
                 text.rd = ClockIcons.DOT
                 text.wait = False
+                DisplayDgt.show(text)
+                text = self._reset_menu_results()
                 break
             if case(MenuState.SYS_IP):
                 # do action!
@@ -674,6 +674,8 @@ class MenuStateMachine(Observable):
                     text.wait = True
                 else:
                     text = self.dgttranslate.text('B10_noipadr')
+                DisplayDgt.show(text)
+                text = self._reset_menu_results()
                 break
             if case(MenuState.SYS_SOUND):
                 text = self.enter_sys_sound_type_menu()
