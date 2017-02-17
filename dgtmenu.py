@@ -267,7 +267,7 @@ class MenuStateMachine(Observable):
             msg = sorted(level_dict)[self.menu_engine_level_index]
             text = self.dgttranslate.text('B00_level', msg)
         else:
-            text = self.dgttranslate.text('Y00_errormenu')
+            text = self._reset_menu_results()
         return text
 
     def enter_sys_menu(self):
@@ -600,22 +600,32 @@ class MenuStateMachine(Observable):
                 break
             if case(MenuState.ENG_NAME):
                 # maybe do action!
-                eng = self.installed_engines[self.menu_engine_name_index]
-                level_dict = eng['level_dict']
-                if level_dict:
-                    if self.menu_engine_level_index is None or len(level_dict) <= self.menu_engine_level_index:
-                        self.menu_engine_level_index = len(level_dict) - 1
-                    msg = sorted(level_dict)[self.menu_engine_level_index]
-                    text = self.dgttranslate.text('B00_level', msg)
-                    DisplayDgt.show(text)
-                else:
+                text = self.enter_eng_name_level_menu()
+                if not text:
                     config = ConfigObj('picochess.ini')
                     config['engine-level'] = None
                     config.write()
+                    eng = self.installed_engines[self.menu_engine_name_index]
                     eng_text = self.dgttranslate.text('B10_okengine')
                     self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options={}, ok_text=True))
                     self.engine_restart = True
-                    text = self._reset_menu_results()
+
+                # eng = self.installed_engines[self.menu_engine_name_index]
+                # level_dict = eng['level_dict']
+                # if level_dict:
+                #     if self.menu_engine_level_index is None or len(level_dict) <= self.menu_engine_level_index:
+                #         self.menu_engine_level_index = len(level_dict) - 1
+                #     msg = sorted(level_dict)[self.menu_engine_level_index]
+                #     text = self.dgttranslate.text('B00_level', msg)
+                #     DisplayDgt.show(text)
+                # else:
+                #     config = ConfigObj('picochess.ini')
+                #     config['engine-level'] = None
+                #     config.write()
+                #     eng_text = self.dgttranslate.text('B10_okengine')
+                #     self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options={}, ok_text=True))
+                #     self.engine_restart = True
+                #     text = self._reset_menu_results()
                 break
             if case(MenuState.ENG_NAME_LEVEL):
                 # do action!
@@ -729,7 +739,7 @@ class MenuStateMachine(Observable):
                     if ckey + '-voice' in config:
                         del (config[ckey + '-voice'])
                         config.write()
-                    # self.fire(Event.SET_VOICE(type=self.menu_system_voice_type_index, lang=vkey, speaker='mute'))
+                    self.fire(Event.SET_VOICE(type=self.menu_system_voice_type_index, lang='en', speaker='mute'))
                     text = self.dgttranslate.text('B10_okvoice')
                     DisplayDgt.show(text)
                     text = self._reset_menu_results()

@@ -123,7 +123,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if text:
                 DisplayDgt.show(text)
             else:
-                self.exit_display()
+                self.exit_display(wait=True)
         else:
             if self.last_move:
                 side = ClockSide.LEFT if (self.last_turn == chess.WHITE) != self.dgtmenu.flip_board else ClockSide.RIGHT
@@ -181,7 +181,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         if text:
             DisplayDgt.show(text)
         else:
-            pass
+            self.exit_display(wait=True)
 
     def _process_lever(self, right_side_down, dev):
         logging.debug('({}) clock: handle lever press - right_side_down: {}'.format(dev, right_side_down))
