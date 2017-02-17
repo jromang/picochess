@@ -373,7 +373,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     pass
                 else:
                     DisplayDgt.show(message.level_text)
-                    # self._exit_display(force=False)
                     self.exit_display(force=True)
                 break
             if case(MessageApi.TIME_CONTROL):

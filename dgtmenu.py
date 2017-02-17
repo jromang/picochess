@@ -156,7 +156,7 @@ class MenuStateMachine(Observable):
             ('rnbqkbnr/pppppppp/8/8/8/6Q1/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FISCHER, minutes_per_game=30, fischer_increment=15)),
             ('rnbqkbnr/pppppppp/8/8/8/7Q/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FISCHER, minutes_per_game=60, fischer_increment=30))])
 
-    def _reset_menu_results(self):
+    def reset_menu_results(self):
         self.state = MenuState.TOP
         return None
 
@@ -269,7 +269,7 @@ class MenuStateMachine(Observable):
             msg = sorted(level_dict)[self.menu_engine_level_index]
             text = self.dgttranslate.text('B00_level', msg)
         else:
-            text = self._reset_menu_results()
+            text = self.reset_menu_results()
         return text
 
     def enter_sys_menu(self):
@@ -516,7 +516,7 @@ class MenuStateMachine(Observable):
                 # do action!
                 text = self.dgttranslate.text('B10_okmode')
                 self.fire(Event.SET_INTERACTION_MODE(mode=self.menu_mode_index, mode_text=text, ok_text=True))
-                text = self._reset_menu_results()
+                text = self.reset_menu_results()
                 break
             if case(MenuState.POS):
                 text = self.enter_pos_color_menu()
@@ -545,7 +545,7 @@ class MenuStateMachine(Observable):
                     self.flip_board = self.menu_setup_reverse_index
                     self.fire(Event.SETUP_POSITION(fen=bit_board.fen(), uci960=self.menu_setup_uci960_index))
                     # self._reset_moves_and_score() done in "START_NEW_GAME"
-                    text = self._reset_menu_results()
+                    text = self.reset_menu_results()
                 else:
                     DisplayDgt.show(self.dgttranslate.text('Y05_illegalpos'))
                     text = self.dgttranslate.text('B00_scanboard')
@@ -566,7 +566,7 @@ class MenuStateMachine(Observable):
                 time_text = self.dgttranslate.text('B10_oktime')
                 time_control = self.tc_blitz_map[list(self.tc_blitz_map)[self.menu_time_blitz_ctrl_index]]
                 self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=time_text, ok_text=True))
-                text = self._reset_menu_results()
+                text = self.reset_menu_results()
                 break
             if case(MenuState.TIME_FISCH):
                 text = self.enter_time_fisch_ctrl_menu()
@@ -576,7 +576,7 @@ class MenuStateMachine(Observable):
                 time_text = self.dgttranslate.text('B10_oktime')
                 time_control = self.tc_fisch_map[list(self.tc_fisch_map)[self.menu_time_fisch_ctrl_index]]
                 self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=time_text, ok_text=True))
-                text = self._reset_menu_results()
+                text = self.reset_menu_results()
                 break
             if case(MenuState.TIME_FIXED):
                 text = self.enter_time_fixed_ctrl_menu()
@@ -586,7 +586,7 @@ class MenuStateMachine(Observable):
                 time_text = self.dgttranslate.text('B10_oktime')
                 time_control = self.tc_fixed_map[list(self.tc_fixed_map)[self.menu_time_fixed_ctrl_index]]
                 self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=time_text, ok_text=True))
-                text = self._reset_menu_results()
+                text = self.reset_menu_results()
                 break
             if case(MenuState.BOOK):
                 text = self.enter_book_name_menu()
@@ -595,7 +595,7 @@ class MenuStateMachine(Observable):
                 # do action!
                 book_text = self.dgttranslate.text('B10_okbook')
                 self.fire(Event.SET_OPENING_BOOK(book=self.all_books[self.menu_book_index], book_text=book_text, ok_text=True))
-                text = self._reset_menu_results()
+                text = self.reset_menu_results()
                 break
             if case(MenuState.ENG):
                 text = self.enter_eng_name_menu()
@@ -644,7 +644,7 @@ class MenuStateMachine(Observable):
                 eng_text = self.dgttranslate.text('B10_okengine')
                 self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options=options, ok_text=True))
                 self.engine_restart = True
-                text = self._reset_menu_results()
+                text = self.reset_menu_results()
                 break
             if case(MenuState.SYS):
                 if self.menu_system_index == Settings.VERSION:
@@ -668,7 +668,7 @@ class MenuStateMachine(Observable):
                 text.rd = ClockIcons.DOT
                 text.wait = False
                 DisplayDgt.show(text)
-                text = self._reset_menu_results()
+                text = self.reset_menu_results()
                 break
             if case(MenuState.SYS_IP):
                 # do action!
@@ -686,7 +686,7 @@ class MenuStateMachine(Observable):
                 else:
                     text = self.dgttranslate.text('B10_noipadr')
                 DisplayDgt.show(text)
-                text = self._reset_menu_results()
+                text = self.reset_menu_results()
                 break
             if case(MenuState.SYS_SOUND):
                 text = self.enter_sys_sound_type_menu()
@@ -699,7 +699,7 @@ class MenuStateMachine(Observable):
                 config.write()
                 text = self.dgttranslate.text('B10_okbeep')
                 DisplayDgt.show(text)
-                text = self._reset_menu_results()
+                text = self.reset_menu_results()
                 break
             if case(MenuState.SYS_LANG):
                 text = self.enter_sys_lang_name_menu()
@@ -715,14 +715,14 @@ class MenuStateMachine(Observable):
                 config.write()
                 text = self.dgttranslate.text('B10_oklang')
                 DisplayDgt.show(text)
-                text = self._reset_menu_results()
+                text = self.reset_menu_results()
                 break
             if case(MenuState.SYS_LOG):
                 # do action!
                 self.fire(Event.EMAIL_LOG())
                 text = self.dgttranslate.text('B10_oklogfile')  # @todo give pos/neg feedback
                 DisplayDgt.show(text)
-                text = self._reset_menu_results()
+                text = self.reset_menu_results()
                 break
             if case(MenuState.SYS_VOICE):
                 text = self.enter_sys_voice_type_menu()
@@ -738,12 +738,12 @@ class MenuStateMachine(Observable):
                     config = ConfigObj('picochess.ini')
                     ckey = 'user' if self.menu_system_voice_type_index == VoiceType.USER_VOICE else 'computer'
                     if ckey + '-voice' in config:
-                        del (config[ckey + '-voice'])
+                        del config[ckey + '-voice']
                         config.write()
                     self.fire(Event.SET_VOICE(type=self.menu_system_voice_type_index, lang='en', speaker='mute'))
                     text = self.dgttranslate.text('B10_okvoice')
                     DisplayDgt.show(text)
-                    text = self._reset_menu_results()
+                    text = self.reset_menu_results()
                 break
             if case(MenuState.SYS_VOICE_TYPE_MUTE_LANG):
                 text = self.enter_sys_voice_type_mute_lang_speak_menu()
@@ -760,7 +760,7 @@ class MenuStateMachine(Observable):
                 self.fire(Event.SET_VOICE(type=self.menu_system_voice_type_index, lang=vkey, speaker=skey))
                 text = self.dgttranslate.text('B10_okvoice')
                 DisplayDgt.show(text)
-                text = self._reset_menu_results()
+                text = self.reset_menu_results()
                 break
             if case(MenuState.SYS_DISP):
                 if self.menu_system_display_index == SystemDisplay.PONDER_INTERVAL:
@@ -774,11 +774,14 @@ class MenuStateMachine(Observable):
             if case(MenuState.SYS_DISP_CNFRM_YESNO):
                 # do action!
                 config = ConfigObj('picochess.ini')
-                config['disable-confirm-message'] = self.menu_system_display_confirm_index
+                if self.menu_system_display_confirm_index:
+                    config['disable-confirm-message'] = self.menu_system_display_confirm_index
+                elif 'disable-confirm-message' in config:
+                    del config['disable-confirm-message']
                 config.write()
                 text = self.dgttranslate.text('B10_okconfirm')
                 DisplayDgt.show(text)
-                text = self._reset_menu_results()
+                text = self.reset_menu_results()
                 break
             if case(MenuState.SYS_DISP_PONDER):
                 text = self.enter_sys_disp_ponder_interval_menu()
@@ -790,7 +793,7 @@ class MenuStateMachine(Observable):
                 config.write()
                 text = self.dgttranslate.text('B10_okponderinterval')
                 DisplayDgt.show(text)
-                text = self._reset_menu_results()
+                text = self.reset_menu_results()
                 break
             if case():  # Default
                 break
