@@ -687,6 +687,8 @@ class MenuStateMachine(Observable):
                 config['beep-config'] = self.dgttranslate.beep_to_config(self.menu_system_sound_beep_index)
                 config.write()
                 text = self.dgttranslate.text('B10_okbeep')
+                DisplayDgt.show(text)
+                text = self._reset_menu_results()
                 break
             if case(MenuState.SYS_LANG):
                 text = self.enter_sys_lang_name_menu()
@@ -701,11 +703,15 @@ class MenuStateMachine(Observable):
                 config['language'] = language
                 config.write()
                 text = self.dgttranslate.text('B10_oklang')
+                DisplayDgt.show(text)
+                text = self._reset_menu_results()
                 break
             if case(MenuState.SYS_LOG):
                 # do action!
                 self.fire(Event.EMAIL_LOG())
                 text = self.dgttranslate.text('B10_oklogfile')  # @todo give pos/neg feedback
+                DisplayDgt.show(text)
+                text = self._reset_menu_results()
                 break
             if case(MenuState.SYS_VOICE):
                 text = self.enter_sys_voice_type_menu()
@@ -715,14 +721,18 @@ class MenuStateMachine(Observable):
                 break
             if case(MenuState.SYS_VOICE_TYPE_MUTE):
                 # maybe do action!
-                # config = ConfigObj('picochess.ini')
-                # ckey = 'user' if self.menu_system_voice_type_index == VoiceType.USER_VOICE else 'computer'
-                # if ckey + '-voice' in config:
-                #     del (config[ckey + '-voice'])
-                #     config.write()
-                # self.fire(Event.SET_VOICE(type=self.menu_system_voice_type_index, lang=vkey, speaker='mute'))
-                # text = self.dgttranslate.text('B10_okvoice')
-                text = self.enter_sys_voice_type_mute_lang_menu()
+                if self.menu_system_voice_mute_index:
+                    text = self.enter_sys_voice_type_mute_lang_menu()
+                else:
+                    config = ConfigObj('picochess.ini')
+                    ckey = 'user' if self.menu_system_voice_type_index == VoiceType.USER_VOICE else 'computer'
+                    if ckey + '-voice' in config:
+                        del (config[ckey + '-voice'])
+                        config.write()
+                    # self.fire(Event.SET_VOICE(type=self.menu_system_voice_type_index, lang=vkey, speaker='mute'))
+                    text = self.dgttranslate.text('B10_okvoice')
+                    DisplayDgt.show(text)
+                    text = self._reset_menu_results()
                 break
             if case(MenuState.SYS_VOICE_TYPE_MUTE_LANG):
                 text = self.enter_sys_voice_type_mute_lang_speak_menu()
@@ -738,6 +748,8 @@ class MenuStateMachine(Observable):
                 config.write()
                 self.fire(Event.SET_VOICE(type=self.menu_system_voice_type_index, lang=vkey, speaker=skey))
                 text = self.dgttranslate.text('B10_okvoice')
+                DisplayDgt.show(text)
+                text = self._reset_menu_results()
                 break
             if case(MenuState.SYS_DISP):
                 if self.menu_system_display_index == SystemDisplay.PONDER_TIME:
@@ -755,6 +767,8 @@ class MenuStateMachine(Observable):
                 config.write()
                 self.show_ok_message = self.menu_system_display_okmessage_index
                 text = self.dgttranslate.text('B10_okmessage')
+                DisplayDgt.show(text)
+                text = self._reset_menu_results()
                 break
             if case(MenuState.SYS_DISP_PONDER):
                 text = self.enter_sys_disp_ponder_time_menu()
@@ -766,6 +780,8 @@ class MenuStateMachine(Observable):
                 config.write()
                 self.ponder_time = self.menu_system_display_pondertime_index
                 text = self.dgttranslate.text('B10_okpondertime')
+                DisplayDgt.show(text)
+                text = self._reset_menu_results()
                 break
             if case():  # Default
                 break
