@@ -24,12 +24,12 @@ from math import floor
 
 
 class TimeControl(object):
-    def __init__(self, mode=TimeMode.FIXED, seconds_per_move=0, minutes_per_game=0, fischer_increment=0):
+    def __init__(self, mode=TimeMode.FIXED, fixed=0, blitz=0, fischer=0):
         super(TimeControl, self).__init__()
         self.mode = mode
-        self.seconds_per_move = seconds_per_move
-        self.minutes_per_game = minutes_per_game
-        self.fischer_increment = fischer_increment
+        self.seconds_per_move = fixed
+        self.minutes_per_game = blitz
+        self.fischer_increment = fischer
         self.timer = None
         self.run_color = None
         self.clock_time = None

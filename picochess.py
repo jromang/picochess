@@ -378,22 +378,22 @@ def main():
                 return 1
 
         if len(time_list) == 1:
-            secs = num(time_list[0])
-            time_control = TimeControl(TimeMode.FIXED, seconds_per_move=secs)
-            text = dgttranslate.text('B00_tc_fixed', '{:2d}'.format(secs))
+            fixed = num(time_list[0])
+            timec = TimeControl(TimeMode.FIXED, fixed=fixed)
+            textc = dgttranslate.text('B00_tc_fixed', '{:2d}'.format(fixed))
         elif len(time_list) == 2:
-            mins = num(time_list[0])
-            finc = num(time_list[1])
-            if finc == 0:
-                time_control = TimeControl(TimeMode.BLITZ, minutes_per_game=mins)
-                text = dgttranslate.text('B00_tc_blitz', '{:2d}'.format(mins))
+            blitz = num(time_list[0])
+            fisch = num(time_list[1])
+            if fisch == 0:
+                timec = TimeControl(TimeMode.BLITZ, blitz=blitz)
+                textc = dgttranslate.text('B00_tc_blitz', '{:2d}'.format(blitz))
             else:
-                time_control = TimeControl(TimeMode.FISCHER, minutes_per_game=mins, fischer_increment=finc)
-                text = dgttranslate.text('B00_tc_fisch', '{:2d} {:2d}'.format(mins, finc))
+                timec = TimeControl(TimeMode.FISCHER, blitz=blitz, fischer=fisch)
+                textc = dgttranslate.text('B00_tc_fisch', '{:2d} {:2d}'.format(blitz, fisch))
         else:
-            time_control = TimeControl(TimeMode.BLITZ, minutes_per_game=5)
-            text = dgttranslate.text('B00_tc_blitz', ' 5')
-        return time_control, text
+            timec = TimeControl(TimeMode.BLITZ, blitz=5)
+            textc = dgttranslate.text('B00_tc_blitz', ' 5')
+        return timec, textc
 
     def get_engine_level_dict(engine_level):
         from engine import get_installed_engines
