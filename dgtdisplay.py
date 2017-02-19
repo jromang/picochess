@@ -266,7 +266,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if case(MessageApi.ENGINE_READY):
                 self.dgtmenu.set_engine_index(self.dgtmenu.installed_engines.index(message.eng))
                 self.dgtmenu.set_engine_has_960(message.has_960)
-                if not self.dgtmenu.get_confirm() or not message.ok_text:
+                if not self.dgtmenu.get_confirm() or not message.show_ok:
                     DisplayDgt.show(message.eng_text)
                 self.dgtmenu.set_engine_restart(False)
                 self.exit_display(force=True)
@@ -375,7 +375,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     self.exit_display(force=True)
                 break
             if case(MessageApi.TIME_CONTROL):
-                if not self.dgtmenu.get_confirm() or not message.ok_text:
+                if not self.dgtmenu.get_confirm() or not message.show_ok:
                     DisplayDgt.show(message.time_text)
                 tc = self.time_control = message.time_control
                 time_left, time_right = tc.current_clock_time(flip_board=self.dgtmenu.get_flip_board())
@@ -384,7 +384,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.exit_display(force=True)
                 break
             if case(MessageApi.OPENING_BOOK):
-                if not self.dgtmenu.get_confirm() or not message.ok_text:
+                if not self.dgtmenu.get_confirm() or not message.show_ok:
                     DisplayDgt.show(message.book_text)
                 self.exit_display(force=True)
                 break
@@ -406,7 +406,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if case(MessageApi.INTERACTION_MODE):
                 self.dgtmenu.set_mode(message.mode)
                 self.engine_finished = False
-                if not self.dgtmenu.get_confirm() or not message.ok_text:
+                if not self.dgtmenu.get_confirm() or not message.show_ok:
                     DisplayDgt.show(message.mode_text)
                 self.exit_display(force=True)
                 break
@@ -556,7 +556,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         text = book['text']
                         text.beep = self.dgttranslate.bl(BeepLevel.MAP)
                         text.maxtime = 1
-                        self.fire(Event.SET_OPENING_BOOK(book=book, book_text=text, ok_text=False))
+                        self.fire(Event.SET_OPENING_BOOK(book=book, book_text=text, show_ok=False))
                         self._reset_menu_results()
                     except IndexError:
                         pass
@@ -582,7 +582,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             config = ConfigObj('picochess.ini')
                             config['engine-level'] = msg
                             config.write()
-                            self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options=options, ok_text=False))
+                            self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options=options, show_ok=False))
                             self.dgtmenu.set_engine_restart(True)
                             self._reset_menu_results()
                         except IndexError:
@@ -594,7 +594,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     text = self.dgttranslate.text(mode_map[fen].value)
                     text.beep = self.dgttranslate.bl(BeepLevel.MAP)
                     text.maxtime = 1  # wait 1sec not forever
-                    self.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], mode_text=text, ok_text=False))
+                    self.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], mode_text=text, show_ok=False))
                     self._reset_menu_results()
                 elif fen in self.dgtmenu.tc_fixed_map:
                     logging.debug('Map-Fen: Time control fixed')
@@ -602,7 +602,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     self.dgtmenu.set_time_fixed(list(self.dgtmenu.tc_fixed_map.keys()).index(fen))
                     text = self.dgttranslate.text('M10_tc_fixed', self.dgtmenu.tc_fixed_list[self.dgtmenu.get_time_fixed()])
                     self.fire(Event.SET_TIME_CONTROL(time_control=self.dgtmenu.tc_fixed_map[fen],
-                                                     time_text=text, ok_text=False))
+                                                     time_text=text, show_ok=False))
                     self._reset_menu_results()
                 elif fen in self.dgtmenu.tc_blitz_map:
                     logging.debug('Map-Fen: Time control blitz')
@@ -610,7 +610,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     self.dgtmenu.set_time_blitz(list(self.dgtmenu.tc_blitz_map.keys()).index(fen))
                     text = self.dgttranslate.text('M10_tc_blitz', self.dgtmenu.tc_blitz_list[self.dgtmenu.get_time_blitz()])
                     self.fire(Event.SET_TIME_CONTROL(time_control=self.dgtmenu.tc_blitz_map[fen],
-                                                     time_text=text, ok_text=False))
+                                                     time_text=text, show_ok=False))
                     self._reset_menu_results()
                 elif fen in self.dgtmenu.tc_fisch_map:
                     logging.debug('Map-Fen: Time control fischer')
@@ -618,7 +618,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     self.dgtmenu.set_time_fisch(list(self.dgtmenu.tc_fisch_map.keys()).index(fen))
                     text = self.dgttranslate.text('M10_tc_fisch', self.dgtmenu.tc_fisch_list[self.dgtmenu.get_time_fisch()])
                     self.fire(Event.SET_TIME_CONTROL(time_control=self.dgtmenu.tc_fisch_map[fen],
-                                                     time_text=text, ok_text=False))
+                                                     time_text=text, show_ok=False))
                     self._reset_menu_results()
                 elif fen in shutdown_map:
                     logging.debug('Map-Fen: shutdown')

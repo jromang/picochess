@@ -668,7 +668,7 @@ def main():
                             DisplayMsg.show(Message.ENGINE_READY(eng=event.eng, engine_name=engine_name,
                                                                  eng_text=event.eng_text,
                                                                  has_levels=engine.has_levels(),
-                                                                 has_960=engine.has_chess960(), ok_text=event.ok_text))
+                                                                 has_960=engine.has_chess960(), show_ok=event.show_ok))
                         else:
                             DisplayMsg.show(Message.ENGINE_FAIL())
                         set_wait_state(not engine_fallback)
@@ -823,7 +823,7 @@ def main():
                     if engine.is_pondering():
                         stop_search()
                     set_wait_state()
-                    DisplayMsg.show(Message.INTERACTION_MODE(mode=event.mode, mode_text=event.mode_text, ok_text=event.ok_text))
+                    DisplayMsg.show(Message.INTERACTION_MODE(mode=event.mode, mode_text=event.mode_text, show_ok=event.show_ok))
                     break
 
                 if case(EventApi.SET_OPENING_BOOK):
@@ -832,7 +832,7 @@ def main():
                     config.write()
                     logging.debug("changing opening book [%s]", event.book['file'])
                     bookreader = chess.polyglot.open_reader(event.book['file'])
-                    DisplayMsg.show(Message.OPENING_BOOK(book_text=event.book_text, ok_text=event.ok_text))
+                    DisplayMsg.show(Message.OPENING_BOOK(book_text=event.book_text, show_ok=event.show_ok))
                     break
 
                 if case(EventApi.SET_TIME_CONTROL):
@@ -845,7 +845,7 @@ def main():
                     elif time_control.mode == TimeMode.FIXED:
                         config['time'] = '{:d}'.format(time_control.seconds_per_move)
                     config.write()
-                    DisplayMsg.show(Message.TIME_CONTROL(time_text=event.time_text, ok_text=event.ok_text, time_control=time_control))
+                    DisplayMsg.show(Message.TIME_CONTROL(time_text=event.time_text, show_ok=event.show_ok, time_control=time_control))
                     break
 
                 if case(EventApi.OUT_OF_TIME):

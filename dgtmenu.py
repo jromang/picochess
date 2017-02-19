@@ -612,7 +612,7 @@ class MenuStateMachine(Observable):
             if case(MenuState.MODE_TYPE):
                 # do action!
                 text = self.dgttranslate.text('B10_okmode')
-                self.fire(Event.SET_INTERACTION_MODE(mode=self.menu_mode, mode_text=text, ok_text=True))
+                self.fire(Event.SET_INTERACTION_MODE(mode=self.menu_mode, mode_text=text, show_ok=True))
                 text = self.save_choices()
                 break
             if case(MenuState.POS):
@@ -662,7 +662,7 @@ class MenuStateMachine(Observable):
                 # do action!
                 time_text = self.dgttranslate.text('B10_oktime')
                 time_control = self.tc_blitz_map[list(self.tc_blitz_map)[self.menu_time_blitz]]
-                self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=time_text, ok_text=True))
+                self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=time_text, show_ok=True))
                 text = self.save_choices()
                 break
             if case(MenuState.TIME_FISCH):
@@ -672,7 +672,7 @@ class MenuStateMachine(Observable):
                 # do action!
                 time_text = self.dgttranslate.text('B10_oktime')
                 time_control = self.tc_fisch_map[list(self.tc_fisch_map)[self.menu_time_fisch]]
-                self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=time_text, ok_text=True))
+                self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=time_text, show_ok=True))
                 text = self.save_choices()
                 break
             if case(MenuState.TIME_FIXED):
@@ -682,7 +682,7 @@ class MenuStateMachine(Observable):
                 # do action!
                 time_text = self.dgttranslate.text('B10_oktime')
                 time_control = self.tc_fixed_map[list(self.tc_fixed_map)[self.menu_time_fixed]]
-                self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=time_text, ok_text=True))
+                self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=time_text, show_ok=True))
                 text = self.save_choices()
                 break
             if case(MenuState.BOOK):
@@ -691,7 +691,7 @@ class MenuStateMachine(Observable):
             if case(MenuState.BOOK_NAME):
                 # do action!
                 book_text = self.dgttranslate.text('B10_okbook')
-                self.fire(Event.SET_OPENING_BOOK(book=self.all_books[self.menu_book], book_text=book_text, ok_text=True))
+                self.fire(Event.SET_OPENING_BOOK(book=self.all_books[self.menu_book], book_text=book_text, show_ok=True))
                 text = self.save_choices()
                 break
             if case(MenuState.ENG):
@@ -706,7 +706,7 @@ class MenuStateMachine(Observable):
                     config.write()
                     eng = self.installed_engines[self.menu_engine_name]
                     eng_text = self.dgttranslate.text('B10_okengine')
-                    self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options={}, ok_text=True))
+                    self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options={}, show_ok=True))
                     self.engine_restart = True
                 break
             if case(MenuState.ENG_NAME_LEVEL):
@@ -723,7 +723,7 @@ class MenuStateMachine(Observable):
                 else:
                     options = {}
                 eng_text = self.dgttranslate.text('B10_okengine')
-                self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options=options, ok_text=True))
+                self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options=options, show_ok=True))
                 self.engine_restart = True
                 text = self.save_choices()
                 break
