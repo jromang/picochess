@@ -224,19 +224,20 @@ At start PicoChess looks at the file
 * log-file = /opt/picochess/picochess.log
 * user-voice = en:al
 * computer-voice = en:christina
-* disable-ok-message
+* disable-confirm-message
 
 To set a particular setting, simply include the appropriate line in the picochess.ini file.
 For example, to the disable default confirmation message, include this line in picochess.ini:
 
-disable-ok-message
+disable-confirm-message
 
 To remove a setting, delete the appropriate line or comment it out using the hash character (#) or set the option to false.
 For example, to turn OFF the LED's on the Revelation II chessbot, this line will do:
 
-enable-revelation-leds = false
+disable-revelation-leds = true
 
-UCI engine options can be set in the engines.uci configuration file which you will find in the /opt/picochess/engines/<your_plattform> folder. To set the option, use the uci-option flag.
+UCI engine options can be set in the engines.uci configuration file which you will find in the
+/opt/picochess/engines/<your_plattform> folder. To set the option, use the uci-option flag.
 
 An example .ini file can be found at /opt/picochess/picochess.ini.example.
 Uncomment the appropriate options and rename the file to picochess.ini.

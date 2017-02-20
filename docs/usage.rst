@@ -204,7 +204,8 @@ Here you choose between the following:
 * **sound** - controls the beeps of your dgt clock. You can change between "never", "sometimes", or "always"
 * **language** - sets the language of clock messages. You can choose between english, german, french, dutch and spanish
 * **logfile** - sends a debug log file to your eMail box. Thats for us developers to have a clue what is going on at picochess. Please use this only if you asked for it.
-* **voice** - selects the voice for the computer and user. If you don't want voice please choose "mute".
+* **voice** - selects the voice for the computer and user.
+* **display** - selects the ponder-time or if you see confirmation messages
 
 System shutdown
 ---------------
@@ -220,7 +221,7 @@ PGN file support
 ----------------
 
 All moves of the played game along with engine are stored at the end of the game.
-Every game played with picochess is stored in the /opt/picochess folder as "games.pgn".
+Every game played with picochess is stored in the /opt/picochess/games folder as "games.pgn" (name can be changed by ini).
 If you want to end it before and write out the pgn file including the correct result, you can do as following:
 Placing the two kings on opposite centre squares will signal a resignation:
 - If both kings on white, the result is white wins and the game recorded 1-0

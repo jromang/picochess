@@ -34,9 +34,9 @@
 ## Instead of connecting to a dgt board, you can also start picochess with a command line.
 ## If so, please uncomment the next line
 # console = True
-## If you have a new DGT Pi Clock please uncomment the next line and change "False" to "True".
+## If you have a new DGT Pi Clock please uncomment the next line.
 ## Handle with care. Picochess won't work if you have a DGT XL or DGT3000 clock (standard case)!
-# dgtpi = False
+# dgtpi = True
 
 ### ========================
 ### = Chess engine options =
@@ -122,7 +122,7 @@
 ## Loglevel options are [debug, info, warning, error, critical]
 # log-level = debug
 ## PicoChess can use human voices for announcement
-## If you dont want voice output, please comment these settings out or choose a 'mute' value like 'en:mute'
+## If you want voice output, please uncomment these settings
 ## user-voice used for user moves announcement
 # user-voice = en:al
 ## computer-voice for computer moves announcement

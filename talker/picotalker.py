@@ -46,7 +46,7 @@ class PicoTalker():
                     try:
                         subprocess.call(['ogg123', voice_file], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     except OSError as e:
-                        logging.warning('OSError: {} => turn voice OFF'.format(voice_file, e))
+                        logging.warning('OSError: {} => turn voice OFF'.format(e))
                         self.voice_path = None
                 else:
                     logging.warning('voice file not found {}'.format(voice_file))

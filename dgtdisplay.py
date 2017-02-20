@@ -21,7 +21,7 @@ import math
 
 from dgtiface import *
 from dgttranslate import DgtTranslate
-from dgtmenu import MenuStateMachine
+from dgtmenu import DgtMenu
 from timecontrol import TimeControl
 from engine import get_installed_engines
 import threading
@@ -29,7 +29,7 @@ from configobj import ConfigObj
 
 
 class DgtDisplay(Observable, DisplayMsg, threading.Thread):
-    def __init__(self, dgttranslate: DgtTranslate, dgtmenu: MenuStateMachine, time_control: TimeControl):
+    def __init__(self, dgttranslate: DgtTranslate, dgtmenu: DgtMenu, time_control: TimeControl):
         super(DgtDisplay, self).__init__()
         self.dgttranslate = dgttranslate
         self.dgtmenu = dgtmenu

@@ -17,9 +17,9 @@
 
 from configobj import ConfigObj
 from collections import OrderedDict
-from utilities import TimeMode, TimeModeLoop, BeepLevel, BeepLoop, Menu, MenuLoop, Mode, ModeLoop, Language, LanguageLoop
+from utilities import TimeMode, TimeModeLoop, Menu, MenuLoop, Mode, ModeLoop, Language, LanguageLoop
 from utilities import Settings, SettingsLoop, VoiceType, VoiceTypeLoop, SystemDisplay, SystemDisplayLoop
-from utilities import Observable, DisplayDgt, switch, Dgt, Event, ClockIcons
+from utilities import Observable, DisplayDgt, switch, Dgt, Event, ClockIcons, BeepLevel, BeepLoop
 from timecontrol import TimeControl
 from dgttranslate import DgtTranslate
 import chess
@@ -74,13 +74,14 @@ class MenuState(object):
     SYS_DISP_PONDER_INTERVAL = 772100  # 1-8
 
 
-class MenuStateMachine(Observable):
+class DgtMenu(Observable):
     def __init__(self, disable_confirm_message: bool, ponder_interval: int, dgttranslate: DgtTranslate):
-        super(MenuStateMachine, self).__init__()
+        super(DgtMenu, self).__init__()
 
         self.menu_system_display_confirm = disable_confirm_message
         self.menu_system_display_ponderinterval = ponder_interval
         self.dgttranslate = dgttranslate
+        self.state = MenuState.TOP
 
         self.dgt_fen = '8/8/8/8/8/8/8/8'
         self.ip = None
@@ -111,7 +112,7 @@ class MenuStateMachine(Observable):
 
         self.voices_conf = ConfigObj('talker' + os.sep + 'voices' + os.sep + 'voices.ini')
         self.menu_system_voice_type = VoiceType.COMP_VOICE
-        self.menu_system_voice_mute = False  # @todo set this to 'True' if mute voice choosen
+        self.menu_system_voice_mute = False
         try:
             self.menu_system_voice_lang = self.voices_conf.keys().index(self.dgttranslate.language)
         except ValueError:
@@ -177,7 +178,6 @@ class MenuStateMachine(Observable):
 
         self.res_engine_name = self.menu_engine_name
         self.res_engine_level = self.menu_engine_level
-
         # self.res_system = self.menu_system
         # self.res_system_sound_beep = self.menu_system_sound_beep
         #
