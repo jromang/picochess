@@ -25,7 +25,6 @@ import socket
 import json
 import time
 from threading import Timer
-from dgttranslate import DgtTranslate
 
 import configparser
 
@@ -858,6 +857,8 @@ def hours_minutes_seconds(seconds: int):
     m, s = divmod(seconds, 60)
     h, m = divmod(m, 60)
     return h, m, s
+
+from dgttranslate import DgtTranslate
 
 
 def update_picochess(dgtpi: bool, auto_reboot: bool, dgttranslate: DgtTranslate):

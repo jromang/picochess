@@ -302,6 +302,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.hint_move = chess.Move.null() if ponder is None else ponder
                 self.hint_fen = None if ponder is None else message.game.fen()
                 self.hint_turn = None if ponder is None else message.game.turn
+                # Test the move @todo remove lateron!
+                bit_board = Board(self.hint_fen)
+                if not bit_board.is_legal(self.hint_move):
+                    logging.warning('CM => illegal move found fen: {} move: {}'.format(self.hint_fen, self.hint_move))
                 # Display the move
                 side = ClockSide.LEFT if (turn == chess.WHITE) != self.dgtmenu.get_flip_board() else ClockSide.RIGHT
                 disp = Dgt.DISPLAY_MOVE(move=move, fen=message.fen, side=side, wait=message.wait, maxtime=0,
@@ -437,6 +441,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.hint_move = message.pv[0]
                 self.hint_fen = message.game.fen()
                 self.hint_turn = message.game.turn
+                # Test the move @todo remove lateron!
+                bit_board = Board(self.hint_fen)
+                if not bit_board.is_legal(self.hint_move):
+                    logging.warning('PV => illegal move found fen: {} move: {}'.format(self.hint_fen, self.hint_move))
                 if message.mode == Mode.ANALYSIS and not self.inside_menu():
                     side = self.hint_side()
                     disp = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=True, maxtime=0,
