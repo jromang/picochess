@@ -15,17 +15,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from timecontrol import *
+import chess
+import copy
 import math
 
 from dgtiface import *
+from dgttranslate import DgtTranslate
+from dgtmenu import MenuStateMachine
+from timecontrol import TimeControl
 from engine import get_installed_engines
 import threading
 from configobj import ConfigObj
 
 
 class DgtDisplay(Observable, DisplayMsg, threading.Thread):
-    def __init__(self, dgttranslate, dgtmenu, time_control):
+    def __init__(self, dgttranslate: DgtTranslate, dgtmenu: MenuStateMachine, time_control: TimeControl):
         super(DgtDisplay, self).__init__()
         self.dgttranslate = dgttranslate
         self.dgtmenu = dgtmenu

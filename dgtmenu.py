@@ -21,6 +21,7 @@ from utilities import TimeMode, TimeModeLoop, BeepLevel, BeepLoop, Menu, MenuLoo
 from utilities import Settings, SettingsLoop, VoiceType, VoiceTypeLoop, SystemDisplay, SystemDisplayLoop
 from utilities import Observable, DisplayDgt, switch, Dgt, Event, ClockIcons
 from timecontrol import TimeControl
+from dgttranslate import DgtTranslate
 import chess
 import os
 import logging
@@ -74,7 +75,7 @@ class MenuState(object):
 
 
 class MenuStateMachine(Observable):
-    def __init__(self, disable_confirm_message, ponder_interval, dgttranslate):
+    def __init__(self, disable_confirm_message: bool, ponder_interval: int, dgttranslate: DgtTranslate):
         super(MenuStateMachine, self).__init__()
 
         self.menu_system_display_confirm = disable_confirm_message
@@ -244,11 +245,20 @@ class MenuStateMachine(Observable):
     def set_time_fixed(self, index):
         self.res_time_fixed = self.menu_time_fixed = index
 
+    def get_time_fixed(self):
+        return self.res_time_fixed
+
     def set_time_blitz(self, index):
         self.res_time_blitz = self.menu_time_blitz = index
 
+    def get_time_blitz(self):
+        return self.res_time_blitz
+
     def set_time_fisch(self, index):
         self.res_time_fisch = self.menu_time_fisch = index
+
+    def get_time_fisch(self):
+        return self.res_time_fisch
 
     def set_position_reverse_to_flipboard(self):
         self.flip_board = not self.flip_board  # Flip the board
