@@ -25,6 +25,7 @@ import socket
 import json
 import time
 from threading import Timer
+from dgttranslate import DgtTranslate
 
 import configparser
 
@@ -160,7 +161,7 @@ class MenuLoop(object):
         super(MenuLoop, self).__init__()
 
     @staticmethod
-    def next(m):
+    def next(m: Menu):
         if m == Menu.MODE_MENU:
             return Menu.POSITION_MENU
         elif m == Menu.POSITION_MENU:
@@ -176,7 +177,7 @@ class MenuLoop(object):
         return 'errMenuNext'
 
     @staticmethod
-    def prev(m):
+    def prev(m: Menu):
         if m == Menu.MODE_MENU:
             return Menu.SYSTEM_MENU
         elif m == Menu.POSITION_MENU:
@@ -207,7 +208,7 @@ class ModeLoop(object):
         super(ModeLoop, self).__init__()
 
     @staticmethod
-    def next(m):
+    def next(m: Mode):
         if m == Mode.NORMAL:
             return Mode.ANALYSIS
         elif m == Mode.ANALYSIS:
@@ -223,7 +224,7 @@ class ModeLoop(object):
         return 'errModeNext'
 
     @staticmethod
-    def prev(m):
+    def prev(m: Mode):
         if m == Mode.NORMAL:
             return Mode.PONDER
         elif m == Mode.ANALYSIS:
@@ -256,7 +257,7 @@ class TimeModeLoop(object):
         super(TimeModeLoop, self).__init__()
 
     @staticmethod
-    def next(m):
+    def next(m: TimeMode):
         if m == TimeMode.FIXED:
             return TimeMode.BLITZ
         elif m == TimeMode.BLITZ:
@@ -266,7 +267,7 @@ class TimeModeLoop(object):
         return 'errTiMoNext'
 
     @staticmethod
-    def prev(m):
+    def prev(m: TimeMode):
         if m == TimeMode.FIXED:
             return TimeMode.FISCHER
         elif m == TimeMode.BLITZ:
@@ -291,7 +292,7 @@ class SettingsLoop(object):
         super(SettingsLoop, self).__init__()
 
     @staticmethod
-    def next(m):
+    def next(m: Settings):
         if m == Settings.VERSION:
             return Settings.IPADR
         elif m == Settings.IPADR:
@@ -309,7 +310,7 @@ class SettingsLoop(object):
         return 'errSetgNext'
 
     @staticmethod
-    def prev(m):
+    def prev(m: Settings):
         if m == Settings.VERSION:
             return Settings.DISPLAY
         if m == Settings.DISPLAY:
@@ -341,7 +342,7 @@ class LanguageLoop(object):
         super(LanguageLoop, self).__init__()
 
     @staticmethod
-    def next(m):
+    def next(m: Language):
         if m == Language.EN:
             return Language.DE
         elif m == Language.DE:
@@ -357,7 +358,7 @@ class LanguageLoop(object):
         return 'errLangNext'
 
     @staticmethod
-    def prev(m):
+    def prev(m: Language):
         if m == Language.EN:
             return Language.IT
         if m == Language.IT:
@@ -384,7 +385,7 @@ class BeepLoop(object):
         super(BeepLoop, self).__init__()
 
     @staticmethod
-    def next(m):
+    def next(m: Beep):
         if m == Beep.OFF:
             return Beep.SOME
         elif m == Beep.SOME:
@@ -394,7 +395,7 @@ class BeepLoop(object):
         return 'errBeepNext'
 
     @staticmethod
-    def prev(m):
+    def prev(m: Beep):
         if m == Beep.OFF:
             return Beep.ON
         if m == Beep.ON:
@@ -415,7 +416,7 @@ class VoiceTypeLoop(object):
         super(VoiceTypeLoop, self).__init__()
 
     @staticmethod
-    def next(m):
+    def next(m: VoiceType):
         if m == VoiceType.USER_VOICE:
             return VoiceType.COMP_VOICE
         elif m == VoiceType.COMP_VOICE:
@@ -423,7 +424,7 @@ class VoiceTypeLoop(object):
         return 'errVoTyNext'
 
     @staticmethod
-    def prev(m):
+    def prev(m: VoiceType):
         if m == VoiceType.USER_VOICE:
             return VoiceType.COMP_VOICE
         elif m == VoiceType.COMP_VOICE:
@@ -442,7 +443,7 @@ class SystemDisplayLoop(object):
         super(SystemDisplayLoop, self).__init__()
 
     @staticmethod
-    def next(m):
+    def next(m: SystemDisplay):
         if m == SystemDisplay.PONDER_INTERVAL:
             return SystemDisplay.CONFIRM_MOVE
         elif m == SystemDisplay.CONFIRM_MOVE:
@@ -450,7 +451,7 @@ class SystemDisplayLoop(object):
         return 'errSyDiNext'
 
     @staticmethod
-    def prev(m):
+    def prev(m: SystemDisplay):
         if m == SystemDisplay.PONDER_INTERVAL:
             return SystemDisplay.CONFIRM_MOVE
         elif m == SystemDisplay.CONFIRM_MOVE:
@@ -853,13 +854,13 @@ def get_opening_books():
     return library
 
 
-def hours_minutes_seconds(seconds):
+def hours_minutes_seconds(seconds: int):
     m, s = divmod(seconds, 60)
     h, m = divmod(m, 60)
     return h, m, s
 
 
-def update_picochess(dgtpi, auto_reboot, dgttranslate):
+def update_picochess(dgtpi: bool, auto_reboot: bool, dgttranslate: DgtTranslate):
     git = 'git.exe' if platform.system() == 'Windows' else 'git'
 
     branch = subprocess.Popen([git, 'rev-parse', '--abbrev-ref', 'HEAD'],
@@ -891,7 +892,7 @@ def update_picochess(dgtpi, auto_reboot, dgttranslate):
                 time.sleep(1)  # give time to display the "update" message
 
 
-def shutdown(dgtpi, dev):
+def shutdown(dgtpi: bool, dev: str):
     logging.debug('shutting down system requested by ({})'.format(dev))
     time.sleep(2)  # give some time to send out the pgn file or speak the event
     if platform.system() == 'Windows':
@@ -902,7 +903,7 @@ def shutdown(dgtpi, dev):
         os.system('shutdown -h now')
 
 
-def reboot(dgtpi, dev):
+def reboot(dgtpi: bool, dev: str):
     logging.debug('rebooting system requested by ({})'.format(dev))
     time.sleep(2)  # give some time to send out the pgn file or speak the event
     if platform.system() == 'Windows':

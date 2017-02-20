@@ -31,7 +31,7 @@ except ImportError:
 
 
 class DgtBoard(object):
-    def __init__(self, device, disable_revelation_leds, is_pi):
+    def __init__(self, device: str, disable_revelation_leds: bool, is_pi: bool):
         super(DgtBoard, self).__init__()
         self.given_device = device
         self.device = device
@@ -550,7 +550,7 @@ class DgtBoard(object):
                     self.bt_state = 4
         return False
 
-    def _open_serial(self, device):
+    def _open_serial(self, device: str):
         try:
             self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE,
                                           parity=pyserial.PARITY_NONE, bytesize=pyserial.EIGHTBITS, timeout=2)
@@ -609,7 +609,7 @@ class DgtBoard(object):
         if has_to_wait:
             logging.debug('(ser) clock is released now')
 
-    def set_text_3k(self, text, beep, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
+    def set_text_3k(self, text: str, beep: int, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
         self._wait_for_clock()
         res = self.write_board_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x0c, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
                                         DgtClk.DGT_CMD_CLOCK_ASCII,
@@ -617,7 +617,7 @@ class DgtBoard(object):
                                         DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         return res
 
-    def set_text_xl(self, text, beep, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
+    def set_text_xl(self, text: str, beep: int, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
         def transfer(icons):
             result = 0
             if icons == ClockIcons.DOT:
@@ -634,7 +634,7 @@ class DgtBoard(object):
                                         DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         return res
 
-    def set_and_run(self, lr, lh, lm, ls, rr, rh, rm, rs):
+    def set_and_run(self, lr: int, lh: int, lm: int, ls: int, rr: int, rh: int, rm: int, rs: int):
         self._wait_for_clock()
         side = ClockSide.NONE
         if lr == 1 and rr == 0:
