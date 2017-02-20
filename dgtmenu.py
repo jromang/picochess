@@ -1114,7 +1114,7 @@ class MenuStateMachine(Observable):
                 text = self.dgttranslate.text(self.menu_top.value)
                 break
             if case(MenuState.TIME_BLITZ):
-                self.state = MenuState.TIME_FIXED
+                self.state = MenuState.TIME_FISCH
                 self.menu_time_mode = TimeModeLoop.next(self.menu_time_mode)
                 text = self.dgttranslate.text(self.menu_time_mode.value)
                 break
@@ -1123,7 +1123,7 @@ class MenuStateMachine(Observable):
                 text = self.dgttranslate.text('B00_tc_blitz', self.tc_blitz_list[self.menu_time_blitz])
                 break
             if case(MenuState.TIME_FISCH):
-                self.state = MenuState.TIME_BLITZ
+                self.state = MenuState.TIME_FIXED
                 self.menu_time_mode = TimeModeLoop.next(self.menu_time_mode)
                 text = self.dgttranslate.text(self.menu_time_mode.value)
                 break
@@ -1132,7 +1132,7 @@ class MenuStateMachine(Observable):
                 text = self.dgttranslate.text('B00_tc_fisch', self.tc_fisch_list[self.menu_time_fisch])
                 break
             if case(MenuState.TIME_FIXED):
-                self.state = MenuState.TIME_FISCH
+                self.state = MenuState.TIME_BLITZ
                 self.menu_time_mode = TimeModeLoop.next(self.menu_time_mode)
                 text = self.dgttranslate.text(self.menu_time_mode.value)
                 break
