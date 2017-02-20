@@ -45,7 +45,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
     def _reset_menu_results(self):
         # dont override "menu_mode_result", otherwise wQ a5-f5 wont work anymore (=> if's)
-        pass
+        self.dgtmenu.enter_top_menu()
         # self.menu_time_mode_result = None
         # self.menu_setup_whitetomove_result = None
         # self.menu_setup_reverse_result = None
@@ -303,9 +303,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.hint_fen = None if ponder is None else message.game.fen()
                 self.hint_turn = None if ponder is None else message.game.turn
                 # Test the move @todo remove lateron!
-                bit_board = Board(self.hint_fen)
-                if not bit_board.is_legal(self.hint_move):
-                    logging.warning('CM => illegal move found fen: {} move: {}'.format(self.hint_fen, self.hint_move))
+                if self.hint_move:
+                    bit_board = Board(self.hint_fen)
+                    if not bit_board.is_legal(self.hint_move):
+                        logging.warning('CM => illegal move fen: {} move: {}'.format(self.hint_fen, self.hint_move))
                 # Display the move
                 side = ClockSide.LEFT if (turn == chess.WHITE) != self.dgtmenu.get_flip_board() else ClockSide.RIGHT
                 disp = Dgt.DISPLAY_MOVE(move=move, fen=message.fen, side=side, wait=message.wait, maxtime=0,
@@ -319,7 +320,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     DisplayDgt.show(Dgt.LIGHT_CLEAR())
                     self.leds_are_on = False
                 self._reset_moves_and_score()
-                self._reset_menu_results()
+                # self._reset_menu_results()
                 self.engine_finished = False
                 self.show_setup_pieces_msg = False
                 if message.newgame:
@@ -344,7 +345,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.engine_finished = False
                 if not self.dgtmenu.get_confirm():
                     DisplayDgt.show(self.dgttranslate.text('K05_okpico'))
-                self._reset_menu_results()
+                # self._reset_menu_results()
                 break
             if case(MessageApi.USER_MOVE):
                 if self.leds_are_on:  # can happen in case of a sliding move
@@ -412,7 +413,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     DisplayDgt.show(text)
                 break
             if case(MessageApi.INTERACTION_MODE):
-                self.dgtmenu.set_mode(message.mode)
+                # self.dgtmenu.set_mode(message.mode)
                 self.engine_finished = False
                 if not self.dgtmenu.get_confirm() or not message.show_ok:
                     DisplayDgt.show(message.mode_text)
@@ -442,9 +443,10 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.hint_fen = message.game.fen()
                 self.hint_turn = message.game.turn
                 # Test the move @todo remove lateron!
-                bit_board = Board(self.hint_fen)
-                if not bit_board.is_legal(self.hint_move):
-                    logging.warning('PV => illegal move found fen: {} move: {}'.format(self.hint_fen, self.hint_move))
+                if self.hint_move:
+                    bit_board = Board(self.hint_fen)
+                    if not bit_board.is_legal(self.hint_move):
+                        logging.warning('PV => illegal move fen: {} move: {}'.format(self.hint_fen, self.hint_move))
                 if message.mode == Mode.ANALYSIS and not self.inside_menu():
                     side = self.hint_side()
                     disp = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=True, maxtime=0,
@@ -603,6 +605,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         DisplayDgt.show(self.dgttranslate.text('Y00_erroreng'))
                 elif fen in mode_map:
                     logging.debug("Map-Fen: Interaction mode [%s]", mode_map[fen])
+                    self.dgtmenu.set_mode(mode_map[fen])
                     text = self.dgttranslate.text(mode_map[fen].value)
                     text.beep = self.dgttranslate.bl(BeepLevel.MAP)
                     text.maxtime = 1  # wait 1sec not forever
