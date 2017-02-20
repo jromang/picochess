@@ -345,12 +345,6 @@ def main():
             if inbook:
                 DisplayMsg.show(Message.BOOK_MOVE())
             searchmoves.add(move)
-            # Test the move @todo remove lateron!
-            if ponder:
-                if not game.is_legal(ponder):
-                    logging.warning('HM => illegal move fen: {} move: {}'.format(game.fen(), ponder))
-                    logging.info('Last successful (done) move: {}'.format(move))
-                    ponder = None
             text = Message.COMPUTER_MOVE(move=move, ponder=ponder, fen=fen, turn=turn, game=game.copy(), wait=inbook)
             DisplayMsg.show(text)
         else:
