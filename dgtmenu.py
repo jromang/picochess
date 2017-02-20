@@ -160,7 +160,7 @@ class MenuStateMachine(Observable):
     def save_choices(self):
         self.state = MenuState.TOP
 
-        self.res_top = self.menu_top
+        # self.res_top = self.menu_top
         self.res_mode = self.menu_mode
 
         self.res_position_whitetomove = self.menu_position_whitetomove
@@ -177,17 +177,17 @@ class MenuStateMachine(Observable):
         self.res_engine_name = self.menu_engine_name
         self.res_engine_level = self.menu_engine_level
 
-        self.res_system = self.menu_system
-        self.res_system_sound_beep = self.menu_system_sound_beep
-
-        self.res_system_language_name = self.menu_system_language_name
-
-        self.res_system_voice_type = self.menu_system_voice_type
-        self.res_system_voice_mute = self.menu_system_voice_mute
-        self.res_system_voice_lang = self.menu_system_voice_lang
-        self.res_system_voice_speak = self.menu_system_voice_speak
-
-        self.res_system_display = self.menu_system_display
+        # self.res_system = self.menu_system
+        # self.res_system_sound_beep = self.menu_system_sound_beep
+        #
+        # self.res_system_language_name = self.menu_system_language_name
+        #
+        # self.res_system_voice_type = self.menu_system_voice_type
+        # self.res_system_voice_mute = self.menu_system_voice_mute
+        # self.res_system_voice_lang = self.menu_system_voice_lang
+        # self.res_system_voice_speak = self.menu_system_voice_speak
+        #
+        # self.res_system_display = self.menu_system_display
         self.res_system_display_confirm = self.menu_system_display_confirm
         self.res_system_display_ponderinterval = self.menu_system_display_ponderinterval
 
@@ -218,37 +218,37 @@ class MenuStateMachine(Observable):
         return self.res_mode
 
     def set_mode(self, mode):
-        self.res_mode = mode
+        self.res_mode = self.menu_mode = mode
 
     def get_engine(self):
         return self.installed_engines[self.res_engine_name]
 
     def set_engine_index(self, index):
-        self.res_engine_name = index
+        self.res_engine_name = self.menu_engine_name = index
 
     def get_engine_level(self):
         return self.res_engine_level
 
     def set_engine_level(self, level):
-        self.res_engine_level = level
+        self.res_engine_level = self.menu_engine_level = level
 
     def get_confirm(self):
         return self.res_system_display_confirm
 
     def set_book(self, index):
-        self.res_book_name = index
+        self.res_book_name = self.menu_book = index
 
     def set_time_mode(self, mode):
-        self.res_time_mode = mode
+        self.res_time_mode = self.menu_time_mode = mode
 
     def set_time_fixed(self, index):
-        self.res_time_fixed = index
+        self.res_time_fixed = self.menu_time_fixed = index
 
     def set_time_blitz(self, index):
-        self.res_time_blitz = index
+        self.res_time_blitz = self.menu_time_blitz = index
 
     def set_time_fisch(self, index):
-        self.res_time_fisch = index
+        self.res_time_fisch = self.menu_time_fisch = index
 
     def set_position_reverse_to_flipboard(self):
         self.flip_board = not self.flip_board  # Flip the board
