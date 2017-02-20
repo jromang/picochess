@@ -194,7 +194,7 @@ class MenuStateMachine(Observable):
 
         return None
 
-    def set_engine_restart(self, flag):
+    def set_engine_restart(self, flag: bool):
         self.engine_restart = flag
 
     def get_engine_restart(self):
@@ -206,55 +206,55 @@ class MenuStateMachine(Observable):
     def get_engine_has_960(self):
         return self.engine_has_960
 
-    def set_engine_has_960(self, flag):
+    def set_engine_has_960(self, flag: bool):
         self.engine_has_960 = flag
 
     def get_dgt_fen(self):
         return self.dgt_fen
 
-    def set_dgt_fen(self, fen):
+    def set_dgt_fen(self, fen: str):
         self.dgt_fen = fen
 
     def get_mode(self):
         return self.res_mode
 
-    def set_mode(self, mode):
+    def set_mode(self, mode: Mode):
         self.res_mode = self.menu_mode = mode
 
     def get_engine(self):
         return self.installed_engines[self.res_engine_name]
 
-    def set_engine_index(self, index):
+    def set_engine_index(self, index: int):
         self.res_engine_name = self.menu_engine_name = index
 
     def get_engine_level(self):
         return self.res_engine_level
 
-    def set_engine_level(self, level):
+    def set_engine_level(self, level: int):
         self.res_engine_level = self.menu_engine_level = level
 
     def get_confirm(self):
         return self.res_system_display_confirm
 
-    def set_book(self, index):
+    def set_book(self, index: int):
         self.res_book_name = self.menu_book = index
 
-    def set_time_mode(self, mode):
+    def set_time_mode(self, mode: TimeMode):
         self.res_time_mode = self.menu_time_mode = mode
 
-    def set_time_fixed(self, index):
+    def set_time_fixed(self, index: int):
         self.res_time_fixed = self.menu_time_fixed = index
 
     def get_time_fixed(self):
         return self.res_time_fixed
 
-    def set_time_blitz(self, index):
+    def set_time_blitz(self, index: int):
         self.res_time_blitz = self.menu_time_blitz = index
 
     def get_time_blitz(self):
         return self.res_time_blitz
 
-    def set_time_fisch(self, index):
+    def set_time_fisch(self, index: int):
         self.res_time_fisch = self.menu_time_fisch = index
 
     def get_time_fisch(self):

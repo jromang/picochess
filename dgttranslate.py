@@ -19,29 +19,29 @@ from utilities import *
 
 
 class DgtTranslate(object):
-    def __init__(self, beep_config, beep_level, language):
-        self.ConfigToBeep = {'all' : Beep.ON, 'none' : Beep.OFF, 'some' : Beep.SOME}
+    def __init__(self, beep_config: str, beep_level: int, language: str):
+        self.ConfigToBeep = {'all': Beep.ON, 'none': Beep.OFF, 'some': Beep.SOME}
         self.beep = self.ConfigToBeep[beep_config]
         self.beep_level = beep_level
         self.language = language
 
-    def beep_to_config(self, beep):
+    def beep_to_config(self, beep: Beep):
         return dict(zip(self.ConfigToBeep.values(), self.ConfigToBeep.keys()))[beep]
 
-    def bl(self, beeplevel):
+    def bl(self, beeplevel: BeepLevel):
         if self.beep == Beep.ON:
             return True
         if self.beep == Beep.OFF:
             return False
         return bool(self.beep_level & beeplevel.value)
 
-    def set_beep(self, beep):
+    def set_beep(self, beep: Beep):
         self.beep = beep
 
-    def set_language(self, language):
+    def set_language(self, language: str):
         self.language = language
 
-    def move(self, text):
+    def move(self, text: str):
         directory = {}
         if self.language == 'de':
             directory = {'R': 'T', 'N': 'S', 'B': 'L', 'Q': 'D'}
@@ -57,7 +57,7 @@ class DgtTranslate(object):
             text = text.replace(i, j)
         return text.replace('@', 'R')  # replace the King "@" from fr, es, it languages
 
-    def text(self, str_code, msg='', devs={'ser', 'i2c', 'web'}):
+    def text(self, str_code: str, msg='', devs={'ser', 'i2c', 'web'}):
         entxt = detxt = nltxt = frtxt = estxt = ittxt = None  # error case
 
         (code, text_id) = str_code.split('_', 1)

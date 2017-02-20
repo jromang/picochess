@@ -17,11 +17,12 @@
 
 from chess import Board
 from utilities import *
-from threading import Timer, Thread
+from threading import Timer, Thread, Lock
+from dgttranslate import DgtTranslate
 
 
 class DgtIface(DisplayDgt, Thread):
-    def __init__(self, dgttranslate, msg_lock, dgtboard=None):
+    def __init__(self, dgttranslate: DgtTranslate, msg_lock: Lock, dgtboard=None):
         super(DgtIface, self).__init__()
 
         self.dgtboard = dgtboard
