@@ -161,7 +161,7 @@ Manual installation
 
 6. **Copy the services into the correct place**
 
-``cd /opt/picochess/dgt``
+``cd /opt/picochess/etc``
 
 ``sudo cp picochess.service /etc/systemd/system``
 
@@ -219,7 +219,7 @@ At start PicoChess looks at the file
 
 ... and sets itself up accordingly. Here is a list of some available options:
 
-* enable-revelation-leds = true
+* disable-revelation-leds = true
 * log-level = debug
 * log-file = /opt/picochess/picochess.log
 * user-voice = en:al
