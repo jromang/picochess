@@ -160,8 +160,9 @@ class DgtIface(DisplayDgt, Thread):
         if bit_board.is_legal(message.move):
             move_text = bit_board.san(message.move)
         else:
-            logging.warning('illegal move found fen: {} move: {}'.format(message.fen, message.move))
-            move_text = 'err {}'.format(message.move.uci()[:4])
+            logging.warning('illegal move {} found fen: {}'.format(message.move, message.fen))
+            move_text = 'er{}' if is_xl else 'err {}'
+            move_text = move_text.format(message.move.uci()[:4])
 
         if message.side == ClockSide.RIGHT:
             move_text = move_text.rjust(6 if is_xl else 8)

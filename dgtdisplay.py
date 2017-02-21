@@ -305,7 +305,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 # Test the hint-move @todo find out why this can happen!
                 # At build (handle_move) and in PV this seems not to be the case
                 if self.hint_move and not message.game.is_legal(self.hint_move):
-                    logging.warning('illegal move found fen: {} move: {}'.format(self.hint_fen, self.hint_move))
+                    logging.warning('illegal hint move {} found fen: {}'.format(self.hint_move, self.hint_fen))
                     self.hint_move = chess.Move.null()
                     self.hint_fen = self.hint_turn = None
                 # Display the move
