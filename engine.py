@@ -91,8 +91,26 @@ def write_engine_ini(engine_path=None):
             if engine.has_skill_level():
                 sklevel = engine.get().options['Skill Level']
                 minlevel, maxlevel = int(sklevel[3]), int(sklevel[4])
+                minlevel, maxlevel = min(minlevel, maxlevel), max(minlevel, maxlevel)
                 for level in range(minlevel, maxlevel+1):
                     parser['Level@{:02d}'.format(level)] = {'Skill Level': str(level)}
+            if engine.has_strength():
+                sklevel = engine.get().options['Strength']
+                minlevel, maxlevel = int(sklevel[3]), int(sklevel[4])
+                minlevel, maxlevel = min(minlevel, maxlevel), max(minlevel, maxlevel)
+                if maxlevel - minlevel > 1000:
+                    inc = int((maxlevel - minlevel) / 100)
+                else:
+                    inc = int((maxlevel - minlevel) / 10)
+                if 20 * inc + minlevel < maxlevel:
+                    inc = int((maxlevel - minlevel) / 20)
+                level = minlevel
+                count = 0
+                while level < maxlevel:
+                    parser['Level@{:02d}'.format(count)] = {'Strength': str(level)}
+                    level += inc
+                    count += 1
+                parser['Level@{:02d}'.format(count)] = {'Strength': str(maxlevel)}
             with open(engine_path + os.sep + engine_filename + '.uci', 'w') as configfile:
                 parser.write(configfile)
 
@@ -254,13 +272,16 @@ class UciEngine(object):
         self.options = options
 
     def has_levels(self):
-        return self.level_support or self.has_skill_level() or self.has_limit_strength()
+        return self.level_support or self.has_skill_level() or self.has_limit_strength() or self.has_strength()
 
     def has_skill_level(self):
         return 'Skill Level' in self.engine.options
 
     def has_limit_strength(self):
         return 'UCI_LimitStrength' in self.engine.options
+
+    def has_strength(self):
+        return 'Strength' in self.engine.options
 
     def has_chess960(self):
         return 'UCI_Chess960' in self.engine.options
