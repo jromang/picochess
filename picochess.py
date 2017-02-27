@@ -202,6 +202,10 @@ def main():
         else:
             handle_move(move=move)
 
+    def is_not_user_turn(turn):
+        return (play_mode == PlayMode.USER_WHITE and turn == chess.BLACK) \
+               or (play_mode == PlayMode.USER_BLACK and turn == chess.WHITE)
+
     def process_fen(fen):
         nonlocal last_computer_fen
         nonlocal last_legal_fens
@@ -215,8 +219,7 @@ def main():
         # Check if we have to undo a previous move (sliding)
         elif fen in last_legal_fens:
             if interaction_mode == Mode.NORMAL:
-                if (play_mode == PlayMode.USER_WHITE and game.turn == chess.BLACK) or \
-                        (play_mode == PlayMode.USER_BLACK and game.turn == chess.WHITE):
+                if is_not_user_turn(game.turn):
                     stop_search()
                     game.pop()
                     logging.debug('User move in computer turn, reverting to: ' + game.board_fen())
@@ -228,8 +231,7 @@ def main():
                 else:
                     logging.error("last_legal_fens not cleared: " + game.board_fen())
             elif interaction_mode == Mode.REMOTE:
-                if (play_mode == PlayMode.USER_WHITE and game.turn == chess.BLACK) or \
-                        (play_mode == PlayMode.USER_BLACK and game.turn == chess.WHITE):
+                if is_not_user_turn(game.turn):
                     game.pop()
                     logging.debug('User move in remote turn, reverting to: ' + game.board_fen())
                 elif last_computer_fen:
@@ -292,8 +294,7 @@ def main():
                     last_computer_fen = None
                     last_legal_fens = []
                     if (interaction_mode == Mode.REMOTE or interaction_mode == Mode.NORMAL) and \
-                            ((play_mode == PlayMode.USER_WHITE and game_history.turn == chess.BLACK)
-                              or (play_mode == PlayMode.USER_BLACK and game_history.turn == chess.WHITE)):
+                            is_not_user_turn(game_history.turn):
                         legal_fens = []
                         if interaction_mode == Mode.NORMAL:
                             searchmoves.reset()
@@ -337,9 +338,7 @@ def main():
         stop_search_and_clock()
 
         # engine or remote move
-        if (interaction_mode == Mode.NORMAL or interaction_mode == Mode.REMOTE) and \
-                ((play_mode == PlayMode.USER_WHITE and turn == chess.BLACK) or
-                     (play_mode == PlayMode.USER_BLACK and turn == chess.WHITE)):
+        if (interaction_mode == Mode.NORMAL or interaction_mode == Mode.REMOTE) and is_not_user_turn(turn):
             last_computer_fen = game.board_fen()
             game.push(move)
             if inbook:

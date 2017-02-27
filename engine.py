@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-# from utilities import *
 from utilities import os, platform, EngineStatus, Event, Observable, Dgt, Message, DisplayMsg
 import logging
 import spur
@@ -69,7 +68,18 @@ def read_engine_ini(engine_shell=None, engine_path=None):
 
 
 def write_engine_ini(engine_path=None):
+
     def write_level_ini(engine_filename):
+
+        def calc_inc(diflevel):
+            if diflevel > 1000:
+                inc = int(diflevel / 100)
+            else:
+                inc = int(diflevel / 10)
+            if 20 * inc < diflevel:
+                inc = int(diflevel / 20)
+            return inc
+
         parser = configparser.ConfigParser()
         parser.optionxform = str
         if not parser.read(engine_path + os.sep + engine_filename + '.uci'):
@@ -77,16 +87,11 @@ def write_engine_ini(engine_path=None):
                 uelevel = engine.get().options['UCI_Elo']
                 elo_1, elo_2 = int(uelevel[2]), int(uelevel[3])
                 minlevel, maxlevel = min(elo_1, elo_2), max(elo_1, elo_2)
-                if maxlevel - minlevel > 1000:
-                    inc = int((maxlevel - minlevel) / 100)
-                else:
-                    inc = int((maxlevel - minlevel) / 10)
-                if 20 * inc + minlevel < maxlevel:
-                    inc = int((maxlevel - minlevel) / 20)
-                set_elo = minlevel
-                while set_elo < maxlevel:
-                    parser['Elo@{:04d}'.format(set_elo)] = {'UCI_LimitStrength' : 'true', 'UCI_Elo' : str(set_elo)}
-                    set_elo += inc
+                lvl_inc = calc_inc(maxlevel - minlevel)
+                level = minlevel
+                while level < maxlevel:
+                    parser['Elo@{:04d}'.format(level)] = {'UCI_LimitStrength' : 'true', 'UCI_Elo' : str(level)}
+                    level += lvl_inc
                 parser['Elo@{:04d}'.format(maxlevel)] = {'UCI_LimitStrength': 'false', 'UCI_Elo': str(maxlevel)}
             if engine.has_skill_level():
                 sklevel = engine.get().options['Skill Level']
@@ -98,17 +103,12 @@ def write_engine_ini(engine_path=None):
                 sklevel = engine.get().options['Strength']
                 minlevel, maxlevel = int(sklevel[3]), int(sklevel[4])
                 minlevel, maxlevel = min(minlevel, maxlevel), max(minlevel, maxlevel)
-                if maxlevel - minlevel > 1000:
-                    inc = int((maxlevel - minlevel) / 100)
-                else:
-                    inc = int((maxlevel - minlevel) / 10)
-                if 20 * inc + minlevel < maxlevel:
-                    inc = int((maxlevel - minlevel) / 20)
+                lvl_inc = calc_inc(maxlevel - minlevel)
                 level = minlevel
                 count = 0
                 while level < maxlevel:
                     parser['Level@{:02d}'.format(count)] = {'Strength': str(level)}
-                    level += inc
+                    level += lvl_inc
                     count += 1
                 parser['Level@{:02d}'.format(count)] = {'Strength': str(maxlevel)}
             with open(engine_path + os.sep + engine_filename + '.uci', 'w') as configfile:
