@@ -546,8 +546,9 @@ def main():
         engine_name = engine.get().name
     except AttributeError:
         logging.error('no engines started')
-        DisplayMsg.show(Message.ENGINE_FAIL())
         time.sleep(3)
+        DisplayMsg.show(Message.ENGINE_FAIL())
+        time.sleep(2)
         sys.exit(-1)
 
     # Startup - internal
