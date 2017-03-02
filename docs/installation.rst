@@ -137,7 +137,8 @@ Manual installation
 
 4. **Install dependencies**
 
-  To install the dependencies, you need to use pip3. If you are using Raspbian Jessie, your pip3 installation is probably outdated, resulting in IncompleteRead errors. You can update pip3 as follows:
+  To install the dependencies, you need to use pip3. If you are using Raspbian Jessie, your pip3 installation is
+  probably outdated, resulting in IncompleteRead errors. You can update pip3 as follows:
   
   ``cd``
   
@@ -153,13 +154,31 @@ Manual installation
 
   ``sudo pip3 install --upgrade -r requirements.txt``
 
-5. **UCI config files**
+5. **Build config files**
 
-  Initialize the engines' UCI settings via .uci files:
+  Initialize the config files:
 
   ``sudo python3 ./build_engines.py``
+  ``sudo python3 ./build_books.py``
+  ``sudo python3 ./build_voices.py``
 
-6. **Copy the services into the correct place**
+6. **Copy the dgtpi services into the correct place (ONLY needed if you have a DGTPi chess computer)**
+
+``cd /opt/picochess/etc``
+
+``sudo cp dgtpi.service /etc/systemd/system``
+
+``sudo chmod a+x /etc/systemd/system/dgtpi.service``
+
+``sudo systemctl enable dgtpi``
+
+``sudo cp dgtpistandby.service /etc/systemd/system``
+
+``sudo chmod a+x /etc/systemd/system/dgtpistandby.service``
+
+``sudo systemctl enable dgtpistandby``
+
+7. **Copy the picochess services into the correct place (ONLY needed if you want picochess to startup automatically)**
 
 ``cd /opt/picochess/etc``
 
@@ -173,9 +192,10 @@ Manual installation
 
 ``sudo reboot``
 
-7. **Run PicoChess: automatically or from the command line**
+8. **Run PicoChess: automatically or from the command line (including a special console mode)**
 
-  If installed correctly, PicoChess will start automatically at boot (as a service). You can also start PicoChess from the command line.
+  If installed correctly, PicoChess will start automatically at boot (as a service see 6+7).
+  You can also start PicoChess from the command line in standard mode or in console mode (use "console" flag for this).
 
   PicoChess has a lot of options. Type ``sudo python3 /opt/picochess/picochess.py -h`` for a list.
 
@@ -244,5 +264,5 @@ Uncomment the appropriate options and rename the file to picochess.ini.
 
 Please keep in mind that your picochess.ini file must suit the version of picochess.
 Old picochess.ini versions might not work with newer versions of picochess (picochess.ini.example is always valid).
-If you update picochess by hand or by providing the "inet" flag please take a look for changed settings and update
-picochess.ini accordingly.
+If you update picochess by hand or by providing the "enable-update" flag please take a look for changed settings and
+update picochess.ini accordingly.
