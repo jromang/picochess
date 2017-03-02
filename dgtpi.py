@@ -95,7 +95,7 @@ class DgtPi(DgtIface):
                 DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=times[:3], time_right=times[3:], dev='i2c'))
             time.sleep(0.1)
 
-    def _display_on_dgt_pi(self, text, beep=False, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
+    def _display_on_dgt_pi(self, text: str, beep=False, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
         if len(text) > 11:
             logging.warning('(i2c) clock message too long [%s]', text)
         logging.debug(text)
@@ -163,13 +163,13 @@ class DgtPi(DgtIface):
     def clear_light_revelation_board(self):
         pass
 
-    def stop_clock(self, devs):
+    def stop_clock(self, devs: set):
         if 'i2c' not in devs:
             logging.debug('ignored message cause of devs [stopClock]')
             return
         self._resume_clock(ClockSide.NONE)
 
-    def _resume_clock(self, side):
+    def _resume_clock(self, side: ClockSide):
         l_hms = self.time_left
         r_hms = self.time_right
         if l_hms is None or r_hms is None:
@@ -195,7 +195,7 @@ class DgtPi(DgtIface):
         else:
             self.clock_running = (side != ClockSide.NONE)
 
-    def start_clock(self, time_left, time_right, side, devs):
+    def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
         if 'i2c' not in devs:
             logging.debug('ignored message cause of devs [startClock]')
             return

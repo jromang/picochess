@@ -44,24 +44,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self._reset_moves_and_score()
 
     def _reset_menu_results(self):
-        # dont override "menu_mode_result", otherwise wQ a5-f5 wont work anymore (=> if's)
         self.dgtmenu.enter_top_menu()
-        # self.menu_time_mode_result = None
-        # self.menu_setup_whitetomove_result = None
-        # self.menu_setup_reverse_result = None
-        # self.menu_setup_uci960_result = None
-        # self.menu_top_result = None
-        # self.menu_system_result = None
-        # self.menu_engine_name_result = None
-        # self.menu_system_sound_beep_result = None
-        # self.menu_system_language_lang_result = None
-        # self.menu_system_voice_type_result = None
-        # self.menu_system_voice_mute_result = None
-        # self.menu_system_voice_lang_result = None
-        # self.menu_system_voice_speak_result = None
-        # self.menu_system_display_pondertime_result = None
-        # self.menu_system_display_okmessage_result = None
-        # self.menu_inside_flag = False
 
     def _power_off(self, dev='web'):
         DisplayDgt.show(self.dgttranslate.text('Y10_goodbye'))

@@ -53,7 +53,7 @@ class Emailer(object):
             self.mailgun_key = False
         self.smtp_from = smtp_from
 
-    def send(self, subject, body, path):
+    def send(self, subject: str, body: str, path: str):
         if self.email:  # check if email adress to send the pgn to is provided
             if self.mailgun_key:  # check if we have mailgun-key available to send the pgn successful
                 out = requests.post('https://api.mailgun.net/v3/picochess.org/messages',
@@ -126,7 +126,7 @@ class Emailer(object):
 
 
 class PgnDisplay(DisplayMsg, threading.Thread):
-    def __init__(self, file_name, emailer):
+    def __init__(self, file_name: str, emailer: Emailer):
         super(PgnDisplay, self).__init__()
         self.file_name = file_name
         self.emailer = emailer

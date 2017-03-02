@@ -162,7 +162,6 @@ class DgtMenu(Observable):
     def save_choices(self):
         self.state = MenuState.TOP
 
-        # self.res_top = self.menu_top
         self.res_mode = self.menu_mode
 
         self.res_position_whitetomove = self.menu_position_whitetomove
@@ -178,17 +177,7 @@ class DgtMenu(Observable):
 
         self.res_engine_name = self.menu_engine_name
         self.res_engine_level = self.menu_engine_level
-        # self.res_system = self.menu_system
-        # self.res_system_sound_beep = self.menu_system_sound_beep
-        #
-        # self.res_system_language_name = self.menu_system_language_name
-        #
-        # self.res_system_voice_type = self.menu_system_voice_type
-        # self.res_system_voice_mute = self.menu_system_voice_mute
-        # self.res_system_voice_lang = self.menu_system_voice_lang
-        # self.res_system_voice_speak = self.menu_system_voice_speak
-        #
-        # self.res_system_display = self.menu_system_display
+
         self.res_system_display_confirm = self.menu_system_display_confirm
         self.res_system_display_ponderinterval = self.menu_system_display_ponderinterval
 

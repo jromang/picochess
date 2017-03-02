@@ -132,7 +132,7 @@ class DgtBoard(object):
                 self.clock_lock = time.time()
         return True
 
-    def _process_board_message(self, message_id, message, message_length):
+    def _process_board_message(self, message_id, message, message_length: int):
         for case in switch(message_id):
             if case(DgtMsg.DGT_MSG_VERSION):
                 if message_length != 2:

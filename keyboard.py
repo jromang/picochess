@@ -23,7 +23,7 @@ keyboard_last_fen = None
 
 
 class KeyboardInput(Observable, threading.Thread):
-    def __init__(self, dgttranslate, is_pi):
+    def __init__(self, dgttranslate: DgtTranslate, is_pi: bool):
         super(KeyboardInput, self).__init__()
         self.flip_board = False
         self.board_plugged_in = True

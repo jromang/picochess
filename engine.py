@@ -20,11 +20,12 @@ import logging
 import spur
 import paramiko
 import chess.uci
+from chess import Board
 from threading import Timer
 import configparser
 
 
-def get_installed_engines(engine_shell, engine_file):
+def get_installed_engines(engine_shell, engine_file: str):
     return read_engine_ini(engine_shell, (engine_file.rsplit(os.sep, 1))[0])
 
 
@@ -69,9 +70,9 @@ def read_engine_ini(engine_shell=None, engine_path=None):
 
 def write_engine_ini(engine_path=None):
 
-    def write_level_ini(engine_filename):
+    def write_level_ini(engine_filename: str):
 
-        def calc_inc(diflevel):
+        def calc_inc(diflevel: int):
             if diflevel > 1000:
                 inc = int(diflevel / 100)
             else:
@@ -114,10 +115,10 @@ def write_engine_ini(engine_path=None):
             with open(engine_path + os.sep + engine_filename + '.uci', 'w') as configfile:
                 parser.write(configfile)
 
-    def is_exe(fpath):
+    def is_exe(fpath: str):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
-    def name_build(parts, maxlength, default_name):
+    def name_build(parts: list, maxlength: int, default_name: str):
         eng_name = ''
         for token in parts:
             if len(eng_name) + len(token) > maxlength:
@@ -222,7 +223,7 @@ class Informer(chess.uci.InfoHandler):
 
 
 class UciEngine(object):
-    def __init__(self, file, hostname=None, username=None, key_file=None, password=None, home=''):
+    def __init__(self, file: str, hostname=None, username=None, key_file=None, password=None, home=''):
         super(UciEngine, self).__init__()
         try:
             self.shell = None
@@ -268,7 +269,7 @@ class UciEngine(object):
     def send(self):
         self.engine.setoption(self.options)
 
-    def level(self, options):
+    def level(self, options: dict):
         self.options = options
 
     def has_levels(self):
@@ -292,7 +293,7 @@ class UciEngine(object):
     def get_shell(self):
         return self.shell  # shell is only "not none" if its a local engine - see __init__
 
-    def position(self, game):
+    def position(self, game: Board):
         self.engine.position(game)
 
     def quit(self):
@@ -315,7 +316,7 @@ class UciEngine(object):
         self.engine.stop()
         return self.future.result()
 
-    def go(self, time_dict):
+    def go(self, time_dict: dict):
         if not self.is_waiting():
             logging.warning('engine (still) not waiting - strange!')
         self.status = EngineStatus.THINK
@@ -354,7 +355,7 @@ class UciEngine(object):
     def is_waiting(self):
         return self.status == EngineStatus.WAIT
 
-    def startup(self, options, show=True):
+    def startup(self, options: dict, show=True):
         parser = configparser.ConfigParser()
         parser.optionxform = str
         if not options and parser.read(self.get_file() + '.uci'):

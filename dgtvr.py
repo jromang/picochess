@@ -87,7 +87,7 @@ class DgtVr(DgtIface):
         else:
             logging.debug('[vir] clock isnt running - no need for endText')
 
-    def stop_clock(self, devs):
+    def stop_clock(self, devs: set):
         if self.rt:
             print('\033[1;32;40m<{}> [vir] clock time stopped at {} - {}\033[1;37;40m'. format(time.time(), self.time_left, self.time_right))
             self.rt.stop()
@@ -95,10 +95,10 @@ class DgtVr(DgtIface):
             print('\033[1;36;40m<{}> [vir] clock not ready\033[1;37;40m'. format(time.time()))
         self._resume_clock(ClockSide.NONE)
 
-    def _resume_clock(self, side):
+    def _resume_clock(self, side: ClockSide):
         self.clock_running = (side != ClockSide.NONE)
 
-    def start_clock(self, time_left, time_right, side, devs):
+    def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
         self.time_left = hours_minutes_seconds(time_left)
         self.time_right = hours_minutes_seconds(time_right)
         self.time_side = side
