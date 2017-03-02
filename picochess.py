@@ -344,6 +344,7 @@ def main():
             if inbook:
                 DisplayMsg.show(Message.BOOK_MOVE())
             searchmoves.add(move)
+            logging.debug('move stack {}'.format(game.move_stack))  # @todo remove lateron
             text = Message.COMPUTER_MOVE(move=move, ponder=ponder, fen=fen, turn=turn, game=game.copy(), wait=inbook)
             DisplayMsg.show(text)
         else:
@@ -466,9 +467,10 @@ def main():
 
     args, unknown = parser.parse_known_args()
 
-    if args.engine is None:
+    engine_file = args.engine
+    if engine_file is None:
         el = read_engine_ini()
-        args.engine = el[0]['file']  # read the first engine filename and use it as standard
+        engine_file = el[0]['file']  # read the first engine filename and use it as standard
 
     # Enable logging
     if args.log_file:
@@ -540,7 +542,7 @@ def main():
         update_picochess(args.dgtpi, args.enable_update_reboot, dgttranslate)
 
     # Gentlemen, start your engines...
-    engine = UciEngine(args.engine, hostname=args.engine_remote_server, username=args.engine_remote_user,
+    engine = UciEngine(engine_file, hostname=args.engine_remote_server, username=args.engine_remote_user,
                        key_file=args.engine_remote_key, password=args.engine_remote_pass, home=args.engine_remote_home)
     try:
         engine_name = engine.get().name

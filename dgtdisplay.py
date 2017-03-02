@@ -288,7 +288,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 # Test the hint-move @todo find out why this can happen!
                 # At build (handle_move) and in PV this seems not to be the case
                 if self.hint_move and not message.game.is_legal(self.hint_move):
-                    logging.warning('illegal hint move {} found fen: {}'.format(self.hint_move, self.hint_fen))
+                    logging.warning('CM> illegal hint move {} found fen: {}'.format(self.hint_move, self.hint_fen))
+                    logging.warning('move stack {}'.format(message.game.move_stack))
                     self.hint_move = chess.Move.null()
                     self.hint_fen = self.hint_turn = None
                 # Display the move
@@ -426,6 +427,13 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.hint_move = message.pv[0]
                 self.hint_fen = message.game.fen()
                 self.hint_turn = message.game.turn
+                # Test the hint-move @todo find out why this can happen!
+                # At build (handle_move) and in PV this seems not to be the case
+                if self.hint_move and not message.game.is_legal(self.hint_move):
+                    logging.warning('PV> illegal hint move {} found fen: {}'.format(self.hint_move, self.hint_fen))
+                    logging.warning('move stack {}'.format(message.game.move_stack))
+                    self.hint_move = chess.Move.null()
+                    self.hint_fen = self.hint_turn = None
                 if message.mode == Mode.ANALYSIS and not self.inside_menu():
                     side = self.get_clock_side(self.hint_turn)
                     disp = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=True, maxtime=0,
