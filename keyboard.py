@@ -144,7 +144,7 @@ class TerminalDisplay(DisplayMsg, threading.Thread):
                     print('\033[1;37;40m\n' + message.fen)
                     print(message.game)
                     print(message.game.fen() + '\n\033[1;37;40m')
-                    keyboard_last_fen = message.game.fen().split(' ')[0]
+                    keyboard_last_fen = message.game.board_fen()
                     break
                 if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
                     keyboard_last_fen = None

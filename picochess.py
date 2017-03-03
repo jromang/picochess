@@ -542,7 +542,7 @@ def main():
         update_picochess(args.dgtpi, args.enable_update_reboot, dgttranslate)
 
     # Gentlemen, start your engines...
-    engine = UciEngine(engine_file, hostname=args.engine_remote_server, username=args.engine_remote_user,
+    engine = UciEngine(file=engine_file, hostname=args.engine_remote_server, username=args.engine_remote_user,
                        key_file=args.engine_remote_key, password=args.engine_remote_pass, home=args.engine_remote_home)
     try:
         engine_name = engine.get().name
@@ -613,7 +613,7 @@ def main():
                     else:
                         g = copy.deepcopy(game)
                         g.push(move)
-                        fen = g.fen().split(' ')[0]
+                        fen = g.board_fen()
                         if event.flip_board:
                             fen = fen[::-1]
                         DisplayMsg.show(Message.KEYBOARD_MOVE(fen=fen))
