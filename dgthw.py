@@ -15,12 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from chess import Board
 from dgtiface import DgtIface
 from utilities import *
 from threading import Lock
 from dgttranslate import DgtTranslate
 from dgtboard import DgtBoard
+
 
 class DgtHw(DgtIface):
     def __init__(self, dgttranslate: DgtTranslate, msg_lock: Lock, dgtboard: DgtBoard):

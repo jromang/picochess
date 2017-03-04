@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from utilities import *
+from utilities import Beep, BeepLevel, Dgt, logging, version
 
 
 class DgtTranslate(object):
@@ -57,7 +57,10 @@ class DgtTranslate(object):
             text = text.replace(i, j)
         return text.replace('@', 'R')  # replace the King "@" from fr, es, it languages
 
-    def text(self, str_code: str, msg='', devs={'ser', 'i2c', 'web'}):
+    def text(self, str_code: str, msg='', devs=None):
+        if devs is None:  # prevent W0102 error
+            devs = {'ser', 'i2c', 'web'}
+
         entxt = detxt = nltxt = frtxt = estxt = ittxt = None  # error case
 
         (code, text_id) = str_code.split('_', 1)
