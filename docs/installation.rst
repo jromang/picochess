@@ -112,6 +112,8 @@ Manual installation
 
   * vorbis-tools (``sudo apt-get install vorbis-tools``) to enable speech for versions >= 0.79
 
+  * develop libraries (``sudo apt-get install python3-dev libffi-dev libssl-dev``)
+
 2. **Get a copy of the source code**
 
   ``cd /opt``
