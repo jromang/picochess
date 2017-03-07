@@ -218,7 +218,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
         else:
             return self.user_picotalker
 
-    def say_move(self, move, fen, game):
+    def say_move(self, move, fen, g: chess.Board):
         """
         Takes a chess.Move instance and a chess.BitBoard instance and speaks the move.
         """
@@ -250,6 +250,8 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
             '7': '7.ogg',
             '8': '8.ogg'
         }
+
+        game = g.copy()
 
         bit_board = chess.Board(fen)
         san_move = bit_board.san(move)
