@@ -233,7 +233,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
             EventHandler.write_to_clients({'event': 'title', 'ip_info': self.shared['ip_info']})
 
         def transfer(game: chess.Board):
-            pgn_game = pgn.Game().from_board(game)
+            pgn_game = pgn.Game().from_board(game.copy())
             create_game_header(pgn_game)
             return pgn_game.accept(pgn.StringExporter(headers=True, comments=False, variations=False))
 
