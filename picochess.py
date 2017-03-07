@@ -363,11 +363,11 @@ def main():
                 if check_game_state(game, play_mode):
                     observe(game)
             elif interaction_mode == Mode.OBSERVE:
-                DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode))
+                DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
                 if check_game_state(game, play_mode):
                     observe(game)
             else:  # interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ):
-                DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy(), mode=interaction_mode))
+                DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
                 if check_game_state(game, play_mode):
                     analyse(game)
 

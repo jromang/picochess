@@ -63,7 +63,7 @@ class DgtBoard(object):
 
         self.board_connected_text = None
 
-    def write_board_command(self, message):
+    def write_board_command(self, message: list):
         mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
         if not mes == DgtCmd.DGT_RETURN_SERIALNR:
             logging.debug('put (ser) board [%s], length: %i', mes, len(message))
@@ -132,7 +132,7 @@ class DgtBoard(object):
                 self.clock_lock = time.time()
         return True
 
-    def _process_board_message(self, message_id, message, message_length: int):
+    def _process_board_message(self, message_id: int, message: tuple, message_length: int):
         for case in switch(message_id):
             if case(DgtMsg.DGT_MSG_VERSION):
                 if message_length != 2:
@@ -323,7 +323,7 @@ class DgtBoard(object):
             if case():  # Default
                 logging.warning("DGT message not handled [%s]", DgtMsg(message_id))
 
-    def _read_board_message(self, head):
+    def _read_board_message(self, head: bytes):
         message = ()
         header_len = 3
         header = head + self.serial.read(header_len - 1)
@@ -559,7 +559,7 @@ class DgtBoard(object):
         return True
 
     def _setup_serial_port(self):
-        def success(dev):
+        def success(dev: str):
             self.device = dev
             logging.debug('DGT board connected to %s', self.device)
             return True
