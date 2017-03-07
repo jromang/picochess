@@ -55,8 +55,8 @@ class ChannelHandler(ServerRequestHandler):
             result = {'event': 'broadcast', 'msg': 'Received position from Spectators!', 'pgn': pgn_str, 'fen': fen}
             EventHandler.write_to_clients(result)
         elif action == 'move':
-            move = self.get_argument('source') + self.get_argument('target')
-            WebServer.fire(Event.REMOTE_MOVE(move=move, fen=self.get_argument('fen')))
+            uci_move = self.get_argument('source') + self.get_argument('target')
+            WebServer.fire(Event.REMOTE_MOVE(uci_move=uci_move, fen=self.get_argument('fen')))
 
 
 class EventHandler(WebSocketHandler):
@@ -178,7 +178,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
             self.shared['ip_info'] = {}
 
     def task(self, message):
-        def oldstyle_fen(game):
+        def oldstyle_fen(game: chess.Board):
             builder = []
             builder.append(game.board_fen())
             builder.append('w' if game.turn == chess.WHITE else 'b')
@@ -188,7 +188,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
             builder.append(str(game.fullmove_number))
             return ' '.join(builder)
 
-        def create_game_header(pgn_game):
+        def create_game_header(pgn_game: chess.pgn.Game):
             pgn_game.headers['Result'] = '*'
             pgn_game.headers['White'] = 'None'
             pgn_game.headers['Black'] = 'None'

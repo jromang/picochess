@@ -79,6 +79,8 @@ class EventApi():
     NEW_PV = 'EVT_NEW_PV'  # Engine sends a new principal variation
     NEW_SCORE = 'EVT_NEW_SCORE'  # Engine sends a new score
     NEW_DEPTH = 'EVT_NEW_DEPTH'  # Engine sends a new depth
+    START_SEARCH = 'EVT_START_SEARCH'  # Engine starts the search
+    STOP_SEARCH = 'EVT_STOP_SEARCH'  # Engine stops the search
     # Timecontrol events
     OUT_OF_TIME = 'EVT_OUT_OF_TIME'  # Clock flag fallen
 
@@ -808,7 +810,7 @@ class Event():
     NEW_GAME = ClassFactory(EventApi.NEW_GAME, ['pos960'])
     DRAWRESIGN = ClassFactory(EventApi.DRAWRESIGN, ['result'])
     KEYBOARD_MOVE = ClassFactory(EventApi.KEYBOARD_MOVE, ['move', 'flip_board'])
-    REMOTE_MOVE = ClassFactory(EventApi.REMOTE_MOVE, ['move', 'fen'])
+    REMOTE_MOVE = ClassFactory(EventApi.REMOTE_MOVE, ['uci_move', 'fen'])
     SET_OPENING_BOOK = ClassFactory(EventApi.SET_OPENING_BOOK, ['book', 'book_text', 'show_ok'])
     NEW_ENGINE = ClassFactory(EventApi.NEW_ENGINE, ['eng', 'eng_text', 'options', 'show_ok'])
     SET_INTERACTION_MODE = ClassFactory(EventApi.SET_INTERACTION_MODE, ['mode', 'mode_text', 'show_ok'])
@@ -825,10 +827,12 @@ class Event():
     KEYBOARD_BUTTON = ClassFactory(EventApi.KEYBOARD_BUTTON, ['button', 'dev'])
     KEYBOARD_FEN = ClassFactory(EventApi.KEYBOARD_FEN, ['fen'])
     # Engine events
-    BEST_MOVE = ClassFactory(EventApi.BEST_MOVE, ['result', 'inbook'])
+    BEST_MOVE = ClassFactory(EventApi.BEST_MOVE, ['move', 'ponder', 'inbook'])
     NEW_PV = ClassFactory(EventApi.NEW_PV, ['pv'])
     NEW_SCORE = ClassFactory(EventApi.NEW_SCORE, ['score', 'mate'])
     NEW_DEPTH = ClassFactory(EventApi.NEW_DEPTH, ['depth'])
+    START_SEARCH = ClassFactory(EventApi.START_SEARCH, ['engine_status'])
+    STOP_SEARCH = ClassFactory(EventApi.STOP_SEARCH, ['engine_status'])
     # Timecontrol events
     OUT_OF_TIME = ClassFactory(EventApi.OUT_OF_TIME, ['color'])
 

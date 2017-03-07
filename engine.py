@@ -323,7 +323,8 @@ class UciEngine(object):
         self.show_best = True
         time_dict['async_callback'] = self.callback
 
-        DisplayMsg.show(Message.SEARCH_STARTED(engine_status=self.status))
+        # DisplayMsg.show(Message.SEARCH_STARTED(engine_status=self.status))
+        Observable.fire(Event.START_SEARCH(engine_status=self.status))
         self.future = self.engine.go(**time_dict)
         return self.future
 
@@ -333,15 +334,17 @@ class UciEngine(object):
         self.status = EngineStatus.PONDER
         self.show_best = False
 
-        DisplayMsg.show(Message.SEARCH_STARTED(engine_status=self.status))
+        # DisplayMsg.show(Message.SEARCH_STARTED(engine_status=self.status))
+        Observable.fire(Event.START_SEARCH(engine_status=self.status))
         self.future = self.engine.go(ponder=True, infinite=True, async_callback=self.callback)
         return self.future
 
     def callback(self, command):
         self.res = command.result()
-        DisplayMsg.show(Message.SEARCH_STOPPED(engine_status=self.status))
+        # DisplayMsg.show(Message.SEARCH_STOPPED(engine_status=self.status))
+        Observable.fire(Event.STOP_SEARCH(engine_status=self.status))
         if self.show_best:
-            Observable.fire(Event.BEST_MOVE(result=self.res, inbook=False))
+            Observable.fire(Event.BEST_MOVE(move=self.res.bestmove, ponder=self.res.ponder, inbook=False))
         else:
             logging.debug('event best_move not fired')
         self.status = EngineStatus.WAIT

@@ -52,25 +52,24 @@ class AlternativeMover:
     def __init__(self):
         self.excludemoves = set()
 
-    def all(self, game):
+    def all(self, game: chess.Board):
         searchmoves = set(game.legal_moves) - self.excludemoves
         if not searchmoves:
             self.reset()
             return set(game.legal_moves)
         return searchmoves
 
-    def book(self, bookreader, game):
+    def book(self, bookreader, game_copy: chess.Board):
         try:
-            bm = bookreader.weighted_choice(game, self.excludemoves)
+            bm = bookreader.weighted_choice(game_copy, self.excludemoves)
         except IndexError:
             return None
 
         book_move = bm.move()
         self.add(book_move)
-        g = copy.deepcopy(game)
-        g.push(book_move)
+        game_copy.push(book_move)
         try:
-            bp = bookreader.weighted_choice(g)
+            bp = bookreader.weighted_choice(game_copy)
             book_ponder = bp.move()
         except IndexError:
             book_ponder = None
@@ -90,29 +89,29 @@ def main():
         info = {'location': location, 'ext_ip': ext_ip, 'int_ip': int_ip, 'version': version}
         DisplayMsg.show(Message.IP_INFO(info=info))
 
-    def compute_legal_fens(g):
+    def compute_legal_fens(game_copy: chess.Board):
         """
         Compute a list of legal FENs for the given game.
-        :param g: The game
+        :param game_copy: The game
         :return: A list of legal FENs
         """
         fens = []
-        for move in g.legal_moves:
-            g.push(move)
-            fens.append(g.board_fen())
-            g.pop()
+        for move in game_copy.legal_moves:
+            game_copy.push(move)
+            fens.append(game_copy.board_fen())
+            game_copy.pop()
         return fens
 
-    def think(game, tc):
+    def think(game: chess.Board, tc: TimeControl):
         """
         Start a new search on the current game.
         If a move is found in the opening book, fire an event in a few seconds.
         :return:
         """
         start_clock()
-        book_move = searchmoves.book(bookreader, game)
-        if book_move:
-            Observable.fire(Event.BEST_MOVE(result=book_move, inbook=True))
+        book_res = searchmoves.book(bookreader, game.copy())
+        if book_res:
+            Observable.fire(Event.BEST_MOVE(move=book_res.bestmove, ponder=book_res.ponder, inbook=True))
         else:
             while not engine.is_waiting():
                 time.sleep(0.1)
@@ -122,7 +121,7 @@ def main():
             uci_dict['searchmoves'] = searchmoves.all(game)
             engine.go(uci_dict)
 
-    def analyse(game):
+    def analyse(game: chess.Board):
         """
         Start a new ponder search on the current game.
         :return:
@@ -130,7 +129,7 @@ def main():
         engine.position(copy.deepcopy(game))
         engine.ponder()
 
-    def observe(game):
+    def observe(game: chess.Board):
         """
         Starts a new ponder search on the current game.
         :return:
@@ -170,7 +169,7 @@ def main():
         else:
             logging.warning('wrong mode: {}'.format(interaction_mode))
 
-    def check_game_state(game, play_mode):
+    def check_game_state(game: chess.Board, play_mode: PlayMode):
         """
         Check if the game has ended or not ; it also sends Message to Displays if the game has ended.
         :param game:
@@ -195,7 +194,7 @@ def main():
             DisplayMsg.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=game.copy()))
             return False
 
-    def user_move(move):
+    def user_move(move: chess.Move):
         logging.debug('user move [%s]', move)
         if move not in game.legal_moves:
             logging.warning('Illegal move [%s]', move)
@@ -206,7 +205,7 @@ def main():
         return (play_mode == PlayMode.USER_WHITE and turn == chess.BLACK) \
                or (play_mode == PlayMode.USER_BLACK and turn == chess.WHITE)
 
-    def process_fen(fen):
+    def process_fen(fen: str):
         nonlocal last_computer_fen
         nonlocal last_legal_fens
         nonlocal searchmoves
@@ -249,7 +248,7 @@ def main():
             if interaction_mode == Mode.NORMAL or interaction_mode == Mode.REMOTE:
                 legal_fens = []
             else:
-                legal_fens = compute_legal_fens(game)
+                legal_fens = compute_legal_fens(game.copy())
 
         # legal move
         elif fen in legal_fens:
@@ -260,7 +259,7 @@ def main():
             if interaction_mode == Mode.NORMAL or interaction_mode == Mode.REMOTE:
                 legal_fens = []
             else:
-                legal_fens = compute_legal_fens(game)
+                legal_fens = compute_legal_fens(game.copy())
 
         # Player had done the computer or remote move on the board
         elif last_computer_fen and fen == game.board_fen():
@@ -273,7 +272,7 @@ def main():
                 if time_control.mode != TimeMode.FIXED:
                     start_clock()
                 DisplayMsg.show(Message.COMPUTER_MOVE_DONE_ON_BOARD())
-                legal_fens = compute_legal_fens(game)
+                legal_fens = compute_legal_fens(game.copy())
             else:
                 legal_fens = []
             last_legal_fens = []
@@ -301,7 +300,7 @@ def main():
                             if check_game_state(game, play_mode):
                                 think(game, time_control)
                     else:
-                        legal_fens = compute_legal_fens(game)
+                        legal_fens = compute_legal_fens(game.copy())
 
                     # changed cause dont want to autostart clock here too
                     if interaction_mode == Mode.NORMAL:
@@ -327,7 +326,7 @@ def main():
                 # observe(game)  # dont want to autostart the clock => we are in newgame situation
                 analyse(game)
 
-    def handle_move(move, ponder=None, inbook=False):
+    def handle_move(move: chess.Move, ponder=None, inbook=False):
         nonlocal game
         nonlocal last_computer_fen
         nonlocal searchmoves
@@ -344,7 +343,7 @@ def main():
             if inbook:
                 DisplayMsg.show(Message.BOOK_MOVE())
             searchmoves.add(move)
-            logging.warning('ponder move {} fen: {}'.format(ponder, fen))
+            logging.debug('ponder move {} fen: {}'.format(ponder, fen))
             logging.debug('move stack {}'.format(game.move_stack))  # @todo remove lateron
             text = Message.COMPUTER_MOVE(move=move, ponder=ponder, fen=fen, turn=turn, game=game.copy(), wait=inbook)
             DisplayMsg.show(text)
@@ -371,7 +370,7 @@ def main():
                 if check_game_state(game, play_mode):
                     analyse(game)
 
-    def transfer_time(time_list):
+    def transfer_time(time_list: list):
         def num(ts):
             try:
                 return int(ts)
@@ -556,7 +555,7 @@ def main():
 
     # Startup - internal
     game = chess.Board()  # Create the current game
-    legal_fens = compute_legal_fens(game)  # Compute the legal FENs
+    legal_fens = compute_legal_fens(game.copy())  # Compute the legal FENs
     all_books = get_opening_books()
     try:
         book_index = [book['file'] for book in all_books].index(args.book)
@@ -612,9 +611,9 @@ def main():
                     if move not in game.legal_moves:
                         logging.warning('illegal move [%s]', move)
                     else:
-                        g = copy.deepcopy(game)
-                        g.push(move)
-                        fen = g.board_fen()
+                        game_copy = game.copy()
+                        game_copy.push(move)
+                        fen = game_copy.board_fen()
                         if event.flip_board:
                             fen = fen[::-1]
                         DisplayMsg.show(Message.KEYBOARD_MOVE(fen=fen))
@@ -651,7 +650,7 @@ def main():
                             engine_name = engine.get().name
                         except AttributeError:
                             # New engine failed to start, restart old engine
-                            logging.error("new engine failed to start, reverting to %s", old_file)
+                            logging.error('new engine failed to start, reverting to {}'.format(old_file))
                             engine_fallback = True
                             event.options = {}  # Reset options. This will load the last(=strongest?) level
                             engine = UciEngine(old_file)
@@ -678,7 +677,7 @@ def main():
                     break
 
                 if case(EventApi.SETUP_POSITION):
-                    logging.debug("setting up custom fen: {}".format(event.fen))
+                    logging.debug('setting up custom fen: {}'.format(event.fen))
                     uci960 = event.uci960
 
                     if game.move_stack:
@@ -690,7 +689,7 @@ def main():
                     if engine.has_chess960():
                         engine.option('UCI_Chess960', uci960)
                         engine.send()
-                    legal_fens = compute_legal_fens(game)
+                    legal_fens = compute_legal_fens(game.copy())
                     last_legal_fens = []
                     last_computer_fen = None
                     time_control.reset()
@@ -717,7 +716,7 @@ def main():
                         if engine.has_chess960():
                             engine.option('UCI_Chess960', uci960)
                             engine.send()
-                        legal_fens = compute_legal_fens(game)
+                        legal_fens = compute_legal_fens(game.copy())
                         last_legal_fens = []
                         last_computer_fen = None
                         time_control.reset()
@@ -775,7 +774,7 @@ def main():
                             legal_fens = []
                         else:
                             start_clock()
-                            legal_fens = compute_legal_fens(game)
+                            legal_fens = compute_legal_fens(game.copy())
 
                         text = dgttranslate.text(play_mode.value)
                         DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode, play_mode_text=text))
@@ -793,12 +792,12 @@ def main():
 
                 if case(EventApi.REMOTE_MOVE):
                     if interaction_mode == Mode.REMOTE:
-                        handle_move(move=chess.Move.from_uci(event.move))
-                        legal_fens = compute_legal_fens(game)
+                        handle_move(move=chess.Move.from_uci(event.uci_move))
+                        legal_fens = compute_legal_fens(game.copy())
                     break
 
                 if case(EventApi.BEST_MOVE):
-                    handle_move(move=event.result.bestmove, ponder=event.result.ponder, inbook=event.inbook)
+                    handle_move(move=event.move, ponder=event.ponder, inbook=event.inbook)
                     break
 
                 if case(EventApi.NEW_PV):
@@ -815,6 +814,14 @@ def main():
 
                 if case(EventApi.NEW_DEPTH):
                     DisplayMsg.show(Message.NEW_DEPTH(depth=event.depth))
+                    break
+
+                if case(EventApi.START_SEARCH):
+                    DisplayMsg.show(Message.SEARCH_STARTED(engine_status=event.engine_status))
+                    break
+
+                if case(EventApi.STOP_SEARCH):
+                    DisplayMsg.show(Message.SEARCH_STOPPED(engine_status=event.engine_status))
                     break
 
                 if case(EventApi.SET_INTERACTION_MODE):
