@@ -314,7 +314,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     game_text = 'C10_newgame' if pos960 is None or pos960 == 518 else 'C10_ucigame'
                     DisplayDgt.show(self.dgttranslate.text(game_text, str(pos960)))
                 if self.dgtmenu.get_mode() in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
-                    time_left, time_right = message.time_control.current_clock_time(flip_board=self.dgtmenu.get_flip_board())
+                    time_left, time_right = self.time_control.current_clock_time(flip_board=self.dgtmenu.get_flip_board())
                     DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE,
                                                     wait=True, devs={'ser', 'i2c', 'web'}))
                 break
