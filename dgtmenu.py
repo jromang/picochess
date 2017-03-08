@@ -660,8 +660,8 @@ class DgtMenu(Observable):
             if case(MenuState.TIME_BLITZ_CTRL):
                 # do action!
                 time_text = self.dgttranslate.text('B10_oktime')
-                time_control = self.tc_blitz_map[list(self.tc_blitz_map)[self.menu_time_blitz]]
-                self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=time_text, show_ok=True))
+                tc = self.tc_blitz_map[list(self.tc_blitz_map)[self.menu_time_blitz]] # type: TimeControl
+                self.fire(Event.SET_TIME_CONTROL(tc_init=tc.get_init_parameters(), time_text=time_text, show_ok=True))
                 text = self.save_choices()
                 break
             if case(MenuState.TIME_FISCH):
@@ -670,8 +670,8 @@ class DgtMenu(Observable):
             if case(MenuState.TIME_FISCH_CTRL):
                 # do action!
                 time_text = self.dgttranslate.text('B10_oktime')
-                time_control = self.tc_fisch_map[list(self.tc_fisch_map)[self.menu_time_fisch]]
-                self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=time_text, show_ok=True))
+                tc = self.tc_fisch_map[list(self.tc_fisch_map)[self.menu_time_fisch]]  # type: TimeControl
+                self.fire(Event.SET_TIME_CONTROL(tc_init=tc.get_init_parameters(), time_text=time_text, show_ok=True))
                 text = self.save_choices()
                 break
             if case(MenuState.TIME_FIXED):
@@ -680,8 +680,8 @@ class DgtMenu(Observable):
             if case(MenuState.TIME_FIXED_CTRL):
                 # do action!
                 time_text = self.dgttranslate.text('B10_oktime')
-                time_control = self.tc_fixed_map[list(self.tc_fixed_map)[self.menu_time_fixed]]
-                self.fire(Event.SET_TIME_CONTROL(time_control=time_control, time_text=time_text, show_ok=True))
+                tc = self.tc_fixed_map[list(self.tc_fixed_map)[self.menu_time_fixed]]  # type: TimeControl
+                self.fire(Event.SET_TIME_CONTROL(tc_init=tc.get_init_parameters(), time_text=time_text, show_ok=True))
                 text = self.save_choices()
                 break
             if case(MenuState.BOOK):

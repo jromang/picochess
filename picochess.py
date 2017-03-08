@@ -165,7 +165,7 @@ def main():
     def start_clock():
         if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
             time_control.start(game.turn)
-            DisplayMsg.show(Message.CLOCK_START(turn=game.turn, time_control=time_control, devs={'ser', 'i2c', 'web'}))
+            DisplayMsg.show(Message.CLOCK_START(turn=game.turn, tc_init=time_control.get_init_parameters(), devs={'ser', 'i2c', 'web'}))
         else:
             logging.warning('wrong mode: {}'.format(interaction_mode))
 
@@ -696,7 +696,7 @@ def main():
                     searchmoves.reset()
                     game_declared = False
                     set_wait_state()
-                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, game=game.copy(), newgame=True))
+                    DisplayMsg.show(Message.START_NEW_GAME(game=game.copy(), newgame=True))
                     break
 
                 if case(EventApi.NEW_GAME):
@@ -725,7 +725,7 @@ def main():
                         set_wait_state()
                     else:
                         logging.debug('no need to start a new game')
-                    DisplayMsg.show(Message.START_NEW_GAME(time_control=time_control, game=game.copy(), newgame=newgame))
+                    DisplayMsg.show(Message.START_NEW_GAME(game=game.copy(), newgame=newgame))
                     break
 
                 if case(EventApi.PAUSE_RESUME):
@@ -846,7 +846,8 @@ def main():
                     break
 
                 if case(EventApi.SET_TIME_CONTROL):
-                    time_control = event.time_control
+                    time_control.stop(log=False)
+                    time_control = TimeControl(**event.tc_init)
                     config = ConfigObj('picochess.ini')
                     if time_control.mode == TimeMode.BLITZ:
                         config['time'] = '{:d} 0'.format(time_control.minutes_per_game)
@@ -855,7 +856,7 @@ def main():
                     elif time_control.mode == TimeMode.FIXED:
                         config['time'] = '{:d}'.format(time_control.seconds_per_move)
                     config.write()
-                    DisplayMsg.show(Message.TIME_CONTROL(time_text=event.time_text, show_ok=event.show_ok, time_control=time_control))
+                    DisplayMsg.show(Message.TIME_CONTROL(time_text=event.time_text, show_ok=event.show_ok, tc_init=time_control.get_init_parameters()))
                     break
 
                 if case(EventApi.OUT_OF_TIME):

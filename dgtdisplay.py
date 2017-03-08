@@ -308,6 +308,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 # self._reset_menu_results()
                 self.engine_finished = False
                 self.show_setup_pieces_msg = False
+                self.time_control.reset()
                 if message.newgame:
                     pos960 = message.game.chess960_pos()
                     game_text = 'C10_newgame' if pos960 is None or pos960 == 518 else 'C10_ucigame'
@@ -371,7 +372,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if case(MessageApi.TIME_CONTROL):
                 if not self.dgtmenu.get_confirm() or not message.show_ok:
                     DisplayDgt.show(message.time_text)
-                tc = self.time_control = message.time_control
+                tc = self.time_control = TimeControl(**message.tc_init)
                 time_left, time_right = tc.current_clock_time(flip_board=self.dgtmenu.get_flip_board())
                 DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE,
                                                 wait=True, devs={'ser', 'i2c', 'web'}))
@@ -481,7 +482,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 logging.debug('Search stopped')
                 break
             if case(MessageApi.CLOCK_START):
-                tc = self.time_control = message.time_control
+                tc = self.time_control = TimeControl(**message.tc_init)
                 if tc.mode == TimeMode.FIXED:
                     time_left = time_right = tc.seconds_per_move
                 else:
@@ -603,24 +604,24 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     self.dgtmenu.set_time_mode(TimeMode.FIXED)
                     self.dgtmenu.set_time_fixed(list(self.dgtmenu.tc_fixed_map.keys()).index(fen))
                     text = self.dgttranslate.text('M10_tc_fixed', self.dgtmenu.tc_fixed_list[self.dgtmenu.get_time_fixed()])
-                    self.fire(Event.SET_TIME_CONTROL(time_control=self.dgtmenu.tc_fixed_map[fen],
-                                                     time_text=text, show_ok=False))
+                    tc = self.dgtmenu.tc_fixed_map[fen]  # type: TimeControl
+                    self.fire(Event.SET_TIME_CONTROL(tc_init=tc.get_init_parameters(), time_text=text, show_ok=False))
                     self._reset_menu_results()
                 elif fen in self.dgtmenu.tc_blitz_map:
                     logging.debug('Map-Fen: Time control blitz')
                     self.dgtmenu.set_time_mode(TimeMode.BLITZ)
                     self.dgtmenu.set_time_blitz(list(self.dgtmenu.tc_blitz_map.keys()).index(fen))
                     text = self.dgttranslate.text('M10_tc_blitz', self.dgtmenu.tc_blitz_list[self.dgtmenu.get_time_blitz()])
-                    self.fire(Event.SET_TIME_CONTROL(time_control=self.dgtmenu.tc_blitz_map[fen],
-                                                     time_text=text, show_ok=False))
+                    tc = self.dgtmenu.tc_blitz_map[fen]  # type: TimeControl
+                    self.fire(Event.SET_TIME_CONTROL(tc_init= tc.get_init_parameters(), time_text=text, show_ok=False))
                     self._reset_menu_results()
                 elif fen in self.dgtmenu.tc_fisch_map:
                     logging.debug('Map-Fen: Time control fischer')
                     self.dgtmenu.set_time_mode(TimeMode.FISCHER)
                     self.dgtmenu.set_time_fisch(list(self.dgtmenu.tc_fisch_map.keys()).index(fen))
                     text = self.dgttranslate.text('M10_tc_fisch', self.dgtmenu.tc_fisch_list[self.dgtmenu.get_time_fisch()])
-                    self.fire(Event.SET_TIME_CONTROL(time_control=self.dgtmenu.tc_fisch_map[fen],
-                                                     time_text=text, show_ok=False))
+                    tc = self.dgtmenu.tc_fisch_map[fen]  # type: TimeControl
+                    self.fire(Event.SET_TIME_CONTROL(tc_init=tc.get_init_parameters(), time_text=text, show_ok=False))
                     self._reset_menu_results()
                 elif fen in shutdown_map:
                     logging.debug('Map-Fen: shutdown')

@@ -41,6 +41,9 @@ class TimeControl(object):
         return self.mode == other.mode and self.seconds_per_move == other.seconds_per_move and \
                self.minutes_per_game == other.minutes_per_game and self.fischer_increment == other.fischer_increment
 
+    def get_init_parameters(self):
+        return {'mode': self.mode, 'fixed': self.seconds_per_move, 'blitz': self.minutes_per_game, 'fischer': self.fischer_increment}
+
     def reset(self):
         """Resets the clock's times for both players"""
         if self.mode == TimeMode.BLITZ:
@@ -54,6 +57,10 @@ class TimeControl(object):
                                chess.BLACK: float(self.seconds_per_move)}
         self.active_color = None
 
+    def log_time(self):
+        time_w, time_b = self.current_clock_time(flip_board=False)
+        return hours_minutes_seconds(time_w), hours_minutes_seconds(time_b)
+
     def current_clock_time(self, flip_board=False):
         """Returns the startup time for setting the clock at beginning."""
         ct = copy.copy(self.clock_time)
@@ -66,6 +73,7 @@ class TimeControl(object):
 
     def _out_of_time(self, time_start):
         """Fires an OUT_OF_TIME event."""
+        self.run_color = None
         if self.mode == TimeMode.FIXED:
             logging.debug('timeout - but in "MoveTime" mode, dont fire event')
         elif self.active_color is not None:
@@ -76,31 +84,25 @@ class TimeControl(object):
     def add_inc(self, color):
         if self.mode == TimeMode.FISCHER:
             # log times - issue #184
-            time_w, time_b = self.current_clock_time(flip_board=False)
-            w_hms = hours_minutes_seconds(time_w)
-            b_hms = hours_minutes_seconds(time_b)
+            w_hms, b_hms = self.log_time()
             logging.info('before internal time w:{} - b:{}'.format(w_hms, b_hms))
 
             self.clock_time[color] += self.fischer_increment
 
             # log times - issue #184
-            time_w, time_b = self.current_clock_time(flip_board=False)
-            w_hms = hours_minutes_seconds(time_w)
-            b_hms = hours_minutes_seconds(time_b)
+            w_hms, b_hms = self.log_time()
             logging.info('after internal time w:{} - b:{}'.format(w_hms, b_hms))
 
-    def start(self, color):
+    def start(self, color, log=True):
         """Starts the internal clock."""
-        if self.active_color is None:
+        if not self.is_ticking():
             if self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
                 self.active_color = color
                 self.start_time = time.time()
 
-            # log times
-            time_w, time_b = self.current_clock_time(flip_board=False)
-            w_hms = hours_minutes_seconds(time_w)
-            b_hms = hours_minutes_seconds(time_b)
-            logging.info('start internal time w:{} - b:{}'.format(w_hms, b_hms))
+            if log:
+                w_hms, b_hms = self.log_time()
+                logging.info('start internal time w:{} - b:{}'.format(w_hms, b_hms))
 
             # Only start thread if not already started for same color, and the player has not already lost on time
             if self.clock_time[color] > 0 and self.active_color is not None and self.run_color != self.active_color:
@@ -109,28 +111,25 @@ class TimeControl(object):
                 self.timer.start()
                 self.run_color = self.active_color
 
-    def stop(self):
+    def stop(self, log=True):
         """Stop the internal clock."""
-        if self.active_color is not None:
+        if self.is_ticking():
             if self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
-                # log times
-                time_w, time_b = self.current_clock_time(flip_board=False)
-                w_hms = hours_minutes_seconds(time_w)
-                b_hms = hours_minutes_seconds(time_b)
-                logging.info('old internal time w:{} b:{}'.format(w_hms, b_hms))
+                if log:
+                    w_hms, b_hms = self.log_time()
+                    logging.info('old internal time w:{} b:{}'.format(w_hms, b_hms))
 
                 self.timer.cancel()
                 self.timer.join()
                 used_time = floor((time.time() - self.start_time)*10)/10
-                logging.info('used time: {} secs'.format(used_time))
+                if log:
+                    logging.info('used time: {} secs'.format(used_time))
                 self.clock_time[self.active_color] -= used_time
 
-                # log times
-                time_w, time_b = self.current_clock_time(flip_board=False)
-                w_hms = hours_minutes_seconds(time_w)
-                b_hms = hours_minutes_seconds(time_b)
-                logging.info('new internal time w:{} b:{}'.format(w_hms, b_hms))
-                self.active_color = None
+                if log:
+                    w_hms, b_hms = self.log_time()
+                    logging.info('new internal time w:{} b:{}'.format(w_hms, b_hms))
+                self.run_color = self.active_color = None
 
     def is_ticking(self):
         """Is the internal clock running?"""
