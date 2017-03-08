@@ -24,6 +24,7 @@ import urllib.request
 import socket
 import json
 import time
+import copy
 from threading import Timer
 
 import configparser
@@ -646,7 +647,7 @@ class DisplayMsg(object):  # Display devices (DGT XL clock, Piface LCD, pgn file
     @staticmethod
     def show(message):  # Sends a message on each display device
         for display in msgdisplay_devices:
-            display.msg_queue.put(message)
+            display.msg_queue.put(copy.deepcopy(message))
 
 
 class DisplayDgt(object):  # Display devices (DGT XL clock, Piface LCD, pgn file...)
@@ -658,7 +659,7 @@ class DisplayDgt(object):  # Display devices (DGT XL clock, Piface LCD, pgn file
     @staticmethod
     def show(message):  # Sends a message on each display device
         for display in dgtdisplay_devices:
-            display.dgt_queue.put(message)
+            display.dgt_queue.put(copy.deepcopy(message))
 
 
 # switch/case instruction in python

@@ -139,7 +139,7 @@ class PgnDisplay(DisplayMsg, threading.Thread):
 
     def save_and_email_pgn(self, message):
         logging.debug('Saving game to [' + self.file_name + ']')
-        pgn_game = chess.pgn.Game().from_board(message.game.copy())
+        pgn_game = chess.pgn.Game().from_board(message.game)
 
         # Headers
         pgn_game.headers['Event'] = 'PicoChess game'
