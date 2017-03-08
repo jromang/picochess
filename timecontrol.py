@@ -24,25 +24,29 @@ from math import floor
 
 
 class TimeControl(object):
-    def __init__(self, mode=TimeMode.FIXED, fixed=0, blitz=0, fischer=0):
+    def __init__(self, mode=TimeMode.FIXED, fixed=0, blitz=0, fischer=0, clock_time=None):
         super(TimeControl, self).__init__()
         self.mode = mode
         self.seconds_per_move = fixed
         self.minutes_per_game = blitz
         self.fischer_increment = fischer
+        self.clock_time = clock_time
+
         self.timer = None
         self.run_color = None
-        self.clock_time = None
         self.active_color = None
         self.start_time = None
-        self.reset()
+
+        if not clock_time:
+            self.reset()
 
     def __eq__(self, other):
         return self.mode == other.mode and self.seconds_per_move == other.seconds_per_move and \
                self.minutes_per_game == other.minutes_per_game and self.fischer_increment == other.fischer_increment
 
     def get_init_parameters(self):
-        return {'mode': self.mode, 'fixed': self.seconds_per_move, 'blitz': self.minutes_per_game, 'fischer': self.fischer_increment}
+        return {'mode': self.mode, 'fixed': self.seconds_per_move, 'blitz': self.minutes_per_game,
+                'fischer': self.fischer_increment, 'clock_time': self.clock_time}
 
     def reset(self):
         """Resets the clock's times for both players"""
