@@ -343,8 +343,6 @@ def main():
             if inbook:
                 DisplayMsg.show(Message.BOOK_MOVE())
             searchmoves.add(move)
-            logging.debug('ponder move {} fen: {}'.format(ponder, fen))
-            logging.debug('move stack {}'.format(game.move_stack))  # @todo remove lateron
             text = Message.COMPUTER_MOVE(move=move, ponder=ponder, fen=fen, turn=turn, game=game.copy(), wait=inbook)
             DisplayMsg.show(text)
         else:
