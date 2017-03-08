@@ -187,6 +187,13 @@ class DgtTranslate(object):
             frtxt = Dgt.DISPLAY_TEXT(l='pas d IP   ', m='pas d IP', s='pd ip ')
             estxt = Dgt.DISPLAY_TEXT(l='no IP dir  ', m='no IP   ', s='no ip ')
             ittxt = Dgt.DISPLAY_TEXT(l='no indir ip', m='no ip   ', s='no ip ')
+        if text_id == 'exitmenu':
+            entxt = Dgt.DISPLAY_TEXT(l='exit menu  ', m='exitmenu', s='exit m')
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
         if text_id == 'errormenu':
             entxt = Dgt.DISPLAY_TEXT(l='error menu ', m='err menu', s='errmen')
             detxt = Dgt.DISPLAY_TEXT(l='error Menu ', m='err Menu', s='errmen')

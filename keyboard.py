@@ -123,7 +123,7 @@ class KeyboardInput(Observable, threading.Thread):
                         # move => fen => virtual board sends fen
                         move = chess.Move.from_uci(cmd)
                         self.fire(Event.KEYBOARD_MOVE(move=move, flip_board=self.flip_board))
-            except ValueError as e:
+            except (ValueError, IndexError):
                 logging.warning('Invalid user input [%s]', raw)
 
 

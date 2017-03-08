@@ -43,8 +43,13 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
         self._reset_moves_and_score()
 
-    def _reset_menu_results(self):
-        self.dgtmenu.enter_top_menu()
+    def _exit_menu(self):
+        if self.dgtmenu.inside_menu():
+            self.dgtmenu.enter_top_menu()
+            if not self.dgtmenu.get_confirm():
+                DisplayDgt.show(self.dgttranslate.text('K05_exitmenu'))
+                return True
+        return False
 
     def _power_off(self, dev='web'):
         DisplayDgt.show(self.dgttranslate.text('Y10_goodbye'))
@@ -300,7 +305,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     DisplayDgt.show(Dgt.LIGHT_CLEAR())
                     self.leds_are_on = False
                 self._reset_moves_and_score()
-                # self._reset_menu_results()
                 self.engine_finished = False
                 self.show_setup_pieces_msg = False
                 self.time_control.reset()
@@ -326,7 +330,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.engine_finished = False
                 if not self.dgtmenu.get_confirm():
                     DisplayDgt.show(self.dgttranslate.text('K05_okpico'))
-                # self._reset_menu_results()
+                if self.time_control.mode == TimeMode.FIXED:  # go back to a stoped time display
+                    DisplayDgt.show(Dgt.DISPLAY_TIME(force=False, wait=True, devs={'ser', 'i2c', 'web'}))
                 break
             if case(MessageApi.USER_MOVE):
                 if self.leds_are_on:  # can happen in case of a sliding move
@@ -546,8 +551,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         text = book['text']
                         text.beep = self.dgttranslate.bl(BeepLevel.MAP)
                         text.maxtime = 1
+                        text.wait = self._exit_menu()
                         self.fire(Event.SET_OPENING_BOOK(book=book, book_text=text, show_ok=False))
-                        self._reset_menu_results()
                     except IndexError:
                         pass
                 elif fen in engine_map:
@@ -560,6 +565,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             eng_text = eng['text']
                             eng_text.beep = self.dgttranslate.bl(BeepLevel.MAP)
                             eng_text.maxtime = 1
+                            eng_text.wait = self._exit_menu()
                             if level_dict:
                                 if self.dgtmenu.get_engine_level() is None or len(level_dict) <= self.dgtmenu.get_engine_level():
                                     self.dgtmenu.set_engine_level(len(level_dict) - 1)
@@ -574,7 +580,6 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                             config.write()
                             self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options=options, show_ok=False))
                             self.dgtmenu.set_engine_restart(True)
-                            self._reset_menu_results()
                         except IndexError:
                             pass
                     else:
@@ -585,32 +590,32 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     text = self.dgttranslate.text(mode_map[fen].value)
                     text.beep = self.dgttranslate.bl(BeepLevel.MAP)
                     text.maxtime = 1  # wait 1sec not forever
+                    text.wait = self._exit_menu()
                     self.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], mode_text=text, show_ok=False))
-                    self._reset_menu_results()
                 elif fen in self.dgtmenu.tc_fixed_map:
                     logging.debug('Map-Fen: Time control fixed')
                     self.dgtmenu.set_time_mode(TimeMode.FIXED)
                     self.dgtmenu.set_time_fixed(list(self.dgtmenu.tc_fixed_map.keys()).index(fen))
                     text = self.dgttranslate.text('M10_tc_fixed', self.dgtmenu.tc_fixed_list[self.dgtmenu.get_time_fixed()])
+                    text.wait = self._exit_menu()
                     tc = self.dgtmenu.tc_fixed_map[fen]  # type: TimeControl
                     self.fire(Event.SET_TIME_CONTROL(tc_init=tc.get_init_parameters(), time_text=text, show_ok=False))
-                    self._reset_menu_results()
                 elif fen in self.dgtmenu.tc_blitz_map:
                     logging.debug('Map-Fen: Time control blitz')
                     self.dgtmenu.set_time_mode(TimeMode.BLITZ)
                     self.dgtmenu.set_time_blitz(list(self.dgtmenu.tc_blitz_map.keys()).index(fen))
                     text = self.dgttranslate.text('M10_tc_blitz', self.dgtmenu.tc_blitz_list[self.dgtmenu.get_time_blitz()])
+                    text.wait = self._exit_menu()
                     tc = self.dgtmenu.tc_blitz_map[fen]  # type: TimeControl
-                    self.fire(Event.SET_TIME_CONTROL(tc_init= tc.get_init_parameters(), time_text=text, show_ok=False))
-                    self._reset_menu_results()
+                    self.fire(Event.SET_TIME_CONTROL(tc_init=tc.get_init_parameters(), time_text=text, show_ok=False))
                 elif fen in self.dgtmenu.tc_fisch_map:
                     logging.debug('Map-Fen: Time control fischer')
                     self.dgtmenu.set_time_mode(TimeMode.FISCHER)
                     self.dgtmenu.set_time_fisch(list(self.dgtmenu.tc_fisch_map.keys()).index(fen))
                     text = self.dgttranslate.text('M10_tc_fisch', self.dgtmenu.tc_fisch_list[self.dgtmenu.get_time_fisch()])
+                    text.wait = self._exit_menu()
                     tc = self.dgtmenu.tc_fisch_map[fen]  # type: TimeControl
                     self.fire(Event.SET_TIME_CONTROL(tc_init=tc.get_init_parameters(), time_text=text, show_ok=False))
-                    self._reset_menu_results()
                 elif fen in shutdown_map:
                     logging.debug('Map-Fen: shutdown')
                     self._power_off()
