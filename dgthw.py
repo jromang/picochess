@@ -16,7 +16,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from dgtiface import DgtIface
-from utilities import *
+from utilities import hours_minutes_seconds
+import logging
+from dgtutil import ClockIcons, ClockSide, DgtClk, DgtCmd
 from threading import Lock
 from dgttranslate import DgtTranslate
 from dgtboard import DgtBoard

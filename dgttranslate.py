@@ -15,15 +15,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from utilities import Beep, BeepLevel, Dgt, logging, version
+from dgtutil import Beep, BeepLevel
+from dgtapi import Dgt
+import logging
 
 
 class DgtTranslate(object):
-    def __init__(self, beep_config: str, beep_level: int, language: str):
+    def __init__(self, beep_config: str, beep_level: int, language: str, picochess_version: str):
         self.ConfigToBeep = {'all': Beep.ON, 'none': Beep.OFF, 'some': Beep.SOME}
         self.beep = self.ConfigToBeep[beep_config]
         self.beep_level = beep_level
         self.language = language
+        self.version = picochess_version
 
     def beep_to_config(self, beep: Beep):
         return dict(zip(self.ConfigToBeep.values(), self.ConfigToBeep.keys()))[beep]
@@ -139,7 +142,7 @@ class DgtTranslate(object):
             ittxt = Dgt.DISPLAY_TEXT(l='uci960 si  ', m='960 si  ', s='960 si')
         if text_id == 'picochess':
             wait = True
-            entxt = Dgt.DISPLAY_TEXT(l='picoChs ' + version, m='pico ' + version, s='pic' + version)
+            entxt = Dgt.DISPLAY_TEXT(l='picoChs ' + self.version, m='pico ' + self.version, s='pic' + self.version)
             detxt = entxt
             nltxt = entxt
             frtxt = entxt

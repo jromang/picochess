@@ -17,7 +17,11 @@
 
 import threading
 import chess
-from utilities import *
+import logging
+from utilities import DisplayMsg, version, Observable, RepeatedTimer, switch
+from dgtapi import Message, MessageApi, Event, Dgt
+from dgtutil import EngineStatus
+from dgttranslate import DgtTranslate
 
 keyboard_last_fen = None
 

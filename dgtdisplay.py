@@ -16,12 +16,17 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import chess
-import copy
-import math
+from math import ceil
 
-from dgtiface import *
+import logging
+import copy
+import queue
+from utilities import DisplayDgt, DisplayMsg, Observable, Dgt, switch
 from dgttranslate import DgtTranslate
 from dgtmenu import DgtMenu
+from dgtutil import ClockSide, ClockIcons, BeepLevel, Mode, GameResult, TimeMode
+from dgtapi import Event, MessageApi
+
 from timecontrol import TimeControl
 from engine import get_installed_engines
 import threading
@@ -530,7 +535,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     eng = self.dgtmenu.get_engine()
                     level_dict = eng['level_dict']
                     if level_dict:
-                        inc = math.ceil(len(level_dict) / 8)
+                        inc = ceil(len(level_dict) / 8)
                         level = min(inc * level_map.index(fen), len(level_dict) - 1)
                         self.dgtmenu.set_engine_level(level)
                         msg = sorted(level_dict)[level]

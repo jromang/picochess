@@ -15,10 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import chess
 from dgtiface import DgtIface
-from utilities import *
+from utilities import DisplayMsg, hours_minutes_seconds, RepeatedTimer
+import logging
 import time
+from dgtapi import Message
+from dgtutil import ClockSide
 
 
 class DgtVr(DgtIface):

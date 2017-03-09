@@ -20,7 +20,12 @@
 
 import threading
 import chess
-from utilities import *
+from utilities import DisplayMsg, switch
+import logging
+import subprocess
+import queue
+from dgtapi import MessageApi
+from dgtutil import GameResult, PlayMode, VoiceType
 from pathlib import Path
 
 

@@ -15,8 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from utilities import os, platform, EngineStatus, Event, Observable, Dgt, Message, DisplayMsg
+from dgtapi import Event, Dgt
+from dgtutil import EngineStatus
+from utilities import Observable
 import logging
+import os
+import platform
 import spur
 import paramiko
 import chess.uci

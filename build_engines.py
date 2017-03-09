@@ -17,6 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from engine import *
+from engine import write_engine_ini
 
 write_engine_ini()

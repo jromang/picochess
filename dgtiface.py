@@ -16,7 +16,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from chess import Board
-from utilities import *
+from utilities import hours_minutes_seconds, switch, DisplayDgt
+import logging
+import queue
+from dgtutil import ClockIcons, ClockSide
+from dgtapi import Dgt, DgtApi
 from threading import Timer, Thread, Lock
 from dgttranslate import DgtTranslate
 

@@ -26,7 +26,10 @@ import tornado.wsgi
 from tornado.ioloop import IOLoop
 from tornado.websocket import WebSocketHandler
 
-from utilities import *
+from utilities import Observable, DisplayMsg, switch
+import logging
+from dgtapi import MessageApi, Event
+from dgtutil import GameResult, PlayMode, Mode
 from web.picoweb import picoweb as pw
 
 

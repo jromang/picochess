@@ -31,7 +31,13 @@ import gc
 from engine import UciEngine, read_engine_ini
 
 from timecontrol import TimeControl
-from utilities import *
+from utilities import get_location, update_picochess, get_opening_books, shutdown, reboot
+from utilities import Observable, DisplayMsg, version, switch, evt_queue
+import logging
+import time
+import queue
+from dgtapi import Message, Event, EventApi
+from dgtutil import GameResult, TimeMode, Mode, PlayMode
 from keyboard import KeyboardInput, TerminalDisplay
 from pgn import Emailer, PgnDisplay
 from server import WebServer
@@ -486,7 +492,7 @@ def main():
     if unknown:
         logging.warning('invalid parameter given {}'.format(unknown))
 
-    dgttranslate = DgtTranslate(args.beep_config, args.beep_some_level, args.language)
+    dgttranslate = DgtTranslate(args.beep_config, args.beep_some_level, args.language, version)
     dgtmenu = DgtMenu(args.disable_confirm_message, args.ponder_interval, dgttranslate)
     time_control, time_text = transfer_time(args.time.split())
     time_text.beep = False

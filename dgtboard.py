@@ -17,17 +17,18 @@
 
 import serial as pyserial
 import struct
-from utilities import *
+
+from dgtutil import DgtAck, DgtClk, DgtCmd, DgtMsg, ClockIcons, ClockSide, enum
+from dgtapi import Message, Dgt
+
+from utilities import RepeatedTimer, switch, DisplayMsg, hours_minutes_seconds
+import logging
+
 from threading import Timer, Lock
 from fcntl import fcntl, F_GETFL, F_SETFL
-from os import O_NONBLOCK, read, path
+from os import O_NONBLOCK, read, path, listdir
 import subprocess
 import time
-
-try:
-    import enum
-except ImportError:
-    import enum34 as enum
 
 
 class DgtBoard(object):
@@ -575,9 +576,9 @@ class DgtBoard(object):
                     if self._open_serial(self.given_device):
                         return success(self.given_device)
                 else:
-                    for file in os.listdir('/dev'):
+                    for file in listdir('/dev'):
                         if file.startswith('ttyACM') or file.startswith('ttyUSB') or file == 'rfcomm0':
-                            dev = os.path.join('/dev', file)
+                            dev = path.join('/dev', file)
                             if self._open_serial(dev):
                                 return success(dev)
                     if self._open_bluetooth():

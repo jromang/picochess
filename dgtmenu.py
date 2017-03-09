@@ -17,9 +17,11 @@
 
 from configobj import ConfigObj
 from collections import OrderedDict
-from utilities import TimeMode, TimeModeLoop, Menu, MenuLoop, Mode, ModeLoop, Language, LanguageLoop
-from utilities import Settings, SettingsLoop, VoiceType, VoiceTypeLoop, SystemDisplay, SystemDisplayLoop
-from utilities import Observable, DisplayDgt, switch, Dgt, Event, ClockIcons, BeepLevel, BeepLoop
+from utilities import DisplayDgt, Observable, switch, Dgt
+from dgtutil import TimeMode, TimeModeLoop, Menu, MenuLoop, Mode, ModeLoop, Language, LanguageLoop, ClockIcons, BeepLoop
+from dgtutil import Settings, SettingsLoop, VoiceType, VoiceTypeLoop, SystemDisplay, SystemDisplayLoop, BeepLevel
+from dgtapi import Event
+
 from timecontrol import TimeControl
 from dgttranslate import DgtTranslate
 import chess

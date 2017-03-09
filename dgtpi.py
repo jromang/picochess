@@ -15,9 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from chess import Board
 from dgtiface import DgtIface
-from utilities import *
+from utilities import DisplayMsg, hours_minutes_seconds
+import logging
+import time
+from dgtapi import Message
+from dgtutil import ClockIcons, ClockSide
 from threading import Lock, Timer
 from ctypes import *
 
@@ -124,11 +127,6 @@ class DgtPi(DgtIface):
         self._display_on_dgt_pi(text, message.beep, left_icons, right_icons)
 
     def display_move_on_clock(self, message):
-        # bit_board = Board(message.fen)
-        # move_text = bit_board.san(message.move)
-        # if message.side == ClockSide.RIGHT:
-        #     move_text = move_text.rjust(8)
-        # text = self.dgttranslate.move(move_text)
         bit_board, text = self.get_san(message)
         text = '{:3d}{:s}'.format(bit_board.fullmove_number, text)
         if 'i2c' not in message.devs:
