@@ -331,7 +331,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 if not self.dgtmenu.get_confirm():
                     DisplayDgt.show(self.dgttranslate.text('K05_okpico'))
                 if self.time_control.mode == TimeMode.FIXED:  # go back to a stoped time display
-                    DisplayDgt.show(Dgt.DISPLAY_TIME(force=False, wait=True, devs={'ser', 'i2c', 'web'}))
+                    DisplayDgt.show(Dgt.DISPLAY_TIME(force=True, wait=True, devs={'ser', 'i2c', 'web'}))
                 break
             if case(MessageApi.USER_MOVE):
                 if self.leds_are_on:  # can happen in case of a sliding move
