@@ -388,7 +388,9 @@ class ClockIcons(enum.Enum):
 
 @enum.unique
 class DgtCmd(enum.Enum):
-    """ COMMAND CODES FROM PC TO BOARD """
+
+    """COMMAND CODES FROM PC TO BOARD."""
+
     # Commands not resulting in returning messages:
     DGT_SEND_RESET = 0x40  # Puts the board in IDLE mode, cancelling any UPDATE mode
     DGT_STARTBOOTLOADER = 0x4e  # Makes a long jump to the FC00 boot loader code. Start FLIP now
@@ -452,9 +454,9 @@ class DgtAck(enum.Enum):
 
 
 class DgtMsg(enum.IntEnum):
-    """
-    DESCRIPTION OF THE MESSAGES FROM BOARD TO PC
-    """
+
+    """DESCRIPTION OF THE MESSAGES FROM BOARD TO PC."""
+
     MESSAGE_BIT = 0x80  # The Message ID is the logical OR of MESSAGE_BIT and ID code
     # ID codes
     DGT_NONE = 0x00

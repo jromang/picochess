@@ -184,20 +184,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             self.play_turn = None
             self.fire(Event.SWITCH_SIDES(engine_finished=self.engine_finished))
 
-    def _drawresign(self):
-        _, _, _, rnk_5, rnk_4, _, _, _ = self.dgtmenu.get_dgt_fen().split('/')
-        return '8/8/8/' + rnk_5 + '/' + rnk_4 + '/8/8/8'
-
-    def exit_display(self, wait=False, force=True):
-        if self.play_move and self.dgtmenu.get_mode() in (Mode.NORMAL, Mode.REMOTE):
-            side = self.get_clock_side(self.play_turn)
-            text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side, wait=wait, maxtime=1,
-                                    beep=self.dgttranslate.bl(BeepLevel.BUTTON), devs={'ser', 'i2c', 'web'})
-        else:
-            text = Dgt.DISPLAY_TIME(force=force, wait=True, devs={'ser', 'i2c', 'web'})
-        DisplayDgt.show(text)
-
-    def _process_message(self, message):
+    def _process_fen(self, fen):
         level_map = ('rnbqkbnr/pppppppp/8/q7/8/8/PPPPPPPP/RNBQKBNR',
                      'rnbqkbnr/pppppppp/8/1q6/8/8/PPPPPPPP/RNBQKBNR',
                      'rnbqkbnr/pppppppp/8/2q5/8/8/PPPPPPPP/RNBQKBNR',
@@ -259,6 +246,153 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                           '8/8/8/8/3kK3/8/8/8': GameResult.DRAW,
                           '8/8/8/8/3Kk3/8/8/8': GameResult.DRAW}
 
+        if self.dgtmenu.get_flip_board():  # Flip the board if needed
+            fen = fen[::-1]
+        if fen == 'RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr':  # Check if we have to flip the board
+            logging.debug('flipping the board')
+            self.dgtmenu.set_position_reverse_to_flipboard()  # set standard for setup orientation too
+            fen = fen[::-1]
+        logging.debug("DGT-Fen [%s]", fen)
+        if fen == self.dgtmenu.get_dgt_fen():
+            logging.debug('ignore same fen')
+            return
+        self.dgtmenu.set_dgt_fen(fen)
+        self.drawresign_fen = self._drawresign()
+        # Fire the appropriate event
+        if fen in level_map:
+            eng = self.dgtmenu.get_engine()
+            level_dict = eng['level_dict']
+            if level_dict:
+                inc = ceil(len(level_dict) / 8)
+                level = min(inc * level_map.index(fen), len(level_dict) - 1)
+                self.dgtmenu.set_engine_level(level)
+                msg = sorted(level_dict)[level]
+                text = self.dgttranslate.text('M10_level', msg)
+                logging.debug("Map-Fen: New level {}".format(msg))
+                config = ConfigObj('picochess.ini')
+                config['engine-level'] = msg
+                config.write()
+                self.fire(Event.LEVEL(options=level_dict[msg], level_text=text))
+            else:
+                logging.debug('engine doesnt support levels')
+        elif fen in book_map:
+            book_index = book_map.index(fen)
+            try:
+                book = self.dgtmenu.all_books[book_index]
+                self.dgtmenu.set_book(book_index)
+                logging.debug("Map-Fen: Opening book [%s]", book['file'])
+                text = book['text']
+                text.beep = self.dgttranslate.bl(BeepLevel.MAP)
+                text.maxtime = 1
+                text.wait = self._exit_menu()
+                self.fire(Event.SET_OPENING_BOOK(book=book, book_text=text, show_ok=False))
+            except IndexError:
+                pass
+        elif fen in engine_map:
+            if self.dgtmenu.installed_engines:
+                try:
+                    self.dgtmenu.set_engine_index(engine_map.index(fen))
+                    eng = self.dgtmenu.get_engine()
+                    level_dict = eng['level_dict']
+                    logging.debug("Map-Fen: Engine name [%s]", eng['name'])
+                    eng_text = eng['text']
+                    eng_text.beep = self.dgttranslate.bl(BeepLevel.MAP)
+                    eng_text.maxtime = 1
+                    eng_text.wait = self._exit_menu()
+                    if level_dict:
+                        if self.dgtmenu.get_engine_level() is None or len(
+                                level_dict) <= self.dgtmenu.get_engine_level():
+                            self.dgtmenu.set_engine_level(len(level_dict) - 1)
+                        msg = sorted(level_dict)[self.dgtmenu.get_engine_level()]
+                        options = level_dict[msg]  # cause of "new-engine", send options lateron - now only {}
+                        self.fire(Event.LEVEL(options={}, level_text=self.dgttranslate.text('M10_level', msg)))
+                    else:
+                        msg = None
+                        options = {}
+                    config = ConfigObj('picochess.ini')
+                    config['engine-level'] = msg
+                    config.write()
+                    self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options=options, show_ok=False))
+                    self.dgtmenu.set_engine_restart(True)
+                except IndexError:
+                    pass
+            else:
+                DisplayDgt.show(self.dgttranslate.text('Y00_erroreng'))
+        elif fen in mode_map:
+            logging.debug("Map-Fen: Interaction mode [%s]", mode_map[fen])
+            self.dgtmenu.set_mode(mode_map[fen])
+            text = self.dgttranslate.text(mode_map[fen].value)
+            text.beep = self.dgttranslate.bl(BeepLevel.MAP)
+            text.maxtime = 1  # wait 1sec not forever
+            text.wait = self._exit_menu()
+            self.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], mode_text=text, show_ok=False))
+        elif fen in self.dgtmenu.tc_fixed_map:
+            logging.debug('Map-Fen: Time control fixed')
+            self.dgtmenu.set_time_mode(TimeMode.FIXED)
+            self.dgtmenu.set_time_fixed(list(self.dgtmenu.tc_fixed_map.keys()).index(fen))
+            text = self.dgttranslate.text('M10_tc_fixed', self.dgtmenu.tc_fixed_list[self.dgtmenu.get_time_fixed()])
+            text.wait = self._exit_menu()
+            timectrl = self.dgtmenu.tc_fixed_map[fen]  # type: TimeControl
+            self.fire(Event.SET_TIME_CONTROL(tc_init=timectrl.get_init_parameters(), time_text=text, show_ok=False))
+        elif fen in self.dgtmenu.tc_blitz_map:
+            logging.debug('Map-Fen: Time control blitz')
+            self.dgtmenu.set_time_mode(TimeMode.BLITZ)
+            self.dgtmenu.set_time_blitz(list(self.dgtmenu.tc_blitz_map.keys()).index(fen))
+            text = self.dgttranslate.text('M10_tc_blitz', self.dgtmenu.tc_blitz_list[self.dgtmenu.get_time_blitz()])
+            text.wait = self._exit_menu()
+            timectrl = self.dgtmenu.tc_blitz_map[fen]  # type: TimeControl
+            self.fire(Event.SET_TIME_CONTROL(tc_init=timectrl.get_init_parameters(), time_text=text, show_ok=False))
+        elif fen in self.dgtmenu.tc_fisch_map:
+            logging.debug('Map-Fen: Time control fischer')
+            self.dgtmenu.set_time_mode(TimeMode.FISCHER)
+            self.dgtmenu.set_time_fisch(list(self.dgtmenu.tc_fisch_map.keys()).index(fen))
+            text = self.dgttranslate.text('M10_tc_fisch', self.dgtmenu.tc_fisch_list[self.dgtmenu.get_time_fisch()])
+            text.wait = self._exit_menu()
+            timectrl = self.dgtmenu.tc_fisch_map[fen]  # type: TimeControl
+            self.fire(Event.SET_TIME_CONTROL(tc_init=timectrl.get_init_parameters(), time_text=text, show_ok=False))
+        elif fen in shutdown_map:
+            logging.debug('Map-Fen: shutdown')
+            self._power_off()
+        elif fen in reboot_map:
+            logging.debug('Map-Fen: reboot')
+            self._reboot()
+        elif self.drawresign_fen in drawresign_map:
+            if not self.inside_menu():
+                logging.debug('Map-Fen: drawresign')
+                self.fire(Event.DRAWRESIGN(result=drawresign_map[self.drawresign_fen]))
+        elif '/pppppppp/8/8/8/8/PPPPPPPP/' in fen:  # check for the lines 2-7 cause could be an uci960 pos too
+            bit_board = chess.Board(fen + ' w - - 0 1')
+            pos960 = bit_board.chess960_pos(ignore_castling=True)
+            if pos960 is not None:
+                if pos960 == 518 or self.dgtmenu.get_engine_has_960():
+                    logging.debug('Map-Fen: New game')
+                    self.fire(Event.NEW_GAME(pos960=pos960))
+                else:
+                    # self._reset_moves_and_score()
+                    DisplayDgt.show(self.dgttranslate.text('Y00_error960'))
+        else:
+            if not self.inside_menu():
+                if self.show_setup_pieces_msg:
+                    DisplayDgt.show(self.dgttranslate.text('N00_setpieces'))
+                self.fire(Event.FEN(fen=fen))
+            else:
+                # @todo perhaps resent this fen after menu exit?
+                logging.debug('inside the menu. fen "{}" ignored'.format(fen))
+
+    def _drawresign(self):
+        _, _, _, rnk_5, rnk_4, _, _, _ = self.dgtmenu.get_dgt_fen().split('/')
+        return '8/8/8/' + rnk_5 + '/' + rnk_4 + '/8/8/8'
+
+    def exit_display(self, wait=False, force=True):
+        if self.play_move and self.dgtmenu.get_mode() in (Mode.NORMAL, Mode.REMOTE):
+            side = self.get_clock_side(self.play_turn)
+            text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side, wait=wait, maxtime=1,
+                                    beep=self.dgttranslate.bl(BeepLevel.BUTTON), devs={'ser', 'i2c', 'web'})
+        else:
+            text = Dgt.DISPLAY_TIME(force=force, wait=True, devs={'ser', 'i2c', 'web'})
+        DisplayDgt.show(text)
+
+    def _process_message(self, message):
         for case in switch(message):
             if case(MessageApi.ENGINE_READY):
                 for index in range(0, len(self.dgtmenu.installed_engines)):
@@ -377,8 +511,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if case(MessageApi.TIME_CONTROL):
                 if not self.dgtmenu.get_confirm() or not message.show_ok:
                     DisplayDgt.show(message.time_text)
-                tc = self.time_control = TimeControl(**message.tc_init)
-                time_left, time_right = tc.current_clock_time(flip_board=self.dgtmenu.get_flip_board())
+                timectrl = self.time_control = TimeControl(**message.tc_init)
+                time_left, time_right = timectrl.current_clock_time(flip_board=self.dgtmenu.get_flip_board())
                 DisplayDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE,
                                                 wait=True, devs={'ser', 'i2c', 'web'}))
                 self.exit_display(force=True)
@@ -449,26 +583,26 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.dgtmenu.set_mode(message.info['interaction_mode'])
                 self.dgtmenu.set_book(message.info['book_index'])
                 self.dgtmenu.all_books = message.info['books']
-                tc = self.time_control = message.info['time_control']
-                self.dgtmenu.set_time_mode(tc.mode)
-                # try to find the index from the given time_control (tc)
-                # if user gave a non-existent tc value stay at standard
+                timectrl = self.time_control = message.info['time_control']
+                self.dgtmenu.set_time_mode(timectrl.mode)
+                # try to find the index from the given time_control (timectrl)
+                # if user gave a non-existent timectrl value stay at standard
                 index = 0
-                if tc.mode == TimeMode.FIXED:
+                if timectrl.mode == TimeMode.FIXED:
                     for val in self.dgtmenu.tc_fixed_map.values():
-                        if val == tc:
+                        if val == timectrl:
                             self.dgtmenu.set_time_fixed(index)
                             break
                         index += 1
-                elif tc.mode == TimeMode.BLITZ:
+                elif timectrl.mode == TimeMode.BLITZ:
                     for val in self.dgtmenu.tc_blitz_map.values():
-                        if val == tc:
+                        if val == timectrl:
                             self.dgtmenu.set_time_blitz(index)
                             break
                         index += 1
-                elif tc.mode == TimeMode.FISCHER:
+                elif timectrl.mode == TimeMode.FISCHER:
                     for val in self.dgtmenu.tc_fisch_map.values():
-                        if val == tc:
+                        if val == timectrl:
                             self.dgtmenu.set_time_fisch(index)
                             break
                         index += 1
@@ -480,11 +614,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 logging.debug('Search stopped')
                 break
             if case(MessageApi.CLOCK_START):
-                tc = self.time_control = TimeControl(**message.tc_init)
-                if tc.mode == TimeMode.FIXED:
-                    time_left = time_right = tc.seconds_per_move
+                timectrl = self.time_control = TimeControl(**message.tc_init)
+                if timectrl.mode == TimeMode.FIXED:
+                    time_left = time_right = timectrl.seconds_per_move
                 else:
-                    time_left, time_right = tc.current_clock_time(flip_board=self.dgtmenu.get_flip_board())
+                    time_left, time_right = timectrl.current_clock_time(flip_board=self.dgtmenu.get_flip_board())
                     if time_left < 0:
                         time_left = 0
                     if time_right < 0:
@@ -517,138 +651,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                         self._process_lever(right_side_down=False, dev=message.dev)
                 break
             if case(MessageApi.DGT_FEN):
-                fen = message.fen
-                if self.dgtmenu.get_flip_board():  # Flip the board if needed
-                    fen = fen[::-1]
-                if fen == 'RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr':  # Check if we have to flip the board
-                    logging.debug('flipping the board')
-                    self.dgtmenu.set_position_reverse_to_flipboard()  # set standard for setup orientation too
-                    fen = fen[::-1]
-                logging.debug("DGT-Fen [%s]", fen)
-                if fen == self.dgtmenu.get_dgt_fen():
-                    logging.debug('ignore same fen')
-                    break
-                self.dgtmenu.set_dgt_fen(fen)
-                self.drawresign_fen = self._drawresign()
-                # Fire the appropriate event
-                if fen in level_map:
-                    eng = self.dgtmenu.get_engine()
-                    level_dict = eng['level_dict']
-                    if level_dict:
-                        inc = ceil(len(level_dict) / 8)
-                        level = min(inc * level_map.index(fen), len(level_dict) - 1)
-                        self.dgtmenu.set_engine_level(level)
-                        msg = sorted(level_dict)[level]
-                        text = self.dgttranslate.text('M10_level', msg)
-                        logging.debug("Map-Fen: New level {}".format(msg))
-                        config = ConfigObj('picochess.ini')
-                        config['engine-level'] = msg
-                        config.write()
-                        self.fire(Event.LEVEL(options=level_dict[msg], level_text=text))
-                    else:
-                        logging.debug('engine doesnt support levels')
-                elif fen in book_map:
-                    book_index = book_map.index(fen)
-                    try:
-                        book = self.dgtmenu.all_books[book_index]
-                        self.dgtmenu.set_book(book_index)
-                        logging.debug("Map-Fen: Opening book [%s]", book['file'])
-                        text = book['text']
-                        text.beep = self.dgttranslate.bl(BeepLevel.MAP)
-                        text.maxtime = 1
-                        text.wait = self._exit_menu()
-                        self.fire(Event.SET_OPENING_BOOK(book=book, book_text=text, show_ok=False))
-                    except IndexError:
-                        pass
-                elif fen in engine_map:
-                    if self.dgtmenu.installed_engines:
-                        try:
-                            self.dgtmenu.set_engine_index(engine_map.index(fen))
-                            eng = self.dgtmenu.get_engine()
-                            level_dict = eng['level_dict']
-                            logging.debug("Map-Fen: Engine name [%s]", eng['name'])
-                            eng_text = eng['text']
-                            eng_text.beep = self.dgttranslate.bl(BeepLevel.MAP)
-                            eng_text.maxtime = 1
-                            eng_text.wait = self._exit_menu()
-                            if level_dict:
-                                if self.dgtmenu.get_engine_level() is None or len(level_dict) <= self.dgtmenu.get_engine_level():
-                                    self.dgtmenu.set_engine_level(len(level_dict) - 1)
-                                msg = sorted(level_dict)[self.dgtmenu.get_engine_level()]
-                                options = level_dict[msg]  # cause of "new-engine", send options lateron - now only {}
-                                self.fire(Event.LEVEL(options={}, level_text=self.dgttranslate.text('M10_level', msg)))
-                            else:
-                                msg = None
-                                options = {}
-                            config = ConfigObj('picochess.ini')
-                            config['engine-level'] = msg
-                            config.write()
-                            self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options=options, show_ok=False))
-                            self.dgtmenu.set_engine_restart(True)
-                        except IndexError:
-                            pass
-                    else:
-                        DisplayDgt.show(self.dgttranslate.text('Y00_erroreng'))
-                elif fen in mode_map:
-                    logging.debug("Map-Fen: Interaction mode [%s]", mode_map[fen])
-                    self.dgtmenu.set_mode(mode_map[fen])
-                    text = self.dgttranslate.text(mode_map[fen].value)
-                    text.beep = self.dgttranslate.bl(BeepLevel.MAP)
-                    text.maxtime = 1  # wait 1sec not forever
-                    text.wait = self._exit_menu()
-                    self.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], mode_text=text, show_ok=False))
-                elif fen in self.dgtmenu.tc_fixed_map:
-                    logging.debug('Map-Fen: Time control fixed')
-                    self.dgtmenu.set_time_mode(TimeMode.FIXED)
-                    self.dgtmenu.set_time_fixed(list(self.dgtmenu.tc_fixed_map.keys()).index(fen))
-                    text = self.dgttranslate.text('M10_tc_fixed', self.dgtmenu.tc_fixed_list[self.dgtmenu.get_time_fixed()])
-                    text.wait = self._exit_menu()
-                    tc = self.dgtmenu.tc_fixed_map[fen]  # type: TimeControl
-                    self.fire(Event.SET_TIME_CONTROL(tc_init=tc.get_init_parameters(), time_text=text, show_ok=False))
-                elif fen in self.dgtmenu.tc_blitz_map:
-                    logging.debug('Map-Fen: Time control blitz')
-                    self.dgtmenu.set_time_mode(TimeMode.BLITZ)
-                    self.dgtmenu.set_time_blitz(list(self.dgtmenu.tc_blitz_map.keys()).index(fen))
-                    text = self.dgttranslate.text('M10_tc_blitz', self.dgtmenu.tc_blitz_list[self.dgtmenu.get_time_blitz()])
-                    text.wait = self._exit_menu()
-                    tc = self.dgtmenu.tc_blitz_map[fen]  # type: TimeControl
-                    self.fire(Event.SET_TIME_CONTROL(tc_init=tc.get_init_parameters(), time_text=text, show_ok=False))
-                elif fen in self.dgtmenu.tc_fisch_map:
-                    logging.debug('Map-Fen: Time control fischer')
-                    self.dgtmenu.set_time_mode(TimeMode.FISCHER)
-                    self.dgtmenu.set_time_fisch(list(self.dgtmenu.tc_fisch_map.keys()).index(fen))
-                    text = self.dgttranslate.text('M10_tc_fisch', self.dgtmenu.tc_fisch_list[self.dgtmenu.get_time_fisch()])
-                    text.wait = self._exit_menu()
-                    tc = self.dgtmenu.tc_fisch_map[fen]  # type: TimeControl
-                    self.fire(Event.SET_TIME_CONTROL(tc_init=tc.get_init_parameters(), time_text=text, show_ok=False))
-                elif fen in shutdown_map:
-                    logging.debug('Map-Fen: shutdown')
-                    self._power_off()
-                elif fen in reboot_map:
-                    logging.debug('Map-Fen: reboot')
-                    self._reboot()
-                elif self.drawresign_fen in drawresign_map:
-                    if not self.inside_menu():
-                        logging.debug('Map-Fen: drawresign')
-                        self.fire(Event.DRAWRESIGN(result=drawresign_map[self.drawresign_fen]))
-                elif '/pppppppp/8/8/8/8/PPPPPPPP/' in fen:  # check for the lines 2-7 cause could be an uci960 pos too
-                    bit_board = chess.Board(fen + ' w - - 0 1')
-                    pos960 = bit_board.chess960_pos(ignore_castling=True)
-                    if pos960 is not None:
-                        if pos960 == 518 or self.dgtmenu.get_engine_has_960():
-                            logging.debug('Map-Fen: New game')
-                            self.fire(Event.NEW_GAME(pos960=pos960))
-                        else:
-                            # self._reset_moves_and_score()
-                            DisplayDgt.show(self.dgttranslate.text('Y00_error960'))
-                else:
-                    if not self.inside_menu():
-                        if self.show_setup_pieces_msg:
-                            DisplayDgt.show(self.dgttranslate.text('N00_setpieces'))
-                        self.fire(Event.FEN(fen=fen))
-                    else:
-                        # @todo perhaps resent this fen after menu exit?
-                        logging.debug('inside the menu. fen "{}" ignored'.format(fen))
+                self._process_fen(message.fen)
                 break
             if case(MessageApi.DGT_CLOCK_VERSION):
                 if message.dev == 'ser':  # send the "board connected message" to serial clock
