@@ -656,5 +656,8 @@ class DgtBoard(object):
         return res
 
     def run(self):
+
+        """NOT called from threading.Thread instead inside the __init__ function from dgthw.py."""
+
         self.incoming_board_thread = Timer(0, self._process_incoming_board_forever)
         self.incoming_board_thread.start()

@@ -49,27 +49,51 @@ class DgtIface(DisplayDgt, Thread):
         self.display_hash = None  # Hash value of clock's display
 
     def display_text_on_clock(self, message):
+
+        """override this function."""
+
         raise NotImplementedError()
 
     def display_move_on_clock(self, message):
+
+        """override this function."""
+
         raise NotImplementedError()
 
     def display_time_on_clock(self, message):
+
+        """override this function."""
+
         raise NotImplementedError()
 
     def light_squares_revelation_board(self, squares):
+
+        """override this function."""
+
         raise NotImplementedError()
 
     def clear_light_revelation_board(self):
+
+        """override this function."""
+
         raise NotImplementedError()
 
     def stop_clock(self, devs):
+
+        """override this function."""
+
         raise NotImplementedError()
 
     def _resume_clock(self, side):
+
+        """override this function."""
+
         raise NotImplementedError()
 
     def start_clock(self, time_left, time_right, side, devs):
+
+        """override this function."""
+
         raise NotImplementedError()
 
     def _stopped_maxtimer(self):
@@ -160,6 +184,9 @@ class DgtIface(DisplayDgt, Thread):
             logging.debug("ignore DgtApi: {} at {}".format(message, self.__class__.__name__))
 
     def get_san(self, message, is_xl=False):
+
+        """creates a chess.board plus a text ready to display on clock."""
+
         bit_board = Board(message.fen)
         if bit_board.is_legal(message.move):
             move_text = bit_board.san(message.move)
@@ -174,6 +201,9 @@ class DgtIface(DisplayDgt, Thread):
         return bit_board, text
 
     def run(self):
+
+        """called from threading.Thread by its start() function."""
+
         logging.info('dgt_queue ready')
         while True:
             # Check if we have something to display

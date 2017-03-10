@@ -31,7 +31,7 @@ class DgtHw(DgtIface):
         self.lib_lock = Lock()
         self.dgtboard.run()
 
-    def check_clock(self, text: str):
+    def _check_clock(self, text: str):
         if not self.enable_ser_clock:
             logging.debug('(ser) clock still not found. Ignore [%s]', text)
             self.dgtboard.startup_serial_clock()
@@ -60,6 +60,9 @@ class DgtHw(DgtIface):
                 logging.warning('Finally failed %i', res)
 
     def display_text_on_clock(self, message):
+
+        """display a text on the dgtxl/3k."""
+
         display_m = self.enable_dgt_3000 and not self.dgtboard.use_revelation_leds
         text = message.m if display_m else message.s
         if text is None:
@@ -70,7 +73,7 @@ class DgtHw(DgtIface):
         left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE
         right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
 
-        if not self.check_clock(text):
+        if not self._check_clock(text):
             return
         if display_m:
             self._display_on_dgt_3000(text, message.beep, left_icons, right_icons)
@@ -78,6 +81,9 @@ class DgtHw(DgtIface):
             self._display_on_dgt_xl(text, message.beep, left_icons, right_icons)
 
     def display_move_on_clock(self, message):
+
+        """display a move on the dgtxl/3k."""
+
         left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE
         right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
         display_m = self.enable_dgt_3000 and not self.dgtboard.use_revelation_leds
@@ -91,19 +97,22 @@ class DgtHw(DgtIface):
         if 'ser' not in message.devs:
             logging.debug('ignored message cause of devs [{}]'.format(move_text))
             return
-        if self.check_clock(move_text):
+        if self._check_clock(move_text):
             if display_m:
                 self._display_on_dgt_3000(move_text, message.beep, left_icons, right_icons)
             else:
                 self._display_on_dgt_xl(move_text, message.beep, left_icons, right_icons)
 
     def display_time_on_clock(self, message):
+
+        """display the time on the dgtxl/3k."""
+
         if 'ser' not in message.devs:
             logging.debug('ignored message cause of devs [endText]')
             return
         if self.clock_running or message.force:
             with self.lib_lock:
-                if self.check_clock('END_TEXT'):
+                if self._check_clock('END_TEXT'):
                     if self.time_left is None or self.time_right is None:
                         logging.debug('time values not set - abort function')
                     else:
@@ -112,6 +121,9 @@ class DgtHw(DgtIface):
             logging.debug('(ser) clock isnt running - no need for endText')
 
     def light_squares_revelation_board(self, uci_move: str):
+
+        """light the Rev2 leds."""
+
         if self.dgtboard.use_revelation_leds:
             logging.debug("REV2 lights on move {}".format(uci_move))
             fr = (8 - int(uci_move[1])) * 8 + ord(uci_move[0]) - ord('a')
@@ -119,18 +131,24 @@ class DgtHw(DgtIface):
             self.dgtboard.write_board_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x01, fr, to, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
 
     def clear_light_revelation_board(self):
+
+        """clear the Rev2 leds."""
+
         if self.dgtboard.use_revelation_leds:
             logging.debug('REV2 lights turned off')
             self.dgtboard.write_board_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
 
     def stop_clock(self, devs: set):
+
+        """stop the dgtxl/3k."""
+
         if 'ser' not in devs:
             logging.debug('ignored message cause of devs [stopClock]')
             return
         self._resume_clock(ClockSide.NONE)
 
     def _resume_clock(self, side: ClockSide):
-        if not self.check_clock('RESUME_CLOCK'):
+        if not self._check_clock('RESUME_CLOCK'):
             return
         l_hms = self.time_left
         r_hms = self.time_right
@@ -153,6 +171,9 @@ class DgtHw(DgtIface):
             self.dgtboard.end_text()
 
     def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
+
+        """start the dgtxl/3k."""
+
         if 'ser' not in devs:
             logging.debug('ignored message cause of devs [startClock]')
             return

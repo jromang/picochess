@@ -52,7 +52,7 @@ class TimeControl(object):
                 'fischer': self.fischer_increment, 'clock_time': self.clock_time}
 
     def reset(self):
-        """Resets the clock's times for both players"""
+        """Reset the clock's times for both players."""
         if self.mode == TimeMode.BLITZ:
             self.clock_time = {chess.WHITE: float(self.minutes_per_game * 60),
                                chess.BLACK: float(self.minutes_per_game * 60)}
@@ -69,7 +69,7 @@ class TimeControl(object):
         return hours_minutes_seconds(time_w), hours_minutes_seconds(time_b)
 
     def current_clock_time(self, flip_board=False):
-        """Returns the startup time for setting the clock at beginning."""
+        """Return the startup time for setting the clock at beginning."""
         ct = copy.copy(self.clock_time)
         if flip_board:
             ct[chess.WHITE], ct[chess.BLACK] = ct[chess.BLACK], ct[chess.WHITE]
@@ -79,7 +79,7 @@ class TimeControl(object):
         self.start_time = time.time()
 
     def _out_of_time(self, time_start):
-        """Fires an OUT_OF_TIME event."""
+        """Fire an OUT_OF_TIME event."""
         self.run_color = None
         if self.mode == TimeMode.FIXED:
             logging.debug('timeout - but in "MoveTime" mode, dont fire event')
@@ -139,11 +139,11 @@ class TimeControl(object):
                 self.run_color = self.active_color = None
 
     def is_ticking(self):
-        """Is the internal clock running?"""
+        """Return if the internal clock is running."""
         return self.active_color is not None
 
     def uci(self):
-        """Returns remaining time for both players in an UCI dict."""
+        """Return remaining time for both players in an UCI dict."""
         uci_dict = {}
         if self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
             uci_dict['wtime'] = str(int(self.clock_time[chess.WHITE] * 1000))

@@ -40,6 +40,9 @@ class KeyboardInput(Observable, threading.Thread):
         DisplayMsg.show(Message.DGT_NO_EBOARD_ERROR(text=text))
 
     def run(self):
+
+        """called from threading.Thread by its start() function."""
+
         logging.info('evt_queue ready')
         print('\033[1;37;40m')
         print('#' * 42 + ' PicoChess v' + version + ' ' + '#' * 42)
@@ -136,6 +139,9 @@ class TerminalDisplay(DisplayMsg, threading.Thread):
         super(TerminalDisplay, self).__init__()
 
     def run(self):
+
+        """called from threading.Thread by its start() function."""
+
         global keyboard_last_fen
         logging.info('msg_queue ready')
         while True:

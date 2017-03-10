@@ -149,6 +149,9 @@ class WebServer(Observable, threading.Thread):
         application.listen(port)
 
     def run(self):
+
+        """called from threading.Thread by its start() function."""
+
         logging.info('evt_queue ready')
         IOLoop.instance().start()
 
@@ -388,6 +391,9 @@ class WebDisplay(DisplayMsg, threading.Thread):
         IOLoop.instance().add_callback(callback=lambda: self.task(msg))
 
     def run(self):
+
+        """called from threading.Thread by its start() function."""
+
         logging.info('msg_queue ready')
         while True:
             # Check if we have something to display

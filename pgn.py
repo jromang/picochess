@@ -182,6 +182,9 @@ class PgnDisplay(DisplayMsg, threading.Thread):
         self.emailer.send('Game PGN', str(pgn_game), self.file_name)
 
     def run(self):
+
+        """called from threading.Thread by its start() function."""
+
         logging.info('msg_queue ready')
         while True:
             # Check if we have something to display
