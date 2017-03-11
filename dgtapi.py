@@ -17,6 +17,7 @@
 
 
 class BaseClass(object):
+    """used for creating event, message, dgt classes."""
     def __init__(self, classtype):
         self._type = classtype
 
@@ -32,7 +33,7 @@ def ClassFactory(name, argnames, BaseClass=BaseClass):
         for key, value in kwargs.items():
             # here, the argnames variable is the one passed to the ClassFactory call
             if key not in argnames:
-                raise TypeError("argument %s not valid for %s" % (key, self.__class__.__name__))
+                raise TypeError("argument {} not valid for {}".format(key, self.__class__.__name__))
             setattr(self, key, value)
         BaseClass.__init__(self, name)
 
@@ -41,6 +42,7 @@ def ClassFactory(name, argnames, BaseClass=BaseClass):
 
 
 class EventApi():
+    """the api for the events."""
     # User events
     FEN = 'EVT_FEN'  # User has moved one or more pieces, and we have a new fen position
     LEVEL = 'EVT_LEVEL'  # User sets engine level
@@ -75,6 +77,7 @@ class EventApi():
 
 
 class MessageApi():
+    """the api for message."""
     # Messages to display devices
     COMPUTER_MOVE = 'MSG_COMPUTER_MOVE'  # Show computer move
     BOOK_MOVE = 'MSG_BOOK_MOVE'  # Show book move
@@ -123,6 +126,7 @@ class MessageApi():
 
 
 class DgtApi():
+    """the api for the dgt."""
     # Commands to the DgtHw/DgtPi/DgtVr
     DISPLAY_MOVE = 'DGT_DISPLAY_MOVE'
     DISPLAY_TEXT = 'DGT_DISPLAY_TEXT'
@@ -137,6 +141,7 @@ class DgtApi():
 
 
 class Dgt():
+    """used to define tasks for the communication towards the dgt hardware."""
     DISPLAY_MOVE = ClassFactory(DgtApi.DISPLAY_MOVE, ['move', 'fen', 'side', 'beep', 'maxtime', 'devs', 'wait', 'ld', 'rd'])
     DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['l', 'm', 's', 'beep', 'maxtime', 'devs', 'wait', 'ld', 'rd'])
     DISPLAY_TIME = ClassFactory(DgtApi.DISPLAY_TIME, ['wait', 'force', 'devs'])
@@ -149,6 +154,7 @@ class Dgt():
 
 
 class Message():
+    """general class for transmitting messages between several parts of picochess."""
     # Messages to display devices
     COMPUTER_MOVE = ClassFactory(MessageApi.COMPUTER_MOVE, ['move', 'ponder', 'fen', 'turn', 'game', 'wait'])
     BOOK_MOVE = ClassFactory(MessageApi.BOOK_MOVE, [])
@@ -197,6 +203,7 @@ class Message():
 
 
 class Event():
+    """event used to send towards picochess."""
     # User events
     FEN = ClassFactory(EventApi.FEN, ['fen'])
     LEVEL = ClassFactory(EventApi.LEVEL, ['options', 'level_text'])

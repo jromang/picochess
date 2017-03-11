@@ -22,6 +22,7 @@ import configparser
 
 
 def write_book_ini():
+    """read the books folder and write the result to book.ini."""
     def is_book(fname):
         return fname.endswith('.bin')
 

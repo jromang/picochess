@@ -22,6 +22,7 @@ from configobj import ConfigObj
 
 
 def write_voice_ini():
+    """read the voices folder and write the result to voices.ini."""
     def get_immediate_subdirectories(a_dir):
         return [name for name in os.listdir(a_dir)
                 if os.path.isdir(os.path.join(a_dir, name))]

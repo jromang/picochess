@@ -27,6 +27,7 @@ from math import floor
 
 
 class TimeControl(object):
+    """control the picochess internal clock."""
     def __init__(self, mode=TimeMode.FIXED, fixed=0, blitz=0, fischer=0, clock_time=None):
         super(TimeControl, self).__init__()
         self.mode = mode
@@ -120,23 +121,22 @@ class TimeControl(object):
 
     def stop(self, log=True):
         """Stop the internal clock."""
-        if self.is_ticking():
-            if self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
-                if log:
-                    w_hms, b_hms = self.log_time()
-                    logging.info('old internal time w:{} b:{}'.format(w_hms, b_hms))
+        if self.is_ticking() and self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
+            if log:
+                w_hms, b_hms = self.log_time()
+                logging.info('old internal time w:{} b:{}'.format(w_hms, b_hms))
 
-                self.timer.cancel()
-                self.timer.join()
-                used_time = floor((time.time() - self.start_time)*10)/10
-                if log:
-                    logging.info('used time: {} secs'.format(used_time))
-                self.clock_time[self.active_color] -= used_time
+            self.timer.cancel()
+            self.timer.join()
+            used_time = floor((time.time() - self.start_time)*10)/10
+            if log:
+                logging.info('used time: {} secs'.format(used_time))
+            self.clock_time[self.active_color] -= used_time
 
-                if log:
-                    w_hms, b_hms = self.log_time()
-                    logging.info('new internal time w:{} b:{}'.format(w_hms, b_hms))
-                self.run_color = self.active_color = None
+            if log:
+                w_hms, b_hms = self.log_time()
+                logging.info('new internal time w:{} b:{}'.format(w_hms, b_hms))
+            self.run_color = self.active_color = None
 
     def is_ticking(self):
         """Return if the internal clock is running."""
