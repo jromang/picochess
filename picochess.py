@@ -626,7 +626,7 @@ def main():
                 if case(EventApi.LEVEL):
                     if event.options:
                         engine.startup(event.options, False)
-                    DisplayMsg.show(Message.LEVEL(level_text=event.level_text))
+                    DisplayMsg.show(Message.LEVEL(level_text=event.level_text, do_speak=bool(event.options)))
                     break
 
                 if case(EventApi.NEW_ENGINE):

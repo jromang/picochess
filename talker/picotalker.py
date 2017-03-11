@@ -171,8 +171,11 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                         system_picotalker.talk(['okmode.ogg'])
                         break
                     if case(MessageApi.LEVEL):
-                        logging.debug('announcing LEVEL')
-                        system_picotalker.talk(['oklevel.ogg'])
+                        if message.do_speak:
+                            logging.debug('announcing LEVEL')
+                            system_picotalker.talk(['oklevel.ogg'])
+                        else:
+                            logging.debug('dont announce LEVEL cause its also an engine message')
                         break
                     if case(MessageApi.OPENING_BOOK):
                         logging.debug('announcing OPENING_BOOK')
@@ -223,7 +226,8 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
         else:
             return self.user_picotalker
 
-    def say_move(self, move, fen, game: chess.Board):
+    @staticmethod
+    def say_move(move, fen, game: chess.Board):
         """
         Takes a chess.Move instance and a chess.BitBoard instance and speaks the move.
         """
