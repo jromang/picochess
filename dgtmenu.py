@@ -89,9 +89,9 @@ class DgtMenu(Observable):
         self.ip = None
         self.flip_board = False
 
-        self.menu_position_whitetomove = None
-        self.menu_position_reverse = None
-        self.menu_position_uci960 = None
+        self.menu_position_whitetomove = True
+        self.menu_position_reverse = False
+        self.menu_position_uci960 = False
 
         self.menu_top = Menu.MODE_MENU
         self.menu_mode = Mode.NORMAL
