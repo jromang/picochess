@@ -64,7 +64,7 @@ class DgtBoard(object):
 
         self.board_connected_text = None
 
-    def write_board_command(self, message: list):
+    def write_command(self, message: list):
         mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
         if not mes == DgtCmd.DGT_RETURN_SERIALNR:
             logging.debug('put (ser) board [%s], length: %i', mes, len(message))
@@ -140,7 +140,7 @@ class DgtBoard(object):
                     logging.warning('illegal length in data')
                 board_version = str(message[0]) + '.' + str(message[1])
                 logging.debug("DGT board version %0.2f", float(board_version))
-                self.write_board_command([DgtCmd.DGT_SEND_BRD])  # Update the board => get first FEN
+                self.write_command([DgtCmd.DGT_SEND_BRD])  # Update the board => get first FEN
                 if self.device.find('rfc') == -1:
                     text_l, text_m, text_s = 'USB e-Board', 'USBboard', 'ok usb'
                     channel = 'USB'
@@ -179,7 +179,7 @@ class DgtBoard(object):
                         logging.warning("(ser) clock: ACK error %s", (ack0, ack1, ack2, ack3))
                         if self.last_clock_command:
                             logging.debug('(ser) clock: resending failed message [%s]', self.last_clock_command)
-                            self.write_board_command(self.last_clock_command)
+                            self.write_command(self.last_clock_command)
                             self.last_clock_command = []  # only resend once
                         break
                     else:
@@ -309,7 +309,7 @@ class DgtBoard(object):
             if case(DgtMsg.DGT_MSG_FIELD_UPDATE):
                 if message_length != 2:
                     logging.warning('illegal length in data')
-                self.write_board_command([DgtCmd.DGT_SEND_BRD])  # Ask for the board when a piece moved
+                self.write_command([DgtCmd.DGT_SEND_BRD])  # Ask for the board when a piece moved
                 break
             if case(DgtMsg.DGT_MSG_SERIALNR):
                 if message_length != 5:
@@ -394,14 +394,14 @@ class DgtBoard(object):
         self.clock_lock = False
         command = [DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
                    DgtClk.DGT_CMD_CLOCK_VERSION, DgtClk.DGT_CMD_CLOCK_END_MESSAGE]
-        self.write_board_command(command)  # Get clock version
+        self.write_command(command)  # Get clock version
 
     def _startup_serial_board(self):
-        self.write_board_command([DgtCmd.DGT_SEND_UPDATE_NICE])  # Set the board update mode
-        self.write_board_command([DgtCmd.DGT_SEND_VERSION])  # Get board version
+        self.write_command([DgtCmd.DGT_SEND_UPDATE_NICE])  # Set the board update mode
+        self.write_command([DgtCmd.DGT_SEND_VERSION])  # Get board version
 
     def _watchdog(self):
-        self.write_board_command([DgtCmd.DGT_RETURN_SERIALNR])
+        self.write_command([DgtCmd.DGT_RETURN_SERIALNR])
 
     def _open_bluetooth(self):
         if self.bt_state == -1:
@@ -606,16 +606,16 @@ class DgtBoard(object):
                 logging.debug('resending locked (ser) clock message [%s]', self.last_clock_command)
                 has_to_wait = False
                 counter = 0
-                self.write_board_command(self.last_clock_command)
+                self.write_command(self.last_clock_command)
         if has_to_wait:
             logging.debug('(ser) clock is released now')
 
     def set_text_3k(self, text: str, beep: int, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
         self._wait_for_clock()
-        res = self.write_board_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x0c, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
-                                        DgtClk.DGT_CMD_CLOCK_ASCII,
-                                        text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], beep,
-                                        DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        res = self.write_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x0c, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                                  DgtClk.DGT_CMD_CLOCK_ASCII,
+                                  text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], beep,
+                                  DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         return res
 
     def set_text_xl(self, text: str, beep: int, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
@@ -629,10 +629,10 @@ class DgtBoard(object):
 
         self._wait_for_clock()
         icn = (transfer(right_icons) & 0x07) | (transfer(left_icons) << 3) & 0x38
-        res = self.write_board_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x0b, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
-                                        DgtClk.DGT_CMD_CLOCK_DISPLAY,
-                                        text[2], text[1], text[0], text[5], text[4], text[3], icn, beep,
-                                        DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        res = self.write_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x0b, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                                  DgtClk.DGT_CMD_CLOCK_DISPLAY,
+                                  text[2], text[1], text[0], text[5], text[4], text[3], icn, beep,
+                                  DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         return res
 
     def set_and_run(self, lr: int, lh: int, lm: int, ls: int, rr: int, rh: int, rm: int, rs: int):
@@ -642,22 +642,20 @@ class DgtBoard(object):
             side = ClockSide.LEFT
         if lr == 0 and rr == 1:
             side = ClockSide.RIGHT
-        res = self.write_board_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x0a, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
-                                        DgtClk.DGT_CMD_CLOCK_SETNRUN,
-                                        lh, lm, ls, rh, rm, rs, side,
-                                        DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        res = self.write_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x0a, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                                  DgtClk.DGT_CMD_CLOCK_SETNRUN,
+                                  lh, lm, ls, rh, rm, rs, side,
+                                  DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         return res
 
     def end_text(self):
         self._wait_for_clock()
-        res = self.write_board_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
-                                        DgtClk.DGT_CMD_CLOCK_END,
-                                        DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        res = self.write_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                                  DgtClk.DGT_CMD_CLOCK_END,
+                                  DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         return res
 
     def run(self):
-
         """NOT called from threading.Thread instead inside the __init__ function from dgthw.py."""
-
         self.incoming_board_thread = Timer(0, self._process_incoming_board_forever)
         self.incoming_board_thread.start()

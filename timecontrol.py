@@ -49,6 +49,7 @@ class TimeControl(object):
                self.minutes_per_game == other.minutes_per_game and self.fischer_increment == other.fischer_increment
 
     def get_init_parameters(self):
+        """Return the state of this class for generating a new instance."""
         return {'mode': self.mode, 'fixed': self.seconds_per_move, 'blitz': self.minutes_per_game,
                 'fischer': self.fischer_increment, 'clock_time': self.clock_time}
 
@@ -65,18 +66,19 @@ class TimeControl(object):
                                chess.BLACK: float(self.seconds_per_move)}
         self.active_color = None
 
-    def log_time(self):
+    def _log_time(self):
         time_w, time_b = self.current_clock_time(flip_board=False)
         return hours_minutes_seconds(time_w), hours_minutes_seconds(time_b)
 
     def current_clock_time(self, flip_board=False):
         """Return the startup time for setting the clock at beginning."""
-        ct = copy.copy(self.clock_time)
+        c_time = copy.copy(self.clock_time)
         if flip_board:
-            ct[chess.WHITE], ct[chess.BLACK] = ct[chess.BLACK], ct[chess.WHITE]
-        return int(ct[chess.WHITE]), int(ct[chess.BLACK])
+            c_time[chess.WHITE], c_time[chess.BLACK] = c_time[chess.BLACK], c_time[chess.WHITE]
+        return int(c_time[chess.WHITE]), int(c_time[chess.BLACK])
 
     def reset_start_time(self):
+        """Set the start time to the current time."""
         self.start_time = time.time()
 
     def _out_of_time(self, time_start):
@@ -90,26 +92,27 @@ class TimeControl(object):
             Observable.fire(Event.OUT_OF_TIME(color=self.active_color))
 
     def add_inc(self, color):
+        """Add the increment value to the color given."""
         if self.mode == TimeMode.FISCHER:
             # log times - issue #184
-            w_hms, b_hms = self.log_time()
+            w_hms, b_hms = self._log_time()
             logging.info('before internal time w:{} - b:{}'.format(w_hms, b_hms))
 
             self.clock_time[color] += self.fischer_increment
 
             # log times - issue #184
-            w_hms, b_hms = self.log_time()
+            w_hms, b_hms = self._log_time()
             logging.info('after internal time w:{} - b:{}'.format(w_hms, b_hms))
 
     def start(self, color, log=True):
-        """Starts the internal clock."""
+        """Start the internal clock."""
         if not self.is_ticking():
             if self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
                 self.active_color = color
                 self.start_time = time.time()
 
             if log:
-                w_hms, b_hms = self.log_time()
+                w_hms, b_hms = self._log_time()
                 logging.info('start internal time w:{} - b:{}'.format(w_hms, b_hms))
 
             # Only start thread if not already started for same color, and the player has not already lost on time
@@ -123,7 +126,7 @@ class TimeControl(object):
         """Stop the internal clock."""
         if self.is_ticking() and self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
             if log:
-                w_hms, b_hms = self.log_time()
+                w_hms, b_hms = self._log_time()
                 logging.info('old internal time w:{} b:{}'.format(w_hms, b_hms))
 
             self.timer.cancel()
@@ -134,7 +137,7 @@ class TimeControl(object):
             self.clock_time[self.active_color] -= used_time
 
             if log:
-                w_hms, b_hms = self.log_time()
+                w_hms, b_hms = self._log_time()
                 logging.info('new internal time w:{} b:{}'.format(w_hms, b_hms))
             self.run_color = self.active_color = None
 

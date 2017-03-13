@@ -58,6 +58,7 @@ class DgtVr(DgtIface):
     # (END) dgtserial simulation class
 
     def display_move_on_clock(self, message):
+        """display a move on the console."""
         if self.enable_dgt_3000 or self.enable_dgt_pi:
             bit_board, text = self.get_san(message, not self.enable_dgt_pi)
             if self.enable_dgt_pi:
@@ -73,6 +74,7 @@ class DgtVr(DgtIface):
         print('\033[1;34;40m<{}> [vir] clock move: {} Beep: {}\033[1;37;40m'. format(time.time(), text, message.beep))
 
     def display_text_on_clock(self, message):
+        """display a text on the console."""
         if self.enable_dgt_pi:
             text = message.l
         else:
@@ -84,12 +86,14 @@ class DgtVr(DgtIface):
         print('\033[1;34;40m<{}> [vir] clock text: {} Beep: {}\033[1;37;40m'. format(time.time(), text, message.beep))
 
     def display_time_on_clock(self, force=False):
+        """display the time on the console."""
         if self.clock_running or force:
             print('\033[1;32;40m<{}> [vir] clock showing time again - running state: {}\033[1;37;40m'. format(time.time(), self.clock_running))
         else:
             logging.debug('[vir] clock isnt running - no need for endText')
 
     def stop_clock(self, devs: set):
+        """stop the time on the console."""
         if self.rt:
             print('\033[1;32;40m<{}> [vir] clock time stopped at {} - {}\033[1;37;40m'. format(time.time(), self.time_left, self.time_right))
             self.rt.stop()
@@ -101,6 +105,7 @@ class DgtVr(DgtIface):
         self.clock_running = (side != ClockSide.NONE)
 
     def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
+        """start the time on the console."""
         self.time_left = hours_minutes_seconds(time_left)
         self.time_right = hours_minutes_seconds(time_right)
         self.time_side = side
@@ -114,8 +119,10 @@ class DgtVr(DgtIface):
         self._resume_clock(side)
 
     def light_squares_revelation_board(self, squares):
+        """handle this by dgthw.py."""
         pass
 
     def clear_light_revelation_board(self):
+        """handle this by dgthw.py."""
         pass
 
