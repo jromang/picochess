@@ -149,9 +149,7 @@ class WebServer(Observable, threading.Thread):
         application.listen(port)
 
     def run(self):
-
         """called from threading.Thread by its start() function."""
-
         logging.info('evt_queue ready')
         IOLoop.instance().start()
 
@@ -171,20 +169,16 @@ class WebDisplay(DisplayMsg, threading.Thread):
 
         _workers.apply_async(func, args, kwds, _callback)
 
-    def create_game_info(self):
+    def _create_game_info(self):
         if 'game_info' not in self.shared:
             self.shared['game_info'] = {}
 
-    def create_system_info(self):
+    def _create_system_info(self):
         if 'system_info' not in self.shared:
             self.shared['system_info'] = {}
 
-    def create_ip_info(self):
-        if 'ip_info' not in self.shared:
-            self.shared['ip_info'] = {}
-
     def task(self, message):
-        def oldstyle_fen(game: chess.Board):
+        def _oldstyle_fen(game: chess.Board):
             builder = []
             builder.append(game.board_fen())
             builder.append('w' if game.turn == chess.WHITE else 'b')
@@ -194,7 +188,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
             builder.append(str(game.fullmove_number))
             return ' '.join(builder)
 
-        def create_game_header(pgn_game: chess.pgn.Game):
+        def _create_game_header(pgn_game: chess.pgn.Game):
             pgn_game.headers['Result'] = '*'
             pgn_game.headers['White'] = 'None'
             pgn_game.headers['Black'] = 'None'
@@ -229,18 +223,18 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 if 'location' in self.shared['ip_info']:
                     pgn_game.headers['Site'] = self.shared['ip_info']['location']
 
-        def update_headers():
+        def _update_headers():
             pgn_game = pgn.Game()
-            create_game_header(pgn_game)
+            _create_game_header(pgn_game)
             self.shared['headers'] = pgn_game.headers
             EventHandler.write_to_clients({'event': 'header', 'headers': pgn_game.headers})
 
-        def update_title():
+        def _update_title():
             EventHandler.write_to_clients({'event': 'title', 'ip_info': self.shared['ip_info']})
 
-        def transfer(game: chess.Board):
+        def _transfer(game: chess.Board):
             pgn_game = pgn.Game().from_board(game)
-            create_game_header(pgn_game)
+            _create_game_header(pgn_game)
             return pgn_game.accept(pgn.StringExporter(headers=True, comments=False, variations=False))
 
         for case in switch(message):
@@ -248,7 +242,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 EventHandler.write_to_clients({'event': 'Message', 'msg': 'Book move'})
                 break
             if case(MessageApi.START_NEW_GAME):
-                pgn_str = transfer(message.game)
+                pgn_str = _transfer(message.game)
                 fen = message.game.fen()
                 result = {'pgn': pgn_str, 'fen': fen}
                 self.shared['last_dgt_move_msg'] = result
@@ -259,27 +253,27 @@ class WebDisplay(DisplayMsg, threading.Thread):
                     code_text = ' with setup'
                 EventHandler.write_to_clients({'event': 'NewGame', 'fen': fen})
                 EventHandler.write_to_clients({'event': 'Message', 'msg': 'New game' + code_text})
-                update_headers()
+                _update_headers()
                 break
             if case(MessageApi.SEARCH_STARTED):
                 EventHandler.write_to_clients({'event': 'Message', 'msg': 'Thinking...'})
                 break
             if case(MessageApi.IP_INFO):
                 self.shared['ip_info'] = message.info
-                update_headers()
-                update_title()
+                _update_headers()
+                _update_title()
                 break
             if case(MessageApi.SYSTEM_INFO):
                 self.shared['system_info'] = message.info
                 self.shared['system_info']['old_engine'] = self.shared['system_info']['engine_name']
-                update_headers()
+                _update_headers()
                 break
             if case(MessageApi.ENGINE_READY):
-                self.create_system_info()
+                self._create_system_info()
                 self.shared['system_info']['engine_name'] = message.engine_name
                 if not message.has_levels and 'level_text' in self.shared['game_info']:
                     del self.shared['game_info']['level_text']
-                update_headers()
+                _update_headers()
                 break
             if case(MessageApi.STARTUP_INFO):
                 self.shared['game_info'] = message.info.copy()
@@ -293,30 +287,30 @@ class WebDisplay(DisplayMsg, threading.Thread):
                     del self.shared['game_info']['level_text']
                 break
             if case(MessageApi.OPENING_BOOK):
-                self.create_game_info()
+                self._create_game_info()
                 self.shared['game_info']['book_text'] = message.book_text
                 break
             if case(MessageApi.INTERACTION_MODE):
-                self.create_game_info()
+                self._create_game_info()
                 self.shared['game_info']['interaction_mode'] = message.mode
                 if self.shared['game_info']['interaction_mode'] == Mode.REMOTE:
                     self.shared['system_info']['engine_name'] = 'Remote Player'
                 else:
                     self.shared['system_info']['engine_name'] = self.shared['system_info']['old_engine']
-                update_headers()
+                _update_headers()
                 break
             if case(MessageApi.PLAY_MODE):
-                self.create_game_info()
+                self._create_game_info()
                 self.shared['game_info']['play_mode'] = message.play_mode
                 break
             if case(MessageApi.TIME_CONTROL):
-                self.create_game_info()
+                self._create_game_info()
                 self.shared['game_info']['time_text'] = message.time_text
                 break
             if case(MessageApi.LEVEL):
-                self.create_game_info()
+                self._create_game_info()
                 self.shared['game_info']['level_text'] = message.level_text
-                update_headers()
+                _update_headers()
                 break
             if case(MessageApi.DGT_JACK_CONNECTED_ERROR):
                 result = {'event': 'Message', 'msg': 'Unplug the jack cable please!'}
@@ -345,8 +339,8 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.COMPUTER_MOVE):
-                pgn_str = transfer(message.game)
-                fen = oldstyle_fen(message.game)
+                pgn_str = _transfer(message.game)
+                fen = _oldstyle_fen(message.game)
                 mov = message.move.uci()
                 msg = 'Computer move: ' + str(message.move)
                 result = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'msg': msg, 'review_play': False}
@@ -354,8 +348,8 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.USER_MOVE):
-                pgn_str = transfer(message.game)
-                fen = oldstyle_fen(message.game)
+                pgn_str = _transfer(message.game)
+                fen = _oldstyle_fen(message.game)
                 msg = 'User move: ' + str(message.move)
                 mov = message.move.uci()
                 result = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'msg': msg, 'review_play': False}
@@ -363,8 +357,8 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.REVIEW_MOVE):
-                pgn_str = transfer(message.game)
-                fen = oldstyle_fen(message.game)
+                pgn_str = _transfer(message.game)
+                fen = _oldstyle_fen(message.game)
                 msg = 'Review move: ' + str(message.move)
                 mov = message.move.uci()
                 result = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'msg': msg, 'review_play': True}
@@ -387,17 +381,13 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 # print(message)
                 pass
 
-    def create_task(self, msg):
+    def _create_task(self, msg):
         IOLoop.instance().add_callback(callback=lambda: self.task(msg))
 
     def run(self):
-
         """called from threading.Thread by its start() function."""
-
         logging.info('msg_queue ready')
         while True:
             # Check if we have something to display
             message = self.msg_queue.get()
-            # if repr(message) != MessageApi.DGT_SERIAL_NR:
-            #     logging.debug("received message from msg_queue: %s", message)
-            self.create_task(message)
+            self._create_task(message)
