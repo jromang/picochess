@@ -47,7 +47,7 @@ class DgtBoard(object):
         # the next three are only used for "not dgtpi" mode
         self.clock_lock = False  # serial connected clock is locked
         self.last_clock_command = []  # Used for resend last (failed) clock command
-        self.rt = RepeatedTimer(1, self._watchdog)
+        self.watchdog_timer = RepeatedTimer(1, self._watchdog)
         # bluetooth vars for Jessie & autoconnect
         self.btctl = None
         self.bt_rfcomm = None
@@ -65,6 +65,7 @@ class DgtBoard(object):
         self.board_connected_text = None
 
     def write_command(self, message: list):
+        """write the message list to the dgt board."""
         mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
         if not mes == DgtCmd.DGT_RETURN_SERIALNR:
             logging.debug('put (ser) board [%s], length: %i', mes, len(message))
@@ -92,16 +93,16 @@ class DgtBoard(object):
             'y': 0x20 | 0x08 | 0x04 | 0x40 | 0x02, 'z': 0x01 | 0x40 | 0x08 | 0x02 | 0x10, ' ': 0x00, '-': 0x40,
             '/': 0x20 | 0x40 | 0x04, '|': 0x20 | 0x10 | 0x02 | 0x04, '\\': 0x02 | 0x40 | 0x10
         }
-        for v in message:
-            if type(v) is int:
-                array.append(v)
-            elif isinstance(v, enum.Enum):
-                array.append(v.value)
-            elif type(v) is str:
-                for c in v:
-                    array.append(char_to_xl[c.lower()])
+        for item in message:
+            if type(item) is int:
+                array.append(item)
+            elif isinstance(item, enum.Enum):
+                array.append(item.value)
+            elif type(item) is str:
+                for character in item:
+                    array.append(char_to_xl[character.lower()])
             else:
-                logging.error('type not supported [%s]', type(v))
+                logging.error('type not supported [%s]', type(item))
                 return False
 
         while True:
@@ -112,12 +113,12 @@ class DgtBoard(object):
                 except ValueError:
                     logging.error('invalid bytes sent {0}'.format(message))
                     return False
-                except pyserial.SerialException as e:
-                    logging.error(e)
+                except pyserial.SerialException as write_expection:
+                    logging.error(write_expection)
                     self.serial.close()
                     self.serial = None
-                except IOError as e:
-                    logging.error(e)
+                except IOError as write_expection:
+                    logging.error(write_expection)
                     self.serial.close()
                     self.serial = None
             if mes == DgtCmd.DGT_RETURN_SERIALNR:
@@ -160,11 +161,11 @@ class DgtBoard(object):
                                                              maxtime=1, devs={'i2c', 'web'})  # serial clock lateron
                 DisplayMsg.show(Message.DGT_EBOARD_VERSION(text=self.board_connected_text, channel=channel))
                 self.startup_serial_clock()  # now ask the serial clock to answer
-                if self.rt.is_running():
+                if self.watchdog_timer.is_running():
                     logging.warning('watchdog timer is already running')
                 else:
                     logging.debug('watchdog timer is started')
-                    self.rt.start()
+                    self.watchdog_timer.start()
                 break
             if case(DgtMsg.DGT_MSG_BWTIME):
                 if message_length != 7:
@@ -281,25 +282,25 @@ class DgtBoard(object):
                     0x0d: '1', 0x0e: '2', 0x0f: '3', 0x00: '.'
                 }
                 board = ''
-                for c in message:
-                    board += piece_to_char[c]
+                for character in message:
+                    board += piece_to_char[character]
                 logging.debug('\n' + '\n'.join(board[0 + i:8 + i] for i in range(0, len(board), 8)))  # Show debug board
                 # Create fen from board
                 fen = ''
                 empty = 0
-                for sq in range(0, 64):
-                    if message[sq] != 0:
+                for square in range(0, 64):
+                    if message[square] != 0:
                         if empty > 0:
                             fen += str(empty)
                             empty = 0
-                        fen += piece_to_char[message[sq]]
+                        fen += piece_to_char[message[square]]
                     else:
                         empty += 1
-                    if (sq + 1) % 8 == 0:
+                    if (square + 1) % 8 == 0:
                         if empty > 0:
                             fen += str(empty)
                             empty = 0
-                        if sq < 63:
+                        if square < 63:
                             fen += '/'
 
                 # Attention! This fen is NOT flipped
@@ -391,6 +392,7 @@ class DgtBoard(object):
                 pass
 
     def startup_serial_clock(self):
+        """ask the clock for its version."""
         self.clock_lock = False
         command = [DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
                    DgtClk.DGT_CMD_CLOCK_VERSION, DgtClk.DGT_CMD_CLOCK_END_MESSAGE]
@@ -560,33 +562,33 @@ class DgtBoard(object):
         return True
 
     def _setup_serial_port(self):
-        def success(dev: str):
+        def _success(dev: str):
             self.device = dev
             logging.debug('DGT board connected to %s', self.device)
             return True
 
         waitchars = ['/', '-', '\\', '|']
 
-        if self.rt.is_running():
+        if self.watchdog_timer.is_running():
             logging.debug('watchdog timer is stopped now')
-            self.rt.stop()
+            self.watchdog_timer.stop()
         with self.lock:
             if not self.serial:
                 if self.given_device:
                     if self._open_serial(self.given_device):
-                        return success(self.given_device)
+                        return _success(self.given_device)
                 else:
                     for file in listdir('/dev'):
                         if file.startswith('ttyACM') or file.startswith('ttyUSB') or file == 'rfcomm0':
                             dev = path.join('/dev', file)
                             if self._open_serial(dev):
-                                return success(dev)
+                                return _success(dev)
                     if self._open_bluetooth():
-                        return success('/dev/rfcomm123')
+                        return _success('/dev/rfcomm123')
 
                 # text = self.dgttranslate.text('N00_noboard', 'Board' + waitchars[self.wait_counter])
-                s = 'Board' + waitchars[self.wait_counter]
-                text = Dgt.DISPLAY_TEXT(l='no e-' + s, m='no' + s, s=s,
+                bwait = 'Board' + waitchars[self.wait_counter]
+                text = Dgt.DISPLAY_TEXT(l='no e-' + bwait, m='no' + bwait, s=bwait,
                                         wait=True, beep=False, maxtime=0, devs={'i2c', 'web'})
                 DisplayMsg.show(Message.DGT_NO_EBOARD_ERROR(text=text))
                 self.wait_counter = (self.wait_counter + 1) % len(waitchars)
@@ -619,7 +621,7 @@ class DgtBoard(object):
         return res
 
     def set_text_xl(self, text: str, beep: int, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
-        def transfer(icons):
+        def _transfer(icons: ClockIcons):
             result = 0
             if icons == ClockIcons.DOT:
                 result = 0x01
@@ -628,7 +630,7 @@ class DgtBoard(object):
             return result
 
         self._wait_for_clock()
-        icn = (transfer(right_icons) & 0x07) | (transfer(left_icons) << 3) & 0x38
+        icn = (_transfer(right_icons) & 0x07) | (_transfer(left_icons) << 3) & 0x38
         res = self.write_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x0b, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
                                   DgtClk.DGT_CMD_CLOCK_DISPLAY,
                                   text[2], text[1], text[0], text[5], text[4], text[3], icn, beep,

@@ -22,7 +22,7 @@ import time
 from dgtapi import Message
 from dgtutil import ClockIcons, ClockSide
 from threading import Lock, Timer
-from ctypes import *
+from ctypes import cdll, c_byte, create_string_buffer, pointer
 
 
 class DgtPi(DgtIface):
@@ -209,20 +209,22 @@ class DgtPi(DgtIface):
         l_hms = self.time_left
         r_hms = self.time_right
 
-        lr = rr = 0
+        l_run = r_run = 0
         if side == ClockSide.LEFT:
-            lr = 1
+            l_run = 1
         if side == ClockSide.RIGHT:
-            rr = 1
+            r_run = 1
         with self.lib_lock:
-            res = self.lib.dgtpicom_set_and_run(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
+            res = self.lib.dgtpicom_set_and_run(l_run, l_hms[0], l_hms[1], l_hms[2],
+                                                r_run, r_hms[0], r_hms[1], r_hms[2])
             if res < 0:
                 logging.warning('SetAndRun returned error %i', res)
                 res = self.lib.dgtpicom_configure()
                 if res < 0:
                     logging.warning('Configure also failed %i', res)
                 else:
-                    res = self.lib.dgtpicom_set_and_run(lr, l_hms[0], l_hms[1], l_hms[2], rr, r_hms[0], r_hms[1], r_hms[2])
+                    res = self.lib.dgtpicom_set_and_run(l_run, l_hms[0], l_hms[1], l_hms[2],
+                                                        r_run, r_hms[0], r_hms[1], r_hms[2])
         if res < 0:
             logging.warning('Finally failed %i', res)
         else:

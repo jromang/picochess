@@ -27,7 +27,9 @@ from math import floor
 
 
 class TimeControl(object):
+
     """control the picochess internal clock."""
+
     def __init__(self, mode=TimeMode.FIXED, fixed=0, blitz=0, fischer=0, clock_time=None):
         super(TimeControl, self).__init__()
         self.mode = mode
