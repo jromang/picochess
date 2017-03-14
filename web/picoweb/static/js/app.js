@@ -42,6 +42,7 @@ const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 var board,
     boardStatusEl = $('#BoardStatus'),
     dgtClockStatusEl = $('#DGTClockStatus'),
+    dgtClockTextEl = $('#DGTClockText'),
     pgnEl = $('#pgn');
 var gameHistory, fenHash, currentPosition;
 var backend_server_prefix = 'http://drshivaji.com:3334';
@@ -271,6 +272,9 @@ $(function() {
                     break;
                 case 'Message':
                     dgtClockStatusEl.html(data.msg);
+                    break;
+                case 'Clock':
+                    dgtClockTextEl.html(data.msg);
                     break;
                 case 'header':
                     setHeaders(data['headers']);
