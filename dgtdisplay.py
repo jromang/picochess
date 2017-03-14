@@ -34,6 +34,9 @@ from configobj import ConfigObj
 
 
 class DgtDisplay(Observable, DisplayMsg, threading.Thread):
+
+    """Dispatcher for Messages towards DGT hardware or back to the event system (picochess)."""
+
     def __init__(self, dgttranslate: DgtTranslate, dgtmenu: DgtMenu, time_control: TimeControl):
         super(DgtDisplay, self).__init__()
         self.dgttranslate = dgttranslate

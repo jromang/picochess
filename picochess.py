@@ -516,13 +516,13 @@ def main():
         logging.debug('starting picochess in virtual mode')
         KeyboardInput(dgttranslate, args.dgtpi).start()
         TerminalDisplay().start()
-        DgtVr(dgttranslate, my_lock, dgtboard).start()
+        DgtVr(dgttranslate, dgtboard).start()
     else:
         # Connect to DGT board
         logging.debug('starting picochess in board mode')
         if args.dgtpi:
-            DgtPi(dgttranslate, my_lock).start()
-        DgtHw(dgttranslate, my_lock, dgtboard).start()
+            DgtPi(dgttranslate).start()
+        DgtHw(dgttranslate, dgtboard).start()
     # Save to PGN
     emailer = Emailer(
         email=args.email, mailgun_key=args.mailgun_key,

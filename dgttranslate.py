@@ -21,6 +21,9 @@ import logging
 
 
 class DgtTranslate(object):
+
+    """Handle translations for clock texts or moves."""
+
     def __init__(self, beep_config: str, beep_level: int, language: str, picochess_version: str):
         self.ConfigToBeep = {'all': Beep.ON, 'none': Beep.OFF, 'some': Beep.SOME}
         self.beep = self.ConfigToBeep[beep_config]

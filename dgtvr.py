@@ -21,41 +21,43 @@ import logging
 import time
 from dgtapi import Message
 from dgtutil import ClockSide
+from dgttranslate import DgtTranslate
+from dgtboard import DgtBoard
 
 
 class DgtVr(DgtIface):
-    def __init__(self, dgttranslate, msg_lock, dgtboard):
-        super(DgtVr, self).__init__(dgttranslate, msg_lock, dgtboard)
-        # virtual lib
-        self.rt = None
+
+    """Handle the virtual clock communication."""
+
+    def __init__(self, dgttranslate: DgtTranslate, dgtboard: DgtBoard):
+        super(DgtVr, self).__init__(dgttranslate, dgtboard)
+        self.virtual_timer = None
         self.time_side = ClockSide.NONE
-        # setup virtual clock
         self.enable_dgt_pi = dgtboard.is_pi
         main = 2 if dgtboard.is_pi else 0
         DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=main, sub=0, dev='web', text=None))
 
-    # (START) dgtserial class simulation
     def _runclock(self):
         if self.time_side == ClockSide.LEFT:
             h, m, s = self.time_left
             time_left = 3600*h + 60*m + s - 1
             if time_left <= 0:
                 print('\033[1;31;40m<{}> [vir] clock flag: left\033[1;37;40m'. format(time.time()))
-                self.rt.stop()
+                self.virtual_timer.stop()
             self.time_left = hours_minutes_seconds(time_left)
         if self.time_side == ClockSide.RIGHT:
             h, m, s = self.time_right
             time_right = 3600*h + 60*m + s - 1
             if time_right <= 0:
                 print('\033[1;31;40m<{}> [vir] clock flag: right\033[1;37;40m'. format(time.time()))
-                self.rt.stop()
+                self.virtual_timer.stop()
             self.time_right = hours_minutes_seconds(time_right)
         if self.maxtimer_running:
             print('\033[1;32;40m<{}> [vir] clock maxtime not run out\033[1;37;40m'. format(time.time()))
         else:
-            print('\033[1;34;40m<{}> [vir] clock time: {} - {}\033[1;37;40m'.format(time.time(), self.time_left, self.time_right))
+            print('\033[1;34;40m<{}> [vir] clock time: {} - {}\033[1;37;40m'.
+                  format(time.time(), self.time_left, self.time_right))
         DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=self.time_left, time_right=self.time_right, dev='web'))
-    # (END) dgtserial simulation class
 
     def display_move_on_clock(self, message):
         """display a move on the console."""
@@ -88,15 +90,17 @@ class DgtVr(DgtIface):
     def display_time_on_clock(self, force=False):
         """display the time on the console."""
         if self.clock_running or force:
-            print('\033[1;32;40m<{}> [vir] clock showing time again - running state: {}\033[1;37;40m'. format(time.time(), self.clock_running))
+            print('\033[1;32;40m<{}> [vir] clock showing time again - running state: {}\033[1;37;40m'.
+                  format(time.time(), self.clock_running))
         else:
             logging.debug('[vir] clock isnt running - no need for endText')
 
     def stop_clock(self, devs: set):
         """stop the time on the console."""
-        if self.rt:
-            print('\033[1;32;40m<{}> [vir] clock time stopped at {} - {}\033[1;37;40m'. format(time.time(), self.time_left, self.time_right))
-            self.rt.stop()
+        if self.virtual_timer:
+            print('\033[1;32;40m<{}> [vir] clock time stopped at {} - {}\033[1;37;40m'.
+                  format(time.time(), self.time_left, self.time_right))
+            self.virtual_timer.stop()
         else:
             print('\033[1;36;40m<{}> [vir] clock not ready\033[1;37;40m'. format(time.time()))
         self._resume_clock(ClockSide.NONE)
@@ -110,12 +114,13 @@ class DgtVr(DgtIface):
         self.time_right = hours_minutes_seconds(time_right)
         self.time_side = side
 
-        print('\033[1;32;40m<{}> [vir] clock time started at {} - {} on {}\033[1;37;40m'. format(time.time(), self.time_left, self.time_right, side))
-        if self.rt:
-            self.rt.stop()
+        print('\033[1;32;40m<{}> [vir] clock time started at {} - {} on {}\033[1;37;40m'.
+              format(time.time(), self.time_left, self.time_right, side))
+        if self.virtual_timer:
+            self.virtual_timer.stop()
         if side != ClockSide.NONE:
-            self.rt = RepeatedTimer(1, self._runclock)
-            self.rt.start()
+            self.virtual_timer = RepeatedTimer(1, self._runclock)
+            self.virtual_timer.start()
         self._resume_clock(side)
 
     def light_squares_revelation_board(self, squares):

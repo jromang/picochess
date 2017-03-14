@@ -25,8 +25,11 @@ from dgtboard import DgtBoard
 
 
 class DgtHw(DgtIface):
-    def __init__(self, dgttranslate: DgtTranslate, msg_lock: Lock, dgtboard: DgtBoard):
-        super(DgtHw, self).__init__(dgttranslate, msg_lock, dgtboard)
+
+    """Handle the DgtXL/3000 communication"""
+
+    def __init__(self, dgttranslate: DgtTranslate, dgtboard: DgtBoard):
+        super(DgtHw, self).__init__(dgttranslate, dgtboard)
 
         self.lib_lock = Lock()
         self.dgtboard.run()

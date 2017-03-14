@@ -21,13 +21,17 @@ import logging
 import time
 from dgtapi import Message
 from dgtutil import ClockIcons, ClockSide
+from dgttranslate import DgtTranslate
 from threading import Lock, Timer
 from ctypes import cdll, c_byte, create_string_buffer, pointer
 
 
 class DgtPi(DgtIface):
-    def __init__(self, dgttranslate, msg_lock):
-        super(DgtPi, self).__init__(dgttranslate, msg_lock)
+
+    """Handle the DgtPi communication"""
+
+    def __init__(self, dgttranslate: DgtTranslate):
+        super(DgtPi, self).__init__(dgttranslate)
 
         self.lib_lock = Lock()
         self.lib = cdll.LoadLibrary('etc/dgtpicom.so')
