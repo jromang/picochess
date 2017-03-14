@@ -47,7 +47,8 @@ class DgtIface(DisplayDgt, Thread):
         # delayed task array
         self.tasks = []
         self.do_process = True
-        self.msg_lock = msg_lock
+        # self.msg_lock = msg_lock
+        self.msg_lock = Lock()
 
         self.display_hash = None  # Hash value of clock's display
 
