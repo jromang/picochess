@@ -37,31 +37,31 @@
 <body>
 <div class="container-fluid">
     <div class="row">
-        <div class="col-xs-6">
-            <div style="margin-bottom: 6vh;">
-                <div style="padding: 1vh;">
-                    <div class="pull-right">
-                        <button type="button" id="flipOrientationBtn" class="btn btn-raised btn-default btn-xs text-break">
-                            <i class='fa fa-refresh'></i><span class="hidden-xs"> Flip</span>
-                        </button>
-                        <button type="button" id="DgtSyncBtn" class="btn btn-raised btn-warning btn-xs text-break">
-                            <i class='fa fa-delicious'></i><span class="hidden-xs"> Sync</span>
-                        </button>
-                        <button type="button" id="downloadBtn" class="btn btn-raised btn-info btn-xs text-break">
-                            <i class='fa fa-download'></i><span class="hidden-xs"> Get PGN</span>
-                        </button>
-                        <button type="button" id="broadcastBtn" class="btn btn-raised btn-success btn-xs text-break">
-                            <i class='fa fa-cloud-download'></i><span class="hidden-xs"> Broadcast</span>
-                        </button>
-                    </div>
-                </div>
+        <div class="col-xs-12">
+            <div class="pull-left">
+                <button type="button" id="flipOrientationBtn" class="btn btn-raised btn-default btn-xs text-break">
+                    <i class='fa fa-refresh'></i><span class="hidden-xs"> Flip</span>
+                </button>
+                <button type="button" id="DgtSyncBtn" class="btn btn-raised btn-warning btn-xs text-break">
+                    <i class='fa fa-delicious'></i><span class="hidden-xs"> Sync</span>
+                </button>
+                <button type="button" id="downloadBtn" class="btn btn-raised btn-info btn-xs text-break">
+                    <i class='fa fa-download'></i><span class="hidden-xs"> Get PGN</span>
+                </button>
+                <button type="button" id="broadcastBtn" class="btn btn-raised btn-success btn-xs text-break">
+                    <i class='fa fa-cloud-download'></i><span class="hidden-xs"> Broadcast</span>
+                </button>
             </div>
+            <div class="pull-right">
+                <p id="DGTClockStatus"></p>
+            </div>
+        </div>
+        <div class="col-xs-6">
             <div id="board_panel" class="panel panel-primary">
                 <div class="panel-body" style="position:relative;">
                     <div id="board" style="margin-bottom: 10px;"></div>
                     <div class="pull-left">
                         <span id="sidetomove"></span>&nbsp;<span id="BoardStatus"></span>
-                        <p id="DGTClockStatus"></p>
                     </div>
                     <div class="pull-right">
                         <div id="gameControls">
@@ -78,11 +78,11 @@
         <div class="col-xs-6">
             <div class="panel panel-primary">
                 <div class="panel-heading hidden-xs">
-                    <h3 class="panel-title">Clock</h3>
+                    <h3 class="panel-title">DGT Clock</h3>
                 </div>
                 <div class="panel-body">
                     <div class="pull-left">
-                        <h4>0123456789A</h4>
+                        <h4 id="clock-display" style="font-size: 1.8vw">0123456789A</h4>
                     </div>
                     <div class="pull-right">
                         <button type="button" id="button0" class="btn btn-raised btn-default btn-xs">
