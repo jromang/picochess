@@ -66,6 +66,7 @@ class AlternativeMover:
         return searchmoves
 
     def book(self, bookreader, game_copy: chess.Board):
+        """Get a BookMove or None from game position."""
         try:
             bm = bookreader.weighted_choice(game_copy, self.excludemoves)
         except IndexError:
@@ -75,8 +76,8 @@ class AlternativeMover:
         self.add(book_move)
         game_copy.push(book_move)
         try:
-            bp = bookreader.weighted_choice(game_copy)
-            book_ponder = bp.move()
+            choice = bookreader.weighted_choice(game_copy)
+            book_ponder = choice.move()
         except IndexError:
             book_ponder = None
         return chess.uci.BestMove(book_move, book_ponder)
@@ -98,6 +99,7 @@ def main():
     def compute_legal_fens(game_copy: chess.Board):
         """
         Compute a list of legal FENs for the given game.
+
         :param game_copy: The game
         :return: A list of legal FENs
         """
@@ -112,7 +114,6 @@ def main():
         """
         Start a new search on the current game.
         If a move is found in the opening book, fire an event in a few seconds.
-        :return:
         """
         start_clock()
         book_res = searchmoves.book(bookreader, game.copy())
@@ -128,18 +129,12 @@ def main():
             engine.go(uci_dict)
 
     def analyse(game: chess.Board):
-        """
-        Start a new ponder search on the current game.
-        :return:
-        """
+        """Start a new ponder search on the current game."""
         engine.position(copy.deepcopy(game))
         engine.ponder()
 
     def observe(game: chess.Board):
-        """
-        Starts a new ponder search on the current game.
-        :return:
-        """
+        """Start a new ponder search on the current game."""
         start_clock()
         analyse(game)
 
@@ -155,10 +150,7 @@ def main():
             stop_search()
 
     def stop_search():
-        """
-        Stop current search.
-        :return:
-        """
+        """Stop current search."""
         engine.stop()
 
     def stop_clock():
@@ -178,6 +170,7 @@ def main():
     def check_game_state(game: chess.Board, play_mode: PlayMode):
         """
         Check if the game has ended or not ; it also sends Message to Displays if the game has ended.
+
         :param game:
         :param play_mode:
         :return: True is the game continues, False if it has ended
@@ -201,6 +194,7 @@ def main():
             return False
 
     def user_move(move: chess.Move):
+        """Handle an user move."""
         logging.debug('user move [%s]', move)
         if move not in game.legal_moves:
             logging.warning('Illegal move [%s]', move)
@@ -208,6 +202,7 @@ def main():
             handle_move(move=move)
 
     def is_not_user_turn(turn):
+        """Is it users turn (only valid in normal or remote mode)."""
         return (play_mode == PlayMode.USER_WHITE and turn == chess.BLACK) \
                or (play_mode == PlayMode.USER_BLACK and turn == chess.WHITE)
 
@@ -333,6 +328,7 @@ def main():
                 analyse(game)
 
     def handle_move(move: chess.Move, ponder=None, inbook=False):
+        """Handle a (user/computer) move depending on the interaction mode."""
         nonlocal game
         nonlocal last_computer_fen
         nonlocal searchmoves
@@ -375,6 +371,7 @@ def main():
                     analyse(game)
 
     def transfer_time(time_list: list):
+        """Tranfer the time list to a TimeControl Object and a Text Object."""
         def num(ts):
             try:
                 return int(ts)

@@ -748,9 +748,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 pass
 
     def run(self):
-
         """called from threading.Thread by its start() function."""
-
         logging.info('msg_queue ready')
         while True:
             # Check if we have something to display
