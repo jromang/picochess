@@ -173,49 +173,57 @@ class WebDgt(DisplayDgt, threading.Thread):
     def task(self, message):
         for case in switch(message):
             if case(DgtApi.DISPLAY_MOVE):
-                msg = 'move: ' + str(message.move)
-                result = {'event': 'Clock', 'msg': msg}
-                EventHandler.write_to_clients(result)
+                if 'web' in message.devs:
+                    bit_board = chess.Board(message.fen)
+                    text = bit_board.san(message.move)
+                    result = {'event': 'Clock', 'text': text}
+                    EventHandler.write_to_clients(result)
                 break
             if case(DgtApi.DISPLAY_TEXT):
-                msg = 'text: ' + str(message.l)
-                result = {'event': 'Clock', 'msg': msg}
-                EventHandler.write_to_clients(result)
+                if 'web' in message.devs:
+                    text = str(message.l)
+                    result = {'event': 'Clock', 'text': text}
+                    EventHandler.write_to_clients(result)
                 break
             if case(DgtApi.DISPLAY_TIME):
-                msg = 'display time'
-                result = {'event': 'Clock', 'msg': msg}
-                EventHandler.write_to_clients(result)
+                if 'web' in message.devs:
+                    text = 'display time'
+                    result = {'event': 'Clock', 'text': text}
+                    EventHandler.write_to_clients(result)
                 break
             if case(DgtApi.LIGHT_CLEAR):
-                msg = 'clear light'
-                result = {'event': 'Clock', 'msg': msg}
-                EventHandler.write_to_clients(result)
+                text = 'clear light'
+                result = {'event': 'Clock', 'text': text}
+                # EventHandler.write_to_clients(result)
                 break
             if case(DgtApi.LIGHT_SQUARES):
-                msg = 'light: ' + str(message.uci_move)
-                result = {'event': 'Clock', 'msg': msg}
-                EventHandler.write_to_clients(result)
+                text = 'light: ' + str(message.uci_move)
+                result = {'event': 'Clock', 'text': text}
+                # EventHandler.write_to_clients(result)
                 break
             if case(DgtApi.CLOCK_STOP):
-                msg = 'stop clock'
-                result = {'event': 'Clock', 'msg': msg}
-                EventHandler.write_to_clients(result)
+                # text = 'stop clock'
+                # result = {'event': 'Clock', 'text': text}
+                # EventHandler.write_to_clients(result)
                 break
             if case(DgtApi.CLOCK_START):
-                msg = 'start clock'
-                result = {'event': 'Clock', 'msg': msg}
-                EventHandler.write_to_clients(result)
+                # text = 'start clock'
+                # result = {'event': 'Clock', 'text': text}
+                # EventHandler.write_to_clients(result)
                 break
             if case(DgtApi.CLOCK_VERSION):
-                msg = 'version: ' + str(message.main) + str(message.sub)
-                result = {'event': 'Clock', 'msg': msg}
-                EventHandler.write_to_clients(result)
+                # text = 'version: ' + str(message.main) + str(message.sub)
+                # result = {'event': 'Clock', 'text': text}
+                # EventHandler.write_to_clients(result)
                 break
             if case(DgtApi.CLOCK_TIME):
-                msg = 'time: ' + str(message.time_left) + str(message.time_right)
-                result = {'event': 'Clock', 'msg': msg}
-                EventHandler.write_to_clients(result)
+                if message.dev == 'ser':
+                    time_l = message.time_left
+                    time_r = message.time_right
+                    text_l = '{}:{:02d}.{:02d}'.format(time_l[0], time_l[1], time_l[2])
+                    text_r = '{}:{:02d}.{:02d}'.format(time_r[0], time_r[1], time_r[2])
+                    result = {'event': 'Clock', 'text': text_l + ' ' + text_r}
+                    EventHandler.write_to_clients(result)
                 break
             if case():  # Default
                 pass

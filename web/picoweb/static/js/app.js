@@ -274,7 +274,7 @@ $(function() {
                     dgtClockStatusEl.html(data.msg);
                     break;
                 case 'Clock':
-                    dgtClockTextEl.html(data.msg);
+                    dgtClockTextEl.html(data.text);
                     break;
                 case 'header':
                     setHeaders(data['headers']);
