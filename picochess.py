@@ -509,7 +509,6 @@ def main():
         logging.debug('PicoTalker disabled')
 
     dgtboard = DgtBoard(args.dgt_port, args.disable_revelation_leds, args.dgtpi)
-    my_lock = threading.Lock()  # @todo this is not the correct way (DgtPi & DgtHw are independent)
 
     if args.console:
         # Enable keyboard input and terminal display
