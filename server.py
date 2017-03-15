@@ -126,7 +126,7 @@ class ChessBoardHandler(ServerRequestHandler):
         self.shared = shared
 
     def get(self):
-        self.render('web/picoweb/templates/board2.html')
+        self.render('web/picoweb/templates/clock.html')
 
 
 class WebServer(Observable, threading.Thread):
