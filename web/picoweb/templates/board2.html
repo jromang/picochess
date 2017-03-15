@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en" dir="ltr">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Picochess Webserver</title>
+    <link rel="stylesheet" href="/static/css/ladda-themeless.min.css"/>
+
+    <link rel="stylesheet" href="/static/css/bootstrap-3.3.7.min.css"/>
+    <link rel="stylesheet" href="/static/css/material-design/ripples.min.css"/>
+    <link rel="stylesheet" href="/static/css/material-design/bootstrap-material-design.min.css"/>
+
+    <link rel="stylesheet" href="/static/css/normalize-4.1.1.css"/>
+    <link rel="stylesheet" href="/static/css/chessboard.css"/>
+    <link rel="stylesheet" href="/static/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/static/css/custom.css"/>
+
+    <script src="/static/js/jquery-1.12.4.min.js"></script>
+    <script src="/static/js/bootstrap-3.3.7.min.js"></script>
+    <script src="/static/js/material-design/ripples.min.js"></script>
+    <script src="/static/js/material-design/material.min.js"></script>
+
+    <script src="/static/js/spin.min.js"></script>
+    <script src="/static/js/ladda.min.js"></script>
+    <script src="/static/js/jquery.dynatable.js"></script>
+    <script src="/static/js/enginegame.js"></script>
+    <script src="/static/js/chessboard.js"></script>
+    <script src="/static/js/chess.js"></script>
+
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+    <meta http-equiv="Pragma" content="no-cache"/>
+    <meta http-equiv="Expires" content="0"/>
+</head>
+
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-6">
+            <div id="board_panel" class="panel panel-primary">
+                <div class="panel-body" style="position:relative;">
+                    <div id="board" style="margin-bottom: 10px;"></div>
+                    <div class="pull-left">
+                        <span id="sidetomove"></span>&nbsp;<span id="BoardStatus"></span>
+                        <p id="DGTClockStatus"></p>
+                    </div>
+                    <div class="pull-right">
+                        <div id="gameControls">
+                            <button type="button" id="startBtn" class="btn btn-default btn-xs"><i class='fa fa-fast-backward'></i></button>
+                            <button type="button" id="backBtn" class="btn btn-default btn-xs"><i class='fa fa-arrow-left'></i></button>
+                            <button type="button" id="fwdBtn" class="btn btn-default btn-xs"><i class='fa fa-arrow-right'></i></button>
+                            <button type="button" id="endBtn" class="btn btn-default btn-xs"><i class='fa fa-fast-forward'></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xs-6">
+            <div class="panel panel-primary">
+                <div class="panel-heading hidden-xs">
+                    <h3 class="panel-title">Actions</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="pull-right">
+                        <button type="button" id="flipOrientationBtn" class="btn btn-raised btn-default btn-xs text-break">
+                            <i class='fa fa-refresh'></i><span class="hidden-xs"> Flip</span>
+                        </button>
+                        <button type="button" id="DgtSyncBtn" class="btn btn-raised btn-warning btn-xs text-break">
+                            <i class='fa fa-delicious'></i><span class="hidden-xs"> Sync</span>
+                        </button>
+                        <button type="button" id="downloadBtn" class="btn btn-raised btn-info btn-xs text-break">
+                            <i class='fa fa-download'></i><span class="hidden-xs"> Get PGN</span>
+                        </button>
+                        <button type="button" id="broadcastBtn" class="btn btn-raised btn-success btn-xs text-break">
+                            <i class='fa fa-cloud-download'></i><span class="hidden-xs"> Broadcast</span>
+                        </button>
+                    </div>
+                    <!--
+                    <p class="pull-left">
+                        <button type="button" id="button0" class="btn btn-raised btn-default btn-xs">
+                            <i class='fa fa-backward'></i>
+                        </button>
+                        <button type="button" id="button1" class="btn btn-raised btn-default btn-xs">
+                            <i class='fa fa-minus'></i>
+                        </button>
+                        <button type="button" id="button2" class="btn btn-raised btn-default btn-xs">
+                            <i class='fa fa-pause'></i>
+                        </button>
+                        <button type="button" id="button3" class="btn btn-raised btn-default btn-xs">
+                            <i class='fa fa-plus'></i>
+                        </button>
+                        <button type="button" id="button4" class="btn btn-raised btn-default btn-xs">
+                            <i class='fa fa-forward'></i>
+                        </button>
+                        <button type="button" id="lever" class="btn btn-raised btn-success btn-xs">
+                            <i class='fa fa-retweet'></i>
+                        </button>
+                    </p>
+                    -->
+                </div>
+            </div>
+
+            <div class="panel panel-primary">
+                <div class="panel-heading hidden-xs">
+                    <h3 class="panel-title">Game record</h3>
+                </div>
+
+                <div class="panel-body">
+                    <div id="pgn" style="max-height:37%; overflow-y:auto; overflow-x:hidden; min-height:40%; position:relative;"></div>
+                </div>
+            </div>
+
+            <div class="well">
+                <ul class="nav nav-pills">
+                    <li class="active">
+                        <a href="#book" data-toggle="tab">Book</a>
+                    </li>
+                    <li class="">
+                        <a href="#engine" data-toggle="tab">Engine</a>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <div class="tab-pane fade active in" id="book">
+                        <table id="BookStatsTable" cellpadding="0" cellspacing="0" style="width:100%; align: center; overflow: auto" class="table-responsive table-condensed table-bordered flat-table flat-table-1">
+                            <thead>
+                            <tr>
+                                <th data-dynatable-column="move">Move</th>
+                                <th data-dynatable-column="freq">Games</th>
+                                <th data-dynatable-column="pct">Winning %</th>
+                                <th data-dynatable-column="wins">Wins</th>
+                                <th data-dynatable-column="draws">Draws</th>
+                                <th data-dynatable-column="losses">Losses</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+
+                    <div class="tab-pane fade" id="engine">
+                        <div class="row">
+                            <div class="btn-group pull-left">
+                                <button id="analyzePlus" class="btn btn-raised btn-default">
+                                    <span id="analyzePlusText"><i class='fa fa-plus'></i></span>
+                                </button>
+                                <button id="analyzeMinus" class="btn btn-raised btn-default">
+                                    <span id="analyzeMinusText"><i class='fa fa-minus'></i></span>
+                                </button>
+                            </div>
+
+                            <div class="btn-group pull-right">
+                                <button id="analyzeBtn" class="btn btn-raised btn-success"><i class='fa fa-cog'></i>
+                                    <span id="AnalyzeText">Analyze</span>
+                                </button>
+                            </div>
+
+                            <div id="listener">
+                                <embed name="nacl_module" id='stockfish_module' width="0" height="0" src='/static/stockfish/stockfish.nmf' type='application/x-pnacl' />
+                            </div>
+                            <div id="engineStatus"></div>
+                            <span id="engineMultiPVStatus"></span>
+                        </div>
+                        <div class="row">
+                            <div id="pv_output" class="gameMoves list-group">
+                                <div id="pv_1"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-xs-12 flip-scroll">
+
+            <div class="well">
+                <div class="tab-content clearfix">
+                    <div class="tab-pane active" id="reference">
+                        <table id="GameStatsTable" cellpadding="0" cellspacing="0" style="width: 100%; align: center; overflow: auto" class="table-condensed table-bordered table-responsive flat-table flat-table-1">
+                            <thead>
+                                <tr>
+                                    <th data-dynatable-column="white">White</th>
+                                    <th data-dynatable-column="white_elo">White Elo</th>
+                                    <th data-dynatable-column="black">Black</th>
+                                    <th data-dynatable-column="black_elo">Black Elo</th>
+                                    <th data-dynatable-column="result">Result</th>
+                                    <th data-dynatable-column="date">Date</th>
+                                    <th data-dynatable-column="event">Event</th>
+                                    <th data-dynatable-column="site">Site</th>
+                                    <th data-dynatable-column="eco">ECO</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>
