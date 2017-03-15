@@ -217,7 +217,7 @@ class WebDgt(DisplayDgt, threading.Thread):
                 # EventHandler.write_to_clients(result)
                 break
             if case(DgtApi.CLOCK_TIME):
-                if message.dev == 'ser':
+                if message.dev != 'i2c':
                     time_l = message.time_left
                     time_r = message.time_right
                     text_l = '{}:{:02d}.{:02d}'.format(time_l[0], time_l[1], time_l[2])
