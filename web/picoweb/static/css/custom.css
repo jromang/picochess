@@ -44,6 +44,10 @@
     padding: 4px 1vw;
 }
 
+#clockControls button {
+    padding: 4px 1vw;
+}
+
 #pgn h4 {
     font-size: 1.8vw;
 }
@@ -161,18 +165,22 @@
 }
 
 body {
-    font-size: 1vw;
+    font-size: 1vh;
 }
 
 #BoardStatus {
-    font-size: 1.2vw;
+    font-size: 3vh;
 }
 
 #DGTClockStatus {
-    font-size: 1.2vw;
+    font-size: 3vh;
 }
 
 #gameControls .btn {
+    margin: 0 1px;
+}
+
+#clockControls .btn {
     margin: 0 1px;
 }
 
@@ -186,4 +194,12 @@ body {
 
 .btn {
     margin: 5px 1px;
+}
+
+.panel {
+    margin-bottom: 3vh;
+}
+
+.panel-body {
+    padding: 1.2vw;
 }
