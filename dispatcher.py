@@ -31,7 +31,6 @@ class Dispatcher(DispatchDgt, Thread):
 
         self.maxtimer = None
         self.maxtimer_running = False
-        self.clock_running = False
         self.time_factor = 1  # This is for testing the duration - remove it lateron!
         # delayed task array
         self.tasks = []
@@ -42,11 +41,14 @@ class Dispatcher(DispatchDgt, Thread):
 
     def _stopped_maxtimer(self):
         self.maxtimer_running = False
-        if self.clock_running:
-            logging.debug('showing the running clock again')
-            DisplayDgt.show(Dgt.DISPLAY_TIME(force=False, wait=True, devs={'ser', 'i2c', 'web'}))
-        else:
-            logging.debug('clock not running - ignored maxtime')
+        # if self.clock_running:
+        #     logging.debug('showing the running clock again')
+        #     DisplayDgt.show(Dgt.DISPLAY_TIME(force=False, wait=True, devs={'ser', 'i2c', 'web'}))
+        # else:
+        #     logging.debug('clock not running - ignored maxtime')
+
+        # @todo we try it without this test from above - since dispatcher doesnt know if clock is running anyway
+        DisplayDgt.show(Dgt.DISPLAY_TIME(force=False, wait=True, devs={'ser', 'i2c', 'web'}))
         if self.tasks:
             logging.debug('processing delayed tasks: {}'.format(self.tasks))
         while self.tasks:
@@ -79,7 +81,7 @@ class Dispatcher(DispatchDgt, Thread):
 
     def run(self):
         """called from threading.Thread by its start() function."""
-        logging.info('dispatcher_queue ready')
+        logging.info('dispatch_queue ready')
         while True:
             # Check if we have something to display
             try:
@@ -103,7 +105,7 @@ class Dispatcher(DispatchDgt, Thread):
                     else:
                         logging.debug('command doesnt change the clock display => no need to interrupt max timer')
                 else:
-                    logging.debug('max timer not running')
+                    logging.debug('max timer not running => process command')
 
                 if self.do_process:
                     self._process_message(message)

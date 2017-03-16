@@ -35,6 +35,7 @@ class DgtIface(DisplayDgt, Thread):
         self.dgtboard = dgtboard
         self.dgttranslate = dgttranslate
 
+        self.clock_running = False
         self.enable_dgt_3000 = False
         self.enable_ser_clock = False
         self.time_left = None
