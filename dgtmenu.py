@@ -17,7 +17,7 @@
 
 from configobj import ConfigObj
 from collections import OrderedDict
-from utilities import DisplayDgt, Observable, switch, Dgt
+from utilities import DisplayDgt, Observable, switch, Dgt, DispatchDgt
 from dgtutil import TimeMode, TimeModeLoop, Menu, MenuLoop, Mode, ModeLoop, Language, LanguageLoop, ClockIcons, BeepLoop
 from dgtutil import Settings, SettingsLoop, VoiceType, VoiceTypeLoop, SystemDisplay, SystemDisplayLoop, BeepLevel
 from dgtapi import Event
@@ -645,7 +645,7 @@ class DgtMenu(Observable):
                     # self._reset_moves_and_score() done in "START_NEW_GAME"
                     text = self.save_choices()
                 else:
-                    DisplayDgt.show(self.dgttranslate.text('Y05_illegalpos'))
+                    DispatchDgt.show(self.dgttranslate.text('Y05_illegalpos'))
                     text = self.dgttranslate.text('B00_scanboard')
                 break
             if case(MenuState.TIME):
@@ -749,7 +749,7 @@ class DgtMenu(Observable):
                 text = self.dgttranslate.text('B10_picochess')
                 text.rd = ClockIcons.DOT
                 text.wait = False
-                DisplayDgt.show(text)
+                DispatchDgt.show(text)
                 text = self.save_choices()
                 break
             if case(MenuState.SYS_IP):
@@ -759,7 +759,7 @@ class DgtMenu(Observable):
                     text = self.dgttranslate.text('B07_default', msg)
                     if len(msg) == 7:  # delete the " " for XL incase its "123 456"
                         text.s = msg[:3] + msg[4:]
-                    DisplayDgt.show(text)
+                    DispatchDgt.show(text)
                     msg = ' '.join(self.ip.split('.')[2:])
                     text = self.dgttranslate.text('N07_default', msg)
                     if len(msg) == 7:  # delete the " " for XL incase its "123 456"
@@ -767,7 +767,7 @@ class DgtMenu(Observable):
                     text.wait = True
                 else:
                     text = self.dgttranslate.text('B10_noipadr')
-                DisplayDgt.show(text)
+                DispatchDgt.show(text)
                 text = self.save_choices()
                 break
             if case(MenuState.SYS_SOUND):
@@ -780,7 +780,7 @@ class DgtMenu(Observable):
                 config['beep-config'] = self.dgttranslate.beep_to_config(self.menu_system_sound_beep)
                 config.write()
                 text = self.dgttranslate.text('B10_okbeep')
-                DisplayDgt.show(text)
+                DispatchDgt.show(text)
                 text = self.save_choices()
                 break
             if case(MenuState.SYS_LANG):
@@ -796,14 +796,14 @@ class DgtMenu(Observable):
                 config['language'] = language
                 config.write()
                 text = self.dgttranslate.text('B10_oklang')
-                DisplayDgt.show(text)
+                DispatchDgt.show(text)
                 text = self.save_choices()
                 break
             if case(MenuState.SYS_LOG):
                 # do action!
                 self.fire(Event.EMAIL_LOG())
                 text = self.dgttranslate.text('B10_oklogfile')  # @todo give pos/neg feedback
-                DisplayDgt.show(text)
+                DispatchDgt.show(text)
                 text = self.save_choices()
                 break
             if case(MenuState.SYS_VOICE):
@@ -824,7 +824,7 @@ class DgtMenu(Observable):
                         config.write()
                     self.fire(Event.SET_VOICE(type=self.menu_system_voice_type, lang='en', speaker='mute'))
                     text = self.dgttranslate.text('B10_okvoice')
-                    DisplayDgt.show(text)
+                    DispatchDgt.show(text)
                     text = self.save_choices()
                 break
             if case(MenuState.SYS_VOICE_TYPE_MUTE_LANG):
@@ -841,7 +841,7 @@ class DgtMenu(Observable):
                 config.write()
                 self.fire(Event.SET_VOICE(type=self.menu_system_voice_type, lang=vkey, speaker=skey))
                 text = self.dgttranslate.text('B10_okvoice')
-                DisplayDgt.show(text)
+                DispatchDgt.show(text)
                 text = self.save_choices()
                 break
             if case(MenuState.SYS_DISP):
@@ -862,7 +862,7 @@ class DgtMenu(Observable):
                     del config['disable-confirm-message']
                 config.write()
                 text = self.dgttranslate.text('B10_okconfirm')
-                DisplayDgt.show(text)
+                DispatchDgt.show(text)
                 text = self.save_choices()
                 break
             if case(MenuState.SYS_DISP_PONDER):
@@ -874,7 +874,7 @@ class DgtMenu(Observable):
                 config['ponder-interval'] = self.menu_system_display_ponderinterval
                 config.write()
                 text = self.dgttranslate.text('B10_okponderinterval')
-                DisplayDgt.show(text)
+                DispatchDgt.show(text)
                 text = self.save_choices()
                 break
             if case():  # Default

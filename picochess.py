@@ -49,6 +49,7 @@ from dgtdisplay import DgtDisplay
 from dgtboard import DgtBoard
 from dgttranslate import DgtTranslate
 from dgtmenu import DgtMenu
+from dispatcher import Dispatcher
 
 from logging.handlers import RotatingFileHandler
 from configobj import ConfigObj
@@ -509,6 +510,7 @@ def main():
         logging.debug('PicoTalker disabled')
 
     dgtboard = DgtBoard(args.dgt_port, args.disable_revelation_leds, args.dgtpi)
+    Dispatcher().start()
 
     if args.console:
         # Enable keyboard input and terminal display

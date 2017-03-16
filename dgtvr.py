@@ -52,7 +52,7 @@ class DgtVr(DgtIface):
                 print('\033[1;31;40m<{}> [vir] clock flag: right\033[1;37;40m'. format(time.time()))
                 self.virtual_timer.stop()
             self.time_right = hours_minutes_seconds(time_right)
-        if self.maxtimer_running:
+        if False: # self.maxtimer_running: @todo fix this
             print('\033[1;32;40m<{}> [vir] clock maxtime not run out\033[1;37;40m'. format(time.time()))
         else:
             print('\033[1;34;40m<{}> [vir] clock time: {} - {}\033[1;37;40m'.
