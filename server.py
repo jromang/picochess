@@ -29,7 +29,7 @@ from tornado.websocket import WebSocketHandler
 from utilities import Observable, DisplayMsg, DisplayDgt, switch
 import logging
 from dgtapi import MessageApi, Event, DgtApi
-from dgtutil import GameResult, PlayMode, Mode
+from dgtutil import GameResult, PlayMode, Mode, ClockSide
 from web.picoweb import picoweb as pw
 
 
@@ -159,6 +159,7 @@ class WebDgt(DisplayDgt, threading.Thread):
     def __init__(self, shared):
         super(WebDgt, self).__init__()
         self.shared = shared
+        self.clock_running = False
 
     @staticmethod
     def run_background(func, callback, args=(), kwds=None):
@@ -193,23 +194,25 @@ class WebDgt(DisplayDgt, threading.Thread):
                 break
             if case(DgtApi.LIGHT_CLEAR):
                 text = 'clear light'
-                result = {'event': 'Clock', 'text': text}
-                # EventHandler.write_to_clients(result)
+                result = {'event': 'Message', 'msg': text}
+                EventHandler.write_to_clients(result)
                 break
             if case(DgtApi.LIGHT_SQUARES):
                 text = 'light: ' + str(message.uci_move)
-                result = {'event': 'Clock', 'text': text}
-                # EventHandler.write_to_clients(result)
+                result = {'event': 'Message', 'msg': text}
+                EventHandler.write_to_clients(result)
                 break
             if case(DgtApi.CLOCK_STOP):
                 # text = 'stop clock'
                 # result = {'event': 'Clock', 'text': text}
                 # EventHandler.write_to_clients(result)
+                self.clock_running = False
                 break
             if case(DgtApi.CLOCK_START):
                 # text = 'start clock'
                 # result = {'event': 'Clock', 'text': text}
                 # EventHandler.write_to_clients(result)
+                self.clock_running = message.side != ClockSide.NONE
                 break
             if case(DgtApi.CLOCK_VERSION):
                 # text = 'version: ' + str(message.main) + str(message.sub)
