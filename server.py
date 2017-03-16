@@ -160,6 +160,9 @@ class WebDgt(DisplayDgt, threading.Thread):
         super(WebDgt, self).__init__()
         self.shared = shared
         self.clock_running = False
+        self.clock_show_time = True
+        self.time_left = None
+        self.time_right = None
 
     @staticmethod
     def run_background(func, callback, args=(), kwds=None):
@@ -175,6 +178,7 @@ class WebDgt(DisplayDgt, threading.Thread):
         for case in switch(message):
             if case(DgtApi.DISPLAY_MOVE):
                 if 'web' in message.devs:
+                    self.clock_show_time = False
                     bit_board = chess.Board(message.fen)
                     text = bit_board.san(message.move)
                     result = {'event': 'Clock', 'text': text}
@@ -182,15 +186,23 @@ class WebDgt(DisplayDgt, threading.Thread):
                 break
             if case(DgtApi.DISPLAY_TEXT):
                 if 'web' in message.devs:
+                    self.clock_show_time = False
                     text = str(message.l)
                     result = {'event': 'Clock', 'text': text}
                     EventHandler.write_to_clients(result)
                 break
             if case(DgtApi.DISPLAY_TIME):
                 if 'web' in message.devs:
-                    text = 'display time'
-                    result = {'event': 'Clock', 'text': text}
-                    EventHandler.write_to_clients(result)
+                    if self.clock_running or message.force:
+                        self.clock_show_time = True
+                        time_l = self.time_left
+                        time_r = self.time_right
+                        text_l = '{}:{:02d}.{:02d}'.format(time_l[0], time_l[1], time_l[2])
+                        text_r = '{}:{:02d}.{:02d}'.format(time_r[0], time_r[1], time_r[2])
+                        result = {'event': 'Clock', 'text': text_l + ' ' + text_r}
+                        EventHandler.write_to_clients(result)
+                    else:
+                        logging.debug('(web) clock isnt running - no need for endText')
                 break
             if case(DgtApi.LIGHT_CLEAR):
                 text = 'clear light'
@@ -203,30 +215,24 @@ class WebDgt(DisplayDgt, threading.Thread):
                 EventHandler.write_to_clients(result)
                 break
             if case(DgtApi.CLOCK_STOP):
-                # text = 'stop clock'
-                # result = {'event': 'Clock', 'text': text}
-                # EventHandler.write_to_clients(result)
+                self.clock_show_time = True
                 self.clock_running = False
                 break
             if case(DgtApi.CLOCK_START):
-                # text = 'start clock'
-                # result = {'event': 'Clock', 'text': text}
-                # EventHandler.write_to_clients(result)
+                self.clock_show_time = True
                 self.clock_running = message.side != ClockSide.NONE
                 break
             if case(DgtApi.CLOCK_VERSION):
-                # text = 'version: ' + str(message.main) + str(message.sub)
-                # result = {'event': 'Clock', 'text': text}
-                # EventHandler.write_to_clients(result)
                 break
             if case(DgtApi.CLOCK_TIME):
                 if message.dev != 'i2c':
-                    time_l = message.time_left
-                    time_r = message.time_right
-                    text_l = '{}:{:02d}.{:02d}'.format(time_l[0], time_l[1], time_l[2])
-                    text_r = '{}:{:02d}.{:02d}'.format(time_r[0], time_r[1], time_r[2])
-                    result = {'event': 'Clock', 'text': text_l + ' ' + text_r}
-                    EventHandler.write_to_clients(result)
+                    self.time_left = time_l = message.time_left
+                    self.time_right = time_r = message.time_right
+                    if self.clock_show_time:
+                        text_l = '{}:{:02d}.{:02d}'.format(time_l[0], time_l[1], time_l[2])
+                        text_r = '{}:{:02d}.{:02d}'.format(time_r[0], time_r[1], time_r[2])
+                        result = {'event': 'Clock', 'text': text_l + ' ' + text_r}
+                        EventHandler.write_to_clients(result)
                 break
             if case():  # Default
                 pass
