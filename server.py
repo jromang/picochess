@@ -175,6 +175,16 @@ class WebDgt(DisplayDgt, threading.Thread):
         _workers.apply_async(func, args, kwds, _callback)
 
     def task(self, message):
+        def display_time(time_l, time_r):
+            if time_l is None or time_r is None:
+                logging.debug('time values not set - abort function')
+            else:
+                self.clock_show_time = True
+                text_l = '{}:{:02d}.{:02d}'.format(time_l[0], time_l[1], time_l[2])
+                text_r = '{}:{:02d}.{:02d}'.format(time_r[0], time_r[1], time_r[2])
+                result = {'event': 'Clock', 'text': text_l + ' ' + text_r}
+                EventHandler.write_to_clients(result)
+
         for case in switch(message):
             if case(DgtApi.DISPLAY_MOVE):
                 if 'web' in message.devs:
@@ -194,16 +204,7 @@ class WebDgt(DisplayDgt, threading.Thread):
             if case(DgtApi.DISPLAY_TIME):
                 if 'web' in message.devs:
                     if self.clock_running or message.force:
-                        self.clock_show_time = True
-                        time_l = self.time_left
-                        time_r = self.time_right
-                        if time_l is None or time_r is None:
-                            logging.debug('time values not set - abort function')
-                        else:
-                            text_l = '{}:{:02d}.{:02d}'.format(time_l[0], time_l[1], time_l[2])
-                            text_r = '{}:{:02d}.{:02d}'.format(time_r[0], time_r[1], time_r[2])
-                            result = {'event': 'Clock', 'text': text_l + ' ' + text_r}
-                            EventHandler.write_to_clients(result)
+                        display_time(self.time_left, self.time_right)
                     else:
                         logging.debug('(web) clock isnt running - no need for endText')
                 break
@@ -218,24 +219,23 @@ class WebDgt(DisplayDgt, threading.Thread):
                 EventHandler.write_to_clients(result)
                 break
             if case(DgtApi.CLOCK_STOP):
-                self.clock_show_time = True
-                self.clock_running = False
+                if 'web' in message.devs:
+                    self.clock_show_time = True
+                    self.clock_running = False
                 break
             if case(DgtApi.CLOCK_START):
-                self.clock_show_time = True
-                self.clock_running = message.side != ClockSide.NONE
+                if 'web' in message.devs:
+                    self.clock_running = message.side != ClockSide.NONE
+                    display_time(self.time_left, self.time_right)
                 break
             if case(DgtApi.CLOCK_VERSION):
                 break
             if case(DgtApi.CLOCK_TIME):
                 if message.dev != 'i2c':
-                    self.time_left = time_l = message.time_left
-                    self.time_right = time_r = message.time_right
+                    self.time_left = message.time_left
+                    self.time_right = message.time_right
                     if self.clock_show_time:
-                        text_l = '{}:{:02d}.{:02d}'.format(time_l[0], time_l[1], time_l[2])
-                        text_r = '{}:{:02d}.{:02d}'.format(time_r[0], time_r[1], time_r[2])
-                        result = {'event': 'Clock', 'text': text_l + ' ' + text_r}
-                        EventHandler.write_to_clients(result)
+                        display_time(self.time_left, self.time_right)
                 break
             if case():  # Default
                 pass
@@ -336,25 +336,13 @@ class WebDisplay(DisplayMsg, threading.Thread):
             return pgn_game.accept(pgn.StringExporter(headers=True, comments=False, variations=False))
 
         for case in switch(message):
-            if case(MessageApi.BOOK_MOVE):
-                # EventHandler.write_to_clients({'event': 'Message', 'msg': 'Book move'})
-                break
             if case(MessageApi.START_NEW_GAME):
                 pgn_str = _transfer(message.game)
                 fen = message.game.fen()
                 result = {'pgn': pgn_str, 'fen': fen}
                 self.shared['last_dgt_move_msg'] = result
-                # pos960 = message.game.chess960_pos()
-                # if pos960:
-                #     code_text = '' if pos960 == 518 else ' - chess960 code {}'.format(pos960)
-                # else:
-                #     code_text = ' with setup'
                 EventHandler.write_to_clients({'event': 'NewGame', 'fen': fen})
-                # EventHandler.write_to_clients({'event': 'Message', 'msg': 'New game' + code_text})
                 _update_headers()
-                break
-            if case(MessageApi.SEARCH_STARTED):
-                # EventHandler.write_to_clients({'event': 'Message', 'msg': 'Thinking...'})
                 break
             if case(MessageApi.IP_INFO):
                 self.shared['ip_info'] = message.info
