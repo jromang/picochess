@@ -106,13 +106,10 @@ class DgtIface(DisplayDgt, Thread):
                 self.light_squares_revelation_board(message.uci_move)
                 break
             if case(DgtApi.CLOCK_STOP):
-                # if self.clock_running:
-                #     self.stop_clock(message.devs)
-                # else:
-                #     logging.debug('clock is already stopped')
-
-                # @todo check this, like above
-                self.stop_clock(message.devs)
+                if self.clock_running:
+                    self.stop_clock(message.devs)
+                else:
+                    logging.debug('clock is already stopped')
                 break
             if case(DgtApi.CLOCK_START):
                 # log times

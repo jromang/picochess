@@ -197,10 +197,13 @@ class WebDgt(DisplayDgt, threading.Thread):
                         self.clock_show_time = True
                         time_l = self.time_left
                         time_r = self.time_right
-                        text_l = '{}:{:02d}.{:02d}'.format(time_l[0], time_l[1], time_l[2])
-                        text_r = '{}:{:02d}.{:02d}'.format(time_r[0], time_r[1], time_r[2])
-                        result = {'event': 'Clock', 'text': text_l + ' ' + text_r}
-                        EventHandler.write_to_clients(result)
+                        if time_l is None or time_r is None:
+                            logging.debug('time values not set - abort function')
+                        else:
+                            text_l = '{}:{:02d}.{:02d}'.format(time_l[0], time_l[1], time_l[2])
+                            text_r = '{}:{:02d}.{:02d}'.format(time_r[0], time_r[1], time_r[2])
+                            result = {'event': 'Clock', 'text': text_l + ' ' + text_r}
+                            EventHandler.write_to_clients(result)
                     else:
                         logging.debug('(web) clock isnt running - no need for endText')
                 break
@@ -334,24 +337,24 @@ class WebDisplay(DisplayMsg, threading.Thread):
 
         for case in switch(message):
             if case(MessageApi.BOOK_MOVE):
-                EventHandler.write_to_clients({'event': 'Message', 'msg': 'Book move'})
+                # EventHandler.write_to_clients({'event': 'Message', 'msg': 'Book move'})
                 break
             if case(MessageApi.START_NEW_GAME):
                 pgn_str = _transfer(message.game)
                 fen = message.game.fen()
                 result = {'pgn': pgn_str, 'fen': fen}
                 self.shared['last_dgt_move_msg'] = result
-                pos960 = message.game.chess960_pos()
-                if pos960:
-                    code_text = '' if pos960 == 518 else ' - chess960 code {}'.format(pos960)
-                else:
-                    code_text = ' with setup'
+                # pos960 = message.game.chess960_pos()
+                # if pos960:
+                #     code_text = '' if pos960 == 518 else ' - chess960 code {}'.format(pos960)
+                # else:
+                #     code_text = ' with setup'
                 EventHandler.write_to_clients({'event': 'NewGame', 'fen': fen})
-                EventHandler.write_to_clients({'event': 'Message', 'msg': 'New game' + code_text})
+                # EventHandler.write_to_clients({'event': 'Message', 'msg': 'New game' + code_text})
                 _update_headers()
                 break
             if case(MessageApi.SEARCH_STARTED):
-                EventHandler.write_to_clients({'event': 'Message', 'msg': 'Thinking...'})
+                # EventHandler.write_to_clients({'event': 'Message', 'msg': 'Thinking...'})
                 break
             if case(MessageApi.IP_INFO):
                 self.shared['ip_info'] = message.info

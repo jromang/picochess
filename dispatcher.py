@@ -32,12 +32,10 @@ class Dispatcher(DispatchDgt, Thread):
         self.maxtimer = None
         self.maxtimer_running = False
         self.time_factor = 1  # This is for testing the duration - remove it lateron!
-        # delayed task array
-        self.tasks = []
-        self.do_process = True
-        self.msg_lock = Lock()
+        self.tasks = []  # delayed task array
 
         self.display_hash = None  # Hash value of clock's display
+        self.process_lock = Lock()
 
     def _stopped_maxtimer(self):
         self.maxtimer_running = False
@@ -53,7 +51,8 @@ class Dispatcher(DispatchDgt, Thread):
             logging.debug('processing delayed tasks: {}'.format(self.tasks))
         while self.tasks:
             message = self.tasks.pop(0)
-            self._process_message(message)
+            with self.process_lock:
+                self._process_message(message)
             if self.maxtimer_running:  # run over the task list until a maxtime command was processed
                 break
 
@@ -88,16 +87,16 @@ class Dispatcher(DispatchDgt, Thread):
                 message = self.dispatch_queue.get()
                 logging.debug("received command from dispatch_queue: %s", message)
 
-                self.do_process = True
                 if self.maxtimer_running:
                     if hasattr(message, 'wait'):
                         if message.wait:
                             self.tasks.append(message)
                             logging.debug('tasks delayed: {}'.format(self.tasks))
-                            self.do_process = False
+                            continue
                         else:
                             logging.debug('ignore former maxtime')
                             self.maxtimer.cancel()
+                            self.maxtimer.join()
                             self.maxtimer_running = False
                             if self.tasks:
                                 logging.debug('delete following tasks: {}'.format(self.tasks))
@@ -107,9 +106,7 @@ class Dispatcher(DispatchDgt, Thread):
                 else:
                     logging.debug('max timer not running => process command')
 
-                if self.do_process:
+                with self.process_lock:
                     self._process_message(message)
-                else:
-                    logging.debug('task delayed: {}'.format(message))
             except queue.Empty:
                 pass
