@@ -208,6 +208,14 @@ class WebDgt(DisplayDgt, threading.Thread):
                     else:
                         logging.debug('(web) clock isnt running - no need for endText')
                 break
+            if case(DgtApi.LIGHT_CLEAR):
+                result = {'event': 'Clear'}
+                EventHandler.write_to_clients(result)
+                break
+            if case(DgtApi.LIGHT_SQUARES):
+                result = {'event': 'Light', 'fr': message.uci_move[:2], 'to': message.uci_move[2:]}
+                EventHandler.write_to_clients(result)
+                break
             if case(DgtApi.CLOCK_STOP):
                 if 'web' in message.devs:
                     self.clock_show_time = True

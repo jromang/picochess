@@ -274,6 +274,14 @@ $(function() {
                 case 'Clock':
                     dgtClockTextEl.html(data.text);
                     break;
+                case 'Light':
+                    add_highlight(data.fr, 'white');
+                    add_highlight(data.to, 'black');
+                    break;
+                case 'Clear':
+                    remove_highlights('white');
+                    remove_highlights('black');
+                    break;
                 case 'header':
                     setHeaders(data['headers']);
                     break;
@@ -294,6 +302,13 @@ $(function() {
         load_nacl_stockfish();
     }
 });
+
+function remove_highlights(color) {
+      $('#board div.highlight-' + color).removeClass('highlight-' + color);
+}
+function add_highlight(square, color) {
+    $('#board [data-square="' + square + '"]').addClass('highlight-' +  color);
+}
 
 // do not pick up pieces if the game is over
 // only pick up pieces for the side to move
