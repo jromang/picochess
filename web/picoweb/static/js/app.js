@@ -263,7 +263,7 @@ $(function() {
                 case 'newFEN':
                     updateDGTPosition(data);
                     updateStatus();
-                    dgtClockStatusEl.html(data.msg);
+                    highlightBoard(data.move, data.play);
                     break;
                 case 'NewGame':
                     newBoard(data.fen);
@@ -274,13 +274,8 @@ $(function() {
                 case 'Clock':
                     dgtClockTextEl.html(data.text);
                     break;
-                case 'Light':
-                    add_highlight(data.fr, 'white');
-                    add_highlight(data.to, 'black');
-                    break;
                 case 'Clear':
-                    remove_highlights('white');
-                    remove_highlights('black');
+                    remove_highlights();
                     break;
                 case 'header':
                     setHeaders(data['headers']);
@@ -303,8 +298,17 @@ $(function() {
     }
 });
 
-function remove_highlights(color) {
-      $('#board div.highlight-' + color).removeClass('highlight-' + color);
+function highlightBoard(uci_move, play) {
+    remove_highlights();
+    var move = uci_move.match(/.{2}/g);
+    add_highlight(move[0], play);
+    add_highlight(move[1], play);
+}
+
+function remove_highlights() {
+    $('#board div.highlight-computer').removeClass('highlight-computer');
+    $('#board div.highlight-user').removeClass('highlight-user');
+    $('#board div.highlight-review').removeClass('highlight-review');
 }
 function add_highlight(square, color) {
     $('#board [data-square="' + square + '"]').addClass('highlight-' +  color);

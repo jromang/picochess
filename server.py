@@ -208,14 +208,6 @@ class WebDgt(DisplayDgt, threading.Thread):
                     else:
                         logging.debug('(web) clock isnt running - no need for endText')
                 break
-            if case(DgtApi.LIGHT_CLEAR):
-                result = {'event': 'Clear'}
-                EventHandler.write_to_clients(result)
-                break
-            if case(DgtApi.LIGHT_SQUARES):
-                result = {'event': 'Light', 'fr': message.uci_move[:2], 'to': message.uci_move[2:]}
-                EventHandler.write_to_clients(result)
-                break
             if case(DgtApi.CLOCK_STOP):
                 if 'web' in message.devs:
                     self.clock_show_time = True
@@ -414,26 +406,27 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 pgn_str = _transfer(message.game)
                 fen = _oldstyle_fen(message.game)
                 mov = message.move.uci()
-                msg = 'Computer move: ' + str(message.move)
-                result = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'msg': msg, 'review_play': False}
+                result = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'play': 'computer'}
                 self.shared['last_dgt_move_msg'] = result
+                EventHandler.write_to_clients(result)
+                break
+            if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
+                result = {'event': 'Clear'}
                 EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.USER_MOVE):
                 pgn_str = _transfer(message.game)
                 fen = _oldstyle_fen(message.game)
-                msg = 'User move: ' + str(message.move)
                 mov = message.move.uci()
-                result = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'msg': msg, 'review_play': False}
+                result = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'play': 'user'}
                 self.shared['last_dgt_move_msg'] = result
                 EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.REVIEW_MOVE):
                 pgn_str = _transfer(message.game)
                 fen = _oldstyle_fen(message.game)
-                msg = 'Review move: ' + str(message.move)
                 mov = message.move.uci()
-                result = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'msg': msg, 'review_play': True}
+                result = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'play': 'review'}
                 self.shared['last_dgt_move_msg'] = result
                 EventHandler.write_to_clients(result)
                 break
