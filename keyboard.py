@@ -32,12 +32,15 @@ class KeyboardInput(Observable, threading.Thread):
         self.flip_board = False
         self.board_plugged_in = True
         self.rt = RepeatedTimer(1, self.fire_no_board_connection)
+        self.wait_counter = 0
         self.dgttranslate = dgttranslate
         self.is_pi = is_pi
 
     def fire_no_board_connection(self):
-        text = self.dgttranslate.text('N00_noboard', 'Board!')
+        waitchars = ['/', '-', '\\', '|']
+        text = self.dgttranslate.text('N00_noboard', 'Board' + waitchars[self.wait_counter])
         DisplayMsg.show(Message.DGT_NO_EBOARD_ERROR(text=text))
+        self.wait_counter = (self.wait_counter + 1) % len(waitchars)
 
     def run(self):
 

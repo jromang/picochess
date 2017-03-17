@@ -259,19 +259,17 @@ $(function() {
         // Process messages from picochess
         ws.onmessage = function(e) {
             var data = JSON.parse(e.data);
-            if ('msg' in data) {
-                dgtClockStatusEl.html(data.msg);
-            }
             switch (data.event) {
                 case 'newFEN':
                     updateDGTPosition(data);
                     updateStatus();
+                    dgtClockStatusEl.html(data.msg);
                     break;
                 case 'NewGame':
                     newBoard(data.fen);
                     break;
                 case 'Message':
-                    dgtClockStatusEl.html(data.msg);
+                    boardStatusEl.html(data.msg);
                     break;
                 case 'Clock':
                     dgtClockTextEl.html(data.text);
@@ -287,7 +285,7 @@ $(function() {
             }
         };
         ws.onclose = function() {
-            dgtClockStatusEl.html('closed');
+            dgtClockStatusEl.html('connection closed');
         };
     }
 

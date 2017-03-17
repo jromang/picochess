@@ -208,16 +208,6 @@ class WebDgt(DisplayDgt, threading.Thread):
                     else:
                         logging.debug('(web) clock isnt running - no need for endText')
                 break
-            if case(DgtApi.LIGHT_CLEAR):
-                text = 'clear light'
-                result = {'event': 'Message', 'msg': text}
-                EventHandler.write_to_clients(result)
-                break
-            if case(DgtApi.LIGHT_SQUARES):
-                text = 'light: ' + str(message.uci_move)
-                result = {'event': 'Message', 'msg': text}
-                EventHandler.write_to_clients(result)
-                break
             if case(DgtApi.CLOCK_STOP):
                 if 'web' in message.devs:
                     self.clock_show_time = True
@@ -398,30 +388,18 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 self.shared['game_info']['level_text'] = message.level_text
                 _update_headers()
                 break
-            if case(MessageApi.DGT_JACK_CONNECTED_ERROR):
-                result = {'event': 'Message', 'msg': 'Unplug the jack cable please!'}
-                EventHandler.write_to_clients(result)
-                break
             if case(MessageApi.DGT_NO_CLOCK_ERROR):
-                # result = {'event': 'Message', 'msg': 'Connect a clock please!'}
-                # EventHandler.write_to_clients(result)
-                break
-            if case(MessageApi.DGT_NO_EBOARD_ERROR):
-                result = {'event': 'Message', 'msg': 'Connect an E-Board please!'}
-                EventHandler.write_to_clients(result)
-                break
-            if case(MessageApi.DGT_EBOARD_VERSION):
-                result = {'event': 'Message', 'msg': message.text.l + ' connected through ' + message.channel}
+                result = {'event': 'Message', 'msg': 'Error clock'}
                 EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.DGT_CLOCK_VERSION):
                 if message.dev == 'ser':
                     attached = 'serial'
                 elif message.dev == 'i2c':
-                    attached = 'i2c'
+                    attached = 'i2c-pi'
                 else:
-                    attached = 'virtual'
-                result = {'event': 'Message', 'msg': 'DGT clock connected through ' + attached}
+                    attached = 'server'
+                result = {'event': 'Message', 'msg': 'Ok clock ' + attached}
                 EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.COMPUTER_MOVE):
