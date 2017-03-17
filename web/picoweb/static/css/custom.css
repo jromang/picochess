@@ -204,6 +204,10 @@ body {
     padding: 1.2vw;
 }
 
+.fa-lg {
+    font-size: 3vh;
+}
+
 .highlight-user {
   -webkit-box-shadow: inset 0 0 3px 3px yellow;
   -moz-box-shadow: inset 0 0 3px 3px yellow;

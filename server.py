@@ -182,7 +182,7 @@ class WebDgt(DisplayDgt, threading.Thread):
                 self.clock_show_time = True
                 text_l = '{}:{:02d}.{:02d}'.format(time_l[0], time_l[1], time_l[2])
                 text_r = '{}:{:02d}.{:02d}'.format(time_r[0], time_r[1], time_r[2])
-                result = {'event': 'Clock', 'text': text_l + ' ' + text_r}
+                result = {'event': 'Clock', 'text': text_l + '&nbsp;&nbsp;' + text_r}
                 EventHandler.write_to_clients(result)
 
         for case in switch(message):
@@ -207,6 +207,10 @@ class WebDgt(DisplayDgt, threading.Thread):
                         display_time(self.time_left, self.time_right)
                     else:
                         logging.debug('(web) clock isnt running - no need for endText')
+                break
+            if case(DgtApi.LIGHT_CLEAR):
+                result = {'event': 'Clear'}
+                EventHandler.write_to_clients(result)
                 break
             if case(DgtApi.CLOCK_STOP):
                 if 'web' in message.devs:
@@ -411,8 +415,6 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
-                result = {'event': 'Clear'}
-                EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.USER_MOVE):
                 pgn_str = _transfer(message.game)
@@ -427,6 +429,22 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 fen = _oldstyle_fen(message.game)
                 mov = message.move.uci()
                 result = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'play': 'review'}
+                self.shared['last_dgt_move_msg'] = result
+                EventHandler.write_to_clients(result)
+                break
+            if case(MessageApi.ALTERNATIVE_MOVE):
+                pgn_str = _transfer(message.game)
+                fen = _oldstyle_fen(message.game)
+                mov = message.game.peek().uci()
+                result = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'play': 'reload'}
+                self.shared['last_dgt_move_msg'] = result
+                EventHandler.write_to_clients(result)
+                break
+            if case(MessageApi.SWITCH_SIDES):
+                pgn_str = _transfer(message.game)
+                fen = _oldstyle_fen(message.game)
+                mov = message.move.uci()
+                result = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'play': 'reload'}
                 self.shared['last_dgt_move_msg'] = result
                 EventHandler.write_to_clients(result)
                 break

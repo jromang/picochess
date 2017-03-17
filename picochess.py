@@ -746,7 +746,7 @@ def main():
                         last_computer_fen = None
                         game.pop()
                         think(game, time_control)
-                        DisplayMsg.show(Message.ALTERNATIVE_MOVE())
+                        DisplayMsg.show(Message.ALTERNATIVE_MOVE(game=game.copy()))
                     break
 
                 if case(EventApi.SWITCH_SIDES):
@@ -782,7 +782,7 @@ def main():
                         DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode, play_mode_text=text))
 
                         if event.engine_finished:
-                            DisplayMsg.show(Message.SWITCH_SIDES(move=move))
+                            DisplayMsg.show(Message.SWITCH_SIDES(game=game.copy(), move=move))
                     break
 
                 if case(EventApi.DRAWRESIGN):
