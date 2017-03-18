@@ -30,10 +30,12 @@ import configparser
 
 
 def get_installed_engines(engine_shell, engine_file: str):
+    """create a library list."""
     return read_engine_ini(engine_shell, (engine_file.rsplit(os.sep, 1))[0])
 
 
 def read_engine_ini(engine_shell=None, engine_path=None):
+    """read engine.ini and creates a library list out of it."""
     config = configparser.ConfigParser()
     config.optionxform = str
     try:
@@ -54,10 +56,10 @@ def read_engine_ini(engine_shell=None, engine_path=None):
         parser.optionxform = str
         level_dict = {}
         if parser.read(engine_path + os.sep + section + '.uci'):
-            for ps in parser.sections():
-                level_dict[ps] = {}
-                for option in parser.options(ps):
-                    level_dict[ps][option] = parser[ps][option]
+            for p_section in parser.sections():
+                level_dict[p_section] = {}
+                for option in parser.options(p_section):
+                    level_dict[p_section][option] = parser[p_section][option]
 
         text = Dgt.DISPLAY_TEXT(l=config[section]['large'], m=config[section]['medium'], s=config[section]['small'],
                                 wait=True, beep=False, maxtime=0, devs={'ser', 'i2c', 'web'})
@@ -73,10 +75,11 @@ def read_engine_ini(engine_shell=None, engine_path=None):
 
 
 def write_engine_ini(engine_path=None):
-
+    """read the engine folder and create the engine.ini file."""
     def write_level_ini(engine_filename: str):
-
+        """write the level part for the engine.ini file."""
         def calc_inc(diflevel: int):
+            """calculate the increment for (max 20) levels."""
             if diflevel > 1000:
                 inc = int(diflevel / 100)
             else:
@@ -120,9 +123,11 @@ def write_engine_ini(engine_path=None):
                 parser.write(configfile)
 
     def is_exe(fpath: str):
+        """is fpath an executable."""
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
     def name_build(parts: list, maxlength: int, default_name: str):
+        """get a (clever formed) cut name for the part list."""
         eng_name = ''
         for token in parts:
             if len(eng_name) + len(token) > maxlength:
@@ -227,6 +232,9 @@ class Informer(chess.uci.InfoHandler):
 
 
 class UciEngine(object):
+
+    """handle the uci engine communication."""
+
     def __init__(self, file: str, hostname=None, username=None, key_file=None, password=None, home=''):
         super(UciEngine, self).__init__()
         try:
@@ -327,7 +335,6 @@ class UciEngine(object):
         self.show_best = True
         time_dict['async_callback'] = self.callback
 
-        # DisplayMsg.show(Message.SEARCH_STARTED(engine_status=self.status))
         Observable.fire(Event.START_SEARCH(engine_status=self.status))
         self.future = self.engine.go(**time_dict)
         return self.future
@@ -338,14 +345,13 @@ class UciEngine(object):
         self.status = EngineStatus.PONDER
         self.show_best = False
 
-        # DisplayMsg.show(Message.SEARCH_STARTED(engine_status=self.status))
         Observable.fire(Event.START_SEARCH(engine_status=self.status))
         self.future = self.engine.go(ponder=True, infinite=True, async_callback=self.callback)
         return self.future
 
     def callback(self, command):
         self.res = command.result()
-        # DisplayMsg.show(Message.SEARCH_STOPPED(engine_status=self.status))
+
         Observable.fire(Event.STOP_SEARCH(engine_status=self.status))
         if self.show_best:
             Observable.fire(Event.BEST_MOVE(move=self.res.bestmove, ponder=self.res.ponder, inbook=False))

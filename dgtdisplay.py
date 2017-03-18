@@ -21,7 +21,7 @@ from math import ceil
 import logging
 import copy
 import queue
-from utilities import DisplayDgt, DisplayMsg, Observable, Dgt, switch, DispatchDgt
+from utilities import DisplayMsg, Observable, Dgt, switch, DispatchDgt
 from dgttranslate import DgtTranslate
 from dgtmenu import DgtMenu
 from dgtutil import ClockSide, ClockIcons, BeepLevel, Mode, GameResult, TimeMode
@@ -87,7 +87,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.depth = None
 
     def _combine_depth_and_score(self):
-        def score_to_string(score_val, length):
+        def _score_to_string(score_val, length):
             if length == 's':
                 return '{:5.2f}'.format(int(score_val) / 100).replace('.', '')
             if length == 'm':
@@ -101,9 +101,9 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 score.s = '-999'
             if int(score.s) >= 1000:
                 score.s = '999'
-            score.l = '{:3d}{:s}'.format(self.depth, score_to_string(score.l[-8:], 'l'))
-            score.m = '{:2d}{:s}'.format(self.depth % 100, score_to_string(score.m[-6:], 'm'))
-            score.s = '{:2d}{:s}'.format(self.depth % 100, score_to_string(score.s[-4:], 's'))
+            score.l = '{:3d}{:s}'.format(self.depth, _score_to_string(score.l[-8:], 'l'))
+            score.m = '{:2d}{:s}'.format(self.depth % 100, _score_to_string(score.m[-6:], 'm'))
+            score.s = '{:2d}{:s}'.format(self.depth % 100, _score_to_string(score.s[-4:], 's'))
             score.rd = ClockIcons.DOT
         except ValueError:
             pass
@@ -440,7 +440,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         if self.dgtmenu.get_mode() in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
             time_left, time_right = self.time_control.current_clock_time(flip_board=self.dgtmenu.get_flip_board())
             DispatchDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE,
-                                            wait=True, devs={'ser', 'i2c', 'web'}))
+                                             wait=True, devs={'ser', 'i2c', 'web'}))
 
     def _process_computer_move_done_on_board(self):
         if self.leds_are_on:
@@ -722,7 +722,8 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 DispatchDgt.show(Dgt.CLOCK_VERSION(main=message.main, sub=message.sub, dev=message.dev))
                 break
             if case(MessageApi.DGT_CLOCK_TIME):
-                DispatchDgt.show(Dgt.CLOCK_TIME(time_left=message.time_left, time_right=message.time_right, dev=message.dev))
+                DispatchDgt.show(Dgt.CLOCK_TIME(time_left=message.time_left, time_right=message.time_right,
+                                                dev=message.dev))
                 break
             if case(MessageApi.DGT_SERIAL_NR):
                 self._process_dgt_serial_nr()

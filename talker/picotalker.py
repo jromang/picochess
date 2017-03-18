@@ -44,14 +44,15 @@ class PicoTalker():
             logging.warning('not valid voice parameter')
 
     def talk(self, sounds):
+        """speak out the sound part by using ogg123."""
         if self.voice_path:
             for part in sounds:
                 voice_file = self.voice_path + '/' + part
                 if Path(voice_file).is_file():
                     try:
                         subprocess.call(['ogg123', voice_file], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                    except OSError as e:
-                        logging.warning('OSError: {} => turn voice OFF'.format(e))
+                    except OSError as os_exc:
+                        logging.warning('OSError: {} => turn voice OFF'.format(os_exc))
                         self.voice_path = None
                 else:
                     logging.warning('voice file not found {}'.format(voice_file))
@@ -63,6 +64,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
     def __init__(self, user_voice, computer_voice):
         """
         Initialize a PicoTalkerDisplay with voices for the user and/or computer players.
+
         :param user_voice: The voice to use for the user (eg. en:al).
         :param computer_voice:  The voice to use for the computer (eg. en:christina).
         """
@@ -218,7 +220,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
 
     def system_voice(self):
         """
-        Returns a voice object to use for system announcements (settings changes, etc).
+        Return a voice object to use for system announcements (settings changes, etc).
         Attempts to return the computer voice first, otherwise returns the user voice.
         """
         if self.computer_picotalker:
@@ -229,7 +231,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
     @staticmethod
     def say_move(move, fen, game: chess.Board):
         """
-        Takes a chess.Move instance and a chess.BitBoard instance and speaks the move.
+        Take a chess.Move instance and a chess.BitBoard instance and speaks the move.
         """
         move_parts = {
             'K': 'king.ogg',
@@ -269,11 +271,11 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
         elif san_move.startswith('O-O'):
             voice_parts += ['castlekingside.ogg']
         else:
-            for c in san_move:
+            for part in san_move:
                 try:
-                    sound_file = move_parts[c]
+                    sound_file = move_parts[part]
                 except KeyError:
-                    logging.warning('unknown char found in san: [{} : {}]'.format(san_move, c))
+                    logging.warning('unknown char found in san: [{} : {}]'.format(san_move, part))
                     sound_file = ''
                 if sound_file:
                     voice_parts += [sound_file]

@@ -31,21 +31,20 @@ class KeyboardInput(Observable, threading.Thread):
         super(KeyboardInput, self).__init__()
         self.flip_board = False
         self.board_plugged_in = True
-        self.rt = RepeatedTimer(1, self.fire_no_board_connection)
+        self.plug_board_timer = RepeatedTimer(1, self.fire_no_board_connection)
         self.wait_counter = 0
         self.dgttranslate = dgttranslate
         self.is_pi = is_pi
 
     def fire_no_board_connection(self):
+        """display a no board connection message."""
         waitchars = ['/', '-', '\\', '|']
         text = self.dgttranslate.text('N00_noboard', 'Board' + waitchars[self.wait_counter])
         DisplayMsg.show(Message.DGT_NO_EBOARD_ERROR(text=text))
         self.wait_counter = (self.wait_counter + 1) % len(waitchars)
 
     def run(self):
-
         """called from threading.Thread by its start() function."""
-
         logging.info('evt_queue ready')
         print('\033[1;37;40m')
         print('#' * 42 + ' PicoChess v' + version + ' ' + '#' * 42)
@@ -115,14 +114,14 @@ class KeyboardInput(Observable, threading.Thread):
                             raise ValueError(plug)
                         if plug == 'in':
                             self.board_plugged_in = True
-                            self.rt.stop()
+                            self.plug_board_timer.stop()
                             text_l, text_m, text_s = 'VirtBoard  ', 'V-Board ', 'vboard'
                             text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s,
                                                     wait=True, beep=False, maxtime=1, devs={'ser', 'i2c', 'web'})
                             DisplayMsg.show(Message.DGT_EBOARD_VERSION(text=text, channel='console'))
                         if plug == 'off':
                             self.board_plugged_in = False
-                            self.rt.start()
+                            self.plug_board_timer.start()
                     elif cmd.startswith('go'):
                         if keyboard_last_fen is not None:
                             self.fire(Event.KEYBOARD_FEN(fen=keyboard_last_fen))
@@ -142,9 +141,7 @@ class TerminalDisplay(DisplayMsg, threading.Thread):
         super(TerminalDisplay, self).__init__()
 
     def run(self):
-
         """called from threading.Thread by its start() function."""
-
         global keyboard_last_fen
         logging.info('msg_queue ready')
         while True:

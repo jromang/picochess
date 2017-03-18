@@ -17,7 +17,7 @@
 
 from configobj import ConfigObj
 from collections import OrderedDict
-from utilities import DisplayDgt, Observable, switch, Dgt, DispatchDgt
+from utilities import Observable, switch, Dgt, DispatchDgt
 from dgtutil import TimeMode, TimeModeLoop, Menu, MenuLoop, Mode, ModeLoop, Language, LanguageLoop, ClockIcons, BeepLoop
 from dgtutil import Settings, SettingsLoop, VoiceType, VoiceTypeLoop, SystemDisplay, SystemDisplayLoop, BeepLevel
 from dgtapi import Event
