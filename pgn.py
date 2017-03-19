@@ -73,6 +73,7 @@ class Emailer(object):
             # lib without encryption (SMTP-port 21)
             logging.debug('SMTP Mail delivery: Import standard SMTP Lib (no SSL encryption)')
             from smtplib import SMTP
+        conn = False
         try:
             outer = MIMEMultipart()
             outer['Subject'] = subject  # put subject to mail
@@ -104,22 +105,21 @@ class Emailer(object):
             logging.debug('SMTP Mail delivery: trying to connect to ' + self.smtp_server)
             conn = SMTP(self.smtp_server)  # contact smtp server
             conn.set_debuglevel(False)  # no debug info from smtp lib
-            logging.debug('SMTP Mail delivery: trying to log to SMTP Server')
-            conn.login(self.smtp_user, self.smtp_pass)  # login at smtp server
-            try:
-                logging.debug('SMTP Mail delivery: trying to send email')
-                conn.sendmail(self.smtp_from, self.email, outer.as_string())
-                # @todo should check the result from sendmail
-                logging.debug('SMTP Mail delivery: successfuly delivered message to SMTP server')
-            except Exception as e:
-                logging.error('SMTP Mail delivery: Failed')
-                logging.error('SMTP Mail delivery: ' + str(e))
-            finally:
-                conn.close()
-                logging.debug('SMTP Mail delivery: Ended')
-        except Exception as e:
+            if self.smtp_user is not None and self.smtp_pass is not None:
+                logging.debug('SMTP Mail delivery: trying to log to SMTP Server')
+                conn.login(self.smtp_user, self.smtp_pass)  # login at smtp server
+
+            logging.debug('SMTP Mail delivery: trying to send email')
+            conn.sendmail(self.smtp_from, self.email, outer.as_string())
+            # @todo should check the result from sendmail
+            logging.debug('SMTP Mail delivery: successfuly delivered message to SMTP server')
+        except Exception as smtp_exc:
             logging.error('SMTP Mail delivery: Failed')
-            logging.error('SMTP Mail delivery: ' + str(e))
+            logging.error('SMTP Mail delivery: ' + str(smtp_exc))
+        finally:
+            if conn:
+                conn.close()
+            logging.debug('SMTP Mail delivery: Ended')
 
     def _use_mailgun(self, subject, body):
         out = requests.post('https://api.mailgun.net/v3/picochess.org/messages',
