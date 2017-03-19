@@ -222,6 +222,9 @@ class WebDgt(DisplayDgt, threading.Thread):
             if case(DgtApi.CLOCK_START):
                 if 'web' in message.devs:
                     self.clock_running = message.side != ClockSide.NONE
+                    # simulate the "start_clock" function from dgthw/pi
+                    self.time_left = message.time_left
+                    self.time_right = message.time_right
                     display_time(self.time_left, self.time_right)
                 break
             if case(DgtApi.CLOCK_VERSION):

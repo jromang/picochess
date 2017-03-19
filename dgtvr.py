@@ -87,11 +87,15 @@ class DgtVr(DgtIface):
         logging.debug(text)
         print('\033[1;34;40m<{}> [vir] clock text: {} Beep: {}\033[1;37;40m'. format(time.time(), text, message.beep))
 
-    def display_time_on_clock(self, force=False):
+    def display_time_on_clock(self, message):
         """display the time on the console."""
-        if self.clock_running or force:
+        if 'web' not in message.devs:
+            logging.debug('ignored message cause of devs [endText]')
+            return
+        if self.clock_running or message.force:
             print('\033[1;32;40m<{}> [vir] clock showing time again - running state: {}\033[1;37;40m'.
                   format(time.time(), self.clock_running))
+            print('VR', self.time_left, self.time_right)
         else:
             logging.debug('[vir] clock isnt running - no need for endText')
 
