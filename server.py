@@ -60,6 +60,8 @@ class ChannelHandler(ServerRequestHandler):
         elif action == 'move':
             uci_move = self.get_argument('source') + self.get_argument('target')
             WebServer.fire(Event.REMOTE_MOVE(uci_move=uci_move, fen=self.get_argument('fen')))
+        elif action == 'clockbutton':
+            WebServer.fire(Event.KEYBOARD_BUTTON(button=self.get_argument('button'), dev='web'))
 
 
 class EventHandler(WebSocketHandler):

@@ -793,6 +793,11 @@ $('#analyzeBtn').on('click', analyze_pressed);
 $('#analyzePlus').on('click', multipv_increase);
 $('#analyzeMinus').on('click', multipv_decrease);
 
+$('#ClockBtn0').on('click', ClockButton0);
+$('#ClockBtn1').on('click', ClockButton1);
+$('#ClockBtn2').on('click', ClockButton2);
+$('#ClockBtn3').on('click', ClockButton3);
+$('#ClockBtn4').on('click', ClockButton4);
 
 function clickRowGameWriter(rowIndex, record, columns, cellWriter) {
     var tr = '';
@@ -1106,6 +1111,31 @@ function broadcastPosition() {
         $.post('/channel', {action: 'broadcast', fen: currentPosition.fen, pgn: content}, function (data) {
         });
     }
+}
+
+function ClockButton0() {
+    $.post('/channel', {action: 'clockbutton', button: 0}, function (data) {
+    });
+}
+
+function ClockButton1() {
+    $.post('/channel', {action: 'clockbutton', button: 1}, function (data) {
+    });
+}
+
+function ClockButton2() {
+    $.post('/channel', {action: 'clockbutton', button: 2}, function (data) {
+    });
+}
+
+function ClockButton3() {
+    $.post('/channel', {action: 'clockbutton', button: 3}, function (data) {
+    });
+}
+
+function ClockButton4() {
+    $.post('/channel', {action: 'clockbutton', button: 4}, function (data) {
+    });
 }
 
 function goToGameFen() {
