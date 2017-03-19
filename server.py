@@ -382,6 +382,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
             if case(MessageApi.PLAY_MODE):
                 self._create_game_info()
                 self.shared['game_info']['play_mode'] = message.play_mode
+                _update_headers()
                 break
             if case(MessageApi.TIME_CONTROL):
                 self._create_game_info()

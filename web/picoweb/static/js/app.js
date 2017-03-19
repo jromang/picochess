@@ -62,7 +62,6 @@ var setupBoardFen = START_FEN;
 
 function updateDGTPosition(data) {
     if (!goToPosition(data.fen) || data.play == 'reload') {
-        console.log(data);
         loadGame(data['pgn'].split("\n"));
         goToPosition(data.fen);
     }
@@ -1023,7 +1022,6 @@ function loadGame(pgn_lines) {
     else {
         currentPosition = fenHash[curr_fen];
     }
-    console.log(game_headers);
     setHeaders(game_headers);
     $('.fen').unbind('click', goToGameFen).one('click', goToGameFen);
 }
