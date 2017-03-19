@@ -5,13 +5,14 @@ test-warnings: no
 strictness: veryhigh
 max-line-length: 120
 ignore-paths:
-    - bin
     - books
     - docs
     - engines
-    - include
-    - lib
-    - src
-    - tablebases
+    - etc
+    - games
     - logs
-    - dgt
+    - manual
+    - scripts
+    - tablebases
+    - test
+    - venv
