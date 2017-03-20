@@ -272,6 +272,7 @@ $(function() {
                     boardStatusEl.html(data.msg);
                     break;
                 case 'Clock':
+                    console.log(data.text);
                     dgtClockTextEl.html(data.text);
                     break;
                 case 'Clear':

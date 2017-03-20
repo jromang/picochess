@@ -26,7 +26,7 @@ import tornado.wsgi
 from tornado.ioloop import IOLoop
 from tornado.websocket import WebSocketHandler
 
-from utilities import Observable, DisplayMsg, DisplayDgt, switch
+from utilities import Observable, DisplayMsg, DisplayDgt, switch, hours_minutes_seconds
 import logging
 from dgtapi import MessageApi, Event, DgtApi
 from dgtutil import GameResult, PlayMode, Mode, ClockSide
@@ -185,6 +185,7 @@ class WebDgt(DisplayDgt, threading.Thread):
                 text_l = '{}:{:02d}.{:02d}'.format(time_l[0], time_l[1], time_l[2])
                 text_r = '{}:{:02d}.{:02d}'.format(time_r[0], time_r[1], time_r[2])
                 result = {'event': 'Clock', 'text': text_l + '&nbsp;&nbsp;' + text_r}
+                print(result)
                 EventHandler.write_to_clients(result)
 
         for case in switch(message):
@@ -223,8 +224,8 @@ class WebDgt(DisplayDgt, threading.Thread):
                 if 'web' in message.devs:
                     self.clock_running = message.side != ClockSide.NONE
                     # simulate the "start_clock" function from dgthw/pi
-                    self.time_left = message.time_left
-                    self.time_right = message.time_right
+                    self.time_left = hours_minutes_seconds(message.time_left)
+                    self.time_right = hours_minutes_seconds(message.time_right)
                     display_time(self.time_left, self.time_right)
                 break
             if case(DgtApi.CLOCK_VERSION):
