@@ -87,20 +87,20 @@ class DgtHw(DgtIface):
         right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
         display_m = self.enable_dgt_3000 and not self.dgtboard.use_revelation_leds
         if display_m:
-            bit_board, move_text = self.get_san(message)
+            bit_board, text = self.get_san(message)
         else:
-            move_text = message.move.uci()
+            text = message.move.uci()
             if message.side == ClockSide.RIGHT:
-                move_text = move_text.rjust(6)
+                text = text.rjust(6)
 
         if 'ser' not in message.devs:
-            logging.debug('ignored message cause of devs [{}]'.format(move_text))
+            logging.debug('ignored message cause of devs [{}]'.format(text))
             return
-        if self._check_clock(move_text):
+        if self._check_clock(text):
             if display_m:
-                self._display_on_dgt_3000(move_text, message.beep, left_icons, right_icons)
+                self._display_on_dgt_3000(text, message.beep, left_icons, right_icons)
             else:
-                self._display_on_dgt_xl(move_text, message.beep, left_icons, right_icons)
+                self._display_on_dgt_xl(text, message.beep, left_icons, right_icons)
 
     def display_time_on_clock(self, message):
         """display the time on the dgtxl/3k."""

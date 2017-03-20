@@ -71,8 +71,9 @@ class DgtVr(DgtIface):
             text = str(message.move)
             if message.side == ClockSide.RIGHT:
                 text = text.rjust(6)
-
-        logging.debug(text)
+        if 'web' not in message.devs:
+            logging.debug('ignored message cause of devs [{}]'.format(text))
+            return
         print('\033[1;34;40m<{}> [vir] clock move: {} Beep: {}\033[1;37;40m'. format(time.time(), text, message.beep))
 
     def display_text_on_clock(self, message):
@@ -84,7 +85,9 @@ class DgtVr(DgtIface):
         if text is None:
             text = message.m
 
-        logging.debug(text)
+        if 'web' not in message.devs:
+            logging.debug('ignored message cause of devs [{}]'.format(text))
+            return
         print('\033[1;34;40m<{}> [vir] clock text: {} Beep: {}\033[1;37;40m'. format(time.time(), text, message.beep))
 
     def display_time_on_clock(self, message):
@@ -93,14 +96,19 @@ class DgtVr(DgtIface):
             logging.debug('ignored message cause of devs [endText]')
             return
         if self.clock_running or message.force:
-            print('\033[1;32;40m<{}> [vir] clock showing time again - running state: {}\033[1;37;40m'.
-                  format(time.time(), self.clock_running))
-            print('VR', self.time_left, self.time_right)
+            if self.time_left is None or self.time_right is None:
+                logging.debug('time values not set - abort function')
+            else:
+                print('\033[1;32;40m<{}> [vir] clock showing time again - running state: {}\033[1;37;40m'.
+                      format(time.time(), self.clock_running))
         else:
             logging.debug('[vir] clock isnt running - no need for endText')
 
     def stop_clock(self, devs: set):
         """stop the time on the console."""
+        if 'web' not in devs:
+            logging.debug('ignored message cause of devs [stopClock]')
+            return
         if self.virtual_timer:
             print('\033[1;32;40m<{}> [vir] clock time stopped at {} - {}\033[1;37;40m'.
                   format(time.time(), self.time_left, self.time_right))
@@ -114,6 +122,9 @@ class DgtVr(DgtIface):
 
     def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
         """start the time on the console."""
+        if 'web' not in devs:
+            logging.debug('ignored message cause of devs [stopClock]')
+            return
         self.time_left = hours_minutes_seconds(time_left)
         self.time_right = hours_minutes_seconds(time_right)
         self.time_side = side

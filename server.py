@@ -17,10 +17,11 @@
 
 import datetime
 import threading
-from multiprocessing.pool import ThreadPool
+# from multiprocessing.pool import ThreadPool
 
 import chess
 import chess.pgn as pgn
+
 import tornado.web
 import tornado.wsgi
 from tornado.ioloop import IOLoop
@@ -33,7 +34,7 @@ from dgtutil import GameResult, PlayMode, Mode, ClockSide
 from web.picoweb import picoweb as pw
 
 
-_workers = ThreadPool(5)
+# _workers = ThreadPool(5)
 
 # This needs to be reworked to be session based (probably by token)
 # Otherwise multiple clients behind a NAT can all play as the 'player'
@@ -41,14 +42,14 @@ client_ips = []
 
 
 class ServerRequestHandler(tornado.web.RequestHandler):
+    def initialize(self, shared=None):
+        self.shared = shared
+
     def data_received(self, chunk):
         pass
 
 
 class ChannelHandler(ServerRequestHandler):
-    def initialize(self, shared=None):
-        self.shared = shared
-
     def post(self):
         action = self.get_argument('action')
 
@@ -96,9 +97,6 @@ class EventHandler(WebSocketHandler):
 
 
 class DGTHandler(ServerRequestHandler):
-    def initialize(self, shared=None):
-        self.shared = shared
-
     def get(self, *args, **kwargs):
         action = self.get_argument('action')
         if action == 'get_last_move':
@@ -107,9 +105,6 @@ class DGTHandler(ServerRequestHandler):
 
 
 class InfoHandler(ServerRequestHandler):
-    def initialize(self, shared=None):
-        self.shared = shared
-
     def get(self, *args, **kwargs):
         action = self.get_argument('action')
         if action == 'get_system_info':
@@ -124,9 +119,6 @@ class InfoHandler(ServerRequestHandler):
 
 
 class ChessBoardHandler(ServerRequestHandler):
-    def initialize(self, shared=None):
-        self.shared = shared
-
     def get(self):
         self.render('web/picoweb/templates/clock.html')
 
@@ -166,15 +158,15 @@ class WebDgt(DisplayDgt, threading.Thread):
         self.time_left = None
         self.time_right = None
 
-    @staticmethod
-    def run_background(func, callback, args=(), kwds=None):
-        if not kwds:
-            kwds = {}
-
-        def _callback(result):
-            IOLoop.instance().add_callback(lambda: callback(result))
-
-        _workers.apply_async(func, args, kwds, _callback)
+    # @staticmethod
+    # def run_background(func, callback, args=(), kwds=None):
+    #     if not kwds:
+    #         kwds = {}
+    #
+    #     def _callback(result):
+    #         IOLoop.instance().add_callback(lambda: callback(result))
+    #
+    #     _workers.apply_async(func, args, kwds, _callback)
 
     def task(self, message):
         def display_time(time_l, time_r):
@@ -185,6 +177,7 @@ class WebDgt(DisplayDgt, threading.Thread):
                 text_l = '{}:{:02d}.{:02d}'.format(time_l[0], time_l[1], time_l[2])
                 text_r = '{}:{:02d}.{:02d}'.format(time_r[0], time_r[1], time_r[2])
                 result = {'event': 'Clock', 'text': text_l + '&nbsp;&nbsp;' + text_r}
+                logging.debug('Result: {}'.format(result))
                 EventHandler.write_to_clients(result)
 
         for case in switch(message):
@@ -256,15 +249,15 @@ class WebDisplay(DisplayMsg, threading.Thread):
         super(WebDisplay, self).__init__()
         self.shared = shared
 
-    @staticmethod
-    def run_background(func, callback, args=(), kwds=None):
-        if not kwds:
-            kwds = {}
-
-        def _callback(result):
-            IOLoop.instance().add_callback(lambda: callback(result))
-
-        _workers.apply_async(func, args, kwds, _callback)
+    # @staticmethod
+    # def run_background(func, callback, args=(), kwds=None):
+    #     if not kwds:
+    #         kwds = {}
+    #
+    #     def _callback(result):
+    #         IOLoop.instance().add_callback(lambda: callback(result))
+    #
+    #     _workers.apply_async(func, args, kwds, _callback)
 
     def _create_game_info(self):
         if 'game_info' not in self.shared:
