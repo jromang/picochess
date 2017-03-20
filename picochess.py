@@ -510,7 +510,6 @@ def main():
         logging.debug('PicoTalker disabled')
 
     dgtboard = DgtBoard(args.dgt_port, args.disable_revelation_leds, args.dgtpi)
-    Dispatcher().start()
 
     if args.console:
         # Enable keyboard input and terminal display
@@ -524,6 +523,8 @@ def main():
         if args.dgtpi:
             DgtPi(dgttranslate).start()
         DgtHw(dgttranslate, dgtboard).start()
+    # The class Dispatcher sends DgtApi messages at the correct (delayed) time out
+    Dispatcher().start()
     # Save to PGN
     emailer = Emailer(
         email=args.email, mailgun_key=args.mailgun_key,

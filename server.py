@@ -185,7 +185,6 @@ class WebDgt(DisplayDgt, threading.Thread):
                 text_l = '{}:{:02d}.{:02d}'.format(time_l[0], time_l[1], time_l[2])
                 text_r = '{}:{:02d}.{:02d}'.format(time_r[0], time_r[1], time_r[2])
                 result = {'event': 'Clock', 'text': text_l + '&nbsp;&nbsp;' + text_r}
-                print(result)
                 EventHandler.write_to_clients(result)
 
         for case in switch(message):
