@@ -119,7 +119,7 @@ class MessageApi():
     NEW_DEPTH = 'MSG_NEW_DEPTH'  # Shows a new depth
     ALTERNATIVE_MOVE = 'MSG_ALTERNATIVE_MOVE'  # User wants another move to be calculated
     SWITCH_SIDES = 'MSG_SWITCH_SIDES'  # Forget the engines move, and let it be user's turn
-    KEYBOARD_MOVE = 'MSG_KEYBOARD_MOVE'  # Sends back the fen for a given move (needed for keyboard.py)
+    # KEYBOARD_MOVE = 'MSG_KEYBOARD_MOVE'  # Sends back the fen for a given move (needed for keyboard.py)
     SYSTEM_SHUTDOWN = 'MSG_SYSTEM_SHUTDOWN'  # Sends a Shutdown
     SYSTEM_REBOOT = 'MSG_SYSTEM_REBOOT'  # Sends a Reboot
     SET_VOICE = 'MSG_SET_VOICE'  # User chooses a new voice
@@ -196,7 +196,7 @@ class Message():
     NEW_DEPTH = ClassFactory(MessageApi.NEW_DEPTH, ['depth'])
     ALTERNATIVE_MOVE = ClassFactory(MessageApi.ALTERNATIVE_MOVE, ['game'])
     SWITCH_SIDES = ClassFactory(MessageApi.SWITCH_SIDES, ['game', 'move'])
-    KEYBOARD_MOVE = ClassFactory(MessageApi.KEYBOARD_MOVE, ['fen'])
+    # KEYBOARD_MOVE = ClassFactory(MessageApi.KEYBOARD_MOVE, ['fen'])
     SYSTEM_SHUTDOWN = ClassFactory(MessageApi.SYSTEM_SHUTDOWN, [])
     SYSTEM_REBOOT = ClassFactory(MessageApi.SYSTEM_REBOOT, [])
     SET_VOICE = ClassFactory(MessageApi.SET_VOICE, ['type', 'lang', 'speaker'])
@@ -209,7 +209,7 @@ class Event():
     LEVEL = ClassFactory(EventApi.LEVEL, ['options', 'level_text'])
     NEW_GAME = ClassFactory(EventApi.NEW_GAME, ['pos960'])
     DRAWRESIGN = ClassFactory(EventApi.DRAWRESIGN, ['result'])
-    KEYBOARD_MOVE = ClassFactory(EventApi.KEYBOARD_MOVE, ['move', 'flip_board'])
+    KEYBOARD_MOVE = ClassFactory(EventApi.KEYBOARD_MOVE, ['move'])
     REMOTE_MOVE = ClassFactory(EventApi.REMOTE_MOVE, ['uci_move', 'fen'])
     SET_OPENING_BOOK = ClassFactory(EventApi.SET_OPENING_BOOK, ['book', 'book_text', 'show_ok'])
     NEW_ENGINE = ClassFactory(EventApi.NEW_ENGINE, ['eng', 'eng_text', 'options', 'show_ok'])

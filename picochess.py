@@ -617,8 +617,6 @@ def main():
                         game_copy = game.copy()
                         game_copy.push(move)
                         fen = game_copy.board_fen()
-                        if event.flip_board:
-                            fen = fen[::-1]
                         DisplayMsg.show(Message.DGT_FEN(fen=fen))
                     break
 

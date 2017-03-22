@@ -131,7 +131,7 @@ class KeyboardInput(Observable, threading.Thread):
                     else:
                         # move => fen => virtual board sends fen
                         move = chess.Move.from_uci(cmd)
-                        self.fire(Event.KEYBOARD_MOVE(move=move, flip_board=self.flip_board))
+                        self.fire(Event.KEYBOARD_MOVE(move=move))
             except (ValueError, IndexError):
                 logging.warning('Invalid user input [%s]', raw)
 
@@ -184,8 +184,8 @@ class TerminalDisplay(DisplayMsg, threading.Thread):
                     if message.engine_status == EngineStatus.WAIT:
                         print('\033[1;31;40mComputer stops waiting - hmmm\033[1;37;40m')
                     break
-                if case(MessageApi.KEYBOARD_MOVE):
-                    keyboard_last_fen = message.fen
-                    break
+                # if case(MessageApi.KEYBOARD_MOVE):
+                #     keyboard_last_fen = message.fen
+                #     break
                 if case():  # Default
                     pass

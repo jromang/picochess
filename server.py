@@ -67,9 +67,9 @@ class ChannelHandler(ServerRequestHandler):
                     WebServer.fire(Event.KEYBOARD_FEN(fen=fen.split(' ')[0]))
                 # end simulation code
                 else:
-                    # Event.KEYBOARD_MOVE tranfers "move" to "fen" and then continues with "Event.KEYBOARD_FEN"
+                    # Event.KEYBOARD_MOVE tranfers "move" to "fen" and then continues with "Message.DGT_FEN"
                     move = chess.Move.from_uci(cmd)
-                    WebServer.fire(Event.KEYBOARD_MOVE(move=move, flip_board=False))
+                    WebServer.fire(Event.KEYBOARD_MOVE(move=move))
         except (ValueError, IndexError):
             logging.warning('Invalid user input [%s]', raw)
 
