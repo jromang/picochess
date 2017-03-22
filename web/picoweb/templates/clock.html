@@ -39,22 +39,46 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-xs-12">
-            <div class="pull-left">
-                <button type="button" id="flipOrientationBtn" class="btn btn-raised btn-default btn-xs text-break">
-                    <i class='fa fa-refresh'></i><span class="hidden-xs"> Flip</span>
-                </button>
-                <button type="button" id="DgtSyncBtn" class="btn btn-raised btn-warning btn-xs text-break">
-                    <i class='fa fa-delicious'></i><span class="hidden-xs"> Sync</span>
-                </button>
-                <button type="button" id="downloadBtn" class="btn btn-raised btn-info btn-xs text-break">
-                    <i class='fa fa-download'></i><span class="hidden-xs"> Get PGN</span>
-                </button>
-                <button type="button" id="broadcastBtn" class="btn btn-raised btn-success btn-xs text-break">
-                    <i class='fa fa-cloud-download'></i><span class="hidden-xs"> Broadcast</span>
-                </button>
+            <div class="col-xs-6">
+                <div class="pull-left">
+                    <button type="button" id="flipOrientationBtn" class="btn btn-raised btn-default btn-xs text-break">
+                        <i class='fa fa-refresh'></i><span class="hidden-xs"> Flip</span>
+                    </button>
+                    <button type="button" id="DgtSyncBtn" class="btn btn-raised btn-warning btn-xs text-break">
+                        <i class='fa fa-delicious'></i><span class="hidden-xs"> Sync</span>
+                    </button>
+                    <button type="button" id="downloadBtn" class="btn btn-raised btn-info btn-xs text-break">
+                        <i class='fa fa-download'></i><span class="hidden-xs"> Get PGN</span>
+                    </button>
+                    <button type="button" id="broadcastBtn" class="btn btn-raised btn-success btn-xs text-break">
+                        <i class='fa fa-cloud-download'></i><span class="hidden-xs"> Broadcast</span>
+                    </button>
+                </div>
             </div>
-            <div class="pull-right">
-                <p id="DGTClockStatus"></p>
+            <div class="col-xs-6">
+                <div class="pull-left">
+                    <button type="button" id="lever1" class="btn btn-raised btn-success btn-xs disabled">
+                        <i class='fa fa-retweet'></i>
+                    </button>
+                    <button type="button" id="ClockBtn0" class="btn btn-raised btn-default btn-xs">
+                        <i class='fa fa-backward'></i>
+                    </button>
+                    <button type="button" id="ClockBtn1" class="btn btn-raised btn-default btn-xs">
+                        <i class='fa fa-minus'></i>
+                    </button>
+                    <button type="button" id="ClockBtn2" class="btn btn-raised btn-default btn-xs">
+                        <i class='fa fa-pause'></i>
+                    </button>
+                    <button type="button" id="ClockBtn3" class="btn btn-raised btn-default btn-xs">
+                        <i class='fa fa-plus'></i>
+                    </button>
+                    <button type="button" id="ClockBtn4" class="btn btn-raised btn-default btn-xs">
+                        <i class='fa fa-forward'></i>
+                    </button>
+                    <button type="button" id="lever2" class="btn btn-raised btn-success btn-xs disabled">
+                        <i class='fa fa-retweet'></i>
+                    </button>
+                </div>
             </div>
         </div>
         <div class="col-xs-6">
@@ -66,10 +90,18 @@
                     </div>
                     <div class="pull-right">
                         <div id="gameControls">
-                            <button type="button" id="startBtn" class="btn btn-default btn-xs"><i class='fa fa-fast-backward'></i></button>
-                            <button type="button" id="backBtn" class="btn btn-default btn-xs"><i class='fa fa-arrow-left'></i></button>
-                            <button type="button" id="fwdBtn" class="btn btn-default btn-xs"><i class='fa fa-arrow-right'></i></button>
-                            <button type="button" id="endBtn" class="btn btn-default btn-xs"><i class='fa fa-fast-forward'></i></button>
+                            <button type="button" id="startBtn" class="btn btn-default btn-xs">
+                                <i class='fa fa-fast-backward'></i>
+                            </button>
+                            <button type="button" id="backBtn" class="btn btn-default btn-xs">
+                                <i class='fa fa-arrow-left'></i>
+                            </button>
+                            <button type="button" id="fwdBtn" class="btn btn-default btn-xs">
+                                <i class='fa fa-arrow-right'></i>
+                            </button>
+                            <button type="button" id="endBtn" class="btn btn-default btn-xs">
+                                <i class='fa fa-fast-forward'></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -81,29 +113,12 @@
                 <div class="panel-heading hidden-xs">
                     <h3 class="panel-title">DGT Clock</h3>
                 </div>
-                <div class="panel-body">
+                <div class="panel-body" style="min-height: 10vh;">
                     <div class="pull-left">
-                        <h4 id="DGTClockText" style="font-size: 1.8vw"></h4>
+                        <h4 id="DGTClockText"></h4>
                     </div>
-                    <div id="clockControls" class="pull-right">
-                        <button type="button" id="ClockBtn0" class="btn btn-default btn-xs">
-                            <i class='fa fa-backward'></i>
-                        </button>
-                        <button type="button" id="ClockBtn1" class="btn btn-default btn-xs">
-                            <i class='fa fa-minus'></i>
-                        </button>
-                        <button type="button" id="ClockBtn2" class="btn btn-default btn-xs">
-                            <i class='fa fa-pause'></i>
-                        </button>
-                        <button type="button" id="ClockBtn3" class="btn btn-default btn-xs">
-                            <i class='fa fa-plus'></i>
-                        </button>
-                        <button type="button" id="ClockBtn4" class="btn btn-default btn-xs">
-                            <i class='fa fa-forward'></i>
-                        </button>
-                        <button type="button" id="lever" class="btn btn-success btn-xs">
-                            <i class='fa fa-retweet'></i>
-                        </button>
+                    <div class="pull-right">
+                        <h4 id="DGTClockStatus"></h4>
                     </div>
                 </div>
             </div>
