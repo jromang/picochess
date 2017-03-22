@@ -262,6 +262,10 @@ body {
     margin: 0;
 }
 
+#Console {
+    font-size: 1vw;
+}
+
 #gameControls .btn {
     margin: 0 1px;
 }

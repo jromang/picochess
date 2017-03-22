@@ -612,14 +612,14 @@ def main():
                     move = event.move
                     logging.debug('keyboard move [%s]', move)
                     if move not in game.legal_moves:
-                        logging.warning('illegal move [%s]', move)
+                        logging.warning('illegal move. fen: [%s]', game.fen())
                     else:
                         game_copy = game.copy()
                         game_copy.push(move)
                         fen = game_copy.board_fen()
                         if event.flip_board:
                             fen = fen[::-1]
-                        DisplayMsg.show(Message.KEYBOARD_MOVE(fen=fen))
+                        DisplayMsg.show(Message.DGT_FEN(fen=fen))
                     break
 
                 if case(EventApi.LEVEL):

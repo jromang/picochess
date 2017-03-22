@@ -801,6 +801,10 @@ $('#ClockBtn2').on('click', ClockButton2);
 $('#ClockBtn3').on('click', ClockButton3);
 $('#ClockBtn4').on('click', ClockButton4);
 
+$('#consoleBtn').on('click', ConsoleButton);
+$('#sendConsoleBtn').on('click', SendConsoleCommand);
+
+
 function clickRowGameWriter(rowIndex, record, columns, cellWriter) {
     var tr = '';
     // grab the record's attribute for each column
@@ -1138,6 +1142,17 @@ function ClockButton3() {
 function ClockButton4() {
     $.post('/channel', {action: 'clockbutton', button: 4}, function (data) {
     });
+}
+
+function SendConsoleCommand() {
+    var cmd = $('#inputConsole').val();
+    $.post('/channel', {action: 'command', command: cmd}, function (data) {
+    });
+}
+
+function ConsoleButton() {
+    $('#Console').toggle();
+    $('#Database').toggle();
 }
 
 function goToGameFen() {

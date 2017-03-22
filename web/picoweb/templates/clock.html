@@ -54,6 +54,11 @@
                         <i class='fa fa-cloud-download'></i><span class="hidden-xs"> Broadcast</span>
                     </button>
                 </div>
+                <div class="pull-right">
+                    <button type="button" id="consoleBtn" class="btn btn-raised btn-primary btn-xs" data-placement="auto" data-toggle="tooltip" title="enter/exit console mode">
+                        <i class='fa fa-bullhorn'></i><span class="hidden-xs"> Console</span>
+                    </button>
+                </div>
             </div>
             <div class="col-xs-6">
                 <div class="pull-left">
@@ -191,8 +196,28 @@
             </div>
         </div>
 
-        <div class="col-xs-12 flip-scroll">
+        <div id="Console" class="col-xs-12" style="display: none;">
+            <div class="panel panel-primary">
+                <div class="panel-body">
+                    <div class="col-xs-6">
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button id="sendConsoleBtn" class="btn btn-raised btn-info" type="button">Go!</button>
+                            </span>
+                            <input id="inputConsole" type="text" class="form-control" placeholder="Enter command...">
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <textarea id="consoleTextarea" style="overflow-y: scroll; height: 100%; width: 100%; resize: none;"></textarea>
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    This console mode is mainly for development. Better activate picochess together with a DGT-Board ;-) Following commands are available: newgame:{w|b}, print:{fen}, setup:{fen}, fen:{fen}, plug:{in|off}
+                </div>
+            </div>
+        </div>
 
+        <div id="Database" class="col-xs-12 flip-scroll">
             <div class="well">
                 <div class="tab-content clearfix">
                     <div class="tab-pane active" id="reference">

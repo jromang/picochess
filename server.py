@@ -50,6 +50,29 @@ class ServerRequestHandler(tornado.web.RequestHandler):
 
 
 class ChannelHandler(ServerRequestHandler):
+    def process_console_command(self, raw):
+        cmd = raw.lower()
+
+        try:
+            if cmd.startswith('print:'):
+                fen = raw.split(':')[1]
+                print(chess.Board(fen))
+            else:
+                # Here starts the simulation of a dgt-board!
+                # Let the user send events like the board would do
+                if cmd.startswith('fen:'):
+                    fen = raw.split(':')[1]
+                    # dgt board only sends the basic fen => be sure
+                    # it's same no matter what fen the user entered
+                    WebServer.fire(Event.KEYBOARD_FEN(fen=fen.split(' ')[0]))
+                # end simulation code
+                else:
+                    # Event.KEYBOARD_MOVE tranfers "move" to "fen" and then continues with "Event.KEYBOARD_FEN"
+                    move = chess.Move.from_uci(cmd)
+                    WebServer.fire(Event.KEYBOARD_MOVE(move=move, flip_board=False))
+        except (ValueError, IndexError):
+            logging.warning('Invalid user input [%s]', raw)
+
     def post(self):
         action = self.get_argument('action')
 
@@ -63,6 +86,10 @@ class ChannelHandler(ServerRequestHandler):
             WebServer.fire(Event.REMOTE_MOVE(uci_move=uci_move, fen=self.get_argument('fen')))
         elif action == 'clockbutton':
             WebServer.fire(Event.KEYBOARD_BUTTON(button=self.get_argument('button'), dev='web'))
+        elif action == 'command':
+            command = self.get_argument('command')
+            self.process_console_command(command)
+            pass
 
 
 class EventHandler(WebSocketHandler):
