@@ -293,7 +293,11 @@ body {
 }
 
 .btn {
-    margin: 5px 1px;
+    padding: 2vh 2vw;
+}
+
+.btn-group-xs .btn, .btn-group-xs .input-group-btn .btn, .btn.btn-xs, .input-group-btn .btn.btn-xs {
+    padding: 1vh 1vw;
 }
 
 .panel {
