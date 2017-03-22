@@ -17,7 +17,6 @@
 
 import datetime
 import threading
-# from multiprocessing.pool import ThreadPool
 
 import chess
 import chess.pgn as pgn
@@ -32,9 +31,6 @@ import logging
 from dgtapi import MessageApi, Event, DgtApi
 from dgtutil import GameResult, PlayMode, Mode, ClockSide
 from web.picoweb import picoweb as pw
-
-
-# _workers = ThreadPool(5)
 
 # This needs to be reworked to be session based (probably by token)
 # Otherwise multiple clients behind a NAT can all play as the 'player'
@@ -66,6 +62,10 @@ class ChannelHandler(ServerRequestHandler):
                     # it's same no matter what fen the user entered
                     WebServer.fire(Event.KEYBOARD_FEN(fen=fen.split(' ')[0]))
                 # end simulation code
+                elif cmd.startswith('go'):
+                    if 'last_dgt_move_msg' in self.shared:
+                        fen = self.shared['last_dgt_move_msg']['fen'].split(' ')[0]
+                        WebServer.fire(Event.KEYBOARD_FEN(fen=fen))
                 else:
                     # Event.KEYBOARD_MOVE tranfers "move" to "fen" and then continues with "Message.DGT_FEN"
                     move = chess.Move.from_uci(cmd)
@@ -185,16 +185,6 @@ class WebDgt(DisplayDgt, threading.Thread):
         self.time_left = None
         self.time_right = None
 
-    # @staticmethod
-    # def run_background(func, callback, args=(), kwds=None):
-    #     if not kwds:
-    #         kwds = {}
-    #
-    #     def _callback(result):
-    #         IOLoop.instance().add_callback(lambda: callback(result))
-    #
-    #     _workers.apply_async(func, args, kwds, _callback)
-
     def task(self, message):
         def display_time(time_l, time_r):
             if time_l is None or time_r is None:
@@ -275,16 +265,6 @@ class WebDisplay(DisplayMsg, threading.Thread):
     def __init__(self, shared):
         super(WebDisplay, self).__init__()
         self.shared = shared
-
-    # @staticmethod
-    # def run_background(func, callback, args=(), kwds=None):
-    #     if not kwds:
-    #         kwds = {}
-    #
-    #     def _callback(result):
-    #         IOLoop.instance().add_callback(lambda: callback(result))
-    #
-    #     _workers.apply_async(func, args, kwds, _callback)
 
     def _create_game_info(self):
         if 'game_info' not in self.shared:

@@ -90,11 +90,11 @@ class KeyboardInput(Observable, threading.Thread):
                             raise ValueError(fen)
                     # Here starts the simulation of a dgt-board!
                     # Let the user send events like the board would do
-                    elif cmd.startswith('fen:'):
-                        fen = raw.split(':')[1]
-                        # dgt board only sends the basic fen => be sure
-                        # it's same no matter what fen the user entered
-                        self.fire(Event.KEYBOARD_FEN(fen=fen.split(' ')[0]))
+                    # elif cmd.startswith('fen:'):
+                    #     fen = raw.split(':')[1]
+                    #     # dgt board only sends the basic fen => be sure
+                    #     # it's same no matter what fen the user entered
+                    #     self.fire(Event.KEYBOARD_FEN(fen=fen.split(' ')[0]))
                     elif cmd.startswith('button:'):
                         button = int(cmd.split(':')[1])
                         if button not in range(6):
@@ -122,16 +122,16 @@ class KeyboardInput(Observable, threading.Thread):
                         if plug == 'off':
                             self.board_plugged_in = False
                             self.plug_board_timer.start()
-                    elif cmd.startswith('go'):
-                        if keyboard_last_fen is not None:
-                            self.fire(Event.KEYBOARD_FEN(fen=keyboard_last_fen))
-                        else:
-                            print('\033[1;31;40mlast move already send to virtual board\033[1;37;40m')
+                    # elif cmd.startswith('go'):
+                    #     if keyboard_last_fen is not None:
+                    #         self.fire(Event.KEYBOARD_FEN(fen=keyboard_last_fen))
+                    #     else:
+                    #         print('\033[1;31;40mlast move already send to virtual board\033[1;37;40m')
                     # end simulation code
-                    else:
-                        # move => fen => virtual board sends fen
-                        move = chess.Move.from_uci(cmd)
-                        self.fire(Event.KEYBOARD_MOVE(move=move))
+                    # else:
+                    #     # move => fen => virtual board sends fen
+                    #     move = chess.Move.from_uci(cmd)
+                    #     self.fire(Event.KEYBOARD_MOVE(move=move))
             except (ValueError, IndexError):
                 logging.warning('Invalid user input [%s]', raw)
 
