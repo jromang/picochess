@@ -296,6 +296,8 @@ $(function() {
         $('#analyzeBtn').prop('disabled', true);
         load_nacl_stockfish();
     }
+
+    $('[data-toggle="tooltip"]').tooltip();
 });
 
 function highlightBoard(uci_move, play) {
