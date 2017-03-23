@@ -95,13 +95,13 @@ class KeyboardInput(Observable, threading.Thread):
                     #     # dgt board only sends the basic fen => be sure
                     #     # it's same no matter what fen the user entered
                     #     self.fire(Event.KEYBOARD_FEN(fen=fen.split(' ')[0]))
-                    elif cmd.startswith('button:'):
-                        button = int(cmd.split(':')[1])
-                        if button not in range(6):
-                            raise ValueError(button)
-                        if button == 5:  # make it to power button
-                            button = 0x11
-                        self.fire(Event.KEYBOARD_BUTTON(button=button, dev='i2c' if self.is_pi else 'ser'))
+                    # elif cmd.startswith('button:'):
+                    #     button = int(cmd.split(':')[1])
+                    #     if button not in range(6):
+                    #         raise ValueError(button)
+                    #     if button == 5:  # make it to power button
+                    #         button = 0x11
+                    #     self.fire(Event.KEYBOARD_BUTTON(button=button, dev='i2c' if self.is_pi else 'ser'))
                     elif cmd.startswith('lever:'):
                         lever = cmd.split(':')[1]
                         if lever not in ('l', 'r'):

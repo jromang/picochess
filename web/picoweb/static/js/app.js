@@ -795,18 +795,19 @@ $('#analyzeBtn').on('click', analyze_pressed);
 $('#analyzePlus').on('click', multipv_increase);
 $('#analyzeMinus').on('click', multipv_decrease);
 
-$('#ClockBtn0').on('click', ClockButton0);
-$('#ClockBtn1').on('click', ClockButton1);
-$('#ClockBtn2').on('click', ClockButton2);
-$('#ClockBtn3').on('click', ClockButton3);
-$('#ClockBtn4').on('click', ClockButton4);
+$('#ClockBtn0').on('click', clockButton0);
+$('#ClockBtn1').on('click', clockButton1);
+$('#ClockBtn2').on('click', clockButton2);
+$('#ClockBtn3').on('click', clockButton3);
+$('#ClockBtn4').on('click', clockButton4);
 
-$('#consoleBtn').on('click', ConsoleButton);
-$('#sendConsoleBtn').on('click', GetFenToInput);
+$('#consoleBtn').on('click', toggleConsoleButton);
+$('#getFenToConsoleBtn').on('click', getFenToConsole);
 
-$("#inputConsole").keyup(function(event){
-    if(event.keyCode == 13){
-        SendConsoleCommand();
+$("#inputConsole").keyup(function(event) {
+    if(event.keyCode == 13) {
+        sendConsoleCommand();
+        $(this).val('');
     }
 });
 
@@ -1124,43 +1125,48 @@ function broadcastPosition() {
     }
 }
 
-function ClockButton0() {
+function clockButton0() {
     $.post('/channel', {action: 'clockbutton', button: 0}, function (data) {
     });
 }
 
-function ClockButton1() {
+function clockButton1() {
     $.post('/channel', {action: 'clockbutton', button: 1}, function (data) {
     });
 }
 
-function ClockButton2() {
+function clockButton2() {
     $.post('/channel', {action: 'clockbutton', button: 2}, function (data) {
     });
 }
 
-function ClockButton3() {
+function clockButton3() {
     $.post('/channel', {action: 'clockbutton', button: 3}, function (data) {
     });
 }
 
-function ClockButton4() {
+function clockButton4() {
     $.post('/channel', {action: 'clockbutton', button: 4}, function (data) {
     });
 }
 
-function SendConsoleCommand() {
+function clockButtonPower() {
+    $.post('/channel', {action: 'clockbutton', button: 0x11}, function (data) {
+    });
+}
+
+function sendConsoleCommand() {
     var cmd = $('#inputConsole').val();
     $.post('/channel', {action: 'command', command: cmd}, function (data) {
     });
 }
 
-function GetFenToInput() {
+function getFenToConsole() {
     var tmp_game = create_game_pointer();
     $('#inputConsole').val(tmp_game.fen());
 }
 
-function ConsoleButton() {
+function toggleConsoleButton() {
     $('#Console').toggle();
     $('#Database').toggle();
 }
