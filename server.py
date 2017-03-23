@@ -26,11 +26,15 @@ import tornado.wsgi
 from tornado.ioloop import IOLoop
 from tornado.websocket import WebSocketHandler
 
-from utilities import Observable, DisplayMsg, DisplayDgt, switch, hours_minutes_seconds
+from utilities import Observable, DisplayMsg, DisplayDgt, switch, hours_minutes_seconds, RepeatedTimer
 import logging
 from dgtapi import MessageApi, Event, DgtApi
 from dgtutil import GameResult, PlayMode, Mode, ClockSide
 from web.picoweb import picoweb as pw
+
+from dgtiface import DgtIface
+from dgttranslate import DgtTranslate
+from dgtboard import DgtBoard
 
 # This needs to be reworked to be session based (probably by token)
 # Otherwise multiple clients behind a NAT can all play as the 'player'
@@ -57,6 +61,12 @@ class ChannelHandler(ServerRequestHandler):
                 # dgt board only sends the basic fen => be sure
                 # it's same no matter what fen the user entered
                 WebServer.fire(Event.KEYBOARD_FEN(fen=fen.split(' ')[0]))
+            elif cmd.startswith('lever:'):
+                lever = cmd.split(':')[1]
+                if lever not in ('l', 'r'):
+                    raise ValueError(lever)
+                button = 0x40 if lever == 'r' else -0x40
+                WebServer.fire(Event.KEYBOARD_BUTTON(button=button, dev='web'))
             # end simulation code
             elif cmd.startswith('go'):
                 if 'last_dgt_move_msg' in self.shared:
@@ -147,11 +157,11 @@ class ChessBoardHandler(ServerRequestHandler):
 
 
 class WebServer(Observable, threading.Thread):
-    def __init__(self, port=80):
+    def __init__(self, port: int, dgttranslate: DgtTranslate, dgtboard: DgtBoard):
         shared = {}
 
         WebDisplay(shared).start()
-        WebDgt(shared).start()
+        WebVr(dgttranslate, dgtboard).start()
         super(WebServer, self).__init__()
         wsgi_app = tornado.wsgi.WSGIContainer(pw)
 
@@ -172,88 +182,197 @@ class WebServer(Observable, threading.Thread):
         IOLoop.instance().start()
 
 
-class WebDgt(DisplayDgt, threading.Thread):
-    def __init__(self, shared):
-        super(WebDgt, self).__init__()
-        self.shared = shared
-        self.clock_running = False
+class WebVr(DgtIface):
+
+    """Handle the web (clock) communication."""
+
+    def __init__(self, dgttranslate: DgtTranslate, dgtboard: DgtBoard):
+        super(WebVr, self).__init__(dgttranslate, dgtboard)
+        self.virtual_timer = None
+        self.time_side = ClockSide.NONE
+        # self.enable_dgt_pi = dgtboard.is_pi
         self.clock_show_time = True
-        self.time_left = None
-        self.time_right = None
 
-    def _process_message(self, message):
-        def display_time(time_l, time_r):
-            if time_l is None or time_r is None:
-                logging.debug('time values not set - abort function')
-            else:
-                self.clock_show_time = True
-                text_l = '{}:{:02d}.{:02d}'.format(time_l[0], time_l[1], time_l[2])
-                text_r = '{}:{:02d}.{:02d}'.format(time_r[0], time_r[1], time_r[2])
-                result = {'event': 'Clock', 'text': text_l + '&nbsp;&nbsp;' + text_r}
-                EventHandler.write_to_clients(result)
+    def _runclock(self):
+        if self.time_side == ClockSide.LEFT:
+            h, m, s = self.time_left
+            time_left = 3600*h + 60*m + s - 1
+            if time_left <= 0:
+                self.virtual_timer.stop()
+            self.time_left = hours_minutes_seconds(time_left)
+        if self.time_side == ClockSide.RIGHT:
+            h, m, s = self.time_right
+            time_right = 3600*h + 60*m + s - 1
+            if time_right <= 0:
+                self.virtual_timer.stop()
+            self.time_right = hours_minutes_seconds(time_right)
+        self.display_time(self.time_left, self.time_right)
 
-        for case in switch(message):
-            if case(DgtApi.DISPLAY_MOVE):
-                if 'web' in message.devs:
-                    self.clock_show_time = False
-                    bit_board = chess.Board(message.fen)
-                    text = bit_board.san(message.move)
-                    result = {'event': 'Clock', 'text': text}
-                    EventHandler.write_to_clients(result)
-                break
-            if case(DgtApi.DISPLAY_TEXT):
-                if 'web' in message.devs:
-                    self.clock_show_time = False
-                    text = str(message.l)
-                    result = {'event': 'Clock', 'text': text}
-                    EventHandler.write_to_clients(result)
-                break
-            if case(DgtApi.DISPLAY_TIME):
-                if 'web' in message.devs:
-                    if self.clock_running or message.force:
-                        display_time(self.time_left, self.time_right)
-                    else:
-                        logging.debug('(web) clock isnt running - no need for endText')
-                break
-            if case(DgtApi.LIGHT_CLEAR):
-                result = {'event': 'Clear'}
-                EventHandler.write_to_clients(result)
-                break
-            if case(DgtApi.CLOCK_STOP):
-                if 'web' in message.devs:
-                    self.clock_show_time = True
-                    self.clock_running = False
-                break
-            if case(DgtApi.CLOCK_START):
-                if 'web' in message.devs:
-                    self.clock_running = message.side != ClockSide.NONE
-                    # simulate the "start_clock" function from dgthw/pi
-                    self.time_left = hours_minutes_seconds(message.time_left)
-                    self.time_right = hours_minutes_seconds(message.time_right)
-                    display_time(self.time_left, self.time_right)
-                break
-            if case(DgtApi.CLOCK_VERSION):
-                break
-            if case(DgtApi.CLOCK_TIME):
-                if message.dev != 'i2c':
-                    self.time_left = message.time_left
-                    self.time_right = message.time_right
-                    if self.clock_show_time:
-                        display_time(self.time_left, self.time_right)
-                break
-            if case():  # Default
-                pass
+    def display_time(self, time_l, time_r):
+        if time_l is None or time_r is None:
+            logging.debug('time values not set - abort function')
+        elif self.clock_show_time:
+            text_l = '{}:{:02d}.{:02d}'.format(time_l[0], time_l[1], time_l[2])
+            text_r = '{}:{:02d}.{:02d}'.format(time_r[0], time_r[1], time_r[2])
+            result = {'event': 'Clock', 'text': text_l + '&nbsp;&nbsp;' + text_r}
+            EventHandler.write_to_clients(result)
+
+    def display_move_on_clock(self, message):
+        """display a move on the web clock."""
+        if 'web' not in message.devs:
+            logging.debug('ignored message cause of devs [displayMove]')
+            return
+        self.clock_show_time = False
+        bit_board = chess.Board(message.fen)
+        text = bit_board.san(message.move)
+        result = {'event': 'Clock', 'text': text}
+        EventHandler.write_to_clients(result)
+
+    def display_text_on_clock(self, message):
+        """display a text on the web clock."""
+        if 'web' not in message.devs:
+            logging.debug('ignored message cause of devs [displayText]')
+            return
+        self.clock_show_time = False
+        text = str(message.l)
+        result = {'event': 'Clock', 'text': text}
+        EventHandler.write_to_clients(result)
+
+    def display_time_on_clock(self, message):
+        """display the time on the web clock."""
+        if 'web' not in message.devs:
+            logging.debug('ignored message cause of devs [endText]')
+            return
+        if self.clock_running or message.force:
+            self.clock_show_time = True
+            self.display_time(self.time_left, self.time_right)
+        else:
+            logging.debug('(web) clock isnt running - no need for endText')
+
+    def stop_clock(self, devs: set):
+        """stop the time on the web clock."""
+        if 'web' not in devs:
+            logging.debug('ignored message cause of devs [stopClock]')
+            return
+        if self.virtual_timer:
+            self.virtual_timer.stop()
+        self._resume_clock(ClockSide.NONE)
+
+    def _resume_clock(self, side: ClockSide):
+        self.clock_running = (side != ClockSide.NONE)
+        self.time_side = side
+
+    def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
+        """start the time on the web clock."""
+        if 'web' not in devs:
+            logging.debug('ignored message cause of devs [startClock]')
+            return
+        if self.virtual_timer:
+            self.virtual_timer.stop()
+        if side != ClockSide.NONE:
+            self.virtual_timer = RepeatedTimer(1, self._runclock)
+            self.virtual_timer.start()
+        self._resume_clock(side)
+        self.clock_show_time = True
+        # simulate the "start_clock" function from dgthw/pi
+        self.time_left = hours_minutes_seconds(time_left)
+        self.time_right = hours_minutes_seconds(time_right)
+        self.display_time(self.time_left, self.time_right)
+
+    def light_squares_revelation_board(self, squares):
+        """handle this by dgthw.py."""
+        pass
+
+    def clear_light_revelation_board(self):
+        result = {'event': 'Clear'}
+        EventHandler.write_to_clients(result)
 
     def _create_task(self, msg):
         IOLoop.instance().add_callback(callback=lambda: self._process_message(msg))
 
-    def run(self):
-        """called from threading.Thread by its start() function."""
-        logging.info('dgt_queue ready')
-        while True:
-            # Check if we have something to display
-            message = self.dgt_queue.get()
-            self._create_task(message)
+
+# class WebDgt(DisplayDgt, threading.Thread):
+#     def __init__(self, shared):
+#         super(WebDgt, self).__init__()
+#         self.shared = shared
+#         self.clock_running = False
+#         self.clock_show_time = True
+#         self.time_left = None
+#         self.time_right = None
+#
+#     def _process_message(self, message):
+#         def display_time(time_l, time_r):
+#             if time_l is None or time_r is None:
+#                 logging.debug('time values not set - abort function')
+#             else:
+#                 self.clock_show_time = True
+#                 text_l = '{}:{:02d}.{:02d}'.format(time_l[0], time_l[1], time_l[2])
+#                 text_r = '{}:{:02d}.{:02d}'.format(time_r[0], time_r[1], time_r[2])
+#                 result = {'event': 'Clock', 'text': text_l + '&nbsp;&nbsp;' + text_r}
+#                 EventHandler.write_to_clients(result)
+#
+#         for case in switch(message):
+#             if case(DgtApi.DISPLAY_MOVE):
+#                 if 'web' in message.devs:
+#                     self.clock_show_time = False
+#                     bit_board = chess.Board(message.fen)
+#                     text = bit_board.san(message.move)
+#                     result = {'event': 'Clock', 'text': text}
+#                     EventHandler.write_to_clients(result)
+#                 break
+#             if case(DgtApi.DISPLAY_TEXT):
+#                 if 'web' in message.devs:
+#                     self.clock_show_time = False
+#                     text = str(message.l)
+#                     result = {'event': 'Clock', 'text': text}
+#                     EventHandler.write_to_clients(result)
+#                 break
+#             if case(DgtApi.DISPLAY_TIME):
+#                 if 'web' in message.devs:
+#                     if self.clock_running or message.force:
+#                         display_time(self.time_left, self.time_right)
+#                     else:
+#                         logging.debug('(web) clock isnt running - no need for endText')
+#                 break
+#             if case(DgtApi.LIGHT_CLEAR):
+#                 result = {'event': 'Clear'}
+#                 EventHandler.write_to_clients(result)
+#                 break
+#             if case(DgtApi.CLOCK_STOP):
+#                 if 'web' in message.devs:
+#                     self.clock_show_time = True
+#                     self.clock_running = False
+#                 break
+#             if case(DgtApi.CLOCK_START):
+#                 if 'web' in message.devs:
+#                     self.clock_running = message.side != ClockSide.NONE
+#                     # simulate the "start_clock" function from dgthw/pi
+#                     self.time_left = hours_minutes_seconds(message.time_left)
+#                     self.time_right = hours_minutes_seconds(message.time_right)
+#                     display_time(self.time_left, self.time_right)
+#                 break
+#             if case(DgtApi.CLOCK_VERSION):
+#                 break
+#             if case(DgtApi.CLOCK_TIME):
+#                 if message.dev != 'i2c':
+#                     self.time_left = message.time_left
+#                     self.time_right = message.time_right
+#                     if self.clock_show_time:
+#                         display_time(self.time_left, self.time_right)
+#                 break
+#             if case():  # Default
+#                 pass
+#
+#     def _create_task(self, msg):
+#         IOLoop.instance().add_callback(callback=lambda: self._process_message(msg))
+#
+#     def run(self):
+#         """called from threading.Thread by its start() function."""
+#         logging.info('dgt_queue ready')
+#         while True:
+#             # Check if we have something to display
+#             message = self.dgt_queue.get()
+#             self._create_task(message)
 
 
 class WebDisplay(DisplayMsg, threading.Thread):
@@ -459,7 +578,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                     elif message.result == GameResult.OUT_OF_TIME:
                         result = '0-1' if message.game.turn == chess.WHITE else '1-0'
                     if result:
-                        EventHandler.write_to_clients({'event': 'Message', 'msg': 'Game over, Result: ' + result})
+                        EventHandler.write_to_clients({'event': 'Message', 'msg': 'Result: ' + result})
                 break
             if case():  # Default
                 # print(message)

@@ -123,7 +123,7 @@ class DgtVr(DgtIface):
     def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
         """start the time on the console."""
         if 'web' not in devs:
-            logging.debug('ignored message cause of devs [stopClock]')
+            logging.debug('ignored message cause of devs [startClock]')
             return
         self.time_left = hours_minutes_seconds(time_left)
         self.time_right = hours_minutes_seconds(time_right)

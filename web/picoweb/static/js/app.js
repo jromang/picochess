@@ -288,7 +288,7 @@ $(function() {
             }
         };
         ws.onclose = function() {
-            dgtClockStatusEl.html('connection closed');
+            dgtClockStatusEl.html('closed');
         };
     }
 

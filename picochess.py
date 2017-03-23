@@ -497,10 +497,6 @@ def main():
     # The class dgtDisplay talks to DgtHw/DgtPi or DgtVr
     DgtDisplay(dgttranslate, dgtmenu, time_control).start()
 
-    # Launch web server
-    if args.web_server_port:
-        WebServer(args.web_server_port).start()
-
     # Create PicoTalker for speech output
     if args.user_voice or args.computer_voice:
         from talker.picotalker import PicoTalkerDisplay
@@ -511,12 +507,16 @@ def main():
 
     dgtboard = DgtBoard(args.dgt_port, args.disable_revelation_leds, args.dgtpi)
 
+    # Launch web server
+    if args.web_server_port:
+        WebServer(args.web_server_port, dgttranslate, dgtboard).start()
+
     if args.console:
         # Enable keyboard input and terminal display
         logging.debug('starting picochess in virtual mode')
-        KeyboardInput(dgttranslate, args.dgtpi).start()
-        TerminalDisplay().start()
-        DgtVr(dgttranslate, dgtboard).start()
+        # KeyboardInput(dgttranslate, args.dgtpi).start()
+        # TerminalDisplay().start()
+        # DgtVr(dgttranslate, dgtboard).start()
     else:
         # Connect to DGT board
         logging.debug('starting picochess in board mode')
