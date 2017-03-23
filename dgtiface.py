@@ -137,6 +137,9 @@ class DgtIface(DisplayDgt, Thread):
             if case():  # Default
                 pass
 
+    def _create_task(self, msg):
+        self._process_message(msg)
+
     def run(self):
         """called from threading.Thread by its start() function."""
         logging.info('dgt_queue ready')
@@ -144,6 +147,6 @@ class DgtIface(DisplayDgt, Thread):
             # Check if we have something to display
             try:
                 message = self.dgt_queue.get()
-                self._process_message(message)
+                self._create_task(message)
             except queue.Empty:
                 pass

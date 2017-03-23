@@ -50,26 +50,22 @@ class ChannelHandler(ServerRequestHandler):
         cmd = raw.lower()
 
         try:
-            if cmd.startswith('print:'):
+            # Here starts the simulation of a dgt-board!
+            # Let the user send events like the board would do
+            if cmd.startswith('fen:'):
                 fen = raw.split(':')[1]
-                print(chess.Board(fen))
+                # dgt board only sends the basic fen => be sure
+                # it's same no matter what fen the user entered
+                WebServer.fire(Event.KEYBOARD_FEN(fen=fen.split(' ')[0]))
+            # end simulation code
+            elif cmd.startswith('go'):
+                if 'last_dgt_move_msg' in self.shared:
+                    fen = self.shared['last_dgt_move_msg']['fen'].split(' ')[0]
+                    WebServer.fire(Event.KEYBOARD_FEN(fen=fen))
             else:
-                # Here starts the simulation of a dgt-board!
-                # Let the user send events like the board would do
-                if cmd.startswith('fen:'):
-                    fen = raw.split(':')[1]
-                    # dgt board only sends the basic fen => be sure
-                    # it's same no matter what fen the user entered
-                    WebServer.fire(Event.KEYBOARD_FEN(fen=fen.split(' ')[0]))
-                # end simulation code
-                elif cmd.startswith('go'):
-                    if 'last_dgt_move_msg' in self.shared:
-                        fen = self.shared['last_dgt_move_msg']['fen'].split(' ')[0]
-                        WebServer.fire(Event.KEYBOARD_FEN(fen=fen))
-                else:
-                    # Event.KEYBOARD_MOVE tranfers "move" to "fen" and then continues with "Message.DGT_FEN"
-                    move = chess.Move.from_uci(cmd)
-                    WebServer.fire(Event.KEYBOARD_MOVE(move=move))
+                # Event.KEYBOARD_MOVE tranfers "move" to "fen" and then continues with "Message.DGT_FEN"
+                move = chess.Move.from_uci(cmd)
+                WebServer.fire(Event.KEYBOARD_MOVE(move=move))
         except (ValueError, IndexError):
             logging.warning('Invalid user input [%s]', raw)
 
@@ -185,7 +181,7 @@ class WebDgt(DisplayDgt, threading.Thread):
         self.time_left = None
         self.time_right = None
 
-    def task(self, message):
+    def _process_message(self, message):
         def display_time(time_l, time_r):
             if time_l is None or time_r is None:
                 logging.debug('time values not set - abort function')
@@ -194,7 +190,6 @@ class WebDgt(DisplayDgt, threading.Thread):
                 text_l = '{}:{:02d}.{:02d}'.format(time_l[0], time_l[1], time_l[2])
                 text_r = '{}:{:02d}.{:02d}'.format(time_r[0], time_r[1], time_r[2])
                 result = {'event': 'Clock', 'text': text_l + '&nbsp;&nbsp;' + text_r}
-                logging.debug('Result: {}'.format(result))
                 EventHandler.write_to_clients(result)
 
         for case in switch(message):
@@ -250,7 +245,7 @@ class WebDgt(DisplayDgt, threading.Thread):
                 pass
 
     def _create_task(self, msg):
-        IOLoop.instance().add_callback(callback=lambda: self.task(msg))
+        IOLoop.instance().add_callback(callback=lambda: self._process_message(msg))
 
     def run(self):
         """called from threading.Thread by its start() function."""
