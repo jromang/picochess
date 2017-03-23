@@ -802,8 +802,13 @@ $('#ClockBtn3').on('click', ClockButton3);
 $('#ClockBtn4').on('click', ClockButton4);
 
 $('#consoleBtn').on('click', ConsoleButton);
-$('#sendConsoleBtn').on('click', SendConsoleCommand);
+$('#sendConsoleBtn').on('click', GetFenToInput);
 
+$("#inputConsole").keyup(function(event){
+    if(event.keyCode == 13){
+        SendConsoleCommand();
+    }
+});
 
 function clickRowGameWriter(rowIndex, record, columns, cellWriter) {
     var tr = '';
@@ -1148,6 +1153,11 @@ function SendConsoleCommand() {
     var cmd = $('#inputConsole').val();
     $.post('/channel', {action: 'command', command: cmd}, function (data) {
     });
+}
+
+function GetFenToInput() {
+    var tmp_game = create_game_pointer();
+    $('#inputConsole').val(tmp_game.fen());
 }
 
 function ConsoleButton() {
