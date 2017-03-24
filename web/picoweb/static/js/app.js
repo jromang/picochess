@@ -800,6 +800,7 @@ $('#ClockBtn1').on('click', clockButton1);
 $('#ClockBtn2').on('click', clockButton2);
 $('#ClockBtn3').on('click', clockButton3);
 $('#ClockBtn4').on('click', clockButton4);
+$('#ClockLeverBtn').on('click', toggleLeverButton);
 
 $('#consoleBtn').on('click', toggleConsoleButton);
 $('#getFenToConsoleBtn').on('click', getFenToConsole);
@@ -1147,6 +1148,17 @@ function clockButton3() {
 
 function clockButton4() {
     $.post('/channel', {action: 'clockbutton', button: 4}, function (data) {
+    });
+}
+
+function toggleLeverButton() {
+    $('#leverDown').toggle();
+    $('#leverUp').toggle();
+    var button = 0x40;
+    if($('#leverDown').is(':hidden')) {
+        button = -0x40;
+    }
+    $.post('/channel', {action: 'clockbutton', button: button}, function (data) {
     });
 }
 

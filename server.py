@@ -61,12 +61,6 @@ class ChannelHandler(ServerRequestHandler):
                 # dgt board only sends the basic fen => be sure
                 # it's same no matter what fen the user entered
                 WebServer.fire(Event.KEYBOARD_FEN(fen=fen.split(' ')[0]))
-            elif cmd.startswith('lever:'):
-                lever = cmd.split(':')[1]
-                if lever not in ('l', 'r'):
-                    raise ValueError(lever)
-                button = 0x40 if lever == 'r' else -0x40
-                WebServer.fire(Event.KEYBOARD_BUTTON(button=button, dev='web'))
             # end simulation code
             elif cmd.startswith('go'):
                 if 'last_dgt_move_msg' in self.shared:
