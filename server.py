@@ -99,11 +99,9 @@ class EventHandler(WebSocketHandler):
         self.shared = shared
 
     def on_message(self, message):
-        print('MESSAGE')
         pass
 
     def data_received(self, chunk):
-        print('DATA')
         pass
 
     def real_ip(self):
@@ -112,18 +110,15 @@ class EventHandler(WebSocketHandler):
         return real_ip
 
     def open(self):
-        print('OPEN')
         EventHandler.clients.add(self)
         client_ips.append(self.real_ip())
 
     def on_close(self):
-        print('CLOSE')
         EventHandler.clients.remove(self)
         client_ips.remove(self.real_ip())
 
     @classmethod
     def write_to_clients(cls, msg):
-        print(cls.clients, msg)
         for client in cls.clients:
             client.write_message(msg)
 
@@ -149,7 +144,6 @@ class InfoHandler(ServerRequestHandler):
             if 'headers' in self.shared:
                 self.write(self.shared['headers'])
         if action == 'get_clock_text':
-            print(self.shared)
             if 'clock_text' in self.shared:
                 self.write(self.shared['clock_text'])
 

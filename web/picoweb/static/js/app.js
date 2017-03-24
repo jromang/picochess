@@ -91,8 +91,7 @@ function getAllInfo() {
         dgtClockStatusEl.html(textStatus);
     });
     $.get('/info', {action: 'get_clock_text'}, function(data) {
-        console.log(data);
-        //dgtClockTextEl.html(data.text);
+        dgtClockTextEl.html(data);
     }).fail(function(jqXHR, textStatus) {
         console.log(textStatus);
         dgtClockStatusEl.html(textStatus);
