@@ -26,9 +26,9 @@ import tornado.wsgi
 from tornado.ioloop import IOLoop
 from tornado.websocket import WebSocketHandler
 
-from utilities import Observable, DisplayMsg, DisplayDgt, switch, hours_minutes_seconds, RepeatedTimer
+from utilities import Observable, DisplayMsg, switch, hours_minutes_seconds, RepeatedTimer
 import logging
-from dgtapi import MessageApi, Event, DgtApi
+from dgtapi import MessageApi, Event, Message
 from dgtutil import GameResult, PlayMode, Mode, ClockSide
 from web.picoweb import picoweb as pw
 
@@ -60,16 +60,16 @@ class ChannelHandler(ServerRequestHandler):
                 fen = raw.split(':')[1]
                 # dgt board only sends the basic fen => be sure
                 # it's same no matter what fen the user entered
-                WebServer.fire(Event.KEYBOARD_FEN(fen=fen.split(' ')[0]))
+                Observable.fire(Event.KEYBOARD_FEN(fen=fen.split(' ')[0]))
             # end simulation code
             elif cmd.startswith('go'):
                 if 'last_dgt_move_msg' in self.shared:
                     fen = self.shared['last_dgt_move_msg']['fen'].split(' ')[0]
-                    WebServer.fire(Event.KEYBOARD_FEN(fen=fen))
+                    Observable.fire(Event.KEYBOARD_FEN(fen=fen))
             else:
                 # Event.KEYBOARD_MOVE tranfers "move" to "fen" and then continues with "Message.DGT_FEN"
                 move = chess.Move.from_uci(cmd)
-                WebServer.fire(Event.KEYBOARD_MOVE(move=move))
+                Observable.fire(Event.KEYBOARD_MOVE(move=move))
         except (ValueError, IndexError):
             logging.warning('Invalid user input [%s]', raw)
 
@@ -83,9 +83,9 @@ class ChannelHandler(ServerRequestHandler):
             EventHandler.write_to_clients(result)
         elif action == 'move':
             uci_move = self.get_argument('source') + self.get_argument('target')
-            WebServer.fire(Event.REMOTE_MOVE(uci_move=uci_move, fen=self.get_argument('fen')))
+            Observable.fire(Event.REMOTE_MOVE(uci_move=uci_move, fen=self.get_argument('fen')))
         elif action == 'clockbutton':
-            WebServer.fire(Event.KEYBOARD_BUTTON(button=self.get_argument('button'), dev='web'))
+            Observable.fire(Event.KEYBOARD_BUTTON(button=self.get_argument('button'), dev='web'))
         elif action == 'command':
             command = self.get_argument('command')
             self.process_console_command(command)
@@ -99,9 +99,11 @@ class EventHandler(WebSocketHandler):
         self.shared = shared
 
     def on_message(self, message):
+        print('MESSAGE')
         pass
 
     def data_received(self, chunk):
+        print('DATA')
         pass
 
     def real_ip(self):
@@ -110,15 +112,18 @@ class EventHandler(WebSocketHandler):
         return real_ip
 
     def open(self):
+        print('OPEN')
         EventHandler.clients.add(self)
         client_ips.append(self.real_ip())
 
     def on_close(self):
+        print('CLOSE')
         EventHandler.clients.remove(self)
         client_ips.remove(self.real_ip())
 
     @classmethod
     def write_to_clients(cls, msg):
+        print(cls.clients, msg)
         for client in cls.clients:
             client.write_message(msg)
 
@@ -143,6 +148,10 @@ class InfoHandler(ServerRequestHandler):
         if action == 'get_headers':
             if 'headers' in self.shared:
                 self.write(self.shared['headers'])
+        if action == 'get_clock_text':
+            print(self.shared)
+            if 'clock_text' in self.shared:
+                self.write(self.shared['clock_text'])
 
 
 class ChessBoardHandler(ServerRequestHandler):
@@ -150,12 +159,12 @@ class ChessBoardHandler(ServerRequestHandler):
         self.render('web/picoweb/templates/clock.html')
 
 
-class WebServer(Observable, threading.Thread):
+class WebServer(threading.Thread):
     def __init__(self, port: int, dgttranslate: DgtTranslate, dgtboard: DgtBoard):
         shared = {}
 
         WebDisplay(shared).start()
-        WebVr(dgttranslate, dgtboard).start()
+        WebVr(shared, dgttranslate, dgtboard).start()
         super(WebServer, self).__init__()
         wsgi_app = tornado.wsgi.WSGIContainer(pw)
 
@@ -180,15 +189,19 @@ class WebVr(DgtIface):
 
     """Handle the web (clock) communication."""
 
-    def __init__(self, dgttranslate: DgtTranslate, dgtboard: DgtBoard):
+    def __init__(self, shared, dgttranslate: DgtTranslate, dgtboard: DgtBoard):
         super(WebVr, self).__init__(dgttranslate, dgtboard)
+        self.shared = shared
         self.virtual_timer = None
         self.time_side = ClockSide.NONE
         self.enable_dgt_pi = dgtboard.is_pi
-        # main = 2 if dgtboard.is_pi else 0
-        # DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=main, sub=0, dev='web', text=None))
-        self.enable_dgt_3000 = True  # @todo as long the above isnt send
+        sub = 2 if dgtboard.is_pi else 0
+        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=2, sub=sub, dev='web', text=None))
         self.clock_show_time = True
+
+    def _create_clock_text(self):
+        if 'clock_text' not in self.shared:
+            self.shared['clock_text'] = {}
 
     def _runclock(self):
         if self.time_side == ClockSide.LEFT:
@@ -211,7 +224,10 @@ class WebVr(DgtIface):
         elif self.clock_show_time:
             text_l = '{}:{:02d}.{:02d}'.format(time_l[0], time_l[1], time_l[2])
             text_r = '{}:{:02d}.{:02d}'.format(time_r[0], time_r[1], time_r[2])
-            result = {'event': 'Clock', 'text': text_l + '&nbsp;&nbsp;' + text_r}
+            text = text_l + '&nbsp;&nbsp;' + text_r
+            self._create_clock_text()
+            self.shared['clock_text'] = text
+            result = {'event': 'Clock', 'text': text}
             EventHandler.write_to_clients(result)
 
     def display_move_on_clock(self, message):
@@ -230,6 +246,8 @@ class WebVr(DgtIface):
             logging.debug('ignored message cause of devs [{}]'.format(text))
             return
         self.clock_show_time = False
+        self._create_clock_text()
+        self.shared['clock_text'] = text
         result = {'event': 'Clock', 'text': text}
         EventHandler.write_to_clients(result)
 
@@ -245,6 +263,8 @@ class WebVr(DgtIface):
             logging.debug('ignored message cause of devs [{}]'.format(text))
             return
         self.clock_show_time = False
+        self._create_clock_text()
+        self.shared['clock_text'] = text
         result = {'event': 'Clock', 'text': text}
         EventHandler.write_to_clients(result)
 
@@ -299,90 +319,6 @@ class WebVr(DgtIface):
 
     def _create_task(self, msg):
         IOLoop.instance().add_callback(callback=lambda: self._process_message(msg))
-
-
-# class WebDgt(DisplayDgt, threading.Thread):
-#     def __init__(self, shared):
-#         super(WebDgt, self).__init__()
-#         self.shared = shared
-#         self.clock_running = False
-#         self.clock_show_time = True
-#         self.time_left = None
-#         self.time_right = None
-#
-#     def _process_message(self, message):
-#         def display_time(time_l, time_r):
-#             if time_l is None or time_r is None:
-#                 logging.debug('time values not set - abort function')
-#             else:
-#                 self.clock_show_time = True
-#                 text_l = '{}:{:02d}.{:02d}'.format(time_l[0], time_l[1], time_l[2])
-#                 text_r = '{}:{:02d}.{:02d}'.format(time_r[0], time_r[1], time_r[2])
-#                 result = {'event': 'Clock', 'text': text_l + '&nbsp;&nbsp;' + text_r}
-#                 EventHandler.write_to_clients(result)
-#
-#         for case in switch(message):
-#             if case(DgtApi.DISPLAY_MOVE):
-#                 if 'web' in message.devs:
-#                     self.clock_show_time = False
-#                     bit_board = chess.Board(message.fen)
-#                     text = bit_board.san(message.move)
-#                     result = {'event': 'Clock', 'text': text}
-#                     EventHandler.write_to_clients(result)
-#                 break
-#             if case(DgtApi.DISPLAY_TEXT):
-#                 if 'web' in message.devs:
-#                     self.clock_show_time = False
-#                     text = str(message.l)
-#                     result = {'event': 'Clock', 'text': text}
-#                     EventHandler.write_to_clients(result)
-#                 break
-#             if case(DgtApi.DISPLAY_TIME):
-#                 if 'web' in message.devs:
-#                     if self.clock_running or message.force:
-#                         display_time(self.time_left, self.time_right)
-#                     else:
-#                         logging.debug('(web) clock isnt running - no need for endText')
-#                 break
-#             if case(DgtApi.LIGHT_CLEAR):
-#                 result = {'event': 'Clear'}
-#                 EventHandler.write_to_clients(result)
-#                 break
-#             if case(DgtApi.CLOCK_STOP):
-#                 if 'web' in message.devs:
-#                     self.clock_show_time = True
-#                     self.clock_running = False
-#                 break
-#             if case(DgtApi.CLOCK_START):
-#                 if 'web' in message.devs:
-#                     self.clock_running = message.side != ClockSide.NONE
-#                     # simulate the "start_clock" function from dgthw/pi
-#                     self.time_left = hours_minutes_seconds(message.time_left)
-#                     self.time_right = hours_minutes_seconds(message.time_right)
-#                     display_time(self.time_left, self.time_right)
-#                 break
-#             if case(DgtApi.CLOCK_VERSION):
-#                 break
-#             if case(DgtApi.CLOCK_TIME):
-#                 if message.dev != 'i2c':
-#                     self.time_left = message.time_left
-#                     self.time_right = message.time_right
-#                     if self.clock_show_time:
-#                         display_time(self.time_left, self.time_right)
-#                 break
-#             if case():  # Default
-#                 pass
-#
-#     def _create_task(self, msg):
-#         IOLoop.instance().add_callback(callback=lambda: self._process_message(msg))
-#
-#     def run(self):
-#         """called from threading.Thread by its start() function."""
-#         logging.info('dgt_queue ready')
-#         while True:
-#             # Check if we have something to display
-#             message = self.dgt_queue.get()
-#             self._create_task(message)
 
 
 class WebDisplay(DisplayMsg, threading.Thread):
@@ -523,7 +459,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 _update_headers()
                 break
             if case(MessageApi.DGT_NO_CLOCK_ERROR):
-                result = {'event': 'Message', 'msg': 'Error clock'}
+                result = {'event': 'Status', 'msg': 'Error clock'}
                 EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.DGT_CLOCK_VERSION):
@@ -533,7 +469,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                     attached = 'i2c-pi'
                 else:
                     attached = 'server'
-                result = {'event': 'Message', 'msg': 'Ok clock ' + attached}
+                result = {'event': 'Status', 'msg': 'Ok clock ' + attached}
                 EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.COMPUTER_MOVE):

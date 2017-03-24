@@ -76,7 +76,7 @@ class MenuState(object):
     SYS_DISP_PONDER_INTERVAL = 772100  # 1-8
 
 
-class DgtMenu(Observable):
+class DgtMenu(object):
     def __init__(self, disable_confirm_message: bool, ponder_interval: int, dgttranslate: DgtTranslate):
         super(DgtMenu, self).__init__()
 
@@ -613,7 +613,7 @@ class DgtMenu(Observable):
             if case(MenuState.MODE_TYPE):
                 # do action!
                 text = self.dgttranslate.text('B10_okmode')
-                self.fire(Event.SET_INTERACTION_MODE(mode=self.menu_mode, mode_text=text, show_ok=True))
+                Observable.fire(Event.SET_INTERACTION_MODE(mode=self.menu_mode, mode_text=text, show_ok=True))
                 text = self.save_choices()
                 break
             if case(MenuState.POS):
@@ -641,7 +641,7 @@ class DgtMenu(Observable):
                 bit_board.set_fen(bit_board.fen())
                 if bit_board.is_valid():
                     self.flip_board = self.menu_position_reverse
-                    self.fire(Event.SETUP_POSITION(fen=bit_board.fen(), uci960=self.menu_position_uci960))
+                    Observable.fire(Event.SETUP_POSITION(fen=bit_board.fen(), uci960=self.menu_position_uci960))
                     # self._reset_moves_and_score() done in "START_NEW_GAME"
                     text = self.save_choices()
                 else:
@@ -663,7 +663,7 @@ class DgtMenu(Observable):
                 # do action!
                 time_text = self.dgttranslate.text('B10_oktime')
                 tc = self.tc_blitz_map[list(self.tc_blitz_map)[self.menu_time_blitz]] # type: TimeControl
-                self.fire(Event.SET_TIME_CONTROL(tc_init=tc.get_init_parameters(), time_text=time_text, show_ok=True))
+                Observable.fire(Event.SET_TIME_CONTROL(tc_init=tc.get_parameters(), time_text=time_text, show_ok=True))
                 text = self.save_choices()
                 break
             if case(MenuState.TIME_FISCH):
@@ -673,7 +673,7 @@ class DgtMenu(Observable):
                 # do action!
                 time_text = self.dgttranslate.text('B10_oktime')
                 tc = self.tc_fisch_map[list(self.tc_fisch_map)[self.menu_time_fisch]]  # type: TimeControl
-                self.fire(Event.SET_TIME_CONTROL(tc_init=tc.get_init_parameters(), time_text=time_text, show_ok=True))
+                Observable.fire(Event.SET_TIME_CONTROL(tc_init=tc.get_parameters(), time_text=time_text, show_ok=True))
                 text = self.save_choices()
                 break
             if case(MenuState.TIME_FIXED):
@@ -683,7 +683,7 @@ class DgtMenu(Observable):
                 # do action!
                 time_text = self.dgttranslate.text('B10_oktime')
                 tc = self.tc_fixed_map[list(self.tc_fixed_map)[self.menu_time_fixed]]  # type: TimeControl
-                self.fire(Event.SET_TIME_CONTROL(tc_init=tc.get_init_parameters(), time_text=time_text, show_ok=True))
+                Observable.fire(Event.SET_TIME_CONTROL(tc_init=tc.get_parameters(), time_text=time_text, show_ok=True))
                 text = self.save_choices()
                 break
             if case(MenuState.BOOK):
@@ -692,7 +692,7 @@ class DgtMenu(Observable):
             if case(MenuState.BOOK_NAME):
                 # do action!
                 book_text = self.dgttranslate.text('B10_okbook')
-                self.fire(Event.SET_OPENING_BOOK(book=self.all_books[self.menu_book], book_text=book_text, show_ok=True))
+                Observable.fire(Event.SET_OPENING_BOOK(book=self.all_books[self.menu_book], book_text=book_text, show_ok=True))
                 text = self.save_choices()
                 break
             if case(MenuState.ENG):
@@ -707,7 +707,7 @@ class DgtMenu(Observable):
                     config.write()
                     eng = self.installed_engines[self.menu_engine_name]
                     eng_text = self.dgttranslate.text('B10_okengine')
-                    self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options={}, show_ok=True))
+                    Observable.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options={}, show_ok=True))
                     self.engine_restart = True
                 break
             if case(MenuState.ENG_NAME_LEVEL):
@@ -720,11 +720,11 @@ class DgtMenu(Observable):
                     config = ConfigObj('picochess.ini')
                     config['engine-level'] = msg
                     config.write()
-                    self.fire(Event.LEVEL(options={}, level_text=self.dgttranslate.text('B10_level', msg)))
+                    Observable.fire(Event.LEVEL(options={}, level_text=self.dgttranslate.text('B10_level', msg)))
                 else:
                     options = {}
                 eng_text = self.dgttranslate.text('B10_okengine')
-                self.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options=options, show_ok=True))
+                Observable.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options=options, show_ok=True))
                 self.engine_restart = True
                 text = self.save_choices()
                 break
@@ -801,7 +801,7 @@ class DgtMenu(Observable):
                 break
             if case(MenuState.SYS_LOG):
                 # do action!
-                self.fire(Event.EMAIL_LOG())
+                Observable.fire(Event.EMAIL_LOG())
                 text = self.dgttranslate.text('B10_oklogfile')  # @todo give pos/neg feedback
                 DispatchDgt.fire(text)
                 text = self.save_choices()
@@ -822,7 +822,7 @@ class DgtMenu(Observable):
                     if ckey + '-voice' in config:
                         del config[ckey + '-voice']
                         config.write()
-                    self.fire(Event.SET_VOICE(type=self.menu_system_voice_type, lang='en', speaker='mute'))
+                    Observable.fire(Event.SET_VOICE(type=self.menu_system_voice_type, lang='en', speaker='mute'))
                     text = self.dgttranslate.text('B10_okvoice')
                     DispatchDgt.fire(text)
                     text = self.save_choices()
@@ -839,7 +839,7 @@ class DgtMenu(Observable):
                 skey = speakers[self.menu_system_voice_speak]
                 config[ckey + '-voice'] = vkey + ':' + skey
                 config.write()
-                self.fire(Event.SET_VOICE(type=self.menu_system_voice_type, lang=vkey, speaker=skey))
+                Observable.fire(Event.SET_VOICE(type=self.menu_system_voice_type, lang=vkey, speaker=skey))
                 text = self.dgttranslate.text('B10_okvoice')
                 DispatchDgt.fire(text)
                 text = self.save_choices()

@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from utilities import DisplayDgt, DispatchDgt
+from utilities import DisplayDgt, DispatchDgt, dispatch_queue
 import logging
 import queue
 from dgtapi import Dgt, DgtApi
@@ -84,7 +84,7 @@ class Dispatcher(DispatchDgt, Thread):
         while True:
             # Check if we have something to display
             try:
-                message = self.dispatch_queue.get()
+                message = dispatch_queue.get()
                 logging.debug("received command from dispatch_queue: %s", message)
 
                 if self.maxtimer_running:

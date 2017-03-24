@@ -90,6 +90,13 @@ function getAllInfo() {
     }).fail(function(jqXHR, textStatus) {
         dgtClockStatusEl.html(textStatus);
     });
+    $.get('/info', {action: 'get_clock_text'}, function(data) {
+        console.log(data);
+        //dgtClockTextEl.html(data.text);
+    }).fail(function(jqXHR, textStatus) {
+        console.log(textStatus);
+        dgtClockStatusEl.html(textStatus);
+    });
 }
 
 function setTitle(data) {
@@ -125,7 +132,7 @@ function goToDGTFen() {
         if (data) {
             updateDGTPosition(data);
             if (data['msg']) {
-                dgtClockStatusEl.html(data['msg']);
+                boardStatusEl.html(data['msg']);
             }
         }
     }).fail(function(jqXHR, textStatus) {
@@ -273,6 +280,9 @@ $(function() {
                     break;
                 case 'Clock':
                     dgtClockTextEl.html(data.text);
+                    break;
+                case 'Status':
+                    dgtClockStatusEl.html(data.msg);
                     break;
                 case 'Clear':
                     remove_highlights();

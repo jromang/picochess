@@ -38,13 +38,11 @@ import time
 import queue
 from dgtapi import Message, Event, EventApi
 from dgtutil import GameResult, TimeMode, Mode, PlayMode
-from keyboard import KeyboardInput, TerminalDisplay
 from pgn import Emailer, PgnDisplay
 from server import WebServer
 
 from dgthw import DgtHw
 from dgtpi import DgtPi
-from dgtvr import DgtVr
 from dgtdisplay import DgtDisplay
 from dgtboard import DgtBoard
 from dgttranslate import DgtTranslate
@@ -164,7 +162,7 @@ def main():
     def start_clock():
         if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
             time_control.start(game.turn)
-            DisplayMsg.show(Message.CLOCK_START(turn=game.turn, tc_init=time_control.get_init_parameters(), devs={'ser', 'i2c', 'web'}))
+            DisplayMsg.show(Message.CLOCK_START(turn=game.turn, tc_init=time_control.get_parameters(), devs={'ser', 'i2c', 'web'}))
         else:
             logging.warning('wrong mode: {}'.format(interaction_mode))
 
@@ -494,7 +492,7 @@ def main():
     dgtmenu = DgtMenu(args.disable_confirm_message, args.ponder_interval, dgttranslate)
     time_control, time_text = transfer_time(args.time.split())
     time_text.beep = False
-    # The class dgtDisplay talks to DgtHw/DgtPi or DgtVr
+    # The class dgtDisplay fires Event (Observable) & DispatchDgt (Dispatcher)
     DgtDisplay(dgttranslate, dgtmenu, time_control).start()
 
     # Create PicoTalker for speech output
@@ -514,9 +512,6 @@ def main():
     if args.console:
         # Enable keyboard input and terminal display
         logging.debug('starting picochess in virtual mode')
-        # KeyboardInput(dgttranslate, args.dgtpi).start()
-        # TerminalDisplay().start()
-        # DgtVr(dgttranslate, dgtboard).start()
     else:
         # Connect to DGT board
         logging.debug('starting picochess in board mode')
@@ -857,7 +852,7 @@ def main():
                     elif time_control.mode == TimeMode.FIXED:
                         config['time'] = '{:d}'.format(time_control.seconds_per_move)
                     config.write()
-                    DisplayMsg.show(Message.TIME_CONTROL(time_text=event.time_text, show_ok=event.show_ok, tc_init=time_control.get_init_parameters()))
+                    DisplayMsg.show(Message.TIME_CONTROL(time_text=event.time_text, show_ok=event.show_ok, tc_init=time_control.get_parameters()))
                     break
 
                 if case(EventApi.OUT_OF_TIME):

@@ -50,7 +50,7 @@ class TimeControl(object):
         return self.mode == other.mode and self.seconds_per_move == other.seconds_per_move and \
                self.minutes_per_game == other.minutes_per_game and self.fischer_increment == other.fischer_increment
 
-    def get_init_parameters(self):
+    def get_parameters(self):
         """Return the state of this class for generating a new instance."""
         return {'mode': self.mode, 'fixed': self.seconds_per_move, 'blitz': self.minutes_per_game,
                 'fischer': self.fischer_increment, 'clock_time': self.clock_time}
