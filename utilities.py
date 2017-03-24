@@ -35,6 +35,7 @@ from dgtapi import Dgt
 version = '084'
 
 evt_queue = queue.Queue()
+dispatch_queue = queue.Queue()
 serial_queue = queue.Queue()
 
 msgdisplay_devices = []
@@ -49,6 +50,15 @@ class Observable(object):  # Input devices are observable
     @staticmethod
     def fire(event):
         evt_queue.put(copy.deepcopy(event))
+
+
+class DispatchDgt(object):  # Input devices are observable
+    def __init__(self):
+        super(DispatchDgt, self).__init__()
+
+    @staticmethod
+    def fire(dgt):
+        dispatch_queue.put(copy.deepcopy(dgt))
 
 
 class DisplayMsg(object):  # Display devices (DGT XL clock, Piface LCD, pgn file...)
@@ -73,18 +83,6 @@ class DisplayDgt(object):  # Display devices (DGT XL clock, Piface LCD, pgn file
     def show(message):  # Sends a message on each display device
         for display in dgtdisplay_devices:
             display.dgt_queue.put(copy.deepcopy(message))
-
-
-class DispatchDgt(object):  # Display devices (DGT XL clock, Piface LCD, pgn file...)
-    def __init__(self):
-        super(DispatchDgt, self).__init__()
-        self.dispatch_queue = queue.Queue()
-        dgtdispatch_devices.append(self)
-
-    @staticmethod
-    def show(message):  # Sends a message on each display device
-        for display in dgtdispatch_devices:
-            display.dispatch_queue.put(copy.deepcopy(message))
 
 
 # switch/case instruction in python
@@ -188,7 +186,7 @@ def update_picochess(dgtpi: bool, auto_reboot: bool, dgttranslate: DgtTranslate)
                                   stdout=subprocess.PIPE, env=force_en_env).communicate()[0].decode(encoding='UTF-8')
         logging.debug(output)
         if 'up-to-date' not in output:
-            DispatchDgt.show(dgttranslate.text('Y00_update'))
+            DispatchDgt.fire(dgttranslate.text('Y00_update'))
             # Update
             logging.debug('updating picochess')
             output = subprocess.Popen(['pip3', 'install', '-r', 'requirements.txt'],

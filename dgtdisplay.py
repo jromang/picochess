@@ -59,17 +59,17 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         if self.dgtmenu.inside_menu():
             self.dgtmenu.enter_top_menu()
             if not self.dgtmenu.get_confirm():
-                DispatchDgt.show(self.dgttranslate.text('K05_exitmenu'))
+                DispatchDgt.fire(self.dgttranslate.text('K05_exitmenu'))
                 return True
         return False
 
     def _power_off(self, dev='web'):
-        DispatchDgt.show(self.dgttranslate.text('Y10_goodbye'))
+        DispatchDgt.fire(self.dgttranslate.text('Y10_goodbye'))
         self.dgtmenu.set_engine_restart(True)
         self.fire(Event.SHUTDOWN(dev=dev))
 
     def _reboot(self, dev='web'):
-        DispatchDgt.show(self.dgttranslate.text('Y10_pleasewait'))
+        DispatchDgt.fire(self.dgttranslate.text('Y10_pleasewait'))
         self.dgtmenu.set_engine_restart(True)
         self.fire(Event.REBOOT(dev=dev))
 
@@ -121,7 +121,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         if self._inside_menu():
             text = self.dgtmenu.up()  # button0 can exit the menu, so check
             if text:
-                DispatchDgt.show(text)
+                DispatchDgt.fire(text)
             else:
                 self._exit_display(wait=True)
         else:
@@ -131,18 +131,18 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                         beep=self.dgttranslate.bl(BeepLevel.BUTTON), devs={'ser', 'i2c', 'web'})
             else:
                 text = self.dgttranslate.text('B10_nomove')
-            DispatchDgt.show(text)
+            DispatchDgt.fire(text)
             self._exit_display(wait=True)
 
     def _process_button1(self, dev):
         logging.debug('({}) clock: handle button 1 press'.format(dev))
         if self._inside_menu():
-            DispatchDgt.show(self.dgtmenu.left())  # button1 cant exit the menu
+            DispatchDgt.fire(self.dgtmenu.left())  # button1 cant exit the menu
         else:
             text = self._combine_depth_and_score()
             text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             # text.maxtime = 0
-            DispatchDgt.show(text)
+            DispatchDgt.fire(text)
             self._exit_display(wait=True)
 
     def _process_button2(self, dev):
@@ -157,14 +157,14 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 if self.dgtmenu.get_mode() in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
                     text = self.dgttranslate.text('B00_nofunction')
-                    DispatchDgt.show(text)
+                    DispatchDgt.fire(text)
                 else:
                     self.fire(Event.PAUSE_RESUME())
 
     def _process_button3(self, dev):
         logging.debug('({}) clock: handle button 3 press'.format(dev))
         if self._inside_menu():
-            DispatchDgt.show(self.dgtmenu.right())  # button3 cant exit the menu
+            DispatchDgt.fire(self.dgtmenu.right())  # button3 cant exit the menu
         else:
             if self.hint_move:
                 side = self._get_clock_side(self.hint_turn)
@@ -172,14 +172,14 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                         beep=self.dgttranslate.bl(BeepLevel.BUTTON), devs={'ser', 'i2c', 'web'})
             else:
                 text = self.dgttranslate.text('B10_nomove')
-            DispatchDgt.show(text)
+            DispatchDgt.fire(text)
             self._exit_display(wait=True)
 
     def _process_button4(self, dev):
         logging.debug('({}) clock: handle button 4 press'.format(dev))
         text = self.dgtmenu.down()
         if text:
-            DispatchDgt.show(text)
+            DispatchDgt.fire(text)
         else:
             self._exit_display(wait=True)
 
@@ -344,7 +344,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 except IndexError:
                     pass
             else:
-                DispatchDgt.show(self.dgttranslate.text('Y00_erroreng'))
+                DispatchDgt.fire(self.dgttranslate.text('Y00_erroreng'))
         elif fen in mode_map:
             logging.debug("Map-Fen: Interaction mode [%s]", mode_map[fen])
             self.dgtmenu.set_mode(mode_map[fen])
@@ -396,11 +396,11 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                     self.fire(Event.NEW_GAME(pos960=pos960))
                 else:
                     # self._reset_moves_and_score()
-                    DispatchDgt.show(self.dgttranslate.text('Y00_error960'))
+                    DispatchDgt.fire(self.dgttranslate.text('Y00_error960'))
         else:
             if not self._inside_menu():
                 if self.show_setup_pieces_msg:
-                    DispatchDgt.show(self.dgttranslate.text('N00_setpieces'))
+                    DispatchDgt.fire(self.dgttranslate.text('N00_setpieces'))
                 self.fire(Event.FEN(fen=fen))
             else:
                 # @todo perhaps resent this fen after menu exit?
@@ -412,7 +412,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self.dgtmenu.set_engine_index(index)
         self.dgtmenu.set_engine_has_960(message.has_960)
         if not self.dgtmenu.get_confirm() or not message.show_ok:
-            DispatchDgt.show(message.eng_text)
+            DispatchDgt.fire(message.eng_text)
         self.dgtmenu.set_engine_restart(False)
         self._exit_display(force=True)
 
@@ -427,7 +427,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
 
     def _process_start_new_game(self, message):
         if self.leds_are_on:
-            DispatchDgt.show(Dgt.LIGHT_CLEAR())
+            DispatchDgt.fire(Dgt.LIGHT_CLEAR())
             self.leds_are_on = False
         self._reset_moves_and_score()
         self.engine_finished = False
@@ -436,15 +436,15 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         if message.newgame:
             pos960 = message.game.chess960_pos()
             game_text = 'C10_newgame' if pos960 is None or pos960 == 518 else 'C10_ucigame'
-            DispatchDgt.show(self.dgttranslate.text(game_text, str(pos960)))
+            DispatchDgt.fire(self.dgttranslate.text(game_text, str(pos960)))
         if self.dgtmenu.get_mode() in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
             time_left, time_right = self.time_control.current_clock_time(flip_board=self.dgtmenu.get_flip_board())
-            DispatchDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE,
+            DispatchDgt.fire(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE,
                                              wait=True, devs={'ser', 'i2c', 'web'}))
 
     def _process_computer_move_done_on_board(self):
         if self.leds_are_on:
-            DispatchDgt.show(Dgt.LIGHT_CLEAR())
+            DispatchDgt.fire(Dgt.LIGHT_CLEAR())
             self.leds_are_on = False
         self.last_move = self.play_move
         self.last_fen = self.play_fen
@@ -454,14 +454,14 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         self.play_turn = None
         self.engine_finished = False
         if not self.dgtmenu.get_confirm():
-            DispatchDgt.show(self.dgttranslate.text('K05_okpico'))
+            DispatchDgt.fire(self.dgttranslate.text('K05_okpico'))
         if self.time_control.mode == TimeMode.FIXED:  # go back to a stoped time display
-            DispatchDgt.show(Dgt.DISPLAY_TIME(force=True, wait=True, devs={'ser', 'i2c', 'web'}))
+            DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs={'ser', 'i2c', 'web'}))
 
     def _process_computer_move(self, message):
         if self.leds_are_on:  # can happen in case of a book move
             logging.warning('REV2 lights still on')
-            DispatchDgt.show(Dgt.LIGHT_CLEAR())
+            DispatchDgt.fire(Dgt.LIGHT_CLEAR())
         move = message.move
         ponder = message.ponder
         fen = message.fen
@@ -477,39 +477,39 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
         side = self._get_clock_side(turn)
         disp = Dgt.DISPLAY_MOVE(move=move, fen=message.fen, side=side, wait=message.wait, maxtime=0,
                                 beep=self.dgttranslate.bl(BeepLevel.CONFIG), devs={'ser', 'i2c', 'web'})
-        DispatchDgt.show(disp)
-        DispatchDgt.show(Dgt.LIGHT_SQUARES(uci_move=move.uci()))
+        DispatchDgt.fire(disp)
+        DispatchDgt.fire(Dgt.LIGHT_SQUARES(uci_move=move.uci()))
         self.leds_are_on = True
 
     def _process_user_move(self, message):
         if self.leds_are_on:  # can happen in case of a sliding move
             logging.warning('REV2 lights still on')
-            DispatchDgt.show(Dgt.LIGHT_CLEAR())
+            DispatchDgt.fire(Dgt.LIGHT_CLEAR())
             self.leds_are_on = False
         self.last_move = message.move
         self.last_fen = message.fen
         self.last_turn = message.turn
         self.engine_finished = False
         if not self.dgtmenu.get_confirm():
-            DispatchDgt.show(self.dgttranslate.text('K05_okuser'))
+            DispatchDgt.fire(self.dgttranslate.text('K05_okuser'))
 
     def _process_review_move(self, message):
         if self.leds_are_on:  # can happen in case of a sliding move
             logging.warning('REV2 lights still on')
-            DispatchDgt.show(Dgt.LIGHT_CLEAR())
+            DispatchDgt.fire(Dgt.LIGHT_CLEAR())
             self.leds_are_on = False
         self.last_move = message.move
         self.last_fen = message.fen
         self.last_turn = message.turn
         if not self.dgtmenu.get_confirm():
-            DispatchDgt.show(self.dgttranslate.text('K05_okmove'))
+            DispatchDgt.fire(self.dgttranslate.text('K05_okmove'))
 
     def _process_time_control(self, message):
         if not self.dgtmenu.get_confirm() or not message.show_ok:
-            DispatchDgt.show(message.time_text)
+            DispatchDgt.fire(message.time_text)
         timectrl = self.time_control = TimeControl(**message.tc_init)
         time_left, time_right = timectrl.current_clock_time(flip_board=self.dgtmenu.get_flip_board())
-        DispatchDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE, wait=True,
+        DispatchDgt.fire(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE, wait=True,
                                          devs={'ser', 'i2c', 'web'}))
         self._exit_display(force=True)
 
@@ -523,7 +523,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             text = self.dgttranslate.text('N10_mate', str(message.mate))
         self.score = text
         if message.mode == Mode.KIBITZ and not self._inside_menu():
-            DispatchDgt.show(self._combine_depth_and_score())
+            DispatchDgt.fire(self._combine_depth_and_score())
 
     def _process_new_pv(self, message):
         self.hint_move = message.pv[0]
@@ -533,7 +533,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             side = self._get_clock_side(self.hint_turn)
             disp = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=True, maxtime=0,
                                     beep=self.dgttranslate.bl(BeepLevel.NO), devs={'ser', 'i2c', 'web'})
-            DispatchDgt.show(disp)
+            DispatchDgt.fire(disp)
 
     def _process_startup_info(self, message):
         self.dgtmenu.set_mode(message.info['interaction_mode'])
@@ -574,7 +574,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             if time_right < 0:
                 time_right = 0
         side = self._get_clock_side(message.turn)
-        DispatchDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side, wait=False,
+        DispatchDgt.fire(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side, wait=False,
                                          devs=message.devs))
 
     def _process_dgt_serial_nr(self):
@@ -590,7 +590,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
             else:
                 text = self._combine_depth_and_score()
             text.wait = True
-            DispatchDgt.show(text)
+            DispatchDgt.fire(text)
             self.show_move_or_value = (self.show_move_or_value + 1) % (self.dgtmenu.get_ponderinterval() * 2)
 
     def _drawresign(self):
@@ -604,7 +604,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                                     beep=self.dgttranslate.bl(BeepLevel.BUTTON), devs={'ser', 'i2c', 'web'})
         else:
             text = Dgt.DISPLAY_TIME(force=force, wait=True, devs={'ser', 'i2c', 'web'})
-        DispatchDgt.show(text)
+        DispatchDgt.fire(text)
 
     def _process_message(self, message):
         for case in switch(message):
@@ -615,7 +615,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self._process_engine_startup(message)
                 break
             if case(MessageApi.ENGINE_FAIL):
-                DispatchDgt.show(self.dgttranslate.text('Y00_erroreng'))
+                DispatchDgt.fire(self.dgttranslate.text('Y00_erroreng'))
                 break
             if case(MessageApi.COMPUTER_MOVE):
                 self._process_computer_move(message)
@@ -634,13 +634,13 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 break
             if case(MessageApi.ALTERNATIVE_MOVE):
                 if self.leds_are_on:
-                    DispatchDgt.show(Dgt.LIGHT_CLEAR())
+                    DispatchDgt.fire(Dgt.LIGHT_CLEAR())
                     self.leds_are_on = False
-                DispatchDgt.show(self.dgttranslate.text('B05_altmove'))
+                DispatchDgt.fire(self.dgttranslate.text('B05_altmove'))
                 break
             if case(MessageApi.LEVEL):
                 if not self.dgtmenu.get_engine_restart():
-                    DispatchDgt.show(message.level_text)
+                    DispatchDgt.fire(message.level_text)
                     self._exit_display(force=True)
                 break
             if case(MessageApi.TIME_CONTROL):
@@ -648,40 +648,40 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 break
             if case(MessageApi.OPENING_BOOK):
                 if not self.dgtmenu.get_confirm() or not message.show_ok:
-                    DispatchDgt.show(message.book_text)
+                    DispatchDgt.fire(message.book_text)
                 self._exit_display(force=True)
                 break
             if case(MessageApi.TAKE_BACK):
                 if self.leds_are_on:
-                    DispatchDgt.show(Dgt.LIGHT_CLEAR())
+                    DispatchDgt.fire(Dgt.LIGHT_CLEAR())
                     self.leds_are_on = False
                 self._reset_moves_and_score()
                 self.engine_finished = False
-                DispatchDgt.show(self.dgttranslate.text('C00_takeback'))
+                DispatchDgt.fire(self.dgttranslate.text('C00_takeback'))
                 break
             if case(MessageApi.GAME_ENDS):
                 if not self.dgtmenu.get_engine_restart():  # filter out the shutdown/reboot process
                     text = self.dgttranslate.text(message.result.value)
                     text.beep = self.dgttranslate.bl(BeepLevel.CONFIG)
                     text.maxtime = 0.5
-                    DispatchDgt.show(text)
+                    DispatchDgt.fire(text)
                 break
             if case(MessageApi.INTERACTION_MODE):
                 # self.dgtmenu.set_mode(message.mode)
                 self.engine_finished = False
                 if not self.dgtmenu.get_confirm() or not message.show_ok:
-                    DispatchDgt.show(message.mode_text)
+                    DispatchDgt.fire(message.mode_text)
                 self._exit_display(force=True)
                 break
             if case(MessageApi.PLAY_MODE):
-                DispatchDgt.show(message.play_mode_text)
+                DispatchDgt.fire(message.play_mode_text)
                 break
             if case(MessageApi.NEW_SCORE):
                 self._process_new_score(message)
                 break
             if case(MessageApi.BOOK_MOVE):
                 self.score = self.dgttranslate.text('N10_score', None)
-                DispatchDgt.show(self.dgttranslate.text('N10_bookmove'))
+                DispatchDgt.fire(self.dgttranslate.text('N10_bookmove'))
                 break
             if case(MessageApi.NEW_PV):
                 self._process_new_pv(message)
@@ -705,7 +705,7 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 self._process_clock_start(message)
                 break
             if case(MessageApi.CLOCK_STOP):
-                DispatchDgt.show(Dgt.CLOCK_STOP(devs=message.devs))
+                DispatchDgt.fire(Dgt.CLOCK_STOP(devs=message.devs))
                 break
             if case(MessageApi.DGT_BUTTON):
                 self._process_button(message)
@@ -715,28 +715,28 @@ class DgtDisplay(Observable, DisplayMsg, threading.Thread):
                 break
             if case(MessageApi.DGT_CLOCK_VERSION):
                 if message.dev == 'ser':  # send the "board connected message" to serial clock
-                    DispatchDgt.show(message.text)
+                    DispatchDgt.fire(message.text)
                 time_left, time_right = self.time_control.current_clock_time(flip_board=self.dgtmenu.get_flip_board())
-                DispatchDgt.show(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE,
+                DispatchDgt.fire(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE,
                                                  wait=True, devs={message.dev}))
-                DispatchDgt.show(Dgt.CLOCK_VERSION(main=message.main, sub=message.sub, dev=message.dev))
+                DispatchDgt.fire(Dgt.CLOCK_VERSION(main=message.main, sub=message.sub, dev=message.dev))
                 break
             if case(MessageApi.DGT_CLOCK_TIME):
-                DispatchDgt.show(Dgt.CLOCK_TIME(time_left=message.time_left, time_right=message.time_right,
+                DispatchDgt.fire(Dgt.CLOCK_TIME(time_left=message.time_left, time_right=message.time_right,
                                                 dev=message.dev))
                 break
             if case(MessageApi.DGT_SERIAL_NR):
                 self._process_dgt_serial_nr()
                 break
             if case(MessageApi.DGT_JACK_CONNECTED_ERROR):  # this will only work in case of 2 clocks connected!
-                DispatchDgt.show(self.dgttranslate.text('Y00_errorjack'))
+                DispatchDgt.fire(self.dgttranslate.text('Y00_errorjack'))
                 break
             if case(MessageApi.DGT_EBOARD_VERSION):
-                DispatchDgt.show(message.text)
-                DispatchDgt.show(Dgt.DISPLAY_TIME(force=True, wait=True, devs={'i2c'}))
+                DispatchDgt.fire(message.text)
+                DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs={'i2c'}))
                 break
             if case(MessageApi.DGT_NO_EBOARD_ERROR):
-                DispatchDgt.show(message.text)
+                DispatchDgt.fire(message.text)
                 break
             if case(MessageApi.DGT_NO_CLOCK_ERROR):
                 break

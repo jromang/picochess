@@ -106,7 +106,7 @@ class EventHandler(WebSocketHandler):
 
     def real_ip(self):
         x_real_ip = self.request.headers.get('X-Real-IP')
-        real_ip = self.request.remote_ip if not x_real_ip else x_real_ip
+        real_ip = x_real_ip if x_real_ip else self.request.remote_ip
         return real_ip
 
     def open(self):
@@ -184,7 +184,10 @@ class WebVr(DgtIface):
         super(WebVr, self).__init__(dgttranslate, dgtboard)
         self.virtual_timer = None
         self.time_side = ClockSide.NONE
-        # self.enable_dgt_pi = dgtboard.is_pi
+        self.enable_dgt_pi = dgtboard.is_pi
+        # main = 2 if dgtboard.is_pi else 0
+        # DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=main, sub=0, dev='web', text=None))
+        self.enable_dgt_3000 = True  # @todo as long the above isnt send
         self.clock_show_time = True
 
     def _runclock(self):
@@ -213,22 +216,35 @@ class WebVr(DgtIface):
 
     def display_move_on_clock(self, message):
         """display a move on the web clock."""
+        if self.enable_dgt_3000 or self.enable_dgt_pi:
+            bit_board, text = self.get_san(message, not self.enable_dgt_pi)
+            if self.enable_dgt_pi:
+                text = '{:3d}.{:s}'.format(bit_board.fullmove_number, text)
+            else:
+                text = '{:2d}.{:s}'.format(bit_board.fullmove_number % 100, text)
+        else:
+            text = str(message.move)
+            if message.side == ClockSide.RIGHT:
+                text = text.rjust(6)
         if 'web' not in message.devs:
-            logging.debug('ignored message cause of devs [displayMove]')
+            logging.debug('ignored message cause of devs [{}]'.format(text))
             return
         self.clock_show_time = False
-        bit_board = chess.Board(message.fen)
-        text = bit_board.san(message.move)
         result = {'event': 'Clock', 'text': text}
         EventHandler.write_to_clients(result)
 
     def display_text_on_clock(self, message):
         """display a text on the web clock."""
+        if self.enable_dgt_pi:
+            text = message.l
+        else:
+            text = message.m if self.enable_dgt_3000 else message.s
+        if text is None:
+            text = message.m
         if 'web' not in message.devs:
-            logging.debug('ignored message cause of devs [displayText]')
+            logging.debug('ignored message cause of devs [{}]'.format(text))
             return
         self.clock_show_time = False
-        text = str(message.l)
         result = {'event': 'Clock', 'text': text}
         EventHandler.write_to_clients(result)
 

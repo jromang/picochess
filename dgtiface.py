@@ -122,8 +122,8 @@ class DgtIface(DisplayDgt, Thread):
             if case(DgtApi.CLOCK_VERSION):
                 text = self.dgttranslate.text('Y20_picochess', devs={message.dev})
                 text.rd = ClockIcons.DOT
-                DispatchDgt.show(text)
-                DispatchDgt.show(Dgt.DISPLAY_TIME(force=True, wait=True, devs={message.dev}))
+                DispatchDgt.fire(text)
+                DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs={message.dev}))
                 if message.dev != 'i2c':
                     self.enable_ser_clock = True
                     if message.main == 2:
