@@ -139,20 +139,20 @@
 
             <div class="panel panel-primary">
                 <div class="panel-heading hidden-xs">
-                    <h3 class="panel-title">Data</h3>
+                    <h3 class="panel-title">Datatable Book-Test</h3>
                 </div>
 
                 <div class="panel-body">
                     <div id="test">
-                        <table id="example" style="font-size: 1vw;">
+                        <table id="example" class="table table-bordered table-hover" style="font-size: 1vw; width: 100%;">
                             <thead>
                             <tr>
-                                <th data-class-name="move">Move</th>
-                                <th data-class-name="freq">Games</th>
-                                <th data-class-name="pct">Winning %</th>
-                                <th data-class-name="wins">Wins</th>
-                                <th data-class-name="draws">Draws</th>
-                                <th data-class-name="losses">Losses</th>
+                                <th data-class-name="moveCls">Move</th>
+                                <th data-class-name="freqCls">Games</th>
+                                <th data-class-name="pctCls">Winning %</th>
+                                <th data-class-name="winsCls">Wins</th>
+                                <th data-class-name="drawsCls">Draws</th>
+                                <th data-class-name="lossesCls">Losses</th>
                             </tr>
                             </thead>
                         </table>
@@ -160,14 +160,17 @@
                 </div>
                 <script>
                     $(document).ready(function() {
-                        $("#example").DataTable( {
+                        var BookStatsTable = $("#example").DataTable( {
                             "processing": true,
                             "paging": false,
                             "info": false,
                             "searching": false,
-                            "serverSide": true,
+                            "order": [[1, "desc"]],
+                            "select": true,
+                            //"serverSide": true,
                             "ajax": {
-                                "url": "http://drshivaji.com:3334/query?callback=js_callback",
+                                //"url": "http://drshivaji.com:3334/query?callback=js_callback",
+                                "url": "http://drshivaji.com:3334/query",
                                 "dataSrc": "records",
                                 "data": function ( d ) {
                                     d.action = "get_book_moves";
@@ -176,13 +179,19 @@
                             },
                             "columns": [
                                 {data: "move"},
-                                {data: "freq"},
-                                {data: "pct"},
-                                {data: "wins"},
-                                {data: "draws"},
-                                {data: "losses"}
+                                {data: "freq", render: $.fn.dataTable.render.number( ',', '.' )},
+                                {data: "pct", render: $.fn.dataTable.render.number( ',', '.', 2, '', '%' )},
+                                {data: "draws", render: $.fn.dataTable.render.number( ',', '.' )},
+                                {data: "wins", render: $.fn.dataTable.render.number( ',', '.' )},
+                                {data: "losses", render: $.fn.dataTable.render.number( ',', '.' )}
                             ]
                         } );
+                        BookStatsTable.on('select', function( e, dt, type, indexes ) {
+                            if( type === 'row') {
+                                var data = BookStatsTable.rows( indexes ).data().pluck( 'move' );
+                                console.log(data);
+                            }
+                        })
                     } );
                 </script>
             </div>
