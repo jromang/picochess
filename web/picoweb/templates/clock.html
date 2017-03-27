@@ -16,9 +16,10 @@
     <link rel="stylesheet" href="/static/css/normalize-4.1.1.css"/>
     <link rel="stylesheet" href="/static/css/chessboard.css"/>
     <link rel="stylesheet" href="/static/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/static/css/datatables.min.css"/>
     <link rel="stylesheet" href="/static/css/custom.css"/>
 
-    <script src="/static/js/jquery-1.12.4.min.js"></script>
+    <script src="/static/js/jquery-2.2.4.min.js"></script>
     <script src="/static/js/bootstrap-3.3.7.min.js"></script>
     <script src="/static/js/material-design/ripples.min.js"></script>
     <script src="/static/js/material-design/material.min.js"></script>
@@ -26,6 +27,7 @@
     <script src="/static/js/spin.min.js"></script>
     <script src="/static/js/ladda.min.js"></script>
     <script src="/static/js/jquery.dynatable.js"></script>
+    <script src="/static/js/datatables.min.js"></script>
     <script src="/static/js/enginegame.js"></script>
     <script src="/static/js/chessboard.js"></script>
     <script src="/static/js/chess.js"></script>
@@ -133,6 +135,56 @@
                 <div class="panel-body">
                     <div id="pgn" style="max-height:37%; overflow-y:auto; overflow-x:hidden; min-height:40%; position:relative;"></div>
                 </div>
+            </div>
+
+            <div class="panel panel-primary">
+                <div class="panel-heading hidden-xs">
+                    <h3 class="panel-title">Data</h3>
+                </div>
+
+                <div class="panel-body">
+                    <div id="test">
+                        <table id="example" style="font-size: 1vw;">
+                            <thead>
+                            <tr>
+                                <th data-class-name="move">Move</th>
+                                <th data-class-name="freq">Games</th>
+                                <th data-class-name="pct">Winning %</th>
+                                <th data-class-name="wins">Wins</th>
+                                <th data-class-name="draws">Draws</th>
+                                <th data-class-name="losses">Losses</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+                <script>
+                    $(document).ready(function() {
+                        $("#example").DataTable( {
+                            "processing": true,
+                            "paging": false,
+                            "info": false,
+                            "searching": false,
+                            "serverSide": true,
+                            "ajax": {
+                                "url": "http://drshivaji.com:3334/query?callback=js_callback",
+                                "dataSrc": "records",
+                                "data": function ( d ) {
+                                    d.action = "get_book_moves";
+                                    d.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+                                }
+                            },
+                            "columns": [
+                                {data: "move"},
+                                {data: "freq"},
+                                {data: "pct"},
+                                {data: "wins"},
+                                {data: "draws"},
+                                {data: "losses"}
+                            ]
+                        } );
+                    } );
+                </script>
             </div>
 
             <div class="well">
