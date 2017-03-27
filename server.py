@@ -57,10 +57,12 @@ class ChannelHandler(ServerRequestHandler):
             # Here starts the simulation of a dgt-board!
             # Let the user send events like the board would do
             if cmd.startswith('fen:'):
-                fen = raw.split(':')[1]
-                # dgt board only sends the basic fen => be sure
-                # it's same no matter what fen the user entered
-                Observable.fire(Event.KEYBOARD_FEN(fen=fen.split(' ')[0]))
+                fen = raw.split(':')[1].strip()
+                # dgt board only sends the basic fen => be sure it's same no matter what fen the user entered
+                fen = fen.split(' ')[0]
+                bit_board = chess.Board()  # valid the fen
+                bit_board.set_board_fen(fen)
+                Observable.fire(Event.KEYBOARD_FEN(fen=fen))
             # end simulation code
             elif cmd.startswith('go'):
                 if 'last_dgt_move_msg' in self.shared:
@@ -79,7 +81,7 @@ class ChannelHandler(ServerRequestHandler):
         if action == 'broadcast':
             fen = self.get_argument('fen')
             pgn_str = self.get_argument('pgn')
-            result = {'event': 'broadcast', 'msg': 'Received position from Spectators!', 'pgn': pgn_str, 'fen': fen}
+            result = {'event': 'Broadcast', 'msg': 'Position from Spectators!', 'pgn': pgn_str, 'fen': fen}
             EventHandler.write_to_clients(result)
         elif action == 'move':
             uci_move = self.get_argument('source') + self.get_argument('target')
@@ -87,8 +89,7 @@ class ChannelHandler(ServerRequestHandler):
         elif action == 'clockbutton':
             Observable.fire(Event.KEYBOARD_BUTTON(button=self.get_argument('button'), dev='web'))
         elif action == 'command':
-            command = self.get_argument('command')
-            self.process_console_command(command)
+            self.process_console_command(self.get_argument('command'))
             pass
 
 
@@ -221,7 +222,7 @@ class WebVr(DgtIface):
             text = text_l + '&nbsp;&nbsp;' + text_r
             self._create_clock_text()
             self.shared['clock_text'] = text
-            result = {'event': 'Clock', 'text': text}
+            result = {'event': 'Clock', 'msg': text}
             EventHandler.write_to_clients(result)
 
     def display_move_on_clock(self, message):
@@ -242,7 +243,7 @@ class WebVr(DgtIface):
         self.clock_show_time = False
         self._create_clock_text()
         self.shared['clock_text'] = text
-        result = {'event': 'Clock', 'text': text}
+        result = {'event': 'Clock', 'msg': text}
         EventHandler.write_to_clients(result)
 
     def display_text_on_clock(self, message):
@@ -259,7 +260,7 @@ class WebVr(DgtIface):
         self.clock_show_time = False
         self._create_clock_text()
         self.shared['clock_text'] = text
-        result = {'event': 'Clock', 'text': text}
+        result = {'event': 'Clock', 'msg': text}
         EventHandler.write_to_clients(result)
 
     def display_time_on_clock(self, message):
@@ -378,10 +379,10 @@ class WebDisplay(DisplayMsg, threading.Thread):
             pgn_game = pgn.Game()
             _create_game_header(pgn_game)
             self.shared['headers'] = pgn_game.headers
-            EventHandler.write_to_clients({'event': 'header', 'headers': pgn_game.headers})
+            EventHandler.write_to_clients({'event': 'Header', 'headers': pgn_game.headers})
 
         def _update_title():
-            EventHandler.write_to_clients({'event': 'title', 'ip_info': self.shared['ip_info']})
+            EventHandler.write_to_clients({'event': 'Title', 'ip_info': self.shared['ip_info']})
 
         def _transfer(game: chess.Board):
             pgn_game = pgn.Game().from_board(game)
@@ -394,7 +395,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 fen = message.game.fen()
                 result = {'pgn': pgn_str, 'fen': fen}
                 self.shared['last_dgt_move_msg'] = result
-                EventHandler.write_to_clients({'event': 'NewGame', 'fen': fen})
+                EventHandler.write_to_clients({'event': 'Game', 'fen': fen})
                 _update_headers()
                 break
             if case(MessageApi.IP_INFO):
@@ -470,7 +471,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 pgn_str = _transfer(message.game)
                 fen = _oldstyle_fen(message.game)
                 mov = message.move.uci()
-                result = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'play': 'computer'}
+                result = {'pgn': pgn_str, 'fen': fen, 'event': 'Fen', 'move': mov, 'play': 'computer'}
                 self.shared['last_dgt_move_msg'] = result
                 EventHandler.write_to_clients(result)
                 break
@@ -480,7 +481,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 pgn_str = _transfer(message.game)
                 fen = _oldstyle_fen(message.game)
                 mov = message.move.uci()
-                result = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'play': 'user'}
+                result = {'pgn': pgn_str, 'fen': fen, 'event': 'Fen', 'move': mov, 'play': 'user'}
                 self.shared['last_dgt_move_msg'] = result
                 EventHandler.write_to_clients(result)
                 break
@@ -488,7 +489,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 pgn_str = _transfer(message.game)
                 fen = _oldstyle_fen(message.game)
                 mov = message.move.uci()
-                result = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'play': 'review'}
+                result = {'pgn': pgn_str, 'fen': fen, 'event': 'Fen', 'move': mov, 'play': 'review'}
                 self.shared['last_dgt_move_msg'] = result
                 EventHandler.write_to_clients(result)
                 break
@@ -496,7 +497,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 pgn_str = _transfer(message.game)
                 fen = _oldstyle_fen(message.game)
                 mov = message.game.peek().uci()
-                result = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'play': 'reload'}
+                result = {'pgn': pgn_str, 'fen': fen, 'event': 'Fen', 'move': mov, 'play': 'reload'}
                 self.shared['last_dgt_move_msg'] = result
                 EventHandler.write_to_clients(result)
                 break
@@ -504,7 +505,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 pgn_str = _transfer(message.game)
                 fen = _oldstyle_fen(message.game)
                 mov = message.move.uci()
-                result = {'pgn': pgn_str, 'fen': fen, 'event': 'newFEN', 'move': mov, 'play': 'reload'}
+                result = {'pgn': pgn_str, 'fen': fen, 'event': 'Fen', 'move': mov, 'play': 'reload'}
                 self.shared['last_dgt_move_msg'] = result
                 EventHandler.write_to_clients(result)
                 break

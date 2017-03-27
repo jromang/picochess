@@ -266,19 +266,19 @@ $(function() {
         ws.onmessage = function(e) {
             var data = JSON.parse(e.data);
             switch (data.event) {
-                case 'newFEN':
+                case 'Fen':
                     updateDGTPosition(data);
                     updateStatus();
                     highlightBoard(data.move, data.play);
                     break;
-                case 'NewGame':
+                case 'Game':
                     newBoard(data.fen);
                     break;
                 case 'Message':
                     boardStatusEl.html(data.msg);
                     break;
                 case 'Clock':
-                    dgtClockTextEl.html(data.text);
+                    dgtClockTextEl.html(data.msg);
                     break;
                 case 'Status':
                     dgtClockStatusEl.html(data.msg);
@@ -286,11 +286,14 @@ $(function() {
                 case 'Clear':
                     remove_highlights();
                     break;
-                case 'header':
+                case 'Header':
                     setHeaders(data['headers']);
                     break;
-                case 'title':
+                case 'Title':
                     setTitle(data['ip_info']);
+                    break;
+                case 'Broadcast':
+                    boardStatusEl.html(data.msg);
                     break;
                 default:
                     console.warn(data);
