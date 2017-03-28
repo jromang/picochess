@@ -146,7 +146,25 @@ var BookDataTable = $("#BookTable").DataTable( {
     "info": false,
     "searching": false,
     "order": [[1, "desc"]],
-    "select": true,
+    "select": {
+        "style": "os",
+        "selector": "td:not(.control)"
+    },
+    "responsive": {
+        "details": {
+           "type": "column",
+           "target": 0
+        }
+      },
+      "columnDefs": [
+         {
+           "data": null,
+           "defaultContent": "",
+           "className": "control",
+           "orderable": false,
+           "targets": 0
+         }
+      ],
     "ajax": {
         "url": "http://drshivaji.com:3334/query",
         "dataSrc": "records",
@@ -156,20 +174,21 @@ var BookDataTable = $("#BookTable").DataTable( {
         }
     },
     "columns": [
+        {data: null},
         {data: "move", render: function ( data, type, row ) { return figurinize_move(data) } },
-        {data: "freq", render: $.fn.dataTable.render.number( ',', '.' )},
-        {data: "pct", render: $.fn.dataTable.render.number( ',', '.', 2, '', '%' )},
-        {data: "draws", render: $.fn.dataTable.render.number( ',', '.' )},
-        {data: "wins", render: $.fn.dataTable.render.number( ',', '.' )},
-        {data: "losses", render: $.fn.dataTable.render.number( ',', '.' )}
+        {data: "freq", render: $.fn.dataTable.render.number( ",", "." )},
+        {data: "pct", render: $.fn.dataTable.render.number( ",", ".", 2, "", "%" )},
+        {data: "draws", render: $.fn.dataTable.render.number( ",", "." )},
+        {data: "wins", render: $.fn.dataTable.render.number( ",", "." )},
+        {data: "losses", render: $.fn.dataTable.render.number( ",", "." )}
     ]
-} );
+});
 BookDataTable.on('select', function( e, dt, type, indexes ) {
     if( type === 'row') {
-        var move = BookDataTable.rows(indexes).data().pluck('move')[0];
+        var data = BookDataTable.rows(indexes).data().pluck('move')[0];
         stop_analysis();
         var tmp_game = create_game_pointer();
-        //var move = tmp_game.move($(this).attr('data-move'));
+        var move = tmp_game.move(data);
         updateCurrentPosition(move, tmp_game);
         board.position(currentPosition.fen);
         updateStatus();
@@ -186,33 +205,6 @@ $(function() {
     window.engine_lines = {};
     window.activedb = "#ref";
     window.multipv = 1;
-    window.BookStatsTable = $('#BookStatsTable').dynatable({
-        dataset: {
-            ajax: true,
-            ajaxDataType: 'jsonp',
-            ajaxUrl: backend_server_prefix + '/query?callback=js_callback',
-            ajaxOnLoad: true,
-            ajaxData: {
-                action: 'get_book_moves',
-                fen: START_FEN
-            },
-            records: []
-        },
-        inputs: {
-            processingText: '<img width="col-xs-3" src="/static/img/ajax-loader.gif" />'
-        },
-        features: {
-            paginate: false,
-            search: false,
-            recordCount: false
-        },
-        writers: {
-            _rowWriter: clickRowBookWriter
-        },
-        readers: {
-            _rowReader: clickRowBookReader
-        }
-    }).data('dynatable');
 
     $("#GameStatsTable").delegate('tr', 'click', function() {
         $.ajax({
@@ -227,15 +219,6 @@ $(function() {
             loadGame(data['pgn']);
             updateStatus();
         });
-    });
-
-    $("#BookStatsTable").delegate('tr', 'click', function() {
-        stop_analysis();
-        var tmp_game = create_game_pointer();
-        var move = tmp_game.move($(this).attr('data-move'));
-        updateCurrentPosition(move, tmp_game);
-        board.position(currentPosition.fen);
-        updateStatus();
     });
 
     window.GameStatsTable = $('#GameStatsTable').dynatable({
@@ -792,14 +775,7 @@ var updateStatus = function() {
     if (window.analysis) {
         analyze(true);
     }
-//    window.BookStatsTable.processingIndicator.show();
-    window.BookStatsTable.settings.dataset.ajaxData = {
-        action: 'get_book_moves',
-        fen: fen,
-        db: window.activedb
-    };
-    window.BookStatsTable.process();
-    // New with DataTables
+
     BookFen = fen;
     BookDataTable.ajax.reload();
 

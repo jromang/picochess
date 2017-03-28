@@ -137,29 +137,6 @@
                 </div>
             </div>
 
-            <div class="panel panel-primary">
-                <div class="panel-heading hidden-xs">
-                    <h3 class="panel-title">Datatable Book-Test</h3>
-                </div>
-
-                <div class="panel-body">
-                    <div id="test">
-                        <table id="BookTable" class="table table-bordered table-hover" style="font-size: 1vw; width: 100%;">
-                            <thead>
-                            <tr>
-                                <th data-class-name="moveCls">Move</th>
-                                <th data-class-name="freqCls">Games</th>
-                                <th data-class-name="pctCls">Winning %</th>
-                                <th data-class-name="winsCls">Wins</th>
-                                <th data-class-name="drawsCls">Draws</th>
-                                <th data-class-name="lossesCls">Losses</th>
-                            </tr>
-                            </thead>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
             <div class="well">
                 <ul class="nav nav-pills">
                     <li class="active">
@@ -172,15 +149,16 @@
 
                 <div class="tab-content">
                     <div class="tab-pane fade active in" id="book">
-                        <table id="BookStatsTable" cellpadding="0" cellspacing="0" style="width:100%; align: center; overflow: auto" class="table-responsive table-condensed table-bordered flat-table flat-table-1">
+                        <table id="BookTable" class="table table-bordered table-hover" style="font-size: 1vw; width: 100%;">
                             <thead>
                             <tr>
-                                <th data-dynatable-column="move">Move</th>
-                                <th data-dynatable-column="freq">Games</th>
-                                <th data-dynatable-column="pct">Winning %</th>
-                                <th data-dynatable-column="wins">Wins</th>
-                                <th data-dynatable-column="draws">Draws</th>
-                                <th data-dynatable-column="losses">Losses</th>
+                                <th></th>
+                                <th data-priority="1">Move</th>
+                                <th data-priority="2">Games</th>
+                                <th data-priority="3">Winning</th>
+                                <th>Wins</th>
+                                <th>Draws</th>
+                                <th>Losses</th>
                             </tr>
                             </thead>
                         </table>
