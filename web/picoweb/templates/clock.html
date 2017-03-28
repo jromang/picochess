@@ -144,7 +144,7 @@
 
                 <div class="panel-body">
                     <div id="test">
-                        <table id="example" class="table table-bordered table-hover" style="font-size: 1vw; width: 100%;">
+                        <table id="BookTable" class="table table-bordered table-hover" style="font-size: 1vw; width: 100%;">
                             <thead>
                             <tr>
                                 <th data-class-name="moveCls">Move</th>
@@ -158,42 +158,6 @@
                         </table>
                     </div>
                 </div>
-                <script>
-                    $(document).ready(function() {
-                        var BookStatsTable = $("#example").DataTable( {
-                            "processing": true,
-                            "paging": false,
-                            "info": false,
-                            "searching": false,
-                            "order": [[1, "desc"]],
-                            "select": true,
-                            //"serverSide": true,
-                            "ajax": {
-                                //"url": "http://drshivaji.com:3334/query?callback=js_callback",
-                                "url": "http://drshivaji.com:3334/query",
-                                "dataSrc": "records",
-                                "data": function ( d ) {
-                                    d.action = "get_book_moves";
-                                    d.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-                                }
-                            },
-                            "columns": [
-                                {data: "move"},
-                                {data: "freq", render: $.fn.dataTable.render.number( ',', '.' )},
-                                {data: "pct", render: $.fn.dataTable.render.number( ',', '.', 2, '', '%' )},
-                                {data: "draws", render: $.fn.dataTable.render.number( ',', '.' )},
-                                {data: "wins", render: $.fn.dataTable.render.number( ',', '.' )},
-                                {data: "losses", render: $.fn.dataTable.render.number( ',', '.' )}
-                            ]
-                        } );
-                        BookStatsTable.on('select', function( e, dt, type, indexes ) {
-                            if( type === 'row') {
-                                var data = BookStatsTable.rows( indexes ).data().pluck( 'move' );
-                                console.log(data);
-                            }
-                        })
-                    } );
-                </script>
             </div>
 
             <div class="well">

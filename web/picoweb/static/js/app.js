@@ -59,6 +59,7 @@ gameHistory.result = '';
 gameHistory.variations = [];
 
 var setupBoardFen = START_FEN;
+var BookFen = START_FEN;
 
 function updateDGTPosition(data) {
     if (!goToPosition(data.fen) || data.play == 'reload') {
@@ -138,6 +139,42 @@ function goToDGTFen() {
         dgtClockStatusEl.html(textStatus);
     });
 }
+
+var BookDataTable = $("#BookTable").DataTable( {
+    "processing": true,
+    "paging": false,
+    "info": false,
+    "searching": false,
+    "order": [[1, "desc"]],
+    "select": true,
+    "ajax": {
+        "url": "http://drshivaji.com:3334/query",
+        "dataSrc": "records",
+        "data": function ( d ) {
+            d.action = "get_book_moves";
+            d.fen = BookFen;
+        }
+    },
+    "columns": [
+        {data: "move", render: function ( data, type, row ) { return figurinize_move(data) } },
+        {data: "freq", render: $.fn.dataTable.render.number( ',', '.' )},
+        {data: "pct", render: $.fn.dataTable.render.number( ',', '.', 2, '', '%' )},
+        {data: "draws", render: $.fn.dataTable.render.number( ',', '.' )},
+        {data: "wins", render: $.fn.dataTable.render.number( ',', '.' )},
+        {data: "losses", render: $.fn.dataTable.render.number( ',', '.' )}
+    ]
+} );
+BookDataTable.on('select', function( e, dt, type, indexes ) {
+    if( type === 'row') {
+        var move = BookDataTable.rows(indexes).data().pluck('move')[0];
+        stop_analysis();
+        var tmp_game = create_game_pointer();
+        //var move = tmp_game.move($(this).attr('data-move'));
+        updateCurrentPosition(move, tmp_game);
+        board.position(currentPosition.fen);
+        updateStatus();
+    }
+});
 
 $(function() {
     getAllInfo();
@@ -762,6 +799,9 @@ var updateStatus = function() {
         db: window.activedb
     };
     window.BookStatsTable.process();
+    // New with DataTables
+    BookFen = fen;
+    BookDataTable.ajax.reload();
 
     window.GameStatsTable.settings.dataset.ajaxData = {
         action: 'get_games',
