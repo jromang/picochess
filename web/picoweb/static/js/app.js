@@ -194,7 +194,57 @@ BookDataTable.on('select', function( e, dt, type, indexes ) {
         updateStatus();
     }
 });
-
+/*
+var GameDataTable = $("#GameTable").DataTable( {
+    "processing": true,
+    "serverSide": true,
+    "paging": true,
+    "info": true,
+    "searching": true,
+    "order": [[1, "desc"]],
+    "select": {
+        "style": "os",
+        "selector": "td:not(.control)"
+    },
+    "responsive": {
+        "details": {
+           "type": "column",
+           "target": 0
+        }
+      },
+      "columnDefs": [
+         {
+           "data": null,
+           "defaultContent": "",
+           "className": "control",
+           "orderable": false,
+           "targets": 0
+         }
+      ],
+    "ajax": {
+        "url": "http://drshivaji.com:3334/query",
+        "dataType": "jsonp",
+        "dataSrc": "records",
+        "data": function ( d ) {
+            d.action = "get_games";
+            d.fen = BookFen;
+        }
+    },
+    "columns": [
+        {data: null},
+        {data: 'id'},
+        {data: "white"},
+        {data: "white_elo"},
+        {data: "black"},
+        {data: "black_elo"},
+        {data: "result"},
+        {data: "date"},
+        {data: "event"},
+        {data: "site"},
+        {data: "eco"}
+    ]
+});
+*/
 $(function() {
     getAllInfo();
     // JP! is this really needed?!?

@@ -149,7 +149,7 @@
 
                 <div class="tab-content">
                     <div class="tab-pane fade active in" id="book">
-                        <table id="BookTable" class="table table-bordered table-hover" style="font-size: 1vw; width: 100%;">
+                        <table id="BookTable" class="table table-bordered table-hover" style="font-size: 1vw; text-align: center; width: 100%;">
                             <thead>
                             <tr>
                                 <th></th>
@@ -224,8 +224,18 @@
 
         <div id="Database" class="col-xs-12 flip-scroll">
             <div class="well">
-                <div class="tab-content clearfix">
-                    <div class="tab-pane active" id="reference">
+                <!--
+                <ul class="nav nav-pills">
+                    <li class="active">
+                        <a href="#olddb" data-toggle="tab">OLD</a>
+                    </li>
+                    <li class="">
+                        <a href="#newdb" data-toggle="tab">NEW</a>
+                    </li>
+                </ul>
+                -->
+                <div class="tab-content">
+                    <div class="tab-pane fade active in" id="olddb">
                         <table id="GameStatsTable" cellpadding="0" cellspacing="0" style="width: 100%; align: center; overflow: auto" class="table-condensed table-bordered table-responsive flat-table flat-table-1">
                             <thead>
                                 <tr>
@@ -242,6 +252,27 @@
                             </thead>
                         </table>
                     </div>
+                    <!--
+                    <div class="tab-pane fade" id="newdb">
+                        <table id="GameTable" class="table table-bordered table-hover" style="font-size: 1vw; text-align: center; width: 100%;">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>ID</th>
+                                <th data-priority="1">White</th>
+                                <th data-priority="5">White Elo</th>
+                                <th data-priority="1">Black</th>
+                                <th data-priority="5">Black Elo</th>
+                                <th data-priority="2">Result</th>
+                                <th data-priority="3">Date</th>
+                                <th data-priority="4">Event</th>
+                                <th data-priority="4">Site</th>
+                                <th data-priority="3">ECO</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    -->
                 </div>
             </div>
         </div>
