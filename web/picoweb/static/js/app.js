@@ -168,6 +168,8 @@ var BookDataTable = $("#BookTable").DataTable( {
     "ajax": {
         "url": "http://drshivaji.com:3334/query",
         "dataSrc": "records",
+        "dataType": "jsonp",
+        "jsonp": "js_callback",
         "data": function ( d ) {
             d.action = "get_book_moves";
             d.fen = BookFen;
@@ -176,11 +178,11 @@ var BookDataTable = $("#BookTable").DataTable( {
     "columns": [
         {data: null},
         {data: "move", render: function ( data, type, row ) { return figurinize_move(data) } },
-        {data: "freq", render: $.fn.dataTable.render.number( ",", "." )},
+        {data: "freq", render: $.fn.dataTable.render.intlNumber()},
         {data: "pct", render: $.fn.dataTable.render.number( ",", ".", 2, "", "%" )},
-        {data: "draws", render: $.fn.dataTable.render.number( ",", "." )},
-        {data: "wins", render: $.fn.dataTable.render.number( ",", "." )},
-        {data: "losses", render: $.fn.dataTable.render.number( ",", "." )}
+        {data: "draws", render: $.fn.dataTable.render.intlNumber()},
+        {data: "wins", render: $.fn.dataTable.render.intlNumber()},
+        {data: "losses", render: $.fn.dataTable.render.intlNumber()}
     ]
 });
 BookDataTable.on('select', function( e, dt, type, indexes ) {
