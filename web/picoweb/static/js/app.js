@@ -195,7 +195,18 @@ BookDataTable.on('select', function( e, dt, type, indexes ) {
         updateStatus();
     }
 });
-/*
+
+function game_callback(json) {
+    console.log(json);
+    var newData = {'records': json['records']};
+    newData['recordsTotal'] = json['totalRecordCount'];
+    newData['recordsFiltered'] = json['queryRecordCount'];
+    newData['draw'] = 1;
+    console.log(newData);
+    //return newData;
+    return json;
+}
+
 var GameDataTable = $("#GameTable").DataTable( {
     "processing": true,
     "serverSide": true,
@@ -226,10 +237,15 @@ var GameDataTable = $("#GameTable").DataTable( {
         "url": "http://drshivaji.com:3334/query",
         "dataSrc": "records",
         "dataType": "jsonp",
+        //"jsonpCallback": "game_callback",
         "data": function ( d ) {
             d.action = "get_games";
             d.fen = BookFen;
         }
+        // "success": function(data, status, jqXHR) {
+        //     console.log('SUCCESS');
+        //     return game_callback(data);
+        // }
     },
     "columns": [
         {data: null},
@@ -245,7 +261,13 @@ var GameDataTable = $("#GameTable").DataTable( {
         {data: "eco"}
     ]
 });
-*/
+GameDataTable.on('xhr.dt', function( e, settings, json, xhr) {
+    console.log('xhr');
+    json['recordsTotal'] = json['totalRecordCount'];
+    json['recordsFiltered'] = json['queryRecordCount'];
+    console.log(json);
+});
+
 $(function() {
     getAllInfo();
     // JP! is this really needed?!?

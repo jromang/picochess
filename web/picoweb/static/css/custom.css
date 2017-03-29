@@ -337,3 +337,7 @@ body {
 #engineMultiPVStatus {
     font-size: 1.5vw;
 }
+
+div.dataTables_info {
+    font-size: 1vw;
+}
