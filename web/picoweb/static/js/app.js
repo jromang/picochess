@@ -169,7 +169,6 @@ var BookDataTable = $("#BookTable").DataTable( {
         "url": "http://drshivaji.com:3334/query",
         "dataSrc": "records",
         "dataType": "jsonp",
-        "jsonp": "js_callback",
         "data": function ( d ) {
             d.action = "get_book_moves";
             d.fen = BookFen;
@@ -196,7 +195,7 @@ BookDataTable.on('select', function( e, dt, type, indexes ) {
         updateStatus();
     }
 });
-/*
+
 var GameDataTable = $("#GameTable").DataTable( {
     "processing": true,
     "serverSide": true,
@@ -225,8 +224,8 @@ var GameDataTable = $("#GameTable").DataTable( {
       ],
     "ajax": {
         "url": "http://drshivaji.com:3334/query",
-        "dataType": "jsonp",
         "dataSrc": "records",
+        "dataType": "jsonp",
         "data": function ( d ) {
             d.action = "get_games";
             d.fen = BookFen;
@@ -246,7 +245,7 @@ var GameDataTable = $("#GameTable").DataTable( {
         {data: "eco"}
     ]
 });
-*/
+
 $(function() {
     getAllInfo();
     // JP! is this really needed?!?
