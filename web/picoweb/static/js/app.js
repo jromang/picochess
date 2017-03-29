@@ -195,7 +195,7 @@ BookDataTable.on('select', function( e, dt, type, indexes ) {
         updateStatus();
     }
 });
-
+/*
 var GameDataTable = $("#GameTable").DataTable( {
     "processing": true,
     "serverSide": true,
@@ -245,7 +245,7 @@ var GameDataTable = $("#GameTable").DataTable( {
         {data: "eco"}
     ]
 });
-
+*/
 $(function() {
     getAllInfo();
     // JP! is this really needed?!?
@@ -1372,14 +1372,15 @@ function formatEngineOutput(line) {
             turn_sep = '..';
         }
 
-        output = '<div class="list-group-item"><div class="row-picture"><i class="fa fa-paste"></i></div><div class="row-content">';
+        output = '<div class="list-group-item"><div class="row-picture" style="padding-right: 0.2vw;">' +
+            '<button id="import_pv_' + multipv + '" class="importPVBtn btn btn-default btn-xs"><i class="fa fa-paste"></i></button>' +
+            '</div><div class="row-content">';
 
         if (score !== null) {
             output += '<div class="least-content">' +
-                '<button id="import_pv_' + multipv + '" class="importPVBtn btn btn-xs btn-default">' +
-                '<i class="fa fa-paste"></i></button></div>';
+                '<i class="fa fa-paste"></i></div>';
             output += '<h4 class="list-group-item-heading" id="pv_' + multipv + '_score">' +
-                '<span style="color:blue">' + score + '/' + depth + ' ' + '</span></h4>';
+                '<span style="color:blue">' + score + '/' + depth + '</span></h4>';
         }
         output += '<p class="list-group-item-text">' + turn_sep;
         for (i = 0; i < history.length; ++i) {
