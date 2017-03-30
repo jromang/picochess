@@ -59,7 +59,7 @@ gameHistory.result = '';
 gameHistory.variations = [];
 
 var setupBoardFen = START_FEN;
-var BookFen = START_FEN;
+var DataTableFen = START_FEN;
 
 function updateDGTPosition(data) {
     if (!goToPosition(data.fen) || data.play == 'reload') {
@@ -171,7 +171,7 @@ var BookDataTable = $("#BookTable").DataTable( {
         "dataType": "jsonp",
         "data": function ( d ) {
             d.action = "get_book_moves";
-            d.fen = BookFen;
+            d.fen = DataTableFen;
         }
     },
     "columns": [
@@ -195,18 +195,6 @@ BookDataTable.on('select', function( e, dt, type, indexes ) {
         updateStatus();
     }
 });
-
-function game_callback(json) {
-    console.log('game_callback');
-    console.log(json);
-    var newData = {'records': json['records']};
-    newData['recordsTotal'] = json['totalRecordCount'];
-    newData['recordsFiltered'] = json['queryRecordCount'];
-    newData['draw'] = Math.floor(Math.random() * 900) + 100;
-    console.log(newData);
-    //return newData;
-    return json;
-}
 
 var GameDataTable = $("#GameTable").DataTable( {
     "processing": true,
@@ -240,7 +228,7 @@ var GameDataTable = $("#GameTable").DataTable( {
         "dataType": "jsonp",
         "data": function ( d ) {
             d.action = "get_games";
-            d.fen = BookFen;
+            d.fen = DataTableFen;
         }
     },
     "columns": [
@@ -258,9 +246,11 @@ var GameDataTable = $("#GameTable").DataTable( {
     ]
 });
 GameDataTable.on('xhr.dt', function( e, settings, json, xhr) {
-    console.log('xhr');
+    console.log('xhr.dt');
     json['recordsTotal'] = json['totalRecordCount'];
     json['recordsFiltered'] = json['queryRecordCount'];
+    delete json['totalRecordCount'];
+    delete json['queryRecordCount'];
     console.log(json);
 });
 
@@ -845,8 +835,9 @@ var updateStatus = function() {
         analyze(true);
     }
 
-    BookFen = fen;
+    DataTableFen = fen;
     BookDataTable.ajax.reload();
+    GameDataTable.ajax.reload();
 
     window.GameStatsTable.settings.dataset.ajaxData = {
         action: 'get_games',
