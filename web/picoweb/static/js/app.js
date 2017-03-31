@@ -46,6 +46,7 @@ var board,
     pgnEl = $('#pgn');
 var gameHistory, fenHash, currentPosition;
 var backend_server_prefix = 'http://drshivaji.com:3334';
+//var backend_server_prefix = "http://localhost:7777";
 
 fenHash = {};
 
@@ -172,6 +173,7 @@ var BookDataTable = $("#BookTable").DataTable( {
         "data": function ( d ) {
             d.action = "get_book_moves";
             d.fen = DataTableFen;
+            //d.db = "#user";
         }
     },
     "columns": [
@@ -233,6 +235,7 @@ var GameDataTable = $("#GameTable").DataTable( {
         "data": function ( d ) {
             d.action = "get_games";
             d.fen = DataTableFen;
+            //d.db = "#user";
         },
         "error": function (xhr, error, thrown) {
             console.warn(xhr);
@@ -270,8 +273,8 @@ GameDataTable.on('select', function( e, dt, type, indexes ) {
             url: backend_server_prefix + '/query?callback=game_callback',
             data: {
                 action: 'get_game_content',
-                game_num: data,
-                db: window.activedb
+                game_num: data
+                //db: '#user'//window.activedb
             }
         }).done(function(data) {
             loadGame(data['pgn']);
@@ -284,7 +287,7 @@ $(function() {
     getAllInfo();
     // JP! is this really needed?!?
     $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
-        window.activedb = e.target.hash;
+        //window.activedb = e.target.hash;
         updateStatus();
     });
     window.engine_lines = {};
@@ -309,7 +312,8 @@ $(function() {
     window.GameStatsTable = $('#GameStatsTable').dynatable({
         dataset: {
             ajax: true,
-            ajaxUrl: backend_server_prefix + '/query?callback=game_callback',
+            //ajaxUrl: backend_server_prefix + '/query?callback=game_callback',
+            ajaxUrl: backend_server_prefix + '/query',
             ajaxDataType: 'jsonp',
             ajaxOnLoad: true,
             ajaxData: {
