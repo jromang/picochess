@@ -51,7 +51,6 @@ var backend_server_prefix = 'http://drshivaji.com:3334';
 fenHash = {};
 
 currentPosition = {};
-// JP!
 currentPosition.fen = START_FEN;
 
 gameHistory = currentPosition;
@@ -285,7 +284,7 @@ GameDataTable.on('select', function( e, dt, type, indexes ) {
 
 $(function() {
     getAllInfo();
-    // JP! is this really needed?!?
+
     $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
         //window.activedb = e.target.hash;
         updateStatus();
@@ -293,54 +292,6 @@ $(function() {
     window.engine_lines = {};
     window.activedb = "#ref";
     window.multipv = 1;
-
-    $("#GameStatsTable").delegate('tr', 'click', function() {
-        $.ajax({
-            dataType: 'jsonp',
-            url: backend_server_prefix + '/query?callback=game_callback',
-            data: {
-                action: 'get_game_content',
-                game_num: $(this).attr('data-game-id'),
-                db: window.activedb
-            }
-        }).done(function(data) {
-            loadGame(data['pgn']);
-            updateStatus();
-        });
-    });
-
-    window.GameStatsTable = $('#GameStatsTable').dynatable({
-        dataset: {
-            ajax: true,
-            //ajaxUrl: backend_server_prefix + '/query?callback=game_callback',
-            ajaxUrl: backend_server_prefix + '/query',
-            ajaxDataType: 'jsonp',
-            ajaxOnLoad: true,
-            ajaxData: {
-                action: 'get_games',
-                fen: START_FEN
-            },
-            records: []
-        },
-        inputs: {
-            processingText: '<img width="col-xs-3" src="/static/img/ajax-loader.gif" />',
-            paginationClass: 'pagination',
-            paginationActiveClass: 'active',
-            paginationDisabledClass: 'disabled'
-        },
-        features: {
-            paginate: true,
-            search: true,
-            recordCount: true,
-            perPageSelect: true
-        },
-        writers: {
-            _rowWriter: clickRowGameWriter
-        },
-        readers: {
-            _rowReader: clickRowGameReader
-        }
-    }).data('dynatable');
 
     $(document).keydown(function(e) {
         if (e.keyCode == 39) { //right arrow
@@ -870,13 +821,6 @@ var updateStatus = function() {
     DataTableFen = fen;
     BookDataTable.ajax.reload();
     GameDataTable.ajax.reload();
-
-    window.GameStatsTable.settings.dataset.ajaxData = {
-        action: 'get_games',
-        fen: fen,
-        db: window.activedb
-    };
-    window.GameStatsTable.process();
 
     $(".highlight").removeClass('highlight');
 

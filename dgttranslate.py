@@ -145,7 +145,7 @@ class DgtTranslate(object):
             ittxt = Dgt.DISPLAY_TEXT(l='uci960 si  ', m='960 si  ', s='960 si')
         if text_id == 'picochess':
             wait = True
-            entxt = Dgt.DISPLAY_TEXT(l='picoChs ' + self.version, m='pico ' + self.version, s='pic' + self.version)
+            entxt = Dgt.DISPLAY_TEXT(l='PicoChs ' + self.version, m='pico ' + self.version, s='pic' + self.version)
             detxt = entxt
             nltxt = entxt
             frtxt = entxt
@@ -740,7 +740,7 @@ class DgtTranslate(object):
             estxt = entxt
             ittxt = entxt
         if text_id == 'display_ponderinterval_menu':
-            entxt = Dgt.DISPLAY_TEXT(l='ponder intv', m='PondIntv', s='po int')
+            entxt = Dgt.DISPLAY_TEXT(l='ponder intv', m='PondIntv', s='ponint')
             detxt = entxt
             nltxt = entxt
             frtxt = entxt
