@@ -233,6 +233,9 @@ var GameDataTable = $("#GameTable").DataTable( {
         "data": function ( d ) {
             d.action = "get_games";
             d.fen = DataTableFen;
+        },
+        "error": function (xhr, error, thrown) {
+            console.warn(xhr);
         }
     },
     "columns": [
@@ -251,10 +254,12 @@ var GameDataTable = $("#GameTable").DataTable( {
 });
 GameDataTable.on('xhr.dt', function( e, settings, json, xhr) {
     console.log('xhr.dt');
-    json['recordsTotal'] = json['totalRecordCount'];
-    json['recordsFiltered'] = json['queryRecordCount'];
-    delete json['totalRecordCount'];
-    delete json['queryRecordCount'];
+    if(json) {
+        json['recordsTotal'] = json['totalRecordCount'];
+        json['recordsFiltered'] = json['queryRecordCount'];
+        delete json['totalRecordCount'];
+        delete json['queryRecordCount'];
+    }
     console.log(json);
 });
 GameDataTable.on('select', function( e, dt, type, indexes ) {
@@ -408,6 +413,8 @@ $(function() {
         $('#analyzeBtn').prop('disabled', true);
         load_nacl_stockfish();
     }
+
+    $.fn.dataTable.ext.errMode = 'throw';
 
     $('[data-toggle="tooltip"]').tooltip();
 });

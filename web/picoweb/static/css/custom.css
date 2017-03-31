@@ -341,3 +341,7 @@ body {
 div.dataTables_info {
     font-size: 1vw;
 }
+
+.dataTables_processing {
+    font-size: 1vw;
+}
