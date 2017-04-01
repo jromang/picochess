@@ -172,7 +172,7 @@ var BookDataTable = $("#BookTable").DataTable( {
         "data": function ( d ) {
             d.action = "get_book_moves";
             d.fen = DataTableFen;
-            //d.db = "#user";
+            d.db = "#user";
         }
     },
     "columns": [
@@ -234,7 +234,7 @@ var GameDataTable = $("#GameTable").DataTable( {
         "data": function ( d ) {
             d.action = "get_games";
             d.fen = DataTableFen;
-            //d.db = "#user";
+            d.db = "#user";
         },
         "error": function (xhr, error, thrown) {
             console.warn(xhr);
@@ -272,8 +272,8 @@ GameDataTable.on('select', function( e, dt, type, indexes ) {
             url: backend_server_prefix + '/query?callback=game_callback',
             data: {
                 action: 'get_game_content',
-                game_num: data
-                //db: '#user'//window.activedb
+                game_num: data,
+                db: '#user'//window.activedb
             }
         }).done(function(data) {
             loadGame(data['pgn']);
