@@ -229,12 +229,13 @@ class WebVr(DgtIface):
         """display a move on the web clock."""
         if self.enable_dgt_3000 or self.enable_dgt_pi:
             bit_board, text = self.get_san(message, not self.enable_dgt_pi)
+            points = '...' if message.side == ClockSide.RIGHT else '.'
             if self.enable_dgt_pi:
-                text = '{:3d}.{:s}'.format(bit_board.fullmove_number, text)
+                text = '{:3d}{:s}{:s}'.format(bit_board.fullmove_number, points, text)
             else:
-                text = '{:2d}.{:s}'.format(bit_board.fullmove_number % 100, text)
+                text = '{:2d}{:s}{:s}'.format(bit_board.fullmove_number % 100, points, text)
         else:
-            text = str(message.move)
+            text = message.move.uci()
             if message.side == ClockSide.RIGHT:
                 text = text.rjust(6)
         if 'web' not in message.devs:
