@@ -164,6 +164,9 @@ def get_opening_books():
 
 
 def hours_minutes_seconds(seconds: int):
+    if seconds < 0:
+        logging.warning('negative time {}'.format(seconds))
+        return 0, 0, 0
     m, s = divmod(seconds, 60)
     h, m = divmod(m, 60)
     return h, m, s

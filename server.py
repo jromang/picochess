@@ -203,13 +203,17 @@ class WebVr(DgtIface):
             h, m, s = self.time_left
             time_left = 3600*h + 60*m + s - 1
             if time_left <= 0:
+                logging.info('time left is negative {}'.format(time_left))
                 self.virtual_timer.stop()
+                self.time_left = 0
             self.time_left = hours_minutes_seconds(time_left)
         if self.time_side == ClockSide.RIGHT:
             h, m, s = self.time_right
             time_right = 3600*h + 60*m + s - 1
             if time_right <= 0:
+                logging.info('time right is negative {}'.format(time_right))
                 self.virtual_timer.stop()
+                self.time_right = 0
             self.time_right = hours_minutes_seconds(time_right)
         self.display_time(self.time_left, self.time_right)
 
