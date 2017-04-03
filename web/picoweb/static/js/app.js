@@ -103,11 +103,13 @@ function setTitle(data) {
     window.ip_info = data;
     var ip = '';
     if (window.ip_info.ext_ip) {
-        ip += ' ExtIP: ' + window.ip_info.ext_ip
+        ip += ' IP: ' + window.ip_info.ext_ip
     }
+    /*
     if (window.ip_info.int_ip) {
         ip += ' IntIP: ' + window.ip_info.int_ip
     }
+    */
     var version = '';
     if (window.ip_info.version) {
         version = window.ip_info.version
@@ -255,14 +257,12 @@ var GameDataTable = $("#GameTable").DataTable( {
     ]
 });
 GameDataTable.on('xhr.dt', function( e, settings, json, xhr) {
-    //console.log('xhr.dt');
     if(json) {
         json['recordsTotal'] = json['totalRecordCount'];
         json['recordsFiltered'] = json['queryRecordCount'];
         delete json['totalRecordCount'];
         delete json['queryRecordCount'];
     }
-    //console.log(json);
 });
 GameDataTable.on('select', function( e, dt, type, indexes ) {
     if( type === 'row') {
@@ -874,6 +874,7 @@ $("#inputConsole").keyup(function(event) {
     }
 });
 
+/*
 function clickRowGameWriter(rowIndex, record, columns, cellWriter) {
     var tr = '';
     // grab the record's attribute for each column
@@ -901,6 +902,7 @@ function clickRowBookWriter(rowIndex, record, columns, cellWriter) {
 function clickRowBookReader(rowIndex, rowElement, record) {
     record.customData = $(rowElement).data('move');
 }
+*/
 
 function addNewMove(m, current_position, fen, props) {
     var node = {};
