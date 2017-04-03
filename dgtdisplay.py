@@ -690,7 +690,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 self.depth = message.depth
                 break
             if case(MessageApi.IP_INFO):
-                self.dgtmenu.ip = message.info['int_ip']
+                self.dgtmenu.int_ip = message.info['int_ip']
+                self.dgtmenu.ext_ip = message.info['ext_ip']
                 break
             if case(MessageApi.STARTUP_INFO):
                 self._process_startup_info(message)

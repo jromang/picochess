@@ -245,7 +245,8 @@ body {
 }
 
 .nav li a {
-    font-size: 1.5vw;
+    font-size: 1.2vw;
+    padding: 0.6vw 0.9vw;
 }
 
 #BoardStatus {
@@ -289,7 +290,7 @@ body {
 
 .pagination {
     margin: 0;
-    font-size: 1.3vw;
+    font-size: 1.0vw;
 }
 .pagination > li > a, .pagination > li > span
 {
@@ -344,4 +345,11 @@ div.dataTables_info {
 
 .dataTables_processing {
     font-size: 1vw;
+}
+
+div.dataTables_wrapper div.dataTables_length select {
+    width: 20vw;
+}
+.checkbox label, .radio label, label {
+    font-size: 1.5vw;
 }

@@ -210,12 +210,12 @@ Here you choose between the following:
 System shutdown
 ---------------
 
-From the start position, replace the white king with the extra white queen; this will shut down the machine (takes a few seconds until the blue light turns off). You can also do it with only the two white queens on the board (on e1,d1).
+From the start position, replace the white king with the extra white queen; this will shut down the machine (takes a few seconds until the light turns off). You can also do it with only the two white queens on the board (on e1,d1).
 
 System reboot
 -------------
 
-From the start position, replace the black king with the extra black queen; this will reboot the machine (takes a few seconds until the blue light turns off). You can also do it with only the two black queens on the board (on e8,d8).
+From the start position, replace the black king with the extra black queen; this will reboot the machine (takes a few seconds until the light turns off). You can also do it with only the two black queens on the board (on e8,d8).
 
 PGN file support
 ----------------

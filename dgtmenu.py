@@ -59,6 +59,8 @@ class MenuState(object):
     SYS = 700000
     SYS_VERS = 710000
     SYS_IP = 720000
+    SYS_IP_INT = 721000
+    SYS_IP_EXT = 722000
     SYS_SOUND = 730000
     SYS_SOUND_TYPE = 731000  # never, always, some
     SYS_LANG = 740000
@@ -86,7 +88,8 @@ class DgtMenu(object):
         self.state = MenuState.TOP
 
         self.dgt_fen = '8/8/8/8/8/8/8/8'
-        self.ip = None
+        self.int_ip = None
+        self.ext_ip = None
         self.flip_board = False
 
         self.menu_position_whitetomove = True
@@ -754,13 +757,13 @@ class DgtMenu(object):
                 break
             if case(MenuState.SYS_IP):
                 # do action!
-                if self.ip:
-                    msg = ' '.join(self.ip.split('.')[:2])
+                if self.int_ip:
+                    msg = ' '.join(self.int_ip.split('.')[:2])
                     text = self.dgttranslate.text('B07_default', msg)
                     if len(msg) == 7:  # delete the " " for XL incase its "123 456"
                         text.s = msg[:3] + msg[4:]
                     DispatchDgt.fire(text)
-                    msg = ' '.join(self.ip.split('.')[2:])
+                    msg = ' '.join(self.int_ip.split('.')[2:])
                     text = self.dgttranslate.text('N07_default', msg)
                     if len(msg) == 7:  # delete the " " for XL incase its "123 456"
                         text.s = msg[:3] + msg[4:]

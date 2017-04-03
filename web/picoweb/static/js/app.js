@@ -94,7 +94,7 @@ function getAllInfo() {
     $.get('/info', {action: 'get_clock_text'}, function(data) {
         dgtClockTextEl.html(data);
     }).fail(function(jqXHR, textStatus) {
-        console.log(textStatus);
+        console.warn(textStatus);
         dgtClockStatusEl.html(textStatus);
     });
 }
@@ -145,7 +145,7 @@ var BookDataTable = $("#BookTable").DataTable( {
     "paging": false,
     "info": false,
     "searching": false,
-    "order": [[1, "desc"]],
+    "order": [[2, "desc"]],
     "select": {
         "style": "os",
         "selector": "td:not(.control)"
@@ -255,14 +255,14 @@ var GameDataTable = $("#GameTable").DataTable( {
     ]
 });
 GameDataTable.on('xhr.dt', function( e, settings, json, xhr) {
-    console.log('xhr.dt');
+    //console.log('xhr.dt');
     if(json) {
         json['recordsTotal'] = json['totalRecordCount'];
         json['recordsFiltered'] = json['queryRecordCount'];
         delete json['totalRecordCount'];
         delete json['queryRecordCount'];
     }
-    console.log(json);
+    //console.log(json);
 });
 GameDataTable.on('select', function( e, dt, type, indexes ) {
     if( type === 'row') {
