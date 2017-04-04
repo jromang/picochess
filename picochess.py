@@ -211,6 +211,9 @@ def main():
         nonlocal searchmoves
         nonlocal legal_fens
 
+        print(fen)
+        print(game.board_fen())
+        print(last_computer_fen)
         # Check for same position
         if (fen == game.board_fen() and not last_computer_fen) or fen == last_computer_fen:
             logging.debug('Already in this fen: ' + fen)
@@ -340,11 +343,11 @@ def main():
         # engine or remote move
         if (interaction_mode == Mode.NORMAL or interaction_mode == Mode.REMOTE) and is_not_user_turn(turn):
             last_computer_fen = game.board_fen()
-            game.push(move)
+            # game.push(move)
             if inbook:
                 DisplayMsg.show(Message.BOOK_MOVE())
             searchmoves.add(move)
-            text = Message.COMPUTER_MOVE(move=move, ponder=ponder, fen=fen, turn=turn, game=game.copy(), wait=inbook)
+            text = Message.COMPUTER_MOVE(move=move, ponder=ponder, game=game.copy(), wait=inbook)
             DisplayMsg.show(text)
         else:
             last_computer_fen = None

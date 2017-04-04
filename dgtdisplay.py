@@ -442,7 +442,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             DispatchDgt.fire(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE,
                                              wait=True, devs={'ser', 'i2c', 'web'}))
 
-    def _process_computer_move_done_on_board(self):
+    def _process_computer_move_done(self):
         if self.leds_are_on:
             DispatchDgt.fire(Dgt.LIGHT_CLEAR())
             self.leds_are_on = False
@@ -464,18 +464,25 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             DispatchDgt.fire(Dgt.LIGHT_CLEAR())
         move = message.move
         ponder = message.ponder
-        fen = message.fen
-        turn = message.turn
+        # fen = message.fen
+        # turn = message.turn
         self.engine_finished = True
         self.play_move = move
-        self.play_fen = fen
-        self.play_turn = turn
-        self.hint_move = chess.Move.null() if ponder is None else ponder
-        self.hint_fen = None if ponder is None else message.game.fen()
-        self.hint_turn = None if ponder is None else message.game.turn
+        self.play_fen = message.game.fen()
+        self.play_turn = message.game.turn
+        if ponder:
+            game_copy = message.game.copy()
+            game_copy.push(move)
+            self.hint_move = ponder
+            self.hint_fen = game_copy.fen()
+            self.hint_turn = game_copy.turn
+        else:
+            self.hint_move = chess.Move.null()
+            self.hint_fen = None
+            self.hint_turn = None
         # Display the move
-        side = self._get_clock_side(turn)
-        disp = Dgt.DISPLAY_MOVE(move=move, fen=message.fen, side=side, wait=message.wait, maxtime=0,
+        side = self._get_clock_side(message.game.turn)
+        disp = Dgt.DISPLAY_MOVE(move=move, fen=message.game.fen(), side=side, wait=message.wait, maxtime=0,
                                 beep=self.dgttranslate.bl(BeepLevel.CONFIG), devs={'ser', 'i2c', 'web'})
         DispatchDgt.fire(disp)
         DispatchDgt.fire(Dgt.LIGHT_SQUARES(uci_move=move.uci(), type='computer'))
@@ -624,7 +631,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 self._process_start_new_game(message)
                 break
             if case(MessageApi.COMPUTER_MOVE_DONE):
-                self._process_computer_move_done_on_board()
+                self._process_computer_move_done()
                 break
             if case(MessageApi.USER_MOVE_DONE):
                 self._process_user_move(message)

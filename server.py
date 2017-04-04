@@ -473,6 +473,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.COMPUTER_MOVE):
+                message.game.push(message.move)
                 pgn_str = _transfer(message.game)
                 fen = _oldstyle_fen(message.game)
                 mov = message.move.uci()
