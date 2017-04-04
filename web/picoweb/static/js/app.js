@@ -105,11 +105,6 @@ function setTitle(data) {
     if (window.ip_info.ext_ip) {
         ip += ' IP: ' + window.ip_info.ext_ip
     }
-    /*
-    if (window.ip_info.int_ip) {
-        ip += ' IntIP: ' + window.ip_info.int_ip
-    }
-    */
     var version = '';
     if (window.ip_info.version) {
         version = window.ip_info.version
@@ -873,36 +868,6 @@ $("#inputConsole").keyup(function(event) {
         $(this).val('');
     }
 });
-
-/*
-function clickRowGameWriter(rowIndex, record, columns, cellWriter) {
-    var tr = '';
-    // grab the record's attribute for each column
-    for (var i = 0, len = columns.length; i < len; i++) {
-        tr += cellWriter(columns[i], record);
-    }
-    return '<tr data-game-id=' + record.id + '>' + tr + '</tr>';
-}
-
-function clickRowGameReader(rowIndex, rowElement, record) {
-    record.customData = $(rowElement).data('id');
-}
-
-function clickRowBookWriter(rowIndex, record, columns, cellWriter) {
-    var tr = '';
-    var original_move = record.move;
-    record.move = figurinize_move(record.move);
-    // grab the record's attribute for each column
-    for (var i = 0, len = columns.length; i < len; i++) {
-        tr += cellWriter(columns[i], record);
-    }
-    return '<tr data-move=' + original_move + '>' + tr + '</tr>';
-}
-
-function clickRowBookReader(rowIndex, rowElement, record) {
-    record.customData = $(rowElement).data('move');
-}
-*/
 
 function addNewMove(m, current_position, fen, props) {
     var node = {};

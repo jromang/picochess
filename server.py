@@ -460,7 +460,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 break
             if case(MessageApi.DGT_NO_CLOCK_ERROR):
                 result = {'event': 'Status', 'msg': 'Error clock'}
-                EventHandler.write_to_clients(result)
+                # EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.DGT_CLOCK_VERSION):
                 if message.dev == 'ser':
