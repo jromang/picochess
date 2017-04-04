@@ -262,7 +262,10 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
             '8': '8.ogg'
         }
 
-        bit_board = chess.Board(fen)
+        # bit_board = chess.Board(fen)
+        # san_move = bit_board.san(move)
+        bit_board = game.copy()
+        move = bit_board.pop()
         san_move = bit_board.san(move)
         voice_parts = []
 
