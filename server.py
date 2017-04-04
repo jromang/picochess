@@ -309,9 +309,9 @@ class WebVr(DgtIface):
         self.time_right = hours_minutes_seconds(time_right)
         self.display_time(self.time_left, self.time_right)
 
-    def light_squares_revelation_board(self, squares):
-        """handle this by dgthw.py."""
-        pass
+    def light_squares_revelation_board(self, squares, type: str):
+        result = {'event': 'Light', 'move': squares, 'play': type}
+        EventHandler.write_to_clients(result)
 
     def clear_light_revelation_board(self):
         result = {'event': 'Clear'}
@@ -398,9 +398,9 @@ class WebDisplay(DisplayMsg, threading.Thread):
             if case(MessageApi.START_NEW_GAME):
                 pgn_str = _transfer(message.game)
                 fen = message.game.fen()
-                result = {'pgn': pgn_str, 'fen': fen}
+                result = {'pgn': pgn_str, 'fen': fen, 'event': 'Game', 'move': '0000', 'play': 'newgame'}
                 self.shared['last_dgt_move_msg'] = result
-                EventHandler.write_to_clients({'event': 'Game', 'fen': fen})
+                EventHandler.write_to_clients(result)
                 _update_headers()
                 break
             if case(MessageApi.IP_INFO):
@@ -478,11 +478,13 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 mov = message.move.uci()
                 result = {'pgn': pgn_str, 'fen': fen, 'event': 'Fen', 'move': mov, 'play': 'computer'}
                 self.shared['last_dgt_move_msg'] = result
+                # EventHandler.write_to_clients(result)
+                break
+            if case(MessageApi.COMPUTER_MOVE_DONE):
+                result = self.shared['last_dgt_move_msg']
                 EventHandler.write_to_clients(result)
                 break
-            if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
-                break
-            if case(MessageApi.USER_MOVE):
+            if case(MessageApi.USER_MOVE_DONE):
                 pgn_str = _transfer(message.game)
                 fen = _oldstyle_fen(message.game)
                 mov = message.move.uci()
@@ -490,7 +492,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 self.shared['last_dgt_move_msg'] = result
                 EventHandler.write_to_clients(result)
                 break
-            if case(MessageApi.REVIEW_MOVE):
+            if case(MessageApi.REVIEW_MOVE_DONE):
                 pgn_str = _transfer(message.game)
                 fen = _oldstyle_fen(message.game)
                 mov = message.move.uci()

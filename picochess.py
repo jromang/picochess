@@ -271,7 +271,7 @@ def main():
                 time_control.add_inc(not game.turn)
                 if time_control.mode != TimeMode.FIXED:
                     start_clock()
-                DisplayMsg.show(Message.COMPUTER_MOVE_DONE_ON_BOARD())
+                DisplayMsg.show(Message.COMPUTER_MOVE_DONE())
                 legal_fens = compute_legal_fens(game.copy())
             else:
                 legal_fens = []
@@ -353,19 +353,19 @@ def main():
                 DisplayMsg.show(Message.BOOK_MOVE())
             searchmoves.reset()
             if interaction_mode == Mode.NORMAL:
-                DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
+                DisplayMsg.show(Message.USER_MOVE_DONE(move=move, fen=fen, turn=turn, game=game.copy()))
                 if check_game_state(game, play_mode):
                     think(game, time_control)
             elif interaction_mode == Mode.REMOTE:
-                DisplayMsg.show(Message.USER_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
+                DisplayMsg.show(Message.USER_MOVE_DONE(move=move, fen=fen, turn=turn, game=game.copy()))
                 if check_game_state(game, play_mode):
                     observe(game)
             elif interaction_mode == Mode.OBSERVE:
-                DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
+                DisplayMsg.show(Message.REVIEW_MOVE_DONE(move=move, fen=fen, turn=turn, game=game.copy()))
                 if check_game_state(game, play_mode):
                     observe(game)
             else:  # interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ):
-                DisplayMsg.show(Message.REVIEW_MOVE(move=move, fen=fen, turn=turn, game=game.copy()))
+                DisplayMsg.show(Message.REVIEW_MOVE_DONE(move=move, fen=fen, turn=turn, game=game.copy()))
                 if check_game_state(game, play_mode):
                     analyse(game)
 

@@ -116,14 +116,14 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                             self.computer_picotalker.talk(self.say_move(message.move, message.fen, message.game))
                             previous_move = str(message.move)
                         break
-                    if case(MessageApi.USER_MOVE):
+                    if case(MessageApi.USER_MOVE_DONE):
                         if message.move and message.game and str(message.move) != previous_move \
                                 and self.user_picotalker is not None:
                             logging.debug('announcing USER_MOVE [%s]', message.move)
                             self.user_picotalker.talk(self.say_move(message.move, message.fen, message.game))
                             previous_move = str(message.move)
                         break
-                    if case(MessageApi.REVIEW_MOVE):
+                    if case(MessageApi.REVIEW_MOVE_DONE):
                         if message.move and message.game and str(message.move) != previous_move \
                                 and self.user_picotalker is not None:
                             logging.debug('announcing REVIEW_MOVE [%s]', message.move)

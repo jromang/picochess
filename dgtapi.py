@@ -82,7 +82,7 @@ class MessageApi():
     COMPUTER_MOVE = 'MSG_COMPUTER_MOVE'  # Show computer move
     BOOK_MOVE = 'MSG_BOOK_MOVE'  # Show book move
     NEW_PV = 'MSG_NEW_PV'  # Show the new Principal Variation
-    REVIEW_MOVE = 'MSG_REVIEW_MOVE'  # Player is reviewing a game (analysis, kibitz or observe modes)
+    REVIEW_MOVE_DONE = 'MSG_REVIEW_MOVE_DONE'  # Player is reviewing a game (analysis, kibitz or observe modes)
     ENGINE_READY = 'MSG_ENGINE_READY'
     ENGINE_STARTUP = 'MSG_ENGINE_STARTUP'  # first time a new engine is ready
     ENGINE_FAIL = 'MSG_ENGINE_FAIL'  # Engine startup fails
@@ -103,13 +103,13 @@ class MessageApi():
     INTERACTION_MODE = 'MSG_INTERACTON_MODE'  # Interaction mode
     PLAY_MODE = 'MSG_PLAY_MODE'  # Play mode
     START_NEW_GAME = 'MSG_START_NEW_GAME'  # User starts a new game
-    COMPUTER_MOVE_DONE_ON_BOARD = 'MSG_COMPUTER_MOVE_DONE_ON_BOARD'  # User has done the computer move on board
+    COMPUTER_MOVE_DONE = 'MSG_COMPUTER_MOVE_DONE'  # User has done the computer move on board
     SEARCH_STARTED = 'MSG_SEARCH_STARTED'  # Engine has started to search
     SEARCH_STOPPED = 'MSG_SEARCH_STOPPED'  # Engine has stopped the search
     TAKE_BACK = 'MSG_TACK_BACK'  # User takes back move(s)
     CLOCK_START = 'MSG_CLOCK_START'  # Say to run autonomous clock, contains time_control
     CLOCK_STOP = 'MSG_CLOCK_STOP'  # Stops the clock
-    USER_MOVE = 'MSG_USER_MOVE'  # Player has done a move on board
+    USER_MOVE_DONE = 'MSG_USER_MOVE_DONE'  # Player has done a move on board
     GAME_ENDS = 'MSG_GAME_ENDS'  # The current game has ended, contains a 'result' (GameResult) and list of 'moves'
 
     SYSTEM_INFO = 'MSG_SYSTEM_INFO'  # Information about picochess such as version etc
@@ -146,7 +146,7 @@ class Dgt():
     DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['l', 'm', 's', 'beep', 'maxtime', 'devs', 'wait', 'ld', 'rd'])
     DISPLAY_TIME = ClassFactory(DgtApi.DISPLAY_TIME, ['wait', 'force', 'devs'])
     LIGHT_CLEAR = ClassFactory(DgtApi.LIGHT_CLEAR, [])
-    LIGHT_SQUARES = ClassFactory(DgtApi.LIGHT_SQUARES, ['uci_move'])
+    LIGHT_SQUARES = ClassFactory(DgtApi.LIGHT_SQUARES, ['uci_move', 'type'])
     CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, ['devs'])
     CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side', 'devs', 'wait'])
     CLOCK_VERSION = ClassFactory(DgtApi.CLOCK_VERSION, ['main', 'sub', 'dev'])
@@ -159,7 +159,7 @@ class Message():
     COMPUTER_MOVE = ClassFactory(MessageApi.COMPUTER_MOVE, ['move', 'ponder', 'fen', 'turn', 'game', 'wait'])
     BOOK_MOVE = ClassFactory(MessageApi.BOOK_MOVE, [])
     NEW_PV = ClassFactory(MessageApi.NEW_PV, ['pv', 'mode', 'game'])
-    REVIEW_MOVE = ClassFactory(MessageApi.REVIEW_MOVE, ['move', 'fen', 'turn', 'game'])
+    REVIEW_MOVE_DONE = ClassFactory(MessageApi.REVIEW_MOVE_DONE, ['move', 'fen', 'turn', 'game'])
     ENGINE_READY = ClassFactory(MessageApi.ENGINE_READY, ['eng', 'eng_text', 'engine_name', 'has_levels', 'has_960', 'show_ok'])
     ENGINE_STARTUP = ClassFactory(MessageApi.ENGINE_STARTUP, ['shell', 'file', 'level_index', 'has_levels', 'has_960'])
     ENGINE_FAIL = ClassFactory(MessageApi.ENGINE_FAIL, [])
@@ -180,13 +180,13 @@ class Message():
     INTERACTION_MODE = ClassFactory(MessageApi.INTERACTION_MODE, ['mode', 'mode_text', 'show_ok'])
     PLAY_MODE = ClassFactory(MessageApi.PLAY_MODE, ['play_mode', 'play_mode_text'])
     START_NEW_GAME = ClassFactory(MessageApi.START_NEW_GAME, ['game', 'newgame'])
-    COMPUTER_MOVE_DONE_ON_BOARD = ClassFactory(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD, [])
+    COMPUTER_MOVE_DONE = ClassFactory(MessageApi.COMPUTER_MOVE_DONE, [])
     SEARCH_STARTED = ClassFactory(MessageApi.SEARCH_STARTED, ['engine_status'])
     SEARCH_STOPPED = ClassFactory(MessageApi.SEARCH_STOPPED, ['engine_status'])
     TAKE_BACK = ClassFactory(MessageApi.TAKE_BACK, [])
     CLOCK_START = ClassFactory(MessageApi.CLOCK_START, ['turn', 'tc_init', 'devs'])
     CLOCK_STOP = ClassFactory(MessageApi.CLOCK_STOP, ['devs'])
-    USER_MOVE = ClassFactory(MessageApi.USER_MOVE, ['move', 'fen', 'turn', 'game'])
+    USER_MOVE_DONE = ClassFactory(MessageApi.USER_MOVE_DONE, ['move', 'fen', 'turn', 'game'])
     GAME_ENDS = ClassFactory(MessageApi.GAME_ENDS, ['result', 'play_mode', 'game'])
 
     SYSTEM_INFO = ClassFactory(MessageApi.SYSTEM_INFO, ['info'])

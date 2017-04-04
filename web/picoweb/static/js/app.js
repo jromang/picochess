@@ -128,9 +128,7 @@ function goToDGTFen() {
     $.get('/dgt', {action: 'get_last_move'}, function(data) {
         if (data) {
             updateDGTPosition(data);
-            if (data['msg']) {
-                boardStatusEl.html(data['msg']);
-            }
+            highlightBoard(data.move, data.play);
         }
     }).fail(function(jqXHR, textStatus) {
         dgtClockStatusEl.html(textStatus);
@@ -334,7 +332,6 @@ $(function() {
                 case 'Fen':
                     updateDGTPosition(data);
                     updateStatus();
-                    highlightBoard(data.move, data.play);
                     break;
                 case 'Game':
                     newBoard(data.fen);
@@ -347,6 +344,9 @@ $(function() {
                     break;
                 case 'Status':
                     dgtClockStatusEl.html(data.msg);
+                    break;
+                case 'Light':
+                    highlightBoard(data.move, data.play);
                     break;
                 case 'Clear':
                     remove_highlights();
@@ -391,6 +391,7 @@ function remove_highlights() {
     $('#board div.highlight-user').removeClass('highlight-user');
     $('#board div.highlight-review').removeClass('highlight-review');
 }
+
 function add_highlight(square, color) {
     $('#board [data-square="' + square + '"]').addClass('highlight-' +  color);
 }

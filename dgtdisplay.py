@@ -478,7 +478,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         disp = Dgt.DISPLAY_MOVE(move=move, fen=message.fen, side=side, wait=message.wait, maxtime=0,
                                 beep=self.dgttranslate.bl(BeepLevel.CONFIG), devs={'ser', 'i2c', 'web'})
         DispatchDgt.fire(disp)
-        DispatchDgt.fire(Dgt.LIGHT_SQUARES(uci_move=move.uci()))
+        DispatchDgt.fire(Dgt.LIGHT_SQUARES(uci_move=move.uci(), type='computer'))
         self.leds_are_on = True
 
     def _process_user_move(self, message):
@@ -623,13 +623,13 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             if case(MessageApi.START_NEW_GAME):
                 self._process_start_new_game(message)
                 break
-            if case(MessageApi.COMPUTER_MOVE_DONE_ON_BOARD):
+            if case(MessageApi.COMPUTER_MOVE_DONE):
                 self._process_computer_move_done_on_board()
                 break
-            if case(MessageApi.USER_MOVE):
+            if case(MessageApi.USER_MOVE_DONE):
                 self._process_user_move(message)
                 break
-            if case(MessageApi.REVIEW_MOVE):
+            if case(MessageApi.REVIEW_MOVE_DONE):
                 self._process_review_move(message)
                 break
             if case(MessageApi.ALTERNATIVE_MOVE):
