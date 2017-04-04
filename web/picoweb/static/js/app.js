@@ -237,6 +237,18 @@ var GameDataTable = $("#GameTable").DataTable( {
             console.warn(xhr);
         }
     },
+    "initComplete": function() {
+        var searchInput = $('div.dataTables_filter input');
+        searchInput.unbind();
+        searchInput.bind('keyup', function(e) {
+            if(this.value.length > 2) {
+                GameDataTable.search( this.value ).draw();
+            }
+            if(this.value === '') {
+                GameDataTable.search('').draw();
+            }
+        });
+    },
     "columns": [
         {data: null},
         {data: 'id'},
