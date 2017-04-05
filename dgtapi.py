@@ -183,7 +183,7 @@ class Message():
     COMPUTER_MOVE_DONE = ClassFactory(MessageApi.COMPUTER_MOVE_DONE, [])
     SEARCH_STARTED = ClassFactory(MessageApi.SEARCH_STARTED, ['engine_status'])
     SEARCH_STOPPED = ClassFactory(MessageApi.SEARCH_STOPPED, ['engine_status'])
-    TAKE_BACK = ClassFactory(MessageApi.TAKE_BACK, [])
+    TAKE_BACK = ClassFactory(MessageApi.TAKE_BACK, ['game'])
     CLOCK_START = ClassFactory(MessageApi.CLOCK_START, ['turn', 'tc_init', 'devs'])
     CLOCK_STOP = ClassFactory(MessageApi.CLOCK_STOP, ['devs'])
     USER_MOVE_DONE = ClassFactory(MessageApi.USER_MOVE_DONE, ['move', 'fen', 'turn', 'game'])

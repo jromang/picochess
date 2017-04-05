@@ -517,6 +517,14 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 self.shared['last_dgt_move_msg'] = result
                 EventHandler.write_to_clients(result)
                 break
+            if case(MessageApi.TAKE_BACK):
+                pgn_str = _transfer(message.game)
+                fen = _oldstyle_fen(message.game)
+                mov = message.game.peek().uci()
+                result = {'pgn': pgn_str, 'fen': fen, 'event': 'Fen', 'move': mov, 'play': 'reload'}
+                self.shared['last_dgt_move_msg'] = result
+                EventHandler.write_to_clients(result)
+                break
             if case(MessageApi.GAME_ENDS):
                 if message.game.move_stack:
                     result = None
