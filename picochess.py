@@ -195,7 +195,6 @@ def main():
     def user_move(move: chess.Move):
         """Handle an user move."""
         nonlocal game
-        # nonlocal last_computer_fen
         nonlocal done_move
         nonlocal done_computer_fen
 
@@ -203,8 +202,6 @@ def main():
         if move not in game.legal_moves:
             logging.warning('Illegal move [%s]', move)
         else:
-            # handle_move(move=move, typ='user')
-            # last_computer_fen = None
             done_computer_fen = None
             done_move = chess.Move.null()
             game.push(move)
@@ -233,7 +230,6 @@ def main():
         return condition1 or condition2
 
     def process_fen(fen: str):
-        # nonlocal last_computer_fen
         nonlocal last_legal_fens
         nonlocal searchmoves
         nonlocal legal_fens
@@ -242,7 +238,7 @@ def main():
         nonlocal done_computer_fen
 
         # Check for same position
-        if (fen == game.board_fen() and not done_computer_fen) or fen == done_computer_fen:
+        if fen == game.board_fen() and not done_computer_fen:
             logging.debug('Already in this fen: ' + fen)
 
         # Check if we have to undo a previous move (sliding)
@@ -253,7 +249,6 @@ def main():
                     game.pop()
                     logging.debug('User move in computer turn, reverting to: ' + game.board_fen())
                 elif done_computer_fen:
-                    # last_computer_fen = None
                     done_computer_fen = None
                     done_move = chess.Move.null()
                     # game.pop()
@@ -266,7 +261,6 @@ def main():
                     game.pop()
                     logging.debug('User move in remote turn, reverting to: ' + game.board_fen())
                 elif done_computer_fen:
-                    # last_computer_fen = None
                     done_computer_fen = None
                     done_move = chess.Move.null()
                     # game.pop()
@@ -299,7 +293,6 @@ def main():
         elif fen == done_computer_fen:
             assert interaction_mode in (Mode.NORMAL, Mode.REMOTE), 'wrong mode: %s' % interaction_mode
             game.push(done_move)
-            # last_computer_fen = None
             done_computer_fen = None
             done_move = chess.Move.null()
             if check_game_state(game, play_mode):
@@ -326,7 +319,6 @@ def main():
                     stop_search_and_clock()
                     while len(game_history.move_stack) < len(game.move_stack):
                         game.pop()
-                    # last_computer_fen = None
                     done_computer_fen = None
                     done_move = chess.Move.null()
                     last_legal_fens = []
@@ -362,49 +354,6 @@ def main():
             if interaction_mode in (Mode.OBSERVE, Mode.REMOTE):
                 # observe(game)  # dont want to autostart the clock => we are in newgame situation
                 analyse(game)
-
-    # def handle_move(move: chess.Move, ponder=None, inbook=False, typ=''):
-    #     """Handle a (user/computer) move depending on the interaction mode."""
-    #     nonlocal game
-    #     nonlocal last_computer_fen
-    #     nonlocal searchmoves
-    #     fen = game.fen()
-    #     turn = game.turn
-    #
-    #     # clock must be stopped BEFORE the "book_move" event cause SetNRun resets the clock display
-    #     stop_search_and_clock()
-    #
-    #     # engine or remote move
-    #     if interaction_mode in (Mode.NORMAL, Mode.REMOTE) and is_not_user_turn(turn):
-    #         last_computer_fen = game.board_fen()
-    #         # game.push(move)
-    #         if inbook:
-    #             DisplayMsg.show(Message.BOOK_MOVE())
-    #         searchmoves.add(move)
-    #         text = Message.COMPUTER_MOVE(move=move, ponder=ponder, game=game.copy(), wait=inbook)
-    #         DisplayMsg.show(text)
-    #     else:
-    #         last_computer_fen = None
-    #         game.push(move)
-    #         if inbook:
-    #             DisplayMsg.show(Message.BOOK_MOVE())
-    #         searchmoves.reset()
-    #         if interaction_mode == Mode.NORMAL:
-    #             DisplayMsg.show(Message.USER_MOVE_DONE(move=move, fen=fen, turn=turn, game=game.copy()))
-    #             if check_game_state(game, play_mode):
-    #                 think(game, time_control)
-    #         elif interaction_mode == Mode.REMOTE:
-    #             DisplayMsg.show(Message.USER_MOVE_DONE(move=move, fen=fen, turn=turn, game=game.copy()))
-    #             if check_game_state(game, play_mode):
-    #                 observe(game)
-    #         elif interaction_mode == Mode.OBSERVE:
-    #             DisplayMsg.show(Message.REVIEW_MOVE_DONE(move=move, fen=fen, turn=turn, game=game.copy()))
-    #             if check_game_state(game, play_mode):
-    #                 observe(game)
-    #         else:  # interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ):
-    #             DisplayMsg.show(Message.REVIEW_MOVE_DONE(move=move, fen=fen, turn=turn, game=game.copy()))
-    #             if check_game_state(game, play_mode):
-    #                 analyse(game)
 
     def transfer_time(time_list: list):
         """Tranfer the time list to a TimeControl Object and a Text Object."""
@@ -602,7 +551,6 @@ def main():
     interaction_mode = Mode.NORMAL
     play_mode = PlayMode.USER_WHITE  # @todo make it valid in Mode.REMOTE too!
 
-    # last_computer_fen = None
     last_legal_fens = []
     done_computer_fen = None
     done_move = chess.Move.null()
@@ -726,7 +674,6 @@ def main():
                         engine.send()
                     legal_fens = compute_legal_fens(game.copy())
                     last_legal_fens = []
-                    # last_computer_fen = None
                     done_computer_fen = None
                     done_move = chess.Move.null()
                     time_control.reset()
@@ -755,7 +702,6 @@ def main():
                             engine.send()
                         legal_fens = compute_legal_fens(game.copy())
                         last_legal_fens = []
-                        # last_computer_fen = None
                         done_computer_fen = None
                         done_move = chess.Move.null()
                         time_control.reset()
@@ -780,7 +726,6 @@ def main():
 
                 if case(EventApi.ALTERNATIVE_MOVE):
                     if done_computer_fen:
-                        # last_computer_fen = None
                         done_computer_fen = None
                         done_move = chess.Move.null()
                         # game.pop()
@@ -799,7 +744,6 @@ def main():
                             engine.stop(show_best=False)
                             user_to_move = True
                         if event.engine_finished:
-                            # last_computer_fen = None
                             done_computer_fen = None
                             done_move = chess.Move.null()
                             move = game.pop()
@@ -840,7 +784,6 @@ def main():
                         # legal_fens = compute_legal_fens(game.copy())
 
                         stop_search_and_clock()
-                        # last_computer_fen = game.board_fen()
                         text = Message.COMPUTER_MOVE(move=chess.Move.from_uci(event.uci_move), game=game.copy(), wait=False)
                         DisplayMsg.show(text)
                         game_copy = game.copy()
@@ -857,7 +800,6 @@ def main():
 
                         # clock must be stopped BEFORE the "book_move" event cause SetNRun resets the clock display
                         stop_clock()
-                        # last_computer_fen = game.board_fen()
                         if event.inbook:
                             DisplayMsg.show(Message.BOOK_MOVE())
                         searchmoves.add(event.move)
