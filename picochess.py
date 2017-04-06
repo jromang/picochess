@@ -283,7 +283,8 @@ def main():
                 game.pop()
                 logging.debug('Wrong color move -> sliding, reverting to: ' + game.board_fen())
             legal_moves = list(game.legal_moves)
-            user_move(legal_moves[last_legal_fens.index(fen)])
+            move = legal_moves[last_legal_fens.index(fen)]  # type: chess.Move
+            user_move(move)
             if interaction_mode in (Mode.NORMAL, Mode.REMOTE):
                 legal_fens = []
             else:
@@ -293,7 +294,8 @@ def main():
         elif fen in legal_fens:
             time_control.add_inc(game.turn)
             legal_moves = list(game.legal_moves)
-            user_move(legal_moves[legal_fens.index(fen)])
+            move = legal_moves[legal_fens.index(fen)]  # type: chess.Move
+            user_move(move)
             last_legal_fens = legal_fens
             if interaction_mode in (Mode.NORMAL, Mode.REMOTE):
                 legal_fens = []
