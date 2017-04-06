@@ -89,7 +89,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
         """
         Start listening for Messages on our queue and generate speech as appropriate.
         """
-        previous_move = ''  # Ignore repeated broadcasts of a move.
+        previous_move = chess.Move.null()  # Ignore repeated broadcasts of a move.
         system_picotalker = self.system_voice()
         logging.info('msg_queue ready')
         while True:
@@ -110,25 +110,27 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                             system_picotalker.talk(['newgame.ogg'])
                         break
                     if case(MessageApi.COMPUTER_MOVE):
-                        if message.move and message.game and str(message.move) != previous_move \
+                        if message.move and message.game and message.move != previous_move \
                                 and self.computer_picotalker is not None:
                             logging.debug('announcing COMPUTER_MOVE [%s]', message.move)
-                            self.computer_picotalker.talk(self.say_move(message.move, message.game.fen(), message.game))
-                            previous_move = str(message.move)
+                            game = message.game.copy()
+                            game.push(message.move)
+                            self.computer_picotalker.talk(self.say_last_move(game))
+                            previous_move = message.move
                         break
                     if case(MessageApi.USER_MOVE_DONE):
-                        if message.move and message.game and str(message.move) != previous_move \
+                        if message.move and message.game and message.move != previous_move \
                                 and self.user_picotalker is not None:
                             logging.debug('announcing USER_MOVE [%s]', message.move)
-                            self.user_picotalker.talk(self.say_move(message.move, message.fen, message.game))
-                            previous_move = str(message.move)
+                            self.user_picotalker.talk(self.say_last_move(message.game))
+                            previous_move = message.move
                         break
                     if case(MessageApi.REVIEW_MOVE_DONE):
-                        if message.move and message.game and str(message.move) != previous_move \
+                        if message.move and message.game and message.move != previous_move \
                                 and self.user_picotalker is not None:
                             logging.debug('announcing REVIEW_MOVE [%s]', message.move)
-                            self.user_picotalker.talk(self.say_move(message.move, message.fen, message.game))
-                            previous_move = str(message.move)
+                            self.user_picotalker.talk(self.say_last_move(message.game))
+                            previous_move = message.move
                         break
                     if case(MessageApi.GAME_ENDS):
                         if message.result == GameResult.OUT_OF_TIME:
@@ -229,7 +231,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
             return self.user_picotalker
 
     @staticmethod
-    def say_move(move, fen, game: chess.Board):
+    def say_last_move(game: chess.Board):
         """
         Take a chess.Move instance and a chess.BitBoard instance and speaks the move.
         """
@@ -262,8 +264,6 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
             '8': '8.ogg'
         }
 
-        # bit_board = chess.Board(fen)
-        # san_move = bit_board.san(move)
         bit_board = game.copy()
         move = bit_board.pop()
         san_move = bit_board.san(move)
