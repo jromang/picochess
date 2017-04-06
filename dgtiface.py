@@ -73,13 +73,16 @@ class DgtIface(DisplayDgt, Thread):
         """override this function."""
         raise NotImplementedError()
 
+    def getName(self):
+        return self.__class__.__name__
+
     def get_san(self, message, is_xl=False):
         """create a chess.board plus a text ready to display on clock."""
         bit_board = Board(message.fen)
         if bit_board.is_legal(message.move):
             move_text = bit_board.san(message.move)
         else:
-            logging.warning('illegal move {} found fen: {}'.format(message.move, message.fen))
+            logging.warning('[{}] illegal move {} found fen: {}'.format(self.getName(), message.move, message.fen))
             move_text = 'er{}' if is_xl else 'err {}'
             move_text = move_text.format(message.move.uci()[:4])
 
@@ -109,14 +112,15 @@ class DgtIface(DisplayDgt, Thread):
                 if self.clock_running:
                     self.stop_clock(message.devs)
                 else:
-                    logging.debug('clock is already stopped')
+                    logging.debug('[{}] clock is already stopped'.format(self.getName()))
                 break
             if case(DgtApi.CLOCK_START):
                 # log times
                 l_hms = hours_minutes_seconds(message.time_left)
                 r_hms = hours_minutes_seconds(message.time_right)
-                logging.debug('last time received from clock l:{} r:{}'.format(self.time_left, self.time_right))
-                logging.debug('sending time to clock l:{} r:{}'.format(l_hms, r_hms))
+                logging.debug('[{}] last time received from clock l:{} r:{}'
+                              .format(self.getName(), self.time_left, self.time_right))
+                logging.debug('[{}] sending time to clock l:{} r:{}'.format(self.getName(), l_hms, r_hms))
                 self.start_clock(message.time_left, message.time_right, message.side, message.devs)
                 break
             if case(DgtApi.CLOCK_VERSION):
@@ -130,7 +134,8 @@ class DgtIface(DisplayDgt, Thread):
                         self.enable_dgt_3000 = True
                 break
             if case(DgtApi.CLOCK_TIME):
-                logging.debug('({}) clock: received time from clock l:{} r:{}'.format(message.dev, message.time_left, message.time_right))
+                logging.debug('[{}] ({}) clock: received time from clock l:{} r:{}'
+                              .format(self.getName(), message.dev, message.time_left, message.time_right))
                 self.time_left = message.time_left
                 self.time_right = message.time_right
                 break
@@ -142,7 +147,7 @@ class DgtIface(DisplayDgt, Thread):
 
     def run(self):
         """called from threading.Thread by its start() function."""
-        logging.info('dgt_queue ready')
+        logging.info('[{}] dgt_queue ready'.format(self.getName()))
         while True:
             # Check if we have something to display
             try:
