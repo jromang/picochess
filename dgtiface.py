@@ -53,7 +53,7 @@ class DgtIface(DisplayDgt, Thread):
         """override this function."""
         raise NotImplementedError()
 
-    def light_squares_revelation_board(self, squares, type):
+    def light_squares_revelation_board(self, squares, typ):
         """override this function."""
         raise NotImplementedError()
 
@@ -103,7 +103,7 @@ class DgtIface(DisplayDgt, Thread):
                 self.clear_light_revelation_board()
                 break
             if case(DgtApi.LIGHT_SQUARES):
-                self.light_squares_revelation_board(message.uci_move, message.type)
+                self.light_squares_revelation_board(message.uci_move, message.typ)
                 break
             if case(DgtApi.CLOCK_STOP):
                 if self.clock_running:

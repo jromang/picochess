@@ -90,7 +90,6 @@ class ChannelHandler(ServerRequestHandler):
             Observable.fire(Event.KEYBOARD_BUTTON(button=self.get_argument('button'), dev='web'))
         elif action == 'command':
             self.process_console_command(self.get_argument('command'))
-            pass
 
 
 class EventHandler(WebSocketHandler):
@@ -200,24 +199,24 @@ class WebVr(DgtIface):
 
     def _runclock(self):
         if self.time_side == ClockSide.LEFT:
-            h, m, s = self.time_left
-            time_left = 3600*h + 60*m + s - 1
+            hours, mins, secs = self.time_left
+            time_left = 3600*hours + 60*mins + secs - 1
             if time_left <= 0:
                 logging.info('time left is negative {}'.format(time_left))
                 self.virtual_timer.stop()
                 self.time_left = 0
             self.time_left = hours_minutes_seconds(time_left)
         if self.time_side == ClockSide.RIGHT:
-            h, m, s = self.time_right
-            time_right = 3600*h + 60*m + s - 1
+            hours, mins, secs = self.time_right
+            time_right = 3600*hours + 60*mins + secs - 1
             if time_right <= 0:
                 logging.info('time right is negative {}'.format(time_right))
                 self.virtual_timer.stop()
                 self.time_right = 0
             self.time_right = hours_minutes_seconds(time_right)
-        self.display_time(self.time_left, self.time_right)
+        self._display_time(self.time_left, self.time_right)
 
-    def display_time(self, time_l, time_r):
+    def _display_time(self, time_l, time_r):
         if time_l is None or time_r is None:
             logging.debug('time values not set - abort function')
         elif self.clock_show_time:
@@ -275,7 +274,7 @@ class WebVr(DgtIface):
             return
         if self.clock_running or message.force:
             self.clock_show_time = True
-            self.display_time(self.time_left, self.time_right)
+            self._display_time(self.time_left, self.time_right)
         else:
             logging.debug('(web) clock isnt running - no need for endText')
 
@@ -307,10 +306,10 @@ class WebVr(DgtIface):
         # simulate the "start_clock" function from dgthw/pi
         self.time_left = hours_minutes_seconds(time_left)
         self.time_right = hours_minutes_seconds(time_right)
-        self.display_time(self.time_left, self.time_right)
+        self._display_time(self.time_left, self.time_right)
 
-    def light_squares_revelation_board(self, squares, type: str):
-        result = {'event': 'Light', 'move': squares, 'play': type}
+    def light_squares_revelation_board(self, squares, typ: str):
+        result = {'event': 'Light', 'move': squares, 'play': typ}
         EventHandler.write_to_clients(result)
 
     def clear_light_revelation_board(self):

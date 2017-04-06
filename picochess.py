@@ -58,6 +58,7 @@ class AlternativeMover:
         self.excludemoves = set()
 
     def all(self, game: chess.Board):
+        """Get all remaining legal moves from game position."""
         searchmoves = set(game.legal_moves) - self.excludemoves
         if not searchmoves:
             self.reset()
@@ -67,11 +68,11 @@ class AlternativeMover:
     def book(self, bookreader, game_copy: chess.Board):
         """Get a BookMove or None from game position."""
         try:
-            bm = bookreader.weighted_choice(game_copy, self.excludemoves)
+            choice = bookreader.weighted_choice(game_copy, self.excludemoves)
         except IndexError:
             return None
 
-        book_move = bm.move()
+        book_move = choice.move()
         self.add(book_move)
         game_copy.push(book_move)
         try:
@@ -82,15 +83,18 @@ class AlternativeMover:
         return chess.uci.BestMove(book_move, book_ponder)
 
     def add(self, move):
+        """Add move to the excluded move list."""
         self.excludemoves.add(move)
 
     def reset(self):
+        """Reset the exclude move list."""
         self.excludemoves = set()
 
 
 def main():
 
     def display_ip_info():
+        """Fire an IP_INFO message with the IP adr."""
         location, ext_ip, int_ip = get_location()
         info = {'location': location, 'ext_ip': ext_ip, 'int_ip': int_ip, 'version': version}
         DisplayMsg.show(Message.IP_INFO(info=info))
@@ -109,7 +113,7 @@ def main():
             game_copy.pop()
         return fens
 
-    def think(game: chess.Board, tc: TimeControl):
+    def think(game: chess.Board, timec: TimeControl):
         """
         Start a new search on the current game.
         If a move is found in the opening book, fire an event in a few seconds.
@@ -123,7 +127,7 @@ def main():
                 time.sleep(0.1)
                 logging.warning('engine is still not waiting')
             engine.position(copy.deepcopy(game))
-            uci_dict = tc.uci()
+            uci_dict = timec.uci()
             uci_dict['searchmoves'] = searchmoves.all(game)
             engine.go(uci_dict)
 
@@ -138,6 +142,7 @@ def main():
         analyse(game)
 
     def stop_search_and_clock():
+        """depending on the interaction mode stop search and clock."""
         if interaction_mode == Mode.NORMAL:
             stop_clock()
             if not engine.is_waiting():
@@ -153,6 +158,7 @@ def main():
         engine.stop()
 
     def stop_clock():
+        """Stop the clock."""
         if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
             time_control.stop()
             DisplayMsg.show(Message.CLOCK_STOP(devs={'ser', 'i2c', 'web'}))
@@ -160,6 +166,7 @@ def main():
             logging.warning('wrong function call! mode: {}'.format(interaction_mode))
 
     def start_clock():
+        """Start the clock."""
         if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
             time_control.start(game.turn)
             tc_init = time_control.get_parameters()
@@ -233,6 +240,7 @@ def main():
         return condition1 or condition2
 
     def process_fen(fen: str):
+        """Process given fen like doMove, undoMove, takebackPosition, handleSliding."""
         nonlocal last_legal_fens
         nonlocal searchmoves
         nonlocal legal_fens
@@ -347,6 +355,7 @@ def main():
                     break
 
     def set_wait_state(start_search=True):
+        """Enter engine waiting (normal mode) and maybe (by parameter) start pondering."""
         if interaction_mode == Mode.NORMAL:
             nonlocal play_mode
             play_mode = PlayMode.USER_WHITE if game.turn == chess.WHITE else PlayMode.USER_BLACK
@@ -359,10 +368,10 @@ def main():
                 analyse(game)
 
     def transfer_time(time_list: list):
-        """Tranfer the time list to a TimeControl Object and a Text Object."""
-        def num(ts):
+        """Transfer the time list to a TimeControl Object and a Text Object."""
+        def num(time_str):
             try:
-                return int(ts)
+                return int(time_str)
             except ValueError:
                 return 1
 
@@ -385,6 +394,7 @@ def main():
         return timec, textc
 
     def get_engine_level_dict(engine_level):
+        """Transfer an engine level to its level_dict plus an index."""
         from engine import get_installed_engines
 
         installed_engines = get_installed_engines(engine.get_shell(), engine.get_file())
@@ -458,8 +468,8 @@ def main():
 
     engine_file = args.engine
     if engine_file is None:
-        el = read_engine_ini()
-        engine_file = el[0]['file']  # read the first engine filename and use it as standard
+        eng_ini = read_engine_ini()
+        engine_file = eng_ini[0]['file']  # read the first engine filename and use it as standard
 
     # Enable logging
     if args.log_file:
@@ -471,9 +481,9 @@ def main():
 
     logging.debug('#'*20 + ' PicoChess v' + version + ' ' + '#'*20)
     # log the startup parameters but hide the password fields
-    p = copy.copy(vars(args))
-    p['mailgun_key'] = p['engine_remote_key'] = p['engine_remote_pass'] = p['smtp_pass'] = '*****'
-    logging.debug('startup parameters: {}'.format(p))
+    a_copy = copy.copy(vars(args))
+    a_copy['mailgun_key'] = a_copy['smtp_pass'] = a_copy['engine_remote_key'] = a_copy['engine_remote_pass'] = '*****'
+    logging.debug('startup parameters: {}'.format(a_copy))
     if unknown:
         logging.warning('invalid parameter given {}'.format(unknown))
 
@@ -622,7 +632,7 @@ def main():
                     # Closeout the engine process and threads
                     # The all return non-zero error codes, 0=success
                     if engine.quit():  # Ask nicely
-                        if engine.terminate():  # If you won't go nicely.... 
+                        if engine.terminate():  # If you won't go nicely....
                             if engine.kill():  # Right that does it!
                                 logging.error('engine shutdown failure')
                                 DisplayMsg.show(Message.ENGINE_FAIL())
