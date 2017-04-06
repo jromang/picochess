@@ -162,7 +162,8 @@ def main():
     def start_clock():
         if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
             time_control.start(game.turn)
-            DisplayMsg.show(Message.CLOCK_START(turn=game.turn, tc_init=time_control.get_parameters(), devs={'ser', 'i2c', 'web'}))
+            tc_init = time_control.get_parameters()
+            DisplayMsg.show(Message.CLOCK_START(turn=game.turn, tc_init=tc_init, devs={'ser', 'i2c', 'web'}))
         else:
             logging.warning('wrong function call! mode: {}'.format(interaction_mode))
 
@@ -202,6 +203,8 @@ def main():
         if move not in game.legal_moves:
             logging.warning('Illegal move [%s]', move)
         else:
+            stop_search_and_clock()
+
             done_computer_fen = None
             done_move = chess.Move.null()
             game.push(move)
@@ -665,7 +668,8 @@ def main():
 
                     if game.move_stack:
                         if not (game.is_game_over() or game_declared):
-                            DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=game.copy()))
+                            result = GameResult.ABORT
+                            DisplayMsg.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=game.copy()))
                     game = chess.Board(event.fen, uci960)
                     # see new_game
                     stop_search_and_clock()
@@ -690,7 +694,8 @@ def main():
                         uci960 = event.pos960 != 518
 
                         if not (game.is_game_over() or game_declared):
-                            DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=game.copy()))
+                            result = GameResult.ABORT
+                            DisplayMsg.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=game.copy()))
 
                         game = chess.Board()
                         if uci960:
@@ -780,12 +785,9 @@ def main():
 
                 if case(EventApi.REMOTE_MOVE):
                     if interaction_mode == Mode.REMOTE and is_not_user_turn(game.turn):
-                        # handle_move(move=chess.Move.from_uci(event.uci_move), typ='remote')
-                        # legal_fens = compute_legal_fens(game.copy())
-
                         stop_search_and_clock()
-                        text = Message.COMPUTER_MOVE(move=chess.Move.from_uci(event.uci_move), game=game.copy(), wait=False)
-                        DisplayMsg.show(text)
+                        move = chess.Move.from_uci(event.uci_move)
+                        DisplayMsg.show(Message.COMPUTER_MOVE(move=move, game=game.copy(), wait=False))
                         game_copy = game.copy()
                         game_copy.push(event.move)
                         done_computer_fen = game.board_fen()
@@ -796,15 +798,13 @@ def main():
 
                 if case(EventApi.BEST_MOVE):
                     if interaction_mode == Mode.NORMAL and is_not_user_turn(game.turn):
-                        # handle_move(move=event.move, ponder=event.ponder, inbook=event.inbook, typ='best')
-
                         # clock must be stopped BEFORE the "book_move" event cause SetNRun resets the clock display
                         stop_clock()
                         if event.inbook:
                             DisplayMsg.show(Message.BOOK_MOVE())
                         searchmoves.add(event.move)
-                        text = Message.COMPUTER_MOVE(move=event.move, ponder=event.ponder, game=game.copy(), wait=event.inbook)
-                        DisplayMsg.show(text)
+                        DisplayMsg.show(Message.COMPUTER_MOVE(move=event.move, ponder=event.ponder, game=game.copy(),
+                                                              wait=event.inbook))
                         game_copy = game.copy()
                         game_copy.push(event.move)
                         done_computer_fen = game_copy.board_fen()
@@ -822,7 +822,8 @@ def main():
                     break
 
                 if case(EventApi.NEW_SCORE):
-                    DisplayMsg.show(Message.NEW_SCORE(score=event.score, mate=event.mate, mode=interaction_mode, turn=game.turn))
+                    DisplayMsg.show(Message.NEW_SCORE(score=event.score, mate=event.mate, mode=interaction_mode,
+                                                      turn=game.turn))
                     break
 
                 if case(EventApi.NEW_DEPTH):
@@ -850,7 +851,8 @@ def main():
                     if engine.is_pondering():
                         stop_search()
                     set_wait_state()
-                    DisplayMsg.show(Message.INTERACTION_MODE(mode=event.mode, mode_text=event.mode_text, show_ok=event.show_ok))
+                    DisplayMsg.show(Message.INTERACTION_MODE(mode=event.mode, mode_text=event.mode_text,
+                                                             show_ok=event.show_ok))
                     break
 
                 if case(EventApi.SET_OPENING_BOOK):
@@ -865,30 +867,35 @@ def main():
                 if case(EventApi.SET_TIME_CONTROL):
                     time_control.stop(log=False)
                     time_control = TimeControl(**event.tc_init)
+                    tc_init = time_control.get_parameters()
                     config = ConfigObj('picochess.ini')
                     if time_control.mode == TimeMode.BLITZ:
-                        config['time'] = '{:d} 0'.format(time_control.minutes_per_game)
+                        config['time'] = '{:d} 0'.format(tc_init['blitz'])
                     elif time_control.mode == TimeMode.FISCHER:
-                        config['time'] = '{:d} {:d}'.format(time_control.minutes_per_game, time_control.fischer_increment)
+                        config['time'] = '{:d} {:d}'.format(tc_init['blitz'], tc_init['fischer'])
                     elif time_control.mode == TimeMode.FIXED:
-                        config['time'] = '{:d}'.format(time_control.seconds_per_move)
+                        config['time'] = '{:d}'.format(tc_init['fixed'])
                     config.write()
-                    DisplayMsg.show(Message.TIME_CONTROL(time_text=event.time_text, show_ok=event.show_ok, tc_init=time_control.get_parameters()))
+                    text = Message.TIME_CONTROL(time_text=event.time_text, show_ok=event.show_ok, tc_init=tc_init)
+                    DisplayMsg.show(text)
                     break
 
                 if case(EventApi.OUT_OF_TIME):
                     stop_search_and_clock()
-                    DisplayMsg.show(Message.GAME_ENDS(result=GameResult.OUT_OF_TIME, play_mode=play_mode, game=game.copy()))
+                    result = GameResult.OUT_OF_TIME
+                    DisplayMsg.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=game.copy()))
                     break
 
                 if case(EventApi.SHUTDOWN):
-                    DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=game.copy()))
+                    result = GameResult.ABORT
+                    DisplayMsg.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=game.copy()))
                     DisplayMsg.show(Message.SYSTEM_SHUTDOWN())
                     shutdown(args.dgtpi, dev=event.dev)
                     break
 
                 if case(EventApi.REBOOT):
-                    DisplayMsg.show(Message.GAME_ENDS(result=GameResult.ABORT, play_mode=play_mode, game=game.copy()))
+                    result = GameResult.ABORT
+                    DisplayMsg.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=game.copy()))
                     DisplayMsg.show(Message.SYSTEM_REBOOT())
                     reboot(args.dgtpi, dev=event.dev)
                     break
