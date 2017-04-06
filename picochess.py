@@ -242,7 +242,7 @@ def main():
         nonlocal done_computer_fen
 
         # Check for same position
-        if (fen == game.board_fen() and not done_computer_fen) or fen == done_computer_fen:
+        if fen == game.board_fen() and not done_computer_fen:
             logging.debug('Already in this fen: ' + fen)
 
         # Check if we have to undo a previous move (sliding)
