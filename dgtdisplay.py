@@ -161,17 +161,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 else:
                     Observable.fire(Event.PAUSE_RESUME())
 
-            if self.engine_finished:
-                # @todo Protect against multi entrance of Alt-move
-                self.engine_finished = False  # This is not 100% ok, but for the moment better as nothing
-                Observable.fire(Event.ALTERNATIVE_MOVE())
-            else:
-                if self.dgtmenu.get_mode() in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
-                    text = self.dgttranslate.text('B00_nofunction')
-                    DispatchDgt.fire(text)
-                else:
-                    Observable.fire(Event.PAUSE_RESUME())
-
     def _process_button3(self, dev):
         logging.debug('({}) clock: handle button 3 press'.format(dev))
         if self._inside_menu():
