@@ -335,6 +335,9 @@ $(function() {
                     if(data.play === 'reload') {
                         remove_highlights();
                     }
+                    if(data.play === 'user') {
+                        highlightBoard(data.move, 'user');
+                    }
                     break;
                 case 'Game':
                     newBoard(data.fen);
@@ -349,7 +352,7 @@ $(function() {
                     dgtClockStatusEl.html(data.msg);
                     break;
                 case 'Light':
-                    highlightBoard(data.move, data.play);
+                    highlightBoard(data.move, 'computer');
                     break;
                 case 'Clear':
                     remove_highlights();

@@ -117,9 +117,9 @@ class DgtHw(DgtIface):
         else:
             logging.debug('(ser) clock isnt running - no need for endText')
 
-    def light_squares_revelation_board(self, uci_move: str, typ: str):
+    def light_squares_revelation_board(self, uci_move: str):
         """light the Rev2 leds."""
-        if self.dgtboard.use_revelation_leds and typ == 'computer':
+        if self.dgtboard.use_revelation_leds:
             logging.debug("REV2 lights on move {}".format(uci_move))
             fr_s = (8 - int(uci_move[1])) * 8 + ord(uci_move[0]) - ord('a')
             to_s = (8 - int(uci_move[3])) * 8 + ord(uci_move[2]) - ord('a')

@@ -202,7 +202,7 @@ class WebVr(DgtIface):
             hours, mins, secs = self.time_left
             time_left = 3600*hours + 60*mins + secs - 1
             if time_left <= 0:
-                logging.info('time left is negative {}'.format(time_left))
+                logging.info('negative/zero time left: {}'.format(time_left))
                 self.virtual_timer.stop()
                 self.time_left = 0
             self.time_left = hours_minutes_seconds(time_left)
@@ -210,7 +210,7 @@ class WebVr(DgtIface):
             hours, mins, secs = self.time_right
             time_right = 3600*hours + 60*mins + secs - 1
             if time_right <= 0:
-                logging.info('time right is negative {}'.format(time_right))
+                logging.info('negative/zero time right: {}'.format(time_right))
                 self.virtual_timer.stop()
                 self.time_right = 0
             self.time_right = hours_minutes_seconds(time_right)
@@ -222,7 +222,10 @@ class WebVr(DgtIface):
         elif self.clock_show_time:
             text_l = '{}:{:02d}.{:02d}'.format(time_l[0], time_l[1], time_l[2])
             text_r = '{}:{:02d}.{:02d}'.format(time_r[0], time_r[1], time_r[2])
-            text = text_l + '&nbsp;&nbsp;' + text_r
+            icon_d = 'fa-caret-right' if self.time_side == ClockSide.RIGHT else 'fa-caret-left'
+            if self.time_side == ClockSide.NONE:
+                icon_d = 'fa-sort'
+            text = text_l + '&nbsp;<i class="fa ' + icon_d + '"></i>&nbsp;' + text_r
             self._create_clock_text()
             self.shared['clock_text'] = text
             result = {'event': 'Clock', 'msg': text}
@@ -308,8 +311,8 @@ class WebVr(DgtIface):
         self.time_right = hours_minutes_seconds(time_right)
         self._display_time(self.time_left, self.time_right)
 
-    def light_squares_revelation_board(self, squares, typ: str):
-        result = {'event': 'Light', 'move': squares, 'play': typ}
+    def light_squares_revelation_board(self, squares):
+        result = {'event': 'Light', 'move': squares}
         EventHandler.write_to_clients(result)
 
     def clear_light_revelation_board(self):
@@ -477,8 +480,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 fen = _oldstyle_fen(message.game)
                 mov = message.move.uci()
                 result = {'pgn': pgn_str, 'fen': fen, 'event': 'Fen', 'move': mov, 'play': 'computer'}
-                self.shared['last_dgt_move_msg'] = result
-                # EventHandler.write_to_clients(result)
+                self.shared['last_dgt_move_msg'] = result  # not send => keep it for COMPUTER_MOVE_DONE
                 break
             if case(MessageApi.COMPUTER_MOVE_DONE):
                 result = self.shared['last_dgt_move_msg']

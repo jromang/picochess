@@ -496,7 +496,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         disp = Dgt.DISPLAY_MOVE(move=move, fen=message.game.fen(), side=side, wait=message.wait, maxtime=0,
                                 beep=self.dgttranslate.bl(BeepLevel.CONFIG), devs={'ser', 'i2c', 'web'})
         DispatchDgt.fire(disp)
-        DispatchDgt.fire(Dgt.LIGHT_SQUARES(uci_move=move.uci(), typ='computer'))
+        DispatchDgt.fire(Dgt.LIGHT_SQUARES(uci_move=move.uci()))
         self.leds_are_on = True
 
     def _process_user_move(self, message):
@@ -510,7 +510,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.engine_finished = False
         if not self.dgtmenu.get_confirm():
             DispatchDgt.fire(self.dgttranslate.text('K05_okuser'))
-        DispatchDgt.fire(Dgt.LIGHT_SQUARES(uci_move=message.move.uci(), typ='user'))  # display hightlight at server
 
     def _process_review_move(self, message):
         if self.leds_are_on:  # can happen in case of a sliding move
