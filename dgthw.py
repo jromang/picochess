@@ -129,7 +129,8 @@ class DgtHw(DgtIface):
         """clear the Rev2 leds."""
         if self.dgtboard.use_revelation_leds:
             logging.debug('REV2 lights turned off')
-            self.dgtboard.write_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+            # self.dgtboard.write_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+            self.dgtboard.write_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x01, 98, 99, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
 
     def stop_clock(self, devs: set):
         """stop the dgtxl/3k."""
