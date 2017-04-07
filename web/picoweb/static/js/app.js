@@ -62,7 +62,7 @@ var setupBoardFen = START_FEN;
 var DataTableFen = START_FEN;
 
 function updateDGTPosition(data) {
-    if (!goToPosition(data.fen) || data.play == 'reload') {
+    if (!goToPosition(data.fen) || data.play === 'reload') {
         loadGame(data['pgn'].split("\n"));
         goToPosition(data.fen);
     }
@@ -332,6 +332,9 @@ $(function() {
                 case 'Fen':
                     updateDGTPosition(data);
                     updateStatus();
+                    if(data.play === 'reload') {
+                        remove_highlights();
+                    }
                     break;
                 case 'Game':
                     newBoard(data.fen);

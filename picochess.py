@@ -761,9 +761,9 @@ def main():
                             engine.stop(show_best=False)
                             user_to_move = True
                         if event.engine_finished:
+                            move = done_move if done_computer_fen else game.pop()
                             done_computer_fen = None
                             done_move = chess.Move.null()
-                            move = game.pop()
                             user_to_move = True
                         else:
                             move = chess.Move.null()
