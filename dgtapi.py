@@ -74,6 +74,8 @@ class EventApi():
     STOP_SEARCH = 'EVT_STOP_SEARCH'  # Engine stops the search
     # Timecontrol events
     OUT_OF_TIME = 'EVT_OUT_OF_TIME'  # Clock flag fallen
+    # Special events
+    EXIT_MENU = 'EVT_EXIT_MENU'  # User exists the menu
 
 
 class MessageApi():
@@ -123,6 +125,8 @@ class MessageApi():
     SYSTEM_SHUTDOWN = 'MSG_SYSTEM_SHUTDOWN'  # Sends a Shutdown
     SYSTEM_REBOOT = 'MSG_SYSTEM_REBOOT'  # Sends a Reboot
     SET_VOICE = 'MSG_SET_VOICE'  # User chooses a new voice
+
+    EXIT_MENU = 'MSG_EXIT_MENU'  # User exits the menu
 
 
 class DgtApi():
@@ -201,6 +205,8 @@ class Message():
     SYSTEM_REBOOT = ClassFactory(MessageApi.SYSTEM_REBOOT, [])
     SET_VOICE = ClassFactory(MessageApi.SET_VOICE, ['type', 'lang', 'speaker'])
 
+    EXIT_MENU = ClassFactory(MessageApi.EXIT_MENU, [])
+
 
 class Event():
     """event used to send towards picochess."""
@@ -235,3 +241,5 @@ class Event():
     STOP_SEARCH = ClassFactory(EventApi.STOP_SEARCH, ['engine_status'])
     # Timecontrol events
     OUT_OF_TIME = ClassFactory(EventApi.OUT_OF_TIME, ['color'])
+    # special events
+    EXIT_MENU = ClassFactory(EventApi.EXIT_MENU, [])

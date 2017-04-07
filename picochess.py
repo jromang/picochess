@@ -758,7 +758,6 @@ def main():
                     if done_computer_fen:
                         done_computer_fen = None
                         done_move = chess.Move.null()
-                        # DisplayMsg.show(Message.ALTERNATIVE_MOVE(game=game.copy()))
                         think(game, time_control, Message.ALTERNATIVE_MOVE(game=game.copy()))
                     break
 
@@ -875,8 +874,8 @@ def main():
                         stop_search()
                     if engine.is_pondering():
                         stop_search()
-                    set_wait_state(Message.INTERACTION_MODE(mode=event.mode, mode_text=event.mode_text,
-                                                            show_ok=event.show_ok))
+                    msg = Message.INTERACTION_MODE(mode=event.mode, mode_text=event.mode_text, show_ok=event.show_ok)
+                    set_wait_state(msg)
                     break
 
                 if case(EventApi.SET_OPENING_BOOK):
@@ -944,6 +943,10 @@ def main():
 
                 if case(EventApi.KEYBOARD_FEN):
                     DisplayMsg.show(Message.DGT_FEN(fen=event.fen))
+                    break
+
+                if case(EventApi.EXIT_MENU):
+                    DisplayMsg.show(Message.EXIT_MENU())
                     break
 
                 if case():  # Default

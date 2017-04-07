@@ -664,7 +664,7 @@ class DgtMenu(object):
                 break
             if case(MenuState.TIME_BLITZ_CTRL):
                 # do action!
-                time_text = self.dgttranslate.text('B10_oktime')
+                time_text = self.dgttranslate.text('B11_oktime')
                 tc = self.tc_blitz_map[list(self.tc_blitz_map)[self.menu_time_blitz]] # type: TimeControl
                 Observable.fire(Event.SET_TIME_CONTROL(tc_init=tc.get_parameters(), time_text=time_text, show_ok=True))
                 text = self.save_choices()
@@ -674,7 +674,7 @@ class DgtMenu(object):
                 break
             if case(MenuState.TIME_FISCH_CTRL):
                 # do action!
-                time_text = self.dgttranslate.text('B10_oktime')
+                time_text = self.dgttranslate.text('B11_oktime')
                 tc = self.tc_fisch_map[list(self.tc_fisch_map)[self.menu_time_fisch]]  # type: TimeControl
                 Observable.fire(Event.SET_TIME_CONTROL(tc_init=tc.get_parameters(), time_text=time_text, show_ok=True))
                 text = self.save_choices()
@@ -684,7 +684,7 @@ class DgtMenu(object):
                 break
             if case(MenuState.TIME_FIXED_CTRL):
                 # do action!
-                time_text = self.dgttranslate.text('B10_oktime')
+                time_text = self.dgttranslate.text('B11_oktime')
                 tc = self.tc_fixed_map[list(self.tc_fixed_map)[self.menu_time_fixed]]  # type: TimeControl
                 Observable.fire(Event.SET_TIME_CONTROL(tc_init=tc.get_parameters(), time_text=time_text, show_ok=True))
                 text = self.save_choices()
@@ -694,7 +694,7 @@ class DgtMenu(object):
                 break
             if case(MenuState.BOOK_NAME):
                 # do action!
-                book_text = self.dgttranslate.text('B10_okbook')
+                book_text = self.dgttranslate.text('B11_okbook')
                 Observable.fire(Event.SET_OPENING_BOOK(book=self.all_books[self.menu_book], book_text=book_text, show_ok=True))
                 text = self.save_choices()
                 break
@@ -709,7 +709,7 @@ class DgtMenu(object):
                     config['engine-level'] = None
                     config.write()
                     eng = self.installed_engines[self.menu_engine_name]
-                    eng_text = self.dgttranslate.text('B10_okengine')
+                    eng_text = self.dgttranslate.text('B11_okengine')
                     Observable.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options={}, show_ok=True))
                     self.engine_restart = True
                 break
@@ -726,7 +726,7 @@ class DgtMenu(object):
                     Observable.fire(Event.LEVEL(options={}, level_text=self.dgttranslate.text('B10_level', msg)))
                 else:
                     options = {}
-                eng_text = self.dgttranslate.text('B10_okengine')
+                eng_text = self.dgttranslate.text('B11_okengine')
                 Observable.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options=options, show_ok=True))
                 self.engine_restart = True
                 text = self.save_choices()

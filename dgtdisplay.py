@@ -59,7 +59,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         if self.dgtmenu.inside_menu():
             self.dgtmenu.enter_top_menu()
             if not self.dgtmenu.get_confirm():
-                DispatchDgt.fire(self.dgttranslate.text('K05_exitmenu'))
+                # DispatchDgt.fire(self.dgttranslate.text('K05_exitmenu'))
                 return True
         return False
 
@@ -177,11 +177,12 @@ class DgtDisplay(DisplayMsg, threading.Thread):
 
     def _process_button4(self, dev):
         logging.debug('({}) clock: handle button 4 press'.format(dev))
-        text = self.dgtmenu.down()
+        text = self.dgtmenu.down()  # button4 can exit the menu, so check
         if text:
             DispatchDgt.fire(text)
         else:
-            self._exit_display(wait=True)
+            Observable.fire(Event.EXIT_MENU())
+            # self._exit_display(wait=True)
 
     def _process_lever(self, right_side_down, dev):
         logging.debug('({}) clock: handle lever press - right_side_down: {}'.format(dev, right_side_down))
@@ -414,7 +415,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         if not self.dgtmenu.get_confirm() or not message.show_ok:
             DispatchDgt.fire(message.eng_text)
         self.dgtmenu.set_engine_restart(False)
-        self._exit_display(force=True)
+        # self._exit_display(force=True)
 
     def _process_engine_startup(self, message):
         self.dgtmenu.installed_engines = get_installed_engines(message.shell, message.file)
@@ -518,7 +519,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         time_left, time_right = timectrl.current_clock_time(flip_board=self.dgtmenu.get_flip_board())
         DispatchDgt.fire(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE, wait=True,
                                          devs={'ser', 'i2c', 'web'}))
-        self._exit_display(force=True)
+        # self._exit_display(force=True)
 
     def _process_new_score(self, message):
         if message.mate is None:
@@ -656,7 +657,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             if case(MessageApi.OPENING_BOOK):
                 if not self.dgtmenu.get_confirm() or not message.show_ok:
                     DispatchDgt.fire(message.book_text)
-                self._exit_display(force=True)
+                # self._exit_display(force=True)
                 break
             if case(MessageApi.TAKE_BACK):
                 if self.leds_are_on:
@@ -664,7 +665,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                     self.leds_are_on = False
                 self._reset_moves_and_score()
                 self.engine_finished = False
-                DispatchDgt.fire(self.dgttranslate.text('C00_takeback'))
+                DispatchDgt.fire(self.dgttranslate.text('C10_takeback'))
                 break
             if case(MessageApi.GAME_ENDS):
                 if not self.dgtmenu.get_engine_restart():  # filter out the shutdown/reboot process
@@ -678,7 +679,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 self.engine_finished = False
                 if not self.dgtmenu.get_confirm() or not message.show_ok:
                     DispatchDgt.fire(message.mode_text)
-                self._exit_display(force=True)
+                # self._exit_display(force=True)
                 break
             if case(MessageApi.PLAY_MODE):
                 DispatchDgt.fire(message.play_mode_text)
@@ -754,6 +755,9 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 self.hint_fen = None
                 self.hint_turn = None
                 logging.debug('user ignored move {}'.format(message.move))
+                break
+            if case(MessageApi.EXIT_MENU):
+                self._exit_display(wait=True)
                 break
             if case():  # Default
                 # print(message)
