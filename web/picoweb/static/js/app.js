@@ -297,7 +297,7 @@ $(function() {
     window.multipv = 1;
 
     $(document).keydown(function(e) {
-        if (e.keyCode == 39) { //right arrow
+        if (e.keyCode === 39) { //right arrow
             if (e.ctrlKey) {
                 $('#endBtn').click();
             } else {
@@ -308,7 +308,7 @@ $(function() {
     });
 
     $(document).keydown(function(e) {
-        if (e.keyCode == 37) { //left arrow
+        if (e.keyCode === 37) { //left arrow
             if (e.ctrlKey) {
                 $('#startBtn').click();
             } else {
@@ -518,7 +518,7 @@ function WebExporter(columns) {
     };
 
     this.put_fullmove_number = function(turn, fullmove_number, variation_start) {
-        if (turn == 'w') {
+        if (turn === 'w') {
             this.write_token(String(fullmove_number) + ". ");
         }
         else if (variation_start) {
@@ -631,7 +631,7 @@ function PGNExporter(columns) {
     };
 
     this.put_fullmove_number = function(turn, fullmove_number, variation_start) {
-        if (turn == 'w') {
+        if (turn === 'w') {
             this.write_token(String(fullmove_number) + ". ");
         }
         else if (variation_start) {
@@ -988,10 +988,10 @@ function loadGame(pgn_lines) {
         var token = result[0];
         var comment;
 
-        if (token == '1-0' || token == '0-1' || token == '1/2-1/2' || token == '*') {
+        if (token === '1-0' || token === '0-1' || token === '1/2-1/2' || token === '*') {
             game_headers['Result'] = token;
         }
-        else if (token[0] == '{') {
+        else if (token[0] === '{') {
             last_variation_stack_index = variation_stack.length - 1;
 
             comment = token.substring(1, token.length - 1);
@@ -1014,7 +1014,7 @@ function loadGame(pgn_lines) {
                 comment = undefined;
             }
         }
-        else if (token == '(') {
+        else if (token === '(') {
             last_board_stack_index = board_stack.length - 1;
             last_variation_stack_index = variation_stack.length - 1;
 
@@ -1025,31 +1025,31 @@ function loadGame(pgn_lines) {
                 in_variation = false;
             }
         }
-        else if (token == ')') {
+        else if (token === ')') {
             if (variation_stack.length > 1) {
                 variation_stack.pop();
                 board_stack.pop();
             }
         }
-        else if (token[0] == '$') {
+        else if (token[0] === '$') {
             variation_stack[variation_stack.length - 1].nags.push(token.slice(1));
         }
-        else if (token == '?') {
+        else if (token === '?') {
             variation_stack[variation_stack.length - 1].nags.push(NAG_MISTAKE);
         }
-        else if (token == '??') {
+        else if (token === '??') {
             variation_stack[variation_stack.length - 1].nags.push(NAG_BLUNDER);
         }
-        else if (token == '!') {
+        else if (token === '!') {
             variation_stack[variation_stack.length - 1].nags.push(NAG_GOOD_MOVE);
         }
-        else if (token == '!!') {
+        else if (token === '!!') {
             variation_stack[variation_stack.length - 1].nags.push(NAG_BRILLIANT_MOVE);
         }
-        else if (token == '!?') {
+        else if (token === '!?') {
             variation_stack[variation_stack.length - 1].nags.push(NAG_SPECULATIVE_MOVE);
         }
-        else if (token == '?!') {
+        else if (token === '?!') {
             variation_stack[variation_stack.length - 1].nags.push(NAG_DUBIOUS_MOVE);
         }
         else {
@@ -1305,16 +1305,24 @@ function formatEngineOutput(line) {
             multipv = Number(tokens[multipv_index + 1]);
         }
 
-        var score = tokens[score_index];
-        if (score == 'cp') {
+        var token = tokens[score_index];
+        var score = '?';
+        if (token === 'mate') {
+            score = '#' + token + tokens[score_index + 1];
+        }
+        else {
             score = (tokens[score_index + 1] / 100.0).toFixed(2);
-            if (analysis_game.turn() == 'b') {
+            if (analysis_game.turn() === 'b') {
                 score *= -1;
             }
+            if (token === 'lowerbound') {
+                score = '>' + score;
+            }
+            if (token === 'upperbound') {
+                score = '<' + score;
+            }
         }
-        else if (score == 'mate') {
-            score = '#' + score;
-        }
+
         var pv_index = tokens.indexOf('pv') + 1;
 
         var pv_out = tokens.slice(pv_index);
@@ -1323,7 +1331,7 @@ function formatEngineOutput(line) {
             var from = pv_out[i].slice(0, 2);
             var to = pv_out[i].slice(2, 4);
             var promotion = '';
-            if (pv_out[i].length == 5) {
+            if (pv_out[i].length === 5) {
                 promotion = pv_out[i][4];
             }
             if (promotion) {
@@ -1337,7 +1345,7 @@ function formatEngineOutput(line) {
         window.engine_lines['import_pv_' + multipv] = {score: score, depth: depth, line: history};
 
         var turn_sep = '';
-        if (start_move_num % 2 == 0) {
+        if (start_move_num % 2 === 0) {
             turn_sep = '..';
         }
 
@@ -1353,7 +1361,7 @@ function formatEngineOutput(line) {
         }
         output += '<p class="list-group-item-text">' + turn_sep;
         for (i = 0; i < history.length; ++i) {
-            if ((start_move_num + i) % 2 == 1) {
+            if ((start_move_num + i) % 2 === 1) {
                 output += Math.floor((start_move_num + i + 1) / 2) + ". ";
             }
             if (history[i]) {
@@ -1483,9 +1491,9 @@ function getPreviousMoves(node, format) {
     format = format || 'raw';
 
     if (node.previous) {
-        if (format == 'san') {
+        if (format === 'san') {
             var san = '';
-            if (node.half_move_num % 2 == 1) {
+            if (node.half_move_num % 2 === 1) {
                 san += Math.floor((node.half_move_num + 1) / 2) + ". "
             }
             san += node.move.san;
@@ -1501,7 +1509,7 @@ function getPreviousMoves(node, format) {
 
 function analyze(position_update) {
     if (!position_update) {
-        if ($('#AnalyzeText').text() == 'Analyze') {
+        if ($('#AnalyzeText').text() === 'Analyze') {
             window.analysis = true;
             $('#AnalyzeText').text('Stop');
         }
