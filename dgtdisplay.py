@@ -123,7 +123,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             if text:
                 DispatchDgt.fire(text)
             else:
-                self._exit_display(wait=True)
+                self._exit_display()
         else:
             if self.last_move:
                 side = self._get_clock_side(self.last_turn)
@@ -132,7 +132,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             else:
                 text = self.dgttranslate.text('B10_nomove')
             DispatchDgt.fire(text)
-            self._exit_display(wait=True)
+            self._exit_display()
 
     def _process_button1(self, dev):
         logging.debug('({}) clock: handle button 1 press'.format(dev))
@@ -143,7 +143,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             # text.maxtime = 0
             DispatchDgt.fire(text)
-            self._exit_display(wait=True)
+            self._exit_display()
 
     def _process_button2(self, dev):
         logging.debug('({}) clock: handle button 2 press'.format(dev))
@@ -173,7 +173,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             else:
                 text = self.dgttranslate.text('B10_nomove')
             DispatchDgt.fire(text)
-            self._exit_display(wait=True)
+            self._exit_display()
 
     def _process_button4(self, dev):
         logging.debug('({}) clock: handle button 4 press'.format(dev))
@@ -182,7 +182,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             DispatchDgt.fire(text)
         else:
             Observable.fire(Event.EXIT_MENU())
-            # self._exit_display(wait=True)
 
     def _process_lever(self, right_side_down, dev):
         logging.debug('({}) clock: handle lever press - right_side_down: {}'.format(dev, right_side_down))
@@ -296,6 +295,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 self.dgtmenu.set_engine_level(level)
                 msg = sorted(level_dict)[level]
                 text = self.dgttranslate.text('M10_level', msg)
+                text.wait = self._exit_menu()
                 logging.debug("Map-Fen: New level {}".format(msg))
                 config = ConfigObj('picochess.ini')
                 config['engine-level'] = msg
@@ -415,7 +415,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         if not self.dgtmenu.get_confirm() or not message.show_ok:
             DispatchDgt.fire(message.eng_text)
         self.dgtmenu.set_engine_restart(False)
-        # self._exit_display(force=True)
 
     def _process_engine_startup(self, message):
         self.dgtmenu.installed_engines = get_installed_engines(message.shell, message.file)
@@ -519,7 +518,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         time_left, time_right = timectrl.current_clock_time(flip_board=self.dgtmenu.get_flip_board())
         DispatchDgt.fire(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE, wait=True,
                                          devs={'ser', 'i2c', 'web'}))
-        # self._exit_display(force=True)
 
     def _process_new_score(self, message):
         if message.mate is None:
@@ -605,7 +603,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         _, _, _, rnk_5, rnk_4, _, _, _ = self.dgtmenu.get_dgt_fen().split('/')
         return '8/8/8/' + rnk_5 + '/' + rnk_4 + '/8/8/8'
 
-    def _exit_display(self, wait=False, force=True):
+    def _exit_display(self, wait=True, force=True):
         if self.play_move and self.dgtmenu.get_mode() in (Mode.NORMAL, Mode.REMOTE):
             side = self._get_clock_side(self.play_turn)
             text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side, wait=wait, maxtime=1,
@@ -649,7 +647,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             if case(MessageApi.LEVEL):
                 if not self.dgtmenu.get_engine_restart():
                     DispatchDgt.fire(message.level_text)
-                    self._exit_display(force=True)
                 break
             if case(MessageApi.TIME_CONTROL):
                 self._process_time_control(message)
@@ -657,7 +654,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             if case(MessageApi.OPENING_BOOK):
                 if not self.dgtmenu.get_confirm() or not message.show_ok:
                     DispatchDgt.fire(message.book_text)
-                # self._exit_display(force=True)
                 break
             if case(MessageApi.TAKE_BACK):
                 if self.leds_are_on:
@@ -679,7 +675,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 self.engine_finished = False
                 if not self.dgtmenu.get_confirm() or not message.show_ok:
                     DispatchDgt.fire(message.mode_text)
-                # self._exit_display(force=True)
                 break
             if case(MessageApi.PLAY_MODE):
                 DispatchDgt.fire(message.play_mode_text)
@@ -757,7 +752,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 logging.debug('user ignored move {}'.format(message.move))
                 break
             if case(MessageApi.EXIT_MENU):
-                self._exit_display(wait=True)
+                self._exit_display()
                 break
             if case():  # Default
                 # print(message)
