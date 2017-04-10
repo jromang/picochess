@@ -292,7 +292,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             level_dict = eng['level_dict']
             if level_dict:
                 inc = ceil(len(level_dict) / 8)
-                level = min(inc * level_map.index(fen), len(level_dict) - 1)
+                level = min(inc * level_map.index(fen), len(level_dict) - 1)  # type: int
                 self.dgtmenu.set_engine_level(level)
                 msg = sorted(level_dict)[level]
                 text = self.dgttranslate.text('M10_level', msg)
@@ -328,9 +328,9 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                     eng_text.maxtime = 1
                     eng_text.wait = self._exit_menu()
                     if level_dict:
-                        if self.dgtmenu.get_engine_level() is None or len(
-                                level_dict) <= self.dgtmenu.get_engine_level():
-                            self.dgtmenu.set_engine_level(len(level_dict) - 1)
+                        len_level = len(level_dict)
+                        if self.dgtmenu.get_engine_level() is None or len_level <= self.dgtmenu.get_engine_level():
+                            self.dgtmenu.set_engine_level(len_level - 1)
                         msg = sorted(level_dict)[self.dgtmenu.get_engine_level()]
                         options = level_dict[msg]  # cause of "new-engine", send options lateron - now only {}
                         Observable.fire(Event.LEVEL(options={}, level_text=self.dgttranslate.text('M10_level', msg)))
@@ -399,13 +399,13 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                     # self._reset_moves_and_score()
                     DispatchDgt.fire(self.dgttranslate.text('Y00_error960'))
         else:
-            if not self._inside_menu():
+            if False and self._inside_menu():
+                # @todo perhaps resent this fen after menu exit?
+                logging.debug('inside the menu. fen "{}" ignored'.format(fen))
+            else:
                 if self.show_setup_pieces_msg:
                     DispatchDgt.fire(self.dgttranslate.text('N00_setpieces'))
                 Observable.fire(Event.FEN(fen=fen))
-            else:
-                # @todo perhaps resent this fen after menu exit?
-                logging.debug('inside the menu. fen "{}" ignored'.format(fen))
 
     def _process_engine_ready(self, message):
         for index in range(0, len(self.dgtmenu.installed_engines)):
@@ -489,7 +489,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         DispatchDgt.fire(Dgt.LIGHT_SQUARES(uci_move=move.uci()))
         self.leds_are_on = True
 
-    def _process_user_move(self, message):
+    def _process_user_move_done(self, message):
         if self.leds_are_on:  # can happen in case of a sliding move
             logging.warning('REV2 lights still on')
             DispatchDgt.fire(Dgt.LIGHT_CLEAR())
@@ -501,7 +501,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         if not self.dgtmenu.get_confirm():
             DispatchDgt.fire(self.dgttranslate.text('K05_okuser'))
 
-    def _process_review_move(self, message):
+    def _process_review_move_done(self, message):
         if self.leds_are_on:  # can happen in case of a sliding move
             logging.warning('REV2 lights still on')
             DispatchDgt.fire(Dgt.LIGHT_CLEAR())
@@ -635,10 +635,10 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 self._process_computer_move_done()
                 break
             if case(MessageApi.USER_MOVE_DONE):
-                self._process_user_move(message)
+                self._process_user_move_done(message)
                 break
             if case(MessageApi.REVIEW_MOVE_DONE):
-                self._process_review_move(message)
+                self._process_review_move_done(message)
                 break
             if case(MessageApi.ALTERNATIVE_MOVE):
                 if self.leds_are_on:

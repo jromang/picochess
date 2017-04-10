@@ -216,28 +216,30 @@ def main():
 
             done_computer_fen = None
             done_move = chess.Move.null()
+            fen = game.fen()
+            turn = game.turn
             game.push(move)
             searchmoves.reset()
             if interaction_mode == Mode.NORMAL:
-                msg = Message.USER_MOVE_DONE(move=move, fen=game.fen(), turn=game.turn, game=game.copy())
+                msg = Message.USER_MOVE_DONE(move=move, fen=fen, turn=turn, game=game.copy())
                 if check_game_state(game, play_mode):
                     think(game, time_control, msg)
                 else:
                     DisplayMsg.show(msg)
             elif interaction_mode == Mode.REMOTE:
-                msg = Message.USER_MOVE_DONE(move=move, fen=game.fen(), turn=game.turn, game=game.copy())
+                msg = Message.USER_MOVE_DONE(move=move, fen=fen, turn=turn, game=game.copy())
                 if check_game_state(game, play_mode):
                     observe(game, msg)
                 else:
                     DisplayMsg.show(msg)
             elif interaction_mode == Mode.OBSERVE:
-                msg = Message.REVIEW_MOVE_DONE(move=move, fen=game.fen(), turn=game.turn, game=game.copy())
+                msg = Message.REVIEW_MOVE_DONE(move=move, fen=fen, turn=turn, game=game.copy())
                 if check_game_state(game, play_mode):
                     observe(game, msg)
                 else:
                     DisplayMsg.show(msg)
             else:  # interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ):
-                msg = Message.REVIEW_MOVE_DONE(move=move, fen=game.fen(), turn=game.turn, game=game.copy())
+                msg = Message.REVIEW_MOVE_DONE(move=move, fen=fen, turn=turn, game=game.copy())
                 if check_game_state(game, play_mode):
                     analyse(game, msg)
                 else:
