@@ -189,6 +189,7 @@ BookDataTable.on('select', function( e, dt, type, indexes ) {
         updateCurrentPosition(move, tmp_game);
         board.position(currentPosition.fen);
         updateStatus();
+        remove_highlights();
     }
 });
 
@@ -283,6 +284,7 @@ GameDataTable.on('select', function( e, dt, type, indexes ) {
         }).done(function(data) {
             loadGame(data['pgn']);
             updateStatus();
+            remove_highlights();
         });
     }
 });

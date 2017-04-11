@@ -5,5 +5,5 @@ pyserial==3.2.1
 python-chess==0.17.0
 requests==2.13.0
 spur==0.3.20
-tornado==4.4.2
+tornado==4.4.3
 configobj==5.0.6
