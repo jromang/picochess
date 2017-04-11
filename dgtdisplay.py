@@ -147,7 +147,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
 
     def _process_button2(self, dev):
         logging.debug('({}) clock: handle button 2 press'.format(dev))
-        if self._inside_menu():
+        if False and self._inside_menu():  # @todo even the next comment is valid, we still need it for "alt-move"
             pass  # button2 doesnt have any function in menu
         else:
             if self.dgtmenu.get_mode() in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):

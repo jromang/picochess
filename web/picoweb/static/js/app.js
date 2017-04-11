@@ -1235,6 +1235,7 @@ function toggleConsoleButton() {
 function goToGameFen() {
     var fen = $(this).attr('data-fen');
     goToPosition(fen);
+    remove_highlights();
 }
 
 function goToPosition(fen) {
