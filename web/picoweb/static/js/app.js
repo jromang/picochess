@@ -858,7 +858,7 @@ var cfg = {
 board = new ChessBoard('board', cfg);
 $(window).resize(board.resize);
 
-$('#flipOrientationBtn').on('click', board.flip);
+$('#flipOrientationBtn').on('click', boardFlip);
 $('#backBtn').on('click', goBack);
 $('#fwdBtn').on('click', goForward);
 $('#startBtn').on('click', goToStart);
@@ -1285,6 +1285,10 @@ function goBack() {
         board.position(currentPosition.fen);
     }
     updateStatus();
+}
+
+function boardFlip() {
+    board.flip();
 }
 
 function formatEngineOutput(line) {
