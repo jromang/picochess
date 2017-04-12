@@ -99,6 +99,10 @@ def main():
         info = {'location': location, 'ext_ip': ext_ip, 'int_ip': int_ip, 'version': version}
         DisplayMsg.show(Message.IP_INFO(info=info))
 
+    # def stop_fen_timer():
+    #     nonlocal fen_timer_running
+    #     fen_timer_running = False
+
     def compute_legal_fens(game_copy: chess.Board):
         """
         Compute a list of legal FENs for the given game.
@@ -259,7 +263,11 @@ def main():
         nonlocal game
         nonlocal done_move
         nonlocal done_computer_fen
+        # nonlocal fen_timer
+        # nonlocal fen_timer_running
+        # nonlocal error_fen
 
+        handled_fen = True
         # Check for same position
         if fen == game.board_fen():
             logging.debug('Already in this fen: ' + fen)
@@ -277,6 +285,7 @@ def main():
                     game.pop()
                     logging.debug('User move while computer move is displayed, reverting to: ' + game.board_fen())
                 else:
+                    handled_fen = False
                     logging.error("last_legal_fens not cleared: " + game.board_fen())
             elif interaction_mode == Mode.REMOTE:
                 if is_not_user_turn(game.turn):
@@ -288,6 +297,7 @@ def main():
                     game.pop()
                     logging.debug('User move while remote move is displayed, reverting to: ' + game.board_fen())
                 else:
+                    handled_fen = False
                     logging.error('last_legal_fens not cleared: ' + game.board_fen())
             else:
                 game.pop()
@@ -331,10 +341,12 @@ def main():
 
         # Check if this is a previous legal position and allow user to restart from this position
         else:
+            handled_fen = False
             game_history = copy.deepcopy(game)
             while game_history.move_stack:
                 game_history.pop()
                 if game_history.board_fen() == fen:
+                    handled_fen = True
                     logging.debug("Current game FEN      : {}".format(game.fen()))
                     logging.debug("Undoing game until FEN: {}".format(fen))
                     stop_search_and_clock()
@@ -366,6 +378,25 @@ def main():
                     if not msg_send:
                         DisplayMsg.show(msg)
                     break
+        logging.debug('fen {} result: {}'.format(fen, handled_fen))
+        # if handled_fen:
+        #     error_fen = None
+        #     if fen_timer_running:
+        #         fen_timer.cancel()
+        #         fen_timer.join()
+        #         fen_timer_running = False
+        # else:
+        #     if fen_timer_running:  # new fen during the old fen wait time not over
+        #         error_fen = fen  # set the new result fen
+        #         fen_timer.cancel()
+        #         fen_timer.join()
+        #     else:
+        #         if error_fen == fen:
+        #             logging.info('illegal fen {} for at least 5secs'.format(error_fen))
+        #         error_fen = fen
+        #     fen_timer = threading.Timer(5, stop_fen_timer)
+        #     fen_timer.start()
+        #     fen_timer_running = True
 
     def set_wait_state(msg: Message, start_search=True):
         """Enter engine waiting (normal mode) and maybe (by parameter) start pondering."""
@@ -604,6 +635,10 @@ def main():
 
     ip_info_thread = threading.Timer(10, display_ip_info)  # give RaspberyPi 10sec time to startup its network devices
     ip_info_thread.start()
+
+    # fen_timer = threading.Timer(5, stop_fen_timer)
+    # fen_timer_running = False
+    # error_fen = None
 
     # Event loop
     logging.info('evt_queue ready')
