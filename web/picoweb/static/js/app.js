@@ -340,6 +340,9 @@ $(function() {
                     if(data.play === 'user') {
                         highlightBoard(data.move, 'user');
                     }
+                    if(data.play === 'review') {
+                        highlightBoard(data.move, 'review');
+                    }
                     break;
                 case 'Game':
                     newBoard(data.fen);
