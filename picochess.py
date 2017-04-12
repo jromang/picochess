@@ -261,7 +261,7 @@ def main():
         nonlocal done_computer_fen
 
         # Check for same position
-        if fen == game.board_fen() and not done_computer_fen:
+        if fen == game.board_fen():
             logging.debug('Already in this fen: ' + fen)
 
         # Check if we have to undo a previous move (sliding)
@@ -274,7 +274,6 @@ def main():
                 elif done_computer_fen:
                     done_computer_fen = None
                     done_move = chess.Move.null()
-                    # game.pop()
                     game.pop()
                     logging.debug('User move while computer move is displayed, reverting to: ' + game.board_fen())
                 else:
@@ -286,7 +285,6 @@ def main():
                 elif done_computer_fen:
                     done_computer_fen = None
                     done_move = chess.Move.null()
-                    # game.pop()
                     game.pop()
                     logging.debug('User move while remote move is displayed, reverting to: ' + game.board_fen())
                 else:

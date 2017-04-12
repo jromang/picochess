@@ -475,9 +475,10 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 EventHandler.write_to_clients(result)
                 break
             if case(MessageApi.COMPUTER_MOVE):
-                message.game.push(message.move)
-                pgn_str = _transfer(message.game)
-                fen = _oldstyle_fen(message.game)
+                game_copy = message.game.copy()
+                game_copy.push(message.move)
+                pgn_str = _transfer(game_copy)
+                fen = _oldstyle_fen(game_copy)
                 mov = message.move.uci()
                 result = {'pgn': pgn_str, 'fen': fen, 'event': 'Fen', 'move': mov, 'play': 'computer'}
                 self.shared['last_dgt_move_msg'] = result  # not send => keep it for COMPUTER_MOVE_DONE

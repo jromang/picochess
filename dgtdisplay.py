@@ -147,19 +147,17 @@ class DgtDisplay(DisplayMsg, threading.Thread):
 
     def _process_button2(self, dev):
         logging.debug('({}) clock: handle button 2 press'.format(dev))
-        if False and self._inside_menu():  # @todo even the next comment is valid, we still need it for "alt-move"
-            pass  # button2 doesnt have any function in menu
+        # even button2 has no function inside the menu we need to care for an "alt-move" event
+        if self.dgtmenu.get_mode() in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
+            text = self.dgttranslate.text('B00_nofunction')
+            DispatchDgt.fire(text)
         else:
-            if self.dgtmenu.get_mode() in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
-                text = self.dgttranslate.text('B00_nofunction')
-                DispatchDgt.fire(text)
+            if self.engine_finished:
+                # @todo Protect against multi entrance of Alt-move
+                self.engine_finished = False  # This is not 100% ok, but for the moment better as nothing
+                Observable.fire(Event.ALTERNATIVE_MOVE())
             else:
-                if self.engine_finished:
-                    # @todo Protect against multi entrance of Alt-move
-                    self.engine_finished = False  # This is not 100% ok, but for the moment better as nothing
-                    Observable.fire(Event.ALTERNATIVE_MOVE())
-                else:
-                    Observable.fire(Event.PAUSE_RESUME())
+                Observable.fire(Event.PAUSE_RESUME())
 
     def _process_button3(self, dev):
         logging.debug('({}) clock: handle button 3 press'.format(dev))
@@ -399,13 +397,9 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                     # self._reset_moves_and_score()
                     DispatchDgt.fire(self.dgttranslate.text('Y00_error960'))
         else:
-            if False and self._inside_menu():
-                # @todo perhaps resent this fen after menu exit?
-                logging.debug('inside the menu. fen "{}" ignored'.format(fen))
-            else:
-                if self.show_setup_pieces_msg:
-                    DispatchDgt.fire(self.dgttranslate.text('N00_setpieces'))
-                Observable.fire(Event.FEN(fen=fen))
+            if self.show_setup_pieces_msg and not self._inside_menu():
+                DispatchDgt.fire(self.dgttranslate.text('N00_setpieces'))
+            Observable.fire(Event.FEN(fen=fen))
 
     def _process_engine_ready(self, message):
         for index in range(0, len(self.dgtmenu.installed_engines)):

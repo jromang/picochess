@@ -113,9 +113,9 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                         if message.move and message.game and message.move != previous_move \
                                 and self.computer_picotalker is not None:
                             logging.debug('announcing COMPUTER_MOVE [%s]', message.move)
-                            game = message.game.copy()
-                            game.push(message.move)
-                            self.computer_picotalker.talk(self.say_last_move(game))
+                            game_copy = message.game.copy()
+                            game_copy.push(message.move)
+                            self.computer_picotalker.talk(self.say_last_move(game_copy))
                             previous_move = message.move
                         break
                     if case(MessageApi.USER_MOVE_DONE):
