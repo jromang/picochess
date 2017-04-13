@@ -99,9 +99,26 @@ def main():
         info = {'location': location, 'ext_ip': ext_ip, 'int_ip': int_ip, 'version': version}
         DisplayMsg.show(Message.IP_INFO(info=info))
 
-    # def stop_fen_timer():
-    #     nonlocal fen_timer_running
-    #     fen_timer_running = False
+    def expired_fen_timer():
+        nonlocal fen_timer_running
+        fen_timer_running = False
+        if error_fen:
+            logging.info('illegal fen {} for 5secs'.format(error_fen))
+
+    def stop_fen_timer():
+        nonlocal fen_timer_running
+        nonlocal fen_timer
+        if fen_timer_running:
+            fen_timer.cancel()
+            fen_timer.join()
+            fen_timer_running = False
+
+    def start_fen_timer():
+        nonlocal fen_timer_running
+        nonlocal fen_timer
+        fen_timer = threading.Timer(5, expired_fen_timer)
+        fen_timer.start()
+        fen_timer_running = True
 
     def compute_legal_fens(game_copy: chess.Board):
         """
@@ -263,9 +280,7 @@ def main():
         nonlocal game
         nonlocal done_move
         nonlocal done_computer_fen
-        # nonlocal fen_timer
-        # nonlocal fen_timer_running
-        # nonlocal error_fen
+        nonlocal error_fen
 
         handled_fen = True
         # Check for same position
@@ -378,25 +393,14 @@ def main():
                     if not msg_send:
                         DisplayMsg.show(msg)
                     break
-        logging.debug('fen {} result: {}'.format(fen, handled_fen))
-        # if handled_fen:
-        #     error_fen = None
-        #     if fen_timer_running:
-        #         fen_timer.cancel()
-        #         fen_timer.join()
-        #         fen_timer_running = False
-        # else:
-        #     if fen_timer_running:  # new fen during the old fen wait time not over
-        #         error_fen = fen  # set the new result fen
-        #         fen_timer.cancel()
-        #         fen_timer.join()
-        #     else:
-        #         if error_fen == fen:
-        #             logging.info('illegal fen {} for at least 5secs'.format(error_fen))
-        #         error_fen = fen
-        #     fen_timer = threading.Timer(5, stop_fen_timer)
-        #     fen_timer.start()
-        #     fen_timer_running = True
+        # doing issue #152
+        logging.debug('fen: {} result: {}'.format(fen, handled_fen))
+        stop_fen_timer()
+        if handled_fen:
+            error_fen = None
+        else:
+            error_fen = fen
+            start_fen_timer()
 
     def set_wait_state(msg: Message, start_search=True):
         """Enter engine waiting (normal mode) and maybe (by parameter) start pondering."""
@@ -636,9 +640,9 @@ def main():
     ip_info_thread = threading.Timer(10, display_ip_info)  # give RaspberyPi 10sec time to startup its network devices
     ip_info_thread.start()
 
-    # fen_timer = threading.Timer(5, stop_fen_timer)
-    # fen_timer_running = False
-    # error_fen = None
+    fen_timer = threading.Timer(5, expired_fen_timer)
+    fen_timer_running = False
+    error_fen = None
 
     # Event loop
     logging.info('evt_queue ready')

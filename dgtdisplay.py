@@ -386,7 +386,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             if not self._inside_menu():
                 logging.debug('Map-Fen: drawresign')
                 Observable.fire(Event.DRAWRESIGN(result=drawresign_map[self.drawresign_fen]))
-        elif '/pppppppp/8/8/8/8/PPPPPPPP/' in fen:  # check for the lines 2-7 cause could be an uci960 pos too
+        else:
             bit_board = chess.Board(fen + ' w - - 0 1')
             pos960 = bit_board.chess960_pos(ignore_castling=True)
             if pos960 is not None:
@@ -396,10 +396,10 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 else:
                     # self._reset_moves_and_score()
                     DispatchDgt.fire(self.dgttranslate.text('Y00_error960'))
-        else:
-            if self.show_setup_pieces_msg and not self._inside_menu():
-                DispatchDgt.fire(self.dgttranslate.text('N00_setpieces'))
-            Observable.fire(Event.FEN(fen=fen))
+            else:
+                if self.show_setup_pieces_msg and not self._inside_menu():
+                    DispatchDgt.fire(self.dgttranslate.text('N00_setpieces'))
+                Observable.fire(Event.FEN(fen=fen))
 
     def _process_engine_ready(self, message):
         for index in range(0, len(self.dgtmenu.installed_engines)):
