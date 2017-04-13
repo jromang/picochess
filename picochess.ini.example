@@ -1,5 +1,5 @@
 ### ===============================
-### = picochess.ini.example v0.83 =
+### = picochess.ini.example v0.86 =
 ### ===============================
 ### Example and description how to configure PicoChess
 ### To use this file, simply copy this file to picochess.ini and edit the appropriate settings
@@ -20,7 +20,7 @@
 ## Please keep in mind: values 0 and 15 making no sense (but allowed) since they are the same as "never" & "always"
 ## inside the clock menu you can choose between "always", "never" and "some". The value you give inside here, is
 ## the value of "some". Each part of beeps has a special number and you have to add them to get the beep-some-level
-## CONFIG = 1 Takeback, GameEnd, NewGame and ComputerMove
+## CONFIG = 1 Takeback, GameEnd, NewGame, ComputerMove and SetPieces
 ## BUTTON = 2 All Events coming from button press
 ## MAP = 4    All Events coming from Queen placing at start pos (line3-6)
 ## OKAY = 8   All Events from "ok" (confirm) messages

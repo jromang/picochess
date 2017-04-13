@@ -45,7 +45,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
 
         self.engine_finished = False
         self.drawresign_fen = None
-        self.show_setup_pieces_msg = True
         self.show_move_or_value = 0
         self.leds_are_on = False
 
@@ -397,8 +396,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                     # self._reset_moves_and_score()
                     DispatchDgt.fire(self.dgttranslate.text('Y00_error960'))
             else:
-                if False and self.show_setup_pieces_msg and not self._inside_menu():
-                    DispatchDgt.fire(self.dgttranslate.text('N00_setpieces'))
                 Observable.fire(Event.FEN(fen=fen))
 
     def _process_engine_ready(self, message):
@@ -425,7 +422,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self.leds_are_on = False
         self._reset_moves_and_score()
         self.engine_finished = False
-        self.show_setup_pieces_msg = False
         self.time_control.reset()
         if message.newgame:
             pos960 = message.game.chess960_pos()
@@ -606,8 +602,9 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             text = None
             if self._inside_menu():
                 text = self.dgtmenu.get_current_text()
-                text.wait = True
-            if not text:
+            if text:
+                text.wait = True  # in case of "bad pos" message send before
+            else:
                 text = Dgt.DISPLAY_TIME(force=True, wait=True, devs={'ser', 'i2c', 'web'})
         DispatchDgt.fire(text)
 
@@ -754,7 +751,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 self._exit_display()
                 break
             if case(MessageApi.WRONG_FEN):
-                DispatchDgt.fire(self.dgttranslate.text('Y10_illegalpos'))
+                DispatchDgt.fire(self.dgttranslate.text('C10_setpieces'))
                 break
             if case():  # Default
                 # print(message)
