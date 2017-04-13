@@ -597,17 +597,18 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         _, _, _, rnk_5, rnk_4, _, _, _ = self.dgtmenu.get_dgt_fen().split('/')
         return '8/8/8/' + rnk_5 + '/' + rnk_4 + '/8/8/8'
 
-    def _exit_display(self, wait=True, force=True):
+    def _exit_display(self):
         if self.play_move and self.dgtmenu.get_mode() in (Mode.NORMAL, Mode.REMOTE):
             side = self._get_clock_side(self.play_turn)
-            text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side, wait=wait, maxtime=1,
+            text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side, wait=True, maxtime=1,
                                     beep=self.dgttranslate.bl(BeepLevel.BUTTON), devs={'ser', 'i2c', 'web'})
         else:
             text = None
             if self._inside_menu():
                 text = self.dgtmenu.get_current_text()
+                text.wait = True
             if not text:
-                text = Dgt.DISPLAY_TIME(force=force, wait=True, devs={'ser', 'i2c', 'web'})
+                text = Dgt.DISPLAY_TIME(force=True, wait=True, devs={'ser', 'i2c', 'web'})
         DispatchDgt.fire(text)
 
     def _process_message(self, message):
