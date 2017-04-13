@@ -422,6 +422,7 @@ def main():
                 analyse(game, msg)
                 return
         DisplayMsg.show(msg)
+        stop_fen_timer()
 
     def transfer_time(time_list: list):
         """Transfer the time list to a TimeControl Object and a Text Object."""
@@ -679,6 +680,7 @@ def main():
                     if event.options:
                         engine.startup(event.options, False)
                     DisplayMsg.show(Message.LEVEL(level_text=event.level_text, do_speak=bool(event.options)))
+                    stop_fen_timer()
                     break
 
                 if case(EventApi.NEW_ENGINE):
@@ -849,6 +851,7 @@ def main():
                         stop_search_and_clock()
                         DisplayMsg.show(Message.GAME_ENDS(result=event.result, play_mode=play_mode, game=game.copy()))
                         game_declared = True
+                        stop_fen_timer()
                     break
 
                 if case(EventApi.REMOTE_MOVE):
@@ -929,6 +932,7 @@ def main():
                     logging.debug("changing opening book [%s]", event.book['file'])
                     bookreader = chess.polyglot.open_reader(event.book['file'])
                     DisplayMsg.show(Message.OPENING_BOOK(book_text=event.book_text, show_ok=event.show_ok))
+                    stop_fen_timer()
                     break
 
                 if case(EventApi.SET_TIME_CONTROL):
@@ -945,6 +949,7 @@ def main():
                     config.write()
                     text = Message.TIME_CONTROL(time_text=event.time_text, show_ok=event.show_ok, tc_init=tc_init)
                     DisplayMsg.show(text)
+                    stop_fen_timer()
                     break
 
                 if case(EventApi.OUT_OF_TIME):
