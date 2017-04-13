@@ -603,7 +603,11 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side, wait=wait, maxtime=1,
                                     beep=self.dgttranslate.bl(BeepLevel.BUTTON), devs={'ser', 'i2c', 'web'})
         else:
-            text = Dgt.DISPLAY_TIME(force=force, wait=True, devs={'ser', 'i2c', 'web'})
+            text = None
+            if self._inside_menu():
+                text = self.dgtmenu.get_current_text()
+            if not text:
+                text = Dgt.DISPLAY_TIME(force=force, wait=True, devs={'ser', 'i2c', 'web'})
         DispatchDgt.fire(text)
 
     def _process_message(self, message):
