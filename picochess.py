@@ -100,12 +100,16 @@ def main():
         DisplayMsg.show(Message.IP_INFO(info=info))
 
     def expired_fen_timer():
+        """Handle times up for an unhandled fen string send from board."""
         nonlocal fen_timer_running
         fen_timer_running = False
         if error_fen:
-            logging.info('illegal fen {} for 5secs'.format(error_fen))
+            logging.info('wrong fen {} for 3secs'.format(error_fen))
+            DisplayMsg.show(Message.WRONG_FEN())
+            DisplayMsg.show(Message.EXIT_MENU())
 
     def stop_fen_timer():
+        """Stop the fen timer cause another fen string been send."""
         nonlocal fen_timer_running
         nonlocal fen_timer
         if fen_timer_running:
@@ -114,9 +118,10 @@ def main():
             fen_timer_running = False
 
     def start_fen_timer():
+        """Start the fen timer in case an unhandled fen string been received from board."""
         nonlocal fen_timer_running
         nonlocal fen_timer
-        fen_timer = threading.Timer(5, expired_fen_timer)
+        fen_timer = threading.Timer(3, expired_fen_timer)
         fen_timer.start()
         fen_timer_running = True
 
@@ -640,7 +645,7 @@ def main():
     ip_info_thread = threading.Timer(10, display_ip_info)  # give RaspberyPi 10sec time to startup its network devices
     ip_info_thread.start()
 
-    fen_timer = threading.Timer(5, expired_fen_timer)
+    fen_timer = threading.Timer(3, expired_fen_timer)
     fen_timer_running = False
     error_fen = None
 

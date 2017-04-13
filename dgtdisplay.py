@@ -397,7 +397,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                     # self._reset_moves_and_score()
                     DispatchDgt.fire(self.dgttranslate.text('Y00_error960'))
             else:
-                if self.show_setup_pieces_msg and not self._inside_menu():
+                if False and self.show_setup_pieces_msg and not self._inside_menu():
                     DispatchDgt.fire(self.dgttranslate.text('N00_setpieces'))
                 Observable.fire(Event.FEN(fen=fen))
 
@@ -747,6 +747,9 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 break
             if case(MessageApi.EXIT_MENU):
                 self._exit_display()
+                break
+            if case(MessageApi.WRONG_FEN):
+                DispatchDgt.fire(self.dgttranslate.text('Y10_illegalpos'))
                 break
             if case():  # Default
                 # print(message)

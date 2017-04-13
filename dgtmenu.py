@@ -185,8 +185,7 @@ class DgtMenu(object):
 
         self.res_system_display_confirm = self.menu_system_display_confirm
         self.res_system_display_ponderinterval = self.menu_system_display_ponderinterval
-
-        return None
+        return False
 
     def set_engine_restart(self, flag: bool):
         self.engine_restart = flag
@@ -266,7 +265,7 @@ class DgtMenu(object):
 
     def enter_top_menu(self):
         self.state = MenuState.TOP
-        return None
+        return False
 
     def enter_mode_menu(self):
         self.state = MenuState.MODE

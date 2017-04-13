@@ -127,6 +127,7 @@ class MessageApi():
     SET_VOICE = 'MSG_SET_VOICE'  # User chooses a new voice
 
     EXIT_MENU = 'MSG_EXIT_MENU'  # User exits the menu
+    WRONG_FEN = 'MSG_WRONG_FEN'  # User sends a wrong placement of pieces (timed)
 
 
 class DgtApi():
@@ -206,6 +207,7 @@ class Message():
     SET_VOICE = ClassFactory(MessageApi.SET_VOICE, ['type', 'lang', 'speaker'])
 
     EXIT_MENU = ClassFactory(MessageApi.EXIT_MENU, [])
+    WRONG_FEN = ClassFactory(MessageApi.WRONG_FEN, [])
 
 
 class Event():
