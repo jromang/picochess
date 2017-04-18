@@ -52,9 +52,42 @@
                     <button type="button" id="downloadBtn" class="btn btn-raised btn-info btn-xs text-break" data-placement="auto" data-toggle="tooltip" title="get pgn file">
                         <i class='fa fa-download'></i><span class="hidden-xs"> Get PGN</span>
                     </button>
-                    <button type="button" id="broadcastBtn" class="btn btn-raised btn-success btn-xs text-break" data-placement="auto" data-toggle="tooltip" title="broadcast position">
-                        <i class='fa fa-cloud-download'></i><span class="hidden-xs"> Broadcast</span>
-                    </button>
+                    <div class="btn-group">
+                        <button type="button" id="remoteBtn" class="btn btn-raised btn-success btn-xs text-break" data-placement="auto" data-toggle="dropdown" title="remote">
+                            <i class='fa fa-cloud-download'></i><span class="hidden-xs"> Remote</span>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <div id="loginbox" style="padding: 10px;">
+                                    <div class="col-xs-12">
+                                        <p>
+                                            <label for="RemoteRoom">Room name:</label>
+                                            <input id="RemoteRoom" type="text" value="" maxlength="6" placeholder="max 6chars">
+                                        </p>
+                                        <p>
+                                            <label for="RemoteNick">Nickname:</label>
+                                            <input id="RemoteNick" type="text" value="" maxlength="6" placeholder="max 6chars">
+                                        </p>
+                                    </div>
+                                    <div class="col-xs-12">
+                                        <input id="enterRoomBtn" style="width: 100%;" type="button" value="Enter Room" disabled="disabled"/>
+                                        <input id="leaveRoomBtn" style="width: 100%;" type="button" value="Leave Room" disabled="disabled"/>
+                                    </div>
+                                </div>
+                            </li>
+                            <li role="separator" class="divider"></li>
+                            <li><a href="#" onclick="return false;">UserList</a></li>
+                            <li><a href="#">Broadcast</a></li>
+                            <!--
+                            <li>
+                                <button type="button" id="broadcastBtn" class="btn btn-raised btn-success btn-xs text-break" data-placement="auto" data-toggle="tooltip" title="broadcast position">
+                                    <i class='fa fa-cloud-download'></i><span class="hidden-xs"> Broadcast</span>
+                                </button>
+                            </li>
+                            -->
+                        </ul>
+                    </div>
                 </div>
                 <div class="pull-right">
                     <button type="button" id="consoleBtn" class="btn btn-raised btn-primary btn-xs" data-placement="auto" data-toggle="tooltip" title="enter/exit console mode">

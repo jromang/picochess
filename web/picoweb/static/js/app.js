@@ -47,6 +47,7 @@ var board,
 var gameHistory, fenHash, currentPosition;
 var backend_server_prefix = 'http://drshivaji.com:3334';
 //var backend_server_prefix = "http://localhost:7777";
+var remote_server_prefix = "localhost:8888";
 
 fenHash = {};
 
@@ -298,6 +299,16 @@ $(function() {
     window.engine_lines = {};
     window.multipv = 1;
 
+    $("#RemoteRoom").keyup(function(event) { remote_send(); } );
+    $("#RemoteNick").keyup(function(event) { remote_send(); } );
+
+    function remote_send() {
+        if ( $("#RemoteRoom").val() !== "" && $("#RemoteNick").val() !== "") {
+            $("#enterRoomBtn").removeAttr("disabled");
+        } else {
+            $("#enterRoomBtn").attr("disabled", "disabled");
+        }
+    }
     $(document).keydown(function(e) {
         if (e.keyCode === 39) { //right arrow
             if (e.ctrlKey) {
@@ -886,6 +897,10 @@ $('#ClockLeverBtn').on('click', toggleLeverButton);
 $('#consoleBtn').on('click', toggleConsoleButton);
 $('#getFenToConsoleBtn').on('click', getFenToConsole);
 
+$('#enterRoomBtn').on('click', enterRoom);
+$('#leaveRoomBtn').on('click', leaveRoom);
+
+
 $("#inputConsole").keyup(function(event) {
     if(event.keyCode == 13) {
         sendConsoleCommand();
@@ -1292,6 +1307,88 @@ function goBack() {
 
 function boardFlip() {
     board.flip();
+}
+
+function leaveRoom() {
+    $('#leaveRoomBtn').attr('disabled', 'disabled');
+    $('#enterRoomBtn').removeAttr('disabled');
+    $('#RemoteRoom').removeAttr('disabled');
+    $('#RemoteNick').removeAttr('disabled');
+}
+
+function enterRoom() {
+    $.ajax({
+        dataType: 'jsonp',
+        url: 'http://' + remote_server_prefix,
+        data: {
+            room: $('#RemoteRoom').val(),
+            nick: $('#RemoteNick').val()
+        }
+    }).done(function(data) {
+        console.log(data);
+        if(data.result === 'OK') {
+            $('#leaveRoomBtn').removeAttr('disabled');
+            $('#enterRoomBtn').attr('disabled', 'disabled');
+            $('#RemoteRoom').attr('disabled', 'disabled');
+            $('#RemoteNick').attr('disabled', 'disabled');
+
+            var remote_ws = new WebSocket("ws://" + remote_server_prefix + "/ws");
+
+            remote_ws.onopen = function (event) {
+                console.log("RemoteChessServerSocket opened");
+                deleteCookie("picochess_remote")
+            };
+
+            remote_ws.onclose = function () {
+                console.log("RemoteChessServerSocket closed");
+            };
+
+            remote_ws.onerror = function (event) {
+                console.warn("RemoteChessServerSocket error");
+            };
+
+            remote_ws.onmessage = receive_message;
+        }
+
+    }).fail(function(jqXHR, textStatus) {
+        console.warn(textStatus);
+        dgtClockStatusEl.html(textStatus);
+    });
+}
+
+function receive_message(wsevent) {
+    console.log("received message: " + wsevent.data);
+    var msg_obj = $.parseJSON(wsevent.data);
+    switch (msg_obj.msgtype) {
+        case "join":
+            $('#consoleTextarea').append(msg_obj.username + msg_obj.payload + '&#13;');
+            break;
+        case "leave":
+            $('#consoleTextarea').append(msg_obj.username + msg_obj.payload + '&#13;');
+            break;
+        case "nick_list":
+            $('#consoleTextarea').append('current users: ' + msg_obj.payload.toString() + '&#13;');
+            break;
+        default:
+            $('#consoleTextarea').append(msg_obj.username + ':' +  msg_obj.payload + '&#13;');
+    }
+}
+
+function getCookie(name) {
+    var pattern = new RegExp(name + "=.[^;]*");
+    var matched = document.cookie.match(pattern);
+    if (matched) {
+        var cookie = matched[0].split('=');
+        return cookie[1]
+    }
+    return false
+}
+
+function deleteCookie( name, path, domain ) {
+    if ( getCookie( name ) ) document.cookie = name + "=" +
+        ( ( path ) ? ";path=" + path : "") +
+        ( ( domain ) ? ";domain=" + domain : "" ) +
+        ";expires=Thu, 01-Jan-1970 00:00:01 GMT";
 }
 
 function formatEngineOutput(line) {
