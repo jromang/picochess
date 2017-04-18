@@ -515,7 +515,7 @@ def main():
     parser.add_argument('-v', '--version', action='version', version='%(prog)s version {}'.format(version),
                         help='show current version', default=None)
     parser.add_argument('-pi', '--dgtpi', action='store_true', help='use the dgtpi hardware')
-    parser.add_argument('-pt', '--ponder-interval', type=int, default=3, choices=range(1,9),
+    parser.add_argument('-pt', '--ponder-interval', type=int, default=3, choices=range(1, 9),
                         help='how long each part of ponder display should be visible (default=3secs)')
     parser.add_argument('-lang', '--language', choices=['en', 'de', 'nl', 'fr', 'es', 'it'], default='en',
                         help='picochess language')
@@ -828,9 +828,8 @@ def main():
                             play_mode = PlayMode.USER_WHITE if game.turn == chess.WHITE else PlayMode.USER_BLACK
                         else:
                             play_mode = PlayMode.USER_WHITE if game.turn == chess.BLACK else PlayMode.USER_BLACK
-
-                        text = dgttranslate.text(play_mode.value)
-                        # DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode, play_mode_text=text))
+                        pm_value = play_mode.value  # type: str
+                        text = dgttranslate.text(pm_value)
                         msg = Message.PLAY_MODE(play_mode=play_mode, play_mode_text=text)
 
                         if not user_to_move and check_game_state(game, play_mode):
