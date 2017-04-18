@@ -48,6 +48,7 @@ var gameHistory, fenHash, currentPosition;
 var backend_server_prefix = 'http://drshivaji.com:3334';
 //var backend_server_prefix = "http://localhost:7777";
 var remote_server_prefix = "localhost:8888";
+var remote_ws = null;
 
 fenHash = {};
 
@@ -1314,6 +1315,7 @@ function leaveRoom() {
     $('#enterRoomBtn').removeAttr('disabled');
     $('#RemoteRoom').removeAttr('disabled');
     $('#RemoteNick').removeAttr('disabled');
+    remote_ws.close();
 }
 
 function enterRoom() {
@@ -1332,7 +1334,7 @@ function enterRoom() {
             $('#RemoteRoom').attr('disabled', 'disabled');
             $('#RemoteNick').attr('disabled', 'disabled');
 
-            var remote_ws = new WebSocket("ws://" + remote_server_prefix + "/ws");
+            remote_ws = new WebSocket("ws://" + remote_server_prefix + "/ws");
 
             remote_ws.onopen = function (event) {
                 console.log("RemoteChessServerSocket opened");
