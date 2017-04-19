@@ -342,6 +342,9 @@ $(function() {
         var ws = new WebSocket('ws://' + location.host + '/event');
         // Process messages from picochess
         ws.onmessage = function(e) {
+            if(remote_ws) {
+                remote_ws.send(e.data);
+            }
             var data = JSON.parse(e.data);
             switch (data.event) {
                 case 'Fen':
@@ -1313,7 +1316,7 @@ function boardFlip() {
 
 function sendRemoteMsg() {
     if(remote_ws) {
-        var text_msg_obj = {"msgtype": "text", "payload": $('#remoteText').val()};
+        var text_msg_obj = {"event": "text", "payload": $('#remoteText').val()};
         $("#remoteText").val("");
         $("#remoteText").focus();
         var jmsg = JSON.stringify(text_msg_obj);
@@ -1378,7 +1381,7 @@ function enterRoom() {
 function receive_message(wsevent) {
     console.log("received message: " + wsevent.data);
     var msg_obj = $.parseJSON(wsevent.data);
-    switch (msg_obj.msgtype) {
+    switch (msg_obj.event) {
         case "join":
             $('#consoleTextarea').append(msg_obj.username + msg_obj.payload + '&#13;');
             break;
@@ -1388,8 +1391,44 @@ function receive_message(wsevent) {
         case "nick_list":
             $('#consoleTextarea').append('current users: ' + msg_obj.payload.toString() + '&#13;');
             break;
-        default:
+        case "text":
             $('#consoleTextarea').append(msg_obj.username + ':' +  msg_obj.payload + '&#13;');
+            break;
+        // picochess events!
+        case 'Clock':
+            $('#consoleTextarea').append('Clock: ' + msg_obj.msg + '&#13;');
+            break;
+        case 'Light':
+            $('#consoleTextarea').append('Light: ' + msg_obj.move + '&#13;');
+            break;
+        case 'Clear':
+            $('#consoleTextarea').append('Clear' + '&#13;');
+            break;
+        case 'Fen':
+            $('#consoleTextarea').append('Fen: ' + msg_obj.fen + ' move: ' + msg_obj.move + ' play: ' + msg_obj.play + '&#13;');
+            break;
+        case 'Game':
+            $('#consoleTextarea').append('NewGame' + '&#13;');
+            break;
+        case 'Message':
+            $('#consoleTextarea').append('Message: ' + msg_obj.msg + '&#13;');
+            break;
+        case 'Status':
+            $('#consoleTextarea').append('ClockStatus: ' + msg_obj.msg + '&#13;');
+            break;
+        case 'Header':
+            $('#consoleTextarea').append('Header: ' + msg_obj.headers.toString() + '&#13;');
+            break;
+        case 'Title':
+            $('#consoleTextarea').append('ClockStatus: ' + msg_obj.ip_info.toString() + '&#13;');
+            break;
+        case 'Broadcast':
+            $('#consoleTextarea').append('Broadcast: ' + msg_obj.msg + 'fen: ' + msg_obj.fen + '&#13;');
+            break;
+        default:
+            console.log(msg_obj.event);
+            console.log(msg_obj);
+            console.log(' ');
     }
 }
 
