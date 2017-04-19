@@ -59,7 +59,7 @@
                         </button>
                         <ul class="dropdown-menu">
                             <li>
-                                <div id="loginbox" style="padding: 10px;">
+                                <div style="padding: 1vw;">
                                     <div class="col-xs-12">
                                         <p>
                                             <label for="RemoteRoom">Room name:</label>
@@ -71,21 +71,37 @@
                                         </p>
                                     </div>
                                     <div class="col-xs-12">
-                                        <input id="enterRoomBtn" style="width: 100%;" type="button" value="Enter Room" disabled="disabled"/>
-                                        <input id="leaveRoomBtn" style="width: 100%;" type="button" value="Leave Room" disabled="disabled"/>
+                                        <button type="button" id="enterRoomBtn" class="btn btn-raised btn-success btn-sm text-break" title="enter room">
+                                            <i class='fa fa-arrow-right'></i><span class="hidden-xs"> Enter Room</span>
+                                        </button>
+                                        <button type="button" id="leaveRoomBtn" class="btn btn-raised btn-success btn-sm text-break" title="leave room">
+                                            <i class='fa fa-arrow-left'></i><span class="hidden-xs"> Leave Room</span>
+                                        </button>
                                     </div>
                                 </div>
                             </li>
                             <li role="separator" class="divider"></li>
-                            <li><a href="#" onclick="return false;">UserList</a></li>
-                            <li><a href="#">Broadcast</a></li>
-                            <!--
                             <li>
-                                <button type="button" id="broadcastBtn" class="btn btn-raised btn-success btn-xs text-break" data-placement="auto" data-toggle="tooltip" title="broadcast position">
-                                    <i class='fa fa-cloud-download'></i><span class="hidden-xs"> Broadcast</span>
-                                </button>
+                                <div class="col-xs-12" style="padding: 1vw;">
+                                    <button type="button" id="broadcastBtn" class="btn btn-raised btn-success btn-xs text-break" title="broadcast position">
+                                        <i class='fa fa-cloud-download'></i><span class="hidden-xs"> Broadcast</span>
+                                    </button>
+                                </div>
                             </li>
-                            -->
+                            <li role="separator" class="divider"></li>
+                            <li>
+                                <div style="padding: 1vw;">
+                                    <div class="col-xs-12">
+                                        <p>
+                                            <label for="remoteText">Send Text:</label>
+                                            <input id="remoteText" type="text" value="" placeholder="enter your text">
+                                        </p>
+                                        <button type="button" id="SendTextRemoteBtn" class="btn btn-raised btn-success btn-sm text-break" title="send text">
+                                            <i class='fa fa-arrow-right'></i><span class="hidden-xs"> Send</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </li>
                         </ul>
                     </div>
                 </div>

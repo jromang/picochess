@@ -47,8 +47,8 @@ var board,
 var gameHistory, fenHash, currentPosition;
 var backend_server_prefix = 'http://drshivaji.com:3334';
 //var backend_server_prefix = "http://localhost:7777";
-// var remote_server_prefix = "localhost:8888";
-var remote_server_prefix = "drshivaji.com:9876";
+var remote_server_prefix = "localhost:5432";
+//var remote_server_prefix = "drshivaji.com:9876";
 var remote_ws = null;
 
 fenHash = {};
@@ -901,7 +901,7 @@ $('#getFenToConsoleBtn').on('click', getFenToConsole);
 
 $('#enterRoomBtn').on('click', enterRoom);
 $('#leaveRoomBtn').on('click', leaveRoom);
-
+$('#SendTextRemoteBtn').on('click', sendRemoteMsg);
 
 $("#inputConsole").keyup(function(event) {
     if(event.keyCode == 13) {
@@ -1311,12 +1311,27 @@ function boardFlip() {
     board.flip();
 }
 
+function sendRemoteMsg() {
+    if(remote_ws) {
+        var text_msg_obj = {"msgtype": "text", "payload": $('#remoteText').val()};
+        $("#remoteText").val("");
+        $("#remoteText").focus();
+        var jmsg = JSON.stringify(text_msg_obj);
+        remote_ws.send(jmsg);
+    } else {
+        console.log('cant send message cause of closed connection!');
+    }
+}
+
 function leaveRoom() {
-    $('#leaveRoomBtn').attr('disabled', 'disabled');
-    $('#enterRoomBtn').removeAttr('disabled');
+    $('#leaveRoomBtn').attr('disabled', 'disabled').hide();
+    $('#SendTextRemoteBtn').attr('disabled', 'disabled');
+    $('#enterRoomBtn').removeAttr('disabled').show();
     $('#RemoteRoom').removeAttr('disabled');
     $('#RemoteNick').removeAttr('disabled');
-    remote_ws.close();
+    if(remote_ws) {
+        remote_ws.close();
+    }
 }
 
 function enterRoom() {
@@ -1330,8 +1345,9 @@ function enterRoom() {
     }).done(function(data) {
         console.log(data);
         if(data.result === 'OK') {
-            $('#leaveRoomBtn').removeAttr('disabled');
-            $('#enterRoomBtn').attr('disabled', 'disabled');
+            $('#leaveRoomBtn').removeAttr('disabled').show();
+            $('#SendTextRemoteBtn').removeAttr('disabled');
+            $('#enterRoomBtn').attr('disabled', 'disabled').hide();
             $('#RemoteRoom').attr('disabled', 'disabled');
             $('#RemoteNick').attr('disabled', 'disabled');
 
