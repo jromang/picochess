@@ -48,7 +48,7 @@ var gameHistory, fenHash, currentPosition;
 var backend_server_prefix = 'http://drshivaji.com:3334';
 //var backend_server_prefix = "http://localhost:7777";
 // var remote_server_prefix = "localhost:8888";
-var remote_server_prefix = "drshivaji.com:5432";
+var remote_server_prefix = "drshivaji.com:9876";
 var remote_ws = null;
 
 fenHash = {};
