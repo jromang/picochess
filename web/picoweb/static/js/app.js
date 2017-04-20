@@ -47,8 +47,8 @@ var board,
 var gameHistory, fenHash, currentPosition;
 var backend_server_prefix = 'http://drshivaji.com:3334';
 //var backend_server_prefix = "http://localhost:7777";
-//var remote_server_prefix = "localhost:5432";
-var remote_server_prefix = "drshivaji.com:9876";
+var remote_server_prefix = "localhost:5432";
+//var remote_server_prefix = "drshivaji.com:9876";
 var remote_ws = null;
 
 fenHash = {};
@@ -1242,7 +1242,7 @@ function clockButtonPower() {
 
 function sendConsoleCommand() {
     var cmd = $('#inputConsole').val();
-    $('#consoleTextarea').append(cmd + '&#13;');
+    $('#consoleLogArea').append('<li>' + cmd + '</li>');
     $.post('/channel', {action: 'command', command: cmd}, function (data) {
     });
 }
@@ -1383,47 +1383,47 @@ function receive_message(wsevent) {
     var msg_obj = $.parseJSON(wsevent.data);
     switch (msg_obj.event) {
         case "join":
-            $('#consoleTextarea').append(msg_obj.username + msg_obj.payload + '&#13;');
+            $('#consoleLogArea').append('<li>' + msg_obj.username + msg_obj.payload + '</li>');
             break;
         case "leave":
-            $('#consoleTextarea').append(msg_obj.username + msg_obj.payload + '&#13;');
+            $('#consoleLogArea').append('<li>' + msg_obj.username + msg_obj.payload + '</li>');
             break;
         case "nick_list":
-            $('#consoleTextarea').append('current users: ' + msg_obj.payload.toString() + '&#13;');
+            $('#consoleLogArea').append('<li>' + 'current users: ' + msg_obj.payload.toString() + '</li>');
             break;
         case "text":
-            $('#consoleTextarea').append(msg_obj.username + ':' +  msg_obj.payload + '&#13;');
+            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' +  msg_obj.payload + '</li>');
             break;
         // picochess events!
         case 'Clock':
-            $('#consoleTextarea').append('Clock: ' + msg_obj.msg + '&#13;');
+            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'Clock: ' + msg_obj.msg + '</li>');
             break;
         case 'Light':
-            $('#consoleTextarea').append('Light: ' + msg_obj.move + '&#13;');
+            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'Light: ' + msg_obj.move + '</li>');
             break;
         case 'Clear':
-            $('#consoleTextarea').append('Clear' + '&#13;');
+            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'Clear' + '</li>');
             break;
         case 'Fen':
-            $('#consoleTextarea').append('Fen: ' + msg_obj.fen + ' move: ' + msg_obj.move + ' play: ' + msg_obj.play + '&#13;');
+            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'Fen: ' + msg_obj.fen + ' move: ' + msg_obj.move + ' play: ' + msg_obj.play + '</li>');
             break;
         case 'Game':
-            $('#consoleTextarea').append('NewGame' + '&#13;');
+            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'NewGame' + '</li>');
             break;
         case 'Message':
-            $('#consoleTextarea').append('Message: ' + msg_obj.msg + '&#13;');
+            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'Message: ' + msg_obj.msg + '</li>');
             break;
         case 'Status':
-            $('#consoleTextarea').append('ClockStatus: ' + msg_obj.msg + '&#13;');
+            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'ClockStatus: ' + msg_obj.msg + '</li>');
             break;
         case 'Header':
-            $('#consoleTextarea').append('Header: ' + msg_obj.headers.toString() + '&#13;');
+            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'Header: ' + msg_obj.headers.toString() + '</li>');
             break;
         case 'Title':
-            $('#consoleTextarea').append('ClockStatus: ' + msg_obj.ip_info.toString() + '&#13;');
+            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'Title: ' + msg_obj.ip_info.toString() + '</li>');
             break;
         case 'Broadcast':
-            $('#consoleTextarea').append('Broadcast: ' + msg_obj.msg + 'fen: ' + msg_obj.fen + '&#13;');
+            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'Broadcast: ' + msg_obj.msg + 'fen: ' + msg_obj.fen + '</li>');
             break;
         default:
             console.log(msg_obj.event);
