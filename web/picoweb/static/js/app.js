@@ -47,9 +47,9 @@ var board,
 var gameHistory, fenHash, currentPosition;
 var backend_server_prefix = 'http://drshivaji.com:3334';
 //var backend_server_prefix = "http://localhost:7777";
-//var remote_server_prefix = "localhost:5432";
+
 var remote_server_prefix = "drshivaji.com:9876";
-//var remote_server_prefix = "drshivaji.com:5432";
+//var remote_server_prefix = "localhost:5432";
 var remote_ws = null;
 
 fenHash = {};
@@ -770,7 +770,7 @@ function updateCurrentPosition(move, tmp_game) {
     var found_move = false;
     if (currentPosition && currentPosition.variations) {
         for (var i = 0; i < currentPosition.variations.length; i++) {
-            if (move.san == currentPosition.variations[i].move.san) {
+            if (move.san === currentPosition.variations[i].move.san) {
                 currentPosition = currentPosition.variations[i];
                 found_move = true;
             }
@@ -908,7 +908,7 @@ $('#leaveRoomBtn').on('click', leaveRoom);
 $('#SendTextRemoteBtn').on('click', sendRemoteMsg);
 
 $("#inputConsole").keyup(function(event) {
-    if(event.keyCode == 13) {
+    if(event.keyCode === 13) {
         sendConsoleCommand();
         $(this).val('');
     }
@@ -1085,7 +1085,7 @@ function loadGame(pgn_lines) {
             var preparsed_move = token;
             var move = board_stack[last_board_stack_index].move(preparsed_move, {sloppy: true});
             in_variation = true;
-            if (move == null) {
+            if (move === null) {
                 console.log('Unparsed move:');
                 console.log(preparsed_move);
                 console.log('Fen: ' + board_stack[last_board_stack_index].fen());
@@ -1148,7 +1148,7 @@ function writeVariationTree(dom, gameMoves, gameHistoryEl) {
 function getGameHeader(h, pgn_output) {
     var gameHeaderText = '';
 
-    if (true == pgn_output) {
+    if (true === pgn_output) {
         for (var key in h) {
             // hasOwnProperty ensures that inherited properties are not included
             if (h.hasOwnProperty(key)) {
