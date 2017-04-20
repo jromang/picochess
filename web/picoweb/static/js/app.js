@@ -47,8 +47,9 @@ var board,
 var gameHistory, fenHash, currentPosition;
 var backend_server_prefix = 'http://drshivaji.com:3334';
 //var backend_server_prefix = "http://localhost:7777";
-var remote_server_prefix = "localhost:5432";
+//var remote_server_prefix = "localhost:5432";
 //var remote_server_prefix = "drshivaji.com:9876";
+var remote_server_prefix = "drshivaji.com:5432";
 var remote_ws = null;
 
 fenHash = {};
@@ -1354,11 +1355,11 @@ function enterRoom() {
             $('#RemoteRoom').attr('disabled', 'disabled');
             $('#RemoteNick').attr('disabled', 'disabled');
 
-            remote_ws = new WebSocket("ws://" + remote_server_prefix + "/ws");
+            remote_ws = new WebSocket("ws://" + remote_server_prefix + "/ws/" + data.client_id);
 
             remote_ws.onopen = function (event) {
                 console.log("RemoteChessServerSocket opened");
-                deleteCookie("picochess_remote")
+                // deleteCookie("picochess_remote")
             };
 
             remote_ws.onclose = function () {
@@ -1373,7 +1374,8 @@ function enterRoom() {
         }
 
     }).fail(function(jqXHR, textStatus) {
-        console.warn(textStatus);
+        console.warn('Failed ajax request');
+        console.log(jqXHR);
         dgtClockStatusEl.html(textStatus);
     });
 }
@@ -1432,7 +1434,11 @@ function receive_message(wsevent) {
     }
 }
 
+/*
 function getCookie(name) {
+    console.log('getCookie');
+    console.log(document.cookie);
+    console.log(' ');
     var pattern = new RegExp(name + "=.[^;]*");
     var matched = document.cookie.match(pattern);
     if (matched) {
@@ -1443,11 +1449,18 @@ function getCookie(name) {
 }
 
 function deleteCookie( name, path, domain ) {
-    if ( getCookie( name ) ) document.cookie = name + "=" +
-        ( ( path ) ? ";path=" + path : "") +
-        ( ( domain ) ? ";domain=" + domain : "" ) +
-        ";expires=Thu, 01-Jan-1970 00:00:01 GMT";
+    if ( getCookie( name ) ) {
+        var pico_cookie = name + "=" +
+            ( ( path ) ? ";path=" + path : "") +
+            ( ( domain ) ? ";domain=" + domain : "" ) +
+            ";expires=Thu, 01-Jan-1970 00:00:01 GMT";
+        console.log('deleteCookie');
+        console.log(pico_cookie);
+        console.log(' ');
+        document.cookie = pico_cookie;
+    }
 }
+*/
 
 function formatEngineOutput(line) {
     if (line.search('depth') > 0 && line.search('currmove') < 0) {
