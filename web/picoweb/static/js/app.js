@@ -302,6 +302,7 @@ $(function() {
     window.engine_lines = {};
     window.multipv = 1;
 
+    setOutsideRoom();
     $("#RemoteRoom").keyup(function(event) { remote_send(); } );
     $("#RemoteNick").keyup(function(event) { remote_send(); } );
 
@@ -1327,12 +1328,26 @@ function sendRemoteMsg() {
     }
 }
 
-function leaveRoom() {
+function setInsideRoom() {
+    $('#leaveRoomBtn').removeAttr('disabled').show();
+    $('#SendTextRemoteBtn').removeAttr('disabled');
+    $('#enterRoomBtn').attr('disabled', 'disabled').hide();
+    $('#RemoteRoom').attr('disabled', 'disabled');
+    $('#RemoteNick').attr('disabled', 'disabled');
+    $('#broadcastBtn').removeAttr('disabled');
+}
+
+function setOutsideRoom() {
     $('#leaveRoomBtn').attr('disabled', 'disabled').hide();
     $('#SendTextRemoteBtn').attr('disabled', 'disabled');
     $('#enterRoomBtn').removeAttr('disabled').show();
     $('#RemoteRoom').removeAttr('disabled');
     $('#RemoteNick').removeAttr('disabled');
+    $('#broadcastBtn').attr('disabled', 'disabled');
+}
+
+function leaveRoom() {
+    setOutsideRoom();
     if(remote_ws) {
         remote_ws.close();
     }
@@ -1349,25 +1364,22 @@ function enterRoom() {
     }).done(function(data) {
         console.log(data);
         if(data.result === 'OK') {
-            $('#leaveRoomBtn').removeAttr('disabled').show();
-            $('#SendTextRemoteBtn').removeAttr('disabled');
-            $('#enterRoomBtn').attr('disabled', 'disabled').hide();
-            $('#RemoteRoom').attr('disabled', 'disabled');
-            $('#RemoteNick').attr('disabled', 'disabled');
+            setInsideRoom();
 
             remote_ws = new WebSocket("ws://" + remote_server_prefix + "/ws/" + data.client_id);
 
             remote_ws.onopen = function (event) {
                 console.log("RemoteChessServerSocket opened");
-                // deleteCookie("picochess_remote")
             };
 
             remote_ws.onclose = function () {
                 console.log("RemoteChessServerSocket closed");
+                setOutsideRoom();
             };
 
             remote_ws.onerror = function (event) {
                 console.warn("RemoteChessServerSocket error");
+                dgtClockStatusEl.html(event.data);
             };
 
             remote_ws.onmessage = receive_message;
