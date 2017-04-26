@@ -310,7 +310,7 @@ class DgtBoard(object):
 
                 # Attention! This fen is NOT flipped
                 logging.debug("Raw-Fen [%s]", fen)
-                DisplayMsg.show(Message.DGT_FEN(fen=fen))
+                DisplayMsg.show(Message.DGT_FEN(fen=fen, raw=True))
                 break
             if case(DgtMsg.DGT_MSG_FIELD_UPDATE):
                 if message_length != 2:

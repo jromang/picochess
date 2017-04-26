@@ -515,7 +515,7 @@ def main():
     parser.add_argument('-v', '--version', action='version', version='%(prog)s version {}'.format(version),
                         help='show current version', default=None)
     parser.add_argument('-pi', '--dgtpi', action='store_true', help='use the dgtpi hardware')
-    parser.add_argument('-pt', '--ponder-interval', type=int, default=3, choices=range(1,9),
+    parser.add_argument('-pt', '--ponder-interval', type=int, default=3, choices=range(1, 9),
                         help='how long each part of ponder display should be visible (default=3secs)')
     parser.add_argument('-lang', '--language', choices=['en', 'de', 'nl', 'fr', 'es', 'it'], default='en',
                         help='picochess language')
@@ -673,7 +673,7 @@ def main():
                         game_copy = game.copy()
                         game_copy.push(move)
                         fen = game_copy.board_fen()
-                        DisplayMsg.show(Message.DGT_FEN(fen=fen))
+                        DisplayMsg.show(Message.DGT_FEN(fen=fen, raw=False))
                     break
 
                 if case(EventApi.LEVEL):
@@ -991,7 +991,7 @@ def main():
                     break
 
                 if case(EventApi.KEYBOARD_FEN):
-                    DisplayMsg.show(Message.DGT_FEN(fen=event.fen))
+                    DisplayMsg.show(Message.DGT_FEN(fen=event.fen, raw=True))
                     break
 
                 if case(EventApi.EXIT_MENU):

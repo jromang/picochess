@@ -109,7 +109,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         return score
 
     def _get_clock_side(self, turn):
-        side = ClockSide.LEFT if (turn == chess.WHITE) != self.dgtmenu.get_flip_board() else ClockSide.RIGHT
+        side = ClockSide.LEFT if turn == chess.WHITE else ClockSide.RIGHT
         return side
 
     def _inside_menu(self):
@@ -208,7 +208,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             elif button == -0x40:
                 self._process_lever(right_side_down=False, dev=message.dev)
 
-    def _process_fen(self, fen):
+    def _process_fen(self, fen, raw):
         level_map = ('rnbqkbnr/pppppppp/8/q7/8/8/PPPPPPPP/RNBQKBNR',
                      'rnbqkbnr/pppppppp/8/1q6/8/8/PPPPPPPP/RNBQKBNR',
                      'rnbqkbnr/pppppppp/8/2q5/8/8/PPPPPPPP/RNBQKBNR',
@@ -270,7 +270,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                           '8/8/8/8/3kK3/8/8/8': GameResult.DRAW,
                           '8/8/8/8/3Kk3/8/8/8': GameResult.DRAW}
 
-        if self.dgtmenu.get_flip_board():  # Flip the board if needed
+        if self.dgtmenu.get_flip_board() and raw:  # Flip the board if needed
             fen = fen[::-1]
         if fen == 'RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr':  # Check if we have to flip the board
             logging.debug('flipping the board')
@@ -711,7 +711,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 self._process_button(message)
                 break
             if case(MessageApi.DGT_FEN):
-                self._process_fen(message.fen)
+                self._process_fen(message.fen, message.raw)
                 break
             if case(MessageApi.DGT_CLOCK_VERSION):
                 if message.dev == 'ser':  # send the "board connected message" to serial clock
