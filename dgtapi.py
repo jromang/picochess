@@ -173,7 +173,7 @@ class Message():
     OPENING_BOOK = ClassFactory(MessageApi.OPENING_BOOK, ['book_text', 'show_ok'])
 
     DGT_BUTTON = ClassFactory(MessageApi.DGT_BUTTON, ['button', 'dev'])
-    DGT_FEN = ClassFactory(MessageApi.DGT_FEN, ['fen'])
+    DGT_FEN = ClassFactory(MessageApi.DGT_FEN, ['fen', 'raw'])
     DGT_CLOCK_VERSION = ClassFactory(MessageApi.DGT_CLOCK_VERSION, ['main', 'sub', 'dev', 'text'])
     DGT_CLOCK_TIME = ClassFactory(MessageApi.DGT_CLOCK_TIME, ['time_left', 'time_right', 'dev'])
     DGT_SERIAL_NR = ClassFactory(MessageApi.DGT_SERIAL_NR, ['number'])

@@ -272,7 +272,7 @@ def main():
                     DisplayMsg.show(msg)
 
     def is_not_user_turn(turn):
-        """Is it users turn (only valid in normal or remote mode)."""
+        """Return if it is users turn (only valid in normal or remote mode)."""
         condition1 = (play_mode == PlayMode.USER_WHITE and turn == chess.BLACK)
         condition2 = (play_mode == PlayMode.USER_BLACK and turn == chess.WHITE)
         return condition1 or condition2
@@ -426,19 +426,19 @@ def main():
 
     def transfer_time(time_list: list):
         """Transfer the time list to a TimeControl Object and a Text Object."""
-        def num(time_str):
+        def _num(time_str):
             try:
                 return int(time_str)
             except ValueError:
                 return 1
 
         if len(time_list) == 1:
-            fixed = num(time_list[0])
+            fixed = _num(time_list[0])
             timec = TimeControl(TimeMode.FIXED, fixed=fixed)
             textc = dgttranslate.text('B00_tc_fixed', '{:2d}'.format(fixed))
         elif len(time_list) == 2:
-            blitz = num(time_list[0])
-            fisch = num(time_list[1])
+            blitz = _num(time_list[0])
+            fisch = _num(time_list[1])
             if fisch == 0:
                 timec = TimeControl(TimeMode.BLITZ, blitz=blitz)
                 textc = dgttranslate.text('B00_tc_blitz', '{:2d}'.format(blitz))
@@ -673,7 +673,7 @@ def main():
                         game_copy = game.copy()
                         game_copy.push(move)
                         fen = game_copy.board_fen()
-                        DisplayMsg.show(Message.DGT_FEN(fen=fen))
+                        DisplayMsg.show(Message.DGT_FEN(fen=fen, raw=False))
                     break
 
                 if case(EventApi.LEVEL):
@@ -973,10 +973,11 @@ def main():
 
                 if case(EventApi.EMAIL_LOG):
                     if args.log_file:
-                        email_logger = Emailer(email=args.email, mailgun_key=args.mailgun_key,
-                                               smtp_server=args.smtp_server, smtp_user=args.smtp_user,
-                                               smtp_pass=args.smtp_pass, smtp_encryption=args.smtp_encryption,
-                                               smtp_from=args.smtp_from)
+                        email_logger = Emailer(email=args.email, mailgun_key=args.mailgun_key)
+                        email_logger.set_smtp(
+                            sserver=args.smtp_server, suser=args.smtp_user,
+                            spass=args.smtp_pass, sencryption=args.smtp_encryption,
+                            sfrom=args.smtp_from)
                         body = 'You probably want to forward this file to a picochess developer ;-)'
                         email_logger.send('Picochess LOG', body, '/opt/picochess/logs/{}'.format(args.log_file))
                     break
@@ -990,7 +991,7 @@ def main():
                     break
 
                 if case(EventApi.KEYBOARD_FEN):
-                    DisplayMsg.show(Message.DGT_FEN(fen=event.fen))
+                    DisplayMsg.show(Message.DGT_FEN(fen=event.fen, raw=True))
                     break
 
                 if case(EventApi.EXIT_MENU):

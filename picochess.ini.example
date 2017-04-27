@@ -45,7 +45,7 @@
 ## Sets the UCI engine used at startup
 ## handle with care. If you setup this section wrong, picochess wont start.
 ## Path to the engine relative to the 'picochess' folder (local engine - standard case)
-## If you use a remote engine server, please make sure that you also set 'engine-remote-host' accordingly
+## If you use a remote engine server, please make sure that you also set 'engine-remote-home' accordingly
 # engine = engines/armv7l/a-stockf
 ## What level the engine should have at startup?
 ## For a (correct) value please take a look at 'engines/<your_plattform>/<engine_name>.uci'
