@@ -41,24 +41,21 @@ class Emailer(object):
 
     """Handle eMail with subject, body and an attached file."""
 
-    def __init__(self, email=None, mailgun_key=None,
-                 smtp_server=None, smtp_user=None,
-                 smtp_pass=None, smtp_encryption=False, smtp_from=None):
+    def __init__(self, email=None, mailgun_key=None):
         if email:  # check if email address is provided by picochess.ini
             self.email = email
         else:
             self.email = False
-        # store information for SMTP based mail delivery
-        self.smtp_server = smtp_server
-        self.smtp_encryption = smtp_encryption
-        self.smtp_user = smtp_user
-        self.smtp_pass = smtp_pass
-        # store information for mailgun mail delivery
+        self.smtp_server = None
+        self.smtp_encryption = None
+        self.smtp_user = None
+        self.smtp_pass = None
+        self.smtp_from = None
+
         if email and mailgun_key:
             self.mailgun_key = base64.b64decode(str.encode(mailgun_key)).decode('utf-8')
         else:
             self.mailgun_key = False
-        self.smtp_from = smtp_from
 
     def _use_smtp(self, subject, body, path):
         # if self.smtp_server is not provided than don't try to send email via smtp service
@@ -86,18 +83,18 @@ class Emailer(object):
                 ctype = 'application/octet-stream'
             maintype, subtype = ctype.split('/', 1)
             if maintype == 'text':
-                with open(path) as fp:
-                    msg = MIMEText(fp.read(), _subtype=subtype)
+                with open(path) as fpath:
+                    msg = MIMEText(fpath.read(), _subtype=subtype)
             elif maintype == 'image':
-                with open(path, 'rb') as fp:
-                    msg = MIMEImage(fp.read(), _subtype=subtype)
+                with open(path, 'rb') as fpath:
+                    msg = MIMEImage(fpath.read(), _subtype=subtype)
             elif maintype == 'audio':
-                with open(path, 'rb') as fp:
-                    msg = MIMEAudio(fp.read(), _subtype=subtype)
+                with open(path, 'rb') as fpath:
+                    msg = MIMEAudio(fpath.read(), _subtype=subtype)
             else:
-                with open(path, 'rb') as fp:
+                with open(path, 'rb') as fpath:
                     msg = MIMEBase(maintype, subtype)
-                    msg.set_payload(fp.read())
+                    msg.set_payload(fpath.read())
                 encoders.encode_base64(msg)
             msg.add_header('Content-Disposition', 'attachment', filename=os.path.basename(path))
             outer.attach(msg)
@@ -129,6 +126,14 @@ class Emailer(object):
                                   'subject': subject,
                                   'text': body})
         logging.debug(out)
+
+    def set_smtp(self, sserver=None, sencryption=None, suser=None, spass=None, sfrom=None):
+        """store information for SMTP based mail delivery."""
+        self.smtp_server = sserver
+        self.smtp_encryption = sencryption
+        self.smtp_user = suser
+        self.smtp_pass = spass
+        self.smtp_from = sfrom
 
     def send(self, subject: str, body: str, path: str):
         """send the email out."""
@@ -194,6 +199,42 @@ class PgnDisplay(DisplayMsg, threading.Thread):
         file.close()
         self.emailer.send('Game PGN', str(pgn_game), self.file_name)
 
+    def _process_message(self, message):
+        for case in switch(message):
+            if case(MessageApi.SYSTEM_INFO):
+                self.engine_name = message.info['engine_name']
+                self.old_engine = self.engine_name
+                self.user_name = message.info['user_name']
+                break
+            if case(MessageApi.IP_INFO):
+                self.location = message.info['location']
+                break
+            if case(MessageApi.STARTUP_INFO):
+                self.level_text = message.info['level_text']
+                break
+            if case(MessageApi.LEVEL):
+                self.level_text = message.level_text
+                break
+            if case(MessageApi.INTERACTION_MODE):
+                if message.mode == Mode.REMOTE:
+                    self.old_engine = self.engine_name
+                    self.engine_name = 'Remote Player'
+                else:
+                    self.engine_name = self.old_engine
+                break
+            if case(MessageApi.ENGINE_READY):
+                self.engine_name = message.engine_name
+                if not message.has_levels:
+                    self.level_text = None
+                break
+            if case(MessageApi.GAME_ENDS):
+                if message.game.move_stack:
+                    self._save_and_email_pgn(message)
+                break
+            if case():  # Default
+                # print(message)
+                pass
+
     def run(self):
         """called from threading.Thread by its start() function."""
         logging.info('msg_queue ready')
@@ -203,39 +244,6 @@ class PgnDisplay(DisplayMsg, threading.Thread):
                 message = self.msg_queue.get()
                 # if repr(message) != MessageApi.DGT_SERIAL_NR:
                 #     logging.debug("received message from msg_queue: %s", message)
-                for case in switch(message):
-                    if case(MessageApi.SYSTEM_INFO):
-                        self.engine_name = message.info['engine_name']
-                        self.old_engine = self.engine_name
-                        self.user_name = message.info['user_name']
-                        break
-                    if case(MessageApi.IP_INFO):
-                        self.location = message.info['location']
-                        break
-                    if case(MessageApi.STARTUP_INFO):
-                        self.level_text = message.info['level_text']
-                        break
-                    if case(MessageApi.LEVEL):
-                        self.level_text = message.level_text
-                        break
-                    if case(MessageApi.INTERACTION_MODE):
-                        if message.mode == Mode.REMOTE:
-                            self.old_engine = self.engine_name
-                            self.engine_name = 'Remote Player'
-                        else:
-                            self.engine_name = self.old_engine
-                        break
-                    if case(MessageApi.ENGINE_READY):
-                        self.engine_name = message.engine_name
-                        if not message.has_levels:
-                            self.level_text = None
-                        break
-                    if case(MessageApi.GAME_ENDS):
-                        if message.game.move_stack:
-                            self._save_and_email_pgn(message)
-                        break
-                    if case():  # Default
-                        # print(message)
-                        pass
+                self._process_message(message)
             except queue.Empty:
                 pass
