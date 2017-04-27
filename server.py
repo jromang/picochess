@@ -311,7 +311,7 @@ class WebVr(DgtIface):
         self.time_right = hours_minutes_seconds(time_right)
         self._display_time(self.time_left, self.time_right)
 
-    def light_squares_revelation_board(self, squares, flip: bool):
+    def light_squares_revelation_board(self, squares):
         result = {'event': 'Light', 'move': squares}
         EventHandler.write_to_clients(result)
 

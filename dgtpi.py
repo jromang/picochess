@@ -162,7 +162,7 @@ class DgtPi(DgtIface):
         else:
             logging.debug('(i2c) clock isnt running - no need for endText')
 
-    def light_squares_revelation_board(self, uci_move: str, flip: bool):
+    def light_squares_revelation_board(self, uci_move: str):
         """handle this by dgthw.py."""
         pass
 
