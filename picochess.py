@@ -236,7 +236,7 @@ def main():
 
         logging.debug('user move [%s]', move)
         if move not in game.legal_moves:
-            logging.warning('Illegal move [%s]', move)
+            logging.warning('illegal move [%s]', move)
         else:
             stop_search_and_clock()
 
@@ -298,30 +298,30 @@ def main():
                 if is_not_user_turn(game.turn):
                     stop_search()
                     game.pop()
-                    logging.debug('User move in computer turn, reverting to: ' + game.board_fen())
+                    logging.debug('user move in computer turn, reverting to: ' + game.board_fen())
                 elif done_computer_fen:
                     done_computer_fen = None
                     done_move = chess.Move.null()
                     game.pop()
-                    logging.debug('User move while computer move is displayed, reverting to: ' + game.board_fen())
+                    logging.debug('user move while computer move is displayed, reverting to: ' + game.board_fen())
                 else:
                     handled_fen = False
                     logging.error("last_legal_fens not cleared: " + game.board_fen())
             elif interaction_mode == Mode.REMOTE:
                 if is_not_user_turn(game.turn):
                     game.pop()
-                    logging.debug('User move in remote turn, reverting to: ' + game.board_fen())
+                    logging.debug('user move in remote turn, reverting to: ' + game.board_fen())
                 elif done_computer_fen:
                     done_computer_fen = None
                     done_move = chess.Move.null()
                     game.pop()
-                    logging.debug('User move while remote move is displayed, reverting to: ' + game.board_fen())
+                    logging.debug('user move while remote move is displayed, reverting to: ' + game.board_fen())
                 else:
                     handled_fen = False
                     logging.error('last_legal_fens not cleared: ' + game.board_fen())
             else:
                 game.pop()
-                logging.debug('Wrong color move -> sliding, reverting to: ' + game.board_fen())
+                logging.debug('wrong color move -> sliding, reverting to: ' + game.board_fen())
             legal_moves = list(game.legal_moves)
             move = legal_moves[last_legal_fens.index(fen)]  # type: chess.Move
             user_move(move)
@@ -367,8 +367,8 @@ def main():
                 game_history.pop()
                 if game_history.board_fen() == fen:
                     handled_fen = True
-                    logging.debug("Current game FEN      : {}".format(game.fen()))
-                    logging.debug("Undoing game until FEN: {}".format(fen))
+                    logging.debug("current game fen      : {}".format(game.fen()))
+                    logging.debug("undoing game until fen: {}".format(fen))
                     stop_search_and_clock()
                     while len(game_history.move_stack) < len(game.move_stack):
                         game.pop()
@@ -567,10 +567,10 @@ def main():
 
     if args.console:
         # Enable keyboard input and terminal display
-        logging.debug('starting picochess in virtual mode')
+        logging.debug('starting PicoChess in virtual mode')
     else:
         # Connect to DGT board
-        logging.debug('starting picochess in board mode')
+        logging.debug('starting PicoChess in board mode')
         if args.dgtpi:
             DgtPi(dgttranslate).start()
         DgtHw(dgttranslate, dgtboard).start()
@@ -578,9 +578,8 @@ def main():
     Dispatcher().start()
     # Save to PGN
     emailer = Emailer(email=args.email, mailgun_key=args.mailgun_key)
-    emailer.set_smtp(
-        sserver=args.smtp_server, suser=args.smtp_user,
-        spass=args.smtp_pass, sencryption=args.smtp_encryption, sfrom=args.smtp_from)
+    emailer.set_smtp(sserver=args.smtp_server, suser=args.smtp_user, spass=args.smtp_pass,
+                     sencryption=args.smtp_encryption, sfrom=args.smtp_from)
 
     PgnDisplay('games' + os.sep + args.pgn_file, emailer).start()
     if args.pgn_user:
@@ -829,9 +828,8 @@ def main():
                         else:
                             play_mode = PlayMode.USER_WHITE if game.turn == chess.BLACK else PlayMode.USER_BLACK
 
-                        text = dgttranslate.text(play_mode.value)
-                        # DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode, play_mode_text=text))
-                        msg = Message.PLAY_MODE(play_mode=play_mode, play_mode_text=text)
+                        text = play_mode.value
+                        msg = Message.PLAY_MODE(play_mode=play_mode, play_mode_text=dgttranslate.text(text))
 
                         if not user_to_move and check_game_state(game, play_mode):
                             time_control.reset_start_time()
@@ -889,7 +887,7 @@ def main():
                     if game.is_legal(event.pv[0]):
                         DisplayMsg.show(Message.NEW_PV(pv=event.pv, mode=interaction_mode, game=game.copy()))
                     else:
-                        logging.info('illegal move can not be displayed. move:%s fen=%s', event.pv[0], game.fen())
+                        logging.info('illegal move can not be displayed. move: %s fen: %s', event.pv[0], game.fen())
                     break
 
                 if case(EventApi.NEW_SCORE):
@@ -975,10 +973,8 @@ def main():
                 if case(EventApi.EMAIL_LOG):
                     if args.log_file:
                         email_logger = Emailer(email=args.email, mailgun_key=args.mailgun_key)
-                        email_logger.set_smtp(
-                            sserver=args.smtp_server, suser=args.smtp_user,
-                            spass=args.smtp_pass, sencryption=args.smtp_encryption,
-                            sfrom=args.smtp_from)
+                        email_logger.set_smtp(sserver=args.smtp_server, suser=args.smtp_user, spass=args.smtp_pass,
+                                              sencryption=args.smtp_encryption, sfrom=args.smtp_from)
                         body = 'You probably want to forward this file to a picochess developer ;-)'
                         email_logger.send('Picochess LOG', body, '/opt/picochess/logs/{}'.format(args.log_file))
                     break
