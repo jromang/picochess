@@ -15,8 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from dgtapi import Event, Dgt
-from dgtutil import EngineStatus
+from dgt.api import Event, Dgt
+from dgt.util import EngineStatus
 from utilities import Observable
 import logging
 import os
