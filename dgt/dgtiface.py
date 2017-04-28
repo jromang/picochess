@@ -19,10 +19,10 @@ from chess import Board
 from utilities import hours_minutes_seconds, switch, DisplayDgt, DispatchDgt
 import logging
 import queue
-from dgtutil import ClockIcons, ClockSide
-from dgtapi import Dgt, DgtApi
+from dgt.dgtutil import ClockIcons, ClockSide
+from dgt.dgtapi import Dgt, DgtApi
 from threading import Thread
-from dgttranslate import DgtTranslate
+from dgt.dgttranslate import DgtTranslate
 
 
 class DgtIface(DisplayDgt, Thread):

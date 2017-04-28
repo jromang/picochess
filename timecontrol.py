@@ -20,8 +20,8 @@ import time
 import threading
 from utilities import Observable, hours_minutes_seconds
 import logging
-from dgtapi import Event
-from dgtutil import TimeMode
+from dgt.dgtapi import Event
+from dgt.dgtutil import TimeMode
 import copy
 from math import floor
 

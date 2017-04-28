@@ -15,8 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from dgtutil import Beep, BeepLevel
-from dgtapi import Dgt
+from dgt.dgtutil import Beep, BeepLevel
+from dgt.dgtapi import Dgt
 import logging
 
 

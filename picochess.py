@@ -36,17 +36,17 @@ from utilities import Observable, DisplayMsg, version, switch, evt_queue
 import logging
 import time
 import queue
-from dgtapi import Message, Event, EventApi
-from dgtutil import GameResult, TimeMode, Mode, PlayMode
+from dgt.dgtapi import Message, Event, EventApi
+from dgt.dgtutil import GameResult, TimeMode, Mode, PlayMode
 from pgn import Emailer, PgnDisplay
 from server import WebServer
 
-from dgthw import DgtHw
-from dgtpi import DgtPi
-from dgtdisplay import DgtDisplay
-from dgtboard import DgtBoard
-from dgttranslate import DgtTranslate
-from dgtmenu import DgtMenu
+from dgt.dgthw import DgtHw
+from dgt.dgtpi import DgtPi
+from dgt.dgtdisplay import DgtDisplay
+from dgt.dgtboard import DgtBoard
+from dgt.dgttranslate import DgtTranslate
+from dgt.dgtmenu import DgtMenu
 from dispatcher import Dispatcher
 
 from logging.handlers import RotatingFileHandler

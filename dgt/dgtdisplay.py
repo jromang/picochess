@@ -21,11 +21,11 @@ from math import ceil
 import logging
 import copy
 import queue
-from utilities import DisplayMsg, Observable, Dgt, switch, DispatchDgt
-from dgttranslate import DgtTranslate
-from dgtmenu import DgtMenu
-from dgtutil import ClockSide, ClockIcons, BeepLevel, Mode, GameResult, TimeMode
-from dgtapi import Event, MessageApi
+from utilities import DisplayMsg, Observable, switch, DispatchDgt
+from dgt.dgttranslate import DgtTranslate
+from dgt.dgtmenu import DgtMenu
+from dgt.dgtutil import ClockSide, ClockIcons, BeepLevel, Mode, GameResult, TimeMode
+from dgt.dgtapi import Dgt, Event, MessageApi
 
 from timecontrol import TimeControl
 from engine import get_installed_engines

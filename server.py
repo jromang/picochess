@@ -28,13 +28,13 @@ from tornado.websocket import WebSocketHandler
 
 from utilities import Observable, DisplayMsg, switch, hours_minutes_seconds, RepeatedTimer
 import logging
-from dgtapi import MessageApi, Event, Message
-from dgtutil import GameResult, PlayMode, Mode, ClockSide
+from dgt.dgtapi import MessageApi, Event, Message
+from dgt.dgtutil import GameResult, PlayMode, Mode, ClockSide
 from web.picoweb import picoweb as pw
 
-from dgtiface import DgtIface
-from dgttranslate import DgtTranslate
-from dgtboard import DgtBoard
+from dgt.dgtiface import DgtIface
+from dgt.dgttranslate import DgtTranslate
+from dgt.dgtboard import DgtBoard
 
 # This needs to be reworked to be session based (probably by token)
 # Otherwise multiple clients behind a NAT can all play as the 'player'

@@ -15,13 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from dgtiface import DgtIface
+from dgt.dgtiface import DgtIface
 from utilities import DisplayMsg, hours_minutes_seconds
 import logging
 import time
-from dgtapi import Message
-from dgtutil import ClockIcons, ClockSide
-from dgttranslate import DgtTranslate
+from dgt.dgtapi import Message
+from dgt.dgtutil import ClockIcons, ClockSide
+from dgt.dgttranslate import DgtTranslate
 from threading import Lock, Timer
 from ctypes import cdll, c_byte, create_string_buffer, pointer
 

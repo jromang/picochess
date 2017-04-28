@@ -18,8 +18,8 @@
 import serial as pyserial
 import struct
 
-from dgtutil import DgtAck, DgtClk, DgtCmd, DgtMsg, ClockIcons, ClockSide, enum
-from dgtapi import Message, Dgt
+from dgt.dgtutil import DgtAck, DgtClk, DgtCmd, DgtMsg, ClockIcons, ClockSide, enum
+from dgt.dgtapi import Message, Dgt
 
 from utilities import RepeatedTimer, switch, DisplayMsg, hours_minutes_seconds
 import logging

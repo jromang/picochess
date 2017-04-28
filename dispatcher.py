@@ -18,7 +18,7 @@
 from utilities import DisplayDgt, DispatchDgt, dispatch_queue
 import logging
 import queue
-from dgtapi import Dgt, DgtApi
+from dgt.dgtapi import Dgt, DgtApi
 from threading import Timer, Thread, Lock
 
 
