@@ -15,13 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from dgtiface import DgtIface
+from dgt.iface import DgtIface
 from utilities import DisplayMsg, hours_minutes_seconds
 import logging
 import time
-from dgtapi import Message
-from dgtutil import ClockIcons, ClockSide
-from dgttranslate import DgtTranslate
+from dgt.api import Message
+from dgt.util import ClockIcons, ClockSide
+from dgt.translate import DgtTranslate
 from threading import Lock, Timer
 from ctypes import cdll, c_byte, create_string_buffer, pointer
 
@@ -163,11 +163,11 @@ class DgtPi(DgtIface):
             logging.debug('(i2c) clock isnt running - no need for endText')
 
     def light_squares_revelation_board(self, uci_move: str):
-        """handle this by dgthw.py."""
+        """handle this by hw.py."""
         pass
 
     def clear_light_revelation_board(self):
-        """handle this by dgthw.py."""
+        """handle this by hw.py."""
         pass
 
     def stop_clock(self, devs: set):
