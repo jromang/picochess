@@ -28,8 +28,8 @@ import copy
 from threading import Timer
 
 import configparser
-from dgt.dgttranslate import DgtTranslate
-from dgt.dgtapi import Dgt
+from dgt.translate import DgtTranslate
+from dgt.api import Dgt
 
 # picochess version
 version = '087'

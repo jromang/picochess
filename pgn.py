@@ -25,8 +25,8 @@ import requests
 from utilities import DisplayMsg, switch
 import os
 import queue
-from dgt.dgtapi import MessageApi
-from dgt.dgtutil import GameResult, PlayMode, Mode
+from dgt.api import MessageApi
+from dgt.util import GameResult, PlayMode, Mode
 
 from email import encoders
 from email.mime.multipart import MIMEMultipart
