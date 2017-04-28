@@ -578,9 +578,8 @@ def main():
     Dispatcher().start()
     # Save to PGN
     emailer = Emailer(email=args.email, mailgun_key=args.mailgun_key)
-    emailer.set_smtp(
-        sserver=args.smtp_server, suser=args.smtp_user,
-        spass=args.smtp_pass, sencryption=args.smtp_encryption, sfrom=args.smtp_from)
+    emailer.set_smtp(sserver=args.smtp_server, suser=args.smtp_user, spass=args.smtp_pass,
+                     sencryption=args.smtp_encryption, sfrom=args.smtp_from)
 
     PgnDisplay('games' + os.sep + args.pgn_file, emailer).start()
     if args.pgn_user:
@@ -829,9 +828,8 @@ def main():
                         else:
                             play_mode = PlayMode.USER_WHITE if game.turn == chess.BLACK else PlayMode.USER_BLACK
 
-                        text = dgttranslate.text(play_mode.value)
-                        # DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode, play_mode_text=text))
-                        msg = Message.PLAY_MODE(play_mode=play_mode, play_mode_text=text)
+                        text = play_mode.value  # type: str
+                        msg = Message.PLAY_MODE(play_mode=play_mode, play_mode_text=dgttranslate.text(text))
 
                         if not user_to_move and check_game_state(game, play_mode):
                             time_control.reset_start_time()
@@ -975,10 +973,8 @@ def main():
                 if case(EventApi.EMAIL_LOG):
                     if args.log_file:
                         email_logger = Emailer(email=args.email, mailgun_key=args.mailgun_key)
-                        email_logger.set_smtp(
-                            sserver=args.smtp_server, suser=args.smtp_user,
-                            spass=args.smtp_pass, sencryption=args.smtp_encryption,
-                            sfrom=args.smtp_from)
+                        email_logger.set_smtp(sserver=args.smtp_server, suser=args.smtp_user, spass=args.smtp_pass,
+                                              sencryption=args.smtp_encryption, sfrom=args.smtp_from)
                         body = 'You probably want to forward this file to a picochess developer ;-)'
                         email_logger.send('Picochess LOG', body, '/opt/picochess/logs/{}'.format(args.log_file))
                     break
