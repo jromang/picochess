@@ -569,7 +569,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 time_left = 0
             if time_right < 0:
                 time_right = 0
-        side = self._get_clock_side(message.turn)
+        side = ClockSide.LEFT if (message.turn == chess.WHITE) != self.dgtmenu.get_flip_board() else ClockSide.RIGHT
         DispatchDgt.fire(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side, wait=False,
                                          devs=message.devs))
 

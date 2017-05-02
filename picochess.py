@@ -988,7 +988,7 @@ def main():
                     break
 
                 if case(EventApi.KEYBOARD_FEN):
-                    DisplayMsg.show(Message.DGT_FEN(fen=event.fen, raw=True))
+                    DisplayMsg.show(Message.DGT_FEN(fen=event.fen, raw=False))
                     break
 
                 if case(EventApi.EXIT_MENU):
