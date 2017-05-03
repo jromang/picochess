@@ -74,6 +74,7 @@ class DgtIface(DisplayDgt, Thread):
         raise NotImplementedError()
 
     def getName(self):
+        """get classname."""
         return self.__class__.__name__
 
     def get_san(self, message, is_xl=False):
