@@ -1273,6 +1273,33 @@ class DgtMenu(object):
         self.current_text = text
         return text
 
+    def middle(self):
+        def exit_position():
+            self.state = MenuState.POS_READ
+            return self.down()
+
+        text = self.dgttranslate.text('Y00_errormenu')
+        for case in switch(self.state):
+            if case(MenuState.POS):
+                text = exit_position()
+                break
+            if case(MenuState.POS_COL):
+                text = exit_position()
+                break
+            if case(MenuState.POS_REV):
+                text = exit_position()
+                break
+            if case(MenuState.POS_UCI):
+                text = exit_position()
+                break
+            if case(MenuState.POS_READ):
+                text = exit_position()
+                break
+            if case():  # Default
+                break
+        self.current_text = text
+        return text
+
     def inside_menu(self):
         return self.state != MenuState.TOP
 

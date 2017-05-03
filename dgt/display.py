@@ -146,17 +146,18 @@ class DgtDisplay(DisplayMsg, threading.Thread):
 
     def _process_button2(self, dev):
         logging.debug('({}) clock: handle button 2 press'.format(dev))
-        # even button2 has no function inside the menu we need to care for an "alt-move" event
-        if self.dgtmenu.get_mode() in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
-            text = self.dgttranslate.text('B00_nofunction')
-            DispatchDgt.fire(text)
+        if self._inside_menu():
+            DispatchDgt.fire(self.dgtmenu.middle())
         else:
-            if self.engine_finished:
-                # @todo Protect against multi entrance of Alt-move
-                self.engine_finished = False  # This is not 100% ok, but for the moment better as nothing
-                Observable.fire(Event.ALTERNATIVE_MOVE())
+            if self.dgtmenu.get_mode() in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
+                DispatchDgt.fire(self.dgttranslate.text('B00_nofunction'))
             else:
-                Observable.fire(Event.PAUSE_RESUME())
+                if self.engine_finished:
+                    # @todo Protect against multi entrance of Alt-move
+                    self.engine_finished = False  # This is not 100% ok, but for the moment better as nothing
+                    Observable.fire(Event.ALTERNATIVE_MOVE())
+                else:
+                    Observable.fire(Event.PAUSE_RESUME())
 
     def _process_button3(self, dev):
         logging.debug('({}) clock: handle button 3 press'.format(dev))
