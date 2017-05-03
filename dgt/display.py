@@ -147,7 +147,11 @@ class DgtDisplay(DisplayMsg, threading.Thread):
     def _process_button2(self, dev):
         logging.debug('({}) clock: handle button 2 press'.format(dev))
         if self._inside_menu():
-            DispatchDgt.fire(self.dgtmenu.middle())
+            text = self.dgtmenu.middle()  # button2 can exit the menu (if in "position"), so check
+            if text:
+                DispatchDgt.fire(text)
+            else:
+                Observable.fire(Event.EXIT_MENU())
         else:
             if self.dgtmenu.get_mode() in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
                 DispatchDgt.fire(self.dgttranslate.text('B00_nofunction'))
