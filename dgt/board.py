@@ -274,7 +274,7 @@ class DgtBoard(object):
                 else:
                     logging.debug('(ser) clock: null message ignored')
                 if self.clock_lock:
-                    logging.debug('(ser) clock: unlocked after {0:.3f} secs', time.time() - self.clock_lock)
+                    logging.debug('(ser) clock: unlocked after %.3f secs', time.time() - self.clock_lock)
                     self.clock_lock = False
                 break
             if case(DgtMsg.DGT_MSG_BOARD_DUMP):

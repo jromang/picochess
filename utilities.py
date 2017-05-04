@@ -189,7 +189,7 @@ def update_picochess(dgtpi: bool, auto_reboot: bool, dgttranslate: DgtTranslate)
                                   stdout=subprocess.PIPE, env=force_en_env).communicate()[0].decode(encoding='UTF-8')
         logging.debug(output)
         if 'up-to-date' not in output:
-            DispatchDgt.fire(dgttranslate.text('Y24_update'))
+            DispatchDgt.fire(dgttranslate.text('Y25_update'))
             # Update
             logging.debug('updating picochess')
             output = subprocess.Popen(['pip3', 'install', '-r', 'requirements.txt'],
