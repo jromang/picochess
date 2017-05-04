@@ -63,12 +63,12 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         return False
 
     def _power_off(self, dev='web'):
-        DispatchDgt.fire(self.dgttranslate.text('Y10_goodbye'))
+        DispatchDgt.fire(self.dgttranslate.text('Y15_goodbye'))
         self.dgtmenu.set_engine_restart(True)
         Observable.fire(Event.SHUTDOWN(dev=dev))
 
     def _reboot(self, dev='web'):
-        DispatchDgt.fire(self.dgttranslate.text('Y10_pleasewait'))
+        DispatchDgt.fire(self.dgttranslate.text('Y15_pleasewait'))
         self.dgtmenu.set_engine_restart(True)
         Observable.fire(Event.REBOOT(dev=dev))
 

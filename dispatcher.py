@@ -68,7 +68,7 @@ class Dispatcher(DispatchDgt, Thread):
                     self.display_hash = hash(message)
 
         if do_handle:
-            logging.debug("handle DgtApi: %s at %s", message, self.__class__.__name__)
+            logging.debug("handle DgtApi: %s", message)
             if hasattr(message, 'maxtime') and message.maxtime > 0:
                 self.maxtimer = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer)
                 self.maxtimer.start()
@@ -76,7 +76,7 @@ class Dispatcher(DispatchDgt, Thread):
                 self.maxtimer_running = True
             DisplayDgt.show(message)
         else:
-            logging.debug("ignore DgtApi: %s at %s", message, self.__class__.__name__)
+            logging.debug("ignore DgtApi: %s", message)
 
     def run(self):
         """called from threading.Thread by its start() function."""

@@ -189,7 +189,7 @@ def update_picochess(dgtpi: bool, auto_reboot: bool, dgttranslate: DgtTranslate)
                                   stdout=subprocess.PIPE, env=force_en_env).communicate()[0].decode(encoding='UTF-8')
         logging.debug(output)
         if 'up-to-date' not in output:
-            DispatchDgt.fire(dgttranslate.text('Y00_update'))
+            DispatchDgt.fire(dgttranslate.text('Y25_update'))
             # Update
             logging.debug('updating picochess')
             output = subprocess.Popen(['pip3', 'install', '-r', 'requirements.txt'],
@@ -201,12 +201,12 @@ def update_picochess(dgtpi: bool, auto_reboot: bool, dgttranslate: DgtTranslate)
             if auto_reboot:
                 reboot(dgtpi, dev='web')
             else:
-                time.sleep(1)  # give time to display the "update" message
+                time.sleep(2)  # give time to display the "update" message
 
 
 def shutdown(dgtpi: bool, dev: str):
     logging.debug('shutting down system requested by (%s)', dev)
-    time.sleep(2)  # give some time to send out the pgn file or speak the event
+    time.sleep(3)  # give some time to send out the pgn file or speak the event
     if platform.system() == 'Windows':
         os.system('shutdown /s')
     elif dgtpi:
@@ -217,7 +217,7 @@ def shutdown(dgtpi: bool, dev: str):
 
 def reboot(dgtpi: bool, dev: str):
     logging.debug('rebooting system requested by (%s)', dev)
-    time.sleep(2)  # give some time to send out the pgn file or speak the event
+    time.sleep(3)  # give some time to send out the pgn file or speak the event
     if platform.system() == 'Windows':
         os.system('shutdown /r')
     elif dgtpi:
