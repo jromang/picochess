@@ -707,7 +707,7 @@ def main():
                             engine_name = engine.get().name
                         except AttributeError:
                             # New engine failed to start, restart old engine
-                            logging.error('new engine failed to start, reverting to {}'.format(old_file))
+                            logging.error('new engine failed to start, reverting to %s', old_file)
                             engine_fallback = True
                             event.options = {}  # Reset options. This will load the last(=strongest?) level
                             engine = UciEngine(old_file)

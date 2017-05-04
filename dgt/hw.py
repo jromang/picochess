@@ -51,14 +51,14 @@ class DgtHw(DgtIface):
             if not res:
                 logging.warning('Finally failed %i', res)
 
-    def _display_on_dgt_3000(self, text: str, beep=False, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
+    def _display_on_dgt_3000(self, text: str, beep=False):
         text = text.ljust(8)
         if len(text) > 8:
             logging.warning('(ser) clock message too long [%s]', text)
         logging.debug(text)
         text = bytes(text, 'utf-8')
         with self.lib_lock:
-            res = self.dgtboard.set_text_3k(text, 0x03 if beep else 0x00, left_icons, right_icons)
+            res = self.dgtboard.set_text_3k(text, 0x03 if beep else 0x00)
             if not res:
                 logging.warning('Finally failed %i', res)
 
@@ -77,14 +77,12 @@ class DgtHw(DgtIface):
         if not self._check_clock(text):
             return
         if display_m:
-            self._display_on_dgt_3000(text, message.beep, left_icons, right_icons)
+            self._display_on_dgt_3000(text, message.beep)
         else:
             self._display_on_dgt_xl(text, message.beep, left_icons, right_icons)
 
     def display_move_on_clock(self, message):
         """display a move on the dgtxl/3k."""
-        left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE
-        right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
         display_m = self.enable_dgt_3000 and not self.dgtboard.use_revelation_leds
         if display_m:
             bit_board, text = self.get_san(message)
@@ -98,8 +96,10 @@ class DgtHw(DgtIface):
             return
         if self._check_clock(text):
             if display_m:
-                self._display_on_dgt_3000(text, message.beep, left_icons, right_icons)
+                self._display_on_dgt_3000(text, message.beep)
             else:
+                left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE
+                right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
                 self._display_on_dgt_xl(text, message.beep, left_icons, right_icons)
 
     def display_time_on_clock(self, message):

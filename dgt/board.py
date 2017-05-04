@@ -65,7 +65,7 @@ class DgtBoard(object):
         self.r_time = 3600 * 10  # max value cause 10h cant be reached by clock
         self.l_time = 3600 * 10  # max value cause 10h cant be reached by clock
 
-        self.board_connected_text = None
+        self.bconn_text = None
 
     def write_command(self, message: list):
         """write the message list to the dgt board."""
@@ -114,7 +114,7 @@ class DgtBoard(object):
                     self.serial.write(bytearray(array))
                     break
                 except ValueError:
-                    logging.error('invalid bytes sent {0}'.format(message))
+                    logging.error('invalid bytes sent %s', message)
                     return False
                 except pyserial.SerialException as write_expection:
                     logging.error(write_expection)
@@ -145,7 +145,7 @@ class DgtBoard(object):
                 if message_length != 2:
                     logging.warning('illegal length in data')
                 board_version = str(message[0]) + '.' + str(message[1])
-                logging.debug("DGT board version %0.2f", float(board_version))
+                logging.debug("board version %0.2f", float(board_version))
                 self.write_command([DgtCmd.DGT_SEND_BRD])  # Update the board => get first FEN
                 if self.device.find('rfc') == -1:
                     text_l, text_m, text_s = 'USB e-Board', 'USBboard', 'ok usb'
@@ -162,9 +162,9 @@ class DgtBoard(object):
                     else:
                         text_l, text_m, text_s = 'BT e-Board', 'BT board', 'ok bt'
                     channel = 'BT'
-                self.board_connected_text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, wait=True, beep=False,
-                                                             maxtime=1, devs={'i2c', 'web'})  # serial clock lateron
-                DisplayMsg.show(Message.DGT_EBOARD_VERSION(text=self.board_connected_text, channel=channel))
+                self.bconn_text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, wait=True, beep=False, maxtime=1,
+                                                   devs={'i2c', 'web'})  # serial clock lateron
+                DisplayMsg.show(Message.DGT_EBOARD_VERSION(text=self.bconn_text, channel=channel))
                 self.startup_serial_clock()  # now ask the serial clock to answer
                 if self.watchdog_timer.is_running():
                     logging.warning('watchdog timer is already running')
@@ -225,12 +225,12 @@ class DgtBoard(object):
                         main = ack2 >> 4
                         sub = ack2 & 0x0f
                         logging.debug("(ser) clock: version %0.2f", float(str(main) + '.' + str(sub)))
-                        if self.board_connected_text:
-                            self.board_connected_text.devs = {'ser'}  # Now send the (delayed) message to serial clock
+                        if self.bconn_text:
+                            self.bconn_text.devs = {'ser'}  # Now send the (delayed) message to serial clock
                             dev = 'ser'
                         else:
                             dev = 'err'
-                        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=main, sub=sub, dev=dev, text=self.board_connected_text))
+                        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=main, sub=sub, dev=dev, text=self.bconn_text))
                     if ack1 == DgtAck.DGT_ACK_CLOCK_SETNRUN.value:  # set time values to max => sure! override lateron
                         self.r_time = 3600 * 10
                         self.l_time = 3600 * 10
@@ -257,10 +257,10 @@ class DgtBoard(object):
                                 DisplayMsg.show(Message.DGT_NO_CLOCK_ERROR(text='dont_use'))
                             self.lever_pos = None
                         else:
-                            tr = [r_hours, r_mins, r_secs]
-                            tl = [l_hours, l_mins, l_secs]
-                            logging.info('(ser) clock: new time received l:%s r:%s', tl, tr)
-                            DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=tl, time_right=tr, dev='ser'))
+                            rtime = [r_hours, r_mins, r_secs]
+                            ltime = [l_hours, l_mins, l_secs]
+                            logging.info('(ser) clock: new time received l:%s r:%s', ltime, rtime)
+                            DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=ltime, time_right=rtime, dev='ser'))
 
                             right_side_down = -0x40 if status & 0x02 else 0x40
                             if self.lever_pos != right_side_down:
@@ -274,7 +274,7 @@ class DgtBoard(object):
                 else:
                     logging.debug('(ser) clock: null message ignored')
                 if self.clock_lock:
-                    logging.debug('(ser) clock: unlocked after %.3f secs', time.time() - self.clock_lock)
+                    logging.debug('(ser) clock: unlocked after %0.3f secs', time.time() - self.clock_lock)
                     self.clock_lock = False
                 break
             if case(DgtMsg.DGT_MSG_BOARD_DUMP):
@@ -358,7 +358,7 @@ class DgtBoard(object):
                 counter -= 1
                 if data[0] & 0x80:
                     logging.warning('illegal data in message %i found', message_id)
-                    logging.warning('ignore collected message data %s', format(message))
+                    logging.warning('ignore collected message data %s', message)
                     return self._read_board_message(byte)
                 message += data
             else:
@@ -616,7 +616,8 @@ class DgtBoard(object):
         if has_to_wait:
             logging.debug('(ser) clock is released now')
 
-    def set_text_3k(self, text: str, beep: int, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
+    def set_text_3k(self, text: str, beep: int):
+        """display a text on a 3000 Clock."""
         self._wait_for_clock()
         res = self.write_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x0c, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
                                   DgtClk.DGT_CMD_CLOCK_ASCII,
@@ -625,6 +626,7 @@ class DgtBoard(object):
         return res
 
     def set_text_xl(self, text: str, beep: int, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
+        """display a text on a XL clock."""
         def _transfer(icons: ClockIcons):
             result = 0
             if icons == ClockIcons.DOT:
@@ -642,6 +644,7 @@ class DgtBoard(object):
         return res
 
     def set_and_run(self, lr: int, lh: int, lm: int, ls: int, rr: int, rh: int, rm: int, rs: int):
+        """set the clock with times and let it run."""
         self._wait_for_clock()
         side = ClockSide.NONE
         if lr == 1 and rr == 0:
@@ -655,6 +658,7 @@ class DgtBoard(object):
         return res
 
     def end_text(self):
+        """return the clock display to time display."""
         self._wait_for_clock()
         res = self.write_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
                                   DgtClk.DGT_CMD_CLOCK_END,

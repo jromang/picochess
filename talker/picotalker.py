@@ -30,6 +30,9 @@ from pathlib import Path
 
 
 class PicoTalker():
+
+    """Handle the human speaking of events."""
+
     def __init__(self, localisation_id_voice=None):
         self.voice_path = None
 
@@ -50,7 +53,8 @@ class PicoTalker():
                 voice_file = self.voice_path + '/' + part
                 if Path(voice_file).is_file():
                     try:
-                        subprocess.call(['ogg123', voice_file], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                        subprocess.call(['ogg123', voice_file],
+                                        shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     except OSError as os_exc:
                         logging.warning('OSError: %s => turn voice OFF', os_exc)
                         self.voice_path = None
@@ -61,6 +65,9 @@ class PicoTalker():
 
 
 class PicoTalkerDisplay(DisplayMsg, threading.Thread):
+
+    """Listen on messages for talking."""
+
     def __init__(self, user_voice, computer_voice):
         """
         Initialize a PicoTalkerDisplay with voices for the user and/or computer players.
@@ -80,15 +87,15 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
             self.set_computer(PicoTalker(computer_voice))
 
     def set_computer(self, picotalker):
+        """Sets the computer talker."""
         self.computer_picotalker = picotalker
 
     def set_user(self, picotalker):
+        """Sets the user talker."""
         self.user_picotalker = picotalker
 
     def run(self):
-        """
-        Start listening for Messages on our queue and generate speech as appropriate.
-        """
+        """Start listening for Messages on our queue and generate speech as appropriate."""
         previous_move = chess.Move.null()  # Ignore repeated broadcasts of a move.
         system_picotalker = self.system_voice()
         logging.info('msg_queue ready')
@@ -232,9 +239,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
 
     @staticmethod
     def say_last_move(game: chess.Board):
-        """
-        Take a chess.Move instance and a chess.BitBoard instance and speaks the move.
-        """
+        """Take a chess.Move instance and a chess.BitBoard instance and speaks the move."""
         move_parts = {
             'K': 'king.ogg',
             'B': 'bishop.ogg',
