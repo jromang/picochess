@@ -119,7 +119,8 @@ class DgtIface(DisplayDgt, Thread):
                 # log times
                 l_hms = hours_minutes_seconds(message.time_left)
                 r_hms = hours_minutes_seconds(message.time_right)
-                logging.debug('[%s] last time received from clock l:%s r:%s', self.getName(), self.time_left, self.time_right)
+                logging.debug('[%s] last time received from clock l:%s r:%s',
+                              self.getName(), self.time_left, self.time_right)
                 logging.debug('[%s] sending time to clock l:%s r:%s', self.getName(), l_hms, r_hms)
                 self.start_clock(message.time_left, message.time_right, message.side, message.devs)
                 break

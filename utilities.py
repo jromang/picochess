@@ -19,15 +19,16 @@ import logging
 import queue
 import os
 import platform
-import subprocess
 import urllib.request
 import socket
 import json
 import time
 import copy
-from threading import Timer
-
 import configparser
+
+from threading import Timer
+from subprocess import Popen, PIPE
+
 from dgt.translate import DgtTranslate
 from dgt.api import Dgt
 
@@ -43,50 +44,68 @@ dgtdisplay_devices = []
 dgtdispatch_devices = []
 
 
-class Observable(object):  # Input devices are observable
+class Observable(object):
+
+    """Input devices are observable."""
+
     def __init__(self):
         super(Observable, self).__init__()
 
     @staticmethod
     def fire(event):
+        """Put an event on the Queue."""
         evt_queue.put(copy.deepcopy(event))
 
 
-class DispatchDgt(object):  # Input devices are observable
+class DispatchDgt(object):
+
+    """Input devices are observable."""
+
     def __init__(self):
         super(DispatchDgt, self).__init__()
 
     @staticmethod
     def fire(dgt):
+        """Put an event on the Queue."""
         dispatch_queue.put(copy.deepcopy(dgt))
 
 
-class DisplayMsg(object):  # Display devices (DGT XL clock, Piface LCD, pgn file...)
+class DisplayMsg(object):
+
+    """Display devices (DGT XL clock, Piface LCD, pgn file...)."""
+
     def __init__(self):
         super(DisplayMsg, self).__init__()
         self.msg_queue = queue.Queue()
         msgdisplay_devices.append(self)
 
     @staticmethod
-    def show(message):  # Sends a message on each display device
+    def show(message):
+        """Sends a message on each display device."""
         for display in msgdisplay_devices:
             display.msg_queue.put(copy.deepcopy(message))
 
 
-class DisplayDgt(object):  # Display devices (DGT XL clock, Piface LCD, pgn file...)
+class DisplayDgt(object):
+
+    """Display devices (DGT XL clock, Piface LCD, pgn file...)."""
+
     def __init__(self):
         super(DisplayDgt, self).__init__()
         self.dgt_queue = queue.Queue()
         dgtdisplay_devices.append(self)
 
     @staticmethod
-    def show(message):  # Sends a message on each display device
+    def show(message):
+        """Sends a message on each display device."""
         for display in dgtdisplay_devices:
             display.dgt_queue.put(copy.deepcopy(message))
 
 
-# switch/case instruction in python
 class switch(object):
+
+    """switch/case instruction in python."""
+
     def __init__(self, value):
         if type(value) is int:
             self.value = value
@@ -95,12 +114,12 @@ class switch(object):
         self.fall = False
 
     def __iter__(self):
-        """Return the match method once, then stop"""
+        """Return the match method once, then stop."""
         yield self.match
         raise StopIteration
 
     def match(self, *args):
-        """Indicate whether or not to enter a case suite"""
+        """Indicate whether or not to enter a case suite."""
         if self.fall or not args:
             return True
         elif self.value in args:  # changed for v1.5, see below
@@ -111,6 +130,9 @@ class switch(object):
 
 
 class RepeatedTimer(object):
+
+    """Call function on a given interval."""
+
     def __init__(self, interval, function, *args, **kwargs):
         self._timer = None
         self.interval = interval
@@ -125,9 +147,11 @@ class RepeatedTimer(object):
         self.function(*self.args, **self.kwargs)
 
     def is_running(self):
+        """Return the running status."""
         return self.timer_running
 
     def start(self):
+        """Start the RepeatedTimer."""
         if not self.timer_running:
             self._timer = Timer(self.interval, self._run)
             self._timer.start()
@@ -136,6 +160,7 @@ class RepeatedTimer(object):
             logging.info('repeated timer already running - strange!')
 
     def stop(self):
+        """Stop the RepeatedTimer."""
         if self.timer_running:
             self._timer.cancel()
             self.timer_running = False
@@ -144,6 +169,7 @@ class RepeatedTimer(object):
 
 
 def get_opening_books():
+    """Build an opening book lib."""
     config = configparser.ConfigParser()
     config.optionxform = str
     program_path = os.path.dirname(os.path.realpath(__file__)) + os.sep
@@ -164,39 +190,39 @@ def get_opening_books():
 
 
 def hours_minutes_seconds(seconds: int):
+    """Return the match method once, then stop."""
     if seconds < 0:
         logging.warning('negative time %i', seconds)
         return 0, 0, 0
-    m, s = divmod(seconds, 60)
-    h, m = divmod(m, 60)
-    return h, m, s
+    mins, secs = divmod(seconds, 60)
+    hours, mins = divmod(mins, 60)
+    return hours, mins, secs
 
 
 def update_picochess(dgtpi: bool, auto_reboot: bool, dgttranslate: DgtTranslate):
+    """Update picochess from git."""
+    def do_command(command):
+        return Popen(command, stdout=PIPE).communicate()[0].decode(encoding='UTF-8')
+
     git = 'git.exe' if platform.system() == 'Windows' else 'git'
 
-    branch = subprocess.Popen([git, 'rev-parse', '--abbrev-ref', 'HEAD'],
-                              stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8').rstrip()
+    branch = do_command([git, 'rev-parse', '--abbrev-ref', 'HEAD']).rstrip()
     if branch == 'stable' or branch == 'master':
         # Fetch remote repo
-        output = subprocess.Popen([git, 'remote', 'update'],
-                                  stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
+        output = do_command([git, 'remote', 'update'])
         logging.debug(output)
         # Check if update is needed - but first force an english environment for it
         force_en_env = os.environ.copy()
         force_en_env['LC_ALL'] = 'C'
-        output = subprocess.Popen([git, 'status', '-uno'],
-                                  stdout=subprocess.PIPE, env=force_en_env).communicate()[0].decode(encoding='UTF-8')
+        output = Popen([git, 'status', '-uno'], stdout=PIPE, env=force_en_env).communicate()[0].decode(encoding='UTF-8')
         logging.debug(output)
         if 'up-to-date' not in output:
             DispatchDgt.fire(dgttranslate.text('Y25_update'))
             # Update
             logging.debug('updating picochess')
-            output = subprocess.Popen(['pip3', 'install', '-r', 'requirements.txt'],
-                                      stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
+            output = do_command(['pip3', 'install', '-r', 'requirements.txt'])
             logging.debug(output)
-            output = subprocess.Popen([git, 'pull', 'origin', branch],
-                                      stdout=subprocess.PIPE).communicate()[0].decode(encoding='UTF-8')
+            output = do_command([git, 'pull', 'origin', branch])
             logging.debug(output)
             if auto_reboot:
                 reboot(dgtpi, dev='web')
@@ -205,6 +231,7 @@ def update_picochess(dgtpi: bool, auto_reboot: bool, dgttranslate: DgtTranslate)
 
 
 def shutdown(dgtpi: bool, dev: str):
+    """Shutdown picochess."""
     logging.debug('shutting down system requested by (%s)', dev)
     time.sleep(3)  # give some time to send out the pgn file or speak the event
     if platform.system() == 'Windows':
@@ -216,6 +243,7 @@ def shutdown(dgtpi: bool, dev: str):
 
 
 def reboot(dgtpi: bool, dev: str):
+    """Reboot picochess."""
     logging.debug('rebooting system requested by (%s)', dev)
     time.sleep(3)  # give some time to send out the pgn file or speak the event
     if platform.system() == 'Windows':
@@ -227,11 +255,12 @@ def reboot(dgtpi: bool, dev: str):
 
 
 def get_location():
+    """Return the location of the user and the external and interal ip adr."""
     try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(('8.8.8.8', 80))
-        int_ip = s.getsockname()[0]
-        s.close()
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.connect(('8.8.8.8', 80))
+        int_ip = sock.getsockname()[0]
+        sock.close()
 
         response = urllib.request.urlopen('https://freegeoip.net/json/')
         j = json.loads(response.read().decode())
