@@ -125,7 +125,7 @@ class DgtPi(DgtIface):
         if text is None:
             text = message.m
         if 'i2c' not in message.devs:
-            logging.debug('ignored message cause of devs [{}]'.format(text))
+            logging.debug('ignored message cause of devs [%s]', text)
             return
         left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE
         right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
@@ -136,7 +136,7 @@ class DgtPi(DgtIface):
         bit_board, text = self.get_san(message)
         text = '{:3d}{:s}'.format(bit_board.fullmove_number, text)
         if 'i2c' not in message.devs:
-            logging.debug('ignored message cause of devs [{}]'.format(text))
+            logging.debug('ignored message cause of devs [%s]', text)
             return
         left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.DOT
         right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE

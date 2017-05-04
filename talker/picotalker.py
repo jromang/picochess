@@ -52,10 +52,10 @@ class PicoTalker():
                     try:
                         subprocess.call(['ogg123', voice_file], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     except OSError as os_exc:
-                        logging.warning('OSError: {} => turn voice OFF'.format(os_exc))
+                        logging.warning('OSError: %s => turn voice OFF', os_exc)
                         self.voice_path = None
                 else:
-                    logging.warning('voice file not found {}'.format(voice_file))
+                    logging.warning('voice file not found %s', voice_file)
         else:
             logging.debug('picotalker turned off')
 
@@ -278,7 +278,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                 try:
                     sound_file = move_parts[part]
                 except KeyError:
-                    logging.warning('unknown char found in san: [{} : {}]'.format(san_move, part))
+                    logging.warning('unknown char found in san: [%s : %s]', san_move, part)
                     sound_file = ''
                 if sound_file:
                     voice_parts += [sound_file]

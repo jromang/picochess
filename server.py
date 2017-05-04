@@ -202,7 +202,7 @@ class WebVr(DgtIface):
             hours, mins, secs = self.time_left
             time_left = 3600*hours + 60*mins + secs - 1
             if time_left <= 0:
-                logging.info('negative/zero time left: {}'.format(time_left))
+                logging.info('negative/zero time left: %s', time_left)
                 self.virtual_timer.stop()
                 self.time_left = 0
             self.time_left = hours_minutes_seconds(time_left)
@@ -210,7 +210,7 @@ class WebVr(DgtIface):
             hours, mins, secs = self.time_right
             time_right = 3600*hours + 60*mins + secs - 1
             if time_right <= 0:
-                logging.info('negative/zero time right: {}'.format(time_right))
+                logging.info('negative/zero time right: %s', time_right)
                 self.virtual_timer.stop()
                 self.time_right = 0
             self.time_right = hours_minutes_seconds(time_right)
@@ -245,7 +245,7 @@ class WebVr(DgtIface):
             if message.side == ClockSide.RIGHT:
                 text = text.rjust(6)
         if 'web' not in message.devs:
-            logging.debug('ignored message cause of devs [{}]'.format(text))
+            logging.debug('ignored message cause of devs [%s]', text)
             return
         self.clock_show_time = False
         self._create_clock_text()
@@ -262,7 +262,7 @@ class WebVr(DgtIface):
         if text is None:
             text = message.m
         if 'web' not in message.devs:
-            logging.debug('ignored message cause of devs [{}]'.format(text))
+            logging.debug('ignored message cause of devs [%s]', text)
             return
         self.clock_show_time = False
         self._create_clock_text()

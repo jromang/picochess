@@ -379,7 +379,7 @@ class UciEngine(object):
             pc_opts.update(options)
             options = pc_opts
 
-        logging.debug("setting engine with options {}".format(options))
+        logging.debug("setting engine with options %s", options)
         self.level(options)
         self.send()
         if show:

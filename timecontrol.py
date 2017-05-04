@@ -98,13 +98,13 @@ class TimeControl(object):
         if self.mode == TimeMode.FISCHER:
             # log times - issue #184
             w_hms, b_hms = self._log_time()
-            logging.info('before internal time w:{} - b:{}'.format(w_hms, b_hms))
+            logging.info('before internal time w:%s - b:%s', w_hms, b_hms)
 
             self.clock_time[color] += self.fischer_increment
 
             # log times - issue #184
             w_hms, b_hms = self._log_time()
-            logging.info('after internal time w:{} - b:{}'.format(w_hms, b_hms))
+            logging.info('after internal time w:%s - b:%s', w_hms, b_hms)
 
     def start(self, color, log=True):
         """Start the internal clock."""
@@ -115,7 +115,7 @@ class TimeControl(object):
 
             if log:
                 w_hms, b_hms = self._log_time()
-                logging.info('start internal time w:{} - b:{}'.format(w_hms, b_hms))
+                logging.info('start internal time w:%s - b:%s', w_hms, b_hms)
 
             # Only start thread if not already started for same color, and the player has not already lost on time
             if self.clock_time[color] > 0 and self.active_color is not None and self.run_color != self.active_color:
@@ -129,18 +129,18 @@ class TimeControl(object):
         if self.is_ticking() and self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
             if log:
                 w_hms, b_hms = self._log_time()
-                logging.info('old internal time w:{} b:{}'.format(w_hms, b_hms))
+                logging.info('old internal time w:%s b:%s', w_hms, b_hms)
 
             self.timer.cancel()
             self.timer.join()
             used_time = floor((time.time() - self.start_time)*10)/10
             if log:
-                logging.info('used time: {} secs'.format(used_time))
+                logging.info('used time: %s secs', used_time)
             self.clock_time[self.active_color] -= used_time
 
             if log:
                 w_hms, b_hms = self._log_time()
-                logging.info('new internal time w:{} b:{}'.format(w_hms, b_hms))
+                logging.info('new internal time w:%s b:%s', w_hms, b_hms)
             self.run_color = self.active_color = None
 
     def is_ticking(self):

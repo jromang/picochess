@@ -165,7 +165,7 @@ def get_opening_books():
 
 def hours_minutes_seconds(seconds: int):
     if seconds < 0:
-        logging.warning('negative time {}'.format(seconds))
+        logging.warning('negative time %i', seconds)
         return 0, 0, 0
     m, s = divmod(seconds, 60)
     h, m = divmod(m, 60)
@@ -205,7 +205,7 @@ def update_picochess(dgtpi: bool, auto_reboot: bool, dgttranslate: DgtTranslate)
 
 
 def shutdown(dgtpi: bool, dev: str):
-    logging.debug('shutting down system requested by ({})'.format(dev))
+    logging.debug('shutting down system requested by (%s)', dev)
     time.sleep(2)  # give some time to send out the pgn file or speak the event
     if platform.system() == 'Windows':
         os.system('shutdown /s')
@@ -216,7 +216,7 @@ def shutdown(dgtpi: bool, dev: str):
 
 
 def reboot(dgtpi: bool, dev: str):
-    logging.debug('rebooting system requested by ({})'.format(dev))
+    logging.debug('rebooting system requested by (%s)', dev)
     time.sleep(2)  # give some time to send out the pgn file or speak the event
     if platform.system() == 'Windows':
         os.system('shutdown /r')

@@ -834,7 +834,7 @@ class DgtTranslate(object):
 
         if entxt is None:
             entxt = Dgt.DISPLAY_TEXT(l=None, m=text_id, s=None, wait=False, beep=self.bl(BeepLevel.YES), maxtime=0)
-            logging.warning('unknown text_id {}'.format(text_id))
+            logging.warning('unknown text_id %s', text_id)
         if self.language == 'de' and detxt is not None:
             return detxt
         if self.language == 'nl' and nltxt is not None:

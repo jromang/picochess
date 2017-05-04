@@ -116,7 +116,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         return self.dgtmenu.inside_menu()
 
     def _process_button0(self, dev):
-        logging.debug('({}) clock: handle button 0 press'.format(dev))
+        logging.debug('(%s) clock: handle button 0 press', dev)
         if self._inside_menu():
             text = self.dgtmenu.up()  # button0 can exit the menu, so check
             if text:
@@ -134,7 +134,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self._exit_display()
 
     def _process_button1(self, dev):
-        logging.debug('({}) clock: handle button 1 press'.format(dev))
+        logging.debug('(%s) clock: handle button 1 press', dev)
         if self._inside_menu():
             DispatchDgt.fire(self.dgtmenu.left())  # button1 cant exit the menu
         else:
@@ -145,7 +145,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self._exit_display()
 
     def _process_button2(self, dev):
-        logging.debug('({}) clock: handle button 2 press'.format(dev))
+        logging.debug('(%s) clock: handle button 2 press', dev)
         if self._inside_menu():
             text = self.dgtmenu.middle()  # button2 can exit the menu (if in "position"), so check
             if text:
@@ -164,7 +164,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                     Observable.fire(Event.PAUSE_RESUME())
 
     def _process_button3(self, dev):
-        logging.debug('({}) clock: handle button 3 press'.format(dev))
+        logging.debug('(%s) clock: handle button 3 press', dev)
         if self._inside_menu():
             DispatchDgt.fire(self.dgtmenu.right())  # button3 cant exit the menu
         else:
@@ -178,7 +178,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self._exit_display()
 
     def _process_button4(self, dev):
-        logging.debug('({}) clock: handle button 4 press'.format(dev))
+        logging.debug('(%s) clock: handle button 4 press', dev)
         text = self.dgtmenu.down()  # button4 can exit the menu, so check
         if text:
             DispatchDgt.fire(text)
@@ -186,7 +186,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             Observable.fire(Event.EXIT_MENU())
 
     def _process_lever(self, right_side_down, dev):
-        logging.debug('({}) clock: handle lever press - right_side_down: {}'.format(dev, right_side_down))
+        logging.debug('(%s) clock: handle lever press - right_side_down: %s', dev, right_side_down)
         if not self._inside_menu():
             self.play_move = chess.Move.null()
             self.play_fen = None
@@ -298,7 +298,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 msg = sorted(level_dict)[level]
                 text = self.dgttranslate.text('M10_level', msg)
                 text.wait = self._exit_menu()
-                logging.debug("Map-Fen: New level {}".format(msg))
+                logging.debug("Map-Fen: New level %s", msg)
                 config = ConfigObj('picochess.ini')
                 config['engine-level'] = msg
                 config.write()
@@ -750,7 +750,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 self.hint_move = chess.Move.null()
                 self.hint_fen = None
                 self.hint_turn = None
-                logging.debug('user ignored move {}'.format(message.move))
+                logging.debug('user ignored move %s', message.move)
                 break
             if case(MessageApi.EXIT_MENU):
                 self._exit_display()

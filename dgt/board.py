@@ -73,7 +73,7 @@ class DgtBoard(object):
         if not mes == DgtCmd.DGT_RETURN_SERIALNR:
             logging.debug('put (ser) board [%s], length: %i', mes, len(message))
             if mes.value == DgtClk.DGT_CMD_CLOCK_ASCII.value:
-                logging.debug('sending text [{}] to (ser) clock'.format(''.join([chr(elem) for elem in message[4:12]])))
+                logging.debug('sending text [%s] to (ser) clock', ''.join([chr(elem) for elem in message[4:12]]))
 
         array = []
         char_to_xl = {
@@ -136,7 +136,7 @@ class DgtBoard(object):
                 logging.debug('(ser) clock: now locked')
                 self.clock_lock = time.time()
         if message[0] == DgtCmd.DGT_SET_LEDS:
-            logging.debug('LEDs turned {}'.format('on' if message[2] else 'off'))
+            logging.debug('LEDs turned %s', 'on' if message[2] else 'off')
         return True
 
     def _process_board_message(self, message_id: int, message: tuple, message_length: int):
@@ -245,10 +245,10 @@ class DgtBoard(object):
                     l_time = l_hours * 3600 + l_mins * 60 + l_secs
                     errtim = r_hours > 9 or l_hours > 9 or r_mins > 59 or l_mins > 59 or r_secs > 59 or l_secs > 59
                     if errtim:  # complete illegal package received
-                        logging.warning('(ser) clock: illegal new time received {}'.format(message))
+                        logging.warning('(ser) clock: illegal new time received %s', message)
                     elif r_time > self.r_time or l_time > self.l_time:  # the new time is higher as the old => ignore
-                        logging.warning('(ser) clock: strange old time received {} l:{} r:{}'.format(
-                            message, hours_minutes_seconds(self.l_time), hours_minutes_seconds(self.r_time)))
+                        logging.warning('(ser) clock: strange old time received %s l:%s r:%s',
+                                        message, hours_minutes_seconds(self.l_time), hours_minutes_seconds(self.r_time))
                     else:
                         status = message[6] & 0x3f
                         if status & 0x20:
@@ -259,13 +259,12 @@ class DgtBoard(object):
                         else:
                             tr = [r_hours, r_mins, r_secs]
                             tl = [l_hours, l_mins, l_secs]
-                            logging.info('(ser) clock: new time received l:{} r:{}'.format(tl, tr))
+                            logging.info('(ser) clock: new time received l:%s r:%s', tl, tr)
                             DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=tl, time_right=tr, dev='ser'))
 
                             right_side_down = -0x40 if status & 0x02 else 0x40
                             if self.lever_pos != right_side_down:
-                                logging.debug('(ser) clock: button status: {} old lever_pos: {}'.format(
-                                    status, self.lever_pos))
+                                logging.debug('(ser) clock: button status: %s old lever_pos: %s', status, self.lever_pos)
                                 if self.lever_pos is not None:
                                     DisplayMsg.show(Message.DGT_BUTTON(button=right_side_down, dev='ser'))
                                 self.lever_pos = right_side_down
@@ -275,7 +274,7 @@ class DgtBoard(object):
                 else:
                     logging.debug('(ser) clock: null message ignored')
                 if self.clock_lock:
-                    logging.debug('(ser) clock: unlocked after {0:.3f} secs'.format(time.time() - self.clock_lock))
+                    logging.debug('(ser) clock: unlocked after {0:.3f} secs', time.time() - self.clock_lock)
                     self.clock_lock = False
                 break
             if case(DgtMsg.DGT_MSG_BOARD_DUMP):
