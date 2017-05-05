@@ -123,7 +123,7 @@ def write_engine_ini(engine_path=None):
                 parser.write(configfile)
 
     def is_exe(fpath: str):
-        """is fpath an executable."""
+        """check if fpath is an executable."""
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
     def name_build(parts: list, maxlength: int, default_name: str):
@@ -170,6 +170,9 @@ def write_engine_ini(engine_path=None):
 
 
 class Informer(chess.uci.InfoHandler):
+
+    """internal uci engine info handler."""
+
     def __init__(self):
         super(Informer, self).__init__()
         self.allow_score = True

@@ -344,6 +344,9 @@ class SystemDisplayLoop(object):
 
 @enum.unique
 class GameResult(enum.Enum):
+
+    """Game end result."""
+
     MATE = 'B00_gameresult_mate'
     STALEMATE = 'B00_gameresult_stalemate'
     OUT_OF_TIME = 'B00_gameresult_time'
@@ -357,6 +360,9 @@ class GameResult(enum.Enum):
 
 
 class EngineStatus(AutoNumber):
+
+    """Status of the engine."""
+
     THINK = ()
     PONDER = ()
     WAIT = ()
@@ -364,6 +370,9 @@ class EngineStatus(AutoNumber):
 
 @enum.unique
 class BeepLevel(enum.Enum):
+
+    """Define the beep level for each beep event."""
+
     YES = 0x0f  # Always ON
     NO = 0x00  # Always OFF
     CONFIG = 0x01  # Takeback, GameEnd, NewGame, ComputerMove and SetPieces
@@ -374,6 +383,9 @@ class BeepLevel(enum.Enum):
 
 @enum.unique
 class ClockSide(enum.Enum):
+
+    """Side to display the message."""
+
     LEFT = 0x01
     RIGHT = 0x02
     NONE = 0x04
@@ -381,6 +393,9 @@ class ClockSide(enum.Enum):
 
 @enum.unique
 class ClockIcons(enum.Enum):
+
+    """DGT clock icons."""
+
     NONE = 0x00
     COLON = 0x08
     DOT = 0x10
@@ -421,6 +436,9 @@ class DgtCmd(enum.Enum):
 
 
 class DgtClk(enum.Enum):
+
+    """DESCRIPTION OF THE COMMANDS FROM BOARD TO PC."""
+
     DGT_CMD_CLOCK_DISPLAY = 0x01  # This command can control the segments of six 7-segment characters,
     # two dots, two semicolons and the two '1' symbols.
     DGT_CMD_CLOCK_ICONS = 0x02  # Used to control the clock icons like flags etc.
@@ -439,6 +457,9 @@ class DgtClk(enum.Enum):
 
 
 class DgtAck(enum.Enum):
+
+    """DESCRIPTION OF THE ACKNOWLEDGMENTS FROM BOARD TO PC."""
+
     DGT_ACK_CLOCK_DISPLAY = 0x01  # Display ack
     DGT_ACK_CLOCK_ICON = 0x02
     DGT_ACK_CLOCK_END = 0x03

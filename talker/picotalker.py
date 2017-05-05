@@ -87,11 +87,11 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
             self.set_computer(PicoTalker(computer_voice))
 
     def set_computer(self, picotalker):
-        """Sets the computer talker."""
+        """Set the computer talker."""
         self.computer_picotalker = picotalker
 
     def set_user(self, picotalker):
-        """Sets the user talker."""
+        """Set the user talker."""
         self.user_picotalker = picotalker
 
     def run(self):
