@@ -44,7 +44,7 @@ class DgtHw(DgtIface):
     def _display_on_dgt_xl(self, text: str, beep=False, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
         text = text.ljust(6)
         if len(text) > 6:
-            logging.warning('(ser) clock: message too long [%s]', text)
+            logging.warning('(ser) clock message too long [%s]', text)
         logging.debug(text)
         with self.lib_lock:
             res = self.dgtboard.set_text_xl(text, 0x03 if beep else 0x00, left_icons, right_icons)
@@ -54,7 +54,7 @@ class DgtHw(DgtIface):
     def _display_on_dgt_3000(self, text: str, beep=False):
         text = text.ljust(8)
         if len(text) > 8:
-            logging.warning('(ser) clock: message too long [%s]', text)
+            logging.warning('(ser) clock message too long [%s]', text)
         logging.debug(text)
         text = bytes(text, 'utf-8')
         with self.lib_lock:
@@ -69,7 +69,7 @@ class DgtHw(DgtIface):
         if text is None:
             text = message.l if display_m else message.m
         if 'ser' not in message.devs:
-            logging.debug('ignored message cause of devs [%s]', text)
+            logging.debug('ignored %s - devs: %s', text, message.devs)
             return
         left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE
         right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
@@ -92,7 +92,7 @@ class DgtHw(DgtIface):
                 text = text.rjust(6)
 
         if 'ser' not in message.devs:
-            logging.debug('ignored message cause of devs [%s]', text)
+            logging.debug('ignored %s - devs: %s', text, message.devs)
             return
         if self._check_clock(text):
             if display_m:
@@ -105,7 +105,7 @@ class DgtHw(DgtIface):
     def display_time_on_clock(self, message):
         """display the time on the dgtxl/3k."""
         if 'ser' not in message.devs:
-            logging.debug('ignored message cause of devs [endText]')
+            logging.debug('ignored endText - devs: %s', message.devs)
             return
         if self.clock_running or message.force:
             with self.lib_lock:
@@ -120,7 +120,7 @@ class DgtHw(DgtIface):
     def light_squares_revelation_board(self, uci_move: str):
         """light the Rev2 leds."""
         if self.dgtboard.use_revelation_leds:
-            logging.debug('(rev) leds: turned on - move: %s', uci_move)
+            logging.debug('(rev) leds turned on - move: %s', uci_move)
             fr_s = (8 - int(uci_move[1])) * 8 + ord(uci_move[0]) - ord('a')
             to_s = (8 - int(uci_move[3])) * 8 + ord(uci_move[2]) - ord('a')
             self.dgtboard.write_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x01, fr_s, to_s, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
@@ -128,13 +128,13 @@ class DgtHw(DgtIface):
     def clear_light_revelation_board(self):
         """clear the Rev2 leds."""
         if self.dgtboard.use_revelation_leds:
-            logging.debug('(rev) leds: turned off')
+            logging.debug('(rev) leds turned off')
             self.dgtboard.write_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
 
     def stop_clock(self, devs: set):
         """stop the dgtxl/3k."""
         if 'ser' not in devs:
-            logging.debug('ignored message cause of devs [stopClock]')
+            logging.debug('ignored stopClock - devs: %s', devs)
             return
         self._resume_clock(ClockSide.NONE)
 
@@ -164,7 +164,7 @@ class DgtHw(DgtIface):
     def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
         """start the dgtxl/3k."""
         if 'ser' not in devs:
-            logging.debug('ignored message cause of devs [startClock]')
+            logging.debug('ignored startClock - devs: %s', devs)
             return
         self.time_left = hours_minutes_seconds(time_left)
         self.time_right = hours_minutes_seconds(time_right)
