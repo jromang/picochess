@@ -44,23 +44,23 @@ class DgtHw(DgtIface):
     def _display_on_dgt_xl(self, text: str, beep=False, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
         text = text.ljust(6)
         if len(text) > 6:
-            logging.warning('(ser) clock message too long [%s]', text)
+            logging.warning('(ser) clock: message too long [%s]', text)
         logging.debug(text)
         with self.lib_lock:
             res = self.dgtboard.set_text_xl(text, 0x03 if beep else 0x00, left_icons, right_icons)
             if not res:
-                logging.warning('Finally failed %i', res)
+                logging.warning('finally failed %i', res)
 
-    def _display_on_dgt_3000(self, text: str, beep=False, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
+    def _display_on_dgt_3000(self, text: str, beep=False):
         text = text.ljust(8)
         if len(text) > 8:
-            logging.warning('(ser) clock message too long [%s]', text)
+            logging.warning('(ser) clock: message too long [%s]', text)
         logging.debug(text)
         text = bytes(text, 'utf-8')
         with self.lib_lock:
-            res = self.dgtboard.set_text_3k(text, 0x03 if beep else 0x00, left_icons, right_icons)
+            res = self.dgtboard.set_text_3k(text, 0x03 if beep else 0x00)
             if not res:
-                logging.warning('Finally failed %i', res)
+                logging.warning('finally failed %i', res)
 
     def display_text_on_clock(self, message):
         """display a text on the dgtxl/3k."""
@@ -69,7 +69,7 @@ class DgtHw(DgtIface):
         if text is None:
             text = message.l if display_m else message.m
         if 'ser' not in message.devs:
-            logging.debug('ignored message cause of devs [{}]'.format(text))
+            logging.debug('ignored message cause of devs [%s]', text)
             return
         left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE
         right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
@@ -77,14 +77,12 @@ class DgtHw(DgtIface):
         if not self._check_clock(text):
             return
         if display_m:
-            self._display_on_dgt_3000(text, message.beep, left_icons, right_icons)
+            self._display_on_dgt_3000(text, message.beep)
         else:
             self._display_on_dgt_xl(text, message.beep, left_icons, right_icons)
 
     def display_move_on_clock(self, message):
         """display a move on the dgtxl/3k."""
-        left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE
-        right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
         display_m = self.enable_dgt_3000 and not self.dgtboard.use_revelation_leds
         if display_m:
             bit_board, text = self.get_san(message)
@@ -94,12 +92,14 @@ class DgtHw(DgtIface):
                 text = text.rjust(6)
 
         if 'ser' not in message.devs:
-            logging.debug('ignored message cause of devs [{}]'.format(text))
+            logging.debug('ignored message cause of devs [%s]', text)
             return
         if self._check_clock(text):
             if display_m:
-                self._display_on_dgt_3000(text, message.beep, left_icons, right_icons)
+                self._display_on_dgt_3000(text, message.beep)
             else:
+                left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE
+                right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
                 self._display_on_dgt_xl(text, message.beep, left_icons, right_icons)
 
     def display_time_on_clock(self, message):
@@ -120,7 +120,7 @@ class DgtHw(DgtIface):
     def light_squares_revelation_board(self, uci_move: str):
         """light the Rev2 leds."""
         if self.dgtboard.use_revelation_leds:
-            logging.debug('REV2 lights on move {}'.format(uci_move))
+            logging.debug('(rev) leds: turned on - move: %s', uci_move)
             fr_s = (8 - int(uci_move[1])) * 8 + ord(uci_move[0]) - ord('a')
             to_s = (8 - int(uci_move[3])) * 8 + ord(uci_move[2]) - ord('a')
             self.dgtboard.write_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x01, fr_s, to_s, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
@@ -128,7 +128,7 @@ class DgtHw(DgtIface):
     def clear_light_revelation_board(self):
         """clear the Rev2 leds."""
         if self.dgtboard.use_revelation_leds:
-            logging.debug('REV2 lights turned off')
+            logging.debug('(rev) leds: turned off')
             self.dgtboard.write_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0, 63, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
 
     def stop_clock(self, devs: set):
@@ -155,7 +155,7 @@ class DgtHw(DgtIface):
         with self.lib_lock:
             res = self.dgtboard.set_and_run(l_run, l_hms[0], l_hms[1], l_hms[2], r_run, r_hms[0], r_hms[1], r_hms[2])
             if not res:
-                logging.warning('Finally failed %i', res)
+                logging.warning('finally failed %i', res)
             else:
                 self.clock_running = (side != ClockSide.NONE)
             # this is needed for some(!) clocks

@@ -63,12 +63,12 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         return False
 
     def _power_off(self, dev='web'):
-        DispatchDgt.fire(self.dgttranslate.text('Y10_goodbye'))
+        DispatchDgt.fire(self.dgttranslate.text('Y15_goodbye'))
         self.dgtmenu.set_engine_restart(True)
         Observable.fire(Event.SHUTDOWN(dev=dev))
 
     def _reboot(self, dev='web'):
-        DispatchDgt.fire(self.dgttranslate.text('Y10_pleasewait'))
+        DispatchDgt.fire(self.dgttranslate.text('Y15_pleasewait'))
         self.dgtmenu.set_engine_restart(True)
         Observable.fire(Event.REBOOT(dev=dev))
 
@@ -116,7 +116,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         return self.dgtmenu.inside_menu()
 
     def _process_button0(self, dev):
-        logging.debug('({}) clock: handle button 0 press'.format(dev))
+        logging.debug('(%s) clock: handle button 0 press', dev)
         if self._inside_menu():
             text = self.dgtmenu.up()  # button0 can exit the menu, so check
             if text:
@@ -134,7 +134,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self._exit_display()
 
     def _process_button1(self, dev):
-        logging.debug('({}) clock: handle button 1 press'.format(dev))
+        logging.debug('(%s) clock: handle button 1 press', dev)
         if self._inside_menu():
             DispatchDgt.fire(self.dgtmenu.left())  # button1 cant exit the menu
         else:
@@ -145,21 +145,26 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self._exit_display()
 
     def _process_button2(self, dev):
-        logging.debug('({}) clock: handle button 2 press'.format(dev))
-        # even button2 has no function inside the menu we need to care for an "alt-move" event
-        if self.dgtmenu.get_mode() in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
-            text = self.dgttranslate.text('B00_nofunction')
-            DispatchDgt.fire(text)
-        else:
-            if self.engine_finished:
-                # @todo Protect against multi entrance of Alt-move
-                self.engine_finished = False  # This is not 100% ok, but for the moment better as nothing
-                Observable.fire(Event.ALTERNATIVE_MOVE())
+        logging.debug('(%s) clock: handle button 2 press', dev)
+        if self._inside_menu():
+            text = self.dgtmenu.middle()  # button2 can exit the menu (if in "position"), so check
+            if text:
+                DispatchDgt.fire(text)
             else:
-                Observable.fire(Event.PAUSE_RESUME())
+                Observable.fire(Event.EXIT_MENU())
+        else:
+            if self.dgtmenu.get_mode() in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
+                DispatchDgt.fire(self.dgttranslate.text('B00_nofunction'))
+            else:
+                if self.engine_finished:
+                    # @todo Protect against multi entrance of Alt-move
+                    self.engine_finished = False  # This is not 100% ok, but for the moment better as nothing
+                    Observable.fire(Event.ALTERNATIVE_MOVE())
+                else:
+                    Observable.fire(Event.PAUSE_RESUME())
 
     def _process_button3(self, dev):
-        logging.debug('({}) clock: handle button 3 press'.format(dev))
+        logging.debug('(%s) clock: handle button 3 press', dev)
         if self._inside_menu():
             DispatchDgt.fire(self.dgtmenu.right())  # button3 cant exit the menu
         else:
@@ -173,7 +178,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self._exit_display()
 
     def _process_button4(self, dev):
-        logging.debug('({}) clock: handle button 4 press'.format(dev))
+        logging.debug('(%s) clock: handle button 4 press', dev)
         text = self.dgtmenu.down()  # button4 can exit the menu, so check
         if text:
             DispatchDgt.fire(text)
@@ -181,7 +186,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             Observable.fire(Event.EXIT_MENU())
 
     def _process_lever(self, right_side_down, dev):
-        logging.debug('({}) clock: handle lever press - right_side_down: {}'.format(dev, right_side_down))
+        logging.debug('(%s) clock: handle lever press - right_side_down: %s', dev, right_side_down)
         if not self._inside_menu():
             self.play_move = chess.Move.null()
             self.play_fen = None
@@ -276,7 +281,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             logging.debug('flipping the board')
             self.dgtmenu.set_position_reverse_to_flipboard()  # set standard for setup orientation too
             fen = fen[::-1]
-        logging.debug("DGT-Fen [%s]", fen)
+        logging.debug('DGT-Fen [%s]', fen)
         if fen == self.dgtmenu.get_dgt_fen():
             logging.debug('ignore same fen')
             return
@@ -293,7 +298,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 msg = sorted(level_dict)[level]
                 text = self.dgttranslate.text('M10_level', msg)
                 text.wait = self._exit_menu()
-                logging.debug("Map-Fen: New level {}".format(msg))
+                logging.debug('map: New level %s', msg)
                 config = ConfigObj('picochess.ini')
                 config['engine-level'] = msg
                 config.write()
@@ -305,7 +310,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             try:
                 book = self.dgtmenu.all_books[book_index]
                 self.dgtmenu.set_book(book_index)
-                logging.debug("Map-Fen: Opening book [%s]", book['file'])
+                logging.debug('map: Opening book [%s]', book['file'])
                 text = book['text']
                 text.beep = self.dgttranslate.bl(BeepLevel.MAP)
                 text.maxtime = 1
@@ -319,7 +324,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                     self.dgtmenu.set_engine_index(engine_map.index(fen))
                     eng = self.dgtmenu.get_engine()
                     level_dict = eng['level_dict']
-                    logging.debug("Map-Fen: Engine name [%s]", eng['name'])
+                    logging.debug('map: Engine name [%s]', eng['name'])
                     eng_text = eng['text']
                     eng_text.beep = self.dgttranslate.bl(BeepLevel.MAP)
                     eng_text.maxtime = 1
@@ -344,7 +349,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             else:
                 DispatchDgt.fire(self.dgttranslate.text('Y00_erroreng'))
         elif fen in mode_map:
-            logging.debug("Map-Fen: Interaction mode [%s]", mode_map[fen])
+            logging.debug('map: Interaction mode [%s]', mode_map[fen])
             self.dgtmenu.set_mode(mode_map[fen])
             text = self.dgttranslate.text(mode_map[fen].value)
             text.beep = self.dgttranslate.bl(BeepLevel.MAP)
@@ -352,7 +357,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             text.wait = self._exit_menu()
             Observable.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], mode_text=text, show_ok=False))
         elif fen in self.dgtmenu.tc_fixed_map:
-            logging.debug('Map-Fen: Time control fixed')
+            logging.debug('map: Time control fixed')
             self.dgtmenu.set_time_mode(TimeMode.FIXED)
             self.dgtmenu.set_time_fixed(list(self.dgtmenu.tc_fixed_map.keys()).index(fen))
             text = self.dgttranslate.text('M10_tc_fixed', self.dgtmenu.tc_fixed_list[self.dgtmenu.get_time_fixed()])
@@ -360,7 +365,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             timectrl = self.dgtmenu.tc_fixed_map[fen]  # type: TimeControl
             Observable.fire(Event.SET_TIME_CONTROL(tc_init=timectrl.get_parameters(), time_text=text, show_ok=False))
         elif fen in self.dgtmenu.tc_blitz_map:
-            logging.debug('Map-Fen: Time control blitz')
+            logging.debug('map: Time control blitz')
             self.dgtmenu.set_time_mode(TimeMode.BLITZ)
             self.dgtmenu.set_time_blitz(list(self.dgtmenu.tc_blitz_map.keys()).index(fen))
             text = self.dgttranslate.text('M10_tc_blitz', self.dgtmenu.tc_blitz_list[self.dgtmenu.get_time_blitz()])
@@ -368,7 +373,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             timectrl = self.dgtmenu.tc_blitz_map[fen]  # type: TimeControl
             Observable.fire(Event.SET_TIME_CONTROL(tc_init=timectrl.get_parameters(), time_text=text, show_ok=False))
         elif fen in self.dgtmenu.tc_fisch_map:
-            logging.debug('Map-Fen: Time control fischer')
+            logging.debug('map: Time control fischer')
             self.dgtmenu.set_time_mode(TimeMode.FISCHER)
             self.dgtmenu.set_time_fisch(list(self.dgtmenu.tc_fisch_map.keys()).index(fen))
             text = self.dgttranslate.text('M10_tc_fisch', self.dgtmenu.tc_fisch_list[self.dgtmenu.get_time_fisch()])
@@ -376,21 +381,21 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             timectrl = self.dgtmenu.tc_fisch_map[fen]  # type: TimeControl
             Observable.fire(Event.SET_TIME_CONTROL(tc_init=timectrl.get_parameters(), time_text=text, show_ok=False))
         elif fen in shutdown_map:
-            logging.debug('Map-Fen: shutdown')
+            logging.debug('map: shutdown')
             self._power_off()
         elif fen in reboot_map:
-            logging.debug('Map-Fen: reboot')
+            logging.debug('map: reboot')
             self._reboot()
         elif self.drawresign_fen in drawresign_map:
             if not self._inside_menu():
-                logging.debug('Map-Fen: drawresign')
+                logging.debug('map: drawresign')
                 Observable.fire(Event.DRAWRESIGN(result=drawresign_map[self.drawresign_fen]))
         else:
             bit_board = chess.Board(fen + ' w - - 0 1')
             pos960 = bit_board.chess960_pos(ignore_castling=True)
             if pos960 is not None:
                 if pos960 == 518 or self.dgtmenu.get_engine_has_960():
-                    logging.debug('Map-Fen: New game')
+                    logging.debug('map: New game')
                     Observable.fire(Event.NEW_GAME(pos960=pos960))
                 else:
                     # self._reset_moves_and_score()
@@ -450,7 +455,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
 
     def _process_computer_move(self, message):
         if self.leds_are_on:  # can happen in case of a book move
-            logging.warning('REV2 lights still on')
+            logging.warning('(rev) leds still on')
             DispatchDgt.fire(Dgt.LIGHT_CLEAR())
         move = message.move
         ponder = message.ponder
@@ -480,7 +485,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
 
     def _process_user_move_done(self, message):
         if self.leds_are_on:  # can happen in case of a sliding move
-            logging.warning('REV2 lights still on')
+            logging.warning('(rev) leds still on')
             DispatchDgt.fire(Dgt.LIGHT_CLEAR())
             self.leds_are_on = False
         self.last_move = message.move
@@ -492,7 +497,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
 
     def _process_review_move_done(self, message):
         if self.leds_are_on:  # can happen in case of a sliding move
-            logging.warning('REV2 lights still on')
+            logging.warning('(rev) leds still on')
             DispatchDgt.fire(Dgt.LIGHT_CLEAR())
             self.leds_are_on = False
         self.last_move = message.move
@@ -569,7 +574,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 time_left = 0
             if time_right < 0:
                 time_right = 0
-        side = self._get_clock_side(message.turn)
+        side = ClockSide.LEFT if (message.turn == chess.WHITE) != self.dgtmenu.get_flip_board() else ClockSide.RIGHT
         DispatchDgt.fire(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side, wait=False,
                                          devs=message.devs))
 
@@ -745,7 +750,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 self.hint_move = chess.Move.null()
                 self.hint_fen = None
                 self.hint_turn = None
-                logging.debug('user ignored move {}'.format(message.move))
+                logging.debug('user ignored move %s', message.move)
                 break
             if case(MessageApi.EXIT_MENU):
                 self._exit_display()
@@ -765,7 +770,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             try:
                 message = self.msg_queue.get()
                 if repr(message) != MessageApi.DGT_SERIAL_NR:
-                    logging.debug("received message from msg_queue: %s", message)
+                    logging.debug('received message from msg_queue: %s', message)
                 self._process_message(message)
             except queue.Empty:
                 pass

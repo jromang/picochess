@@ -48,7 +48,7 @@ class Dispatcher(DispatchDgt, Thread):
         # @todo we try it without this test from above - since dispatcher doesnt know if clock is running anyway
         DisplayDgt.show(Dgt.DISPLAY_TIME(force=False, wait=True, devs={'ser', 'i2c', 'web'}))
         if self.tasks:
-            logging.debug('processing delayed tasks: {}'.format(self.tasks))
+            logging.debug('processing delayed tasks: %s', self.tasks)
         while self.tasks:
             message = self.tasks.pop(0)
             with self.process_lock:
@@ -68,15 +68,15 @@ class Dispatcher(DispatchDgt, Thread):
                     self.display_hash = hash(message)
 
         if do_handle:
-            logging.debug("handle DgtApi: {} at {}".format(message, self.__class__.__name__))
+            logging.debug("handle DgtApi: %s", message)
             if hasattr(message, 'maxtime') and message.maxtime > 0:
                 self.maxtimer = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer)
                 self.maxtimer.start()
-                logging.debug('showing {} for {} secs'.format(message, message.maxtime * self.time_factor))
+                logging.debug('showing %s for %i secs', message, message.maxtime * self.time_factor)
                 self.maxtimer_running = True
             DisplayDgt.show(message)
         else:
-            logging.debug("ignore DgtApi: {} at {}".format(message, self.__class__.__name__))
+            logging.debug("ignore DgtApi: %s", message)
 
     def run(self):
         """called from threading.Thread by its start() function."""
@@ -91,7 +91,7 @@ class Dispatcher(DispatchDgt, Thread):
                     if hasattr(message, 'wait'):
                         if message.wait:
                             self.tasks.append(message)
-                            logging.debug('tasks delayed: {}'.format(self.tasks))
+                            logging.debug('tasks delayed: %s', self.tasks)
                             continue
                         else:
                             logging.debug('ignore former maxtime')
@@ -99,7 +99,7 @@ class Dispatcher(DispatchDgt, Thread):
                             self.maxtimer.join()
                             self.maxtimer_running = False
                             if self.tasks:
-                                logging.debug('delete following tasks: {}'.format(self.tasks))
+                                logging.debug('delete following tasks: %s', self.tasks)
                                 self.tasks = []
                     else:
                         logging.debug('command doesnt change the clock display => no need to interrupt max timer')

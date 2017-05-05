@@ -104,7 +104,7 @@ def main():
         nonlocal fen_timer_running
         fen_timer_running = False
         if error_fen:
-            logging.info('wrong fen {} for 3secs'.format(error_fen))
+            logging.info('wrong fen %s for 3secs', error_fen)
             DisplayMsg.show(Message.WRONG_FEN())
             DisplayMsg.show(Message.EXIT_MENU())
 
@@ -191,7 +191,7 @@ def main():
             time_control.stop()
             DisplayMsg.show(Message.CLOCK_STOP(devs={'ser', 'i2c', 'web'}))
         else:
-            logging.warning('wrong function call! mode: {}'.format(interaction_mode))
+            logging.warning('wrong function call! mode: %s', interaction_mode)
 
     def start_clock():
         """Start the clock."""
@@ -200,7 +200,7 @@ def main():
             tc_init = time_control.get_parameters()
             DisplayMsg.show(Message.CLOCK_START(turn=game.turn, tc_init=tc_init, devs={'ser', 'i2c', 'web'}))
         else:
-            logging.warning('wrong function call! mode: {}'.format(interaction_mode))
+            logging.warning('wrong function call! mode: %s', interaction_mode)
 
     def check_game_state(game: chess.Board, play_mode: PlayMode):
         """
@@ -367,8 +367,8 @@ def main():
                 game_history.pop()
                 if game_history.board_fen() == fen:
                     handled_fen = True
-                    logging.debug("current game fen      : {}".format(game.fen()))
-                    logging.debug("undoing game until fen: {}".format(fen))
+                    logging.debug("current game fen      : %s", game.fen())
+                    logging.debug("undoing game until fen: %s", fen)
                     stop_search_and_clock()
                     while len(game_history.move_stack) < len(game.move_stack):
                         game.pop()
@@ -399,7 +399,7 @@ def main():
                         DisplayMsg.show(msg)
                     break
         # doing issue #152
-        logging.debug('fen: {} result: {}'.format(fen, handled_fen))
+        logging.debug('fen: %s result: %s', fen, handled_fen)
         stop_fen_timer()
         if handled_fen:
             error_fen = None
@@ -540,9 +540,9 @@ def main():
     # log the startup parameters but hide the password fields
     a_copy = copy.copy(vars(args))
     a_copy['mailgun_key'] = a_copy['smtp_pass'] = a_copy['engine_remote_key'] = a_copy['engine_remote_pass'] = '*****'
-    logging.debug('startup parameters: {}'.format(a_copy))
+    logging.debug('startup parameters: %s', a_copy)
     if unknown:
-        logging.warning('invalid parameter given {}'.format(unknown))
+        logging.warning('invalid parameter given %s', unknown)
 
     dgttranslate = DgtTranslate(args.beep_config, args.beep_some_level, args.language, version)
     dgtmenu = DgtMenu(args.disable_confirm_message, args.ponder_interval, dgttranslate)
@@ -707,7 +707,7 @@ def main():
                             engine_name = engine.get().name
                         except AttributeError:
                             # New engine failed to start, restart old engine
-                            logging.error('new engine failed to start, reverting to {}'.format(old_file))
+                            logging.error('new engine failed to start, reverting to %s', old_file)
                             engine_fallback = True
                             event.options = {}  # Reset options. This will load the last(=strongest?) level
                             engine = UciEngine(old_file)
@@ -734,7 +734,7 @@ def main():
                     break
 
                 if case(EventApi.SETUP_POSITION):
-                    logging.debug('setting up custom fen: {}'.format(event.fen))
+                    logging.debug('setting up custom fen: %s', event.fen)
                     uci960 = event.uci960
 
                     if game.move_stack:
@@ -760,7 +760,7 @@ def main():
                 if case(EventApi.NEW_GAME):
                     newgame = game.move_stack or (game.chess960_pos() != event.pos960)
                     if newgame:
-                        logging.debug('starting a new game with code: {}'.format(event.pos960))
+                        logging.debug('starting a new game with code: %s', event.pos960)
                         uci960 = event.pos960 != 518
 
                         if not (game.is_game_over() or game_declared):
@@ -827,9 +827,9 @@ def main():
                             play_mode = PlayMode.USER_WHITE if game.turn == chess.WHITE else PlayMode.USER_BLACK
                         else:
                             play_mode = PlayMode.USER_WHITE if game.turn == chess.BLACK else PlayMode.USER_BLACK
-                        pm_value = play_mode.value  # type: str
-                        text = dgttranslate.text(pm_value)
-                        msg = Message.PLAY_MODE(play_mode=play_mode, play_mode_text=text)
+
+                        text = play_mode.value  # type: str
+                        msg = Message.PLAY_MODE(play_mode=play_mode, play_mode_text=dgttranslate.text(text))
 
                         if not user_to_move and check_game_state(game, play_mode):
                             time_control.reset_start_time()
@@ -862,7 +862,7 @@ def main():
                         done_computer_fen = game.board_fen()
                         done_move = event.move
                     else:
-                        logging.warning('wrong function call! mode: {} turn: {}'.format(interaction_mode, game.turn))
+                        logging.warning('wrong function call! mode: %s turn: %s', interaction_mode, game.turn)
                     break
 
                 if case(EventApi.BEST_MOVE):
@@ -879,7 +879,7 @@ def main():
                         done_computer_fen = game_copy.board_fen()
                         done_move = event.move
                     else:
-                        logging.warning('wrong function call! mode: {} turn: {}'.format(interaction_mode, game.turn))
+                        logging.warning('wrong function call! mode: %s turn: %s', interaction_mode, game.turn)
                     break
 
                 if case(EventApi.NEW_PV):
@@ -988,7 +988,7 @@ def main():
                     break
 
                 if case(EventApi.KEYBOARD_FEN):
-                    DisplayMsg.show(Message.DGT_FEN(fen=event.fen, raw=True))
+                    DisplayMsg.show(Message.DGT_FEN(fen=event.fen, raw=False))
                     break
 
                 if case(EventApi.EXIT_MENU):
