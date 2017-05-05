@@ -592,8 +592,8 @@ class DgtBoard(object):
 
                 # text = self.dgttranslate.text('N00_noboard', 'Board' + waitchars[self.wait_counter])
                 bwait = 'Board' + waitchars[self.wait_counter]
-                text = Dgt.DISPLAY_TEXT(l='no e-' + bwait, m='no' + bwait, s=bwait,
-                                        wait=True, beep=False, maxtime=0, devs={'i2c', 'web'})
+                text = Dgt.DISPLAY_TEXT(l='no e-' + bwait, m='no' + bwait, s=bwait, wait=True, beep=False, maxtime=0.1,
+                                        devs={'i2c', 'web'})
                 DisplayMsg.show(Message.DGT_NO_EBOARD_ERROR(text=text))
                 self.wait_counter = (self.wait_counter + 1) % len(waitchars)
         return False

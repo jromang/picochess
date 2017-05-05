@@ -73,7 +73,7 @@ class Dispatcher(DispatchDgt, Thread):
         if do_handle:
             logging.debug("handle DgtApi: %s", message)
             if hasattr(message, 'maxtime') and message.maxtime > 0:
-                if message.maxtime == 2:  # @todo make this (recognize picochess message) independent of time=2.0
+                if repr(message) == DgtApi.DISPLAY_TEXT and 'sys' in message.devs:
                     self.dgtmenu.enable_picochess_displayed()
                 self.maxtimer = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer)
                 self.maxtimer.start()

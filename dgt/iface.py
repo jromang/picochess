@@ -125,7 +125,7 @@ class DgtIface(DisplayDgt, Thread):
                 self.start_clock(message.time_left, message.time_right, message.side, message.devs)
                 break
             if case(DgtApi.CLOCK_VERSION):
-                text = self.dgttranslate.text('Y20_picochess', devs={message.dev})
+                text = self.dgttranslate.text('Y20_picochess', devs={message.dev, 'sys'})
                 text.rd = ClockIcons.DOT
                 DispatchDgt.fire(text)
                 DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs={message.dev}))
