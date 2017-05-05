@@ -136,7 +136,7 @@ class DgtBoard(object):
                 logging.debug('(ser) clock: now locked')
                 self.clock_lock = time.time()
         if message[0] == DgtCmd.DGT_SET_LEDS:
-            logging.debug('LEDs turned %s', 'on' if message[2] else 'off')
+            logging.debug('(rev) leds: turned %s', 'on' if message[2] else 'off')
         return True
 
     def _process_board_message(self, message_id: int, message: tuple, message_length: int):
@@ -145,7 +145,7 @@ class DgtBoard(object):
                 if message_length != 2:
                     logging.warning('illegal length in data')
                 board_version = str(message[0]) + '.' + str(message[1])
-                logging.debug("board version %0.2f", float(board_version))
+                logging.debug('board version %0.2f', float(board_version))
                 self.write_command([DgtCmd.DGT_SEND_BRD])  # Update the board => get first FEN
                 if self.device.find('rfc') == -1:
                     text_l, text_m, text_s = 'USB e-Board', 'USBboard', 'ok usb'
@@ -182,18 +182,18 @@ class DgtBoard(object):
                     ack2 = ((message[4]) & 0x7f) | ((message[0] << 3) & 0x80)
                     ack3 = ((message[5]) & 0x7f) | ((message[0] << 2) & 0x80)
                     if ack0 != 0x10:
-                        logging.warning("(ser) clock: ACK error %s", (ack0, ack1, ack2, ack3))
+                        logging.warning('(ser) clock: ACK error %s', (ack0, ack1, ack2, ack3))
                         if self.last_clock_command:
                             logging.debug('(ser) clock: resending failed message [%s]', self.last_clock_command)
                             self.write_command(self.last_clock_command)
                             self.last_clock_command = []  # only resend once
                         break
                     else:
-                        logging.debug("(ser) clock: ACK okay [%s]", DgtAck(ack1))
+                        logging.debug('(ser) clock: ACK okay [%s]', DgtAck(ack1))
                         if self.last_clock_command:
                             cmd = self.last_clock_command[3]  # cmd = type(DgtClk)
                             if cmd.value != ack1 and ack1 < 0x80:
-                                logging.warning("(ser) clock: ACK [%s] out of sync last: [%s]", DgtAck(ack1), cmd)
+                                logging.warning('(ser) clock: ACK [%s] out of sync last: [%s]', DgtAck(ack1), cmd)
 
                     if ack1 == DgtAck.DGT_ACK_CLOCK_BUTTON.value:
                         # this are the other (ack2-ack3) codes
@@ -203,28 +203,28 @@ class DgtBoard(object):
                         #                   25-50 81-53 | button 2 + 3-4
                         #                         73-53 | button 3 + 4
                         if ack3 == 49:
-                            logging.info("(ser) clock: button 0 pressed - ack2: %i", ack2)
+                            logging.info('(ser) clock: button 0 pressed - ack2: %i', ack2)
                             DisplayMsg.show(Message.DGT_BUTTON(button=0, dev='ser'))
                         if ack3 == 52:
-                            logging.info("(ser) clock: button 1 pressed - ack2: %i", ack2)
+                            logging.info('(ser) clock: button 1 pressed - ack2: %i', ack2)
                             DisplayMsg.show(Message.DGT_BUTTON(button=1, dev='ser'))
                         if ack3 == 51:
-                            logging.info("(ser) clock: button 2 pressed - ack2: %i", ack2)
+                            logging.info('(ser) clock: button 2 pressed - ack2: %i', ack2)
                             DisplayMsg.show(Message.DGT_BUTTON(button=2, dev='ser'))
                         if ack3 == 50:
-                            logging.info("(ser) clock: button 3 pressed - ack2: %i", ack2)
+                            logging.info('(ser) clock: button 3 pressed - ack2: %i', ack2)
                             DisplayMsg.show(Message.DGT_BUTTON(button=3, dev='ser'))
                         if ack3 == 53:
                             if ack2 == 69:
-                                logging.info("(ser) clock: button 0+4 pressed - ack2: %i", ack2)
+                                logging.info('(ser) clock: button 0+4 pressed - ack2: %i', ack2)
                                 DisplayMsg.show(Message.DGT_BUTTON(button=0x11, dev='ser'))
                             else:
-                                logging.info("(ser) clock: button 4 pressed - ack2: %i", ack2)
+                                logging.info('(ser) clock: button 4 pressed - ack2: %i', ack2)
                                 DisplayMsg.show(Message.DGT_BUTTON(button=4, dev='ser'))
                     if ack1 == DgtAck.DGT_ACK_CLOCK_VERSION.value:
                         main = ack2 >> 4
                         sub = ack2 & 0x0f
-                        logging.debug("(ser) clock: version %0.2f", float(str(main) + '.' + str(sub)))
+                        logging.debug('(ser) clock: version %0.2f', float(str(main) + '.' + str(sub)))
                         if self.bconn_text:
                             self.bconn_text.devs = {'ser'}  # Now send the (delayed) message to serial clock
                             dev = 'ser'
@@ -308,7 +308,7 @@ class DgtBoard(object):
                             fen += '/'
 
                 # Attention! This fen is NOT flipped
-                logging.debug("raw fen [%s]", fen)
+                logging.debug('raw fen [%s]', fen)
                 DisplayMsg.show(Message.DGT_FEN(fen=fen, raw=True))
                 break
             if case(DgtMsg.DGT_MSG_FIELD_UPDATE):
@@ -327,7 +327,7 @@ class DgtBoard(object):
                 logging.debug(message)
                 break
             if case():  # Default
-                logging.warning("DGT message not handled [%s]", DgtMsg(message_id))
+                logging.warning('message not handled [%s]', DgtMsg(message_id))
 
     def _read_board_message(self, head: bytes):
         message = ()
@@ -341,14 +341,14 @@ class DgtBoard(object):
         message_id = header[0]
         message_length = counter = (header[1] << 7) + header[2] - header_len
         if message_length <= 0 or message_length > 64:
-            logging.warning("illegal length in message header %i length: %i", message_id, message_length)
+            logging.warning('illegal length in message header %i length: %i', message_id, message_length)
             return message
 
         try:
             if not message_id == DgtMsg.DGT_MSG_SERIALNR:
-                logging.debug("get (ser) board [%s], length: %i", DgtMsg(message_id), message_length)
+                logging.debug('(ser) board: get [%s], length: %i', DgtMsg(message_id), message_length)
         except ValueError:
-            logging.warning("illegal id in message header %i length: %i", message_id, message_length)
+            logging.warning('illegal id in message header %i length: %i', message_id, message_length)
             return message
 
         while counter:
