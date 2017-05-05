@@ -159,8 +159,8 @@ class DgtTranslate(object):
             estxt = Dgt.DISPLAY_TEXT(l='sin funcion', m='sin func', s='nofunc')
             ittxt = Dgt.DISPLAY_TEXT(l='no funzione', m='no funz ', s='nofunz')
         if text_id == 'erroreng':
-            entxt = Dgt.DISPLAY_TEXT(l='err engine ', m='err engn', s='engerr')
-            detxt = Dgt.DISPLAY_TEXT(l='err engine ', m='err engn', s='engerr')
+            entxt = Dgt.DISPLAY_TEXT(l='err engine ', m='err engn', s='erreng')
+            detxt = Dgt.DISPLAY_TEXT(l='err engine ', m='err engn', s='erreng')
             nltxt = Dgt.DISPLAY_TEXT(l='fout engine', m='fout eng', s='e fout')
             frtxt = Dgt.DISPLAY_TEXT(l='err moteur ', m='err mot ', s='errmot')
             estxt = Dgt.DISPLAY_TEXT(l='error motor', m='err mot ', s='errmot')
@@ -573,15 +573,15 @@ class DgtTranslate(object):
         if text_id == 'gameresult_repetition':
             wait = True
             entxt = Dgt.DISPLAY_TEXT(l='repetition ', m='rep pos ', s='reppos')
-            detxt = Dgt.DISPLAY_TEXT(l='Wiederholg ', m='Wiederhg', s='wh pos')
+            detxt = Dgt.DISPLAY_TEXT(l='Wiederholg ', m='Wiederhg', s='wdrhlg')
             nltxt = Dgt.DISPLAY_TEXT(l='zetherhalin', m='herhalin', s='herhal')
             frtxt = Dgt.DISPLAY_TEXT(l='3ieme rep  ', m='3iem rep', s='3 rep ')
             estxt = Dgt.DISPLAY_TEXT(l='repeticion ', m='repite 3', s='rep 3 ')
             ittxt = Dgt.DISPLAY_TEXT(l='3 ripetiz  ', m='3 ripeti', s='3 ripe')
         if text_id == 'gameresult_abort':
             wait = True
-            entxt = Dgt.DISPLAY_TEXT(l='abort      ', m='abort   ', s='abort ')
-            detxt = Dgt.DISPLAY_TEXT(l='Abbruch    ', m='Abbruch ', s='abbrch')
+            entxt = Dgt.DISPLAY_TEXT(l='abort game ', m='abort   ', s='abort ')
+            detxt = Dgt.DISPLAY_TEXT(l='Spl Abbruch', m='Abbruch ', s='abbrch')
             nltxt = Dgt.DISPLAY_TEXT(l='afbreken   ', m='afbreken', s='afbrek')
             frtxt = Dgt.DISPLAY_TEXT(l='sortir     ', m='sortir  ', s='sortir')
             estxt = Dgt.DISPLAY_TEXT(l='abortar    ', m='abortar ', s='abort ')

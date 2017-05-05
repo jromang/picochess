@@ -741,7 +741,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs={'i2c'}))
                 break
             if case(MessageApi.DGT_NO_EBOARD_ERROR):
-                DispatchDgt.fire(message.text)
+                if not self.dgtmenu.inside_update_menu():
+                    DispatchDgt.fire(message.text)
                 break
             if case(MessageApi.DGT_NO_CLOCK_ERROR):
                 break

@@ -172,6 +172,10 @@ class DgtMenu(object):
         self.save_choices()
         # During "picochess" is displayed, some special actions allowed
         self.picochess_displayed = False
+        self.update_top = False  # inside the update-menu?
+
+    def inside_update_menu(self):
+        return self.update_top
 
     def disable_picochess_displayed(self):
         if self.picochess_displayed:
@@ -1376,7 +1380,9 @@ class DgtMenu(object):
 
         if self.picochess_displayed:
             text = self.dgttranslate.text('B00_errormenu')
+            self.update_top = True
         else:
+            self.update_top = False  # @todo for test, we reset it here => do this when realy exit update-menu
             text = self.dgttranslate.text('B00_nofunction')
             for case in switch(self.state):
                 if case(MenuState.POS):
