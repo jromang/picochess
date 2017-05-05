@@ -19,6 +19,7 @@ from utilities import DisplayDgt, DispatchDgt, dispatch_queue
 import logging
 import queue
 from dgt.api import Dgt, DgtApi
+from dgt.menu import DgtMenu
 from threading import Timer, Thread, Lock
 
 
@@ -26,9 +27,10 @@ class Dispatcher(DispatchDgt, Thread):
 
     """a dispatcher taking the dispatch_queue and fill dgt_queue with the commands in time."""
 
-    def __init__(self):
+    def __init__(self, dgtmenu: DgtMenu):
         super(Dispatcher, self).__init__()
 
+        self.dgtmenu = dgtmenu
         self.maxtimer = None
         self.maxtimer_running = False
         self.time_factor = 1  # This is for testing the duration - remove it lateron!
@@ -39,6 +41,7 @@ class Dispatcher(DispatchDgt, Thread):
 
     def _stopped_maxtimer(self):
         self.maxtimer_running = False
+        self.dgtmenu.disable_picochess_displayed()
         # if self.clock_running:
         #     logging.debug('showing the running clock again')
         #     DisplayDgt.show(Dgt.DISPLAY_TIME(force=False, wait=True, devs={'ser', 'i2c', 'web'}))
@@ -70,9 +73,11 @@ class Dispatcher(DispatchDgt, Thread):
         if do_handle:
             logging.debug("handle DgtApi: %s", message)
             if hasattr(message, 'maxtime') and message.maxtime > 0:
+                if message.maxtime == 2:  # @todo make this (recognize picochess message) independent of time=2.0
+                    self.dgtmenu.enable_picochess_displayed()
                 self.maxtimer = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer)
                 self.maxtimer.start()
-                logging.debug('showing %s for %i secs', message, message.maxtime * self.time_factor)
+                logging.debug('showing %s for %.1f secs', message, message.maxtime * self.time_factor)
                 self.maxtimer_running = True
             DisplayDgt.show(message)
         else:

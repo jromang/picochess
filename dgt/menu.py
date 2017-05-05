@@ -17,7 +17,7 @@
 
 from configobj import ConfigObj
 from collections import OrderedDict
-from utilities import Observable, switch, DispatchDgt
+from utilities import Observable, switch, DispatchDgt, get_tags
 from dgt.util import TimeMode, TimeModeLoop, Menu, MenuLoop, Mode, ModeLoop, Language, LanguageLoop, BeepLevel, BeepLoop
 from dgt.util import Settings, SettingsLoop, VoiceType, VoiceTypeLoop, SystemDisplay, SystemDisplayLoop, ClockIcons
 from dgt.api import Dgt, Event
@@ -170,6 +170,16 @@ class DgtMenu(object):
             ('rnbqkbnr/pppppppp/8/8/8/7Q/PPPPPPPP/RNBQKBNR', TimeControl(TimeMode.FISCHER, blitz=60, fischer=30))])
         # setup the result vars for api (dgtdisplay)
         self.save_choices()
+        # During "picochess" is displayed, some special actions allowed
+        self.picochess_displayed = False
+
+    def disable_picochess_displayed(self):
+        if self.picochess_displayed:
+            self.picochess_displayed = False
+
+    def enable_picochess_displayed(self):
+        self.picochess_displayed = True
+        print(get_tags())
 
     def save_choices(self):
         """Save the user choices to the result vars."""
@@ -1364,25 +1374,28 @@ class DgtMenu(object):
             self.state = MenuState.POS_READ
             return self.down()
 
-        text = self.dgttranslate.text('B00_nofunction')
-        for case in switch(self.state):
-            if case(MenuState.POS):
-                text = _exit_position()
-                break
-            if case(MenuState.POS_COL):
-                text = _exit_position()
-                break
-            if case(MenuState.POS_REV):
-                text = _exit_position()
-                break
-            if case(MenuState.POS_UCI):
-                text = _exit_position()
-                break
-            if case(MenuState.POS_READ):
-                text = _exit_position()
-                break
-            if case():  # Default
-                break
+        if self.picochess_displayed:
+            text = self.dgttranslate.text('B00_errormenu')
+        else:
+            text = self.dgttranslate.text('B00_nofunction')
+            for case in switch(self.state):
+                if case(MenuState.POS):
+                    text = _exit_position()
+                    break
+                if case(MenuState.POS_COL):
+                    text = _exit_position()
+                    break
+                if case(MenuState.POS_REV):
+                    text = _exit_position()
+                    break
+                if case(MenuState.POS_UCI):
+                    text = _exit_position()
+                    break
+                if case(MenuState.POS_READ):
+                    text = _exit_position()
+                    break
+                if case():  # Default
+                    break
         self.current_text = text
         return text
 

@@ -575,7 +575,7 @@ def main():
             DgtPi(dgttranslate).start()
         DgtHw(dgttranslate, dgtboard).start()
     # The class Dispatcher sends DgtApi messages at the correct (delayed) time out
-    Dispatcher().start()
+    Dispatcher(dgtmenu).start()
     # Save to PGN
     emailer = Emailer(email=args.email, mailgun_key=args.mailgun_key)
     emailer.set_smtp(sserver=args.smtp_server, suser=args.smtp_user, spass=args.smtp_pass,
