@@ -31,6 +31,7 @@ class Dispatcher(DispatchDgt, Thread):
         super(Dispatcher, self).__init__()
 
         self.dgtmenu = dgtmenu
+        self.devices = []
         self.maxtimer = None
         self.maxtimer_running = False
         self.time_factor = 1  # This is for testing the duration - remove it lateron!
@@ -40,9 +41,9 @@ class Dispatcher(DispatchDgt, Thread):
         self.process_lock = Lock()
 
     def register(self, device: str):
-        pass
+        self.devices.append(device)
 
-    def _stopped_maxtimer(self):
+    def _stopped_maxtimer(self, devs):
         self.maxtimer_running = False
         self.dgtmenu.disable_picochess_displayed()
         # if self.clock_running:
@@ -52,7 +53,7 @@ class Dispatcher(DispatchDgt, Thread):
         #     logging.debug('clock not running - ignored maxtime')
 
         # @todo we try it without this test from above - since dispatcher doesnt know if clock is running anyway
-        DisplayDgt.show(Dgt.DISPLAY_TIME(force=False, wait=True, devs={'ser', 'i2c', 'web'}))
+        DisplayDgt.show(Dgt.DISPLAY_TIME(force=False, wait=True, devs=devs))
         if self.tasks:
             logging.debug('processing delayed tasks: %s', self.tasks)
         while self.tasks:
@@ -78,7 +79,7 @@ class Dispatcher(DispatchDgt, Thread):
             if hasattr(message, 'maxtime') and message.maxtime > 0:
                 if repr(message) == DgtApi.DISPLAY_TEXT and message.maxtime == 2:
                     self.dgtmenu.enable_picochess_displayed()
-                self.maxtimer = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer)
+                self.maxtimer = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer, [message.devs])
                 self.maxtimer.start()
                 logging.debug('showing %s for %.1f secs', message, message.maxtime * self.time_factor)
                 self.maxtimer_running = True
@@ -93,7 +94,7 @@ class Dispatcher(DispatchDgt, Thread):
             # Check if we have something to display
             try:
                 message = dispatch_queue.get()
-                logging.debug("received command from dispatch_queue: %s for %s", message, message.devs)
+                logging.debug("received command from dispatch_queue: %s devs: %s", message, message.devs)
 
                 if self.maxtimer_running:
                     if hasattr(message, 'wait'):
