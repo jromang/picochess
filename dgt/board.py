@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import serial as pyserial
 import struct
 
 from dgt.util import DgtAck, DgtClk, DgtCmd, DgtMsg, ClockIcons, ClockSide, enum
@@ -27,6 +26,7 @@ import logging
 from threading import Timer, Lock
 from fcntl import fcntl, F_GETFL, F_SETFL
 from os import O_NONBLOCK, read, path, listdir
+from serial import Serial, SerialException, STOPBITS_ONE, PARITY_NONE, EIGHTBITS
 import subprocess
 import time
 
@@ -116,7 +116,7 @@ class DgtBoard(object):
                 except ValueError:
                     logging.error('invalid bytes sent %s', message)
                     return False
-                except pyserial.SerialException as write_expection:
+                except SerialException as write_expection:
                     logging.error(write_expection)
                     self.serial.close()
                     self.serial = None
@@ -191,7 +191,7 @@ class DgtBoard(object):
                     else:
                         logging.debug('(ser) clock ACK okay [%s]', DgtAck(ack1))
                         if self.last_clock_command:
-                            cmd = self.last_clock_command[3]  # cmd = type(DgtClk)
+                            cmd = self.last_clock_command[3]  # type: DgtClk
                             if cmd.value != ack1 and ack1 < 0x80:
                                 logging.warning('(ser) clock ACK [%s] out of sync - last: [%s]', DgtAck(ack1), cmd)
 
@@ -388,7 +388,7 @@ class DgtBoard(object):
                     if counter == 0:  # issue 150 - check for alive connection
                         self._watchdog()  # force to write something to the board
                     time.sleep(0.1)
-            except pyserial.SerialException:
+            except SerialException:
                 pass
             except TypeError:
                 pass
@@ -559,9 +559,8 @@ class DgtBoard(object):
 
     def _open_serial(self, device: str):
         try:
-            self.serial = pyserial.Serial(device, stopbits=pyserial.STOPBITS_ONE,
-                                          parity=pyserial.PARITY_NONE, bytesize=pyserial.EIGHTBITS, timeout=2)
-        except pyserial.SerialException:
+            self.serial = Serial(device, stopbits=STOPBITS_ONE, parity=PARITY_NONE, bytesize=EIGHTBITS, timeout=2)
+        except SerialException:
             return False
         return True
 

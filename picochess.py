@@ -543,9 +543,12 @@ def main():
     logging.debug('startup parameters: %s', a_copy)
     if unknown:
         logging.warning('invalid parameter given %s', unknown)
-
+    # wire some dgt classes
+    dgtboard = DgtBoard(args.dgt_port, args.disable_revelation_leds, args.dgtpi)
     dgttranslate = DgtTranslate(args.beep_config, args.beep_some_level, args.language, version)
     dgtmenu = DgtMenu(args.disable_confirm_message, args.ponder_interval, dgttranslate)
+    dgtdispatcher = Dispatcher(dgtmenu)
+
     time_control, time_text = transfer_time(args.time.split())
     time_text.beep = False
     # The class dgtDisplay fires Event (Observable) & DispatchDgt (Dispatcher)
@@ -559,11 +562,10 @@ def main():
     else:
         logging.debug('PicoTalker disabled')
 
-    dgtboard = DgtBoard(args.dgt_port, args.disable_revelation_leds, args.dgtpi)
-
     # Launch web server
     if args.web_server_port:
         WebServer(args.web_server_port, dgttranslate, dgtboard).start()
+        dgtdispatcher.register('web')
 
     if args.console:
         # Enable keyboard input and terminal display
@@ -573,9 +575,11 @@ def main():
         logging.debug('starting PicoChess in board mode')
         if args.dgtpi:
             DgtPi(dgttranslate).start()
+            dgtdispatcher.register('i2c')
         DgtHw(dgttranslate, dgtboard).start()
+        dgtdispatcher.register('ser')
     # The class Dispatcher sends DgtApi messages at the correct (delayed) time out
-    Dispatcher(dgtmenu).start()
+    dgtdispatcher.start()
     # Save to PGN
     emailer = Emailer(email=args.email, mailgun_key=args.mailgun_key)
     emailer.set_smtp(sserver=args.smtp_server, suser=args.smtp_user, spass=args.smtp_pass,

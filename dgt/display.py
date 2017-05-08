@@ -116,7 +116,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         return self.dgtmenu.inside_menu()
 
     def _process_button0(self, dev):
-        logging.debug('(%s) clock: handle button 0 press', dev)
+        logging.debug('(%s) clock handle button 0 press', dev)
         if self._inside_menu():
             text = self.dgtmenu.up()  # button0 can exit the menu, so check
             if text:
@@ -134,7 +134,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self._exit_display()
 
     def _process_button1(self, dev):
-        logging.debug('(%s) clock: handle button 1 press', dev)
+        logging.debug('(%s) clock handle button 1 press', dev)
         if self._inside_menu():
             DispatchDgt.fire(self.dgtmenu.left())  # button1 cant exit the menu
         else:
@@ -145,7 +145,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self._exit_display()
 
     def _process_button2(self, dev):
-        logging.debug('(%s) clock: handle button 2 press', dev)
+        logging.debug('(%s) clock handle button 2 press', dev)
         if self._inside_menu() or self.dgtmenu.picochess_displayed:
             text = self.dgtmenu.middle()  # button2 can exit the menu (if in "position"), so check
             if text:
@@ -164,7 +164,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                     Observable.fire(Event.PAUSE_RESUME())
 
     def _process_button3(self, dev):
-        logging.debug('(%s) clock: handle button 3 press', dev)
+        logging.debug('(%s) clock handle button 3 press', dev)
         if self._inside_menu():
             DispatchDgt.fire(self.dgtmenu.right())  # button3 cant exit the menu
         else:
@@ -178,7 +178,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self._exit_display()
 
     def _process_button4(self, dev):
-        logging.debug('(%s) clock: handle button 4 press', dev)
+        logging.debug('(%s) clock handle button 4 press', dev)
         text = self.dgtmenu.down()  # button4 can exit the menu, so check
         if text:
             DispatchDgt.fire(text)
@@ -186,7 +186,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             Observable.fire(Event.EXIT_MENU())
 
     def _process_lever(self, right_side_down, dev):
-        logging.debug('(%s) clock: handle lever press - right_side_down: %s', dev, right_side_down)
+        logging.debug('(%s) clock handle lever press - right_side_down: %s', dev, right_side_down)
         if not self._inside_menu():
             self.play_move = chess.Move.null()
             self.play_fen = None
@@ -423,7 +423,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
 
     def _process_start_new_game(self, message):
         if self.leds_are_on:
-            DispatchDgt.fire(Dgt.LIGHT_CLEAR())
+            DispatchDgt.fire(Dgt.LIGHT_CLEAR(devs={'ser', 'web'}))
             self.leds_are_on = False
         self._reset_moves_and_score()
         self.engine_finished = False
@@ -439,7 +439,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
 
     def _process_computer_move_done(self):
         if self.leds_are_on:
-            DispatchDgt.fire(Dgt.LIGHT_CLEAR())
+            DispatchDgt.fire(Dgt.LIGHT_CLEAR(devs={'ser', 'web'}))
             self.leds_are_on = False
         self.last_move = self.play_move
         self.last_fen = self.play_fen
@@ -456,7 +456,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
     def _process_computer_move(self, message):
         if self.leds_are_on:  # can happen in case of a book move
             logging.warning('(rev) leds still on')
-            DispatchDgt.fire(Dgt.LIGHT_CLEAR())
+            DispatchDgt.fire(Dgt.LIGHT_CLEAR(devs={'ser', 'web'}))
         move = message.move
         ponder = message.ponder
         # fen = message.fen
@@ -480,13 +480,13 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         disp = Dgt.DISPLAY_MOVE(move=move, fen=message.game.fen(), side=side, wait=message.wait, maxtime=0,
                                 beep=self.dgttranslate.bl(BeepLevel.CONFIG), devs={'ser', 'i2c', 'web'})
         DispatchDgt.fire(disp)
-        DispatchDgt.fire(Dgt.LIGHT_SQUARES(uci_move=move.uci()))
+        DispatchDgt.fire(Dgt.LIGHT_SQUARES(uci_move=move.uci(), devs={'ser', 'web'}))
         self.leds_are_on = True
 
     def _process_user_move_done(self, message):
         if self.leds_are_on:  # can happen in case of a sliding move
             logging.warning('(rev) leds still on')
-            DispatchDgt.fire(Dgt.LIGHT_CLEAR())
+            DispatchDgt.fire(Dgt.LIGHT_CLEAR(devs={'ser', 'web'}))
             self.leds_are_on = False
         self.last_move = message.move
         self.last_fen = message.fen
@@ -498,7 +498,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
     def _process_review_move_done(self, message):
         if self.leds_are_on:  # can happen in case of a sliding move
             logging.warning('(rev) leds still on')
-            DispatchDgt.fire(Dgt.LIGHT_CLEAR())
+            DispatchDgt.fire(Dgt.LIGHT_CLEAR(devs={'ser', 'web'}))
             self.leds_are_on = False
         self.last_move = message.move
         self.last_fen = message.fen
@@ -641,7 +641,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 break
             if case(MessageApi.ALTERNATIVE_MOVE):
                 if self.leds_are_on:
-                    DispatchDgt.fire(Dgt.LIGHT_CLEAR())
+                    DispatchDgt.fire(Dgt.LIGHT_CLEAR(devs={'ser', 'web'}))
                     self.leds_are_on = False
                 DispatchDgt.fire(self.dgttranslate.text('B05_altmove'))
                 break
@@ -658,7 +658,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 break
             if case(MessageApi.TAKE_BACK):
                 if self.leds_are_on:
-                    DispatchDgt.fire(Dgt.LIGHT_CLEAR())
+                    DispatchDgt.fire(Dgt.LIGHT_CLEAR(devs={'ser', 'web'}))
                     self.leds_are_on = False
                 self._reset_moves_and_score()
                 self.engine_finished = False
@@ -724,11 +724,11 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 time_left, time_right = self.time_control.current_clock_time(flip_board=self.dgtmenu.get_flip_board())
                 DispatchDgt.fire(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE,
                                                  wait=True, devs={message.dev}))
-                DispatchDgt.fire(Dgt.CLOCK_VERSION(main=message.main, sub=message.sub, dev=message.dev))
+                DispatchDgt.fire(Dgt.CLOCK_VERSION(main=message.main, sub=message.sub, devs={message.dev}))
                 break
             if case(MessageApi.DGT_CLOCK_TIME):
                 DispatchDgt.fire(Dgt.CLOCK_TIME(time_left=message.time_left, time_right=message.time_right,
-                                                dev=message.dev))
+                                                devs={message.dev}))
                 break
             if case(MessageApi.DGT_SERIAL_NR):
                 self._process_dgt_serial_nr()

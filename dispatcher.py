@@ -39,6 +39,9 @@ class Dispatcher(DispatchDgt, Thread):
         self.display_hash = None  # Hash value of clock's display
         self.process_lock = Lock()
 
+    def register(self, device: str):
+        pass
+
     def _stopped_maxtimer(self):
         self.maxtimer_running = False
         self.dgtmenu.disable_picochess_displayed()
@@ -73,7 +76,7 @@ class Dispatcher(DispatchDgt, Thread):
         if do_handle:
             logging.debug("handle DgtApi: %s", message)
             if hasattr(message, 'maxtime') and message.maxtime > 0:
-                if repr(message) == DgtApi.DISPLAY_TEXT and 'sys' in message.devs:
+                if repr(message) == DgtApi.DISPLAY_TEXT and message.maxtime == 2:
                     self.dgtmenu.enable_picochess_displayed()
                 self.maxtimer = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer)
                 self.maxtimer.start()
@@ -90,7 +93,7 @@ class Dispatcher(DispatchDgt, Thread):
             # Check if we have something to display
             try:
                 message = dispatch_queue.get()
-                logging.debug("received command from dispatch_queue: %s", message)
+                logging.debug("received command from dispatch_queue: %s for %s", message, message.devs)
 
                 if self.maxtimer_running:
                     if hasattr(message, 'wait'):

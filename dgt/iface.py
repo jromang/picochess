@@ -125,18 +125,18 @@ class DgtIface(DisplayDgt, Thread):
                 self.start_clock(message.time_left, message.time_right, message.side, message.devs)
                 break
             if case(DgtApi.CLOCK_VERSION):
-                text = self.dgttranslate.text('Y20_picochess', devs={message.dev, 'sys'})
+                text = self.dgttranslate.text('Y20_picochess', devs=message.devs)
                 text.rd = ClockIcons.DOT
                 DispatchDgt.fire(text)
-                DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs={message.dev}))
-                if message.dev != 'i2c':
+                DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs=message.devs))
+                if 'i2c' not in message.devs:
                     self.enable_ser_clock = True
                     if message.main == 2:
                         self.enable_dgt_3000 = True
                 break
             if case(DgtApi.CLOCK_TIME):
-                logging.debug('[%s] (%s) clock: received time from clock l:%s r:%s',
-                              self.getName(), message.dev, message.time_left, message.time_right)
+                logging.debug('[%s] %s clock received time from clock l:%s r:%s',
+                              self.getName(), message.devs, message.time_left, message.time_right)
                 self.time_left = message.time_left
                 self.time_right = message.time_right
                 break
