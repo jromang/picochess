@@ -17,7 +17,7 @@
 
 from configobj import ConfigObj
 from collections import OrderedDict
-from utilities import Observable, switch, DispatchDgt, get_tags
+from utilities import Observable, switch, DispatchDgt, get_tags, version
 from dgt.util import TimeMode, TimeModeLoop, Menu, MenuLoop, Mode, ModeLoop, Language, LanguageLoop, BeepLevel, BeepLoop
 from dgt.util import Settings, SettingsLoop, VoiceType, VoiceTypeLoop, SystemDisplay, SystemDisplayLoop, ClockIcons
 from dgt.api import Dgt, Event
@@ -172,17 +172,23 @@ class DgtMenu(object):
         self.save_choices()
         # During "picochess" is displayed, some special actions allowed
         self.picochess_displayed = set()
-        self.update_top = False  # inside the update-menu?
+        self.updt_top = False  # inside the update-menu?
+        self.updt_tags = []
+        self.updt_version = 0  # index to current version
 
-    def inside_update_menu(self):
-        return self.update_top
+    def inside_updt_menu(self):
+        return self.updt_top
 
     def disable_picochess_displayed(self, dev):
         self.picochess_displayed.discard(dev)
 
     def enable_picochess_displayed(self, dev):
         self.picochess_displayed.add(dev)
-        print(get_tags())
+        self.updt_tags = get_tags()
+        try:
+            self.updt_version = self.updt_tags.index(version)
+        except ValueError:
+            self.updt_version = len(self.updt_tags) - 1
 
     def inside_picochess_time(self, dev):
         return dev in self.picochess_displayed
@@ -560,7 +566,7 @@ class DgtMenu(object):
         text = self.dgttranslate.text('B00_ponderinterval_time', str(self.menu_system_display_ponderinterval))
         return text
 
-    def up(self):
+    def main_up(self):
         """Change the menu state after UP action."""
         text = self.dgttranslate.text('Y00_errormenu')
         for case in switch(self.state):
@@ -682,7 +688,7 @@ class DgtMenu(object):
         self.current_text = text
         return text
 
-    def down(self):
+    def main_down(self):
         """Change the menu state after DOWN action."""
         text = self.dgttranslate.text('Y00_errormenu')
         for case in switch(self.state):
@@ -986,7 +992,7 @@ class DgtMenu(object):
         self.current_text = text
         return text
 
-    def left(self):
+    def main_left(self):
         """Change the menu state after LEFT action."""
         text = self.dgttranslate.text('Y00_errormenu')
         for case in switch(self.state):
@@ -1180,7 +1186,7 @@ class DgtMenu(object):
         self.current_text = text
         return text
 
-    def right(self):
+    def main_right(self):
         """Change the menu state after RIGHT action."""
         text = self.dgttranslate.text('Y00_errormenu')
         for case in switch(self.state):
@@ -1374,17 +1380,15 @@ class DgtMenu(object):
         self.current_text = text
         return text
 
-    def middle(self, dev):
+    def main_middle(self, dev):
         """Change the menu state after MIDDLE action."""
         def _exit_position():
             self.state = MenuState.POS_READ
-            return self.down()
+            return self.main_down()
 
         if self.inside_picochess_time(dev):
-            text = self.dgttranslate.text('B00_errormenu')
-            self.update_top = True
+            text = self.updt_middle(dev)
         else:
-            self.update_top = False  # @todo for test, we reset it here => do this when realy exit update-menu
             text = self.dgttranslate.text('B00_nofunction')
             for case in switch(self.state):
                 if case(MenuState.POS):
@@ -1407,7 +1411,31 @@ class DgtMenu(object):
         self.current_text = text
         return text
 
-    def inside_menu(self):
+    def updt_middle(self, dev):
+        text = self.dgttranslate.text('B00_updt_version', self.updt_tags[self.updt_version])
+        self.updt_top = True
+        return text
+
+    def updt_right(self):
+        self.updt_version = (self.updt_version + 1) % len(self.updt_tags)
+        text = self.dgttranslate.text('B00_updt_version', self.updt_tags[self.updt_version])
+        return text
+
+    def updt_left(self):
+        self.updt_version = (self.updt_version - 1) % len(self.updt_tags)
+        text = self.dgttranslate.text('B00_updt_version', self.updt_tags[self.updt_version])
+        return text
+
+    def updt_down(self):
+        text = self.dgttranslate.text('B00_errormenu')
+        return text
+
+    def updt_up(self):
+        self.updt_top = False
+        text = self.enter_top_menu()
+        return text
+
+    def inside_main_menu(self):
         """Check if currently inside the menu."""
         return self.state != MenuState.TOP
 

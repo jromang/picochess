@@ -824,6 +824,14 @@ class DgtTranslate(object):
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
+        if text_id == 'updt_version':
+            wait = True
+            entxt = Dgt.DISPLAY_TEXT(l='Version ' + msg, m='Vers ' + msg, s='Ver' + msg)
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
 
         for txt in [entxt, detxt, nltxt, frtxt, estxt, ittxt]:
             if txt:
