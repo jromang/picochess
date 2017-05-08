@@ -189,15 +189,15 @@ class DgtDisplay(DisplayMsg, threading.Thread):
 
     def _process_button4(self, dev):
         logging.debug('(%s) clock handle button 4 press', dev)
-        if self._inside_main_menu():
+        if self._inside_updt_menu():
+            text = self.dgtmenu.updt_down()
+            DispatchDgt.fire(text)
+        else:
             text = self.dgtmenu.main_down()  # button4 can exit the menu, so check
             if text:
                 DispatchDgt.fire(text)
             else:
                 Observable.fire(Event.EXIT_MENU())
-        elif self._inside_updt_menu():
-            text = self.dgtmenu.updt_down()
-            DispatchDgt.fire(text)
 
     def _process_lever(self, right_side_down, dev):
         logging.debug('(%s) clock handle lever press - right_side_down: %s', dev, right_side_down)
