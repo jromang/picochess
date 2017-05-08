@@ -264,7 +264,7 @@ class DgtBoard(object):
 
                             right_side_down = -0x40 if status & 0x02 else 0x40
                             if self.lever_pos != right_side_down:
-                                logging.debug('(ser) clock button status: %x old lever: %x', status, self.lever_pos)
+                                logging.debug('(ser) clock button status: %x old lever: %s', status, self.lever_pos)
                                 if self.lever_pos is not None:
                                     DisplayMsg.show(Message.DGT_BUTTON(button=right_side_down, dev='ser'))
                                 self.lever_pos = right_side_down
