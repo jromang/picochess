@@ -31,7 +31,7 @@ class Dispatcher(DispatchDgt, Thread):
         super(Dispatcher, self).__init__()
 
         self.dgtmenu = dgtmenu
-        self.devices = []
+        self.devices = set()
         self.maxtimer = {}
         self.maxtimer_running = {}
         self.time_factor = 1  # This is for testing the duration - remove it lateron!
@@ -41,7 +41,7 @@ class Dispatcher(DispatchDgt, Thread):
         self.process_lock = {}
 
     def register(self, device: str):
-        self.devices.append(device)
+        self.devices.add(device)
         self.maxtimer[device] = None
         self.maxtimer_running[device] = False
         self.process_lock[device] = Lock()
@@ -50,20 +50,13 @@ class Dispatcher(DispatchDgt, Thread):
 
     def _stopped_maxtimer(self, dev):
         self.maxtimer_running[dev] = False
-        self.dgtmenu.disable_picochess_displayed()
-        # if self.clock_running:
-        #     logging.debug('showing the running clock again')
-        #     DisplayDgt.show(Dgt.DISPLAY_TIME(force=False, wait=True, devs={'ser', 'i2c', 'web'}))
-        # else:
-        #     logging.debug('clock not running - ignored maxtime')
+        self.dgtmenu.disable_picochess_displayed(dev)
 
-        # @todo we try it without this test from above - since dispatcher doesnt know if clock is running anyway
         DisplayDgt.show(Dgt.DISPLAY_TIME(force=False, wait=True, devs={dev}))
         if self.tasks[dev]:
             logging.debug('processing delayed tasks: %s', self.tasks[dev])
         while self.tasks[dev]:
             message = self.tasks[dev].pop(0)
-            message.devs = {dev}
             with self.process_lock[dev]:
                 self._process_message(message, dev)
             if self.maxtimer_running[dev]:  # run over the task list until a maxtime command was processed
@@ -80,18 +73,19 @@ class Dispatcher(DispatchDgt, Thread):
                 else:
                     self.display_hash[dev] = hash(message)
 
+        message.devs = {dev}  # on new system, we only have ONE device each message - force this!
         if do_handle:
-            logging.debug("handle DgtApi: %s devs: %s", message, message.devs)
+            logging.debug('handle DgtApi: %s devs: %s', message, ','.join(message.devs))
             if hasattr(message, 'maxtime') and message.maxtime > 0:
                 if repr(message) == DgtApi.DISPLAY_TEXT and message.maxtime == 2:
-                    self.dgtmenu.enable_picochess_displayed()
+                    self.dgtmenu.enable_picochess_displayed(dev)
                 self.maxtimer[dev] = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer, [dev])
                 self.maxtimer[dev].start()
                 logging.debug('showing %s for %.1f secs', message, message.maxtime * self.time_factor)
                 self.maxtimer_running[dev] = True
             DisplayDgt.show(message)
         else:
-            logging.debug("ignore DgtApi: %s devs: %s", message, message.devs)
+            logging.debug('ignore DgtApi: %s devs: %s', message, ','.join(message.devs))
 
     def run(self):
         """called from threading.Thread by its start() function."""
@@ -100,11 +94,9 @@ class Dispatcher(DispatchDgt, Thread):
             # Check if we have something to display
             try:
                 message = dispatch_queue.get()
-                logging.debug("received command from dispatch_queue: %s devs: %s", message, message.devs)
+                logging.debug('received command from dispatch_queue: %s devs: %s', message, ','.join(message.devs))
 
-                for dev in message.devs:
-                    if dev not in self.devices:
-                        continue
+                for dev in message.devs & self.devices:
                     if self.maxtimer_running[dev]:
                         if hasattr(message, 'wait'):
                             if message.wait:
@@ -116,6 +108,7 @@ class Dispatcher(DispatchDgt, Thread):
                                 self.maxtimer[dev].cancel()
                                 self.maxtimer[dev].join()
                                 self.maxtimer_running[dev] = False
+                                self.dgtmenu.disable_picochess_displayed(dev)
                                 if self.tasks[dev]:
                                     logging.debug('delete following tasks: %s', self.tasks[dev])
                                     self.tasks[dev] = []

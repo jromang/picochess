@@ -171,19 +171,21 @@ class DgtMenu(object):
         # setup the result vars for api (dgtdisplay)
         self.save_choices()
         # During "picochess" is displayed, some special actions allowed
-        self.picochess_displayed = False
+        self.picochess_displayed = set()
         self.update_top = False  # inside the update-menu?
 
     def inside_update_menu(self):
         return self.update_top
 
-    def disable_picochess_displayed(self):
-        if self.picochess_displayed:
-            self.picochess_displayed = False
+    def disable_picochess_displayed(self, dev):
+        self.picochess_displayed.discard(dev)
 
-    def enable_picochess_displayed(self):
-        self.picochess_displayed = True
+    def enable_picochess_displayed(self, dev):
+        self.picochess_displayed.add(dev)
         print(get_tags())
+
+    def inside_picochess_time(self, dev):
+        return dev in self.picochess_displayed
 
     def save_choices(self):
         """Save the user choices to the result vars."""
@@ -1372,13 +1374,13 @@ class DgtMenu(object):
         self.current_text = text
         return text
 
-    def middle(self):
+    def middle(self, dev):
         """Change the menu state after MIDDLE action."""
         def _exit_position():
             self.state = MenuState.POS_READ
             return self.down()
 
-        if self.picochess_displayed:
+        if self.inside_picochess_time(dev):
             text = self.dgttranslate.text('B00_errormenu')
             self.update_top = True
         else:

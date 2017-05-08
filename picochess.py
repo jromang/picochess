@@ -530,7 +530,7 @@ def main():
 
     # Enable logging
     if args.log_file:
-        handler = RotatingFileHandler('logs' + os.sep + args.log_file, maxBytes=1024*1024, backupCount=9)
+        handler = RotatingFileHandler('logs' + os.sep + args.log_file, maxBytes=1.4*1024*1024, backupCount=6)
         logging.basicConfig(level=getattr(logging, args.log_level.upper()),
                             format='%(asctime)s.%(msecs)03d %(levelname)5s %(module)10s - %(funcName)s: %(message)s',
                             datefmt="%Y-%m-%d %H:%M:%S", handlers=[handler])

@@ -146,8 +146,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
 
     def _process_button2(self, dev):
         logging.debug('(%s) clock handle button 2 press', dev)
-        if self._inside_menu() or self.dgtmenu.picochess_displayed:
-            text = self.dgtmenu.middle()  # button2 can exit the menu (if in "position"), so check
+        if self._inside_menu() or self.dgtmenu.inside_picochess_time(dev):
+            text = self.dgtmenu.middle(dev)  # button2 can exit the menu (if in "position"), so check
             if text:
                 DispatchDgt.fire(text)
             else:
