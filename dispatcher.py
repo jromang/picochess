@@ -32,19 +32,24 @@ class Dispatcher(DispatchDgt, Thread):
 
         self.dgtmenu = dgtmenu
         self.devices = []
-        self.maxtimer = None
-        self.maxtimer_running = False
+        self.maxtimer = {}
+        self.maxtimer_running = {}
         self.time_factor = 1  # This is for testing the duration - remove it lateron!
-        self.tasks = []  # delayed task array
+        self.tasks = {}  # delayed task array
 
-        self.display_hash = None  # Hash value of clock's display
-        self.process_lock = Lock()
+        self.display_hash = {}  # Hash value of clock's display
+        self.process_lock = {}
 
     def register(self, device: str):
         self.devices.append(device)
+        self.maxtimer[device] = None
+        self.maxtimer_running[device] = False
+        self.process_lock[device] = Lock()
+        self.tasks[device] = []
+        self.display_hash[device] = None
 
-    def _stopped_maxtimer(self, devs):
-        self.maxtimer_running = False
+    def _stopped_maxtimer(self, dev):
+        self.maxtimer_running[dev] = False
         self.dgtmenu.disable_picochess_displayed()
         # if self.clock_running:
         #     logging.debug('showing the running clock again')
@@ -53,39 +58,40 @@ class Dispatcher(DispatchDgt, Thread):
         #     logging.debug('clock not running - ignored maxtime')
 
         # @todo we try it without this test from above - since dispatcher doesnt know if clock is running anyway
-        DisplayDgt.show(Dgt.DISPLAY_TIME(force=False, wait=True, devs=devs))
-        if self.tasks:
-            logging.debug('processing delayed tasks: %s', self.tasks)
-        while self.tasks:
-            message = self.tasks.pop(0)
-            with self.process_lock:
-                self._process_message(message)
-            if self.maxtimer_running:  # run over the task list until a maxtime command was processed
+        DisplayDgt.show(Dgt.DISPLAY_TIME(force=False, wait=True, devs={dev}))
+        if self.tasks[dev]:
+            logging.debug('processing delayed tasks: %s', self.tasks[dev])
+        while self.tasks[dev]:
+            message = self.tasks[dev].pop(0)
+            message.devs = {dev}
+            with self.process_lock[dev]:
+                self._process_message(message, dev)
+            if self.maxtimer_running[dev]:  # run over the task list until a maxtime command was processed
                 break
 
-    def _process_message(self, message):
+    def _process_message(self, message, dev):
         do_handle = True
         if repr(message) in (DgtApi.CLOCK_START, DgtApi.CLOCK_STOP, DgtApi.CLOCK_TIME):
-            self.display_hash = None  # Cant know the clock display if command changing the running status
+            self.display_hash[dev] = None  # Cant know the clock display if command changing the running status
         else:
             if repr(message) in (DgtApi.DISPLAY_MOVE, DgtApi.DISPLAY_TEXT):
-                if self.display_hash == hash(message) and not message.beep:
+                if self.display_hash[dev] == hash(message) and not message.beep:
                     do_handle = False
                 else:
-                    self.display_hash = hash(message)
+                    self.display_hash[dev] = hash(message)
 
         if do_handle:
-            logging.debug("handle DgtApi: %s", message)
+            logging.debug("handle DgtApi: %s devs: %s", message, message.devs)
             if hasattr(message, 'maxtime') and message.maxtime > 0:
                 if repr(message) == DgtApi.DISPLAY_TEXT and message.maxtime == 2:
                     self.dgtmenu.enable_picochess_displayed()
-                self.maxtimer = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer, [message.devs])
-                self.maxtimer.start()
+                self.maxtimer[dev] = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer, [dev])
+                self.maxtimer[dev].start()
                 logging.debug('showing %s for %.1f secs', message, message.maxtime * self.time_factor)
-                self.maxtimer_running = True
+                self.maxtimer_running[dev] = True
             DisplayDgt.show(message)
         else:
-            logging.debug("ignore DgtApi: %s", message)
+            logging.debug("ignore DgtApi: %s devs: %s", message, message.devs)
 
     def run(self):
         """called from threading.Thread by its start() function."""
@@ -96,26 +102,29 @@ class Dispatcher(DispatchDgt, Thread):
                 message = dispatch_queue.get()
                 logging.debug("received command from dispatch_queue: %s devs: %s", message, message.devs)
 
-                if self.maxtimer_running:
-                    if hasattr(message, 'wait'):
-                        if message.wait:
-                            self.tasks.append(message)
-                            logging.debug('tasks delayed: %s', self.tasks)
-                            continue
+                for dev in message.devs:
+                    if dev not in self.devices:
+                        continue
+                    if self.maxtimer_running[dev]:
+                        if hasattr(message, 'wait'):
+                            if message.wait:
+                                self.tasks[dev].append(message)
+                                logging.debug('tasks delayed: %s', self.tasks[dev])
+                                continue
+                            else:
+                                logging.debug('ignore former maxtime')
+                                self.maxtimer[dev].cancel()
+                                self.maxtimer[dev].join()
+                                self.maxtimer_running[dev] = False
+                                if self.tasks[dev]:
+                                    logging.debug('delete following tasks: %s', self.tasks[dev])
+                                    self.tasks[dev] = []
                         else:
-                            logging.debug('ignore former maxtime')
-                            self.maxtimer.cancel()
-                            self.maxtimer.join()
-                            self.maxtimer_running = False
-                            if self.tasks:
-                                logging.debug('delete following tasks: %s', self.tasks)
-                                self.tasks = []
+                            logging.debug('command doesnt change the clock display => no need to interrupt max timer')
                     else:
-                        logging.debug('command doesnt change the clock display => no need to interrupt max timer')
-                else:
-                    logging.debug('max timer not running => process command')
+                        logging.debug('max timer not running => process command')
 
-                with self.process_lock:
-                    self._process_message(message)
+                    with self.process_lock[dev]:
+                        self._process_message(message, dev)
             except queue.Empty:
                 pass
