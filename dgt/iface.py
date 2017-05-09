@@ -40,6 +40,7 @@ class DgtIface(DisplayDgt, Thread):
         self.enable_ser_clock = False
         self.time_left = None
         self.time_right = None
+        self.case_res = True
 
     def display_text_on_clock(self, message):
         """override this function."""
@@ -95,27 +96,28 @@ class DgtIface(DisplayDgt, Thread):
     def _process_message(self, message):
         if self.getName() not in message.devs:
             logging.debug('[%s] device ignore DgtApi: %s devs: %s', self.getName(), message, ','.join(message.devs))
-            return
+            return True
 
+        self.case_res = True
         for case in switch(message):
             if case(DgtApi.DISPLAY_MOVE):
-                self.display_move_on_clock(message)
+                self.case_res = self.display_move_on_clock(message)
                 break
             if case(DgtApi.DISPLAY_TEXT):
-                self.display_text_on_clock(message)
+                self.case_res = self.display_text_on_clock(message)
                 break
             if case(DgtApi.DISPLAY_TIME):
-                self.display_time_on_clock(message)
+                self.case_res = self.display_time_on_clock(message)
                 break
             if case(DgtApi.LIGHT_CLEAR):
-                self.clear_light_revelation_board()
+                self.case_res = self.clear_light_revelation_board()
                 break
             if case(DgtApi.LIGHT_SQUARES):
-                self.light_squares_revelation_board(message.uci_move)
+                self.case_res = self.light_squares_revelation_board(message.uci_move)
                 break
             if case(DgtApi.CLOCK_STOP):
                 if self.clock_running:
-                    self.stop_clock(message.devs)
+                    self.case_res = self.stop_clock(message.devs)
                 else:
                     logging.debug('[%s] (%s) clock is already stopped', self.getName(), message.devs)
                 break
@@ -127,7 +129,7 @@ class DgtIface(DisplayDgt, Thread):
                               self.getName(), message.devs, self.time_left, self.time_right)
                 logging.debug('[%s] (%s) clock sending time to clock l:%s r:%s',
                               self.getName(), message.devs, l_hms, r_hms)
-                self.start_clock(message.time_left, message.time_right, message.side, message.devs)
+                self.case_res = self.start_clock(message.time_left, message.time_right, message.side, message.devs)
                 break
             if case(DgtApi.CLOCK_VERSION):
                 text = self.dgttranslate.text('Y20_picochess', devs=message.devs)
@@ -147,9 +149,12 @@ class DgtIface(DisplayDgt, Thread):
                 break
             if case():  # Default
                 pass
+            return self.case_res
 
     def _create_task(self, msg):
-        self._process_message(msg)
+        res = self._process_message(msg)
+        if not res:
+            logging.warning('DgtApi command %s failed', msg)
 
     def run(self):
         """called from threading.Thread by its start() function."""

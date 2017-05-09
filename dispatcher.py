@@ -52,10 +52,15 @@ class Dispatcher(DispatchDgt, Thread):
         self.maxtimer_running[dev] = False
         self.dgtmenu.disable_picochess_displayed(dev)
 
+        if dev not in self.devices:
+            logging.debug('delete not registered (%s) tasks', dev)
+            self.tasks[dev] = []
+            return
         DisplayDgt.show(Dgt.DISPLAY_TIME(force=False, wait=True, devs={dev}))
         if self.tasks[dev]:
             logging.debug('processing delayed (%s) tasks: %s', dev, self.tasks[dev])
         while self.tasks[dev]:
+            logging.debug('(%s) tasks has %i members', dev, len(self.tasks[dev]))
             message = self.tasks[dev].pop(0)
             with self.process_lock[dev]:
                 self._process_message(message, dev)

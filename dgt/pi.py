@@ -118,35 +118,38 @@ class DgtPi(DgtIface):
                     res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, left_icons.value, right_icons.value)
         if res < 0:
             logging.warning('finally failed %i', res)
+            return False
+        else:
+            return True
 
     def display_text_on_clock(self, message):
         """display a text on the dgtpi."""
         text = message.l
         if text is None:
             text = message.m
-        if 'i2c' not in message.devs:
+        if self.getName() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)
             return
         left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE
         right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
-        self._display_on_dgt_pi(text, message.beep, left_icons, right_icons)
+        return self._display_on_dgt_pi(text, message.beep, left_icons, right_icons)
 
     def display_move_on_clock(self, message):
         """display a move on the dgtpi."""
         bit_board, text = self.get_san(message)
         text = '{:3d}{:s}'.format(bit_board.fullmove_number, text)
-        if 'i2c' not in message.devs:
+        if self.getName() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)
-            return
+            return True
         left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.DOT
         right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
-        self._display_on_dgt_pi(text, message.beep, left_icons, right_icons)
+        return self._display_on_dgt_pi(text, message.beep, left_icons, right_icons)
 
     def display_time_on_clock(self, message):
         """display the time on the dgtpi."""
-        if 'i2c' not in message.devs:
+        if self.getName() not in message.devs:
             logging.debug('ignored endText - devs: %s', message.devs)
-            return
+            return True
         if self.clock_running or message.force:
             with self.lib_lock:
                 res = self.lib.dgtpicom_end_text()
@@ -159,30 +162,32 @@ class DgtPi(DgtIface):
                         res = self.lib.dgtpicom_end_text()
                 if res < 0:
                     logging.warning('finally failed')
+                    return False
         else:
             logging.debug('(i2c) clock isnt running - no need for endText')
+        return True
 
     def light_squares_revelation_board(self, uci_move: str):
         """handle this by hw.py."""
-        pass
+        return True
 
     def clear_light_revelation_board(self):
         """handle this by hw.py."""
-        pass
+        return True
 
     def stop_clock(self, devs: set):
         """stop the dgtpi."""
-        if 'i2c' not in devs:
+        if self.getName() not in devs:
             logging.debug('ignored stopClock - devs: %s', devs)
-            return
-        self._resume_clock(ClockSide.NONE)
+            return True
+        return self._resume_clock(ClockSide.NONE)
 
     def _resume_clock(self, side: ClockSide):
         l_hms = self.time_left
         r_hms = self.time_right
         if l_hms is None or r_hms is None:
             logging.warning('time values not set - abort function')
-            return
+            return False
 
         l_run = r_run = 0
         if side == ClockSide.LEFT:
@@ -200,14 +205,16 @@ class DgtPi(DgtIface):
                     res = self.lib.dgtpicom_run(l_run, r_run)
         if res < 0:
             logging.warning('finally failed %i', res)
+            return False
         else:
             self.clock_running = (side != ClockSide.NONE)
+            return True
 
     def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
         """start the dgtpi."""
-        if 'i2c' not in devs:
+        if self.getName() not in devs:
             logging.debug('ignored startClock - devs: %s', devs)
-            return
+            return True
         self.time_left = hours_minutes_seconds(time_left)
         self.time_right = hours_minutes_seconds(time_right)
         l_hms = self.time_left
@@ -231,8 +238,10 @@ class DgtPi(DgtIface):
                                                         r_run, r_hms[0], r_hms[1], r_hms[2])
         if res < 0:
             logging.warning('finally failed %i', res)
+            return False
         else:
             self.clock_running = (side != ClockSide.NONE)
+            return True
 
     def getName(self):
         return 'i2c'
