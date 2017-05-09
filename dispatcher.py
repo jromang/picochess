@@ -81,7 +81,7 @@ class Dispatcher(DispatchDgt, Thread):
                     self.dgtmenu.enable_picochess_displayed(dev)
                 self.maxtimer[dev] = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer, [dev])
                 self.maxtimer[dev].start()
-                logging.debug('showing %s for %.1f secs', message, message.maxtime * self.time_factor)
+                logging.debug('(%s) showing %s for %.1f secs', dev, message, message.maxtime * self.time_factor)
                 self.maxtimer_running[dev] = True
             DisplayDgt.show(message)
         else:
@@ -104,7 +104,7 @@ class Dispatcher(DispatchDgt, Thread):
                                 logging.debug('(%s) tasks delayed: %s', dev, self.tasks[dev])
                                 continue
                             else:
-                                logging.debug('ignore former maxtime')
+                                logging.debug('ignore former maxtime - dev: %s', dev)
                                 self.maxtimer[dev].cancel()
                                 self.maxtimer[dev].join()
                                 self.maxtimer_running[dev] = False
@@ -113,9 +113,9 @@ class Dispatcher(DispatchDgt, Thread):
                                     logging.debug('delete following (%s) tasks: %s', dev, self.tasks[dev])
                                     self.tasks[dev] = []
                         else:
-                            logging.debug('command doesnt change the clock display => no need to interrupt max timer')
+                            logging.debug('command doesnt change the clock display => max timer (%s) ignored', dev)
                     else:
-                        logging.debug('max timer not running => process command')
+                        logging.debug('max timer (%s) not running => process command', dev)
 
                     with self.process_lock[dev]:
                         self._process_message(message, dev)
