@@ -93,6 +93,10 @@ class DgtIface(DisplayDgt, Thread):
         return bit_board, text
 
     def _process_message(self, message):
+        if self.getName() not in message.devs:
+            logging.debug('[%s] device ignore DgtApi: %s devs: %s', self.getName(), message, ','.join(message.devs))
+            return
+
         for case in switch(message):
             if case(DgtApi.DISPLAY_MOVE):
                 self.display_move_on_clock(message)
@@ -145,10 +149,7 @@ class DgtIface(DisplayDgt, Thread):
                 pass
 
     def _create_task(self, msg):
-        if self.getName() in msg.devs:
-            self._process_message(msg)
-        else:
-            logging.debug('ignore DgtApi: %s devs: %s', msg, ','.join(msg.devs))
+        self._process_message(msg)
 
     def run(self):
         """called from threading.Thread by its start() function."""

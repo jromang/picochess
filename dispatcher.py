@@ -71,21 +71,24 @@ class Dispatcher(DispatchDgt, Thread):
                 if self.display_hash[dev] == hash(message) and not message.beep:
                     do_handle = False
                 else:
+                    logging.debug('(%s) clock display hash old: %s new: %s', dev, self.display_hash[dev], hash(message))
                     self.display_hash[dev] = hash(message)
 
-        message.devs = {dev}  # on new system, we only have ONE device each message - force this!
+        devstr = ','.join(message.devs)
         if do_handle:
-            logging.debug('handle DgtApi: %s devs: %s', message, ','.join(message.devs))
+            logging.debug('(%s) handle DgtApi: %s devs: %s', dev, message, devstr)
             if hasattr(message, 'maxtime') and message.maxtime > 0:
                 if repr(message) == DgtApi.DISPLAY_TEXT and message.maxtime == 2:
                     self.dgtmenu.enable_picochess_displayed(dev)
                 self.maxtimer[dev] = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer, [dev])
                 self.maxtimer[dev].start()
-                logging.debug('(%s) showing %s for %.1f secs', dev, message, message.maxtime * self.time_factor)
+                logging.debug('(%s) showing %s for %.1f secs devs: %s',
+                              dev, message, message.maxtime * self.time_factor, devstr)
                 self.maxtimer_running[dev] = True
+            message.devs = {dev}  # on new system, we only have ONE device each message - force this!
             DisplayDgt.show(message)
         else:
-            logging.debug('ignore DgtApi: %s devs: %s', message, ','.join(message.devs))
+            logging.debug('(%s) hash ignore DgtApi: %s devs: %s', dev, message, devstr)
 
     def run(self):
         """called from threading.Thread by its start() function."""
