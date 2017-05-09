@@ -233,3 +233,6 @@ class DgtPi(DgtIface):
             logging.warning('finally failed %i', res)
         else:
             self.clock_running = (side != ClockSide.NONE)
+
+    def getName(self):
+        return 'i2c'

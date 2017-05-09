@@ -74,8 +74,8 @@ class DgtIface(DisplayDgt, Thread):
         raise NotImplementedError()
 
     def getName(self):
-        """get classname."""
-        return self.__class__.__name__
+        """override this function."""
+        raise NotImplementedError()
 
     def get_san(self, message, is_xl=False):
         """create a chess.board plus a text ready to display on clock."""
@@ -113,15 +113,16 @@ class DgtIface(DisplayDgt, Thread):
                 if self.clock_running:
                     self.stop_clock(message.devs)
                 else:
-                    logging.debug('[%s] clock is already stopped', self.getName())
+                    logging.debug('[%s] (%s) clock is already stopped', self.getName(), message.devs)
                 break
             if case(DgtApi.CLOCK_START):
                 # log times
                 l_hms = hours_minutes_seconds(message.time_left)
                 r_hms = hours_minutes_seconds(message.time_right)
-                logging.debug('[%s] last time received from clock l:%s r:%s',
-                              self.getName(), self.time_left, self.time_right)
-                logging.debug('[%s] sending time to clock l:%s r:%s', self.getName(), l_hms, r_hms)
+                logging.debug('[%s] (%s) clock received last time from clock l:%s r:%s',
+                              self.getName(), message.devs, self.time_left, self.time_right)
+                logging.debug('[%s] (%s) clock sending time to clock l:%s r:%s',
+                              self.getName(), message.devs, l_hms, r_hms)
                 self.start_clock(message.time_left, message.time_right, message.side, message.devs)
                 break
             if case(DgtApi.CLOCK_VERSION):
@@ -135,7 +136,7 @@ class DgtIface(DisplayDgt, Thread):
                         self.enable_dgt_3000 = True
                 break
             if case(DgtApi.CLOCK_TIME):
-                logging.debug('[%s] %s clock received time from clock l:%s r:%s',
+                logging.debug('[%s] (%s) clock received current time from clock l:%s r:%s',
                               self.getName(), message.devs, message.time_left, message.time_right)
                 self.time_left = message.time_left
                 self.time_right = message.time_right
@@ -144,7 +145,10 @@ class DgtIface(DisplayDgt, Thread):
                 pass
 
     def _create_task(self, msg):
-        self._process_message(msg)
+        if self.getName() in msg.devs:
+            self._process_message(msg)
+        else:
+            logging.debug('ignore DgtApi: %s devs: %s', msg, ','.join(msg.devs))
 
     def run(self):
         """called from threading.Thread by its start() function."""

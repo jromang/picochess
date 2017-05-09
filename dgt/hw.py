@@ -169,3 +169,6 @@ class DgtHw(DgtIface):
         self.time_left = hours_minutes_seconds(time_left)
         self.time_right = hours_minutes_seconds(time_right)
         self._resume_clock(side)
+
+    def getName(self):
+        return 'ser'

@@ -319,6 +319,9 @@ class WebVr(DgtIface):
         result = {'event': 'Clear'}
         EventHandler.write_to_clients(result)
 
+    def getName(self):
+        return 'web'
+
     def _create_task(self, msg):
         IOLoop.instance().add_callback(callback=lambda: self._process_message(msg))
 
