@@ -34,7 +34,7 @@ class Dispatcher(DispatchDgt, Thread):
         self.devices = set()
         self.maxtimer = {}
         self.maxtimer_running = {}
-        self.time_factor = 1  # This is for testing the duration - remove it lateron!
+        self.time_factor = 3  # This is for testing the duration - remove it lateron!
         self.tasks = {}  # delayed task array
 
         self.display_hash = {}  # Hash value of clock's display
@@ -54,7 +54,7 @@ class Dispatcher(DispatchDgt, Thread):
 
         DisplayDgt.show(Dgt.DISPLAY_TIME(force=False, wait=True, devs={dev}))
         if self.tasks[dev]:
-            logging.debug('processing delayed tasks: %s', self.tasks[dev])
+            logging.debug('processing delayed (%s) tasks: %s', dev, self.tasks[dev])
         while self.tasks[dev]:
             message = self.tasks[dev].pop(0)
             with self.process_lock[dev]:
@@ -101,7 +101,7 @@ class Dispatcher(DispatchDgt, Thread):
                         if hasattr(message, 'wait'):
                             if message.wait:
                                 self.tasks[dev].append(message)
-                                logging.debug('tasks delayed: %s', self.tasks[dev])
+                                logging.debug('(%s) tasks delayed: %s', dev, self.tasks[dev])
                                 continue
                             else:
                                 logging.debug('ignore former maxtime')
@@ -110,7 +110,7 @@ class Dispatcher(DispatchDgt, Thread):
                                 self.maxtimer_running[dev] = False
                                 self.dgtmenu.disable_picochess_displayed(dev)
                                 if self.tasks[dev]:
-                                    logging.debug('delete following tasks: %s', self.tasks[dev])
+                                    logging.debug('delete following (%s) tasks: %s', dev, self.tasks[dev])
                                     self.tasks[dev] = []
                         else:
                             logging.debug('command doesnt change the clock display => no need to interrupt max timer')

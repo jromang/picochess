@@ -136,7 +136,7 @@ class DgtBoard(object):
                 logging.debug('(ser) clock now locked')
                 self.clock_lock = time.time()
         if message[0] == DgtCmd.DGT_SET_LEDS:
-            logging.debug('(rev) leds: turned %s', 'on' if message[2] else 'off')
+            logging.debug('(rev) leds turned %s', 'on' if message[2] else 'off')
         return True
 
     def _process_board_message(self, message_id: int, message: tuple, message_length: int):

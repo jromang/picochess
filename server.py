@@ -245,7 +245,7 @@ class WebVr(DgtIface):
             if message.side == ClockSide.RIGHT:
                 text = text.rjust(6)
         if 'web' not in message.devs:
-            logging.debug('ignored message cause of devs [%s]', text)
+            logging.debug('ignored %s - devs: %s', text, message.devs)
             return
         self.clock_show_time = False
         self._create_clock_text()
@@ -262,7 +262,7 @@ class WebVr(DgtIface):
         if text is None:
             text = message.m
         if 'web' not in message.devs:
-            logging.debug('ignored message cause of devs [%s]', text)
+            logging.debug('ignored %s - devs: %s', text, message.devs)
             return
         self.clock_show_time = False
         self._create_clock_text()
@@ -273,7 +273,7 @@ class WebVr(DgtIface):
     def display_time_on_clock(self, message):
         """display the time on the web clock."""
         if 'web' not in message.devs:
-            logging.debug('ignored message cause of devs [endText]')
+            logging.debug('ignored [endText] - devs: %s', message.devs)
             return
         if self.clock_running or message.force:
             self.clock_show_time = True
@@ -284,7 +284,7 @@ class WebVr(DgtIface):
     def stop_clock(self, devs: set):
         """stop the time on the web clock."""
         if 'web' not in devs:
-            logging.debug('ignored message cause of devs [stopClock]')
+            logging.debug('ignored [stopClock] - devs: %s', devs)
             return
         if self.virtual_timer:
             self.virtual_timer.stop()
@@ -297,7 +297,7 @@ class WebVr(DgtIface):
     def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
         """start the time on the web clock."""
         if 'web' not in devs:
-            logging.debug('ignored message cause of devs [startClock]')
+            logging.debug('ignored [StartClock] - devs: %s', devs)
             return
         if self.virtual_timer:
             self.virtual_timer.stop()
