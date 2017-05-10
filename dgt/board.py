@@ -20,7 +20,7 @@ import struct
 from dgt.util import DgtAck, DgtClk, DgtCmd, DgtMsg, ClockIcons, ClockSide, enum
 from dgt.api import Message, Dgt
 
-from utilities import RepeatedTimer, switch, DisplayMsg, hours_minutes_seconds
+from utilities import RepeatedTimer, DisplayMsg, hours_minutes_seconds
 import logging
 
 from threading import Timer, Lock
@@ -140,194 +140,195 @@ class DgtBoard(object):
         return True
 
     def _process_board_message(self, message_id: int, message: tuple, message_length: int):
-        for case in switch(message_id):
-            if case(DgtMsg.DGT_MSG_VERSION):
-                if message_length != 2:
-                    logging.warning('illegal length in data')
-                board_version = str(message[0]) + '.' + str(message[1])
-                logging.debug('(ser) board version %0.2f', float(board_version))
-                self.write_command([DgtCmd.DGT_SEND_BRD])  # Update the board => get first FEN
-                if self.device.find('rfc') == -1:
-                    text_l, text_m, text_s = 'USB e-Board', 'USBboard', 'ok usb'
-                    channel = 'USB'
+        if False:  # switch-case
+            pass
+        elif message_id == DgtMsg.DGT_MSG_VERSION:
+            if message_length != 2:
+                logging.warning('illegal length in data')
+            board_version = str(message[0]) + '.' + str(message[1])
+            logging.debug('(ser) board version %0.2f', float(board_version))
+            self.write_command([DgtCmd.DGT_SEND_BRD])  # Update the board => get first FEN
+            if self.device.find('rfc') == -1:
+                text_l, text_m, text_s = 'USB e-Board', 'USBboard', 'ok usb'
+                channel = 'USB'
+            else:
+                btname5 = self.bt_name[-5:]
+                if 'REVII' in self.bt_name:
+                    text_l, text_m, text_s = 'RevII ' + btname5, 'Rev' + btname5, 'b' + btname5
+                    if not self.disable_revelation_leds:
+                        self.use_revelation_leds = True
+                elif 'DGT_BT' in self.bt_name:
+                    text_l, text_m, text_s = 'DGTBT ' + btname5, 'BT ' + btname5, 'b' + btname5
+                    self.use_revelation_leds = False
                 else:
-                    btname5 = self.bt_name[-5:]
-                    if 'REVII' in self.bt_name:
-                        text_l, text_m, text_s = 'RevII ' + btname5, 'Rev' + btname5, 'b' + btname5
-                        if not self.disable_revelation_leds:
-                            self.use_revelation_leds = True
-                    elif 'DGT_BT' in self.bt_name:
-                        text_l, text_m, text_s = 'DGTBT ' + btname5, 'BT ' + btname5, 'b' + btname5
-                        self.use_revelation_leds = False
-                    else:
-                        text_l, text_m, text_s = 'BT e-Board', 'BT board', 'ok bt'
-                    channel = 'BT'
-                self.bconn_text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, wait=True, beep=False, maxtime=1,
-                                                   devs={'i2c', 'web'})  # serial clock lateron
-                DisplayMsg.show(Message.DGT_EBOARD_VERSION(text=self.bconn_text, channel=channel))
-                self.startup_serial_clock()  # now ask the serial clock to answer
-                if self.watchdog_timer.is_running():
-                    logging.warning('watchdog timer is already running')
-                else:
-                    logging.debug('watchdog timer is started')
-                    self.watchdog_timer.start()
-                break
-            if case(DgtMsg.DGT_MSG_BWTIME):
-                if message_length != 7:
-                    logging.warning('illegal length in data')
-                if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
-                    # Construct the ack message
-                    ack0 = ((message[1]) & 0x7f) | ((message[3] << 3) & 0x80)
-                    ack1 = ((message[2]) & 0x7f) | ((message[3] << 2) & 0x80)
-                    ack2 = ((message[4]) & 0x7f) | ((message[0] << 3) & 0x80)
-                    ack3 = ((message[5]) & 0x7f) | ((message[0] << 2) & 0x80)
-                    if ack0 != 0x10:
-                        logging.warning('(ser) clock ACK error %s', (ack0, ack1, ack2, ack3))
-                        if self.last_clock_command:
-                            logging.debug('(ser) clock resending failed message [%s]', self.last_clock_command)
-                            self.write_command(self.last_clock_command)
-                            self.last_clock_command = []  # only resend once
-                        break
-                    else:
-                        logging.debug('(ser) clock ACK okay [%s]', DgtAck(ack1))
-                        if self.last_clock_command:
-                            cmd = self.last_clock_command[3]  # type: DgtClk
-                            if cmd.value != ack1 and ack1 < 0x80:
-                                logging.warning('(ser) clock ACK [%s] out of sync - last: [%s]', DgtAck(ack1), cmd)
+                    text_l, text_m, text_s = 'BT e-Board', 'BT board', 'ok bt'
+                channel = 'BT'
+            self.bconn_text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, wait=True, beep=False, maxtime=1,
+                                               devs={'i2c', 'web'})  # serial clock lateron
+            DisplayMsg.show(Message.DGT_EBOARD_VERSION(text=self.bconn_text, channel=channel))
+            self.startup_serial_clock()  # now ask the serial clock to answer
+            if self.watchdog_timer.is_running():
+                logging.warning('watchdog timer is already running')
+            else:
+                logging.debug('watchdog timer is started')
+                self.watchdog_timer.start()
 
-                    if ack1 == DgtAck.DGT_ACK_CLOCK_BUTTON.value:
-                        # this are the other (ack2-ack3) codes
-                        # 05-49 33-52 17-51 09-50 65-53 | button 0-4 (single)
-                        #       37-52 21-51 13-50 69-53 | button 0 + 1-4
-                        #             49-51 41-50 97-53 | button 1 + 2-4
-                        #                   25-50 81-53 | button 2 + 3-4
-                        #                         73-53 | button 3 + 4
-                        if ack3 == 49:
-                            logging.info('(ser) clock button 0 pressed - ack2: %i', ack2)
-                            DisplayMsg.show(Message.DGT_BUTTON(button=0, dev='ser'))
-                        if ack3 == 52:
-                            logging.info('(ser) clock button 1 pressed - ack2: %i', ack2)
-                            DisplayMsg.show(Message.DGT_BUTTON(button=1, dev='ser'))
-                        if ack3 == 51:
-                            logging.info('(ser) clock button 2 pressed - ack2: %i', ack2)
-                            DisplayMsg.show(Message.DGT_BUTTON(button=2, dev='ser'))
-                        if ack3 == 50:
-                            logging.info('(ser) clock button 3 pressed - ack2: %i', ack2)
-                            DisplayMsg.show(Message.DGT_BUTTON(button=3, dev='ser'))
-                        if ack3 == 53:
-                            if ack2 == 69:
-                                logging.info('(ser) clock button 0+4 pressed - ack2: %i', ack2)
-                                DisplayMsg.show(Message.DGT_BUTTON(button=0x11, dev='ser'))
-                            else:
-                                logging.info('(ser) clock button 4 pressed - ack2: %i', ack2)
-                                DisplayMsg.show(Message.DGT_BUTTON(button=4, dev='ser'))
-                    if ack1 == DgtAck.DGT_ACK_CLOCK_VERSION.value:
-                        main = ack2 >> 4
-                        sub = ack2 & 0x0f
-                        logging.debug('(ser) clock version %0.2f', float(str(main) + '.' + str(sub)))
-                        if self.bconn_text:
-                            self.bconn_text.devs = {'ser'}  # Now send the (delayed) message to serial clock
-                            dev = 'ser'
+        elif message_id == DgtMsg.DGT_MSG_BWTIME:
+            if message_length != 7:
+                logging.warning('illegal length in data')
+            if ((message[0] & 0x0f) == 0x0a) or ((message[3] & 0x0f) == 0x0a):  # Clock ack message
+                # Construct the ack message
+                ack0 = ((message[1]) & 0x7f) | ((message[3] << 3) & 0x80)
+                ack1 = ((message[2]) & 0x7f) | ((message[3] << 2) & 0x80)
+                ack2 = ((message[4]) & 0x7f) | ((message[0] << 3) & 0x80)
+                ack3 = ((message[5]) & 0x7f) | ((message[0] << 2) & 0x80)
+                if ack0 != 0x10:
+                    logging.warning('(ser) clock ACK error %s', (ack0, ack1, ack2, ack3))
+                    if self.last_clock_command:
+                        logging.debug('(ser) clock resending failed message [%s]', self.last_clock_command)
+                        self.write_command(self.last_clock_command)
+                        self.last_clock_command = []  # only resend once
+                    return
+                else:
+                    logging.debug('(ser) clock ACK okay [%s]', DgtAck(ack1))
+                    if self.last_clock_command:
+                        cmd = self.last_clock_command[3]  # type: DgtClk
+                        if cmd.value != ack1 and ack1 < 0x80:
+                            logging.warning('(ser) clock ACK [%s] out of sync - last: [%s]', DgtAck(ack1), cmd)
+
+                if ack1 == DgtAck.DGT_ACK_CLOCK_BUTTON.value:
+                    # this are the other (ack2-ack3) codes
+                    # 05-49 33-52 17-51 09-50 65-53 | button 0-4 (single)
+                    #       37-52 21-51 13-50 69-53 | button 0 + 1-4
+                    #             49-51 41-50 97-53 | button 1 + 2-4
+                    #                   25-50 81-53 | button 2 + 3-4
+                    #                         73-53 | button 3 + 4
+                    if ack3 == 49:
+                        logging.info('(ser) clock button 0 pressed - ack2: %i', ack2)
+                        DisplayMsg.show(Message.DGT_BUTTON(button=0, dev='ser'))
+                    if ack3 == 52:
+                        logging.info('(ser) clock button 1 pressed - ack2: %i', ack2)
+                        DisplayMsg.show(Message.DGT_BUTTON(button=1, dev='ser'))
+                    if ack3 == 51:
+                        logging.info('(ser) clock button 2 pressed - ack2: %i', ack2)
+                        DisplayMsg.show(Message.DGT_BUTTON(button=2, dev='ser'))
+                    if ack3 == 50:
+                        logging.info('(ser) clock button 3 pressed - ack2: %i', ack2)
+                        DisplayMsg.show(Message.DGT_BUTTON(button=3, dev='ser'))
+                    if ack3 == 53:
+                        if ack2 == 69:
+                            logging.info('(ser) clock button 0+4 pressed - ack2: %i', ack2)
+                            DisplayMsg.show(Message.DGT_BUTTON(button=0x11, dev='ser'))
                         else:
-                            dev = 'err'
-                        DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=main, sub=sub, dev=dev, text=self.bconn_text))
-                    if ack1 == DgtAck.DGT_ACK_CLOCK_SETNRUN.value:  # set time values to max => sure! override lateron
-                        self.r_time = 3600 * 10
-                        self.l_time = 3600 * 10
-                elif any(message[:7]):
-                    r_hours = message[0] & 0x0f
-                    r_mins = (message[1] >> 4) * 10 + (message[1] & 0x0f)
-                    r_secs = (message[2] >> 4) * 10 + (message[2] & 0x0f)
-                    l_hours = message[3] & 0x0f
-                    l_mins = (message[4] >> 4) * 10 + (message[4] & 0x0f)
-                    l_secs = (message[5] >> 4) * 10 + (message[5] & 0x0f)
-                    r_time = r_hours * 3600 + r_mins * 60 + r_secs
-                    l_time = l_hours * 3600 + l_mins * 60 + l_secs
-                    errtim = r_hours > 9 or l_hours > 9 or r_mins > 59 or l_mins > 59 or r_secs > 59 or l_secs > 59
-                    if errtim:  # complete illegal package received
-                        logging.warning('(ser) clock illegal new time received %s', message)
-                    elif r_time > self.r_time or l_time > self.l_time:  # the new time is higher as the old => ignore
-                        logging.warning('(ser) clock strange old time received %s l:%s r:%s',
-                                        message, hours_minutes_seconds(self.l_time), hours_minutes_seconds(self.r_time))
+                            logging.info('(ser) clock button 4 pressed - ack2: %i', ack2)
+                            DisplayMsg.show(Message.DGT_BUTTON(button=4, dev='ser'))
+                if ack1 == DgtAck.DGT_ACK_CLOCK_VERSION.value:
+                    main = ack2 >> 4
+                    sub = ack2 & 0x0f
+                    logging.debug('(ser) clock version %0.2f', float(str(main) + '.' + str(sub)))
+                    if self.bconn_text:
+                        self.bconn_text.devs = {'ser'}  # Now send the (delayed) message to serial clock
+                        dev = 'ser'
                     else:
-                        status = message[6] & 0x3f
-                        if status & 0x20:
-                            logging.info('(ser) clock not connected')
-                            if not self.is_pi:
-                                DisplayMsg.show(Message.DGT_NO_CLOCK_ERROR(text='dont_use'))
-                            self.lever_pos = None
-                        else:
-                            rtime = [r_hours, r_mins, r_secs]
-                            ltime = [l_hours, l_mins, l_secs]
-                            logging.info('(ser) clock new time received l:%s r:%s', ltime, rtime)
-                            DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=ltime, time_right=rtime, dev='ser'))
-
-                            right_side_down = -0x40 if status & 0x02 else 0x40
-                            if self.lever_pos != right_side_down:
-                                logging.debug('(ser) clock button status: %x old lever: %s', status, self.lever_pos)
-                                if self.lever_pos is not None:
-                                    DisplayMsg.show(Message.DGT_BUTTON(button=right_side_down, dev='ser'))
-                                self.lever_pos = right_side_down
-                    if not errtim:
-                        self.r_time = r_time
-                        self.l_time = l_time
+                        dev = 'err'
+                    DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=main, sub=sub, dev=dev, text=self.bconn_text))
+                if ack1 == DgtAck.DGT_ACK_CLOCK_SETNRUN.value:  # set time values to max => sure! override lateron
+                    self.r_time = 3600 * 10
+                    self.l_time = 3600 * 10
+            elif any(message[:7]):
+                r_hours = message[0] & 0x0f
+                r_mins = (message[1] >> 4) * 10 + (message[1] & 0x0f)
+                r_secs = (message[2] >> 4) * 10 + (message[2] & 0x0f)
+                l_hours = message[3] & 0x0f
+                l_mins = (message[4] >> 4) * 10 + (message[4] & 0x0f)
+                l_secs = (message[5] >> 4) * 10 + (message[5] & 0x0f)
+                r_time = r_hours * 3600 + r_mins * 60 + r_secs
+                l_time = l_hours * 3600 + l_mins * 60 + l_secs
+                errtim = r_hours > 9 or l_hours > 9 or r_mins > 59 or l_mins > 59 or r_secs > 59 or l_secs > 59
+                if errtim:  # complete illegal package received
+                    logging.warning('(ser) clock illegal new time received %s', message)
+                elif r_time > self.r_time or l_time > self.l_time:  # the new time is higher as the old => ignore
+                    logging.warning('(ser) clock strange old time received %s l:%s r:%s',
+                                    message, hours_minutes_seconds(self.l_time), hours_minutes_seconds(self.r_time))
                 else:
-                    logging.debug('(ser) clock null message ignored')
-                if self.clock_lock:
-                    logging.debug('(ser) clock unlocked after %.3f secs', time.time() - self.clock_lock)
-                    self.clock_lock = False
-                break
-            if case(DgtMsg.DGT_MSG_BOARD_DUMP):
-                if message_length != 64:
-                    logging.warning('illegal length in data')
-                piece_to_char = {
-                    0x01: 'P', 0x02: 'R', 0x03: 'N', 0x04: 'B', 0x05: 'K', 0x06: 'Q',
-                    0x07: 'p', 0x08: 'r', 0x09: 'n', 0x0a: 'b', 0x0b: 'k', 0x0c: 'q',
-                    0x0d: '1', 0x0e: '2', 0x0f: '3', 0x00: '.'
-                }
-                board = ''
-                for character in message:
-                    board += piece_to_char[character]
-                logging.debug('\n' + '\n'.join(board[0 + i:8 + i] for i in range(0, len(board), 8)))  # Show debug board
-                # Create fen from board
-                fen = ''
-                empty = 0
-                for square in range(0, 64):
-                    if message[square] != 0:
-                        if empty > 0:
-                            fen += str(empty)
-                            empty = 0
-                        fen += piece_to_char[message[square]]
+                    status = message[6] & 0x3f
+                    if status & 0x20:
+                        logging.info('(ser) clock not connected')
+                        if not self.is_pi:
+                            DisplayMsg.show(Message.DGT_NO_CLOCK_ERROR(text='dont_use'))
+                        self.lever_pos = None
                     else:
-                        empty += 1
-                    if (square + 1) % 8 == 0:
-                        if empty > 0:
-                            fen += str(empty)
-                            empty = 0
-                        if square < 63:
-                            fen += '/'
+                        rtime = [r_hours, r_mins, r_secs]
+                        ltime = [l_hours, l_mins, l_secs]
+                        logging.info('(ser) clock new time received l:%s r:%s', ltime, rtime)
+                        DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=ltime, time_right=rtime, dev='ser'))
 
-                # Attention! This fen is NOT flipped
-                logging.debug('raw fen [%s]', fen)
-                DisplayMsg.show(Message.DGT_FEN(fen=fen, raw=True))
-                break
-            if case(DgtMsg.DGT_MSG_FIELD_UPDATE):
-                if message_length != 2:
-                    logging.warning('illegal length in data')
-                self.write_command([DgtCmd.DGT_SEND_BRD])  # Ask for the board when a piece moved
-                break
-            if case(DgtMsg.DGT_MSG_SERIALNR):
-                if message_length != 5:
-                    logging.warning('illegal length in data')
-                DisplayMsg.show(Message.DGT_SERIAL_NR(number=''.join([chr(elem) for elem in message])))
-                break
-            if case(DgtMsg.DGT_MSG_BATTERY_STATUS):
-                if message_length != 9:
-                    logging.warning('illegal length in data')
-                logging.debug(message)
-                break
-            if case():  # Default
-                logging.warning('message not handled [%s]', DgtMsg(message_id))
+                        right_side_down = -0x40 if status & 0x02 else 0x40
+                        if self.lever_pos != right_side_down:
+                            logging.debug('(ser) clock button status: %x old lever: %s', status, self.lever_pos)
+                            if self.lever_pos is not None:
+                                DisplayMsg.show(Message.DGT_BUTTON(button=right_side_down, dev='ser'))
+                            self.lever_pos = right_side_down
+                if not errtim:
+                    self.r_time = r_time
+                    self.l_time = l_time
+            else:
+                logging.debug('(ser) clock null message ignored')
+            if self.clock_lock:
+                logging.debug('(ser) clock unlocked after %.3f secs', time.time() - self.clock_lock)
+                self.clock_lock = False
+
+        elif message_id == DgtMsg.DGT_MSG_BOARD_DUMP:
+            if message_length != 64:
+                logging.warning('illegal length in data')
+            piece_to_char = {
+                0x01: 'P', 0x02: 'R', 0x03: 'N', 0x04: 'B', 0x05: 'K', 0x06: 'Q',
+                0x07: 'p', 0x08: 'r', 0x09: 'n', 0x0a: 'b', 0x0b: 'k', 0x0c: 'q',
+                0x0d: '1', 0x0e: '2', 0x0f: '3', 0x00: '.'
+            }
+            board = ''
+            for character in message:
+                board += piece_to_char[character]
+            logging.debug('\n' + '\n'.join(board[0 + i:8 + i] for i in range(0, len(board), 8)))  # Show debug board
+            # Create fen from board
+            fen = ''
+            empty = 0
+            for square in range(0, 64):
+                if message[square] != 0:
+                    if empty > 0:
+                        fen += str(empty)
+                        empty = 0
+                    fen += piece_to_char[message[square]]
+                else:
+                    empty += 1
+                if (square + 1) % 8 == 0:
+                    if empty > 0:
+                        fen += str(empty)
+                        empty = 0
+                    if square < 63:
+                        fen += '/'
+
+            # Attention! This fen is NOT flipped
+            logging.debug('raw fen [%s]', fen)
+            DisplayMsg.show(Message.DGT_FEN(fen=fen, raw=True))
+
+        elif message_id == DgtMsg.DGT_MSG_FIELD_UPDATE:
+            if message_length != 2:
+                logging.warning('illegal length in data')
+            self.write_command([DgtCmd.DGT_SEND_BRD])  # Ask for the board when a piece moved
+
+        elif message_id == DgtMsg.DGT_MSG_SERIALNR:
+            if message_length != 5:
+                logging.warning('illegal length in data')
+            DisplayMsg.show(Message.DGT_SERIAL_NR(number=''.join([chr(elem) for elem in message])))
+
+        elif message_id == DgtMsg.DGT_MSG_BATTERY_STATUS:
+            if message_length != 9:
+                logging.warning('illegal length in data')
+            logging.debug(message)
+
+        else:  # Default
+            logging.warning('message not handled [%s]', DgtMsg(message_id))
 
     def _read_board_message(self, head: bytes):
         message = ()

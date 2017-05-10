@@ -22,10 +22,10 @@ import chess.pgn
 import datetime
 import logging
 import requests
-from utilities import DisplayMsg, switch
+from utilities import DisplayMsg
 import os
 import queue
-from dgt.api import MessageApi
+from dgt.api import Message
 from dgt.util import GameResult, PlayMode, Mode
 
 from email import encoders
@@ -200,40 +200,42 @@ class PgnDisplay(DisplayMsg, threading.Thread):
         self.emailer.send('Game PGN', str(pgn_game), self.file_name)
 
     def _process_message(self, message):
-        for case in switch(message):
-            if case(MessageApi.SYSTEM_INFO):
-                self.engine_name = message.info['engine_name']
+        if False:  # switch-case
+            pass
+
+        elif isinstance(message, Message.SYSTEM_INFO):
+            self.engine_name = message.info['engine_name']
+            self.old_engine = self.engine_name
+            self.user_name = message.info['user_name']
+
+        elif isinstance(message, Message.IP_INFO):
+            self.location = message.info['location']
+
+        elif isinstance(message, Message.STARTUP_INFO):
+            self.level_text = message.info['level_text']
+
+        elif isinstance(message, Message.LEVEL):
+            self.level_text = message.level_text
+
+        elif isinstance(message, Message.INTERACTION_MODE):
+            if message.mode == Mode.REMOTE:
                 self.old_engine = self.engine_name
-                self.user_name = message.info['user_name']
-                break
-            if case(MessageApi.IP_INFO):
-                self.location = message.info['location']
-                break
-            if case(MessageApi.STARTUP_INFO):
-                self.level_text = message.info['level_text']
-                break
-            if case(MessageApi.LEVEL):
-                self.level_text = message.level_text
-                break
-            if case(MessageApi.INTERACTION_MODE):
-                if message.mode == Mode.REMOTE:
-                    self.old_engine = self.engine_name
-                    self.engine_name = 'Remote Player'
-                else:
-                    self.engine_name = self.old_engine
-                break
-            if case(MessageApi.ENGINE_READY):
-                self.engine_name = message.engine_name
-                if not message.has_levels:
-                    self.level_text = None
-                break
-            if case(MessageApi.GAME_ENDS):
-                if message.game.move_stack:
-                    self._save_and_email_pgn(message)
-                break
-            if case():  # Default
-                # print(message)
-                pass
+                self.engine_name = 'Remote Player'
+            else:
+                self.engine_name = self.old_engine
+
+        elif isinstance(message, Message.ENGINE_READY):
+            self.engine_name = message.engine_name
+            if not message.has_levels:
+                self.level_text = None
+
+        elif isinstance(message, Message.GAME_ENDS):
+            if message.game.move_stack:
+                self._save_and_email_pgn(message)
+
+        else:  # Default
+            # print(message)
+            pass
 
     def run(self):
         """called from threading.Thread by its start() function."""

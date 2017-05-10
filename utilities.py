@@ -103,33 +103,6 @@ class DisplayDgt(object):
             display.dgt_queue.put(copy.deepcopy(message))
 
 
-class switch(object):
-
-    """switch/case instruction in python."""
-
-    def __init__(self, value):
-        if type(value) is int:
-            self.value = value
-        else:
-            self.value = value._type
-        self.fall = False
-
-    def __iter__(self):
-        """Return the match method once, then stop."""
-        yield self.match
-        raise StopIteration
-
-    def match(self, *args):
-        """Indicate whether or not to enter a case suite."""
-        if self.fall or not args:
-            return True
-        elif self.value in args:  # changed for v1.5, see below
-            self.fall = True
-            return True
-        else:
-            return False
-
-
 class RepeatedTimer(object):
 
     """Call function on a given interval."""
