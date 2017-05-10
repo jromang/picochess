@@ -41,7 +41,6 @@ class DgtHw(DgtIface):
             logging.debug('(ser) clock still not found. Ignore [%s]', text)
             self.dgtboard.startup_serial_clock()
             self.dgtdispatcher.stop_maxtimer(self.getName())
-
         return self.enable_ser_clock
 
     def _display_on_dgt_xl(self, text: str, beep=False, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
