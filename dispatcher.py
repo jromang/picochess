@@ -21,6 +21,7 @@ import queue
 from dgt.api import Dgt, DgtApi
 from dgt.menu import DgtMenu
 from threading import Timer, Thread, Lock
+from copy import deepcopy
 
 
 class Dispatcher(DispatchDgt, Thread):
@@ -81,19 +82,27 @@ class Dispatcher(DispatchDgt, Thread):
 
         devstr = ','.join(message.devs)
         if do_handle:
-            logging.debug('(%s) handle DgtApi: %s devs: %s', dev, message, devstr)
+            logging.debug('(%s) handle DgtApi: %s - not used devs: %s', dev, message, devstr)
             if hasattr(message, 'maxtime') and message.maxtime > 0:
                 if repr(message) == DgtApi.DISPLAY_TEXT and message.maxtime == 2:
                     self.dgtmenu.enable_picochess_displayed(dev)
                 self.maxtimer[dev] = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer, [dev])
                 self.maxtimer[dev].start()
-                logging.debug('(%s) showing %s for %.1f secs devs: %s',
+                logging.debug('(%s) showing %s for %.1f secs - not used devs: %s',
                               dev, message, message.maxtime * self.time_factor, devstr)
                 self.maxtimer_running[dev] = True
             message.devs = {dev}  # on new system, we only have ONE device each message - force this!
             DisplayDgt.show(message)
         else:
-            logging.debug('(%s) hash ignore DgtApi: %s devs: %s', dev, message, devstr)
+            logging.debug('(%s) hash ignore DgtApi: %s - not used devs: %s', dev, message, devstr)
+
+    def stop_maxtimer(self, dev):
+        """stop the maxtimer."""
+        if self.maxtimer_running[dev]:
+            self.maxtimer[dev].cancel()
+            self.maxtimer[dev].join()
+            self.maxtimer_running[dev] = False
+            self.dgtmenu.disable_picochess_displayed(dev)
 
     def run(self):
         """called from threading.Thread by its start() function."""
@@ -101,10 +110,11 @@ class Dispatcher(DispatchDgt, Thread):
         while True:
             # Check if we have something to display
             try:
-                message = dispatch_queue.get()
-                logging.debug('received command from dispatch_queue: %s devs: %s', message, ','.join(message.devs))
+                msg = dispatch_queue.get()
+                logging.debug('received command from dispatch_queue: %s devs: %s', msg, ','.join(msg.devs))
 
-                for dev in message.devs & self.devices:
+                for dev in msg.devs & self.devices:
+                    message = deepcopy(msg)
                     if self.maxtimer_running[dev]:
                         if hasattr(message, 'wait'):
                             if message.wait:
@@ -113,17 +123,14 @@ class Dispatcher(DispatchDgt, Thread):
                                 continue
                             else:
                                 logging.debug('ignore former maxtime - dev: %s', dev)
-                                self.maxtimer[dev].cancel()
-                                self.maxtimer[dev].join()
-                                self.maxtimer_running[dev] = False
-                                self.dgtmenu.disable_picochess_displayed(dev)
+                                self.stop_maxtimer(dev)
                                 if self.tasks[dev]:
                                     logging.debug('delete following (%s) tasks: %s', dev, self.tasks[dev])
                                     self.tasks[dev] = []
                         else:
-                            logging.debug('command doesnt change the clock display => max timer (%s) ignored', dev)
+                            logging.debug('command doesnt change the clock display => (%s) max timer ignored', dev)
                     else:
-                        logging.debug('max timer (%s) not running => process command', dev)
+                        logging.debug('(%s) max timer not running => processing command', dev)
 
                     with self.process_lock[dev]:
                         self._process_message(message, dev)

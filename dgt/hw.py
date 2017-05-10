@@ -22,15 +22,17 @@ from dgt.util import ClockIcons, ClockSide, DgtClk, DgtCmd
 from threading import Lock
 from dgt.translate import DgtTranslate
 from dgt.board import DgtBoard
+from dispatcher import Dispatcher
 
 
 class DgtHw(DgtIface):
 
     """Handle the DgtXL/3000 communication."""
 
-    def __init__(self, dgttranslate: DgtTranslate, dgtboard: DgtBoard):
+    def __init__(self, dgttranslate: DgtTranslate, dgtboard: DgtBoard, dgtdispatcher: Dispatcher):
         super(DgtHw, self).__init__(dgttranslate, dgtboard)
 
+        self.dgtdispatcher = dgtdispatcher
         self.lib_lock = Lock()
         self.dgtboard.run()
 
@@ -38,6 +40,8 @@ class DgtHw(DgtIface):
         if not self.enable_ser_clock:
             logging.debug('(ser) clock still not found. Ignore [%s]', text)
             self.dgtboard.startup_serial_clock()
+            self.dgtdispatcher.stop_maxtimer(self.getName())
+
         return self.enable_ser_clock
 
     def _display_on_dgt_xl(self, text: str, beep=False, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):

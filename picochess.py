@@ -576,7 +576,7 @@ def main():
         if args.dgtpi:
             DgtPi(dgttranslate).start()
             dgtdispatcher.register('i2c')
-        DgtHw(dgttranslate, dgtboard).start()
+        DgtHw(dgttranslate, dgtboard, dgtdispatcher).start()
         dgtdispatcher.register('ser')
     # The class Dispatcher sends DgtApi messages at the correct (delayed) time out
     dgtdispatcher.start()

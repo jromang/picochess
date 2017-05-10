@@ -154,7 +154,7 @@ class DgtIface(DisplayDgt, Thread):
     def _create_task(self, msg):
         res = self._process_message(msg)
         if not res:
-            logging.warning('DgtApi command %s failed', msg)
+            logging.warning('DgtApi command %s failed %s', msg, res)
 
     def run(self):
         """called from threading.Thread by its start() function."""
