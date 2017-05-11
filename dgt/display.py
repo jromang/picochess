@@ -757,7 +757,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs={'i2c'}))
 
         elif isinstance(message, Message.DGT_NO_EBOARD_ERROR):
-            if not self.dgtmenu.inside_updt_menu():
+            if not self.dgtmenu.inside_updt_menu() and not self.dgtmenu.inside_main_menu():
                 DispatchDgt.fire(message.text)
 
         elif isinstance(message, Message.DGT_NO_CLOCK_ERROR):
