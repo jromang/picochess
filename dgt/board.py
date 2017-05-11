@@ -163,7 +163,7 @@ class DgtBoard(object):
                 else:
                     text_l, text_m, text_s = 'BT e-Board', 'BT board', 'ok bt'
                 channel = 'BT'
-            self.bconn_text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, wait=True, beep=False, maxtime=1,
+            self.bconn_text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, wait=True, beep=False, maxtime=1.1,
                                                devs={'i2c', 'web'})  # serial clock lateron
             DisplayMsg.show(Message.DGT_EBOARD_VERSION(text=self.bconn_text, channel=channel))
             self.startup_serial_clock()  # now ask the serial clock to answer

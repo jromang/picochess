@@ -85,9 +85,16 @@ class Dispatcher(DispatchDgt, Thread):
                 if repr(message) == DgtApi.DISPLAY_TEXT:
                     if message.maxtime == 2:  # 2.0=picochess message
                         self.dgtmenu.enable_picochess_displayed(dev)
-                    if message.maxtime == 0.1 and self.dgtmenu.inside_updt_menu():  # 0.1=eboard error
-                        logging.debug('inside menu => eboard errors not displayed')
-                        return
+                    if self.dgtmenu.inside_updt_menu():
+                        if message.maxtime == 0.1:  # 0.1=eboard error
+                            logging.debug('inside menu => board errors not displayed')
+                            return
+                        if message.maxtime == 1.1:  # 1.1=eBoard connect
+                            logging.debug('inside menu => board connect not displayed')
+                            return
+                if repr(message) == DgtApi.CLOCK_START and self.dgtmenu.inside_updt_menu():
+                    logging.debug('inside menu => clock not started')
+                    return
                 self.maxtimer[dev] = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer, [dev])
                 self.maxtimer[dev].start()
                 logging.debug('(%s) showing %s for %.1f secs', dev, message, message.maxtime * self.time_factor)
