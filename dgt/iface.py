@@ -95,7 +95,7 @@ class DgtIface(DisplayDgt, Thread):
 
     def _process_message(self, message):
         if self.getName() not in message.devs:
-            logging.debug('[%s] device ignore DgtApi: %s devs: %s', self.getName(), message, ','.join(message.devs))
+            # logging.debug('[%s] device ignore DgtApi: %s devs: %s', self.getName(), message, ','.join(message.devs))
             return True
 
         self.case_res = True
@@ -122,9 +122,9 @@ class DgtIface(DisplayDgt, Thread):
             l_hms = hours_minutes_seconds(message.time_left)
             r_hms = hours_minutes_seconds(message.time_right)
             logging.debug('[%s] (%s) clock received last time from clock l:%s r:%s',
-                          self.getName(), message.devs, self.time_left, self.time_right)
+                          self.getName(), ','.join(message.devs), self.time_left, self.time_right)
             logging.debug('[%s] (%s) clock sending time to clock l:%s r:%s',
-                          self.getName(), message.devs, l_hms, r_hms)
+                          self.getName(), ','.join(message.devs), l_hms, r_hms)
             self.case_res = self.start_clock(message.time_left, message.time_right, message.side, message.devs)
         elif isinstance(message, Dgt.CLOCK_VERSION):
             text = self.dgttranslate.text('Y20_picochess', devs=message.devs)
@@ -137,7 +137,7 @@ class DgtIface(DisplayDgt, Thread):
                     self.enable_dgt_3000 = True
         elif isinstance(message, Dgt.CLOCK_TIME):
             logging.debug('[%s] (%s) clock received current time from clock l:%s r:%s',
-                          self.getName(), message.devs, message.time_left, message.time_right)
+                          self.getName(), ','.join(message.devs), message.time_left, message.time_right)
             self.time_left = message.time_left
             self.time_right = message.time_right
         else:  # switch-default

@@ -1422,6 +1422,7 @@ class DgtMenu(object):
 
     def updt_middle(self, dev):
         text = self.dgttranslate.text('B00_updt_version', self.updt_tags[self.updt_version])
+        logging.debug('enter update menu')
         self.updt_top = True
         return text
 
@@ -1440,7 +1441,9 @@ class DgtMenu(object):
         return text
 
     def updt_up(self):
-        self.updt_top = False
+        if self.updt_top:
+            logging.debug('leave update menu')
+            self.updt_top = False
         text = self.enter_top_menu()
         return text
 
