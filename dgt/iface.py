@@ -95,9 +95,9 @@ class DgtIface(DisplayDgt, Thread):
 
     def _process_message(self, message):
         if self.getName() not in message.devs:
-            # logging.debug('[%s] device ignore DgtApi: %s devs: %s', self.getName(), message, ','.join(message.devs))
             return True
 
+        logging.debug('(%s) handle DgtApi: %s', self.getName(), message)
         self.case_res = True
 
         if False:  # switch-case
@@ -147,7 +147,7 @@ class DgtIface(DisplayDgt, Thread):
     def _create_task(self, msg):
         res = self._process_message(msg)
         if not res:
-            logging.warning('DgtApi command %s failed %s', msg, res)
+            logging.warning('DgtApi command %s failed result: %s', msg, res)
 
     def run(self):
         """called from threading.Thread by its start() function."""
