@@ -92,13 +92,13 @@ class Dispatcher(DispatchDgt, Thread):
                         if message.maxtime == 1.1:  # 1.1=eBoard connect
                             logging.debug('inside menu => board connect not displayed')
                             return
-                if repr(message) == DgtApi.CLOCK_START and self.dgtmenu.inside_updt_menu():
-                    logging.debug('inside menu => clock not started')
-                    return
                 self.maxtimer[dev] = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer, [dev])
                 self.maxtimer[dev].start()
                 logging.debug('(%s) showing %s for %.1f secs', dev, message, message.maxtime * self.time_factor)
                 self.maxtimer_running[dev] = True
+            if repr(message) == DgtApi.CLOCK_START and self.dgtmenu.inside_updt_menu():
+                logging.debug('inside menu => clock not started')
+                return
             message.devs = {dev}  # on new system, we only have ONE device each message - force this!
             DisplayDgt.show(message)
         else:
