@@ -753,8 +753,9 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             DispatchDgt.fire(self.dgttranslate.text('Y00_errorjack'))
 
         elif isinstance(message, Message.DGT_EBOARD_VERSION):
-            DispatchDgt.fire(message.text)
-            DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs={'i2c'}))
+            if not self.dgtmenu.inside_updt_menu():
+                DispatchDgt.fire(message.text)
+                DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs={'i2c'}))
 
         elif isinstance(message, Message.DGT_NO_EBOARD_ERROR):
             if not self.dgtmenu.inside_updt_menu() and not self.dgtmenu.inside_main_menu():
