@@ -77,14 +77,17 @@ class Dispatcher(DispatchDgt, Thread):
                 if self.display_hash[dev] == hash(message) and not message.beep:
                     do_handle = False
                 else:
-                    # logging.debug('(%s) clock display hash old: %s new: %s', dev, self.display_hash[dev], hash(message))
                     self.display_hash[dev] = hash(message)
 
         if do_handle:
             logging.debug('(%s) handle DgtApi: %s', dev, message)
             if hasattr(message, 'maxtime') and message.maxtime > 0:
-                if repr(message) == DgtApi.DISPLAY_TEXT and message.maxtime == 2:
-                    self.dgtmenu.enable_picochess_displayed(dev)
+                if repr(message) == DgtApi.DISPLAY_TEXT:
+                    if message.maxtime == 2:  # 2.0=picochess message
+                        self.dgtmenu.enable_picochess_displayed(dev)
+                    if message.maxtime == 0.1 and self.dgtmenu.inside_updt_menu():  # 0.1=eboard error
+                        logging.debug('inside menu => eboard errors not displayed')
+                        return
                 self.maxtimer[dev] = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer, [dev])
                 self.maxtimer[dev].start()
                 logging.debug('(%s) showing %s for %.1f secs', dev, message, message.maxtime * self.time_factor)
