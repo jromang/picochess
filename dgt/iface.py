@@ -23,13 +23,14 @@ from dgt.util import ClockIcons, ClockSide
 from dgt.api import Dgt
 from threading import Thread
 from dgt.translate import DgtTranslate
+from dgt.board import DgtBoard
 
 
 class DgtIface(DisplayDgt, Thread):
 
     """an Interface class for DgtHw, DgtPi, DgtVr."""
 
-    def __init__(self, dgttranslate: DgtTranslate, dgtboard=None):
+    def __init__(self, dgttranslate: DgtTranslate, dgtboard: DgtBoard):
         super(DgtIface, self).__init__()
 
         self.dgtboard = dgtboard
@@ -131,7 +132,10 @@ class DgtIface(DisplayDgt, Thread):
             text.rd = ClockIcons.DOT
             DispatchDgt.fire(text)
             DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs=message.devs))
-            if 'i2c' not in message.devs:
+            if 'i2c' in message.devs:
+                logging.debug('(i2c) starting the board connection')
+                self.dgtboard.run()  # finally start the serial board connection - see picochess.py
+            else:
                 self.enable_ser_clock = True
                 if message.main == 2:
                     self.enable_dgt_3000 = True

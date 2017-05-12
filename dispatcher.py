@@ -52,7 +52,7 @@ class Dispatcher(DispatchDgt, Thread):
         self.tasks[device] = []
         self.display_hash[device] = None
 
-    def _stopped_maxtimer(self, dev):
+    def _stopped_maxtimer(self, dev: str):
         self.maxtimer_running[dev] = False
         self.dgtmenu.disable_picochess_displayed(dev)
 
@@ -71,7 +71,7 @@ class Dispatcher(DispatchDgt, Thread):
             if self.maxtimer_running[dev]:  # run over the task list until a maxtime command was processed
                 break
 
-    def _process_message(self, message, dev):
+    def _process_message(self, message, dev: str):
         do_handle = True
         if repr(message) in (DgtApi.CLOCK_START, DgtApi.CLOCK_STOP, DgtApi.CLOCK_TIME):
             self.display_hash[dev] = None  # Cant know the clock display if command changing the running status

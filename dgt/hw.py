@@ -34,7 +34,7 @@ class DgtHw(DgtIface):
 
         self.dgtdispatcher = dgtdispatcher
         self.lib_lock = Lock()
-        self.dgtboard.run()
+        # self.dgtboard.run() done by picochess.py or by CLOCK_VERSION if DgtPi see iface.py
 
     def _check_clock(self, text: str):
         if not self.enable_ser_clock:

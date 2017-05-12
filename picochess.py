@@ -568,14 +568,16 @@ def main():
         dgtdispatcher.register('web')
 
     if args.console:
-        # Enable keyboard input and terminal display
-        logging.debug('starting PicoChess in virtual mode')
+        logging.debug('starting PicoChess in console mode')
     else:
         # Connect to DGT board
         logging.debug('starting PicoChess in board mode')
         if args.dgtpi:
-            DgtPi(dgttranslate).start()
+            DgtPi(dgttranslate, dgtboard).start()
             dgtdispatcher.register('i2c')
+        else:
+            logging.debug('(ser) starting the board connection')
+            dgtboard.run()  # a clock can only be online together with the board, so we must start it infront
         DgtHw(dgttranslate, dgtboard, dgtdispatcher).start()
         dgtdispatcher.register('ser')
     # The class Dispatcher sends DgtApi messages at the correct (delayed) time out
