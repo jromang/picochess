@@ -35,6 +35,7 @@ class Dispatcher(DispatchDgt, Thread):
         self.devices = set()
         self.maxtimer = {}
         self.maxtimer_running = {}
+        self.clock_connected = {}
         self.time_factor = 3  # This is for testing the duration - remove it lateron!
         self.tasks = {}  # delayed task array
 
@@ -42,9 +43,11 @@ class Dispatcher(DispatchDgt, Thread):
         self.process_lock = {}
 
     def register(self, device: str):
+        logging.debug('device %s registered', device)
         self.devices.add(device)
         self.maxtimer[device] = None
         self.maxtimer_running[device] = False
+        self.clock_connected[device] = False
         self.process_lock[device] = Lock()
         self.tasks[device] = []
         self.display_hash[device] = None
@@ -81,6 +84,14 @@ class Dispatcher(DispatchDgt, Thread):
 
         if do_handle:
             logging.debug('(%s) handle DgtApi: %s', dev, message)
+            if repr(message) == DgtApi.CLOCK_VERSION:
+                logging.debug('(%s) clock registered', dev)
+                self.clock_connected[dev] = True
+
+            clk = (DgtApi.DISPLAY_MOVE, DgtApi.DISPLAY_TEXT, DgtApi.DISPLAY_TIME, DgtApi.CLOCK_START, DgtApi.CLOCK_STOP)
+            if repr(message) in clk and not self.clock_connected[dev]:
+                logging.debug('(%s) clock still not registered => ignore %s', dev, message)
+                return
             if hasattr(message, 'maxtime') and message.maxtime > 0:
                 if repr(message) == DgtApi.DISPLAY_TEXT:
                     if message.maxtime == 2:  # 2.0=picochess message
