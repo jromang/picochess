@@ -85,7 +85,7 @@ class DgtIface(DisplayDgt, Thread):
         if bit_board.is_legal(message.move):
             move_text = bit_board.san(message.move)
         else:
-            logging.warning('[%s] illegal move %s found fen: %s', self.getName(), message.move, message.fen)
+            logging.warning('[%s] illegal move %s found - fen: %s', self.getName(), message.move, message.fen)
             move_text = 'er{}' if is_xl else 'err {}'
             move_text = move_text.format(message.move.uci()[:4])
 
@@ -98,7 +98,7 @@ class DgtIface(DisplayDgt, Thread):
         if self.getName() not in message.devs:
             return True
 
-        logging.debug('(%s) handle DgtApi: %s', self.getName(), message)
+        logging.debug('(%s) handle DgtApi: %s started', ','.join(message.devs), message)
         self.case_res = True
 
         if False:  # switch-case
@@ -114,38 +114,40 @@ class DgtIface(DisplayDgt, Thread):
         elif isinstance(message, Dgt.LIGHT_SQUARES):
             self.case_res = self.light_squares_revelation_board(message.uci_move)
         elif isinstance(message, Dgt.CLOCK_STOP):
+            logging.debug('(%s) clock sending stop time to clock l:%s r:%s',
+                          ','.join(message.devs), self.time_left, self.time_right)
             if self.clock_running:
                 self.case_res = self.stop_clock(message.devs)
             else:
-                logging.debug('[%s] (%s) clock is already stopped', self.getName(), message.devs)
+                logging.debug('(%s) clock is already stopped', ','.join(message.devs))
         elif isinstance(message, Dgt.CLOCK_START):
             # log times
             l_hms = hours_minutes_seconds(message.time_left)
             r_hms = hours_minutes_seconds(message.time_right)
-            logging.debug('[%s] (%s) clock received last time from clock l:%s r:%s',
-                          self.getName(), ','.join(message.devs), self.time_left, self.time_right)
-            logging.debug('[%s] (%s) clock sending time to clock l:%s r:%s',
-                          self.getName(), ','.join(message.devs), l_hms, r_hms)
+            logging.debug('(%s) clock received last time from clock l:%s r:%s',
+                          ','.join(message.devs), self.time_left, self.time_right)
+            logging.debug('(%s) clock sending start time to clock l:%s r:%s', ','.join(message.devs), l_hms, r_hms)
             self.case_res = self.start_clock(message.time_left, message.time_right, message.side, message.devs)
         elif isinstance(message, Dgt.CLOCK_VERSION):
-            text = self.dgttranslate.text('Y20_picochess', devs=message.devs)
+            text = self.dgttranslate.text('Y21_picochess', devs=message.devs)
             text.rd = ClockIcons.DOT
             DispatchDgt.fire(text)
             DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs=message.devs))
             if 'i2c' in message.devs:
-                logging.debug('(i2c) starting the board connection')
+                logging.debug('(i2c) clock found => starting the board connection')
                 self.dgtboard.run()  # finally start the serial board connection - see picochess.py
             else:
                 self.enable_ser_clock = True
                 if message.main == 2:
                     self.enable_dgt_3000 = True
         elif isinstance(message, Dgt.CLOCK_TIME):
-            logging.debug('[%s] (%s) clock received current time from clock l:%s r:%s',
-                          self.getName(), ','.join(message.devs), message.time_left, message.time_right)
+            logging.debug('(%s) clock received current time from clock l:%s r:%s',
+                          ','.join(message.devs), message.time_left, message.time_right)
             self.time_left = message.time_left
             self.time_right = message.time_right
         else:  # switch-default
             pass
+        logging.debug('(%s) handle DgtApi: %s ended', ','.join(message.devs), message)
         return self.case_res
 
     def _create_task(self, msg):

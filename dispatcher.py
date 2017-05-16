@@ -94,7 +94,7 @@ class Dispatcher(DispatchDgt, Thread):
                 return
             if hasattr(message, 'maxtime') and message.maxtime > 0:
                 if repr(message) == DgtApi.DISPLAY_TEXT:
-                    if message.maxtime == 2:  # 2.0=picochess message
+                    if message.maxtime == 2.1:  # 2.1=picochess message
                         self.dgtmenu.enable_picochess_displayed(dev)
                     if self.dgtmenu.inside_updt_menu():
                         if message.maxtime == 0.1:  # 0.1=eboard error
@@ -149,7 +149,7 @@ class Dispatcher(DispatchDgt, Thread):
                         else:
                             logging.debug('command doesnt change the clock display => (%s) max timer ignored', dev)
                     else:
-                        logging.debug('(%s) max timer not running => processing command', dev)
+                        logging.debug('(%s) max timer not running => processing command: %s', dev, message)
 
                     with self.process_lock[dev]:
                         self._process_message(message, dev)

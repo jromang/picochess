@@ -51,7 +51,7 @@ class DgtHw(DgtIface):
         with self.lib_lock:
             res = self.dgtboard.set_text_xl(text, 0x03 if beep else 0x00, left_icons, right_icons)
             if not res:
-                logging.warning('finally failed %i', res)
+                logging.warning('SetText() returned error %i', res)
             return res
 
     def _display_on_dgt_3000(self, text: str, beep=False):
@@ -63,7 +63,7 @@ class DgtHw(DgtIface):
         with self.lib_lock:
             res = self.dgtboard.set_text_3k(text, 0x03 if beep else 0x00)
             if not res:
-                logging.warning('finally failed %i', res)
+                logging.warning('SetText() returned error %i', res)
             return res
 
     def display_text_on_clock(self, message):

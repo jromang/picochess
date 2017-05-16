@@ -198,14 +198,13 @@ class DgtPi(DgtIface):
         with self.lib_lock:
             res = self.lib.dgtpicom_run(l_run, r_run)
             if res < 0:
-                logging.warning('Run returned error %i', res)
+                logging.warning('Run() returned error %i', res)
                 res = self.lib.dgtpicom_configure()
                 if res < 0:
-                    logging.warning('configure also failed %i', res)
+                    logging.warning('Configure() also failed %i', res)
                 else:
                     res = self.lib.dgtpicom_run(l_run, r_run)
         if res < 0:
-            logging.warning('finally failed %i', res)
             return False
         else:
             self.clock_running = (side != ClockSide.NONE)
@@ -230,15 +229,14 @@ class DgtPi(DgtIface):
             res = self.lib.dgtpicom_set_and_run(l_run, l_hms[0], l_hms[1], l_hms[2],
                                                 r_run, r_hms[0], r_hms[1], r_hms[2])
             if res < 0:
-                logging.warning('SetAndRun returned error %i', res)
+                logging.warning('SetAndRun() returned error %i', res)
                 res = self.lib.dgtpicom_configure()
                 if res < 0:
-                    logging.warning('configure also failed %i', res)
+                    logging.warning('Configure() also failed %i', res)
                 else:
                     res = self.lib.dgtpicom_set_and_run(l_run, l_hms[0], l_hms[1], l_hms[2],
                                                         r_run, r_hms[0], r_hms[1], r_hms[2])
         if res < 0:
-            logging.warning('finally failed %i', res)
             return False
         else:
             self.clock_running = (side != ClockSide.NONE)
