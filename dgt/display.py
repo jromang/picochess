@@ -717,10 +717,10 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self._process_startup_info(message)
 
         elif isinstance(message, Message.SEARCH_STARTED):
-            logging.debug('Search started')
+            logging.debug('search started')
 
         elif isinstance(message, Message.SEARCH_STOPPED):
-            logging.debug('Search stopped')
+            logging.debug('search stopped')
 
         elif isinstance(message, Message.CLOCK_START):
             self._process_clock_start(message)
