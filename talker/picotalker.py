@@ -27,14 +27,16 @@ import queue
 from dgt.api import Message
 from dgt.util import GameResult, PlayMode, VoiceType
 from pathlib import Path
+from shutil import which
 
 
 class PicoTalker():
 
     """Handle the human speaking of events."""
 
-    def __init__(self, localisation_id_voice=None):
+    def __init__(self, localisation_id_voice, speed_factor: float):
         self.voice_path = None
+        self.speed_factor = speed_factor if which('play') else 1.0  # check for "sox" package
 
         try:
             (localisation_id, voice_name) = localisation_id_voice.split(':')
@@ -47,14 +49,17 @@ class PicoTalker():
             logging.warning('not valid voice parameter')
 
     def talk(self, sounds):
-        """speak out the sound part by using ogg123."""
+        """speak out the sound part by using ogg123/play."""
         if self.voice_path:
             for part in sounds:
                 voice_file = self.voice_path + '/' + part
                 if Path(voice_file).is_file():
+                    if self.speed_factor == 1.0:
+                        command = ['ogg123', voice_file]
+                    else:
+                        command = ['play', voice_file, 'tempo', str(self.speed_factor)]
                     try:
-                        subprocess.call(['ogg123', voice_file],
-                                        shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                        subprocess.call(command, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     except OSError as os_exc:
                         logging.warning('OSError: %s => turn voice OFF', os_exc)
                         self.voice_path = None
@@ -68,7 +73,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
 
     """Listen on messages for talking."""
 
-    def __init__(self, user_voice, computer_voice):
+    def __init__(self, user_voice: str, computer_voice: str, speed_factor: int):
         """
         Initialize a PicoTalkerDisplay with voices for the user and/or computer players.
 
@@ -78,13 +83,14 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
         super(PicoTalkerDisplay, self).__init__()
         self.user_picotalker = None
         self.computer_picotalker = None
+        self.speed_factor = 0.75 + (speed_factor & 0x0f) * 0.05
 
         if user_voice:
             logging.debug('creating user voice: [%s]', str(user_voice))
-            self.set_user(PicoTalker(user_voice))
+            self.set_user(PicoTalker(user_voice, self.speed_factor))
         if computer_voice:
             logging.debug('creating computer voice: [%s]', str(computer_voice))
-            self.set_computer(PicoTalker(computer_voice))
+            self.set_computer(PicoTalker(computer_voice, self.speed_factor))
 
     def set_computer(self, picotalker):
         """Set the computer talker."""
