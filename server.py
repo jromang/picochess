@@ -303,7 +303,7 @@ class WebVr(DgtIface):
         if self.getName() not in devs:
             logging.debug('ignored startClock - devs: %s', devs)
             return True
-        if self.virtual_timer:
+        if self.virtual_timer and self.virtual_timer.is_running():
             self.virtual_timer.stop()
         if side != ClockSide.NONE:
             self.virtual_timer = RepeatedTimer(1, self._runclock)

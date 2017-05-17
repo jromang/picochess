@@ -65,7 +65,10 @@ class Dispatcher(DispatchDgt, Thread):
             logging.debug('processing delayed (%s) tasks: %s', dev, self.tasks[dev])
         while self.tasks[dev]:
             logging.debug('(%s) tasks has %i members', dev, len(self.tasks[dev]))
-            message = self.tasks[dev].pop(0)
+            try:
+                message = self.tasks[dev].pop(0)
+            except IndexError:
+                break
             with self.process_lock[dev]:
                 self._process_message(message, dev)
             if self.maxtimer_running[dev]:  # run over the task list until a maxtime command was processed
