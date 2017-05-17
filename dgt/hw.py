@@ -114,7 +114,7 @@ class DgtHw(DgtIface):
             return True
         if self.clock_running or message.force:
             with self.lib_lock:
-                if not self._check_clock('END_TEXT'):
+                if not self._check_clock('EndText() call'):
                     return False
                 if self.time_left is None or self.time_right is None:
                     logging.debug('time values not set - abort function')
@@ -149,7 +149,7 @@ class DgtHw(DgtIface):
         return self._resume_clock(ClockSide.NONE)
 
     def _resume_clock(self, side: ClockSide):
-        if not self._check_clock('RESUME_CLOCK'):
+        if not self._check_clock('ResumeClock() call'):
             return False
         l_hms = self.time_left
         r_hms = self.time_right

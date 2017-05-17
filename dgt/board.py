@@ -599,13 +599,13 @@ class DgtBoard(object):
             self.wait_counter = (self.wait_counter + 1) % len(waitchars)
         return False
 
-    def _wait_for_clock(self):
+    def _wait_for_clock(self, func):
         has_to_wait = False
         counter = 0
         while self.clock_lock:
             if not has_to_wait:
                 has_to_wait = True
-                logging.debug('(ser) clock is locked => waiting')
+                logging.debug('(ser) clock is locked => waiting to serve: %s', func)
             time.sleep(0.1)
             counter += 1
             if counter > 20:
@@ -619,7 +619,7 @@ class DgtBoard(object):
 
     def set_text_3k(self, text: str, beep: int):
         """display a text on a 3000 Clock."""
-        self._wait_for_clock()
+        self._wait_for_clock('SetText3K()')
         res = self.write_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x0c, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
                                   DgtClk.DGT_CMD_CLOCK_ASCII,
                                   text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7], beep,
@@ -636,7 +636,7 @@ class DgtBoard(object):
                 result = 0x02
             return result
 
-        self._wait_for_clock()
+        self._wait_for_clock('SetTextXL()')
         icn = (_transfer(right_icons) & 0x07) | (_transfer(left_icons) << 3) & 0x38
         res = self.write_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x0b, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
                                   DgtClk.DGT_CMD_CLOCK_DISPLAY,
@@ -646,7 +646,7 @@ class DgtBoard(object):
 
     def set_and_run(self, lr: int, lh: int, lm: int, ls: int, rr: int, rh: int, rm: int, rs: int):
         """set the clock with times and let it run."""
-        self._wait_for_clock()
+        self._wait_for_clock('SetAndRun()')
         side = ClockSide.NONE
         if lr == 1 and rr == 0:
             side = ClockSide.LEFT
@@ -660,7 +660,7 @@ class DgtBoard(object):
 
     def end_text(self):
         """return the clock display to time display."""
-        self._wait_for_clock()
+        self._wait_for_clock('EndText()')
         res = self.write_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
                                   DgtClk.DGT_CMD_CLOCK_END,
                                   DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
