@@ -168,11 +168,11 @@ class DgtPi(DgtIface):
             logging.debug('(i2c) clock isnt running - no need for endText')
         return True
 
-    def light_squares_revelation_board(self, uci_move: str):
+    def light_squares_on_revelation(self, uci_move: str):
         """handle this by hw.py."""
         return True
 
-    def clear_light_revelation_board(self):
+    def clear_light_on_revelation(self):
         """handle this by hw.py."""
         return True
 

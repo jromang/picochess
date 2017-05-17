@@ -316,12 +316,12 @@ class WebVr(DgtIface):
         self._display_time(self.time_left, self.time_right)
         return True
 
-    def light_squares_revelation_board(self, squares):
+    def light_squares_on_revelation(self, squares):
         result = {'event': 'Light', 'move': squares}
         EventHandler.write_to_clients(result)
         return True
 
-    def clear_light_revelation_board(self):
+    def clear_light_on_revelation(self):
         result = {'event': 'Clear'}
         EventHandler.write_to_clients(result)
         return True

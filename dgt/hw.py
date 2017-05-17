@@ -125,7 +125,7 @@ class DgtHw(DgtIface):
             logging.debug('(ser) clock isnt running - no need for endText')
             return True
 
-    def light_squares_revelation_board(self, uci_move: str):
+    def light_squares_on_revelation(self, uci_move: str):
         """light the Rev2 leds."""
         if self.dgtboard.use_revelation_leds:
             logging.debug('(rev) leds turned on - move: %s', uci_move)
@@ -134,7 +134,7 @@ class DgtHw(DgtIface):
             self.dgtboard.write_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x01, fr_s, to_s, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         return True
 
-    def clear_light_revelation_board(self):
+    def clear_light_on_revelation(self):
         """clear the Rev2 leds."""
         if self.dgtboard.use_revelation_leds:
             logging.debug('(rev) leds turned off')

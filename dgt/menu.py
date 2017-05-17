@@ -173,6 +173,7 @@ class DgtMenu(object):
         # During "picochess" is displayed, some special actions allowed
         self.picochess_displayed = set()
         self.updt_top = False  # inside the update-menu?
+        self.updt_devs = set()  # list of devices which are inside the update-menu
         self.updt_tags = []
         self.updt_version = 0  # index to current version
 
@@ -1421,29 +1422,31 @@ class DgtMenu(object):
         return text
 
     def updt_middle(self, dev):
-        text = self.dgttranslate.text('B00_updt_version', self.updt_tags[self.updt_version])
-        logging.debug('enter update menu')
+        self.updt_devs.add(dev)
+        text = self.dgttranslate.text('B00_updt_version', self.updt_tags[self.updt_version], devs=self.updt_devs)
+        logging.debug('enter update menu dev: %s', dev)
         self.updt_top = True
         return text
 
     def updt_right(self):
         self.updt_version = (self.updt_version + 1) % len(self.updt_tags)
-        text = self.dgttranslate.text('B00_updt_version', self.updt_tags[self.updt_version])
+        text = self.dgttranslate.text('B00_updt_version', self.updt_tags[self.updt_version], devs=self.updt_devs)
         return text
 
     def updt_left(self):
         self.updt_version = (self.updt_version - 1) % len(self.updt_tags)
-        text = self.dgttranslate.text('B00_updt_version', self.updt_tags[self.updt_version])
+        text = self.dgttranslate.text('B00_updt_version', self.updt_tags[self.updt_version], devs=self.updt_devs)
         return text
 
     def updt_down(self):
-        text = self.dgttranslate.text('B00_errormenu')
+        text = self.dgttranslate.text('B00_errormenu', devs=self.updt_devs)
         return text
 
-    def updt_up(self):
+    def updt_up(self, dev):
         if self.updt_top:
-            logging.debug('leave update menu')
+            logging.debug('leave update menu dev: %s', dev)
             self.updt_top = False
+            self.updt_devs.discard(dev)
         text = self.enter_top_menu()
         return text
 

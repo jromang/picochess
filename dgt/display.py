@@ -127,7 +127,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             else:
                 self._exit_display()
         elif self._inside_updt_menu():
-            self.dgtmenu.updt_up()
+            self.dgtmenu.updt_up(dev)
             self._exit_display()  # button0 always exit the menu
         else:
             if self.last_move:

@@ -55,11 +55,11 @@ class DgtIface(DisplayDgt, Thread):
         """override this function."""
         raise NotImplementedError()
 
-    def light_squares_revelation_board(self, squares):
+    def light_squares_on_revelation(self, squares):
         """override this function."""
         raise NotImplementedError()
 
-    def clear_light_revelation_board(self):
+    def clear_light_on_revelation(self):
         """override this function."""
         raise NotImplementedError()
 
@@ -110,9 +110,9 @@ class DgtIface(DisplayDgt, Thread):
         elif isinstance(message, Dgt.DISPLAY_TIME):
             self.case_res = self.display_time_on_clock(message)
         elif isinstance(message, Dgt.LIGHT_CLEAR):
-            self.case_res = self.clear_light_revelation_board()
+            self.case_res = self.clear_light_on_revelation()
         elif isinstance(message, Dgt.LIGHT_SQUARES):
-            self.case_res = self.light_squares_revelation_board(message.uci_move)
+            self.case_res = self.light_squares_on_revelation(message.uci_move)
         elif isinstance(message, Dgt.CLOCK_STOP):
             logging.debug('(%s) clock sending stop time to clock l:%s r:%s',
                           ','.join(message.devs), self.time_left, self.time_right)
