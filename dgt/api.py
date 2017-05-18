@@ -219,7 +219,7 @@ class Message():
     # KEYBOARD_MOVE = ClassFactory(MessageApi.KEYBOARD_MOVE, ['fen'])
     SYSTEM_SHUTDOWN = ClassFactory(MessageApi.SYSTEM_SHUTDOWN, [])
     SYSTEM_REBOOT = ClassFactory(MessageApi.SYSTEM_REBOOT, [])
-    SET_VOICE = ClassFactory(MessageApi.SET_VOICE, ['type', 'lang', 'speaker'])
+    SET_VOICE = ClassFactory(MessageApi.SET_VOICE, ['type', 'lang', 'speaker', 'speed'])
 
     EXIT_MENU = ClassFactory(MessageApi.EXIT_MENU, [])
     WRONG_FEN = ClassFactory(MessageApi.WRONG_FEN, [])
@@ -247,7 +247,7 @@ class Event():
     REBOOT = ClassFactory(EventApi.REBOOT, ['dev'])
     ALTERNATIVE_MOVE = ClassFactory(EventApi.ALTERNATIVE_MOVE, [])
     EMAIL_LOG = ClassFactory(EventApi.EMAIL_LOG, [])
-    SET_VOICE = ClassFactory(EventApi.SET_VOICE, ['type', 'lang', 'speaker'])
+    SET_VOICE = ClassFactory(EventApi.SET_VOICE, ['type', 'lang', 'speaker', 'speed'])
     # Keyboard events
     KEYBOARD_BUTTON = ClassFactory(EventApi.KEYBOARD_BUTTON, ['button', 'dev'])
     KEYBOARD_FEN = ClassFactory(EventApi.KEYBOARD_FEN, ['fen'])

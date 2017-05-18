@@ -222,6 +222,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                     system_picotalker.talk(['pleasewait.ogg'])
 
                 elif isinstance(message, Message.SET_VOICE):
+                    self.speed_factor = 0.8 + (message.speed & 0x07) * 0.1
                     picotalker = PicoTalker(message.lang + ':' + message.speaker, self.speed_factor)
                     if message.type == Voice.USER:
                         self.set_user(picotalker)

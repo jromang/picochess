@@ -992,7 +992,7 @@ class DgtMenu(object):
                 if ckey + '-voice' in config:
                     del config[ckey + '-voice']
                     config.write()
-                event = Event.SET_VOICE(type=self.menu_system_voice_type, lang='en', speaker='mute')
+                event = Event.SET_VOICE(type=self.menu_system_voice_type, lang='en', speaker='mute', speed=2)
                 Observable.fire(event)
                 text = self.dgttranslate.text('B10_okvoice')
                 DispatchDgt.fire(text)
@@ -1010,7 +1010,8 @@ class DgtMenu(object):
             skey = speakers[self.menu_system_voice_speak]
             config[ckey + '-voice'] = vkey + ':' + skey
             config.write()
-            event = Event.SET_VOICE(type=self.menu_system_voice_type, lang=vkey, speaker=skey)
+            event = Event.SET_VOICE(type=self.menu_system_voice_type, lang=vkey, speaker=skey,
+                                    speed=self.menu_system_voice_factor)
             Observable.fire(event)
             text = self.dgttranslate.text('B10_okvoice')
             DispatchDgt.fire(text)
@@ -1021,8 +1022,18 @@ class DgtMenu(object):
 
         elif self.state == MenuState.SYS_VOICE_SPEED_FACTOR:
             # do action!
-            print('in SPEED_FACTOR')
-            pass
+            vkey = self.voices_conf.keys()[self.menu_system_voice_lang]
+            speakers = self.voices_conf[vkey].keys()
+            config = ConfigObj('picochess.ini')
+            skey = speakers[self.menu_system_voice_speak]
+            config['speed-voice'] = self.menu_system_voice_factor
+            config.write()
+            event = Event.SET_VOICE(type=self.menu_system_voice_type, lang=vkey, speaker=skey,
+                                    speed=self.menu_system_voice_factor)
+            Observable.fire(event)
+            text = self.dgttranslate.text('B10_okspeed')
+            DispatchDgt.fire(text)
+            text = self.save_choices()
 
         elif self.state == MenuState.SYS_DISP:
             if self.menu_system_display == Display.PONDER:
@@ -1212,13 +1223,6 @@ class DgtMenu(object):
             self.state = MenuState.SYS_VOICE_SPEED
             self.menu_system_voice = VoiceLoop.prev(self.menu_system_voice)
             text = self.dgttranslate.text(self.menu_system_voice.value)
-
-        # elif self.state == MenuState.SYS_VOICE_TYPE:
-        #     # self.menu_system_voice_type = VoiceTypeLoop.prev(self.menu_system_voice_type)
-        #     # text = self.dgttranslate.text(self.menu_system_voice_type.value)
-        #     self.state = MenuState.SYS_VOICE_SPEED
-        #     self.menu_system_voice = VoiceLoop.prev(self.menu_system_voice)
-        #     text = self.dgttranslate.text(self.menu_system_voice.value)
 
         elif self.state == MenuState.SYS_VOICE_TYPE_MUTE:
             self.menu_system_voice_mute = not self.menu_system_voice_mute
@@ -1431,13 +1435,6 @@ class DgtMenu(object):
             self.state = MenuState.SYS_VOICE_USER
             self.menu_system_voice = VoiceLoop.next(self.menu_system_voice)
             text = self.dgttranslate.text(self.menu_system_voice.value)
-
-        # elif self.state == MenuState.SYS_VOICE_TYPE:
-        #     # self.menu_system_voice_type = VoiceTypeLoop.next(self.menu_system_voice_type)
-        #     # text = self.dgttranslate.text(self.menu_system_voice_type.value)
-        #     self.state = MenuState.SYS_VOICE_SPEED
-        #     self.menu_system_voice = VoiceLoop.next(self.menu_system_voice)
-        #     text = self.dgttranslate.text(self.menu_system_voice.value)
 
         elif self.state == MenuState.SYS_VOICE_TYPE_MUTE:
             self.menu_system_voice_mute = not self.menu_system_voice_mute
