@@ -18,8 +18,10 @@
 from configobj import ConfigObj
 from collections import OrderedDict
 from utilities import Observable, DispatchDgt, get_tags, version
-from dgt.util import TimeMode, TimeModeLoop, Menu, MenuLoop, Mode, ModeLoop, Language, LanguageLoop, BeepLevel, BeepLoop
-from dgt.util import Settings, SettingsLoop, VoiceType, VoiceTypeLoop, SystemDisplay, SystemDisplayLoop, ClockIcons
+from dgt.util import TimeMode, TimeModeLoop, Top, TopLoop, Mode, ModeLoop, Language, LanguageLoop, BeepLevel, BeepLoop
+from dgt.util import System, SystemLoop, VoiceType, VoiceTypeLoop, Display, DisplayLoop, ClockIcons
+from dgt.util import Voice, VoiceLoop
+
 from dgt.api import Dgt, Event
 
 from timecontrol import TimeControl
@@ -74,6 +76,8 @@ class MenuState(object):
     SYS_VOICE_TYPE_MUTE = 761100  # on, off
     SYS_VOICE_TYPE_MUTE_LANG = 761110
     SYS_VOICE_TYPE_MUTE_LANG_SPEAK = 761111  # al, christina, ...
+    SYS_VOICE_SPEED = 762000
+    SYS_VOICE_SPEED_FACTOR = 762100  # 0-7
     SYS_DISP = 770000
     SYS_DISP_CNFRM = 771000
     SYS_DISP_CNFRM_YESNO = 771100  # yes,no
@@ -103,7 +107,7 @@ class DgtMenu(object):
         self.menu_position_reverse = False
         self.menu_position_uci960 = False
 
-        self.menu_top = Menu.MODE_MENU
+        self.menu_top = Top.MODE
         self.menu_mode = Mode.NORMAL
 
         self.menu_engine_level = None
@@ -115,7 +119,7 @@ class DgtMenu(object):
         self.menu_book = 0
         self.all_books = None
 
-        self.menu_system = Settings.VERSION
+        self.menu_system = System.VERSION
         self.menu_system_sound_beep = self.dgttranslate.beep
 
         langs = {'en': Language.EN, 'de': Language.DE, 'nl': Language.NL,
@@ -123,15 +127,18 @@ class DgtMenu(object):
         self.menu_system_language_name = langs[self.dgttranslate.language]
 
         self.voices_conf = ConfigObj('talker' + os.sep + 'voices' + os.sep + 'voices.ini')
-        self.menu_system_voice_type = VoiceType.COMP_VOICE
+        self.menu_system_voice = Voice.TYPE
+        self.menu_system_voice_type = VoiceType.COMP
         self.menu_system_voice_mute = False
         try:
             self.menu_system_voice_lang = self.voices_conf.keys().index(self.dgttranslate.language)
         except ValueError:
             self.menu_system_voice_lang = 0
-        self.menu_system_voice_speak = 0
 
-        self.menu_system_display = SystemDisplay.PONDER_INTERVAL
+        self.menu_system_voice_speak = 0
+        self.menu_system_voice_factor = 0
+
+        self.menu_system_display = Display.PONDER
 
         self.menu_time_mode = TimeMode.BLITZ
 
@@ -328,7 +335,7 @@ class DgtMenu(object):
     def enter_mode_menu(self):
         """Set the menu state."""
         self.state = MenuState.MODE
-        text = self.dgttranslate.text(Menu.MODE_MENU.value)
+        text = self.dgttranslate.text(Top.MODE.value)
         return text
 
     def enter_mode_type_menu(self):
@@ -340,7 +347,7 @@ class DgtMenu(object):
     def enter_pos_menu(self):
         """Set the menu state."""
         self.state = MenuState.POS
-        text = self.dgttranslate.text(Menu.POSITION_MENU.value)
+        text = self.dgttranslate.text(Top.POSITION.value)
         return text
 
     def enter_pos_color_menu(self):
@@ -370,7 +377,7 @@ class DgtMenu(object):
     def enter_time_menu(self):
         """Set the menu state."""
         self.state = MenuState.TIME
-        text = self.dgttranslate.text(Menu.TIME_MENU.value)
+        text = self.dgttranslate.text(Top.TIME.value)
         return text
 
     def enter_time_blitz_menu(self):
@@ -412,7 +419,7 @@ class DgtMenu(object):
     def enter_book_menu(self):
         """Set the menu state."""
         self.state = MenuState.BOOK
-        text = self.dgttranslate.text(Menu.BOOK_MENU.value)
+        text = self.dgttranslate.text(Top.BOOK.value)
         return text
 
     def enter_book_name_menu(self):
@@ -425,7 +432,7 @@ class DgtMenu(object):
     def enter_eng_menu(self):
         """Set the menu state."""
         self.state = MenuState.ENG
-        text = self.dgttranslate.text(Menu.ENGINE_MENU.value)
+        text = self.dgttranslate.text(Top.ENGINE.value)
         return text
 
     def enter_eng_name_menu(self):
@@ -452,7 +459,7 @@ class DgtMenu(object):
     def enter_sys_menu(self):
         """Set the menu state."""
         self.state = MenuState.SYS
-        text = self.dgttranslate.text(Menu.SYSTEM_MENU.value)
+        text = self.dgttranslate.text(Top.SYSTEM.value)
         return text
 
     def enter_sys_vers_menu(self):
@@ -506,7 +513,7 @@ class DgtMenu(object):
     def enter_sys_voice_type_menu(self):
         """Set the menu state."""
         self.state = MenuState.SYS_VOICE_TYPE
-        text = self.dgttranslate.text(self.menu_system_voice_type.value)
+        text = self.dgttranslate.text(Voice.TYPE.value)
         return text
 
     def enter_sys_voice_type_mute_menu(self):
@@ -536,6 +543,18 @@ class DgtMenu(object):
         text.devs = {'ser', 'i2c', 'web'}
         return text
 
+    def enter_sys_voice_speed_menu(self):
+        """Set the menu state."""
+        self.state = MenuState.SYS_VOICE_SPEED
+        text = self.dgttranslate.text(Voice.SPEED.value)
+        return text
+
+    def enter_sys_voice_speed_factor_menu(self):
+        """Set the menu state."""
+        self.state = MenuState.SYS_VOICE_SPEED_FACTOR
+        text = self.dgttranslate.text('B00_voice_speed', self.menu_system_voice_factor)
+        return text
+
     def enter_sys_disp_menu(self):
         """Set the menu state."""
         self.state = MenuState.SYS_DISP
@@ -545,7 +564,7 @@ class DgtMenu(object):
     def enter_sys_disp_cnfrm_menu(self):
         """Set the menu state."""
         self.state = MenuState.SYS_DISP_CNFRM
-        text = self.dgttranslate.text(SystemDisplay.CONFIRM_MOVE.value)
+        text = self.dgttranslate.text(Display.CONFIRM.value)
         return text
 
     def enter_sys_disp_cnfrm_yesno_menu(self):
@@ -558,13 +577,13 @@ class DgtMenu(object):
     def enter_sys_disp_ponder_menu(self):
         """Set the menu state."""
         self.state = MenuState.SYS_DISP_PONDER
-        text = self.dgttranslate.text(SystemDisplay.PONDER_INTERVAL.value)
+        text = self.dgttranslate.text(Display.PONDER.value)
         return text
 
     def enter_sys_disp_ponder_interval_menu(self):
         """Set the menu state."""
         self.state = MenuState.SYS_DISP_PONDER_INTERVAL
-        text = self.dgttranslate.text('B00_ponderinterval_time', str(self.menu_system_display_ponderinterval))
+        text = self.dgttranslate.text('B00_ponder_interval', str(self.menu_system_display_ponderinterval))
         return text
 
     def main_up(self):
@@ -670,6 +689,9 @@ class DgtMenu(object):
         elif self.state == MenuState.SYS_VOICE_TYPE_MUTE_LANG_SPEAK:
             text = self.enter_sys_voice_type_mute_lang_menu()
 
+        elif self.state == MenuState.SYS_VOICE_SPEED:
+            text = self.enter_sys_voice_menu()
+
         elif self.state == MenuState.SYS_DISP:
             text = self.enter_sys_menu()
 
@@ -696,17 +718,17 @@ class DgtMenu(object):
         if False:  # switch-case
             pass
         elif self.state == MenuState.TOP:
-            if self.menu_top == Menu.MODE_MENU:
+            if self.menu_top == Top.MODE:
                 text = self.enter_mode_menu()
-            if self.menu_top == Menu.POSITION_MENU:
+            if self.menu_top == Top.POSITION:
                 text = self.enter_pos_menu()
-            if self.menu_top == Menu.TIME_MENU:
+            if self.menu_top == Top.TIME:
                 text = self.enter_time_menu()
-            if self.menu_top == Menu.BOOK_MENU:
+            if self.menu_top == Top.BOOK:
                 text = self.enter_book_menu()
-            if self.menu_top == Menu.ENGINE_MENU:
+            if self.menu_top == Top.ENGINE:
                 text = self.enter_eng_menu()
-            if self.menu_top == Menu.SYSTEM_MENU:
+            if self.menu_top == Top.SYSTEM:
                 text = self.enter_sys_menu()
 
         elif self.state == MenuState.MODE:
@@ -840,19 +862,19 @@ class DgtMenu(object):
             text = self.save_choices()
 
         elif self.state == MenuState.SYS:
-            if self.menu_system == Settings.VERSION:
+            if self.menu_system == System.VERSION:
                 text = self.enter_sys_vers_menu()
-            if self.menu_system == Settings.IPADR:
+            if self.menu_system == System.IPADR:
                 text = self.enter_sys_ip_menu()
-            if self.menu_system == Settings.SOUND:
+            if self.menu_system == System.SOUND:
                 text = self.enter_sys_sound_menu()
-            if self.menu_system == Settings.LANGUAGE:
+            if self.menu_system == System.LANGUAGE:
                 text = self.enter_sys_lang_menu()
-            if self.menu_system == Settings.LOGFILE:
+            if self.menu_system == System.LOGFILE:
                 text = self.enter_sys_log_menu()
-            if self.menu_system == Settings.VOICE:
+            if self.menu_system == System.VOICE:
                 text = self.enter_sys_voice_menu()
-            if self.menu_system == Settings.DISPLAY:
+            if self.menu_system == System.DISPLAY:
                 text = self.enter_sys_disp_menu()
 
         elif self.state == MenuState.SYS_VERS:
@@ -918,7 +940,10 @@ class DgtMenu(object):
             text = self.save_choices()
 
         elif self.state == MenuState.SYS_VOICE:
-            text = self.enter_sys_voice_type_menu()
+            if self.menu_system_voice == Voice.TYPE:
+                text = self.enter_sys_voice_type_menu()
+            if self.menu_system_voice == Voice.SPEED:
+                text = self.enter_sys_voice_speed_menu()
 
         elif self.state == MenuState.SYS_VOICE_TYPE:
             text = self.enter_sys_voice_type_mute_menu()
@@ -929,7 +954,7 @@ class DgtMenu(object):
                 text = self.enter_sys_voice_type_mute_lang_menu()
             else:
                 config = ConfigObj('picochess.ini')
-                ckey = 'user' if self.menu_system_voice_type == VoiceType.USER_VOICE else 'computer'
+                ckey = 'user' if self.menu_system_voice_type == VoiceType.USER else 'computer'
                 if ckey + '-voice' in config:
                     del config[ckey + '-voice']
                     config.write()
@@ -947,7 +972,7 @@ class DgtMenu(object):
             vkey = self.voices_conf.keys()[self.menu_system_voice_lang]
             speakers = self.voices_conf[vkey].keys()
             config = ConfigObj('picochess.ini')
-            ckey = 'user' if self.menu_system_voice_type == VoiceType.USER_VOICE else 'computer'
+            ckey = 'user' if self.menu_system_voice_type == VoiceType.USER else 'computer'
             skey = speakers[self.menu_system_voice_speak]
             config[ckey + '-voice'] = vkey + ':' + skey
             config.write()
@@ -957,10 +982,15 @@ class DgtMenu(object):
             DispatchDgt.fire(text)
             text = self.save_choices()
 
+        elif self.state == MenuState.SYS_VOICE_SPEED_FACTOR:
+            # do action!
+            print('in SPEED_FACTOR')
+            pass
+
         elif self.state == MenuState.SYS_DISP:
-            if self.menu_system_display == SystemDisplay.PONDER_INTERVAL:
+            if self.menu_system_display == Display.PONDER:
                 text = self.enter_sys_disp_ponder_menu()
-            if self.menu_system_display == SystemDisplay.CONFIRM_MOVE:
+            if self.menu_system_display == Display.CONFIRM:
                 text = self.enter_sys_disp_cnfrm_menu()
 
         elif self.state == MenuState.SYS_DISP_CNFRM:
@@ -986,7 +1016,7 @@ class DgtMenu(object):
             config = ConfigObj('picochess.ini')
             config['ponder-interval'] = self.menu_system_display_ponderinterval
             config.write()
-            text = self.dgttranslate.text('B10_okponderinterval')
+            text = self.dgttranslate.text('B10_okponder')
             DispatchDgt.fire(text)
             text = self.save_choices()
 
@@ -1005,7 +1035,7 @@ class DgtMenu(object):
 
         elif self.state == MenuState.MODE:
             self.state = MenuState.SYS
-            self.menu_top = MenuLoop.prev(self.menu_top)
+            self.menu_top = TopLoop.prev(self.menu_top)
             text = self.dgttranslate.text(self.menu_top.value)
 
         elif self.state == MenuState.MODE_TYPE:
@@ -1014,7 +1044,7 @@ class DgtMenu(object):
 
         elif self.state == MenuState.POS:
             self.state = MenuState.MODE
-            self.menu_top = MenuLoop.prev(self.menu_top)
+            self.menu_top = TopLoop.prev(self.menu_top)
             text = self.dgttranslate.text(self.menu_top.value)
 
         elif self.state == MenuState.POS_COL:
@@ -1037,7 +1067,7 @@ class DgtMenu(object):
 
         elif self.state == MenuState.TIME:
             self.state = MenuState.POS
-            self.menu_top = MenuLoop.prev(self.menu_top)
+            self.menu_top = TopLoop.prev(self.menu_top)
             text = self.dgttranslate.text(self.menu_top.value)
 
         elif self.state == MenuState.TIME_BLITZ:
@@ -1069,7 +1099,7 @@ class DgtMenu(object):
 
         elif self.state == MenuState.BOOK:
             self.state = MenuState.TIME
-            self.menu_top = MenuLoop.prev(self.menu_top)
+            self.menu_top = TopLoop.prev(self.menu_top)
             text = self.dgttranslate.text(self.menu_top.value)
 
         elif self.state == MenuState.BOOK_NAME:
@@ -1079,7 +1109,7 @@ class DgtMenu(object):
 
         elif self.state == MenuState.ENG:
             self.state = MenuState.BOOK
-            self.menu_top = MenuLoop.prev(self.menu_top)
+            self.menu_top = TopLoop.prev(self.menu_top)
             text = self.dgttranslate.text(self.menu_top.value)
 
         elif self.state == MenuState.ENG_NAME:
@@ -1095,22 +1125,22 @@ class DgtMenu(object):
 
         elif self.state == MenuState.SYS:
             self.state = MenuState.ENG
-            self.menu_top = MenuLoop.prev(self.menu_top)
+            self.menu_top = TopLoop.prev(self.menu_top)
             text = self.dgttranslate.text(self.menu_top.value)
 
         elif self.state == MenuState.SYS_VERS:
             self.state = MenuState.SYS_DISP
-            self.menu_system = SettingsLoop.prev(self.menu_system)
+            self.menu_system = SystemLoop.prev(self.menu_system)
             text = self.dgttranslate.text(self.menu_system.value)
 
         elif self.state == MenuState.SYS_IP:
             self.state = MenuState.SYS_VERS
-            self.menu_system = SettingsLoop.prev(self.menu_system)
+            self.menu_system = SystemLoop.prev(self.menu_system)
             text = self.dgttranslate.text(self.menu_system.value)
 
         elif self.state == MenuState.SYS_SOUND:
             self.state = MenuState.SYS_IP
-            self.menu_system = SettingsLoop.prev(self.menu_system)
+            self.menu_system = SystemLoop.prev(self.menu_system)
             text = self.dgttranslate.text(self.menu_system.value)
 
         elif self.state == MenuState.SYS_SOUND_TYPE:
@@ -1119,7 +1149,7 @@ class DgtMenu(object):
 
         elif self.state == MenuState.SYS_LANG:
             self.state = MenuState.SYS_SOUND
-            self.menu_system = SettingsLoop.prev(self.menu_system)
+            self.menu_system = SystemLoop.prev(self.menu_system)
             text = self.dgttranslate.text(self.menu_system.value)
 
         elif self.state == MenuState.SYS_LANG_NAME:
@@ -1128,17 +1158,20 @@ class DgtMenu(object):
 
         elif self.state == MenuState.SYS_LOG:
             self.state = MenuState.SYS_LANG
-            self.menu_system = SettingsLoop.prev(self.menu_system)
+            self.menu_system = SystemLoop.prev(self.menu_system)
             text = self.dgttranslate.text(self.menu_system.value)
 
         elif self.state == MenuState.SYS_VOICE:
             self.state = MenuState.SYS_LOG
-            self.menu_system = SettingsLoop.prev(self.menu_system)
+            self.menu_system = SystemLoop.prev(self.menu_system)
             text = self.dgttranslate.text(self.menu_system.value)
 
         elif self.state == MenuState.SYS_VOICE_TYPE:
-            self.menu_system_voice_type = VoiceTypeLoop.prev(self.menu_system_voice_type)
-            text = self.dgttranslate.text(self.menu_system_voice_type.value)
+            # self.menu_system_voice_type = VoiceTypeLoop.prev(self.menu_system_voice_type)
+            # text = self.dgttranslate.text(self.menu_system_voice_type.value)
+            self.state = MenuState.SYS_VOICE_SPEED
+            self.menu_system_voice = VoiceLoop.prev(self.menu_system_voice)
+            text = self.dgttranslate.text(self.menu_system_voice.value)
 
         elif self.state == MenuState.SYS_VOICE_TYPE_MUTE:
             self.menu_system_voice_mute = not self.menu_system_voice_mute
@@ -1161,14 +1194,25 @@ class DgtMenu(object):
             text.maxtime = 0
             text.devs = {'ser', 'i2c', 'web'}
 
+        elif self.state == MenuState.SYS_VOICE_SPEED:
+            self.state = MenuState.SYS_VOICE_TYPE
+            # self.menu_system_voice = VoiceLoop.prev(self.menu_system_voice)
+            # text = self.dgttranslate.text(self.menu_system_voice.value)
+            self.menu_system_voice = VoiceLoop.prev(self.menu_system_voice)
+            text = self.dgttranslate.text(self.menu_system_voice.value)
+
+        elif self.state == MenuState.SYS_VOICE_SPEED_FACTOR:
+            self.menu_system_voice_factor = (self.menu_system_voice_factor - 1) % 8
+            text = self.dgttranslate.text('B00_voice_speed', str(self.menu_system_voice_factor))
+
         elif self.state == MenuState.SYS_DISP:
             self.state = MenuState.SYS_VOICE
-            self.menu_system = SettingsLoop.prev(self.menu_system)
+            self.menu_system = SystemLoop.prev(self.menu_system)
             text = self.dgttranslate.text(self.menu_system.value)
 
         elif self.state == MenuState.SYS_DISP_CNFRM:
             self.state = MenuState.SYS_DISP_PONDER
-            self.menu_system_display = SystemDisplayLoop.prev(self.menu_system_display)
+            self.menu_system_display = DisplayLoop.prev(self.menu_system_display)
             text = self.dgttranslate.text(self.menu_system_display.value)
 
         elif self.state == MenuState.SYS_DISP_CNFRM_YESNO:
@@ -1178,14 +1222,14 @@ class DgtMenu(object):
 
         elif self.state == MenuState.SYS_DISP_PONDER:
             self.state = MenuState.SYS_DISP_CNFRM
-            self.menu_system_display = SystemDisplayLoop.prev(self.menu_system_display)
+            self.menu_system_display = DisplayLoop.prev(self.menu_system_display)
             text = self.dgttranslate.text(self.menu_system_display.value)
 
         elif self.state == MenuState.SYS_DISP_PONDER_INTERVAL:
             self.menu_system_display_ponderinterval -= 1
             if self.menu_system_display_ponderinterval < 1:
                 self.menu_system_display_ponderinterval = 8
-            text = self.dgttranslate.text('B00_ponderinterval_time', str(self.menu_system_display_ponderinterval))
+            text = self.dgttranslate.text('B00_ponder_interval', str(self.menu_system_display_ponderinterval))
 
         else:  # Default
             pass
@@ -1202,7 +1246,7 @@ class DgtMenu(object):
 
         elif self.state == MenuState.MODE:
             self.state = MenuState.POS
-            self.menu_top = MenuLoop.next(self.menu_top)
+            self.menu_top = TopLoop.next(self.menu_top)
             text = self.dgttranslate.text(self.menu_top.value)
 
         elif self.state == MenuState.MODE_TYPE:
@@ -1211,7 +1255,7 @@ class DgtMenu(object):
 
         elif self.state == MenuState.POS:
             self.state = MenuState.TIME
-            self.menu_top = MenuLoop.next(self.menu_top)
+            self.menu_top = TopLoop.next(self.menu_top)
             text = self.dgttranslate.text(self.menu_top.value)
 
         elif self.state == MenuState.POS_COL:
@@ -1234,7 +1278,7 @@ class DgtMenu(object):
 
         elif self.state == MenuState.TIME:
             self.state = MenuState.BOOK
-            self.menu_top = MenuLoop.next(self.menu_top)
+            self.menu_top = TopLoop.next(self.menu_top)
             text = self.dgttranslate.text(self.menu_top.value)
 
         elif self.state == MenuState.TIME_BLITZ:
@@ -1266,7 +1310,7 @@ class DgtMenu(object):
 
         elif self.state == MenuState.BOOK:
             self.state = MenuState.ENG
-            self.menu_top = MenuLoop.next(self.menu_top)
+            self.menu_top = TopLoop.next(self.menu_top)
             text = self.dgttranslate.text(self.menu_top.value)
 
         elif self.state == MenuState.BOOK_NAME:
@@ -1276,7 +1320,7 @@ class DgtMenu(object):
 
         elif self.state == MenuState.ENG:
             self.state = MenuState.SYS
-            self.menu_top = MenuLoop.next(self.menu_top)
+            self.menu_top = TopLoop.next(self.menu_top)
             text = self.dgttranslate.text(self.menu_top.value)
 
         elif self.state == MenuState.ENG_NAME:
@@ -1292,22 +1336,22 @@ class DgtMenu(object):
 
         elif self.state == MenuState.SYS:
             self.state = MenuState.MODE
-            self.menu_top = MenuLoop.next(self.menu_top)
+            self.menu_top = TopLoop.next(self.menu_top)
             text = self.dgttranslate.text(self.menu_top.value)
 
         elif self.state == MenuState.SYS_VERS:
             self.state = MenuState.SYS_IP
-            self.menu_system = SettingsLoop.next(self.menu_system)
+            self.menu_system = SystemLoop.next(self.menu_system)
             text = self.dgttranslate.text(self.menu_system.value)
 
         elif self.state == MenuState.SYS_IP:
             self.state = MenuState.SYS_SOUND
-            self.menu_system = SettingsLoop.next(self.menu_system)
+            self.menu_system = SystemLoop.next(self.menu_system)
             text = self.dgttranslate.text(self.menu_system.value)
 
         elif self.state == MenuState.SYS_SOUND:
             self.state = MenuState.SYS_LANG
-            self.menu_system = SettingsLoop.next(self.menu_system)
+            self.menu_system = SystemLoop.next(self.menu_system)
             text = self.dgttranslate.text(self.menu_system.value)
 
         elif self.state == MenuState.SYS_SOUND_TYPE:
@@ -1316,7 +1360,7 @@ class DgtMenu(object):
 
         elif self.state == MenuState.SYS_LANG:
             self.state = MenuState.SYS_LOG
-            self.menu_system = SettingsLoop.next(self.menu_system)
+            self.menu_system = SystemLoop.next(self.menu_system)
             text = self.dgttranslate.text(self.menu_system.value)
 
         elif self.state == MenuState.SYS_LANG_NAME:
@@ -1325,17 +1369,20 @@ class DgtMenu(object):
 
         elif self.state == MenuState.SYS_LOG:
             self.state = MenuState.SYS_VOICE
-            self.menu_system = SettingsLoop.next(self.menu_system)
+            self.menu_system = SystemLoop.next(self.menu_system)
             text = self.dgttranslate.text(self.menu_system.value)
 
         elif self.state == MenuState.SYS_VOICE:
             self.state = MenuState.SYS_DISP
-            self.menu_system = SettingsLoop.next(self.menu_system)
+            self.menu_system = SystemLoop.next(self.menu_system)
             text = self.dgttranslate.text(self.menu_system.value)
 
         elif self.state == MenuState.SYS_VOICE_TYPE:
-            self.menu_system_voice_type = VoiceTypeLoop.next(self.menu_system_voice_type)
-            text = self.dgttranslate.text(self.menu_system_voice_type.value)
+            # self.menu_system_voice_type = VoiceTypeLoop.next(self.menu_system_voice_type)
+            # text = self.dgttranslate.text(self.menu_system_voice_type.value)
+            self.state = MenuState.SYS_VOICE_SPEED
+            self.menu_system_voice = VoiceLoop.next(self.menu_system_voice)
+            text = self.dgttranslate.text(self.menu_system_voice.value)
 
         elif self.state == MenuState.SYS_VOICE_TYPE_MUTE:
             self.menu_system_voice_mute = not self.menu_system_voice_mute
@@ -1358,14 +1405,21 @@ class DgtMenu(object):
             text.maxtime = 0
             text.devs = {'ser', 'i2c', 'web'}
 
+        elif self.state == MenuState.SYS_VOICE_SPEED:
+            # self.menu_system_voice_factor = (self.menu_system_voice_factor + 1) % 8
+            # text = self.dgttranslate.text('B00_voice_speed', self.menu_system_voice_factor)
+            self.state = MenuState.SYS_VOICE_TYPE
+            self.menu_system_voice = VoiceLoop.next(self.menu_system_voice)
+            text = self.dgttranslate.text(self.menu_system_voice.value)
+
         elif self.state == MenuState.SYS_DISP:
             self.state = MenuState.SYS_VERS
-            self.menu_system = SettingsLoop.next(self.menu_system)
+            self.menu_system = SystemLoop.next(self.menu_system)
             text = self.dgttranslate.text(self.menu_system.value)
 
         elif self.state == MenuState.SYS_DISP_CNFRM:
             self.state = MenuState.SYS_DISP_PONDER
-            self.menu_system_display = SystemDisplayLoop.next(self.menu_system_display)
+            self.menu_system_display = DisplayLoop.next(self.menu_system_display)
             text = self.dgttranslate.text(self.menu_system_display.value)
 
         elif self.state == MenuState.SYS_DISP_CNFRM_YESNO:
@@ -1375,14 +1429,14 @@ class DgtMenu(object):
 
         elif self.state == MenuState.SYS_DISP_PONDER:
             self.state = MenuState.SYS_DISP_CNFRM
-            self.menu_system_display = SystemDisplayLoop.next(self.menu_system_display)
+            self.menu_system_display = DisplayLoop.next(self.menu_system_display)
             text = self.dgttranslate.text(self.menu_system_display.value)
 
         elif self.state == MenuState.SYS_DISP_PONDER_INTERVAL:
             self.menu_system_display_ponderinterval += 1
             if self.menu_system_display_ponderinterval > 8:
                 self.menu_system_display_ponderinterval = 1
-            text = self.dgttranslate.text('B00_ponderinterval_time', str(self.menu_system_display_ponderinterval))
+            text = self.dgttranslate.text('B00_ponder_interval', str(self.menu_system_display_ponderinterval))
 
         else:  # Default
             pass

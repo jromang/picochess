@@ -17,6 +17,7 @@
 
 # for this (picotalker) to work you need to run these commands (if you haven't done before)
 # apt-get install vorbis-tools
+# apt-get install sox
 
 import threading
 import chess
@@ -83,7 +84,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
         super(PicoTalkerDisplay, self).__init__()
         self.user_picotalker = None
         self.computer_picotalker = None
-        self.speed_factor = 0.75 + (speed_factor & 0x0f) * 0.05
+        self.speed_factor = 0.8 + (speed_factor & 0x07) * 0.1
 
         if user_voice:
             logging.debug('creating user voice: [%s]', str(user_voice))
@@ -221,8 +222,8 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                     system_picotalker.talk(['pleasewait.ogg'])
 
                 elif isinstance(message, Message.SET_VOICE):
-                    picotalker = PicoTalker(message.lang + ':' + message.speaker)
-                    if message.type == VoiceType.USER_VOICE:
+                    picotalker = PicoTalker(message.lang + ':' + message.speaker, self.speed_factor)
+                    if message.type == VoiceType.USER:
                         self.set_user(picotalker)
                     else:
                         self.set_computer(picotalker)

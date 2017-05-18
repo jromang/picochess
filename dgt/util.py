@@ -30,49 +30,49 @@ class AutoNumber(enum.Enum):
 
 
 @enum.unique
-class Menu(enum.Enum):
-    MODE_MENU = 'B00_menu_mode_menu'  # Mode Menu
-    POSITION_MENU = 'B00_menu_position_menu'  # Setup position menu
-    TIME_MENU = 'B00_menu_time_menu'  # Time controls menu
-    BOOK_MENU = 'B00_menu_book_menu'  # Book menu
-    ENGINE_MENU = 'B00_menu_engine_menu'  # Engine menu
-    SYSTEM_MENU = 'B00_menu_system_menu'  # Settings menu
+class Top(enum.Enum):
+    MODE = 'B00_top_mode_menu'  # Mode Menu
+    POSITION = 'B00_top_position_menu'  # Setup position menu
+    TIME = 'B00_top_time_menu'  # Time controls menu
+    BOOK = 'B00_top_book_menu'  # Book menu
+    ENGINE = 'B00_top_engine_menu'  # Engine menu
+    SYSTEM = 'B00_top_system_menu'  # Settings menu
 
 
-class MenuLoop(object):
+class TopLoop(object):
     def __init__(self):
-        super(MenuLoop, self).__init__()
+        super(TopLoop, self).__init__()
 
     @staticmethod
-    def next(m: Menu):
-        if m == Menu.MODE_MENU:
-            return Menu.POSITION_MENU
-        elif m == Menu.POSITION_MENU:
-            return Menu.TIME_MENU
-        elif m == Menu.TIME_MENU:
-            return Menu.BOOK_MENU
-        elif m == Menu.BOOK_MENU:
-            return Menu.ENGINE_MENU
-        elif m == Menu.ENGINE_MENU:
-            return Menu.SYSTEM_MENU
-        elif m == Menu.SYSTEM_MENU:
-            return Menu.MODE_MENU
+    def next(m: Top):
+        if m == Top.MODE:
+            return Top.POSITION
+        elif m == Top.POSITION:
+            return Top.TIME
+        elif m == Top.TIME:
+            return Top.BOOK
+        elif m == Top.BOOK:
+            return Top.ENGINE
+        elif m == Top.ENGINE:
+            return Top.SYSTEM
+        elif m == Top.SYSTEM:
+            return Top.MODE
         return 'errMenuNext'
 
     @staticmethod
-    def prev(m: Menu):
-        if m == Menu.MODE_MENU:
-            return Menu.SYSTEM_MENU
-        elif m == Menu.POSITION_MENU:
-            return Menu.MODE_MENU
-        elif m == Menu.TIME_MENU:
-            return Menu.POSITION_MENU
-        elif m == Menu.BOOK_MENU:
-            return Menu.TIME_MENU
-        elif m == Menu.ENGINE_MENU:
-            return Menu.BOOK_MENU
-        elif m == Menu.SYSTEM_MENU:
-            return Menu.ENGINE_MENU
+    def prev(m: Top):
+        if m == Top.MODE:
+            return Top.SYSTEM
+        elif m == Top.POSITION:
+            return Top.MODE
+        elif m == Top.TIME:
+            return Top.POSITION
+        elif m == Top.BOOK:
+            return Top.TIME
+        elif m == Top.ENGINE:
+            return Top.BOOK
+        elif m == Top.SYSTEM:
+            return Top.ENGINE
         return 'errMenuPrev'
 
 
@@ -160,55 +160,55 @@ class TimeModeLoop(object):
         return 'errTiMoPrev'
 
 
-class Settings(enum.Enum):
-    VERSION = 'B00_settings_version_menu'
-    IPADR = 'B00_settings_ipadr_menu'
-    SOUND = 'B00_settings_sound_menu'
-    LANGUAGE = 'B00_settings_language_menu'
-    LOGFILE = 'B00_settings_logfile_menu'
-    VOICE = 'B00_settings_voice_menu'
-    DISPLAY = 'B00_settings_display_menu'
+class System(enum.Enum):
+    VERSION = 'B00_system_version_menu'
+    IPADR = 'B00_system_ipadr_menu'
+    SOUND = 'B00_system_sound_menu'
+    LANGUAGE = 'B00_system_language_menu'
+    LOGFILE = 'B00_system_logfile_menu'
+    VOICE = 'B00_system_voice_menu'
+    DISPLAY = 'B00_system_display_menu'
 
 
-class SettingsLoop(object):
+class SystemLoop(object):
     def __init__(self):
-        super(SettingsLoop, self).__init__()
+        super(SystemLoop, self).__init__()
 
     @staticmethod
-    def next(m: Settings):
-        if m == Settings.VERSION:
-            return Settings.IPADR
-        elif m == Settings.IPADR:
-            return Settings.SOUND
-        elif m == Settings.SOUND:
-            return Settings.LANGUAGE
-        elif m == Settings.LANGUAGE:
-            return Settings.LOGFILE
-        elif m == Settings.LOGFILE:
-            return Settings.VOICE
-        elif m == Settings.VOICE:
-            return Settings.DISPLAY
-        elif m == Settings.DISPLAY:
-            return Settings.VERSION
-        return 'errSetgNext'
+    def next(m: System):
+        if m == System.VERSION:
+            return System.IPADR
+        elif m == System.IPADR:
+            return System.SOUND
+        elif m == System.SOUND:
+            return System.LANGUAGE
+        elif m == System.LANGUAGE:
+            return System.LOGFILE
+        elif m == System.LOGFILE:
+            return System.VOICE
+        elif m == System.VOICE:
+            return System.DISPLAY
+        elif m == System.DISPLAY:
+            return System.VERSION
+        return 'errSystNext'
 
     @staticmethod
-    def prev(m: Settings):
-        if m == Settings.VERSION:
-            return Settings.DISPLAY
-        if m == Settings.DISPLAY:
-            return Settings.VOICE
-        if m == Settings.VOICE:
-            return Settings.LOGFILE
-        if m == Settings.LOGFILE:
-            return Settings.LANGUAGE
-        if m == Settings.LANGUAGE:
-            return Settings.SOUND
-        elif m == Settings.SOUND:
-            return Settings.IPADR
-        elif m == Settings.IPADR:
-            return Settings.VERSION
-        return 'errSetgPrev'
+    def prev(m: System):
+        if m == System.VERSION:
+            return System.DISPLAY
+        if m == System.DISPLAY:
+            return System.VOICE
+        if m == System.VOICE:
+            return System.LOGFILE
+        if m == System.LOGFILE:
+            return System.LANGUAGE
+        if m == System.LANGUAGE:
+            return System.SOUND
+        elif m == System.SOUND:
+            return System.IPADR
+        elif m == System.IPADR:
+            return System.VERSION
+        return 'errSystPrev'
 
 
 class Language(enum.Enum):
@@ -288,10 +288,36 @@ class BeepLoop(object):
         return 'errBeepPrev'
 
 
+class Voice(enum.Enum):
+    SPEED = 'B00_voice_speed_menu'
+    TYPE = 'B00_voice_type_menu'
+
+
+class VoiceLoop(object):
+    def __init__(self):
+        super(VoiceLoop, self).__init__()
+
+    @staticmethod
+    def next(m: Voice):
+        if m == Voice.SPEED:
+            return Voice.TYPE
+        elif m == Voice.TYPE:
+            return Voice.SPEED
+        return 'errVoicNext'
+
+    @staticmethod
+    def prev(m: Voice):
+        if m == Voice.SPEED:
+            return Voice.TYPE
+        elif m == Voice.TYPE:
+            return Voice.SPEED
+        return 'errVoicPrev'
+
+
 @enum.unique
 class VoiceType(enum.Enum):
-    USER_VOICE = 'B00_voicetype_user_menu'
-    COMP_VOICE = 'B00_voicetype_comp_menu'
+    USER = 'B00_voicetype_user_menu'
+    COMP = 'B00_voicetype_comp_menu'
 
 
 class VoiceTypeLoop(object):
@@ -300,46 +326,46 @@ class VoiceTypeLoop(object):
 
     @staticmethod
     def next(m: VoiceType):
-        if m == VoiceType.USER_VOICE:
-            return VoiceType.COMP_VOICE
-        elif m == VoiceType.COMP_VOICE:
-            return VoiceType.USER_VOICE
+        if m == VoiceType.USER:
+            return VoiceType.COMP
+        elif m == VoiceType.COMP:
+            return VoiceType.USER
         return 'errVoTyNext'
 
     @staticmethod
     def prev(m: VoiceType):
-        if m == VoiceType.USER_VOICE:
-            return VoiceType.COMP_VOICE
-        elif m == VoiceType.COMP_VOICE:
-            return VoiceType.USER_VOICE
+        if m == VoiceType.USER:
+            return VoiceType.COMP
+        elif m == VoiceType.COMP:
+            return VoiceType.USER
         return 'errVoTyPrev'
 
 
 @enum.unique
-class SystemDisplay(enum.Enum):
-    PONDER_INTERVAL = 'B00_display_ponderinterval_menu'
-    CONFIRM_MOVE = 'B00_display_confirm_menu'
+class Display(enum.Enum):
+    PONDER = 'B00_display_ponder_menu'
+    CONFIRM = 'B00_display_confirm_menu'
 
 
-class SystemDisplayLoop(object):
+class DisplayLoop(object):
     def __init__(self):
-        super(SystemDisplayLoop, self).__init__()
+        super(DisplayLoop, self).__init__()
 
     @staticmethod
-    def next(m: SystemDisplay):
-        if m == SystemDisplay.PONDER_INTERVAL:
-            return SystemDisplay.CONFIRM_MOVE
-        elif m == SystemDisplay.CONFIRM_MOVE:
-            return SystemDisplay.PONDER_INTERVAL
-        return 'errSyDiNext'
+    def next(m: Display):
+        if m == Display.PONDER:
+            return Display.CONFIRM
+        elif m == Display.CONFIRM:
+            return Display.PONDER
+        return 'errDispNext'
 
     @staticmethod
-    def prev(m: SystemDisplay):
-        if m == SystemDisplay.PONDER_INTERVAL:
-            return SystemDisplay.CONFIRM_MOVE
-        elif m == SystemDisplay.CONFIRM_MOVE:
-            return SystemDisplay.PONDER_INTERVAL
-        return 'errSyDiPrev'
+    def prev(m: Display):
+        if m == Display.PONDER:
+            return Display.CONFIRM
+        elif m == Display.CONFIRM:
+            return Display.PONDER
+        return 'errDispPrev'
 
 
 @enum.unique

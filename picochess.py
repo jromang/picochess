@@ -511,8 +511,8 @@ def main():
                         help='sets (some-)beep level from 0(=no beeps) to 15(=all beeps)')
     parser.add_argument('-uv', '--user-voice', type=str, help='voice for user', default='en:mute')
     parser.add_argument('-cv', '--computer-voice', type=str, help='voice for computer', default='en:mute')
-    parser.add_argument('-sv', '--speed-voice', type=int, help='voice speech factor from 0(=75%) to 15(=150%)',
-                        default=5, choices=range(0, 16))
+    parser.add_argument('-sv', '--speed-voice', type=int, help='voice speech factor from 0(=80%) to 7(=150%)',
+                        default=2, choices=range(0, 8))
     parser.add_argument('-u', '--enable-update', action='store_true', help='enable picochess updates')
     parser.add_argument('-ur', '--enable-update-reboot', action='store_true', help='reboot system after update')
     parser.add_argument('-nocm', '--disable-confirm-message', action='store_true', help='disable confirmation messages')

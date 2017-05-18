@@ -376,42 +376,42 @@ class DgtTranslate(object):
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
-        if text_id == 'menu_mode_menu':
+        if text_id == 'top_mode_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Mode       ', m='Mode    ', s='mode  ')
             detxt = Dgt.DISPLAY_TEXT(l='Modus      ', m='Modus   ', s='modus ')
             nltxt = Dgt.DISPLAY_TEXT(l='Modus      ', m='Modus   ', s='modus ')
             frtxt = Dgt.DISPLAY_TEXT(l='Mode       ', m='Mode    ', s='mode  ')
             estxt = Dgt.DISPLAY_TEXT(l='Modo       ', m='Modo    ', s='modo  ')
             ittxt = Dgt.DISPLAY_TEXT(l='Modo       ', m='Modo    ', s='modo  ')
-        if text_id == 'menu_position_menu':
+        if text_id == 'top_position_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Position   ', m='Position', s='posit ')
             detxt = Dgt.DISPLAY_TEXT(l='Position   ', m='Position', s='positn')
             nltxt = Dgt.DISPLAY_TEXT(l='Stelling   ', m='Stelling', s='stelng')
             frtxt = Dgt.DISPLAY_TEXT(l='Position   ', m='Position', s='posit ')
             estxt = Dgt.DISPLAY_TEXT(l='Posicion   ', m='Posicion', s='posic ')
             ittxt = Dgt.DISPLAY_TEXT(l='Posizione  ', m='Posizion', s='posizi')
-        if text_id == 'menu_time_menu':
+        if text_id == 'top_time_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Time       ', m='Time    ', s='time  ')
             detxt = Dgt.DISPLAY_TEXT(l='Zeit       ', m='Zeit    ', s='zeit  ')
             nltxt = Dgt.DISPLAY_TEXT(l='Tyd        ', m='Tyd     ', s='tyd   ')
             frtxt = Dgt.DISPLAY_TEXT(l='Temps      ', m='Temps   ', s='temps ')
             estxt = Dgt.DISPLAY_TEXT(l='Tiempo     ', m='Tiempo  ', s='tiempo')
             ittxt = Dgt.DISPLAY_TEXT(l='Tempo      ', m='Tempo   ', s='tempo ')
-        if text_id == 'menu_book_menu':
+        if text_id == 'top_book_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Book       ', m='Book    ', s='book  ')
             detxt = Dgt.DISPLAY_TEXT(l='Buch       ', m='Buch    ', s='buch  ')
             nltxt = Dgt.DISPLAY_TEXT(l='Boek       ', m='Boek    ', s='boek  ')
             frtxt = Dgt.DISPLAY_TEXT(l='Livre      ', m='Livre   ', s='livre ')
             estxt = Dgt.DISPLAY_TEXT(l='Libro      ', m='Libro   ', s='libro ')
             ittxt = Dgt.DISPLAY_TEXT(l='Libro      ', m='Libro   ', s='libro ')
-        if text_id == 'menu_engine_menu':
+        if text_id == 'top_engine_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Engine     ', m='Engine  ', s='engine')
             detxt = Dgt.DISPLAY_TEXT(l='Engine     ', m='Engine  ', s='engine')
             nltxt = Dgt.DISPLAY_TEXT(l='Engine     ', m='Engine  ', s='engine')
             frtxt = Dgt.DISPLAY_TEXT(l='Moteur     ', m='Moteur  ', s='moteur')
             estxt = Dgt.DISPLAY_TEXT(l='Motor      ', m='Motor   ', s='motor ')
             ittxt = Dgt.DISPLAY_TEXT(l='Motore     ', m='Motore  ', s='motore')
-        if text_id == 'menu_system_menu':
+        if text_id == 'top_system_menu':
             entxt = Dgt.DISPLAY_TEXT(l='System     ', m='System  ', s='system')
             detxt = Dgt.DISPLAY_TEXT(l='System     ', m='System  ', s='system')
             nltxt = Dgt.DISPLAY_TEXT(l='Systeem    ', m='Systeem ', s='system')
@@ -481,49 +481,49 @@ class DgtTranslate(object):
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
-        if text_id == 'settings_version_menu':
+        if text_id == 'system_version_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Version    ', m='Version ', s='vers  ')
             detxt = Dgt.DISPLAY_TEXT(l='Version    ', m='Version ', s='vers  ')
             nltxt = Dgt.DISPLAY_TEXT(l='Versie     ', m='Versie  ', s='versie')
             frtxt = Dgt.DISPLAY_TEXT(l='Version    ', m='Version ', s='vers  ')
             estxt = Dgt.DISPLAY_TEXT(l='Version    ', m='Version ', s='vers  ')
             ittxt = Dgt.DISPLAY_TEXT(l='Versione   ', m='Versione', s='versio')
-        if text_id == 'settings_ipadr_menu':
+        if text_id == 'system_ipadr_menu':
             entxt = Dgt.DISPLAY_TEXT(l='IP adr     ', m='IP adr  ', s='ip adr')
             detxt = Dgt.DISPLAY_TEXT(l='IP adr     ', m='IP adr  ', s='ip adr')
             nltxt = Dgt.DISPLAY_TEXT(l='IP address ', m='IP adr  ', s='ip adr')
             frtxt = Dgt.DISPLAY_TEXT(l='Adr IP     ', m='Adr IP  ', s='adr ip')
             estxt = Dgt.DISPLAY_TEXT(l='IP dir     ', m='IP dir  ', s='ip dir')
             ittxt = Dgt.DISPLAY_TEXT(l='ind IP     ', m='ind IP  ', s='ind ip')
-        if text_id == 'settings_sound_menu':
+        if text_id == 'system_sound_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Sound      ', m='Sound   ', s='sound ')
             detxt = Dgt.DISPLAY_TEXT(l='Toene      ', m='Toene   ', s='toene ')
             nltxt = Dgt.DISPLAY_TEXT(l='Geluid     ', m='Geluid  ', s='geluid')
             frtxt = Dgt.DISPLAY_TEXT(l='Sons       ', m='Sons    ', s='sons  ')
             estxt = Dgt.DISPLAY_TEXT(l='Sonido     ', m='Sonido  ', s='sonido')
             ittxt = Dgt.DISPLAY_TEXT(l='Suoni      ', m='Suoni   ', s='suoni ')
-        if text_id == 'settings_language_menu':
+        if text_id == 'system_language_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Language   ', m='Language', s='lang  ')
             detxt = Dgt.DISPLAY_TEXT(l='Sprache    ', m='Sprache ', s='sprach')
             nltxt = Dgt.DISPLAY_TEXT(l='Taal       ', m='Taal    ', s='taal  ')
             frtxt = Dgt.DISPLAY_TEXT(l='Langue     ', m='Langue  ', s='langue')
             estxt = Dgt.DISPLAY_TEXT(l='Idioma     ', m='Idioma  ', s='idioma')
             ittxt = Dgt.DISPLAY_TEXT(l='Lingua     ', m='Lingua  ', s='lingua')
-        if text_id == 'settings_logfile_menu':
+        if text_id == 'system_logfile_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Log file   ', m='Log file', s='logfil')
             detxt = entxt
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
-        if text_id == 'settings_voice_menu':
+        if text_id == 'system_voice_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Voice      ', m='Voice   ', s='voice ')
             detxt = Dgt.DISPLAY_TEXT(l='Stimme     ', m='Stimme  ', s='stimme')
             nltxt = Dgt.DISPLAY_TEXT(l='Stem       ', m='Stem    ', s='stem  ')
             frtxt = Dgt.DISPLAY_TEXT(l='Voix       ', m='Voix    ', s='voix  ')
             estxt = Dgt.DISPLAY_TEXT(l='Voz        ', m='Voz     ', s='voz   ')
             ittxt = Dgt.DISPLAY_TEXT(l='Voce       ', m='Voce    ', s='voce  ')
-        if text_id == 'settings_display_menu':
+        if text_id == 'system_display_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Display    ', m='Display ', s='dsplay')
             detxt = entxt
             nltxt = entxt
@@ -703,6 +703,20 @@ class DgtTranslate(object):
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
+        if text_id == 'voice_speed_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='voice speed', m='vc speed', s='vspeed')
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
+        if text_id == 'voice_type_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='voice type ', m='vc type ', s='vctype')
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
         if text_id == 'voicetype_user_menu':
             entxt = Dgt.DISPLAY_TEXT(l='user voice ', m='uservoic', s='user v')
             detxt = Dgt.DISPLAY_TEXT(l='Spieler Stm', m='Splr Stm', s='splr s')
@@ -739,21 +753,21 @@ class DgtTranslate(object):
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
-        if text_id == 'display_ponderinterval_menu':
+        if text_id == 'display_ponder_menu':
             entxt = Dgt.DISPLAY_TEXT(l='ponder intv', m='PondIntv', s='ponint')
             detxt = entxt
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
-        if text_id == 'okponderinterval':
+        if text_id == 'okponder':
             entxt = Dgt.DISPLAY_TEXT(l='ok pondIntv', m='okPondIv', s='ok int')
             detxt = entxt
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
-        if text_id == 'ponderinterval_time':
+        if text_id == 'ponder_interval':
             entxt = Dgt.DISPLAY_TEXT(l='pondr intv' + msg, m='pondrIv' + msg, s='p int' + msg)
             detxt = entxt
             nltxt = entxt
@@ -841,7 +855,8 @@ class DgtTranslate(object):
                 txt.devs = devs
 
         if entxt is None:
-            entxt = Dgt.DISPLAY_TEXT(l=None, m=text_id, s=None, wait=False, beep=self.bl(BeepLevel.YES), maxtime=0)
+            beep = self.bl(BeepLevel.YES)
+            entxt = Dgt.DISPLAY_TEXT(l=text_id, m=text_id, s=text_id, wait=False, beep=beep, maxtime=0, devs=devs)
             logging.warning('unknown text_id %s', text_id)
         if self.language == 'de' and detxt is not None:
             return detxt
