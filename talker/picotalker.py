@@ -26,7 +26,7 @@ import logging
 import subprocess
 import queue
 from dgt.api import Message
-from dgt.util import GameResult, PlayMode, VoiceType
+from dgt.util import GameResult, PlayMode, Voice
 from pathlib import Path
 from shutil import which
 
@@ -223,7 +223,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
 
                 elif isinstance(message, Message.SET_VOICE):
                     picotalker = PicoTalker(message.lang + ':' + message.speaker, self.speed_factor)
-                    if message.type == VoiceType.USER:
+                    if message.type == Voice.USER:
                         self.set_user(picotalker)
                     else:
                         self.set_computer(picotalker)

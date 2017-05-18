@@ -290,7 +290,9 @@ class BeepLoop(object):
 
 class Voice(enum.Enum):
     SPEED = 'B00_voice_speed_menu'
-    TYPE = 'B00_voice_type_menu'
+    # TYPE = 'B00_voice_type_menu'
+    USER = 'B00_voice_user_menu'
+    COMP = 'B00_voice_comp_menu'
 
 
 class VoiceLoop(object):
@@ -300,45 +302,49 @@ class VoiceLoop(object):
     @staticmethod
     def next(m: Voice):
         if m == Voice.SPEED:
-            return Voice.TYPE
-        elif m == Voice.TYPE:
+            return Voice.COMP
+        elif m == Voice.COMP:
+            return Voice.USER
+        elif m == Voice.USER:
             return Voice.SPEED
         return 'errVoicNext'
 
     @staticmethod
     def prev(m: Voice):
         if m == Voice.SPEED:
-            return Voice.TYPE
-        elif m == Voice.TYPE:
+            return Voice.USER
+        elif m == Voice.USER:
+            return Voice.COMP
+        elif m == Voice.COMP:
             return Voice.SPEED
         return 'errVoicPrev'
 
 
-@enum.unique
-class VoiceType(enum.Enum):
-    USER = 'B00_voicetype_user_menu'
-    COMP = 'B00_voicetype_comp_menu'
-
-
-class VoiceTypeLoop(object):
-    def __init__(self):
-        super(VoiceTypeLoop, self).__init__()
-
-    @staticmethod
-    def next(m: VoiceType):
-        if m == VoiceType.USER:
-            return VoiceType.COMP
-        elif m == VoiceType.COMP:
-            return VoiceType.USER
-        return 'errVoTyNext'
-
-    @staticmethod
-    def prev(m: VoiceType):
-        if m == VoiceType.USER:
-            return VoiceType.COMP
-        elif m == VoiceType.COMP:
-            return VoiceType.USER
-        return 'errVoTyPrev'
+# @enum.unique
+# class VoiceType(enum.Enum):
+#     USER = 'B00_voicetype_user_menu'
+#     COMP = 'B00_voicetype_comp_menu'
+#
+#
+# class VoiceTypeLoop(object):
+#     def __init__(self):
+#         super(VoiceTypeLoop, self).__init__()
+#
+#     @staticmethod
+#     def next(m: VoiceType):
+#         if m == VoiceType.USER:
+#             return VoiceType.COMP
+#         elif m == VoiceType.COMP:
+#             return VoiceType.USER
+#         return 'errVoTyNext'
+#
+#     @staticmethod
+#     def prev(m: VoiceType):
+#         if m == VoiceType.USER:
+#             return VoiceType.COMP
+#         elif m == VoiceType.COMP:
+#             return VoiceType.USER
+#         return 'errVoTyPrev'
 
 
 @enum.unique
