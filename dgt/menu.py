@@ -1249,7 +1249,7 @@ class DgtMenu(object):
             text = self.dgttranslate.text(self.menu_system_voice.value)
 
         elif self.state == MenuState.SYS_VOICE_SPEED_FACTOR:
-            self.menu_system_voice_factor = (self.menu_system_voice_factor - 1) % 8
+            self.menu_system_voice_factor = (self.menu_system_voice_factor - 1) % 10
             text = self.dgttranslate.text('B00_voice_speed', str(self.menu_system_voice_factor))
 
         elif self.state == MenuState.SYS_DISP:
@@ -1456,14 +1456,12 @@ class DgtMenu(object):
             text.devs = {'ser', 'i2c', 'web'}
 
         elif self.state == MenuState.SYS_VOICE_SPEED:
-            # self.menu_system_voice_factor = (self.menu_system_voice_factor + 1) % 8
-            # text = self.dgttranslate.text('B00_voice_speed', self.menu_system_voice_factor)
             self.state = MenuState.SYS_VOICE_COMP
             self.menu_system_voice = VoiceLoop.next(self.menu_system_voice)
             text = self.dgttranslate.text(self.menu_system_voice.value)
 
         elif self.state == MenuState.SYS_VOICE_SPEED_FACTOR:
-            self.menu_system_voice_factor = (self.menu_system_voice_factor + 1) % 8
+            self.menu_system_voice_factor = (self.menu_system_voice_factor + 1) % 10
             text = self.dgttranslate.text('B00_voice_speed', str(self.menu_system_voice_factor))
 
         elif self.state == MenuState.SYS_DISP:

@@ -84,7 +84,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
         super(PicoTalkerDisplay, self).__init__()
         self.user_picotalker = None
         self.computer_picotalker = None
-        self.speed_factor = 0.8 + (speed_factor & 0x07) * 0.1
+        self.speed_factor = 0.9 + (speed_factor % 10) * 0.05
 
         if user_voice:
             logging.debug('creating user voice: [%s]', str(user_voice))
@@ -228,7 +228,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                     system_picotalker.talk(['pleasewait.ogg'])
 
                 elif isinstance(message, Message.SET_VOICE):
-                    self.speed_factor = 0.8 + (message.speed & 0x07) * 0.1
+                    self.speed_factor = 0.9 + (message.speed % 10) * 0.05
                     picotalker = PicoTalker(message.lang + ':' + message.speaker, self.speed_factor)
                     if message.type == Voice.USER:
                         self.set_user(picotalker)
