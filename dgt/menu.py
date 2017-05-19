@@ -1534,6 +1534,7 @@ class DgtMenu(object):
     def updt_middle(self, dev):
         self.updt_devs.add(dev)
         text = self.dgttranslate.text('B00_updt_version', self.updt_tags[self.updt_version], devs=self.updt_devs)
+        text.rd = ClockIcons.DOT
         logging.debug('enter update menu dev: %s', dev)
         self.updt_top = True
         return text
@@ -1541,11 +1542,13 @@ class DgtMenu(object):
     def updt_right(self):
         self.updt_version = (self.updt_version + 1) % len(self.updt_tags)
         text = self.dgttranslate.text('B00_updt_version', self.updt_tags[self.updt_version], devs=self.updt_devs)
+        text.rd = ClockIcons.DOT
         return text
 
     def updt_left(self):
         self.updt_version = (self.updt_version - 1) % len(self.updt_tags)
         text = self.dgttranslate.text('B00_updt_version', self.updt_tags[self.updt_version], devs=self.updt_devs)
+        text.rd = ClockIcons.DOT
         return text
 
     def updt_down(self):

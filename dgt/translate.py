@@ -705,21 +705,21 @@ class DgtTranslate(object):
             ittxt = entxt
         if text_id == 'voice_speed_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Voice speed', m='Vc speed', s='vspeed')
-            detxt = entxt
+            detxt = Dgt.DISPLAY_TEXT(l='StimmGeschw', m='StmGesch', s='stmges')
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
         if text_id == 'voice_speed':
             entxt = Dgt.DISPLAY_TEXT(l='VoiceSpeed' + msg, m='Vspeed ' + msg, s='v spe' + msg)
-            detxt = entxt
+            detxt = Dgt.DISPLAY_TEXT(l='StmGeschw ' + msg, m='StmGes ' + msg, s='stm g' + msg)
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
         if text_id == 'okspeed':
             entxt = Dgt.DISPLAY_TEXT(l='ok voice sp', m='ok speed', s='ok spe')
-            detxt = entxt
+            detxt = Dgt.DISPLAY_TEXT(l='ok StmGesch', m='okStmGes', s='okstmg')
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
@@ -749,17 +749,17 @@ class DgtTranslate(object):
         if text_id == 'voice_on':
             entxt = Dgt.DISPLAY_TEXT(l='Voice  on  ', m='Voice on', s='vc  on')
             detxt = Dgt.DISPLAY_TEXT(l='Stimme ein ', m='Stim ein', s='st ein')
-            nltxt = entxt
-            frtxt = entxt
-            estxt = entxt
-            ittxt = entxt
+            nltxt = Dgt.DISPLAY_TEXT(l='Stem aan   ', m='Stem aan', s='st aan')
+            frtxt = Dgt.DISPLAY_TEXT(l='Voix allume', m='Voix ete', s='vo ete')
+            estxt = Dgt.DISPLAY_TEXT(l='Voz encend ', m='Voz ence', s='vz enc')
+            ittxt = Dgt.DISPLAY_TEXT(l='Voce attiva', m='Voce att', s='vc att')
         if text_id == 'voice_off':
             entxt = Dgt.DISPLAY_TEXT(l='Voice off  ', m='Voiceoff', s='vc off')
             detxt = Dgt.DISPLAY_TEXT(l='Stimme aus ', m='Stim aus', s='st aus')
-            nltxt = entxt
-            frtxt = entxt
-            estxt = entxt
-            ittxt = entxt
+            nltxt = Dgt.DISPLAY_TEXT(l='Stem uit   ', m='Stem uit', s='st uit')
+            frtxt = Dgt.DISPLAY_TEXT(l='Voix eteint', m='Voix ete', s='vo ete')
+            estxt = Dgt.DISPLAY_TEXT(l='Voz apagada', m='Voz apag', s='vz apa')
+            ittxt = Dgt.DISPLAY_TEXT(l='Voce spenta', m='Voce spe', s='vc spe')
         if text_id == 'display_ponder_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Ponder intv', m='PondIntv', s='ponint')
             detxt = entxt
@@ -783,28 +783,28 @@ class DgtTranslate(object):
             ittxt = entxt
         if text_id == 'display_confirm_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Confirm msg', m='Confirm ', s='confrm')
-            detxt = Dgt.DISPLAY_TEXT(l='Confirm msg', m='Confirm ', s='confrm')
+            detxt = Dgt.DISPLAY_TEXT(l='Zugbestaetg', m='Zugbestg', s='zugbes')
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
         if text_id == 'okconfirm':
             entxt = Dgt.DISPLAY_TEXT(l='ok confirm ', m='okConfrm', s='okconf')
-            detxt = Dgt.DISPLAY_TEXT(l='ok confirm ', m='okConfrm', s='okconf')
+            detxt = Dgt.DISPLAY_TEXT(l='ok Zugbest ', m='okZugbes', s='ok bes')
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
         if text_id == 'confirm_on':
             entxt = Dgt.DISPLAY_TEXT(l='Confirm  on', m='Conf  on', s='cnf on')
-            detxt = Dgt.DISPLAY_TEXT(l='Confirm ein', m='Conf ein', s='cnfein')
+            detxt = Dgt.DISPLAY_TEXT(l='Zugbest ein', m='Best ein', s='besein')
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
         if text_id == 'confirm_off':
             entxt = Dgt.DISPLAY_TEXT(l='Confirm off', m='Conf off', s='cnfoff')
-            detxt = Dgt.DISPLAY_TEXT(l='Confirm aus', m='Conf aus', s='cnfaus')
+            detxt = Dgt.DISPLAY_TEXT(l='Zugbest aus', m='Best aus', s='besaus')
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
@@ -842,17 +842,17 @@ class DgtTranslate(object):
             entxt = Dgt.DISPLAY_TEXT(l='updating pc', m='updating', s='update')
             detxt = entxt
             nltxt = entxt
-            frtxt = entxt
-            estxt = entxt
-            ittxt = entxt
+            frtxt = Dgt.DISPLAY_TEXT(l='actualisePc', m='actualis', s='actual')
+            estxt = Dgt.DISPLAY_TEXT(l='actualizoPc', m='actualiz', s='actual')
+            ittxt = Dgt.DISPLAY_TEXT(l='aggiornare ', m='aggiorPc', s='aggior')
         if text_id == 'updt_version':
             wait = True
             entxt = Dgt.DISPLAY_TEXT(l='Version ' + msg, m='Vers ' + msg, s='ver' + msg)
-            detxt = entxt
-            nltxt = entxt
-            frtxt = entxt
-            estxt = entxt
-            ittxt = entxt
+            detxt = Dgt.DISPLAY_TEXT(l='Version ' + msg, m='Vers ' + msg, s='ver' + msg)
+            nltxt = Dgt.DISPLAY_TEXT(l='Versie  ' + msg, m='Vers ' + msg, s='ver' + msg)
+            frtxt = Dgt.DISPLAY_TEXT(l='Version ' + msg, m='Vers ' + msg, s='ver' + msg)
+            estxt = Dgt.DISPLAY_TEXT(l='Version ' + msg, m='Vers ' + msg, s='ver' + msg)
+            ittxt = Dgt.DISPLAY_TEXT(l='Versione' + msg, m='Vers ' + msg, s='ver' + msg)
 
         for txt in [entxt, detxt, nltxt, frtxt, estxt, ittxt]:
             if txt:
