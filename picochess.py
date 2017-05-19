@@ -40,6 +40,7 @@ from dgt.api import Message, Event
 from dgt.util import GameResult, TimeMode, Mode, PlayMode
 from pgn import Emailer, PgnDisplay
 from server import WebServer
+from talker.picotalker import PicoTalkerDisplay
 
 from dgt.hw import DgtHw
 from dgt.pi import DgtPi
@@ -550,7 +551,7 @@ def main():
     # wire some dgt classes
     dgtboard = DgtBoard(args.dgt_port, args.disable_revelation_leds, args.dgtpi)
     dgttranslate = DgtTranslate(args.beep_config, args.beep_some_level, args.language, version)
-    dgtmenu = DgtMenu(args.disable_confirm_message, args.ponder_interval, dgttranslate)
+    dgtmenu = DgtMenu(args.disable_confirm_message, args.ponder_interval, args.speed_voice, dgttranslate)
     dgtdispatcher = Dispatcher(dgtmenu)
 
     time_control, time_text = transfer_time(args.time.split())
@@ -559,12 +560,7 @@ def main():
     DgtDisplay(dgttranslate, dgtmenu, time_control).start()
 
     # Create PicoTalker for speech output
-    if args.user_voice or args.computer_voice:
-        from talker.picotalker import PicoTalkerDisplay
-        logging.debug("initializing PicoTalker [%s, %s]", str(args.user_voice), str(args.computer_voice))
-        PicoTalkerDisplay(args.user_voice, args.computer_voice, args.speed_voice).start()
-    else:
-        logging.debug('PicoTalker disabled')
+    PicoTalkerDisplay(args.user_voice, args.computer_voice, args.speed_voice).start()
 
     # Launch web server
     if args.web_server_port:

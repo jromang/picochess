@@ -94,11 +94,11 @@ class DgtMenu(object):
 
     """Handle the Dgt Menu."""
 
-    def __init__(self, disable_confirm_message: bool, ponder_interval: int, dgttranslate: DgtTranslate):
+    def __init__(self, disable_confirm: bool, ponder_interval: int, speed_voice: int, dgttranslate: DgtTranslate):
         super(DgtMenu, self).__init__()
 
         self.current_text = None  # save the current text
-        self.menu_system_display_confirm = disable_confirm_message
+        self.menu_system_display_confirm = disable_confirm
         self.menu_system_display_ponderinterval = ponder_interval
         self.dgttranslate = dgttranslate
         self.state = MenuState.TOP
@@ -141,7 +141,7 @@ class DgtMenu(object):
             self.menu_system_voice_lang = 0
 
         self.menu_system_voice_speak = 0
-        self.menu_system_voice_factor = 0
+        self.menu_system_voice_factor = speed_voice
 
         self.menu_system_display = Display.PONDER
 
