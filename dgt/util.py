@@ -290,7 +290,6 @@ class BeepLoop(object):
 
 class Voice(enum.Enum):
     SPEED = 'B00_voice_speed_menu'
-    # TYPE = 'B00_voice_type_menu'
     USER = 'B00_voice_user_menu'
     COMP = 'B00_voice_comp_menu'
 
@@ -318,33 +317,6 @@ class VoiceLoop(object):
         elif m == Voice.COMP:
             return Voice.SPEED
         return 'errVoicPrev'
-
-
-# @enum.unique
-# class VoiceType(enum.Enum):
-#     USER = 'B00_voicetype_user_menu'
-#     COMP = 'B00_voicetype_comp_menu'
-#
-#
-# class VoiceTypeLoop(object):
-#     def __init__(self):
-#         super(VoiceTypeLoop, self).__init__()
-#
-#     @staticmethod
-#     def next(m: VoiceType):
-#         if m == VoiceType.USER:
-#             return VoiceType.COMP
-#         elif m == VoiceType.COMP:
-#             return VoiceType.USER
-#         return 'errVoTyNext'
-#
-#     @staticmethod
-#     def prev(m: VoiceType):
-#         if m == VoiceType.USER:
-#             return VoiceType.COMP
-#         elif m == VoiceType.COMP:
-#             return VoiceType.USER
-#         return 'errVoTyPrev'
 
 
 @enum.unique

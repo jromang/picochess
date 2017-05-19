@@ -971,9 +971,6 @@ class DgtMenu(object):
             if self.menu_system_voice == Voice.SPEED:
                 text = self.enter_sys_voice_speed_menu()
 
-        # elif self.state == MenuState.SYS_VOICE_TYPE:
-        #     text = self.enter_sys_voice_type_mute_menu()
-
         elif self.state == MenuState.SYS_VOICE_USER:
             self.menu_system_voice_type = Voice.USER
             text = self.enter_sys_voice_type_mute_menu()
@@ -1018,6 +1015,7 @@ class DgtMenu(object):
             text = self.save_choices()
 
         elif self.state == MenuState.SYS_VOICE_SPEED:
+            self.menu_system_voice_type = Voice.SPEED
             text = self.enter_sys_voice_speed_factor_menu()
 
         elif self.state == MenuState.SYS_VOICE_SPEED_FACTOR:

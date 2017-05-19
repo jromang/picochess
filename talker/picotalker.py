@@ -101,6 +101,12 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
         """Set the user talker."""
         self.user_picotalker = picotalker
 
+    def set_speech(self, speed_factor):
+        if self.computer_picotalker:
+            self.computer_picotalker.speed_factor = speed_factor
+        if self.user_picotalker:
+            self.user_picotalker.speed_factor = speed_factor
+
     def run(self):
         """Start listening for Messages on our queue and generate speech as appropriate."""
         previous_move = chess.Move.null()  # Ignore repeated broadcasts of a move.
@@ -226,8 +232,10 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                     picotalker = PicoTalker(message.lang + ':' + message.speaker, self.speed_factor)
                     if message.type == Voice.USER:
                         self.set_user(picotalker)
-                    else:
+                    if message.type == Voice.COMP:
                         self.set_computer(picotalker)
+                    if message.type == Voice.SPEED:
+                        self.set_speech(self.speed_factor)
                     system_picotalker = self.system_voice()
 
                 else:  # Default
