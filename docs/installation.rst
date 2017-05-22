@@ -176,6 +176,8 @@ Manual installation
 
 ``sudo cp dgtpistandby.service /etc/systemd/system``
 
+``sudo cp dgtpistandby.target /etc/systemd/system``
+
 ``sudo chmod a+x /etc/systemd/system/dgtpistandby.service``
 
 ``sudo systemctl enable dgtpistandby``
