@@ -40,6 +40,7 @@ Changes
 |20141219|Ben        |Added description of S bit in DGT_MSG_FIELD_UPDATE     |
 |20150720|Marius	 |Swapped D3 and D4 of byte9 of DGT_BWTIME to match 	 |
 |		 |			 |the actual clock behaviour (D3-right), (D4-left)	 	 |
+|20170522|Jürgen     |Updated the RevelationII LED control commands (Ruud) 	 |
 =============================================================================
 
 Main functionality of the DGT Electronic Chess Board
@@ -257,14 +258,25 @@ Start of Definitions:
  * has three extra bytes with data:
  * byte 1 - DGT_SET_LEDS (= 0x60)
  * byte 2 - size (= 0x04)
- * byte 3 - the pattern to display (to be determined, for now: 0 - off, 1 - on)
+ * byte 3 - the pattern to display (0 - off, 1 - on, 2 - auto flags) Firmware <=3.21: only 0x01 - other values ignored
  * byte 4 - the start field
  * byte 5 - the end field
  * byte 6 - end of message (= 0x00)
  * Start and end field have the range 0..63 where 0 is a8 and 63 is h1. This
- * is compliant with the DGT field coding of the board.
- * For the future it is foreseen that this message can have more fields which
- * can be controlled. This means also a different size of the message.
+ * is compliant with the DGT field coding of the board. Other values are ignored.
+ *
+ * New modes for firmware > 3.21:
+ * ==============================
+ * If "Off" mode (byte3 = 0x00) and byte4 = 0x40 (byte5 doesnt matter) all lights are cleared
+ *
+ * By default the eboard dims light on a field if a piece change is detected. This behaviour now can be switched off.
+ * By default the eboard reverses the board and led signalling when a reversed board is detected
+ * (black pieces in correct order on two bottom rows) This behaviour now can be switched off.
+ * byte3 = 0x02 and byte4-5:
+ * 0x01 0x00 : Aufo OFF functions LEDS disabled.
+ * 0x01 0x01 : Aufo OFF functions LEDS enabled (=default).
+ * 0x02 0x00 : Aufo Reverse board function disabled.
+ * 0x02 0x01 : Aufo Reverse board function enabled (=default).
  */
 
 /* ------------------------------------------------------------------------ */
