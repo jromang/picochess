@@ -578,7 +578,7 @@ def main():
         else:
             logging.debug('(ser) starting the board connection')
             dgtboard.run()  # a clock can only be online together with the board, so we must start it infront
-        DgtHw(dgttranslate, dgtboard, dgtdispatcher).start()
+        DgtHw(dgttranslate, dgtboard).start()
         dgtdispatcher.register('ser')
     # The class Dispatcher sends DgtApi messages at the correct (delayed) time out
     dgtdispatcher.start()

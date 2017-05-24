@@ -38,7 +38,6 @@ class DgtIface(DisplayDgt, Thread):
 
         self.clock_running = False
         self.enable_dgt_3000 = False
-        self.enable_ser_clock = False
         self.time_left = None
         self.time_right = None
         self.case_res = True
@@ -137,7 +136,6 @@ class DgtIface(DisplayDgt, Thread):
                 logging.debug('(i2c) clock found => starting the board connection')
                 self.dgtboard.run()  # finally start the serial board connection - see picochess.py
             else:
-                self.enable_ser_clock = True
                 if message.main == 2:
                     self.enable_dgt_3000 = True
         elif isinstance(message, Dgt.CLOCK_TIME):

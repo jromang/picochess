@@ -22,26 +22,24 @@ from dgt.util import ClockIcons, ClockSide, DgtClk, DgtCmd
 from threading import Lock
 from dgt.translate import DgtTranslate
 from dgt.board import DgtBoard
-from dispatcher import Dispatcher
 
 
 class DgtHw(DgtIface):
 
     """Handle the DgtXL/3000 communication."""
 
-    def __init__(self, dgttranslate: DgtTranslate, dgtboard: DgtBoard, dgtdispatcher: Dispatcher):
+    def __init__(self, dgttranslate: DgtTranslate, dgtboard: DgtBoard):
         super(DgtHw, self).__init__(dgttranslate, dgtboard)
 
-        self.dgtdispatcher = dgtdispatcher
         self.lib_lock = Lock()
         # self.dgtboard.run() done by picochess.py or by CLOCK_VERSION if DgtPi see iface.py
 
-    def _check_clock(self, text: str):
-        if not self.enable_ser_clock:
-            logging.debug('(ser) clock still not found. Ignore [%s]', text)
-            self.dgtboard.startup_serial_clock()
-            self.dgtdispatcher.stop_maxtimer(self.getName())
-        return self.enable_ser_clock
+    # def _check_clock(self, text: str):
+    #     if not self.enable_ser_clock:
+    #         logging.debug('(ser) clock still not found. Ignore [%s]', text)
+    #         self.dgtboard.startup_serial_clock()
+    #         self.dgtdispatcher.stop_maxtimer(self.getName())
+    #     return self.enable_ser_clock
 
     def _display_on_dgt_xl(self, text: str, beep=False, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
         text = text.ljust(6)
@@ -78,8 +76,6 @@ class DgtHw(DgtIface):
         left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE
         right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
 
-        if not self._check_clock(text):
-            return False
         if display_m:
             return self._display_on_dgt_3000(text, message.beep)
         else:
@@ -98,8 +94,6 @@ class DgtHw(DgtIface):
         if self.getName() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)
             return True
-        if not self._check_clock(text):
-            return False
         if display_m:
             return self._display_on_dgt_3000(text, message.beep)
         else:
@@ -114,8 +108,6 @@ class DgtHw(DgtIface):
             return True
         if self.clock_running or message.force:
             with self.lib_lock:
-                if not self._check_clock('EndText() call'):
-                    return False
                 if self.time_left is None or self.time_right is None:
                     logging.debug('time values not set - abort function')
                     return False
@@ -149,8 +141,6 @@ class DgtHw(DgtIface):
         return self._resume_clock(ClockSide.NONE)
 
     def _resume_clock(self, side: ClockSide):
-        if not self._check_clock('ResumeClock() call'):
-            return False
         l_hms = self.time_left
         r_hms = self.time_right
         if l_hms is None or r_hms is None:

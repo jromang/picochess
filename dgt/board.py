@@ -50,6 +50,7 @@ class DgtBoard(object):
         # the next three are only used for "not dgtpi" mode
         self.clock_lock = False  # serial connected clock is locked
         self.last_clock_command = []  # Used for resend last (failed) clock command
+        self.enable_ser_clock = None  # None = "unknown status" False="only board found" True="clock also found"
         self.watchdog_timer = RepeatedTimer(1, self._watchdog)
         # bluetooth vars for Jessie & autoconnect
         self.btctl = None
@@ -134,7 +135,7 @@ class DgtBoard(object):
                 logging.warning('(ser) clock already locked. Maybe a "resend"?')
             else:
                 logging.debug('(ser) clock now locked')
-                self.clock_lock = time.time()
+            self.clock_lock = time.time()
         if message[0] == DgtCmd.DGT_SET_LEDS:
             logging.debug('(rev) leds turned %s', 'on' if message[2] else 'off')
         return True
@@ -223,6 +224,7 @@ class DgtBoard(object):
                             logging.info('(ser) clock button 4 pressed - ack2: %i', ack2)
                             DisplayMsg.show(Message.DGT_BUTTON(button=4, dev='ser'))
                 if ack1 == DgtAck.DGT_ACK_CLOCK_VERSION.value:
+                    self.enable_ser_clock = True
                     main = ack2 >> 4
                     sub = ack2 & 0x0f
                     logging.debug('(ser) clock version %0.2f', float(str(main) + '.' + str(sub)))
@@ -262,6 +264,10 @@ class DgtBoard(object):
                         ltime = [l_hours, l_mins, l_secs]
                         logging.info('(ser) clock new time received l:%s r:%s', ltime, rtime)
                         DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=ltime, time_right=rtime, dev='ser'))
+
+                        if not self.enable_ser_clock:
+                            logging.warning('restarting clock setup - enable_ser_clock: %s', self.enable_ser_clock)
+                            self.startup_serial_clock()
 
                         right_side_down = -0x40 if status & 0x02 else 0x40
                         if self.lever_pos != right_side_down:
@@ -399,6 +405,7 @@ class DgtBoard(object):
     def startup_serial_clock(self):
         """ask the clock for its version."""
         self.clock_lock = False
+        self.enable_ser_clock = False
         command = [DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
                    DgtClk.DGT_CMD_CLOCK_VERSION, DgtClk.DGT_CMD_CLOCK_END_MESSAGE]
         self.write_command(command)  # Get clock version
@@ -409,6 +416,11 @@ class DgtBoard(object):
 
     def _watchdog(self):
         self.write_command([DgtCmd.DGT_RETURN_SERIALNR])
+        if self.clock_lock:
+            if time.time() - self.clock_lock > 2:
+                logging.warning('(ser) clock is locked over 2secs')
+                # self.clock_lock = False  # no warning
+                self.write_command(self.last_clock_command)
 
     def _open_bluetooth(self):
         if self.bt_state == -1:
