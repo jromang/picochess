@@ -361,12 +361,12 @@ class DgtTranslate(object):
                 estxt = entxt
                 ittxt = entxt
         if text_id == 'mate':
-            entxt = Dgt.DISPLAY_TEXT(l='mate in ' + msg, m='mate ' + msg, s='mate' + msg)
-            detxt = Dgt.DISPLAY_TEXT(l='Matt in ' + msg, m='Matt ' + msg, s='matt' + msg)
-            nltxt = Dgt.DISPLAY_TEXT(l='mat in  ' + msg, m='mat  ' + msg, s='mat ' + msg)
-            frtxt = Dgt.DISPLAY_TEXT(l='mat en  ' + msg, m='mat  ' + msg, s='mat ' + msg)
-            estxt = Dgt.DISPLAY_TEXT(l='mate en ' + msg, m='mate ' + msg, s='mate' + msg)
-            ittxt = Dgt.DISPLAY_TEXT(l='matto in' + msg, m='matto' + msg, s='matt' + msg)
+            entxt = Dgt.DISPLAY_TEXT(l='mate in ' + msg, m='mate ' + msg, s='mat' + msg)
+            detxt = Dgt.DISPLAY_TEXT(l='Matt in ' + msg, m='Matt ' + msg, s='mat' + msg)
+            nltxt = Dgt.DISPLAY_TEXT(l='mat in  ' + msg, m='mat  ' + msg, s='mat' + msg)
+            frtxt = Dgt.DISPLAY_TEXT(l='mat en  ' + msg, m='mat  ' + msg, s='mat' + msg)
+            estxt = Dgt.DISPLAY_TEXT(l='mate en ' + msg, m='mate ' + msg, s='mat' + msg)
+            ittxt = Dgt.DISPLAY_TEXT(l='matto in' + msg, m='matto' + msg, s='mat' + msg)
         if text_id == 'score':
             text_s = 'no scr' if msg is None else str(msg).rjust(6)
             text_m = 'no score' if msg is None else str(msg).rjust(8)
