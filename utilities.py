@@ -190,19 +190,21 @@ def update_picochess(dgtpi: bool, auto_reboot: bool, dgttranslate: DgtTranslate)
 
     branch = do_command([git, 'rev-parse', '--abbrev-ref', 'HEAD']).rstrip()
     if branch == 'stable' or branch == 'master':
-        output = do_command([git, 'remote', 'update'])  # Fetch remote repo
-        logging.debug('git remote:')
+        # Fetch remote repo
+        output = do_command([git, 'remote', 'update'])
         logging.debug(output)
-        output = do_command([git, 'status', '--porcelain', '-uno'])
-        if output:
-            logging.debug('git status:')
-            logging.debug(output)
+        # Check if update is needed - but first force an english environment for it
+        force_en_env = os.environ.copy()
+        force_en_env['LC_ALL'] = 'C'
+        output = Popen([git, 'status', '-uno'], stdout=PIPE, env=force_en_env).communicate()[0].decode(encoding='UTF-8')
+        logging.debug(output)
+        if 'up-to-date' not in output:
             DispatchDgt.fire(dgttranslate.text('Y25_update'))
+            # Update
+            logging.debug('updating picochess')
             output = do_command([git, 'pull', 'origin', branch])
-            logging.debug('git pull:')
             logging.debug(output)
             output = do_command(['pip3', 'install', '-r', 'requirements.txt'])
-            logging.debug('pip3 install:')
             logging.debug(output)
             if auto_reboot:
                 reboot(dgtpi, dev='web')
