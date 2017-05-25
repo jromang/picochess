@@ -416,10 +416,10 @@ class DgtBoard(object):
 
     def _watchdog(self):
         self.write_command([DgtCmd.DGT_RETURN_SERIALNR])
-        if self.clock_lock:
+        if self.clock_lock and not self.is_pi:
             if time.time() - self.clock_lock > 2:
                 logging.warning('(ser) clock is locked over 2secs')
-                # self.clock_lock = False  # no warning
+                self.clock_lock = False  # display no warning
                 self.write_command(self.last_clock_command)
 
     def _open_bluetooth(self):
