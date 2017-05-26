@@ -531,8 +531,8 @@ class DgtTranslate(object):
             estxt = entxt
             ittxt = entxt
         if text_id == 'system_battery_menu':
-            entxt = Dgt.DISPLAY_TEXT(l='BT battery ', m='Battery ', s=' bt bat')
-            detxt = Dgt.DISPLAY_TEXT(l='BT Batterie', m='Batterie', s=' bt bat')
+            entxt = Dgt.DISPLAY_TEXT(l='BT battery ', m='Battery ', s='bt bat')
+            detxt = Dgt.DISPLAY_TEXT(l='BT Batterie', m='Batterie', s='bt bat')
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
