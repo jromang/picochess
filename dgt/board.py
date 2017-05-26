@@ -129,6 +129,8 @@ class DgtBoard(object):
                 break
             time.sleep(0.1)
 
+        if message[0] == DgtCmd.DGT_SET_LEDS:
+            logging.debug('(rev) leds turned %s', 'on' if message[2] else 'off')
         if message[0] == DgtCmd.DGT_CLOCK_MESSAGE:
             self.last_clock_command = message
             if self.clock_lock:
@@ -136,8 +138,8 @@ class DgtBoard(object):
             else:
                 logging.debug('(ser) clock now locked')
             self.clock_lock = time.time()
-        if message[0] == DgtCmd.DGT_SET_LEDS:
-            logging.debug('(rev) leds turned %s', 'on' if message[2] else 'off')
+        else:
+            time.sleep(0.1)  # give the board some time to process the command
         return True
 
     def _process_board_message(self, message_id: int, message: tuple, message_length: int):
@@ -424,7 +426,7 @@ class DgtBoard(object):
                 logging.warning('(ser) clock is locked over 2secs')
                 self.clock_lock = False  # display no warning
                 self.write_command(self.last_clock_command)
-        self.write_command([DgtCmd.DGT_RETURN_SERIALNR])
+        self.write_command([DgtCmd.DGT_RETURN_SERIALNR])  # ask for this AFTER cause of - maybe - old board hardware
 
     def _open_bluetooth(self):
         if self.bt_state == -1:
