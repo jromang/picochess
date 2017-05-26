@@ -209,15 +209,15 @@ class DgtTranslate(object):
             ittxt = Dgt.DISPLAY_TEXT(l='errore menu', m='err menu', s='errmen')
         if text_id == 'sidewhite':
             entxt = Dgt.DISPLAY_TEXT(l='side move W', m='side W  ', s='side w')
-            detxt = Dgt.DISPLAY_TEXT(l='W am Zug   ', m='W am Zug', s='w zug ')
-            nltxt = Dgt.DISPLAY_TEXT(l='wit aan zet', m='wit zet ', s='w zet ')
+            detxt = Dgt.DISPLAY_TEXT(l='W am Zug   ', m='W am Zug', s=' w zug')
+            nltxt = Dgt.DISPLAY_TEXT(l='wit aan zet', m='wit zet ', s=' w zet')
             frtxt = Dgt.DISPLAY_TEXT(l='aux blancs ', m='mvt bl  ', s='mvt bl')
             estxt = Dgt.DISPLAY_TEXT(l='lado blanco', m='lado W  ', s='lado w')
             ittxt = Dgt.DISPLAY_TEXT(l='lato bianco', m='lato b  ', s='lato b')
         if text_id == 'sideblack':
             entxt = Dgt.DISPLAY_TEXT(l='side move B', m='side B  ', s='side b')
-            detxt = Dgt.DISPLAY_TEXT(l='S am Zug   ', m='S am Zug', s='s zug ')
-            nltxt = Dgt.DISPLAY_TEXT(l='zw aan zet ', m='zw zet  ', s='z zet ')
+            detxt = Dgt.DISPLAY_TEXT(l='S am Zug   ', m='S am Zug', s=' s zug')
+            nltxt = Dgt.DISPLAY_TEXT(l='zw aan zet ', m='zw zet  ', s=' z zet')
             frtxt = Dgt.DISPLAY_TEXT(l='aux noirs  ', m='mvt n   ', s='mvt n ')
             estxt = Dgt.DISPLAY_TEXT(l='lado negro ', m='lado B  ', s='lado b')
             ittxt = Dgt.DISPLAY_TEXT(l='lato nero  ', m='lato n  ', s='lato n')
@@ -531,8 +531,8 @@ class DgtTranslate(object):
             estxt = entxt
             ittxt = entxt
         if text_id == 'system_battery_menu':
-            entxt = Dgt.DISPLAY_TEXT(l='BT battery ', m='Battery ', s='batter')
-            detxt = Dgt.DISPLAY_TEXT(l='BT Batterie', m='Batterie', s='batter')
+            entxt = Dgt.DISPLAY_TEXT(l='BT battery ', m='Battery ', s=' bt bat')
+            detxt = Dgt.DISPLAY_TEXT(l='BT Batterie', m='Batterie', s=' bt bat')
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
@@ -582,7 +582,7 @@ class DgtTranslate(object):
             entxt = Dgt.DISPLAY_TEXT(l='repetition ', m='rep pos ', s='reppos')
             detxt = Dgt.DISPLAY_TEXT(l='Wiederholg ', m='Wiederhg', s='wdrhlg')
             nltxt = Dgt.DISPLAY_TEXT(l='zetherhalin', m='herhalin', s='herhal')
-            frtxt = Dgt.DISPLAY_TEXT(l='3ieme rep  ', m='3iem rep', s='3 rep ')
+            frtxt = Dgt.DISPLAY_TEXT(l='3ieme rep  ', m='3iem rep', s=' 3 rep')
             estxt = Dgt.DISPLAY_TEXT(l='repeticion ', m='repite 3', s='rep 3 ')
             ittxt = Dgt.DISPLAY_TEXT(l='3 ripetiz  ', m='3 ripeti', s='3 ripe')
         if text_id == 'gameresult_abort':
@@ -596,7 +596,7 @@ class DgtTranslate(object):
         if text_id == 'gameresult_white':
             wait = True
             entxt = Dgt.DISPLAY_TEXT(l='W wins     ', m='W wins  ', s='w wins')
-            detxt = Dgt.DISPLAY_TEXT(l='W gewinnt  ', m='W Gewinn', s='w gew ')
+            detxt = Dgt.DISPLAY_TEXT(l='W gewinnt  ', m='W Gewinn', s=' w gew')
             nltxt = Dgt.DISPLAY_TEXT(l='wit wint   ', m='wit wint', s='w wint')
             frtxt = Dgt.DISPLAY_TEXT(l='B gagne    ', m='B gagne ', s='b gagn')
             estxt = Dgt.DISPLAY_TEXT(l='B ganan    ', m='B ganan ', s='b gana')
@@ -604,7 +604,7 @@ class DgtTranslate(object):
         if text_id == 'gameresult_black':
             wait = True
             entxt = Dgt.DISPLAY_TEXT(l='B wins     ', m='B wins  ', s='b wins')
-            detxt = Dgt.DISPLAY_TEXT(l='S gewinnt  ', m='S Gewinn', s='s gew ')
+            detxt = Dgt.DISPLAY_TEXT(l='S gewinnt  ', m='S Gewinn', s=' s gew')
             nltxt = Dgt.DISPLAY_TEXT(l='zwart wint ', m='zw wint ', s='z wint')
             frtxt = Dgt.DISPLAY_TEXT(l='N gagne    ', m='N gagne ', s='n gagn')
             estxt = Dgt.DISPLAY_TEXT(l='N ganan    ', m='N ganan ', s='n gana')
