@@ -199,7 +199,8 @@ class DgtMenu(object):
         self.picochess_displayed.add(dev)
         self.updt_tags = get_tags()
         try:
-            self.updt_version = self.updt_tags.index(version)
+            # self.updt_version = self.updt_tags.index(version)
+            self.updt_version = [item[1] for item in self.updt_tags].index(version)
         except ValueError:
             self.updt_version = len(self.updt_tags) - 1
 
@@ -1529,7 +1530,7 @@ class DgtMenu(object):
 
     def updt_middle(self, dev):
         self.updt_devs.add(dev)
-        text = self.dgttranslate.text('B00_updt_version', self.updt_tags[self.updt_version], devs=self.updt_devs)
+        text = self.dgttranslate.text('B00_updt_version', self.updt_tags[self.updt_version][1], devs=self.updt_devs)
         text.rd = ClockIcons.DOT
         logging.debug('enter update menu dev: %s', dev)
         self.updt_top = True
@@ -1537,25 +1538,30 @@ class DgtMenu(object):
 
     def updt_right(self):
         self.updt_version = (self.updt_version + 1) % len(self.updt_tags)
-        text = self.dgttranslate.text('B00_updt_version', self.updt_tags[self.updt_version], devs=self.updt_devs)
+        text = self.dgttranslate.text('B00_updt_version', self.updt_tags[self.updt_version][1], devs=self.updt_devs)
         text.rd = ClockIcons.DOT
         return text
 
     def updt_left(self):
         self.updt_version = (self.updt_version - 1) % len(self.updt_tags)
-        text = self.dgttranslate.text('B00_updt_version', self.updt_tags[self.updt_version], devs=self.updt_devs)
+        text = self.dgttranslate.text('B00_updt_version', self.updt_tags[self.updt_version][1], devs=self.updt_devs)
         text.rd = ClockIcons.DOT
         return text
 
-    def updt_down(self):
-        text = self.dgttranslate.text('B00_errormenu', devs=self.updt_devs)
-        return text
+    def updt_down(self, dev):
+        logging.debug('leave update menu dev: %s', dev)
+        self.updt_top = False
+        self.updt_devs.discard(dev)
+        self.enter_top_menu()
+        # text = self.dgttranslate.text('B00_errormenu', devs=self.updt_devs)
+        # text = self.dgttranslate.text('B00_updt_version', self.updt_tags[self.updt_version][0], devs=self.updt_devs)
+        # return text
+        return self.updt_tags[self.updt_version][0]
 
     def updt_up(self, dev):
-        if self.updt_top:
-            logging.debug('leave update menu dev: %s', dev)
-            self.updt_top = False
-            self.updt_devs.discard(dev)
+        logging.debug('leave update menu dev: %s', dev)
+        self.updt_top = False
+        self.updt_devs.discard(dev)
         text = self.enter_top_menu()
         return text
 

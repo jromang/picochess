@@ -83,6 +83,7 @@ class EventApi():
     OUT_OF_TIME = 'EVT_OUT_OF_TIME'  # Clock flag fallen
     # Special events
     EXIT_MENU = 'EVT_EXIT_MENU'  # User exists the menu
+    UPDATE = 'EVT_UPDATE'  # User wants to upgrade/downgrade picochess
 
 
 class MessageApi():
@@ -262,3 +263,4 @@ class Event():
     OUT_OF_TIME = ClassFactory(EventApi.OUT_OF_TIME, ['color'])
     # special events
     EXIT_MENU = ClassFactory(EventApi.EXIT_MENU, [])
+    UPDATE = ClassFactory(EventApi.UPDATE, ['tag'])

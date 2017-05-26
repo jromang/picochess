@@ -176,9 +176,9 @@ def hours_minutes_seconds(seconds: int):
 def get_tags():
     """Get the last 5 tags from git."""
     git = 'git.exe' if platform.system() == 'Windows' else 'git'
-    tags = [compile(r'[^\d]+').sub('', tags)
+    tags = [(tags, compile(r'[^\d]+').sub('', tags))
             for tags in Popen([git, 'tag'], stdout=PIPE).communicate()[0].decode(encoding='UTF-8').split('\n')[-4:-1]]
-    return tags  # returns something like ['085', '086', '087']
+    return tags  # returns something like [('v0.85', '085'), ('v0.86', 086'), ('v0.87', '087')]
 
 
 def update_picochess(dgtpi: bool, auto_reboot: bool, dgttranslate: DgtTranslate):

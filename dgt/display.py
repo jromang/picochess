@@ -190,8 +190,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
     def _process_button4(self, dev):
         logging.debug('(%s) clock handle button 4 press', dev)
         if self._inside_updt_menu():
-            text = self.dgtmenu.updt_down()
-            DispatchDgt.fire(text)
+            tag = self.dgtmenu.updt_down(dev)
+            Observable.fire(Event.UPDATE(tag=tag))
         else:
             text = self.dgtmenu.main_down()  # button4 can exit the menu, so check
             if text:
