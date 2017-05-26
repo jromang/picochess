@@ -25,6 +25,7 @@ from dgt.translate import DgtTranslate
 from dgt.board import DgtBoard
 from threading import Lock, Timer
 from ctypes import cdll, c_byte, create_string_buffer, pointer
+from platform import machine
 
 
 class DgtPi(DgtIface):
@@ -35,7 +36,7 @@ class DgtPi(DgtIface):
         super(DgtPi, self).__init__(dgttranslate, dgtboard)
 
         self.lib_lock = Lock()
-        self.lib = cdll.LoadLibrary('etc/dgtpicom.so')
+        self.lib = cdll.LoadLibrary('etc/dgtpicom.x86.so' if machine() == 'x86_64' else 'etc/dgtpicom.so')
 
         self._startup_i2c_clock()
         incoming_clock_thread = Timer(0, self._process_incoming_clock_forever)
