@@ -164,6 +164,7 @@ class DgtBoard(object):
                 else:
                     text_l, text_m, text_s = 'BT e-Board', 'BT board', 'ok bt'
                 channel = 'BT'
+                self.ask_battery_status()
             self.bconn_text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, wait=True, beep=False, maxtime=1.1,
                                                devs={'i2c', 'web'})  # serial clock lateron
             DisplayMsg.show(Message.DGT_EBOARD_VERSION(text=self.bconn_text, channel=channel))
@@ -402,6 +403,9 @@ class DgtBoard(object):
             except struct.error:  # can happen, when plugin board-cable again
                 pass
 
+    def ask_battery_status(self):
+        self.write_command([DgtCmd.DGT_SEND_BATTERY_STATUS])  # Get battery status
+
     def startup_serial_clock(self):
         """ask the clock for its version."""
         self.clock_lock = False
@@ -415,12 +419,12 @@ class DgtBoard(object):
         self.write_command([DgtCmd.DGT_SEND_VERSION])  # Get board version
 
     def _watchdog(self):
-        self.write_command([DgtCmd.DGT_RETURN_SERIALNR])
         if self.clock_lock and not self.is_pi:
             if time.time() - self.clock_lock > 2:
                 logging.warning('(ser) clock is locked over 2secs')
                 self.clock_lock = False  # display no warning
                 self.write_command(self.last_clock_command)
+        self.write_command([DgtCmd.DGT_RETURN_SERIALNR])
 
     def _open_bluetooth(self):
         if self.bt_state == -1:
