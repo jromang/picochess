@@ -530,6 +530,13 @@ class DgtTranslate(object):
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
+        if text_id == 'system_battery_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='BT battery ', m='Battery ', s='batter')
+            detxt = Dgt.DISPLAY_TEXT(l='BT Batterie', m='Batterie', s='batter')
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
         if text_id == 'gameresult_mate':
             wait = True
             entxt = Dgt.DISPLAY_TEXT(l='mate       ', m='mate    ', s='mate  ')
@@ -853,6 +860,13 @@ class DgtTranslate(object):
             frtxt = Dgt.DISPLAY_TEXT(l='Version ' + msg, m='Vers ' + msg, s='ver' + msg)
             estxt = Dgt.DISPLAY_TEXT(l='Version ' + msg, m='Vers ' + msg, s='ver' + msg)
             ittxt = Dgt.DISPLAY_TEXT(l='Versione' + msg, m='Vers ' + msg, s='ver' + msg)
+        if text_id == 'bat_percent':
+            entxt = Dgt.DISPLAY_TEXT(l='battery ' + msg, m='battr' + msg, s='bat' + msg)
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
 
         for txt in [entxt, detxt, nltxt, frtxt, estxt, ittxt]:
             if txt:

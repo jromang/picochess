@@ -89,6 +89,8 @@ class MenuState(object):
     SYS_DISP_PONDER = 772000
     SYS_DISP_PONDER_INTERVAL = 772100  # 1-8
 
+    SYS_BATTERY = 780000
+
 
 class DgtMenu(object):
 
@@ -188,6 +190,8 @@ class DgtMenu(object):
         self.updt_devs = set()  # list of devices which are inside the update-menu
         self.updt_tags = []
         self.updt_version = 0  # index to current version
+
+        self.battery = '-NA'  # standard value: NotAvailable (discharging)
 
     def inside_updt_menu(self):
         return self.updt_top
@@ -605,6 +609,12 @@ class DgtMenu(object):
         text = self.dgttranslate.text('B00_ponder_interval', str(self.menu_system_display_ponderinterval))
         return text
 
+    def enter_sys_battery_menu(self):
+        """Set the menu state."""
+        self.state = MenuState.SYS_BATTERY
+        text = self.dgttranslate.text(self.menu_system.value)
+        return text
+
     def main_up(self):
         """Change the menu state after UP action."""
         text = self.dgttranslate.text('Y00_errormenu')
@@ -731,6 +741,9 @@ class DgtMenu(object):
 
         elif self.state == MenuState.SYS_DISP_PONDER_INTERVAL:
             text = self.enter_sys_disp_ponder_menu()
+
+        elif self.state == MenuState.SYS_BATTERY:
+            text = self.enter_sys_menu()
 
         else:  # Default
             pass
@@ -901,6 +914,8 @@ class DgtMenu(object):
                 text = self.enter_sys_voice_menu()
             if self.menu_system == System.DISPLAY:
                 text = self.enter_sys_disp_menu()
+            if self.menu_system == System.BATTERY:
+                text = self.enter_sys_battery_menu()
 
         elif self.state == MenuState.SYS_VERS:
             # do action!
@@ -1067,6 +1082,12 @@ class DgtMenu(object):
             DispatchDgt.fire(text)
             text = self.save_choices()
 
+        elif self.state == MenuState.SYS_BATTERY:
+            # do action!
+            text = self.dgttranslate.text('B10_bat_percent', self.battery)
+            DispatchDgt.fire(text)
+            text = self.save_choices()
+
         else:  # Default
             pass
         self.current_text = text
@@ -1176,7 +1197,7 @@ class DgtMenu(object):
             text = self.dgttranslate.text(self.menu_top.value)
 
         elif self.state == MenuState.SYS_VERS:
-            self.state = MenuState.SYS_DISP
+            self.state = MenuState.SYS_BATTERY
             self.menu_system = SystemLoop.prev(self.menu_system)
             text = self.dgttranslate.text(self.menu_system.value)
 
@@ -1278,6 +1299,11 @@ class DgtMenu(object):
             if self.menu_system_display_ponderinterval < 1:
                 self.menu_system_display_ponderinterval = 8
             text = self.dgttranslate.text('B00_ponder_interval', str(self.menu_system_display_ponderinterval))
+
+        elif self.state == MenuState.SYS_BATTERY:
+            self.state = MenuState.SYS_DISP
+            self.menu_system = SystemLoop.prev(self.menu_system)
+            text = self.dgttranslate.text(self.menu_system.value)
 
         else:  # Default
             pass
@@ -1466,7 +1492,7 @@ class DgtMenu(object):
             text = self.dgttranslate.text('B00_voice_speed', str(self.menu_system_voice_factor))
 
         elif self.state == MenuState.SYS_DISP:
-            self.state = MenuState.SYS_VERS
+            self.state = MenuState.SYS_BATTERY
             self.menu_system = SystemLoop.next(self.menu_system)
             text = self.dgttranslate.text(self.menu_system.value)
 
@@ -1490,6 +1516,11 @@ class DgtMenu(object):
             if self.menu_system_display_ponderinterval > 8:
                 self.menu_system_display_ponderinterval = 1
             text = self.dgttranslate.text('B00_ponder_interval', str(self.menu_system_display_ponderinterval))
+
+        elif self.state == MenuState.SYS_BATTERY:
+            self.state = MenuState.SYS_VERS
+            self.menu_system = SystemLoop.next(self.menu_system)
+            text = self.dgttranslate.text(self.menu_system.value)
 
         else:  # Default
             pass
@@ -1553,9 +1584,6 @@ class DgtMenu(object):
         self.updt_top = False
         self.updt_devs.discard(dev)
         self.enter_top_menu()
-        # text = self.dgttranslate.text('B00_errormenu', devs=self.updt_devs)
-        # text = self.dgttranslate.text('B00_updt_version', self.updt_tags[self.updt_version][0], devs=self.updt_devs)
-        # return text
         return self.updt_tags[self.updt_version][0]
 
     def updt_up(self, dev):

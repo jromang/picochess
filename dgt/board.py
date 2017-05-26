@@ -334,7 +334,7 @@ class DgtBoard(object):
         elif message_id == DgtMsg.DGT_MSG_BATTERY_STATUS:
             if message_length != 9:
                 logging.warning('illegal length in data')
-            logging.debug(message)
+            DisplayMsg.show(Message.BATTERY(percent=message[0]))
 
         else:  # Default
             logging.warning('message not handled [%s]', DgtMsg(message_id))

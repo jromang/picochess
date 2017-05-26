@@ -138,6 +138,7 @@ class MessageApi():
 
     EXIT_MENU = 'MSG_EXIT_MENU'  # User exits the menu
     WRONG_FEN = 'MSG_WRONG_FEN'  # User sends a wrong placement of pieces (timed)
+    BATTERY = 'MSG_BATTERY'  # percent of BT battery
 
 
 class DgtApi():
@@ -224,6 +225,7 @@ class Message():
 
     EXIT_MENU = ClassFactory(MessageApi.EXIT_MENU, [])
     WRONG_FEN = ClassFactory(MessageApi.WRONG_FEN, [])
+    BATTERY = ClassFactory(MessageApi.BATTERY, ['percent'])
 
 
 class Event():

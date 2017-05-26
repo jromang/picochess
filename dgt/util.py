@@ -168,6 +168,7 @@ class System(enum.Enum):
     LOGFILE = 'B00_system_logfile_menu'
     VOICE = 'B00_system_voice_menu'
     DISPLAY = 'B00_system_display_menu'
+    BATTERY = 'B00_system_battery_menu'
 
 
 class SystemLoop(object):
@@ -189,12 +190,16 @@ class SystemLoop(object):
         elif m == System.VOICE:
             return System.DISPLAY
         elif m == System.DISPLAY:
+            return System.BATTERY
+        elif m == System.BATTERY:
             return System.VERSION
         return 'errSystNext'
 
     @staticmethod
     def prev(m: System):
         if m == System.VERSION:
+            return System.BATTERY
+        if m == System.BATTERY:
             return System.DISPLAY
         if m == System.DISPLAY:
             return System.VOICE

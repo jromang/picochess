@@ -780,6 +780,15 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         elif isinstance(message, Message.WRONG_FEN):
             DispatchDgt.fire(self.dgttranslate.text('C10_setpieces'))
 
+        elif isinstance(message, Message.BATTERY):
+            if message.percent == 0x7f:
+                percent = ' NA'
+            elif message.percent > 99:
+                percent = ' 99'
+            else:
+                percent = str(message.percent)
+            self.dgtmenu.battery = percent
+
         else:  # Default
             # print(message)
             pass
