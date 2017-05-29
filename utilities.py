@@ -173,39 +173,42 @@ def hours_minutes_seconds(seconds: int):
     return hours, mins, secs
 
 
+def do_popen(command, log=True, force_en_env=False):
+    """Connect via Popen and log the result."""
+    if force_en_env:  # force an english environment
+        force_en_env = os.environ.copy()
+        force_en_env['LC_ALL'] = 'C'
+        output = Popen(command, stdout=PIPE, env=force_en_env).communicate()[0].decode(encoding='UTF-8')
+    else:
+        output = Popen(command, stdout=PIPE).communicate()[0].decode(encoding='UTF-8')
+    if log:
+        logging.debug(output)
+    return output
+
+
 def get_tags():
-    """Get the last 5 tags from git."""
+    """Get the last 3 tags from git."""
     git = 'git.exe' if platform.system() == 'Windows' else 'git'
-    tags = [(tags, compile(r'[^\d]+').sub('', tags))
-            for tags in Popen([git, 'tag'], stdout=PIPE).communicate()[0].decode(encoding='UTF-8').split('\n')[-4:-1]]
+    tags = [(tags, compile(r'[^\d]+').sub('', tags)) for tags in do_popen([git, 'tag']).split('\n')[-4:-1]]
     return tags  # returns something like [('v0.85', '085'), ('v0.86', 086'), ('v0.87', '087')]
 
 
 def update_picochess(dgtpi: bool, auto_reboot: bool, dgttranslate: DgtTranslate):
     """Update picochess from git."""
-    def do_command(command):
-        return Popen(command, stdout=PIPE).communicate()[0].decode(encoding='UTF-8')
-
     git = 'git.exe' if platform.system() == 'Windows' else 'git'
 
-    branch = do_command([git, 'rev-parse', '--abbrev-ref', 'HEAD']).rstrip()
+    branch = do_popen([git, 'rev-parse', '--abbrev-ref', 'HEAD'], log=False).rstrip()
     if branch == 'stable' or branch == 'master':
         # Fetch remote repo
-        output = do_command([git, 'remote', 'update'])
-        logging.debug(output)
-        # Check if update is needed - but first force an english environment for it
-        force_en_env = os.environ.copy()
-        force_en_env['LC_ALL'] = 'C'
-        output = Popen([git, 'status', '-uno'], stdout=PIPE, env=force_en_env).communicate()[0].decode(encoding='UTF-8')
-        logging.debug(output)
+        do_popen([git, 'remote', 'update'])
+        # Check if update is needed - need to make sure, we get english answers
+        output = do_popen([git, 'status', '-uno'], force_en_env=True)
         if 'up-to-date' not in output:
             DispatchDgt.fire(dgttranslate.text('Y25_update'))
             # Update
             logging.debug('updating picochess')
-            output = do_command([git, 'pull', 'origin', branch])
-            logging.debug(output)
-            output = do_command(['pip3', 'install', '-r', 'requirements.txt'])
-            logging.debug(output)
+            do_popen([git, 'pull', 'origin', branch])
+            do_popen(['pip3', 'install', '-r', 'requirements.txt'])
             if auto_reboot:
                 reboot(dgtpi, dev='web')
             else:
