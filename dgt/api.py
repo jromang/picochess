@@ -131,7 +131,6 @@ class MessageApi():
     NEW_DEPTH = 'MSG_NEW_DEPTH'  # Shows a new depth
     ALTERNATIVE_MOVE = 'MSG_ALTERNATIVE_MOVE'  # User wants another move to be calculated
     SWITCH_SIDES = 'MSG_SWITCH_SIDES'  # Forget the engines move, and let it be user's turn
-    # KEYBOARD_MOVE = 'MSG_KEYBOARD_MOVE'  # Sends back the fen for a given move (needed for keyboard.py)
     SYSTEM_SHUTDOWN = 'MSG_SYSTEM_SHUTDOWN'  # Sends a Shutdown
     SYSTEM_REBOOT = 'MSG_SYSTEM_REBOOT'  # Sends a Reboot
     SET_VOICE = 'MSG_SET_VOICE'  # User chooses a new voice
@@ -139,6 +138,7 @@ class MessageApi():
     EXIT_MENU = 'MSG_EXIT_MENU'  # User exits the menu
     WRONG_FEN = 'MSG_WRONG_FEN'  # User sends a wrong placement of pieces (timed)
     BATTERY = 'MSG_BATTERY'  # percent of BT battery
+    UPDATE = 'MSG_UPDATE'  # User wants to update picochess
 
 
 class DgtApi():
@@ -218,7 +218,6 @@ class Message():
     NEW_DEPTH = ClassFactory(MessageApi.NEW_DEPTH, ['depth'])
     ALTERNATIVE_MOVE = ClassFactory(MessageApi.ALTERNATIVE_MOVE, ['game'])
     SWITCH_SIDES = ClassFactory(MessageApi.SWITCH_SIDES, ['game', 'move'])
-    # KEYBOARD_MOVE = ClassFactory(MessageApi.KEYBOARD_MOVE, ['fen'])
     SYSTEM_SHUTDOWN = ClassFactory(MessageApi.SYSTEM_SHUTDOWN, [])
     SYSTEM_REBOOT = ClassFactory(MessageApi.SYSTEM_REBOOT, [])
     SET_VOICE = ClassFactory(MessageApi.SET_VOICE, ['type', 'lang', 'speaker', 'speed'])
@@ -226,6 +225,7 @@ class Message():
     EXIT_MENU = ClassFactory(MessageApi.EXIT_MENU, [])
     WRONG_FEN = ClassFactory(MessageApi.WRONG_FEN, [])
     BATTERY = ClassFactory(MessageApi.BATTERY, ['percent'])
+    UPDATE = ClassFactory(MessageApi.UPDATE, [])
 
 
 class Event():

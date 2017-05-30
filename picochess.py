@@ -976,8 +976,8 @@ def main():
                 DisplayMsg.show(Message.EXIT_MENU())
 
             elif isinstance(event, Event.UPDATE):
+                DisplayMsg.show(Message.UPDATE())
                 checkout_tag(event.tag)
-                DisplayMsg.show(Message.EXIT_MENU())
 
             else:  # Default
                 logging.warning("event not handled : [%s]", event)

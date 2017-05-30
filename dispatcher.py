@@ -36,7 +36,7 @@ class Dispatcher(DispatchDgt, Thread):
         self.maxtimer = {}
         self.maxtimer_running = {}
         self.clock_connected = {}
-        self.time_factor = 1  # This is for testing the duration - remove it lateron!
+        self.time_factor = 1*3  # This is for testing the duration - remove it lateron!
         self.tasks = {}  # delayed task array
 
         self.display_hash = {}  # Hash value of clock's display

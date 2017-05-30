@@ -203,7 +203,6 @@ class DgtMenu(object):
         self.picochess_displayed.add(dev)
         self.updt_tags = get_tags()
         try:
-            # self.updt_version = self.updt_tags.index(version)
             self.updt_version = [item[1] for item in self.updt_tags].index(version)
         except ValueError:
             self.updt_version = len(self.updt_tags) - 1
