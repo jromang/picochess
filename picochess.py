@@ -31,7 +31,7 @@ import gc
 from engine import UciEngine, read_engine_ini
 
 from timecontrol import TimeControl
-from utilities import get_location, update_picochess, get_opening_books, shutdown, reboot
+from utilities import get_location, update_picochess, get_opening_books, shutdown, reboot, checkout_tag
 from utilities import Observable, DisplayMsg, version, evt_queue
 import logging
 import time
@@ -976,7 +976,7 @@ def main():
                 DisplayMsg.show(Message.EXIT_MENU())
 
             elif isinstance(event, Event.UPDATE):
-                print(event.tag)
+                checkout_tag(event.tag)
                 DisplayMsg.show(Message.EXIT_MENU())
 
             else:  # Default

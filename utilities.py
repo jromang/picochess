@@ -189,8 +189,15 @@ def do_popen(command, log=True, force_en_env=False):
 def get_tags():
     """Get the last 3 tags from git."""
     git = 'git.exe' if platform.system() == 'Windows' else 'git'
-    tags = [(tags, compile(r'[^\d]+').sub('', tags)) for tags in do_popen([git, 'tag']).split('\n')[-4:-1]]
+    tags = [(tags, compile(r'[^\d]+').sub('', tags)) for tags in do_popen([git, 'tag'], log=False).split('\n')[-4:-1]]
     return tags  # returns something like [('v0.85', '085'), ('v0.86', 086'), ('v0.87', '087')]
+
+
+def checkout_tag(tag):
+    """Update picochess by tag from git."""
+    git = 'git.exe' if platform.system() == 'Windows' else 'git'
+    do_popen([git, 'checkout', tag])
+    do_popen(['pip3', 'install', '-r', 'requirements.txt'])
 
 
 def update_picochess(dgtpi: bool, auto_reboot: bool, dgttranslate: DgtTranslate):
