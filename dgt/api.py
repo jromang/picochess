@@ -83,7 +83,7 @@ class EventApi():
     OUT_OF_TIME = 'EVT_OUT_OF_TIME'  # Clock flag fallen
     # Special events
     EXIT_MENU = 'EVT_EXIT_MENU'  # User exists the menu
-    UPDATE = 'EVT_UPDATE'  # User wants to upgrade/downgrade picochess
+    UPDATE_PICO = 'EVT_UPDATE'  # User wants to upgrade/downgrade picochess
 
 
 class MessageApi():
@@ -138,7 +138,7 @@ class MessageApi():
     EXIT_MENU = 'MSG_EXIT_MENU'  # User exits the menu
     WRONG_FEN = 'MSG_WRONG_FEN'  # User sends a wrong placement of pieces (timed)
     BATTERY = 'MSG_BATTERY'  # percent of BT battery
-    UPDATE = 'MSG_UPDATE'  # User wants to update picochess
+    UPDATE_PICO = 'MSG_UPDATE'  # User wants to update picochess
 
 
 class DgtApi():
@@ -225,7 +225,7 @@ class Message():
     EXIT_MENU = ClassFactory(MessageApi.EXIT_MENU, [])
     WRONG_FEN = ClassFactory(MessageApi.WRONG_FEN, [])
     BATTERY = ClassFactory(MessageApi.BATTERY, ['percent'])
-    UPDATE = ClassFactory(MessageApi.UPDATE, [])
+    UPDATE_PICO = ClassFactory(MessageApi.UPDATE_PICO, [])
 
 
 class Event():
@@ -265,4 +265,4 @@ class Event():
     OUT_OF_TIME = ClassFactory(EventApi.OUT_OF_TIME, ['color'])
     # special events
     EXIT_MENU = ClassFactory(EventApi.EXIT_MENU, [])
-    UPDATE = ClassFactory(EventApi.UPDATE, ['tag'])
+    UPDATE_PICO = ClassFactory(EventApi.UPDATE_PICO, ['tag'])

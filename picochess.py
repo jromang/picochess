@@ -975,9 +975,10 @@ def main():
             elif isinstance(event, Event.EXIT_MENU):
                 DisplayMsg.show(Message.EXIT_MENU())
 
-            elif isinstance(event, Event.UPDATE):
-                DisplayMsg.show(Message.UPDATE())
+            elif isinstance(event, Event.UPDATE_PICO):
+                DisplayMsg.show(Message.UPDATE_PICO())
                 checkout_tag(event.tag)
+                DisplayMsg.show(Message.EXIT_MENU())
 
             else:  # Default
                 logging.warning("event not handled : [%s]", event)

@@ -178,31 +178,36 @@ def do_popen(command, log=True, force_en_env=False):
     if force_en_env:  # force an english environment
         force_en_env = os.environ.copy()
         force_en_env['LC_ALL'] = 'C'
-        output = Popen(command, stdout=PIPE, env=force_en_env).communicate()[0].decode(encoding='UTF-8')
+        stdout, stderr = Popen(command, stdout=PIPE, stderr=PIPE, env=force_en_env).communicate()
     else:
-        output = Popen(command, stdout=PIPE).communicate()[0].decode(encoding='UTF-8')
+        stdout, stderr = Popen(command, stdout=PIPE, stderr=PIPE).communicate()
     if log:
-        logging.debug(output)
-    return output
+        logging.debug([output.decode(encoding='UTF-8') for output in [stdout, stderr]])
+    return stdout.decode(encoding='UTF-8')
+
+
+def git_name():
+    """Get the git execute name."""
+    return 'git.exe' if platform.system() == 'Windows' else 'git'
 
 
 def get_tags():
     """Get the last 3 tags from git."""
-    git = 'git.exe' if platform.system() == 'Windows' else 'git'
+    git = git_name()
     tags = [(tags, compile(r'[^\d]+').sub('', tags)) for tags in do_popen([git, 'tag'], log=False).split('\n')[-4:-1]]
-    return tags  # returns something like [('v0.85', '085'), ('v0.86', 086'), ('v0.87', '087')]
+    return tags  # returns something like [('v0.86', 086'), ('v0.87', '087'), ('v0.88', '088')]
 
 
 def checkout_tag(tag):
     """Update picochess by tag from git."""
-    git = 'git.exe' if platform.system() == 'Windows' else 'git'
+    git = git_name()
     do_popen([git, 'checkout', tag])
     do_popen(['pip3', 'install', '-r', 'requirements.txt'])
 
 
 def update_picochess(dgtpi: bool, auto_reboot: bool, dgttranslate: DgtTranslate):
     """Update picochess from git."""
-    git = 'git.exe' if platform.system() == 'Windows' else 'git'
+    git = git_name()
 
     branch = do_popen([git, 'rev-parse', '--abbrev-ref', 'HEAD'], log=False).rstrip()
     if branch == 'stable' or branch == 'master':

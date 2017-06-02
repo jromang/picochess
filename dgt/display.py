@@ -191,7 +191,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         logging.debug('(%s) clock handle button 4 press', dev)
         if self._inside_updt_menu():
             tag = self.dgtmenu.updt_down(dev)
-            Observable.fire(Event.UPDATE(tag=tag))
+            Observable.fire(Event.UPDATE_PICO(tag=tag))
         else:
             text = self.dgtmenu.main_down()  # button4 can exit the menu, so check
             if text:
@@ -780,9 +780,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         elif isinstance(message, Message.WRONG_FEN):
             DispatchDgt.fire(self.dgttranslate.text('C10_setpieces'))
 
-        elif isinstance(message, Message.UPDATE):
-            DispatchDgt.fire(self.dgttranslate.text('Y25_update'))
-            self._exit_display()
+        elif isinstance(message, Message.UPDATE_PICO):
+            DispatchDgt.fire(self.dgttranslate.text('Y00_update'))
 
         elif isinstance(message, Message.BATTERY):
             if message.percent == 0x7f:
