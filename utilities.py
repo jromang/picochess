@@ -34,7 +34,7 @@ from dgt.translate import DgtTranslate
 from dgt.api import Dgt
 
 # picochess version
-version = '088'
+version = '089'
 
 evt_queue = queue.Queue()
 dispatch_queue = queue.Queue()
