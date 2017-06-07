@@ -28,7 +28,8 @@ import threading
 import copy
 import gc
 
-from engine import UciEngine, read_engine_ini
+from uci.engine import UciEngine
+from uci.util import read_engine_ini, get_installed_engines
 
 from timecontrol import TimeControl
 from utilities import get_location, update_picochess, get_opening_books, shutdown, reboot, checkout_tag
@@ -455,8 +456,6 @@ def main():
 
     def get_engine_level_dict(engine_level):
         """Transfer an engine level to its level_dict plus an index."""
-        from engine import get_installed_engines
-
         installed_engines = get_installed_engines(engine.get_shell(), engine.get_file())
         for index in range(0, len(installed_engines)):
             eng = installed_engines[index]

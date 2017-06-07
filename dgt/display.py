@@ -28,7 +28,7 @@ from dgt.util import ClockSide, ClockIcons, BeepLevel, Mode, GameResult, TimeMod
 from dgt.api import Dgt, Event, Message
 
 from timecontrol import TimeControl
-from engine import get_installed_engines
+from uci.util import get_installed_engines
 import threading
 from configobj import ConfigObj
 
