@@ -21,7 +21,7 @@ from math import ceil
 import logging
 import copy
 import queue
-from utilities import DisplayMsg, Observable, DispatchDgt
+from utilities import DisplayMsg, Observable, DispatchDgt, write_picochess_ini
 from dgt.translate import DgtTranslate
 from dgt.menu import DgtMenu
 from dgt.util import ClockSide, ClockIcons, BeepLevel, Mode, GameResult, TimeMode
@@ -30,7 +30,6 @@ from dgt.api import Dgt, Event, Message
 from timecontrol import TimeControl
 from uci.util import get_installed_engines
 import threading
-from configobj import ConfigObj
 
 
 class DgtDisplay(DisplayMsg, threading.Thread):
@@ -313,9 +312,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 text = self.dgttranslate.text('M10_level', msg)
                 text.wait = self._exit_menu()
                 logging.debug('map: New level %s', msg)
-                config = ConfigObj('picochess.ini')
-                config['engine-level'] = msg
-                config.write()
+                write_picochess_ini('engine-level', msg)
                 Observable.fire(Event.LEVEL(options=level_dict[msg], level_text=text))
             else:
                 logging.debug('engine doesnt support levels')
@@ -353,9 +350,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                     else:
                         msg = None
                         options = {}
-                    config = ConfigObj('picochess.ini')
-                    config['engine-level'] = msg
-                    config.write()
+                    write_picochess_ini('engine-level', msg)
                     Observable.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options=options, show_ok=False))
                     self.dgtmenu.set_engine_restart(True)
                 except IndexError:

@@ -33,6 +33,8 @@ from re import compile, sub
 from dgt.translate import DgtTranslate
 from dgt.api import Dgt
 
+from configobj import ConfigObj, ConfigObjError, DuplicateError
+
 # picochess version
 version = '089'
 
@@ -270,3 +272,13 @@ def get_location():
         return city + country_name + country_code, ext_ip, int_ip
     except:
         return '?', None, None
+
+
+def write_picochess_ini(key: str, value):
+    """update picochess.ini config file with key/value."""
+    try:
+        config = ConfigObj('picochess.ini')
+        config[key] = value
+        config.write()
+    except (ConfigObjError, DuplicateError) as conf_exc:
+        logging.exception(conf_exc)

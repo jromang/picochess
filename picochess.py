@@ -33,7 +33,7 @@ from uci.util import read_engine_ini, get_installed_engines
 
 from timecontrol import TimeControl
 from utilities import get_location, update_picochess, get_opening_books, shutdown, reboot, checkout_tag
-from utilities import Observable, DisplayMsg, version, evt_queue
+from utilities import Observable, DisplayMsg, version, evt_queue, write_picochess_ini
 import logging
 import time
 import queue
@@ -52,7 +52,6 @@ from dgt.menu import DgtMenu
 from dispatcher import Dispatcher
 
 from logging.handlers import RotatingFileHandler
-from configobj import ConfigObj
 
 
 class AlternativeMover:
@@ -686,9 +685,7 @@ def main():
                 stop_fen_timer()
 
             elif isinstance(event, Event.NEW_ENGINE):
-                config = ConfigObj('picochess.ini')
-                config['engine'] = event.eng['file']
-                config.write()
+                write_picochess_ini('engine', event.eng['file'])
                 old_file = engine.get_file()
                 engine_shutdown = True
                 # Stop the old engine cleanly
@@ -912,9 +909,7 @@ def main():
                 set_wait_state(msg)
 
             elif isinstance(event, Event.SET_OPENING_BOOK):
-                config = ConfigObj('picochess.ini')
-                config['book'] = event.book['file']
-                config.write()
+                write_picochess_ini('book', event.book['file'])
                 logging.debug("changing opening book [%s]", event.book['file'])
                 bookreader = chess.polyglot.open_reader(event.book['file'])
                 DisplayMsg.show(Message.OPENING_BOOK(book_text=event.book_text, show_ok=event.show_ok))
@@ -924,14 +919,12 @@ def main():
                 time_control.stop(log=False)
                 time_control = TimeControl(**event.tc_init)
                 tc_init = time_control.get_parameters()
-                config = ConfigObj('picochess.ini')
                 if time_control.mode == TimeMode.BLITZ:
-                    config['time'] = '{:d} 0'.format(tc_init['blitz'])
+                    write_picochess_ini('time', '{:d} 0'.format(tc_init['blitz']))
                 elif time_control.mode == TimeMode.FISCHER:
-                    config['time'] = '{:d} {:d}'.format(tc_init['blitz'], tc_init['fischer'])
+                    write_picochess_ini('time', '{:d} {:d}'.format(tc_init['blitz'], tc_init['fischer']))
                 elif time_control.mode == TimeMode.FIXED:
-                    config['time'] = '{:d}'.format(tc_init['fixed'])
-                config.write()
+                    write_picochess_ini('time', '{:d}'.format(tc_init['fixed']))
                 text = Message.TIME_CONTROL(time_text=event.time_text, show_ok=event.show_ok, tc_init=tc_init)
                 DisplayMsg.show(text)
                 stop_fen_timer()

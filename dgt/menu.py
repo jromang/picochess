@@ -17,7 +17,7 @@
 
 from configobj import ConfigObj
 from collections import OrderedDict
-from utilities import Observable, DispatchDgt, get_tags, version
+from utilities import Observable, DispatchDgt, get_tags, version, write_picochess_ini
 from dgt.util import TimeMode, TimeModeLoop, Top, TopLoop, Mode, ModeLoop, Language, LanguageLoop, BeepLevel, BeepLoop
 from dgt.util import System, SystemLoop, Display, DisplayLoop, ClockIcons
 from dgt.util import Voice, VoiceLoop
@@ -869,9 +869,7 @@ class DgtMenu(object):
             # maybe do action!
             text = self.enter_eng_name_level_menu()
             if not text:
-                config = ConfigObj('picochess.ini')
-                config['engine-level'] = None
-                config.write()
+                write_picochess_ini('engine-level', None)
                 eng = self.installed_engines[self.menu_engine_name]
                 eng_text = self.dgttranslate.text('B10_okengine')
                 event = Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options={}, show_ok=True)
@@ -885,9 +883,7 @@ class DgtMenu(object):
             if level_dict:
                 msg = sorted(level_dict)[self.menu_engine_level]
                 options = level_dict[msg]
-                config = ConfigObj('picochess.ini')
-                config['engine-level'] = msg
-                config.write()
+                write_picochess_ini('engine-level', msg)
                 event = Event.LEVEL(options={}, level_text=self.dgttranslate.text('B10_level', msg))
                 Observable.fire(event)
             else:
@@ -948,9 +944,7 @@ class DgtMenu(object):
         elif self.state == MenuState.SYS_SOUND_TYPE:
             # do action!
             self.dgttranslate.set_beep(self.menu_system_sound_beep)
-            config = ConfigObj('picochess.ini')
-            config['beep-config'] = self.dgttranslate.beep_to_config(self.menu_system_sound_beep)
-            config.write()
+            write_picochess_ini('beep-config', self.dgttranslate.beep_to_config(self.menu_system_sound_beep))
             text = self.dgttranslate.text('B10_okbeep')
             DispatchDgt.fire(text)
             text = self.save_choices()
@@ -964,9 +958,7 @@ class DgtMenu(object):
                      Language.FR: 'fr', Language.ES: 'es', Language.IT: 'it'}
             language = langs[self.menu_system_language_name]
             self.dgttranslate.set_language(language)
-            config = ConfigObj('picochess.ini')
-            config['language'] = language
-            config.write()
+            write_picochess_ini('language', language)
             text = self.dgttranslate.text('B10_oklang')
             DispatchDgt.fire(text)
             text = self.save_choices()
@@ -1037,10 +1029,8 @@ class DgtMenu(object):
             # do action!
             vkey = self.voices_conf.keys()[self.menu_system_voice_lang]
             speakers = self.voices_conf[vkey].keys()
-            config = ConfigObj('picochess.ini')
             skey = speakers[self.menu_system_voice_speak]
-            config['speed-voice'] = self.menu_system_voice_factor
-            config.write()
+            write_picochess_ini('speed-voice', self.menu_system_voice_factor)
             event = Event.SET_VOICE(type=self.menu_system_voice_type, lang=vkey, speaker=skey,
                                     speed=self.menu_system_voice_factor)
             Observable.fire(event)
@@ -1074,9 +1064,7 @@ class DgtMenu(object):
 
         elif self.state == MenuState.SYS_DISP_PONDER_INTERVAL:
             # do action!
-            config = ConfigObj('picochess.ini')
-            config['ponder-interval'] = self.menu_system_display_ponderinterval
-            config.write()
+            write_picochess_ini('ponder-interval', self.menu_system_display_ponderinterval)
             text = self.dgttranslate.text('B10_okponder')
             DispatchDgt.fire(text)
             text = self.save_choices()
