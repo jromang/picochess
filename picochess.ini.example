@@ -1,8 +1,10 @@
 ### ===============================
-### = picochess.ini.example v0.87 =
+### = picochess.ini.example v0.89 =
 ### ===============================
 ### Example and description how to configure PicoChess
 ### To use this file, simply copy this file to picochess.ini and edit the appropriate settings
+### When you want to activate a flag/line, please remove the "# " infront of it f.e. "# book = ..." becomes "book = ..."
+### Its important you keep this file valid (like here, no spaces), otherwise picochess won't work correctly.
 
 ### From v0.71 on some picochess.ini values are overridden when you change their values using the menu system
 ### Perhaps its a good idea to keep a copy of "picochess.ini" before you are going live with your picochess ;-)
@@ -146,3 +148,5 @@
 ## When in ponder mode decides how long each info is displayed. Default is 3 secs.
 ## Must be between 1 to 8 secs.
 # ponder-interval = 3
+## Displays messages with only capital letters. If you want this please uncomment the next line and change to True.
+# capital-letters = False
