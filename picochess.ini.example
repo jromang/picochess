@@ -4,10 +4,11 @@
 ### Example and description how to configure PicoChess
 ### To use this file, simply copy this file to picochess.ini and edit the appropriate settings
 ### When you want to activate a flag/line, please remove the "# " infront of it f.e. "# book = ..." becomes "book = ..."
-### Its important you keep this file valid (like here, no spaces), otherwise picochess won't work correctly.
+### Its important you keep this file valid (like here, no leading spaces), otherwise picochess won't work correctly.
 
 ### From v0.71 on some picochess.ini values are overridden when you change their values using the menu system
 ### Perhaps its a good idea to keep a copy of "picochess.ini" before you are going live with your picochess ;-)
+### The section "DGT", "remote-engine", "Mail", and some "Picochess" flags are examples which can only be changed here
 
 ### Lines that start with 3x# are general comments
 ### Lines that start with 2x# explain the option of the next line that starts with one # 
@@ -26,18 +27,17 @@
 ## BUTTON = 2 All Events coming from button press
 ## MAP = 4    All Events coming from Queen placing at start pos (line3-6)
 ## OKAY = 8   All Events from "ok" (confirm) messages
-## For example to beep on "ok messages" and "button press" would result in 8+2=10 as beep-some-level
+## For example to beep on "ok messages" and "button press" beep-some-level is: 8(okay) + 2(button) = 10
 # beep-some-level = 3
-## Should a confirmation message be displayed? If not, please active the next line
-# disable-confirm-message = True
 ## Specify the serial port your dgt-board is connected to.
 ## If you dont give a parameter picochess tries to find the board automatically (prefered usage).
 # dgt-port = /dev/ttyACM0
 ## Instead of connecting to a dgt board, you can also start picochess with a command line.
 ## If so, please uncomment the next line
 # console = True
-## If you have a new DGT Pi Clock please uncomment the next line.
-## Handle with care. Picochess won't work if you have a DGT XL or DGT3000 clock (standard case)!
+### Handle with care! Only activate this if you have a DGT Pi clock connected. So be careful!
+### Also if you activate it but have non-DGT hardware connected (@raspberryPi) you might harm your hardware.
+## If you have a new DGT Pi clock please uncomment the next line.
 # dgtpi = True
 
 ### ========================
@@ -52,6 +52,9 @@
 ## What level the engine should have at startup?
 ## For a (correct) value please take a look at 'engines/<your_plattform>/<engine_name>.uci'
 # engine-level = Level@20
+### =========================
+### = Remote engine options =
+### =========================
 ### Parameters for a remote engine (server) - good chances you do not need them ;-)
 ## Where is the server with the engine
 # engine-remote-server = engine.remote-domain.com
@@ -68,14 +71,14 @@
 ### = Opening book selection =
 ### ==========================
 ### Sets the opening book used at startup
-### Path of an opening book relative to the 'picochess' folder
-### Defaults to book 'h', normally 'h-varied.bin', if not set or not available
+## Path of an opening book relative to the 'picochess' folder
+## Defaults to book 'h', normally 'h-varied.bin', if not set or not available
 # book = books/h-varied.bin
 
 ### ==================
 ### = Time selection =
 ### ==================
-## Sets the startup time. If you give something like "5 0" that means 5mins blitz (default value)
+### Sets the startup time. If you give something like "5 0" that means 5mins blitz (default value)
 ## Fischer time can be set by changing this "0" (increment value) to a positive number like "3 2"
 ## Fixed time can be set by just giving one number like "10" meaning 10 secs/move
 ## You can also give non-standard values (like "4 6"), but then you cant change them inside the (time) menu.
@@ -129,7 +132,8 @@
 # user-voice = en:al
 ## computer-voice for computer moves announcement
 # computer-voice = en:christina
-## speed-voice factor from 0(=90%) to 9(=135%) increase/decrease the speed of announcements
+## Increase, Decrease the voice speed factor. Must be between 0 to 9. Default is 2 (100%)
+## Each step is 5% starting from 90% towards 135%. Sets factor for both voices (user/computer)
 # speed-voice = 2
 ## PicoChess writes pgn files at end of game. This file is created in the games folder
 # pgn-file = games.pgn
@@ -148,5 +152,7 @@
 ## When in ponder mode decides how long each info is displayed. Default is 3 secs.
 ## Must be between 1 to 8 secs.
 # ponder-interval = 3
-## Displays messages with only capital letters. If you want this please uncomment the next line and change to True.
-# capital-letters = False
+## Displays messages with only capital letters. If so, please uncomment the next line.
+# capital-letters = True
+## Should a confirmation message be displayed? If not, please active the next line
+# disable-confirm-message = True
