@@ -309,7 +309,7 @@ def main():
                     logging.debug('user move while computer move is displayed, reverting to: ' + game.board_fen())
                 else:
                     handled_fen = False
-                    logging.error("last_legal_fens not cleared: " + game.board_fen())
+                    logging.error('last_legal_fens not cleared: ' + game.board_fen())
             elif interaction_mode == Mode.REMOTE:
                 if is_not_user_turn(game.turn):
                     game.pop()
@@ -370,8 +370,8 @@ def main():
                 game_history.pop()
                 if game_history.board_fen() == fen:
                     handled_fen = True
-                    logging.debug("current game fen      : %s", game.fen())
-                    logging.debug("undoing game until fen: %s", fen)
+                    logging.debug('current game fen      : %s', game.fen())
+                    logging.debug('undoing game until fen: %s', fen)
                     stop_search_and_clock()
                     while len(game_history.move_stack) < len(game.move_stack):
                         game.pop()
@@ -540,7 +540,7 @@ def main():
                             datefmt="%Y-%m-%d %H:%M:%S", handlers=[handler])
     logging.getLogger('chess.uci').setLevel(logging.INFO)  # don't want to get so many python-chess uci messages
 
-    logging.debug('#'*20 + ' PicoChess v' + version + ' ' + '#'*20)
+    logging.debug('#'*20 + ' PicoChess v%s ' + '#'*20, version)
     # log the startup parameters but hide the password fields
     a_copy = copy.copy(vars(args))
     a_copy['mailgun_key'] = a_copy['smtp_pass'] = a_copy['engine_remote_key'] = a_copy['engine_remote_pass'] = '*****'
@@ -618,7 +618,7 @@ def main():
     try:
         book_index = [book['file'] for book in all_books].index(args.book)
     except ValueError:
-        logging.warning("selected book not present, defaulting to %s", all_books[7]['file'])
+        logging.warning('selected book not present, defaulting to %s', all_books[7]['file'])
         book_index = 7
     bookreader = chess.polyglot.open_reader(all_books[book_index]['file'])
     searchmoves = AlternativeMover()
@@ -911,7 +911,7 @@ def main():
 
             elif isinstance(event, Event.SET_OPENING_BOOK):
                 write_picochess_ini('book', event.book['file'])
-                logging.debug("changing opening book [%s]", event.book['file'])
+                logging.debug('changing opening book [%s]', event.book['file'])
                 bookreader = chess.polyglot.open_reader(event.book['file'])
                 DisplayMsg.show(Message.OPENING_BOOK(book_text=event.book_text, show_ok=event.show_ok))
                 stop_fen_timer()
@@ -974,7 +974,7 @@ def main():
                 DisplayMsg.show(Message.EXIT_MENU())
 
             else:  # Default
-                logging.warning("event not handled : [%s]", event)
+                logging.warning('event not handled : [%s]', event)
 
             evt_queue.task_done()
 

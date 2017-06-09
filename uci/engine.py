@@ -37,7 +37,7 @@ class UciEngine(object):
         try:
             self.shell = None
             if hostname:
-                logging.info("connecting to [%s]", hostname)
+                logging.info('connecting to [%s]', hostname)
                 if key_file:
                     shell = spur.SshShell(hostname=hostname, username=username, private_key_file=key_file,
                                           missing_host_key=paramiko.AutoAddPolicy())
@@ -55,7 +55,7 @@ class UciEngine(object):
                 self.engine.info_handlers.append(handler)
                 self.engine.uci()
             else:
-                logging.error("engine executable [%s] not found", file)
+                logging.error('engine executable [%s] not found', file)
             self.options = {}
             self.future = None
             self.show_best = True
@@ -176,7 +176,7 @@ class UciEngine(object):
             pc_opts.update(options)
             options = pc_opts
 
-        logging.debug("setting engine with options %s", options)
+        logging.debug('setting engine with options %s', options)
         self.level(options)
         self.send()
         if show:
