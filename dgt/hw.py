@@ -49,6 +49,8 @@ class DgtHw(DgtIface):
         if len(text) > 8:
             logging.warning('(ser) clock message too long [%s]', text)
         logging.debug(text)
+        if self.dgtboard.capital_letters:
+            text = text.upper()
         text = bytes(text, 'utf-8')
         with self.lib_lock:
             res = self.dgtboard.set_text_3k(text, 0x03 if beep else 0x00)

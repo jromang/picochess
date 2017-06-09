@@ -35,13 +35,14 @@ class DgtBoard(object):
 
     """Handle the DGT board communication."""
 
-    def __init__(self, device: str, disable_revelation_leds: bool, is_pi: bool):
+    def __init__(self, device: str, disable_revelation_leds: bool, is_pi: bool, capital_letters: bool):
         super(DgtBoard, self).__init__()
         self.given_device = device
         self.device = device
         self.use_revelation_leds = False
         self.disable_revelation_leds = disable_revelation_leds
         self.is_pi = is_pi
+        self.capital_letters = capital_letters
 
         self.serial = None
         self.lock = Lock()  # inside setup_serial_port()

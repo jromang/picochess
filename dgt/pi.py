@@ -108,6 +108,8 @@ class DgtPi(DgtIface):
         if len(text) > 11:
             logging.warning('(i2c) clock message too long [%s]', text)
         logging.debug(text)
+        if self.dgtboard.capital_letters:
+            text = text.upper()
         text = bytes(text, 'utf-8')
         with self.lib_lock:
             res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, left_icons.value, right_icons.value)
