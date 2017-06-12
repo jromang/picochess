@@ -243,7 +243,9 @@ class WebVr(DgtIface):
         else:
             text = message.move.uci()
             if message.side == ClockSide.RIGHT:
-                text = text.rjust(6)
+                text = text[:2].rjust(3) + text[2:].rjust(3)
+            else:
+                text = text[:2].ljust(3) + text[2:].ljust(3)
         if self.getName() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)
             return True

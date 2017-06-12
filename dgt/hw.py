@@ -83,8 +83,9 @@ class DgtHw(DgtIface):
         else:
             text = message.move.uci()
             if message.side == ClockSide.RIGHT:
-                text = text.rjust(6)
-
+                text = text[:2].rjust(3) + text[2:].rjust(3)
+            else:
+                text = text[:2].ljust(3) + text[2:].ljust(3)
         if self.getName() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)
             return True
@@ -153,8 +154,9 @@ class DgtHw(DgtIface):
                 return False
             else:
                 self.clock_running = (side != ClockSide.NONE)
+            return res
             # this is needed for some(!) clocks
-            return self.dgtboard.end_text()
+            # return self.dgtboard.end_text()
 
     def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
         """start the dgtxl/3k."""
