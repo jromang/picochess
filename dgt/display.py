@@ -749,7 +749,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
 
         elif isinstance(message, Message.DGT_EBOARD_VERSION):
             if self.dgtmenu.inside_updt_menu():
-                logging.debug('inside menu => board version not displayed')
+                logging.debug('inside menu => board channel not displayed')
             else:
                 DispatchDgt.fire(message.text)
                 DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs={'i2c'}))

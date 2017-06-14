@@ -258,8 +258,12 @@ class DgtBoard(object):
                         DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=ltime, time_right=rtime, dev='ser'))
 
                         if not self.enable_ser_clock:
-                            logging.warning('restarting clock setup - enable_ser_clock: %s', self.enable_ser_clock)
-                            self.startup_serial_clock()
+                            if self.watchdog_timer.is_running():  # a running watchdog means: board already found
+                                logging.info('restarting clock setup - enable_ser_clock: %s', self.enable_ser_clock)
+                                self.startup_serial_clock()
+                            else:
+                                dev = 'rev' if 'REVII' in self.bt_name else 'ser'
+                                logging.info('(%s) clock sends messages already but the board still not found', dev)
 
                         right_side_down = -0x40 if status & 0x02 else 0x40
                         if self.lever_pos != right_side_down:
