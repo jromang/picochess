@@ -524,7 +524,7 @@ def main():
                         help='picochess language')
     parser.add_argument('-c', '--console', action='store_true', help='use console interface')
     parser.add_argument('-cl', '--capital-letters', action='store_true', help='clock messages in capital letters')
-    parser.add_argument('-xl', '--xl-end', action='store_true', help='some clocks need this to work - deprecated')
+    parser.add_argument('-noet', '--disable-et', action='store_true', help='some clocks need this to work - deprecated')
 
     args, unknown = parser.parse_known_args()
 
@@ -549,7 +549,7 @@ def main():
     if unknown:
         logging.warning('invalid parameter given %s', unknown)
     # wire some dgt classes
-    dgtboard = DgtBoard(args.dgt_port, args.disable_revelation_leds, args.dgtpi, args.capital_letters, args.xl_end)
+    dgtboard = DgtBoard(args.dgt_port, args.disable_revelation_leds, args.dgtpi, args.capital_letters, args.disable_et)
     dgttranslate = DgtTranslate(args.beep_config, args.beep_some_level, args.language, version)
     dgtmenu = DgtMenu(args.disable_confirm_message, args.ponder_interval, args.speed_voice, dgttranslate)
     dgtdispatcher = Dispatcher(dgtmenu)

@@ -35,7 +35,7 @@ class DgtBoard(object):
 
     """Handle the DGT board communication."""
 
-    def __init__(self, device: str, disable_revelation_leds: bool, is_pi: bool, capital_letters: bool, xl_end: bool):
+    def __init__(self, device: str, disable_revelation_leds: bool, is_pi: bool, capital_letters: bool, disable_end: bool):
         super(DgtBoard, self).__init__()
         self.given_device = device
         self.device = device
@@ -43,7 +43,7 @@ class DgtBoard(object):
         self.disable_revelation_leds = disable_revelation_leds
         self.is_pi = is_pi
         self.capital_letters = capital_letters
-        self.xl_end = xl_end  # @todo for test - XL needs a "end_text" maybe!
+        self.disable_end = disable_end  # @todo for test - XL needs a "end_text" maybe!
 
         self.serial = None
         self.lock = Lock()  # inside setup_serial_port()
@@ -81,8 +81,8 @@ class DgtBoard(object):
         array = []
         char_to_xl = {
             '0': 0x3f, '1': 0x06, '2': 0x5b, '3': 0x4f, '4': 0x66, '5': 0x6d, '6': 0x7d, '7': 0x07, '8': 0x7f, '9': 0x6f,
-            'a': 0x77, 'b': 0x7c, 'c': 0x39, 'd': 0x5e, 'e': 0x79, 'f': 0x71, 'g': 0x3d, 'h': 0x74, 'i': 0x30, 'j': 0x1e,
-            'k': 0x75, 'l': 0x38, 'm': 0x55, 'n': 0x54, 'o': 0x5c, 'p': 0x73, 'q': 0x5d, 'r': 0x50, 's': 0x4d, 't': 0x78,
+            'a': 0x77, 'b': 0x7c, 'c': 0x39, 'd': 0x5e, 'e': 0x79, 'f': 0x71, 'g': 0x3d, 'h': 0x76, 'i': 0x30, 'j': 0x1e,
+            'k': 0x75, 'l': 0x38, 'm': 0x55, 'n': 0x54, 'o': 0x5c, 'p': 0x73, 'q': 0x67, 'r': 0x50, 's': 0x4d, 't': 0x78,
             'u': 0x3e, 'v': 0x2a, 'w': 0x7e, 'x': 0x49, 'y': 0x6e, 'z': 0x59, ' ': 0x00, '-': 0x40, '/': 0x52, '|': 0x36,
             '\\': 0x64, '?': 0x53, '@': 0x65, '=': 0x48, '_': 0x08
         }
