@@ -26,9 +26,9 @@ import tornado.wsgi
 from tornado.ioloop import IOLoop
 from tornado.websocket import WebSocketHandler
 
-from utilities import Observable, DisplayMsg, switch, hours_minutes_seconds, RepeatedTimer
+from utilities import Observable, DisplayMsg, hours_minutes_seconds, RepeatedTimer
 import logging
-from dgt.api import MessageApi, Event, Message
+from dgt.api import Event, Message
 from dgt.util import GameResult, PlayMode, Mode, ClockSide
 from web.picoweb import picoweb as pw
 
@@ -243,15 +243,20 @@ class WebVr(DgtIface):
         else:
             text = message.move.uci()
             if message.side == ClockSide.RIGHT:
-                text = text.rjust(6)
-        if 'web' not in message.devs:
-            logging.debug('ignored message cause of devs [%s]', text)
-            return
+                text = text[:2].rjust(3) + text[2:].rjust(3)
+            else:
+                text = text[:2].ljust(3) + text[2:].ljust(3)
+        if self.getName() not in message.devs:
+            logging.debug('ignored %s - devs: %s', text, message.devs)
+            return True
+        if self.dgtboard.capital_letters:
+            text = text.upper()
         self.clock_show_time = False
         self._create_clock_text()
         self.shared['clock_text'] = text
         result = {'event': 'Clock', 'msg': text}
         EventHandler.write_to_clients(result)
+        return True
 
     def display_text_on_clock(self, message):
         """display a text on the web clock."""
@@ -261,34 +266,39 @@ class WebVr(DgtIface):
             text = message.m if self.enable_dgt_3000 else message.s
         if text is None:
             text = message.m
-        if 'web' not in message.devs:
-            logging.debug('ignored message cause of devs [%s]', text)
-            return
+        if self.getName() not in message.devs:
+            logging.debug('ignored %s - devs: %s', text, message.devs)
+            return True
+        if self.dgtboard.capital_letters:
+            text = text.upper()
         self.clock_show_time = False
         self._create_clock_text()
         self.shared['clock_text'] = text
         result = {'event': 'Clock', 'msg': text}
         EventHandler.write_to_clients(result)
+        return True
 
     def display_time_on_clock(self, message):
         """display the time on the web clock."""
-        if 'web' not in message.devs:
-            logging.debug('ignored message cause of devs [endText]')
-            return
+        if self.getName() not in message.devs:
+            logging.debug('ignored endText - devs: %s', message.devs)
+            return True
         if self.clock_running or message.force:
             self.clock_show_time = True
             self._display_time(self.time_left, self.time_right)
         else:
             logging.debug('(web) clock isnt running - no need for endText')
+        return True
 
     def stop_clock(self, devs: set):
         """stop the time on the web clock."""
-        if 'web' not in devs:
-            logging.debug('ignored message cause of devs [stopClock]')
-            return
+        if self.getName() not in devs:
+            logging.debug('ignored stopClock - devs: %s', devs)
+            return True
         if self.virtual_timer:
             self.virtual_timer.stop()
         self._resume_clock(ClockSide.NONE)
+        return True
 
     def _resume_clock(self, side: ClockSide):
         self.clock_running = (side != ClockSide.NONE)
@@ -296,10 +306,10 @@ class WebVr(DgtIface):
 
     def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
         """start the time on the web clock."""
-        if 'web' not in devs:
-            logging.debug('ignored message cause of devs [startClock]')
-            return
-        if self.virtual_timer:
+        if self.getName() not in devs:
+            logging.debug('ignored startClock - devs: %s', devs)
+            return True
+        if self.virtual_timer and self.virtual_timer.is_running():
             self.virtual_timer.stop()
         if side != ClockSide.NONE:
             self.virtual_timer = RepeatedTimer(1, self._runclock)
@@ -310,14 +320,20 @@ class WebVr(DgtIface):
         self.time_left = hours_minutes_seconds(time_left)
         self.time_right = hours_minutes_seconds(time_right)
         self._display_time(self.time_left, self.time_right)
+        return True
 
-    def light_squares_revelation_board(self, squares):
+    def light_squares_on_revelation(self, squares):
         result = {'event': 'Light', 'move': squares}
         EventHandler.write_to_clients(result)
+        return True
 
-    def clear_light_revelation_board(self):
+    def clear_light_on_revelation(self):
         result = {'event': 'Clear'}
         EventHandler.write_to_clients(result)
+        return True
+
+    def getName(self):
+        return 'web'
 
     def _create_task(self, msg):
         IOLoop.instance().add_callback(callback=lambda: self._process_message(msg))
@@ -396,152 +412,153 @@ class WebDisplay(DisplayMsg, threading.Thread):
             _create_game_header(pgn_game)
             return pgn_game.accept(pgn.StringExporter(headers=True, comments=False, variations=False))
 
-        for case in switch(message):
-            if case(MessageApi.START_NEW_GAME):
-                pgn_str = _transfer(message.game)
-                fen = message.game.fen()
-                result = {'pgn': pgn_str, 'fen': fen, 'event': 'Game', 'move': '0000', 'play': 'newgame'}
-                self.shared['last_dgt_move_msg'] = result
-                EventHandler.write_to_clients(result)
-                _update_headers()
-                break
-            if case(MessageApi.IP_INFO):
-                self.shared['ip_info'] = message.info
-                _update_headers()
-                _update_title()
-                break
-            if case(MessageApi.SYSTEM_INFO):
-                self.shared['system_info'] = message.info
-                self.shared['system_info']['old_engine'] = self.shared['system_info']['engine_name']
-                _update_headers()
-                break
-            if case(MessageApi.ENGINE_READY):
-                self._create_system_info()
-                self.shared['system_info']['engine_name'] = message.engine_name
-                if not message.has_levels and 'level_text' in self.shared['game_info']:
-                    del self.shared['game_info']['level_text']
-                _update_headers()
-                break
-            if case(MessageApi.STARTUP_INFO):
-                self.shared['game_info'] = message.info.copy()
-                # change book_index to book_text
-                books = message.info['books']
-                book_index = message.info['book_index']
-                self.shared['game_info']['book_text'] = books[book_index]['text']
-                del self.shared['game_info']['book_index']
+        if False:  # switch-case
+            pass
+        elif isinstance(message, Message.START_NEW_GAME):
+            pgn_str = _transfer(message.game)
+            fen = message.game.fen()
+            result = {'pgn': pgn_str, 'fen': fen, 'event': 'Game', 'move': '0000', 'play': 'newgame'}
+            self.shared['last_dgt_move_msg'] = result
+            EventHandler.write_to_clients(result)
+            _update_headers()
 
-                if message.info['level_text'] is None:
-                    del self.shared['game_info']['level_text']
-                break
-            if case(MessageApi.OPENING_BOOK):
-                self._create_game_info()
-                self.shared['game_info']['book_text'] = message.book_text
-                break
-            if case(MessageApi.INTERACTION_MODE):
-                self._create_game_info()
-                self.shared['game_info']['interaction_mode'] = message.mode
-                if self.shared['game_info']['interaction_mode'] == Mode.REMOTE:
-                    self.shared['system_info']['engine_name'] = 'Remote Player'
-                else:
-                    self.shared['system_info']['engine_name'] = self.shared['system_info']['old_engine']
-                _update_headers()
-                break
-            if case(MessageApi.PLAY_MODE):
-                self._create_game_info()
-                self.shared['game_info']['play_mode'] = message.play_mode
-                _update_headers()
-                break
-            if case(MessageApi.TIME_CONTROL):
-                self._create_game_info()
-                self.shared['game_info']['time_text'] = message.time_text
-                break
-            if case(MessageApi.LEVEL):
-                self._create_game_info()
-                self.shared['game_info']['level_text'] = message.level_text
-                _update_headers()
-                break
-            if case(MessageApi.DGT_NO_CLOCK_ERROR):
-                result = {'event': 'Status', 'msg': 'Error clock'}
-                # EventHandler.write_to_clients(result)
-                break
-            if case(MessageApi.DGT_CLOCK_VERSION):
-                if message.dev == 'ser':
-                    attached = 'serial'
-                elif message.dev == 'i2c':
-                    attached = 'i2c-pi'
-                else:
-                    attached = 'server'
-                result = {'event': 'Status', 'msg': 'Ok clock ' + attached}
-                EventHandler.write_to_clients(result)
-                break
-            if case(MessageApi.COMPUTER_MOVE):
-                game_copy = message.game.copy()
-                game_copy.push(message.move)
-                pgn_str = _transfer(game_copy)
-                fen = _oldstyle_fen(game_copy)
-                mov = message.move.uci()
-                result = {'pgn': pgn_str, 'fen': fen, 'event': 'Fen', 'move': mov, 'play': 'computer'}
-                self.shared['last_dgt_move_msg'] = result  # not send => keep it for COMPUTER_MOVE_DONE
-                break
-            if case(MessageApi.COMPUTER_MOVE_DONE):
-                result = self.shared['last_dgt_move_msg']
-                EventHandler.write_to_clients(result)
-                break
-            if case(MessageApi.USER_MOVE_DONE):
-                pgn_str = _transfer(message.game)
-                fen = _oldstyle_fen(message.game)
-                mov = message.move.uci()
-                result = {'pgn': pgn_str, 'fen': fen, 'event': 'Fen', 'move': mov, 'play': 'user'}
-                self.shared['last_dgt_move_msg'] = result
-                EventHandler.write_to_clients(result)
-                break
-            if case(MessageApi.REVIEW_MOVE_DONE):
-                pgn_str = _transfer(message.game)
-                fen = _oldstyle_fen(message.game)
-                mov = message.move.uci()
-                result = {'pgn': pgn_str, 'fen': fen, 'event': 'Fen', 'move': mov, 'play': 'review'}
-                self.shared['last_dgt_move_msg'] = result
-                EventHandler.write_to_clients(result)
-                break
-            if case(MessageApi.ALTERNATIVE_MOVE):
-                pgn_str = _transfer(message.game)
-                fen = _oldstyle_fen(message.game)
-                mov = message.game.peek().uci()
-                result = {'pgn': pgn_str, 'fen': fen, 'event': 'Fen', 'move': mov, 'play': 'reload'}
-                self.shared['last_dgt_move_msg'] = result
-                EventHandler.write_to_clients(result)
-                break
-            if case(MessageApi.SWITCH_SIDES):
-                pgn_str = _transfer(message.game)
-                fen = _oldstyle_fen(message.game)
-                mov = message.move.uci()
-                result = {'pgn': pgn_str, 'fen': fen, 'event': 'Fen', 'move': mov, 'play': 'reload'}
-                self.shared['last_dgt_move_msg'] = result
-                EventHandler.write_to_clients(result)
-                break
-            if case(MessageApi.TAKE_BACK):
-                pgn_str = _transfer(message.game)
-                fen = _oldstyle_fen(message.game)
-                mov = message.game.peek().uci()
-                result = {'pgn': pgn_str, 'fen': fen, 'event': 'Fen', 'move': mov, 'play': 'reload'}
-                self.shared['last_dgt_move_msg'] = result
-                EventHandler.write_to_clients(result)
-                break
-            if case(MessageApi.GAME_ENDS):
-                if message.game.move_stack:
-                    result = None
-                    if message.result == GameResult.DRAW:
-                        result = '1/2-1/2'
-                    elif message.result in (GameResult.WIN_WHITE, GameResult.WIN_BLACK):
-                        result = '1-0' if message.result == GameResult.WIN_WHITE else '0-1'
-                    elif message.result == GameResult.OUT_OF_TIME:
-                        result = '0-1' if message.game.turn == chess.WHITE else '1-0'
-                    if result:
-                        EventHandler.write_to_clients({'event': 'Message', 'msg': 'Result: ' + result})
-                break
-            if case():  # Default
-                # print(message)
-                pass
+        elif isinstance(message, Message.IP_INFO):
+            self.shared['ip_info'] = message.info
+            _update_headers()
+            _update_title()
+
+        elif isinstance(message, Message.SYSTEM_INFO):
+            self.shared['system_info'] = message.info
+            self.shared['system_info']['old_engine'] = self.shared['system_info']['engine_name']
+            _update_headers()
+
+        elif isinstance(message, Message.ENGINE_READY):
+            self._create_system_info()
+            self.shared['system_info']['engine_name'] = message.engine_name
+            if not message.has_levels and 'level_text' in self.shared['game_info']:
+                del self.shared['game_info']['level_text']
+            _update_headers()
+
+        elif isinstance(message, Message.STARTUP_INFO):
+            self.shared['game_info'] = message.info.copy()
+            # change book_index to book_text
+            books = message.info['books']
+            book_index = message.info['book_index']
+            self.shared['game_info']['book_text'] = books[book_index]['text']
+            del self.shared['game_info']['book_index']
+
+            if message.info['level_text'] is None:
+                del self.shared['game_info']['level_text']
+
+        elif isinstance(message, Message.OPENING_BOOK):
+            self._create_game_info()
+            self.shared['game_info']['book_text'] = message.book_text
+
+        elif isinstance(message, Message.INTERACTION_MODE):
+            self._create_game_info()
+            self.shared['game_info']['interaction_mode'] = message.mode
+            if self.shared['game_info']['interaction_mode'] == Mode.REMOTE:
+                self.shared['system_info']['engine_name'] = 'Remote Player'
+            else:
+                self.shared['system_info']['engine_name'] = self.shared['system_info']['old_engine']
+            _update_headers()
+
+        elif isinstance(message, Message.PLAY_MODE):
+            self._create_game_info()
+            self.shared['game_info']['play_mode'] = message.play_mode
+            _update_headers()
+
+        elif isinstance(message, Message.TIME_CONTROL):
+            self._create_game_info()
+            self.shared['game_info']['time_text'] = message.time_text
+
+        elif isinstance(message, Message.LEVEL):
+            self._create_game_info()
+            self.shared['game_info']['level_text'] = message.level_text
+            _update_headers()
+
+        elif isinstance(message, Message.DGT_NO_CLOCK_ERROR):
+            result = {'event': 'Status', 'msg': 'Error clock'}
+            # EventHandler.write_to_clients(result)
+
+        elif isinstance(message, Message.DGT_CLOCK_VERSION):
+            if message.dev == 'ser':
+                attached = 'serial'
+            elif message.dev == 'i2c':
+                attached = 'i2c-pi'
+            else:
+                attached = 'server'
+            result = {'event': 'Status', 'msg': 'Ok clock ' + attached}
+            EventHandler.write_to_clients(result)
+
+        elif isinstance(message, Message.COMPUTER_MOVE):
+            game_copy = message.game.copy()
+            game_copy.push(message.move)
+            pgn_str = _transfer(game_copy)
+            fen = _oldstyle_fen(game_copy)
+            mov = message.move.uci()
+            result = {'pgn': pgn_str, 'fen': fen, 'event': 'Fen', 'move': mov, 'play': 'computer'}
+            self.shared['last_dgt_move_msg'] = result  # not send => keep it for COMPUTER_MOVE_DONE
+
+        elif isinstance(message, Message.COMPUTER_MOVE_DONE):
+            result = self.shared['last_dgt_move_msg']
+            EventHandler.write_to_clients(result)
+
+        elif isinstance(message, Message.USER_MOVE_DONE):
+            pgn_str = _transfer(message.game)
+            fen = _oldstyle_fen(message.game)
+            mov = message.move.uci()
+            result = {'pgn': pgn_str, 'fen': fen, 'event': 'Fen', 'move': mov, 'play': 'user'}
+            self.shared['last_dgt_move_msg'] = result
+            EventHandler.write_to_clients(result)
+
+        elif isinstance(message, Message.REVIEW_MOVE_DONE):
+            pgn_str = _transfer(message.game)
+            fen = _oldstyle_fen(message.game)
+            mov = message.move.uci()
+            result = {'pgn': pgn_str, 'fen': fen, 'event': 'Fen', 'move': mov, 'play': 'review'}
+            self.shared['last_dgt_move_msg'] = result
+            EventHandler.write_to_clients(result)
+
+        elif isinstance(message, Message.ALTERNATIVE_MOVE):
+            pgn_str = _transfer(message.game)
+            fen = _oldstyle_fen(message.game)
+            mov = message.game.peek().uci()
+            result = {'pgn': pgn_str, 'fen': fen, 'event': 'Fen', 'move': mov, 'play': 'reload'}
+            self.shared['last_dgt_move_msg'] = result
+            EventHandler.write_to_clients(result)
+
+        elif isinstance(message, Message.SWITCH_SIDES):
+            pgn_str = _transfer(message.game)
+            fen = _oldstyle_fen(message.game)
+            mov = message.move.uci()
+            result = {'pgn': pgn_str, 'fen': fen, 'event': 'Fen', 'move': mov, 'play': 'reload'}
+            self.shared['last_dgt_move_msg'] = result
+            EventHandler.write_to_clients(result)
+
+        elif isinstance(message, Message.TAKE_BACK):
+            pgn_str = _transfer(message.game)
+            fen = _oldstyle_fen(message.game)
+            mov = message.game.peek().uci()
+            result = {'pgn': pgn_str, 'fen': fen, 'event': 'Fen', 'move': mov, 'play': 'reload'}
+            self.shared['last_dgt_move_msg'] = result
+            EventHandler.write_to_clients(result)
+
+        elif isinstance(message, Message.GAME_ENDS):
+            if message.game.move_stack:
+                result = None
+                if message.result == GameResult.DRAW:
+                    result = '1/2-1/2'
+                elif message.result in (GameResult.WIN_WHITE, GameResult.WIN_BLACK):
+                    result = '1-0' if message.result == GameResult.WIN_WHITE else '0-1'
+                elif message.result == GameResult.OUT_OF_TIME:
+                    result = '0-1' if message.game.turn == chess.WHITE else '1-0'
+                if result:
+                    EventHandler.write_to_clients({'event': 'Message', 'msg': 'Result: ' + result})
+
+        else:  # Default
+            # print(message)
+            pass
 
     def _create_task(self, msg):
         IOLoop.instance().add_callback(callback=lambda: self.task(msg))

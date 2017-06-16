@@ -19,64 +19,112 @@ from utilities import DisplayDgt, DispatchDgt, dispatch_queue
 import logging
 import queue
 from dgt.api import Dgt, DgtApi
+from dgt.menu import DgtMenu
 from threading import Timer, Thread, Lock
+from copy import deepcopy
 
 
 class Dispatcher(DispatchDgt, Thread):
 
     """a dispatcher taking the dispatch_queue and fill dgt_queue with the commands in time."""
 
-    def __init__(self):
+    def __init__(self, dgtmenu: DgtMenu):
         super(Dispatcher, self).__init__()
 
-        self.maxtimer = None
-        self.maxtimer_running = False
+        self.dgtmenu = dgtmenu
+        self.devices = set()
+        self.maxtimer = {}
+        self.maxtimer_running = {}
+        self.clock_connected = {}
         self.time_factor = 1  # This is for testing the duration - remove it lateron!
-        self.tasks = []  # delayed task array
+        self.tasks = {}  # delayed task array
 
-        self.display_hash = None  # Hash value of clock's display
-        self.process_lock = Lock()
+        self.display_hash = {}  # Hash value of clock's display
+        self.process_lock = {}
 
-    def _stopped_maxtimer(self):
-        self.maxtimer_running = False
-        # if self.clock_running:
-        #     logging.debug('showing the running clock again')
-        #     DisplayDgt.show(Dgt.DISPLAY_TIME(force=False, wait=True, devs={'ser', 'i2c', 'web'}))
-        # else:
-        #     logging.debug('clock not running - ignored maxtime')
+    def register(self, device: str):
+        logging.debug('device %s registered', device)
+        self.devices.add(device)
+        self.maxtimer[device] = None
+        self.maxtimer_running[device] = False
+        self.clock_connected[device] = False
+        self.process_lock[device] = Lock()
+        self.tasks[device] = []
+        self.display_hash[device] = None
 
-        # @todo we try it without this test from above - since dispatcher doesnt know if clock is running anyway
-        DisplayDgt.show(Dgt.DISPLAY_TIME(force=False, wait=True, devs={'ser', 'i2c', 'web'}))
-        if self.tasks:
-            logging.debug('processing delayed tasks: %s', self.tasks)
-        while self.tasks:
-            message = self.tasks.pop(0)
-            with self.process_lock:
-                self._process_message(message)
-            if self.maxtimer_running:  # run over the task list until a maxtime command was processed
+    def _stopped_maxtimer(self, dev: str):
+        self.maxtimer_running[dev] = False
+        self.dgtmenu.disable_picochess_displayed(dev)
+
+        if dev not in self.devices:
+            logging.debug('delete not registered (%s) tasks', dev)
+            self.tasks[dev] = []
+            return
+        DisplayDgt.show(Dgt.DISPLAY_TIME(force=False, wait=True, devs={dev}))
+        if self.tasks[dev]:
+            logging.debug('processing delayed (%s) tasks: %s', dev, self.tasks[dev])
+        while self.tasks[dev]:
+            logging.debug('(%s) tasks has %i members', dev, len(self.tasks[dev]))
+            try:
+                message = self.tasks[dev].pop(0)
+            except IndexError:
+                break
+            with self.process_lock[dev]:
+                self._process_message(message, dev)
+            if self.maxtimer_running[dev]:  # run over the task list until a maxtime command was processed
                 break
 
-    def _process_message(self, message):
+    def _process_message(self, message, dev: str):
         do_handle = True
         if repr(message) in (DgtApi.CLOCK_START, DgtApi.CLOCK_STOP, DgtApi.CLOCK_TIME):
-            self.display_hash = None  # Cant know the clock display if command changing the running status
+            self.display_hash[dev] = None  # Cant know the clock display if command changing the running status
         else:
             if repr(message) in (DgtApi.DISPLAY_MOVE, DgtApi.DISPLAY_TEXT):
-                if self.display_hash == hash(message) and not message.beep:
+                if self.display_hash[dev] == hash(message) and not message.beep:
                     do_handle = False
                 else:
-                    self.display_hash = hash(message)
+                    self.display_hash[dev] = hash(message)
 
         if do_handle:
-            logging.debug("handle DgtApi: %s", message)
+            logging.debug('(%s) handle DgtApi: %s', dev, message)
+            if repr(message) == DgtApi.CLOCK_VERSION:
+                logging.debug('(%s) clock registered', dev)
+                self.clock_connected[dev] = True
+
+            clk = (DgtApi.DISPLAY_MOVE, DgtApi.DISPLAY_TEXT, DgtApi.DISPLAY_TIME, DgtApi.CLOCK_START, DgtApi.CLOCK_STOP)
+            if repr(message) in clk and not self.clock_connected[dev]:
+                logging.debug('(%s) clock still not registered => ignore %s', dev, message)
+                return
             if hasattr(message, 'maxtime') and message.maxtime > 0:
-                self.maxtimer = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer)
-                self.maxtimer.start()
-                logging.debug('showing %s for %i secs', message, message.maxtime * self.time_factor)
-                self.maxtimer_running = True
+                if repr(message) == DgtApi.DISPLAY_TEXT:
+                    if message.maxtime == 2.1:  # 2.1=picochess message
+                        self.dgtmenu.enable_picochess_displayed(dev)
+                    if self.dgtmenu.inside_updt_menu():
+                        if message.maxtime == 0.1:  # 0.1=eboard error
+                            logging.debug('(%s) inside menu => board errors not displayed', dev)
+                            return
+                        if message.maxtime == 1.1:  # 1.1=eBoard connect
+                            logging.debug('(%s) inside menu => board connect not displayed', dev)
+                            return
+                self.maxtimer[dev] = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer, [dev])
+                self.maxtimer[dev].start()
+                logging.debug('(%s) showing %s for %.1f secs', dev, message, message.maxtime * self.time_factor)
+                self.maxtimer_running[dev] = True
+            if repr(message) == DgtApi.CLOCK_START and self.dgtmenu.inside_updt_menu():
+                logging.debug('(%s) inside menu => clock not started', dev)
+                return
+            message.devs = {dev}  # on new system, we only have ONE device each message - force this!
             DisplayDgt.show(message)
         else:
-            logging.debug("ignore DgtApi: %s", message)
+            logging.debug('(%s) hash ignore DgtApi: %s', dev, message)
+
+    def stop_maxtimer(self, dev):
+        """stop the maxtimer."""
+        if self.maxtimer_running[dev]:
+            self.maxtimer[dev].cancel()
+            self.maxtimer[dev].join()
+            self.maxtimer_running[dev] = False
+            self.dgtmenu.disable_picochess_displayed(dev)
 
     def run(self):
         """called from threading.Thread by its start() function."""
@@ -84,29 +132,29 @@ class Dispatcher(DispatchDgt, Thread):
         while True:
             # Check if we have something to display
             try:
-                message = dispatch_queue.get()
-                logging.debug("received command from dispatch_queue: %s", message)
+                msg = dispatch_queue.get()
+                logging.debug('received command from dispatch_queue: %s devs: %s', msg, ','.join(msg.devs))
 
-                if self.maxtimer_running:
-                    if hasattr(message, 'wait'):
-                        if message.wait:
-                            self.tasks.append(message)
-                            logging.debug('tasks delayed: %s', self.tasks)
-                            continue
+                for dev in msg.devs & self.devices:
+                    message = deepcopy(msg)
+                    if self.maxtimer_running[dev]:
+                        if hasattr(message, 'wait'):
+                            if message.wait:
+                                self.tasks[dev].append(message)
+                                logging.debug('(%s) tasks delayed: %s', dev, self.tasks[dev])
+                                continue
+                            else:
+                                logging.debug('ignore former maxtime - dev: %s', dev)
+                                self.stop_maxtimer(dev)
+                                if self.tasks[dev]:
+                                    logging.debug('delete following (%s) tasks: %s', dev, self.tasks[dev])
+                                    self.tasks[dev] = []
                         else:
-                            logging.debug('ignore former maxtime')
-                            self.maxtimer.cancel()
-                            self.maxtimer.join()
-                            self.maxtimer_running = False
-                            if self.tasks:
-                                logging.debug('delete following tasks: %s', self.tasks)
-                                self.tasks = []
+                            logging.debug('command doesnt change the clock display => (%s) max timer ignored', dev)
                     else:
-                        logging.debug('command doesnt change the clock display => no need to interrupt max timer')
-                else:
-                    logging.debug('max timer not running => process command')
+                        logging.debug('(%s) max timer not running => processing command: %s', dev, message)
 
-                with self.process_lock:
-                    self._process_message(message)
+                    with self.process_lock[dev]:
+                        self._process_message(message, dev)
             except queue.Empty:
                 pass

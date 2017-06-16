@@ -6,7 +6,7 @@ Easy method : using image files
 
 This is the easiest installation method, supported on the `Raspberry Pi <http://www.raspberrypi.org>`_.
 Many other ARM boards can run picochess (like the powerful `Odroid-XU4 <http://www.hardkernel.com/main/products/prdt_info.php?g_code=G143452239825>`_),
-but you will need to do a :ref:`manual-install-label`.
+but you will need to do a `manual-install-label`_.
 
 You will have to download and install the latest PicoChess image file from the `PicoChess downloads <http://picochess.com/picochess-images>`_ and write it
 to an SD card or to a micro SD card.
@@ -96,10 +96,8 @@ Manual installation
 
 1. **Prerequisites**
 
-  PicoChess is mainly targetted for small devices like the
-  `Raspberry Pi <http://www.raspberrypi.org>`_, however it also
-  runs on a desktop computer (Linux, Mac OS X, Windows). You will need to install this
-  first:
+  PicoChess is mainly targetted for small devices like the `Raspberry Pi <http://www.raspberrypi.org>`_,
+  however it also runs on a desktop computer (Linux, Mac OS X, Windows). You will need to install this first:
 
   * `Python 3.4 or newer (also comes with pip) <https://www.python.org/downloads/>`_
     (on Mac OS X, ``brew install python3``)
@@ -108,9 +106,11 @@ Manual installation
 
   * zeroconf (``sudo apt-get install avahi-daemon avahi-discover libnss-mdns``, included on Mac OS X)
 
-  * espeak and festival (``sudo apt-get install espeak festival``) to enable speech for versions < 0.79
+  * espeak and festival (``sudo apt-get install espeak festival``) to enable voice for versions < 0.79
 
-  * vorbis-tools (``sudo apt-get install vorbis-tools``) to enable speech for versions >= 0.79
+  * vorbis-tools (``sudo apt-get install vorbis-tools``) to enable voice for versions >= 0.79
+
+  * sox (``sudo apt-get install sox``) to enable voice speed for versions >= 0.88
 
   * develop libraries (``sudo apt-get install python3-dev libffi-dev libssl-dev``)
 
@@ -166,35 +166,37 @@ Manual installation
 
 6. **Copy the dgtpi services into the correct place (ONLY needed if you have a DGTPi chess computer)**
 
-``cd /opt/picochess/etc``
+  ``cd /opt/picochess/etc``
 
-``sudo cp dgtpi.service /etc/systemd/system``
+  ``sudo cp dgtpi.service /etc/systemd/system``
 
-``sudo chmod a+x /etc/systemd/system/dgtpi.service``
+  ``sudo chmod a+x /etc/systemd/system/dgtpi.service``
 
-``sudo systemctl enable dgtpi``
+  ``sudo systemctl enable dgtpi``
 
-``sudo cp dgtpistandby.service /etc/systemd/system``
+  ``sudo cp dgtpistandby.service /etc/systemd/system``
 
-``sudo chmod a+x /etc/systemd/system/dgtpistandby.service``
+  ``sudo cp dgtpistandby.target /etc/systemd/system``
 
-``sudo systemctl enable dgtpistandby``
+  ``sudo chmod a+x /etc/systemd/system/dgtpistandby.service``
+
+  ``sudo systemctl enable dgtpistandby``
 
 7. **Copy the picochess services into the correct place (ONLY needed if you want picochess to startup automatically)**
 
-``cd /opt/picochess/etc``
+  ``cd /opt/picochess/etc``
 
-``sudo cp picochess.service /etc/systemd/system``
+  ``sudo cp picochess.service /etc/systemd/system``
 
-``sudo chmod a+x /etc/systemd/system/picochess.service``
+  ``sudo chmod a+x /etc/systemd/system/picochess.service``
 
-``sudo systemctl enable picochess``
+  ``sudo systemctl enable picochess``
 
-``sudo cp hciuart.service /lib/systemd/system``
+  ``sudo cp hciuart.service /lib/systemd/system``
 
-``sudo reboot``
+  ``sudo reboot``
 
-8. **Run PicoChess: automatically or from the command line (including a special console mode)**
+8. **Run PicoChess: automatically or from the command line**
 
   If installed correctly, PicoChess will start automatically at boot (as a service see 6+7).
   You can also start PicoChess from the command line in standard mode or in console mode (use "console" flag for this).

@@ -28,12 +28,15 @@ import configparser
 
 from threading import Timer
 from subprocess import Popen, PIPE
+from re import compile, sub
 
 from dgt.translate import DgtTranslate
 from dgt.api import Dgt
 
+from configobj import ConfigObj, ConfigObjError, DuplicateError
+
 # picochess version
-version = '087'
+version = '089'
 
 evt_queue = queue.Queue()
 dispatch_queue = queue.Queue()
@@ -100,33 +103,6 @@ class DisplayDgt(object):
         """Sends a message on each display device."""
         for display in dgtdisplay_devices:
             display.dgt_queue.put(copy.deepcopy(message))
-
-
-class switch(object):
-
-    """switch/case instruction in python."""
-
-    def __init__(self, value):
-        if type(value) is int:
-            self.value = value
-        else:
-            self.value = value._type
-        self.fall = False
-
-    def __iter__(self):
-        """Return the match method once, then stop."""
-        yield self.match
-        raise StopIteration
-
-    def match(self, *args):
-        """Indicate whether or not to enter a case suite."""
-        if self.fall or not args:
-            return True
-        elif self.value in args:  # changed for v1.5, see below
-            self.fall = True
-            return True
-        else:
-            return False
 
 
 class RepeatedTimer(object):
@@ -199,35 +175,60 @@ def hours_minutes_seconds(seconds: int):
     return hours, mins, secs
 
 
-def update_picochess(dgtpi: bool, auto_reboot: bool, dgttranslate: DgtTranslate):
-    """Update picochess from git."""
-    def do_command(command):
-        return Popen(command, stdout=PIPE).communicate()[0].decode(encoding='UTF-8')
-
-    git = 'git.exe' if platform.system() == 'Windows' else 'git'
-
-    branch = do_command([git, 'rev-parse', '--abbrev-ref', 'HEAD']).rstrip()
-    if branch == 'stable' or branch == 'master':
-        # Fetch remote repo
-        output = do_command([git, 'remote', 'update'])
-        logging.debug(output)
-        # Check if update is needed - but first force an english environment for it
+def do_popen(command, log=True, force_en_env=False):
+    """Connect via Popen and log the result."""
+    if force_en_env:  # force an english environment
         force_en_env = os.environ.copy()
         force_en_env['LC_ALL'] = 'C'
-        output = Popen([git, 'status', '-uno'], stdout=PIPE, env=force_en_env).communicate()[0].decode(encoding='UTF-8')
-        logging.debug(output)
+        stdout, stderr = Popen(command, stdout=PIPE, stderr=PIPE, env=force_en_env).communicate()
+    else:
+        stdout, stderr = Popen(command, stdout=PIPE, stderr=PIPE).communicate()
+    if log:
+        logging.debug([output.decode(encoding='UTF-8') for output in [stdout, stderr]])
+    return stdout.decode(encoding='UTF-8')
+
+
+def git_name():
+    """Get the git execute name."""
+    return 'git.exe' if platform.system() == 'Windows' else 'git'
+
+
+def get_tags():
+    """Get the last 3 tags from git."""
+    git = git_name()
+    tags = [(tags, compile(r'[^\d]+').sub('', tags)) for tags in do_popen([git, 'tag'], log=False).split('\n')[-4:-1]]
+    return tags  # returns something like [('v0.86', 086'), ('v0.87', '087'), ('v0.88', '088')]
+
+
+def checkout_tag(tag):
+    """Update picochess by tag from git."""
+    git = git_name()
+    do_popen([git, 'checkout', tag])
+    do_popen(['pip3', 'install', '-r', 'requirements.txt'])
+
+
+def update_picochess(dgtpi: bool, auto_reboot: bool, dgttranslate: DgtTranslate):
+    """Update picochess from git."""
+    git = git_name()
+
+    branch = do_popen([git, 'rev-parse', '--abbrev-ref', 'HEAD'], log=False).rstrip()
+    if branch == 'stable' or branch == 'master':
+        # Fetch remote repo
+        do_popen([git, 'remote', 'update'])
+        # Check if update is needed - need to make sure, we get english answers
+        output = do_popen([git, 'status', '-uno'], force_en_env=True)
         if 'up-to-date' not in output:
             DispatchDgt.fire(dgttranslate.text('Y25_update'))
             # Update
             logging.debug('updating picochess')
-            output = do_command(['pip3', 'install', '-r', 'requirements.txt'])
-            logging.debug(output)
-            output = do_command([git, 'pull', 'origin', branch])
-            logging.debug(output)
+            do_popen([git, 'pull', 'origin', branch])
+            do_popen(['pip3', 'install', '-r', 'requirements.txt'])
             if auto_reboot:
                 reboot(dgtpi, dev='web')
             else:
                 time.sleep(2)  # give time to display the "update" message
+        else:
+            logging.debug('no update available')
 
 
 def shutdown(dgtpi: bool, dev: str):
@@ -271,3 +272,13 @@ def get_location():
         return city + country_name + country_code, ext_ip, int_ip
     except:
         return '?', None, None
+
+
+def write_picochess_ini(key: str, value):
+    """update picochess.ini config file with key/value."""
+    try:
+        config = ConfigObj('picochess.ini')
+        config[key] = value
+        config.write()
+    except (ConfigObjError, DuplicateError) as conf_exc:
+        logging.exception(conf_exc)

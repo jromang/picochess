@@ -83,6 +83,7 @@ class EventApi():
     OUT_OF_TIME = 'EVT_OUT_OF_TIME'  # Clock flag fallen
     # Special events
     EXIT_MENU = 'EVT_EXIT_MENU'  # User exists the menu
+    UPDATE_PICO = 'EVT_UPDATE'  # User wants to upgrade/downgrade picochess
 
 
 class MessageApi():
@@ -130,13 +131,14 @@ class MessageApi():
     NEW_DEPTH = 'MSG_NEW_DEPTH'  # Shows a new depth
     ALTERNATIVE_MOVE = 'MSG_ALTERNATIVE_MOVE'  # User wants another move to be calculated
     SWITCH_SIDES = 'MSG_SWITCH_SIDES'  # Forget the engines move, and let it be user's turn
-    # KEYBOARD_MOVE = 'MSG_KEYBOARD_MOVE'  # Sends back the fen for a given move (needed for keyboard.py)
     SYSTEM_SHUTDOWN = 'MSG_SYSTEM_SHUTDOWN'  # Sends a Shutdown
     SYSTEM_REBOOT = 'MSG_SYSTEM_REBOOT'  # Sends a Reboot
     SET_VOICE = 'MSG_SET_VOICE'  # User chooses a new voice
 
     EXIT_MENU = 'MSG_EXIT_MENU'  # User exits the menu
     WRONG_FEN = 'MSG_WRONG_FEN'  # User sends a wrong placement of pieces (timed)
+    BATTERY = 'MSG_BATTERY'  # percent of BT battery
+    UPDATE_PICO = 'MSG_UPDATE'  # User wants to update picochess
 
 
 class DgtApi():
@@ -163,12 +165,12 @@ class Dgt():
     DISPLAY_MOVE = ClassFactory(DgtApi.DISPLAY_MOVE, ['move', 'fen', 'side', 'beep', 'maxtime', 'devs', 'wait', 'ld', 'rd'])
     DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['l', 'm', 's', 'beep', 'maxtime', 'devs', 'wait', 'ld', 'rd'])
     DISPLAY_TIME = ClassFactory(DgtApi.DISPLAY_TIME, ['wait', 'force', 'devs'])
-    LIGHT_CLEAR = ClassFactory(DgtApi.LIGHT_CLEAR, [])
-    LIGHT_SQUARES = ClassFactory(DgtApi.LIGHT_SQUARES, ['uci_move'])
+    LIGHT_CLEAR = ClassFactory(DgtApi.LIGHT_CLEAR, ['devs'])
+    LIGHT_SQUARES = ClassFactory(DgtApi.LIGHT_SQUARES, ['uci_move', 'devs'])
     CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, ['devs'])
     CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side', 'devs', 'wait'])
-    CLOCK_VERSION = ClassFactory(DgtApi.CLOCK_VERSION, ['main', 'sub', 'dev'])
-    CLOCK_TIME = ClassFactory(DgtApi.CLOCK_TIME, ['time_left', 'time_right', 'dev'])
+    CLOCK_VERSION = ClassFactory(DgtApi.CLOCK_VERSION, ['main', 'sub', 'devs'])
+    CLOCK_TIME = ClassFactory(DgtApi.CLOCK_TIME, ['time_left', 'time_right', 'devs'])
 
 
 class Message():
@@ -216,13 +218,14 @@ class Message():
     NEW_DEPTH = ClassFactory(MessageApi.NEW_DEPTH, ['depth'])
     ALTERNATIVE_MOVE = ClassFactory(MessageApi.ALTERNATIVE_MOVE, ['game'])
     SWITCH_SIDES = ClassFactory(MessageApi.SWITCH_SIDES, ['game', 'move'])
-    # KEYBOARD_MOVE = ClassFactory(MessageApi.KEYBOARD_MOVE, ['fen'])
     SYSTEM_SHUTDOWN = ClassFactory(MessageApi.SYSTEM_SHUTDOWN, [])
     SYSTEM_REBOOT = ClassFactory(MessageApi.SYSTEM_REBOOT, [])
-    SET_VOICE = ClassFactory(MessageApi.SET_VOICE, ['type', 'lang', 'speaker'])
+    SET_VOICE = ClassFactory(MessageApi.SET_VOICE, ['type', 'lang', 'speaker', 'speed'])
 
     EXIT_MENU = ClassFactory(MessageApi.EXIT_MENU, [])
     WRONG_FEN = ClassFactory(MessageApi.WRONG_FEN, [])
+    BATTERY = ClassFactory(MessageApi.BATTERY, ['percent'])
+    UPDATE_PICO = ClassFactory(MessageApi.UPDATE_PICO, [])
 
 
 class Event():
@@ -247,7 +250,7 @@ class Event():
     REBOOT = ClassFactory(EventApi.REBOOT, ['dev'])
     ALTERNATIVE_MOVE = ClassFactory(EventApi.ALTERNATIVE_MOVE, [])
     EMAIL_LOG = ClassFactory(EventApi.EMAIL_LOG, [])
-    SET_VOICE = ClassFactory(EventApi.SET_VOICE, ['type', 'lang', 'speaker'])
+    SET_VOICE = ClassFactory(EventApi.SET_VOICE, ['type', 'lang', 'speaker', 'speed'])
     # Keyboard events
     KEYBOARD_BUTTON = ClassFactory(EventApi.KEYBOARD_BUTTON, ['button', 'dev'])
     KEYBOARD_FEN = ClassFactory(EventApi.KEYBOARD_FEN, ['fen'])
@@ -262,3 +265,4 @@ class Event():
     OUT_OF_TIME = ClassFactory(EventApi.OUT_OF_TIME, ['color'])
     # special events
     EXIT_MENU = ClassFactory(EventApi.EXIT_MENU, [])
+    UPDATE_PICO = ClassFactory(EventApi.UPDATE_PICO, ['tag'])

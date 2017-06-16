@@ -159,8 +159,8 @@ class DgtTranslate(object):
             estxt = Dgt.DISPLAY_TEXT(l='sin funcion', m='sin func', s='nofunc')
             ittxt = Dgt.DISPLAY_TEXT(l='no funzione', m='no funz ', s='nofunz')
         if text_id == 'erroreng':
-            entxt = Dgt.DISPLAY_TEXT(l='err engine ', m='err engn', s='engerr')
-            detxt = Dgt.DISPLAY_TEXT(l='err engine ', m='err engn', s='engerr')
+            entxt = Dgt.DISPLAY_TEXT(l='err engine ', m='err engn', s='erreng')
+            detxt = Dgt.DISPLAY_TEXT(l='err engine ', m='err engn', s='erreng')
             nltxt = Dgt.DISPLAY_TEXT(l='fout engine', m='fout eng', s='e fout')
             frtxt = Dgt.DISPLAY_TEXT(l='err moteur ', m='err mot ', s='errmot')
             estxt = Dgt.DISPLAY_TEXT(l='error motor', m='err mot ', s='errmot')
@@ -209,15 +209,15 @@ class DgtTranslate(object):
             ittxt = Dgt.DISPLAY_TEXT(l='errore menu', m='err menu', s='errmen')
         if text_id == 'sidewhite':
             entxt = Dgt.DISPLAY_TEXT(l='side move W', m='side W  ', s='side w')
-            detxt = Dgt.DISPLAY_TEXT(l='W am Zug   ', m='W am Zug', s='w zug ')
-            nltxt = Dgt.DISPLAY_TEXT(l='wit aan zet', m='wit zet ', s='w zet ')
+            detxt = Dgt.DISPLAY_TEXT(l='W am Zug   ', m='W am Zug', s=' w zug')
+            nltxt = Dgt.DISPLAY_TEXT(l='wit aan zet', m='wit zet ', s=' w zet')
             frtxt = Dgt.DISPLAY_TEXT(l='aux blancs ', m='mvt bl  ', s='mvt bl')
             estxt = Dgt.DISPLAY_TEXT(l='lado blanco', m='lado W  ', s='lado w')
             ittxt = Dgt.DISPLAY_TEXT(l='lato bianco', m='lato b  ', s='lato b')
         if text_id == 'sideblack':
             entxt = Dgt.DISPLAY_TEXT(l='side move B', m='side B  ', s='side b')
-            detxt = Dgt.DISPLAY_TEXT(l='S am Zug   ', m='S am Zug', s='s zug ')
-            nltxt = Dgt.DISPLAY_TEXT(l='zw aan zet ', m='zw zet  ', s='z zet ')
+            detxt = Dgt.DISPLAY_TEXT(l='S am Zug   ', m='S am Zug', s=' s zug')
+            nltxt = Dgt.DISPLAY_TEXT(l='zw aan zet ', m='zw zet  ', s=' z zet')
             frtxt = Dgt.DISPLAY_TEXT(l='aux noirs  ', m='mvt n   ', s='mvt n ')
             estxt = Dgt.DISPLAY_TEXT(l='lado negro ', m='lado B  ', s='lado b')
             ittxt = Dgt.DISPLAY_TEXT(l='lato nero  ', m='lato n  ', s='lato n')
@@ -251,7 +251,7 @@ class DgtTranslate(object):
             ittxt = Dgt.DISPLAY_TEXT(l='ok tempo   ', m='ok tempo', s='oktemp')
         if text_id == 'okbeep':
             entxt = Dgt.DISPLAY_TEXT(l='ok beep    ', m='ok beep ', s='okbeep')
-            detxt = Dgt.DISPLAY_TEXT(l='ok TonSt   ', m='ok TonSt', s='ok ton')
+            detxt = Dgt.DISPLAY_TEXT(l='ok Toene   ', m='ok Toene', s='ok ton')
             nltxt = Dgt.DISPLAY_TEXT(l='ok piep    ', m='ok piep ', s='okpiep')
             frtxt = Dgt.DISPLAY_TEXT(l='ok sons    ', m='ok sons ', s='oksons')
             estxt = Dgt.DISPLAY_TEXT(l='ok beep    ', m='ok beep ', s='okbeep')
@@ -361,12 +361,12 @@ class DgtTranslate(object):
                 estxt = entxt
                 ittxt = entxt
         if text_id == 'mate':
-            entxt = Dgt.DISPLAY_TEXT(l='mate in ' + msg, m='mate ' + msg, s='mate' + msg)
-            detxt = Dgt.DISPLAY_TEXT(l='Matt in ' + msg, m='Matt ' + msg, s='matt' + msg)
-            nltxt = Dgt.DISPLAY_TEXT(l='mat in  ' + msg, m='mat  ' + msg, s='mat ' + msg)
-            frtxt = Dgt.DISPLAY_TEXT(l='mat en  ' + msg, m='mat  ' + msg, s='mat ' + msg)
-            estxt = Dgt.DISPLAY_TEXT(l='mate en ' + msg, m='mate ' + msg, s='mate' + msg)
-            ittxt = Dgt.DISPLAY_TEXT(l='matto in' + msg, m='matto' + msg, s='matt' + msg)
+            entxt = Dgt.DISPLAY_TEXT(l='mate in ' + msg, m='mate ' + msg, s='mat' + msg)
+            detxt = Dgt.DISPLAY_TEXT(l='Matt in ' + msg, m='Matt ' + msg, s='mat' + msg)
+            nltxt = Dgt.DISPLAY_TEXT(l='mat in  ' + msg, m='mat  ' + msg, s='mat' + msg)
+            frtxt = Dgt.DISPLAY_TEXT(l='mat en  ' + msg, m='mat  ' + msg, s='mat' + msg)
+            estxt = Dgt.DISPLAY_TEXT(l='mate en ' + msg, m='mate ' + msg, s='mat' + msg)
+            ittxt = Dgt.DISPLAY_TEXT(l='matto in' + msg, m='matto' + msg, s='mat' + msg)
         if text_id == 'score':
             text_s = 'no scr' if msg is None else str(msg).rjust(6)
             text_m = 'no score' if msg is None else str(msg).rjust(8)
@@ -376,42 +376,42 @@ class DgtTranslate(object):
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
-        if text_id == 'menu_mode_menu':
+        if text_id == 'top_mode_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Mode       ', m='Mode    ', s='mode  ')
             detxt = Dgt.DISPLAY_TEXT(l='Modus      ', m='Modus   ', s='modus ')
             nltxt = Dgt.DISPLAY_TEXT(l='Modus      ', m='Modus   ', s='modus ')
             frtxt = Dgt.DISPLAY_TEXT(l='Mode       ', m='Mode    ', s='mode  ')
             estxt = Dgt.DISPLAY_TEXT(l='Modo       ', m='Modo    ', s='modo  ')
             ittxt = Dgt.DISPLAY_TEXT(l='Modo       ', m='Modo    ', s='modo  ')
-        if text_id == 'menu_position_menu':
+        if text_id == 'top_position_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Position   ', m='Position', s='posit ')
             detxt = Dgt.DISPLAY_TEXT(l='Position   ', m='Position', s='positn')
             nltxt = Dgt.DISPLAY_TEXT(l='Stelling   ', m='Stelling', s='stelng')
             frtxt = Dgt.DISPLAY_TEXT(l='Position   ', m='Position', s='posit ')
             estxt = Dgt.DISPLAY_TEXT(l='Posicion   ', m='Posicion', s='posic ')
             ittxt = Dgt.DISPLAY_TEXT(l='Posizione  ', m='Posizion', s='posizi')
-        if text_id == 'menu_time_menu':
+        if text_id == 'top_time_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Time       ', m='Time    ', s='time  ')
             detxt = Dgt.DISPLAY_TEXT(l='Zeit       ', m='Zeit    ', s='zeit  ')
             nltxt = Dgt.DISPLAY_TEXT(l='Tyd        ', m='Tyd     ', s='tyd   ')
             frtxt = Dgt.DISPLAY_TEXT(l='Temps      ', m='Temps   ', s='temps ')
             estxt = Dgt.DISPLAY_TEXT(l='Tiempo     ', m='Tiempo  ', s='tiempo')
             ittxt = Dgt.DISPLAY_TEXT(l='Tempo      ', m='Tempo   ', s='tempo ')
-        if text_id == 'menu_book_menu':
+        if text_id == 'top_book_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Book       ', m='Book    ', s='book  ')
             detxt = Dgt.DISPLAY_TEXT(l='Buch       ', m='Buch    ', s='buch  ')
             nltxt = Dgt.DISPLAY_TEXT(l='Boek       ', m='Boek    ', s='boek  ')
             frtxt = Dgt.DISPLAY_TEXT(l='Livre      ', m='Livre   ', s='livre ')
             estxt = Dgt.DISPLAY_TEXT(l='Libro      ', m='Libro   ', s='libro ')
             ittxt = Dgt.DISPLAY_TEXT(l='Libro      ', m='Libro   ', s='libro ')
-        if text_id == 'menu_engine_menu':
+        if text_id == 'top_engine_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Engine     ', m='Engine  ', s='engine')
             detxt = Dgt.DISPLAY_TEXT(l='Engine     ', m='Engine  ', s='engine')
             nltxt = Dgt.DISPLAY_TEXT(l='Engine     ', m='Engine  ', s='engine')
             frtxt = Dgt.DISPLAY_TEXT(l='Moteur     ', m='Moteur  ', s='moteur')
             estxt = Dgt.DISPLAY_TEXT(l='Motor      ', m='Motor   ', s='motor ')
             ittxt = Dgt.DISPLAY_TEXT(l='Motore     ', m='Motore  ', s='motore')
-        if text_id == 'menu_system_menu':
+        if text_id == 'top_system_menu':
             entxt = Dgt.DISPLAY_TEXT(l='System     ', m='System  ', s='system')
             detxt = Dgt.DISPLAY_TEXT(l='System     ', m='System  ', s='system')
             nltxt = Dgt.DISPLAY_TEXT(l='Systeem    ', m='Systeem ', s='system')
@@ -481,51 +481,58 @@ class DgtTranslate(object):
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
-        if text_id == 'settings_version_menu':
+        if text_id == 'system_version_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Version    ', m='Version ', s='vers  ')
             detxt = Dgt.DISPLAY_TEXT(l='Version    ', m='Version ', s='vers  ')
             nltxt = Dgt.DISPLAY_TEXT(l='Versie     ', m='Versie  ', s='versie')
             frtxt = Dgt.DISPLAY_TEXT(l='Version    ', m='Version ', s='vers  ')
             estxt = Dgt.DISPLAY_TEXT(l='Version    ', m='Version ', s='vers  ')
             ittxt = Dgt.DISPLAY_TEXT(l='Versione   ', m='Versione', s='versio')
-        if text_id == 'settings_ipadr_menu':
+        if text_id == 'system_ipadr_menu':
             entxt = Dgt.DISPLAY_TEXT(l='IP adr     ', m='IP adr  ', s='ip adr')
             detxt = Dgt.DISPLAY_TEXT(l='IP adr     ', m='IP adr  ', s='ip adr')
             nltxt = Dgt.DISPLAY_TEXT(l='IP address ', m='IP adr  ', s='ip adr')
             frtxt = Dgt.DISPLAY_TEXT(l='Adr IP     ', m='Adr IP  ', s='adr ip')
             estxt = Dgt.DISPLAY_TEXT(l='IP dir     ', m='IP dir  ', s='ip dir')
             ittxt = Dgt.DISPLAY_TEXT(l='ind IP     ', m='ind IP  ', s='ind ip')
-        if text_id == 'settings_sound_menu':
+        if text_id == 'system_sound_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Sound      ', m='Sound   ', s='sound ')
             detxt = Dgt.DISPLAY_TEXT(l='Toene      ', m='Toene   ', s='toene ')
             nltxt = Dgt.DISPLAY_TEXT(l='Geluid     ', m='Geluid  ', s='geluid')
             frtxt = Dgt.DISPLAY_TEXT(l='Sons       ', m='Sons    ', s='sons  ')
             estxt = Dgt.DISPLAY_TEXT(l='Sonido     ', m='Sonido  ', s='sonido')
             ittxt = Dgt.DISPLAY_TEXT(l='Suoni      ', m='Suoni   ', s='suoni ')
-        if text_id == 'settings_language_menu':
+        if text_id == 'system_language_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Language   ', m='Language', s='lang  ')
             detxt = Dgt.DISPLAY_TEXT(l='Sprache    ', m='Sprache ', s='sprach')
             nltxt = Dgt.DISPLAY_TEXT(l='Taal       ', m='Taal    ', s='taal  ')
             frtxt = Dgt.DISPLAY_TEXT(l='Langue     ', m='Langue  ', s='langue')
             estxt = Dgt.DISPLAY_TEXT(l='Idioma     ', m='Idioma  ', s='idioma')
             ittxt = Dgt.DISPLAY_TEXT(l='Lingua     ', m='Lingua  ', s='lingua')
-        if text_id == 'settings_logfile_menu':
+        if text_id == 'system_logfile_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Log file   ', m='Log file', s='logfil')
             detxt = entxt
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
-        if text_id == 'settings_voice_menu':
+        if text_id == 'system_voice_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Voice      ', m='Voice   ', s='voice ')
             detxt = Dgt.DISPLAY_TEXT(l='Stimme     ', m='Stimme  ', s='stimme')
             nltxt = Dgt.DISPLAY_TEXT(l='Stem       ', m='Stem    ', s='stem  ')
             frtxt = Dgt.DISPLAY_TEXT(l='Voix       ', m='Voix    ', s='voix  ')
             estxt = Dgt.DISPLAY_TEXT(l='Voz        ', m='Voz     ', s='voz   ')
             ittxt = Dgt.DISPLAY_TEXT(l='Voce       ', m='Voce    ', s='voce  ')
-        if text_id == 'settings_display_menu':
+        if text_id == 'system_display_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Display    ', m='Display ', s='dsplay')
             detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
+        if text_id == 'system_battery_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='BT battery ', m='Battery ', s='bt bat')
+            detxt = Dgt.DISPLAY_TEXT(l='BT Batterie', m='Batterie', s='bt bat')
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
@@ -573,15 +580,15 @@ class DgtTranslate(object):
         if text_id == 'gameresult_repetition':
             wait = True
             entxt = Dgt.DISPLAY_TEXT(l='repetition ', m='rep pos ', s='reppos')
-            detxt = Dgt.DISPLAY_TEXT(l='Wiederholg ', m='Wiederhg', s='wh pos')
+            detxt = Dgt.DISPLAY_TEXT(l='Wiederholg ', m='Wiederhg', s='wdrhlg')
             nltxt = Dgt.DISPLAY_TEXT(l='zetherhalin', m='herhalin', s='herhal')
-            frtxt = Dgt.DISPLAY_TEXT(l='3ieme rep  ', m='3iem rep', s='3 rep ')
+            frtxt = Dgt.DISPLAY_TEXT(l='3ieme rep  ', m='3iem rep', s=' 3 rep')
             estxt = Dgt.DISPLAY_TEXT(l='repeticion ', m='repite 3', s='rep 3 ')
             ittxt = Dgt.DISPLAY_TEXT(l='3 ripetiz  ', m='3 ripeti', s='3 ripe')
         if text_id == 'gameresult_abort':
             wait = True
-            entxt = Dgt.DISPLAY_TEXT(l='abort      ', m='abort   ', s='abort ')
-            detxt = Dgt.DISPLAY_TEXT(l='Abbruch    ', m='Abbruch ', s='abbrch')
+            entxt = Dgt.DISPLAY_TEXT(l='abort game ', m='abort   ', s='abort ')
+            detxt = Dgt.DISPLAY_TEXT(l='Spl Abbruch', m='Abbruch ', s='abbrch')
             nltxt = Dgt.DISPLAY_TEXT(l='afbreken   ', m='afbreken', s='afbrek')
             frtxt = Dgt.DISPLAY_TEXT(l='sortir     ', m='sortir  ', s='sortir')
             estxt = Dgt.DISPLAY_TEXT(l='abortar    ', m='abortar ', s='abort ')
@@ -589,7 +596,7 @@ class DgtTranslate(object):
         if text_id == 'gameresult_white':
             wait = True
             entxt = Dgt.DISPLAY_TEXT(l='W wins     ', m='W wins  ', s='w wins')
-            detxt = Dgt.DISPLAY_TEXT(l='W gewinnt  ', m='W Gewinn', s='w gew ')
+            detxt = Dgt.DISPLAY_TEXT(l='W gewinnt  ', m='W Gewinn', s=' w gew')
             nltxt = Dgt.DISPLAY_TEXT(l='wit wint   ', m='wit wint', s='w wint')
             frtxt = Dgt.DISPLAY_TEXT(l='B gagne    ', m='B gagne ', s='b gagn')
             estxt = Dgt.DISPLAY_TEXT(l='B ganan    ', m='B ganan ', s='b gana')
@@ -597,7 +604,7 @@ class DgtTranslate(object):
         if text_id == 'gameresult_black':
             wait = True
             entxt = Dgt.DISPLAY_TEXT(l='B wins     ', m='B wins  ', s='b wins')
-            detxt = Dgt.DISPLAY_TEXT(l='S gewinnt  ', m='S Gewinn', s='s gew ')
+            detxt = Dgt.DISPLAY_TEXT(l='S gewinnt  ', m='S Gewinn', s=' s gew')
             nltxt = Dgt.DISPLAY_TEXT(l='zwart wint ', m='zw wint ', s='z wint')
             frtxt = Dgt.DISPLAY_TEXT(l='N gagne    ', m='N gagne ', s='n gagn')
             estxt = Dgt.DISPLAY_TEXT(l='N ganan    ', m='N ganan ', s='n gana')
@@ -703,87 +710,108 @@ class DgtTranslate(object):
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
-        if text_id == 'voicetype_user_menu':
-            entxt = Dgt.DISPLAY_TEXT(l='user voice ', m='uservoic', s='user v')
+        if text_id == 'voice_speed_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='Voice speed', m='Vc speed', s='vspeed')
+            detxt = Dgt.DISPLAY_TEXT(l='StimmGeschw', m='StmGesch', s='stmges')
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
+        if text_id == 'voice_speed':
+            entxt = Dgt.DISPLAY_TEXT(l='VoiceSpeed' + msg, m='Vspeed ' + msg, s='v spe' + msg)
+            detxt = Dgt.DISPLAY_TEXT(l='StmGeschw ' + msg, m='StmGes ' + msg, s='stm g' + msg)
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
+        if text_id == 'okspeed':
+            entxt = Dgt.DISPLAY_TEXT(l='ok voice sp', m='ok speed', s='ok spe')
+            detxt = Dgt.DISPLAY_TEXT(l='ok StmGesch', m='okStmGes', s='okstmg')
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
+        if text_id == 'voice_user_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='User voice ', m='UserVoic', s='user v')
             detxt = Dgt.DISPLAY_TEXT(l='Spieler Stm', m='Splr Stm', s='splr s')
-            nltxt = Dgt.DISPLAY_TEXT(l='speler Stem', m='splrStem', s='splr s')
-            frtxt = Dgt.DISPLAY_TEXT(l='joueur Voix', m='jourVoix', s='jour v')
-            estxt = Dgt.DISPLAY_TEXT(l='jugador Voz', m='jugadVoz', s='juga v')
-            ittxt = Dgt.DISPLAY_TEXT(l='giocat Voce', m='giocVoce', s='gioc v')
-        if text_id == 'voicetype_comp_menu':
-            entxt = Dgt.DISPLAY_TEXT(l='pico voice ', m='picovoic', s='pico v')
-            detxt = Dgt.DISPLAY_TEXT(l='picoChs Stm', m='pico Stm', s='pico v')
-            nltxt = Dgt.DISPLAY_TEXT(l='picoChsStem', m='picoStem', s='pico s')
-            frtxt = Dgt.DISPLAY_TEXT(l='picoChsVoix', m='picoVoix', s='pico v')
-            estxt = Dgt.DISPLAY_TEXT(l='picoChs Voz', m='pico Voz', s='pico v')
-            ittxt = Dgt.DISPLAY_TEXT(l='picoChsVoce', m='picoVoce', s='pico v')
+            nltxt = Dgt.DISPLAY_TEXT(l='Speler Stem', m='SplrStem', s='splr s')
+            frtxt = Dgt.DISPLAY_TEXT(l='Joueur Voix', m='JourVoix', s='jour v')
+            estxt = Dgt.DISPLAY_TEXT(l='Jugador Voz', m='JugadVoz', s='juga v')
+            ittxt = Dgt.DISPLAY_TEXT(l='Giocat Voce', m='GiocVoce', s='gioc v')
+        if text_id == 'voice_comp_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='Pico voice ', m='PicoVoic', s='pico v')
+            detxt = Dgt.DISPLAY_TEXT(l='PicoChs Stm', m='Pico Stm', s='pico v')
+            nltxt = Dgt.DISPLAY_TEXT(l='PicoChsStem', m='PicoStem', s='pico s')
+            frtxt = Dgt.DISPLAY_TEXT(l='PicoChsVoix', m='PicoVoix', s='pico v')
+            estxt = Dgt.DISPLAY_TEXT(l='PicoChs Voz', m='Pico Voz', s='pico v')
+            ittxt = Dgt.DISPLAY_TEXT(l='PicoChsVoce', m='PicoVoce', s='pico v')
         if text_id == 'okvoice':
             # wait = True
-            entxt = Dgt.DISPLAY_TEXT(l='ok Voice   ', m='ok voice', s='ok voi')
+            entxt = Dgt.DISPLAY_TEXT(l='ok Voice   ', m='ok Voice', s='ok voc')
             detxt = Dgt.DISPLAY_TEXT(l='ok Stimme  ', m='okStimme', s='ok stm')
             nltxt = Dgt.DISPLAY_TEXT(l='ok Stem    ', m='ok Stem ', s='okstem')
             frtxt = Dgt.DISPLAY_TEXT(l='ok Voix    ', m='ok Voix ', s='okvoix')
             estxt = Dgt.DISPLAY_TEXT(l='ok Voz     ', m='ok Voz  ', s='ok voz')
             ittxt = Dgt.DISPLAY_TEXT(l='ok Voce    ', m='ok Voce ', s='okvoce')
         if text_id == 'voice_on':
-            entxt = Dgt.DISPLAY_TEXT(l='Voice on   ', m='voice on', s='vc on ')
+            entxt = Dgt.DISPLAY_TEXT(l='Voice  on  ', m='Voice on', s='vc  on')
             detxt = Dgt.DISPLAY_TEXT(l='Stimme ein ', m='Stim ein', s='st ein')
-            nltxt = entxt
-            frtxt = entxt
-            estxt = entxt
-            ittxt = entxt
+            nltxt = Dgt.DISPLAY_TEXT(l='Stem aan   ', m='Stem aan', s='st aan')
+            frtxt = Dgt.DISPLAY_TEXT(l='Voix allume', m='Voix ete', s='vo ete')
+            estxt = Dgt.DISPLAY_TEXT(l='Voz encend ', m='Voz ence', s='vz enc')
+            ittxt = Dgt.DISPLAY_TEXT(l='Voce attiva', m='Voce att', s='vc att')
         if text_id == 'voice_off':
-            entxt = Dgt.DISPLAY_TEXT(l='Voice  off ', m='voiceoff', s='vc off')
+            entxt = Dgt.DISPLAY_TEXT(l='Voice off  ', m='Voiceoff', s='vc off')
             detxt = Dgt.DISPLAY_TEXT(l='Stimme aus ', m='Stim aus', s='st aus')
-            nltxt = entxt
-            frtxt = entxt
-            estxt = entxt
-            ittxt = entxt
-        if text_id == 'display_ponderinterval_menu':
-            entxt = Dgt.DISPLAY_TEXT(l='ponder intv', m='PondIntv', s='ponint')
+            nltxt = Dgt.DISPLAY_TEXT(l='Stem uit   ', m='Stem uit', s='st uit')
+            frtxt = Dgt.DISPLAY_TEXT(l='Voix eteint', m='Voix ete', s='vo ete')
+            estxt = Dgt.DISPLAY_TEXT(l='Voz apagada', m='Voz apag', s='vz apa')
+            ittxt = Dgt.DISPLAY_TEXT(l='Voce spenta', m='Voce spe', s='vc spe')
+        if text_id == 'display_ponder_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='Ponder intv', m='PondIntv', s='ponint')
             detxt = entxt
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
-        if text_id == 'okponderinterval':
+        if text_id == 'okponder':
             entxt = Dgt.DISPLAY_TEXT(l='ok pondIntv', m='okPondIv', s='ok int')
             detxt = entxt
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
-        if text_id == 'ponderinterval_time':
-            entxt = Dgt.DISPLAY_TEXT(l='pondr intv' + msg, m='pondrIv' + msg, s='p int' + msg)
+        if text_id == 'ponder_interval':
+            entxt = Dgt.DISPLAY_TEXT(l='Pondr intv' + msg, m='PondrIv' + msg, s='p int' + msg)
             detxt = entxt
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
         if text_id == 'display_confirm_menu':
-            entxt = Dgt.DISPLAY_TEXT(l='Confirm Msg', m='Confirm ', s='confrm')
-            detxt = Dgt.DISPLAY_TEXT(l='Confirm Msg', m='Confirm ', s='confrm')
+            entxt = Dgt.DISPLAY_TEXT(l='Confirm msg', m='Confirm ', s='confrm')
+            detxt = Dgt.DISPLAY_TEXT(l='Zugbestaetg', m='Zugbestg', s='zugbes')
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
         if text_id == 'okconfirm':
-            entxt = Dgt.DISPLAY_TEXT(l='ok Confirm ', m='okConfrm', s='okconf')
-            detxt = Dgt.DISPLAY_TEXT(l='ok Confirm ', m='okConfrm', s='okconf')
+            entxt = Dgt.DISPLAY_TEXT(l='ok confirm ', m='okConfrm', s='okconf')
+            detxt = Dgt.DISPLAY_TEXT(l='ok Zugbest ', m='okZugbes', s='ok bes')
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
         if text_id == 'confirm_on':
             entxt = Dgt.DISPLAY_TEXT(l='Confirm  on', m='Conf  on', s='cnf on')
-            detxt = Dgt.DISPLAY_TEXT(l='Confirm ein', m='Conf ein', s='cnfein')
+            detxt = Dgt.DISPLAY_TEXT(l='Zugbest ein', m='Best ein', s='besein')
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
         if text_id == 'confirm_off':
             entxt = Dgt.DISPLAY_TEXT(l='Confirm off', m='Conf off', s='cnfoff')
-            detxt = Dgt.DISPLAY_TEXT(l='Confirm aus', m='Conf aus', s='cnfaus')
+            detxt = Dgt.DISPLAY_TEXT(l='Zugbest aus', m='Best aus', s='besaus')
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
@@ -821,6 +849,21 @@ class DgtTranslate(object):
             entxt = Dgt.DISPLAY_TEXT(l='updating pc', m='updating', s='update')
             detxt = entxt
             nltxt = entxt
+            frtxt = Dgt.DISPLAY_TEXT(l='actualisePc', m='actualis', s='actual')
+            estxt = Dgt.DISPLAY_TEXT(l='actualizoPc', m='actualiz', s='actual')
+            ittxt = Dgt.DISPLAY_TEXT(l='aggiornare ', m='aggiorPc', s='aggior')
+        if text_id == 'updt_version':
+            wait = True
+            entxt = Dgt.DISPLAY_TEXT(l='Version ' + msg, m='Vers ' + msg, s='ver' + msg)
+            detxt = Dgt.DISPLAY_TEXT(l='Version ' + msg, m='Vers ' + msg, s='ver' + msg)
+            nltxt = Dgt.DISPLAY_TEXT(l='Versie  ' + msg, m='Vers ' + msg, s='ver' + msg)
+            frtxt = Dgt.DISPLAY_TEXT(l='Version ' + msg, m='Vers ' + msg, s='ver' + msg)
+            estxt = Dgt.DISPLAY_TEXT(l='Version ' + msg, m='Vers ' + msg, s='ver' + msg)
+            ittxt = Dgt.DISPLAY_TEXT(l='Versione' + msg, m='Vers ' + msg, s='ver' + msg)
+        if text_id == 'bat_percent':
+            entxt = Dgt.DISPLAY_TEXT(l='battery ' + msg, m='battr' + msg, s='bat' + msg)
+            detxt = entxt
+            nltxt = entxt
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
@@ -833,7 +876,8 @@ class DgtTranslate(object):
                 txt.devs = devs
 
         if entxt is None:
-            entxt = Dgt.DISPLAY_TEXT(l=None, m=text_id, s=None, wait=False, beep=self.bl(BeepLevel.YES), maxtime=0)
+            beep = self.bl(BeepLevel.YES)
+            entxt = Dgt.DISPLAY_TEXT(l=text_id, m=text_id, s=text_id, wait=False, beep=beep, maxtime=0, devs=devs)
             logging.warning('unknown text_id %s', text_id)
         if self.language == 'de' and detxt is not None:
             return detxt

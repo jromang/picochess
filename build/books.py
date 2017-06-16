@@ -26,8 +26,8 @@ def write_book_ini():
     def is_book(fname):
         return fname.endswith('.bin')
 
-    program_path = os.path.dirname(os.path.realpath(__file__)) + os.sep
-    books_path = program_path + 'books'
+    program_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+    books_path = program_path + os.sep + 'books'
 
     book_list = sorted(os.listdir(books_path))
     config = configparser.ConfigParser()
