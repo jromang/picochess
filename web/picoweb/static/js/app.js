@@ -62,6 +62,7 @@ var setupBoardFen = START_FEN;
 var DataTableFen = START_FEN;
 
 function updateDGTPosition(data) {
+    return;
     if (!goToPosition(data.fen) || data.play === 'reload') {
         loadGame(data['pgn'].split("\n"));
         goToPosition(data.fen);
@@ -345,7 +346,7 @@ $(function() {
                     }
                     break;
                 case 'Game':
-                    newBoard(data.fen);
+                    //newBoard(data.fen);
                     break;
                 case 'Message':
                     boardStatusEl.html(data.msg);
@@ -357,10 +358,10 @@ $(function() {
                     dgtClockStatusEl.html(data.msg);
                     break;
                 case 'Light':
-                    highlightBoard(data.move, 'computer');
+                    //highlightBoard(data.move, 'computer');
                     break;
                 case 'Clear':
-                    remove_highlights();
+                    //remove_highlights();
                     break;
                 case 'Header':
                     setHeaders(data['headers']);
@@ -858,8 +859,18 @@ var cfg = {
     onDrop: onDrop,
     onSnapEnd: onSnapEnd
 };
-board = new ChessBoard('board', cfg);
-$(window).resize(board.resize);
+// board = new ChessBoard('board', cfg);
+// $(window).resize(board.resize);
+
+var cfg2 = {
+    resizable: true,
+    turnColor: 'black',
+    fen: '8/8/5p2/4P3/4K3/8/8/8',
+};
+
+var chessground_1 = new Chessground(document.getElementById('board'), cfg2 );
+console.log(chessground_1);
+
 
 $('#flipOrientationBtn').on('click', boardFlip);
 $('#backBtn').on('click', goBack);
