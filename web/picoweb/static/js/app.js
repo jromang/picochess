@@ -869,8 +869,18 @@ var cfg2 = {
 };
 
 var chessground_1 = new Chessground(document.getElementById('board'), cfg2 );
-console.log(chessground_1);
-
+//console.log(chessground_1);
+$(window).resize(function() {
+    var bs = $('#boardsection');
+    var minboard = 0;
+    if (bs.height() > bs.width()) {
+        minboard = bs.width();
+    } else {
+        minboard = bs.height();
+    }
+    $('#board').css('width', minboard).css('height', minboard);
+    chessground_1.redrawAll();
+});
 
 $('#flipOrientationBtn').on('click', boardFlip);
 $('#backBtn').on('click', goBack);
