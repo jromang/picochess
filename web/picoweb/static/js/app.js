@@ -62,7 +62,6 @@ var setupBoardFen = START_FEN;
 var DataTableFen = START_FEN;
 
 function updateDGTPosition(data) {
-    return;
     if (!goToPosition(data.fen) || data.play === 'reload') {
         loadGame(data['pgn'].split("\n"));
         goToPosition(data.fen);
@@ -346,7 +345,7 @@ $(function() {
                     }
                     break;
                 case 'Game':
-                    //newBoard(data.fen);
+                    newBoard(data.fen);
                     break;
                 case 'Message':
                     boardStatusEl.html(data.msg);
@@ -392,6 +391,7 @@ $(function() {
 });
 
 function highlightBoard(uci_move, play) {
+    return;
     remove_highlights();
     var move = uci_move.match(/.{2}/g);
     add_highlight(move[0], play);
@@ -399,12 +399,14 @@ function highlightBoard(uci_move, play) {
 }
 
 function remove_highlights() {
+    return;
     $('#board div.highlight-computer').removeClass('highlight-computer');
     $('#board div.highlight-user').removeClass('highlight-user');
     $('#board div.highlight-review').removeClass('highlight-review');
 }
 
 function add_highlight(square, color) {
+    return;
     $('#board [data-square="' + square + '"]').addClass('highlight-' +  color);
 }
 
@@ -866,10 +868,25 @@ var cfg2 = {
     resizable: true,
     turnColor: 'black',
     fen: '8/8/5p2/4P3/4K3/8/8/8',
+    coordinates: false,
 };
 
-var chessground_1 = new Chessground(document.getElementById('board'), cfg2 );
-//console.log(chessground_1);
+chess_1 = Chess();
+var cfg3 = {
+            movable: {
+                color: 'white',
+                free: false,
+                dests: toDests(chess_1)
+            }
+        };
+
+var chessground_1 = new Chessground(document.getElementById('board'), cfg3 );
+
+chessground_1.set({
+    movable: { events: { after: playOtherSide(chessground_1, chess_1) } }
+});
+
+
 $(window).resize(function() {
     var bs = $('#boardsection');
     var minboard = 0;
@@ -881,6 +898,37 @@ $(window).resize(function() {
     $('#board').css('width', minboard).css('height', minboard);
     chessground_1.redrawAll();
 });
+
+function toDests(chess) {
+    var dests = {};
+    chess.SQUARES.forEach(function (s) {
+        var ms = chess.moves({ square: s, verbose: true });
+        if (ms.length)
+            dests[s] = ms.map(function (m) { return m.to; });
+    });
+    console.log(dests);
+    // Object { b8: Array[2], h8: Array[1], a7: Array[2], b7: Array[2], c7: Array[2], d7: Array[2], e7: Array[1], g7: Array[2], h7: Array[2], f6: Array[5] }
+    // Array(0: 'c6', 1: 'a6') for the Nb8 to move to a6, c6
+    return dests;
+}
+
+function toColor(chess) {
+    return (chess.turn() === 'w') ? 'white' : 'black';
+}
+
+function playOtherSide(cg, chess) {
+    return function (orig, dest) {
+        chess.move({ from: orig, to: dest });
+        cg.set({
+            turnColor: toColor(chess),
+            movable: {
+                color: toColor(chess),
+                dests: toDests(chess)
+            }
+        });
+    };
+}
+
 
 $('#flipOrientationBtn').on('click', boardFlip);
 $('#backBtn').on('click', goBack);
