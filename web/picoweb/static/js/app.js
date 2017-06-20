@@ -864,19 +864,21 @@ var cfg = {
 // board = new ChessBoard('board', cfg);
 // $(window).resize(board.resize);
 
+/*
 var cfg2 = {
     resizable: true,
     turnColor: 'black',
     fen: '8/8/5p2/4P3/4K3/8/8/8',
     coordinates: false,
 };
+*/
 
 chess_1 = Chess();
 var cfg3 = {
             movable: {
                 color: 'white',
                 free: false,
-                dests: toDests(chess_1)
+                dests: toDests(chess_1) // getChessGround(chess_1) //
             }
         };
 
@@ -923,10 +925,24 @@ function playOtherSide(cg, chess) {
             turnColor: toColor(chess),
             movable: {
                 color: toColor(chess),
-                dests: toDests(chess)
+                dests: getChessGround(chess) //toDests(chess)
             }
         });
     };
+}
+
+function getChessGround(chess) {
+    $.get('/dgt', {action: 'get_chessground', fen: chess.fen()}, function(data) {
+        if (data) {
+            console.log('PY');
+            console.log(data);
+            console.log('JS');
+            console.log(toDests(chess));
+            return data;
+        }
+    }).fail(function(jqXHR, textStatus) {
+        dgtClockStatusEl.html(textStatus);
+    });
 }
 
 

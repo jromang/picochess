@@ -41,6 +41,16 @@ from dgt.board import DgtBoard
 client_ips = []
 
 
+def to_dests(board: chess.Board):
+    """create a dict for chessground.js from the given board."""
+    dests = {}
+    for move in board.legal_moves:
+        dests[chess.square_name(move.from_square)] = []
+    for move in board.legal_moves:
+        dests[chess.square_name(move.from_square)].append(chess.square_name(move.to_square))
+    return dests
+
+
 class ServerRequestHandler(tornado.web.RequestHandler):
     def initialize(self, shared=None):
         self.shared = shared
@@ -129,6 +139,10 @@ class DGTHandler(ServerRequestHandler):
         if action == 'get_last_move':
             if 'last_dgt_move_msg' in self.shared:
                 self.write(self.shared['last_dgt_move_msg'])
+        if action == 'get_chessground':
+            fen = self.get_argument('fen')
+            self.write(to_dests(chess.Board(fen)))
+            pass
 
 
 class InfoHandler(ServerRequestHandler):
