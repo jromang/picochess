@@ -139,10 +139,6 @@ class DGTHandler(ServerRequestHandler):
         if action == 'get_last_move':
             if 'last_dgt_move_msg' in self.shared:
                 self.write(self.shared['last_dgt_move_msg'])
-        if action == 'get_chessground':
-            fen = self.get_argument('fen')
-            self.write(to_dests(chess.Board(fen)))
-            pass
 
 
 class InfoHandler(ServerRequestHandler):
