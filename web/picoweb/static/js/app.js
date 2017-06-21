@@ -187,7 +187,6 @@ BookDataTable.on('select', function( e, dt, type, indexes ) {
         var tmp_game = create_game_pointer();
         var move = tmp_game.move(data);
         updateCurrentPosition(move, tmp_game);
-        //board.position(currentPosition.fen);
         chessground_1.set({fen: currentPosition.fen});
         updateStatus();
         remove_highlights();
@@ -402,16 +401,7 @@ function highlightBoard(uci_move, play) {
         brush = 'yellow';
     }
     var shapes = {orig: move[0], dest: move[1], brush: brush};
-    /*
-    { orig: 'e2', dest: 'e4', brush: 'green' },
-    { orig: 'a6', dest: 'c8', brush: 'blue' },
-    { orig: 'f8', dest: 'f4', brush: 'yellow' },
-    */
-    console.log(shapes);
     chessground_1.setShapes([shapes]);
-    //chessground_1.redrawAll();
-    //add_highlight(move[0], play);
-    //add_highlight(move[1], play);
 }
 
 function remove_highlights() {
@@ -808,7 +798,6 @@ var onSnapEnd = function(source, target) {
     // illegal move
     // if (move === null) return 'snapback';
     updateCurrentPosition(move, tmp_game);
-    //board.position(currentPosition.fen);
     chessground_1.set({fen: currentPosition.fen});
     updateStatus();
     $.post('/channel', {action: 'move', fen: currentPosition.fen, source: source, target: target}, function(data) {
@@ -869,57 +858,13 @@ var updateStatus = function() {
     $('#' + stripped_fen).addClass('highlight');
 };
 
-/*
-var cfg = {
-    showNotation: false,
-    draggable: true,
-    position: 'start',
-    onDragStart: onDragStart,
-    onDrop: onDrop,
-    onSnapEnd: onSnapEnd
-};
-board = new ChessBoard('board', cfg);
-$(window).resize(board.resize);
-*/
-
-/*
-var cfg2 = {
-    resizable: true,
-    turnColor: 'black',
-    fen: '8/8/5p2/4P3/4K3/8/8/8',
-    coordinates: false,
-};
-*/
-
-var shapeSet1 = [
-    { orig: 'a3', brush: 'green' },
-    { orig: 'a4', brush: 'blue' },
-    { orig: 'a5', brush: 'yellow' },
-    { orig: 'a6', brush: 'red' },
-    { orig: 'e2', dest: 'e4', brush: 'green' },
-    { orig: 'a6', dest: 'c8', brush: 'blue' },
-    { orig: 'f8', dest: 'f4', brush: 'yellow' },
-    { orig: 'h5', brush: 'green', piece: {
-            color: 'white',
-            role: 'knight'
-        } },
-    { orig: 'h6', brush: 'red', piece: {
-            color: 'black',
-            role: 'queen',
-            scale: 0.6
-        } }
-];
-
-
 chess_1 = Chess();
 var cfg3 = {
             movable: {
                 color: 'white',
                 free: false,
                 dests: toDests(chess_1) // getChessGround(chess_1) //
-            },
-            //drawable: { shapes: [{ orig: 'a6', dest: 'c8', brush: 'blue' }] }
-            //drawable: { shapes: shapeSet1 }
+            }
         };
 
 var chessground_1 = new Chessground(document.getElementById('board'), cfg3 );
@@ -948,8 +893,6 @@ function toDests(chess) {
         if (ms.length)
             dests[s] = ms.map(function (m) { return m.to; });
     });
-    // Object { b8: Array[2], h8: Array[1], a7: Array[2], b7: Array[2], c7: Array[2], d7: Array[2], e7: Array[1], g7: Array[2], h7: Array[2], f6: Array[5] }
-    // Array(0: 'c6', 1: 'a6') for the Nb8 to move to a6, c6
     return dests;
 }
 
@@ -1265,12 +1208,6 @@ function download() {
 function newBoard(fen) {
     stop_analysis();
 
-    /*
-    board.destroy();
-    board = new ChessBoard('board', cfg);
-
-    board.position(fen);
-    */
     chessground_1.set({fen: fen});
 
     currentPosition = {};
@@ -1362,7 +1299,6 @@ function goToPosition(fen) {
     if (!currentPosition) {
         return false;
     }
-    //board.position(currentPosition.fen);
     chessground_1.set({fen: currentPosition.fen});
     updateStatus();
     return true;
@@ -1371,7 +1307,6 @@ function goToPosition(fen) {
 function goToStart() {
     stop_analysis();
     currentPosition = gameHistory;
-    //board.position(currentPosition.fen);
     chessground_1.set({fen: currentPosition.fen});
     updateStatus();
 }
@@ -1380,7 +1315,6 @@ function goToEnd() {
     stop_analysis();
     if (fenHash.last) {
         currentPosition = fenHash.last;
-        //board.position(currentPosition.fen);
         chessground_1.set({fen: currentPosition.fen});
     }
     updateStatus();
@@ -1391,7 +1325,6 @@ function goForward() {
     if (currentPosition && currentPosition.variations[0]) {
         currentPosition = currentPosition.variations[0];
         if (currentPosition) {
-            //board.position(currentPosition.fen);
             chessground_1.set({fen: currentPosition.fen});
         }
     }
@@ -1402,14 +1335,12 @@ function goBack() {
     stop_analysis();
     if (currentPosition && currentPosition.previous) {
         currentPosition = currentPosition.previous;
-        //board.position(currentPosition.fen);
         chessground_1.set({fen: currentPosition.fen});
     }
     updateStatus();
 }
 
 function boardFlip() {
-    //board.flip();
     chessground_1.toggleOrientation();
 }
 
@@ -1565,7 +1496,6 @@ function import_pv(e) {
         var move = tmp_game.move(text_move);
         updateCurrentPosition(move, tmp_game);
     }
-    //board.position(currentPosition.fen);
     chessground_1.set({fen: currentPosition.fen});
     updateStatus();
 }
