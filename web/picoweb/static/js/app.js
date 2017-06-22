@@ -678,7 +678,7 @@ function PGNExporter(columns) {
 }
 
 function export_game(root_node, exporter, include_comments, include_variations, _board, _after_variation) {
-    if (_board == undefined) {
+    if (_board === undefined) {
         _board = new Chess(root_node.fen);
     }
 
@@ -762,7 +762,7 @@ function updateCurrentPosition(move, tmp_game) {
     var found_move = false;
     if (currentPosition && currentPosition.variations) {
         for (var i = 0; i < currentPosition.variations.length; i++) {
-            if (move.san == currentPosition.variations[i].move.san) {
+            if (move.san === currentPosition.variations[i].move.san) {
                 currentPosition = currentPosition.variations[i];
                 found_move = true;
             }
@@ -863,7 +863,7 @@ var cfg3 = {
             movable: {
                 color: 'white',
                 free: false,
-                dests: toDests(chess_1) // getChessGround(chess_1) //
+                dests: toDests(chess_1)
             }
         };
 
@@ -875,6 +875,7 @@ chessground_1.set({
 
 
 $(window).resize(function() {
+    /*
     var bs = $('#boardsection');
     var minboard = 0;
     if (bs.height() > bs.width()) {
@@ -883,6 +884,7 @@ $(window).resize(function() {
         minboard = bs.height();
     }
     $('#board').css('width', minboard).css('height', minboard);
+    */
     chessground_1.redrawAll();
 });
 
@@ -1116,7 +1118,7 @@ function loadGame(pgn_lines) {
             var preparsed_move = token;
             var move = board_stack[last_board_stack_index].move(preparsed_move, {sloppy: true});
             in_variation = true;
-            if (move == null) {
+            if (move === null) {
                 console.log('Unparsed move:');
                 console.log(preparsed_move);
                 console.log('Fen: ' + board_stack[last_board_stack_index].fen());
@@ -1179,7 +1181,7 @@ function writeVariationTree(dom, gameMoves, gameHistoryEl) {
 function getGameHeader(h, pgn_output) {
     var gameHeaderText = '';
 
-    if (true == pgn_output) {
+    if (true === pgn_output) {
         for (var key in h) {
             // hasOwnProperty ensures that inherited properties are not included
             if (h.hasOwnProperty(key)) {
