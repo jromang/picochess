@@ -122,7 +122,10 @@ class UciEngine(object):
             logging.info('engine already stopped')
             return self.res
         self.show_best = show_best
-        self.engine.stop()
+        try:
+            self.engine.stop()
+        except chess.uci.EngineTerminatedException:
+            logging.error('Engine terminated')
         return self.future.result()
 
     def go(self, time_dict: dict):

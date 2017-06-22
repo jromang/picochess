@@ -391,7 +391,7 @@ $(function() {
 });
 
 function highlightBoard(uci_move, play) {
-    remove_highlights();
+    //remove_highlights();
     var move = uci_move.match(/.{2}/g);
     var brush = 'green';
     if( play === 'computer') {
@@ -405,15 +405,7 @@ function highlightBoard(uci_move, play) {
 }
 
 function remove_highlights() {
-    return;
-    $('#board div.highlight-computer').removeClass('highlight-computer');
-    $('#board div.highlight-user').removeClass('highlight-user');
-    $('#board div.highlight-review').removeClass('highlight-review');
-}
-
-function add_highlight(square, color) {
-    return;
-    $('#board [data-square="' + square + '"]').addClass('highlight-' +  color);
+    chessground_1.setShapes([]);
 }
 
 // do not pick up pieces if the game is over
