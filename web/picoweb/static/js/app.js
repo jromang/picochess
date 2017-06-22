@@ -395,10 +395,10 @@ function highlightBoard(uci_move, play) {
     var move = uci_move.match(/.{2}/g);
     var brush = 'green';
     if( play === 'computer') {
-        brush = 'blue'
+        brush = 'yellow'
     }
     if( play === 'review') {
-        brush = 'yellow';
+        brush = 'blue';
     }
     var shapes = {orig: move[0], dest: move[1], brush: brush};
     chessground_1.setShapes([shapes]);
