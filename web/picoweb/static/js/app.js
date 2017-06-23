@@ -39,7 +39,7 @@ NAG_BLACK_SEVERE_TIME_PRESSURE = 139;
 
 const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
-var board,
+var //board,
     boardStatusEl = $('#BoardStatus'),
     dgtClockStatusEl = $('#DGTClockStatus'),
     dgtClockTextEl = $('#DGTClockText'),
@@ -188,6 +188,14 @@ BookDataTable.on('select', function( e, dt, type, indexes ) {
         var move = tmp_game.move(data);
         updateCurrentPosition(move, tmp_game);
         chessground_1.set({fen: currentPosition.fen});
+        var tmp_game = create_game_pointer();
+        chessground_1.set({
+            turnColor: toColor(tmp_game),
+            movable: {
+                color: toColor(tmp_game),
+                dests: toDests(tmp_game)
+            }
+        });
         updateStatus();
         remove_highlights();
     }
@@ -796,6 +804,14 @@ var onSnapEnd = function(source, target) {
     // if (move === null) return 'snapback';
     updateCurrentPosition(move, tmp_game);
     chessground_1.set({fen: currentPosition.fen});
+    var tmp_game = create_game_pointer();
+    chessground_1.set({
+        turnColor: toColor(tmp_game),
+        movable: {
+            color: toColor(tmp_game),
+            dests: toDests(tmp_game)
+        }
+    });
     updateStatus();
     $.post('/channel', {action: 'move', fen: currentPosition.fen, source: source, target: target}, function(data) {
     });
@@ -855,19 +871,19 @@ var updateStatus = function() {
     $('#' + stripped_fen).addClass('highlight');
 };
 
-chess_1 = Chess();
+//chess_1 = Chess();
 var cfg3 = {
             movable: {
                 color: 'white',
                 free: false,
-                dests: toDests(chess_1)
+                dests: toDests(Chess())
             }
         };
 
 var chessground_1 = new Chessground(document.getElementById('board'), cfg3 );
 
 chessground_1.set({
-    movable: { events: { after: playOtherSide(chessground_1, chess_1) } }
+    movable: { events: { after: playOtherSide() } }
 });
 
 
@@ -889,7 +905,9 @@ function toColor(chess) {
     return (chess.turn() === 'w') ? 'white' : 'black';
 }
 
-function playOtherSide(cg, chess) {
+function playOtherSide() {
+    return onSnapEnd;
+    /*
     return function (orig, dest) {
         chess.move({ from: orig, to: dest });
         cg.set({
@@ -900,6 +918,7 @@ function playOtherSide(cg, chess) {
             }
         });
     };
+    */
 }
 
 $('#flipOrientationBtn').on('click', boardFlip);
@@ -1197,8 +1216,6 @@ function download() {
 function newBoard(fen) {
     stop_analysis();
 
-    chessground_1.set({fen: fen});
-
     currentPosition = {};
     currentPosition.fen = fen;
 
@@ -1207,6 +1224,16 @@ function newBoard(fen) {
     gameHistory.gameHeader = '';
     gameHistory.result = '';
     gameHistory.variations = [];
+
+    chessground_1.set({fen: fen});
+    var tmp_game = create_game_pointer();
+    chessground_1.set({
+        turnColor: toColor(tmp_game),
+        movable: {
+            color: toColor(tmp_game),
+            dests: toDests(tmp_game)
+        }
+    });
     updateStatus();
 }
 
@@ -1289,6 +1316,14 @@ function goToPosition(fen) {
         return false;
     }
     chessground_1.set({fen: currentPosition.fen});
+    var tmp_game = create_game_pointer();
+    chessground_1.set({
+        turnColor: toColor(tmp_game),
+        movable: {
+            color: toColor(tmp_game),
+            dests: toDests(tmp_game)
+        }
+    });
     updateStatus();
     return true;
 }
@@ -1297,6 +1332,14 @@ function goToStart() {
     stop_analysis();
     currentPosition = gameHistory;
     chessground_1.set({fen: currentPosition.fen});
+    var tmp_game = create_game_pointer();
+    chessground_1.set({
+        turnColor: toColor(tmp_game),
+        movable: {
+            color: toColor(tmp_game),
+            dests: toDests(tmp_game)
+        }
+    });
     updateStatus();
 }
 
@@ -1305,6 +1348,14 @@ function goToEnd() {
     if (fenHash.last) {
         currentPosition = fenHash.last;
         chessground_1.set({fen: currentPosition.fen});
+        var tmp_game = create_game_pointer();
+        chessground_1.set({
+            turnColor: toColor(tmp_game),
+            movable: {
+                color: toColor(tmp_game),
+                dests: toDests(tmp_game)
+            }
+        });
     }
     updateStatus();
 }
@@ -1315,6 +1366,14 @@ function goForward() {
         currentPosition = currentPosition.variations[0];
         if (currentPosition) {
             chessground_1.set({fen: currentPosition.fen});
+            var tmp_game = create_game_pointer();
+            chessground_1.set({
+                turnColor: toColor(tmp_game),
+                movable: {
+                    color: toColor(tmp_game),
+                    dests: toDests(tmp_game)
+                }
+            });
         }
     }
     updateStatus();
@@ -1325,6 +1384,14 @@ function goBack() {
     if (currentPosition && currentPosition.previous) {
         currentPosition = currentPosition.previous;
         chessground_1.set({fen: currentPosition.fen});
+        var tmp_game = create_game_pointer();
+        chessground_1.set({
+            turnColor: toColor(tmp_game),
+            movable: {
+                color: toColor(tmp_game),
+                dests: toDests(tmp_game)
+            }
+        });
     }
     updateStatus();
 }
@@ -1486,6 +1553,14 @@ function import_pv(e) {
         updateCurrentPosition(move, tmp_game);
     }
     chessground_1.set({fen: currentPosition.fen});
+    var tmp_game = create_game_pointer();
+    chessground_1.set({
+        turnColor: toColor(tmp_game),
+        movable: {
+            color: toColor(tmp_game),
+            dests: toDests(tmp_game)
+        }
+    });
     updateStatus();
 }
 
@@ -1540,17 +1615,17 @@ function getPreviousMoves(node, format) {
     format = format || 'raw';
 
     if (node.previous) {
+        var san = '';
         if (format === 'san') {
-            var san = '';
             if (node.half_move_num % 2 === 1) {
                 san += Math.floor((node.half_move_num + 1) / 2) + ". "
             }
             san += node.move.san;
-            return getPreviousMoves(node.previous, format) + ' ' + san;
         }
         else {
-            return getPreviousMoves(node.previous, format) + ' ' + node.move.from + node.move.to + (node.move.promotion ? node.move.promotion : '');
+            san += node.move.from + node.move.to + (node.move.promotion ? node.move.promotion : '');
         }
+        return getPreviousMoves(node.previous, format) + ' ' + san;
     } else {
         return '';
     }
