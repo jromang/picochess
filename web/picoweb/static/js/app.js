@@ -116,7 +116,7 @@ function setTitle(data) {
 
 // copied from loadGame()
 function setHeaders(data) {
-    gameHistory.gameHeader = getGameHeader(data, false);
+    gameHistory.gameHeader = getWebGameHeader(data);
     gameHistory.result = data.Result;
     gameHistory.originalHeader = data;
     var exporter = new WebExporter();
@@ -542,7 +542,7 @@ function WebExporter(columns) {
             console.warn('put_move error');
             console.log(tmp_board.ascii());
             console.log(m);
-            out_move = {'san': 'X' + move.from + move.to};
+            out_move = {'san': 'X' + m.from + m.to};
         }
         this.write_token('<span class="gameMove' + (board.fullmove_number) + '"><a href="#" class="fen" data-fen="' + fen + '" id="' + stripped_fen + '"> ' + figurinize_move(out_move.san) + ' </a></span>');
     };
@@ -565,7 +565,7 @@ function WebExporter(columns) {
     };
 }
 
-function PGNExporter(columns) {
+function PgnExporter(columns) {
     this.lines = [];
     this.columns = columns;
     this.current_line = "";
@@ -648,6 +648,12 @@ function PGNExporter(columns) {
     this.put_move = function(board, m) {
         var tmp_board = new Chess(board.fen());
         var out_move = tmp_board.move(m);
+        if (!out_move) {
+            console.warn('put_move error');
+            console.log(tmp_board.ascii());
+            console.log(m);
+            out_move = {'san': 'X' + m.from + m.to};
+        }
         this.write_token(out_move.san + " ");
     };
 
@@ -695,7 +701,6 @@ function export_game(root_node, exporter, include_comments, include_variations, 
         for (var j = 1; j < root_node.variations.length; j++) {
             var variation = root_node.variations[j];
             exporter.start_variation();
-            // q.push([variations[j]]);#
 
             if (include_comments && variation.starting_comment) {
                 exporter.put_starting_comment(variation.starting_comment);
@@ -867,16 +872,6 @@ chessground_1.set({
 
 
 $(window).resize(function() {
-    /*
-    var bs = $('#boardsection');
-    var minboard = 0;
-    if (bs.height() > bs.width()) {
-        minboard = bs.width();
-    } else {
-        minboard = bs.height();
-    }
-    $('#board').css('width', minboard).css('height', minboard);
-    */
     chessground_1.redrawAll();
 });
 
@@ -1144,7 +1139,7 @@ function loadGame(pgn_lines) {
 }
 
 function get_full_game() {
-    var game_header = getGameHeader(gameHistory.originalHeader, true);
+    var game_header = getPgnGameHeader(gameHistory.originalHeader);
     if (game_header.length <= 1) {
         gameHistory.originalHeader = {
             'White': '*',
@@ -1157,10 +1152,10 @@ function get_full_game() {
             'BlackElo' : '-',
             'WhiteElo' : '-'
         };
-        game_header = getGameHeader(gameHistory.originalHeader, true);
+        game_header = getPgnGameHeader(gameHistory.originalHeader);
     }
 
-    var exporter = new PGNExporter();
+    var exporter = new PgnExporter();
     export_game(gameHistory, exporter, true, true, undefined, false);
     var exporter_content = exporter.toString();
     return game_header + exporter_content;
@@ -1170,23 +1165,23 @@ function writeVariationTree(dom, gameMoves, gameHistoryEl) {
     $(dom).html(gameHistoryEl.gameHeader + '<div class="gameMoves">' + gameMoves + ' <span class="gameResult">' + gameHistoryEl.result + '</span></div>');
 }
 
-function getGameHeader(h, pgn_output) {
+function getPgnGameHeader(h) {
     var gameHeaderText = '';
-
-    if (true === pgn_output) {
-        for (var key in h) {
-            // hasOwnProperty ensures that inherited properties are not included
-            if (h.hasOwnProperty(key)) {
-                var value = h[key];
-                gameHeaderText += "[" + key + " \"" + value + "\"]\n";
-            }
+    for (var key in h) {
+        // hasOwnProperty ensures that inherited properties are not included
+        if (h.hasOwnProperty(key)) {
+            var value = h[key];
+            gameHeaderText += "[" + key + " \"" + value + "\"]\n";
         }
-        gameHeaderText += "\n";
     }
-    else {
-        gameHeaderText = '<h4>' + h.White + ' (' + h.WhiteElo + ') vs ' + h.Black + ' (' + h.BlackElo + ')</h4>';
-        gameHeaderText += '<h5>' + h.Event + ', ' + h.Site + ' ' + h.Date + '</h5>';
-    }
+    gameHeaderText += "\n";
+    return gameHeaderText;
+}
+
+function getWebGameHeader(h) {
+    var gameHeaderText = '';
+    gameHeaderText += '<h4>' + h.White + ' (' + h.WhiteElo + ') vs ' + h.Black + ' (' + h.BlackElo + ')</h4>';
+    gameHeaderText += '<h5>' + h.Event + ', ' + h.Site + ' ' + h.Date + '</h5>';
     return gameHeaderText;
 }
 
