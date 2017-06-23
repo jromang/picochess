@@ -39,11 +39,11 @@ NAG_BLACK_SEVERE_TIME_PRESSURE = 139;
 
 const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
-var //board,
-    boardStatusEl = $('#BoardStatus'),
+var boardStatusEl = $('#BoardStatus'),
     dgtClockStatusEl = $('#DGTClockStatus'),
     dgtClockTextEl = $('#DGTClockText'),
     pgnEl = $('#pgn');
+
 var gameHistory, fenHash, currentPosition;
 var backend_server_prefix = 'http://drshivaji.com:3334';
 //var backend_server_prefix = "http://localhost:7777";
@@ -135,6 +135,19 @@ function goToDGTFen() {
     });
 }
 
+function updateChessGround() {
+    var tmp_game = create_game_pointer();
+
+    chessground_1.set({
+        fen: currentPosition.fen,
+        turnColor: toColor(tmp_game),
+        movable: {
+            color: toColor(tmp_game),
+            dests: toDests(tmp_game)
+        }
+    });
+}
+
 var BookDataTable = $("#BookTable").DataTable( {
     "processing": true,
     "paging": false,
@@ -187,15 +200,7 @@ BookDataTable.on('select', function( e, dt, type, indexes ) {
         var tmp_game = create_game_pointer();
         var move = tmp_game.move(data);
         updateCurrentPosition(move, tmp_game);
-        chessground_1.set({fen: currentPosition.fen});
-        var tmp_game = create_game_pointer();
-        chessground_1.set({
-            turnColor: toColor(tmp_game),
-            movable: {
-                color: toColor(tmp_game),
-                dests: toDests(tmp_game)
-            }
-        });
+        updateChessGround();
         updateStatus();
         remove_highlights();
     }
@@ -429,13 +434,6 @@ function create_game_pointer() {
     }
     return tmp_game;
 }
-
-var onDragStart = function(source, piece, position, orientation) {
-    var tmp_game = create_game_pointer();
-    if ((tmp_game.turn() === 'w' && piece.search(/^b/) !== -1) || (tmp_game.turn() === 'b' && piece.search(/^w/) !== -1)) {
-        return false;
-    }
-};
 
 function strip_fen(fen) {
     var stripped_fen = fen.replace(/\//g, "");
@@ -748,19 +746,6 @@ function export_game(root_node, exporter, include_comments, include_variations, 
     }
 }
 
-var onDrop = function(source, target) {
-    var tmp_game = create_game_pointer();
-
-    var move = tmp_game.move({
-        from: source,
-        to: target,
-        promotion: 'q' // NOTE: always promote to a pawn for example simplicity
-    });
-
-    // illegal move
-    if (move === null) return 'snapback';
-};
-
 // update the board position after the piece snap
 // for castling, en passant, pawn promotion
 function updateCurrentPosition(move, tmp_game) {
@@ -800,18 +785,8 @@ var onSnapEnd = function(source, target) {
         promotion: 'q' // NOTE: always promote to a pawn for example simplicity
     });
 
-    // illegal move
-    // if (move === null) return 'snapback';
     updateCurrentPosition(move, tmp_game);
-    chessground_1.set({fen: currentPosition.fen});
-    var tmp_game = create_game_pointer();
-    chessground_1.set({
-        turnColor: toColor(tmp_game),
-        movable: {
-            color: toColor(tmp_game),
-            dests: toDests(tmp_game)
-        }
-    });
+    updateChessGround();
     updateStatus();
     $.post('/channel', {action: 'move', fen: currentPosition.fen, source: source, target: target}, function(data) {
     });
@@ -871,7 +846,6 @@ var updateStatus = function() {
     $('#' + stripped_fen).addClass('highlight');
 };
 
-//chess_1 = Chess();
 var cfg3 = {
             movable: {
                 color: 'white',
@@ -907,18 +881,6 @@ function toColor(chess) {
 
 function playOtherSide() {
     return onSnapEnd;
-    /*
-    return function (orig, dest) {
-        chess.move({ from: orig, to: dest });
-        cg.set({
-            turnColor: toColor(chess),
-            movable: {
-                color: toColor(chess),
-                dests: toDests(chess)
-            }
-        });
-    };
-    */
 }
 
 $('#flipOrientationBtn').on('click', boardFlip);
@@ -1225,15 +1187,7 @@ function newBoard(fen) {
     gameHistory.result = '';
     gameHistory.variations = [];
 
-    chessground_1.set({fen: fen});
-    var tmp_game = create_game_pointer();
-    chessground_1.set({
-        turnColor: toColor(tmp_game),
-        movable: {
-            color: toColor(tmp_game),
-            dests: toDests(tmp_game)
-        }
-    });
+    updateChessGround();
     updateStatus();
 }
 
@@ -1315,15 +1269,7 @@ function goToPosition(fen) {
     if (!currentPosition) {
         return false;
     }
-    chessground_1.set({fen: currentPosition.fen});
-    var tmp_game = create_game_pointer();
-    chessground_1.set({
-        turnColor: toColor(tmp_game),
-        movable: {
-            color: toColor(tmp_game),
-            dests: toDests(tmp_game)
-        }
-    });
+    updateChessGround();
     updateStatus();
     return true;
 }
@@ -1331,15 +1277,7 @@ function goToPosition(fen) {
 function goToStart() {
     stop_analysis();
     currentPosition = gameHistory;
-    chessground_1.set({fen: currentPosition.fen});
-    var tmp_game = create_game_pointer();
-    chessground_1.set({
-        turnColor: toColor(tmp_game),
-        movable: {
-            color: toColor(tmp_game),
-            dests: toDests(tmp_game)
-        }
-    });
+    updateChessGround();
     updateStatus();
 }
 
@@ -1347,15 +1285,7 @@ function goToEnd() {
     stop_analysis();
     if (fenHash.last) {
         currentPosition = fenHash.last;
-        chessground_1.set({fen: currentPosition.fen});
-        var tmp_game = create_game_pointer();
-        chessground_1.set({
-            turnColor: toColor(tmp_game),
-            movable: {
-                color: toColor(tmp_game),
-                dests: toDests(tmp_game)
-            }
-        });
+        updateChessGround();
     }
     updateStatus();
 }
@@ -1365,15 +1295,7 @@ function goForward() {
     if (currentPosition && currentPosition.variations[0]) {
         currentPosition = currentPosition.variations[0];
         if (currentPosition) {
-            chessground_1.set({fen: currentPosition.fen});
-            var tmp_game = create_game_pointer();
-            chessground_1.set({
-                turnColor: toColor(tmp_game),
-                movable: {
-                    color: toColor(tmp_game),
-                    dests: toDests(tmp_game)
-                }
-            });
+            updateChessGround();
         }
     }
     updateStatus();
@@ -1383,15 +1305,7 @@ function goBack() {
     stop_analysis();
     if (currentPosition && currentPosition.previous) {
         currentPosition = currentPosition.previous;
-        chessground_1.set({fen: currentPosition.fen});
-        var tmp_game = create_game_pointer();
-        chessground_1.set({
-            turnColor: toColor(tmp_game),
-            movable: {
-                color: toColor(tmp_game),
-                dests: toDests(tmp_game)
-            }
-        });
+        updateChessGround();
     }
     updateStatus();
 }
@@ -1552,15 +1466,7 @@ function import_pv(e) {
         var move = tmp_game.move(text_move);
         updateCurrentPosition(move, tmp_game);
     }
-    chessground_1.set({fen: currentPosition.fen});
-    var tmp_game = create_game_pointer();
-    chessground_1.set({
-        turnColor: toColor(tmp_game),
-        movable: {
-            color: toColor(tmp_game),
-            dests: toDests(tmp_game)
-        }
-    });
+    updateChessGround();
     updateStatus();
 }
 
