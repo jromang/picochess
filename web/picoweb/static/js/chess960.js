@@ -33,7 +33,7 @@
  * https://github.com/jhlywa/chess.js/blob/master/LICENSE
  */
 
-var Chess = function(fen) {
+var Chess = function(fen, gtype) {
 
   /* jshint indent: false */
 
@@ -171,9 +171,10 @@ var Chess = function(fen) {
    * starting position
    */
   if (typeof fen === 'undefined') {
-    load(DEFAULT_POSITION);
+    load(DEFAULT_POSITION, GAME_STANDARD);
   } else {
-    load(fen);
+    if (typeof gtype === 'undefined') { gtype = GAME_STANDARD; }
+    load(fen, gtype);
   }
 
   function clear() {
@@ -198,13 +199,14 @@ var Chess = function(fen) {
   }
 
   function reset() {
-    load(DEFAULT_POSITION);
+    load(DEFAULT_POSITION, GAME_STANDARD);
   }
 
-  function load(fen) {
+  function load(fen, gtype) {
     var tokens = fen.split(/\s+/);
     var position = tokens[0];
     var square = 0;
+    game_type = gtype;
 
     if (!validate_fen(fen).valid) {
       return false;
@@ -281,7 +283,7 @@ var Chess = function(fen) {
        8: '1st field (piece positions) is invalid [consecutive numbers].',
        9: '1st field (piece positions) is invalid [invalid piece].',
       10: '1st field (piece positions) is invalid [row too large].',
-      11: 'Illegal en-passant square',
+      11: 'Illegal en-passant square'
     };
 
     /* 1st criterion: 6 space-seperated fields? */
@@ -454,8 +456,7 @@ var Chess = function(fen) {
     var sq = SQUARES[square];
 
     /* don't let the user place more than one king */
-    if (piece.type == KING &&
-        !(kings[piece.color] == EMPTY || kings[piece.color] == sq)) {
+    if (piece.type == KING && !(kings[piece.color] == EMPTY || kings[piece.color] == sq)) {
       return false;
     }
 
@@ -603,11 +604,10 @@ var Chess = function(fen) {
      * single square move generation on the king's square
      */
     if ((!single_square) || last_sq === kings[us]) {
-      /* JP! Das muss um die ganze King/Queen Side Castle Ifs! */
 
       /* king-side castling */
       if (castling[us] & BITS.KSIDE_CASTLE) {
-        if (game_type == GAME_STANDARD) {
+        if (game_type === GAME_STANDARD) {
           var castling_from = kings[us];
           var castling_to = castling_from + 2;
 
@@ -669,10 +669,9 @@ var Chess = function(fen) {
 
       /* queen-side castling */
       if (castling[us] & BITS.QSIDE_CASTLE) {
-        var castling_from = kings[us];
-        var castling_to = castling_from - 2;
-
         if (game_type == GAME_STANDARD) {
+          var castling_from = kings[us];
+          var castling_to = castling_from - 2;
 
           if (board[castling_from - 1] == null &&
               board[castling_from - 2] == null &&
@@ -727,12 +726,12 @@ var Chess = function(fen) {
           }
         }
       }
-    } /* JP! */
+    }
 
     /* if no parameters passed in, assume legal w/ algebraic moves */
-    if (typeof settings == 'undefined') {
-      settings = {legal: true};
-    }
+    //if (typeof settings == 'undefined') {
+    //  settings = {legal: true};
+    //}
 
     /* return all pseudo-legal moves (this includes moves that allow the king
      * to be captured)
@@ -1350,8 +1349,9 @@ var Chess = function(fen) {
     /***************************************************************************
      * PUBLIC API
      **************************************************************************/
-    load: function(fen) {
-      return load(fen);
+    load: function(fen, gtype) {
+      if (typeof gtype === 'undefined') { gtype = GAME_STANDARD; }
+      return load(fen, gtype);
     },
 
     reset: function() {
@@ -1580,20 +1580,16 @@ var Chess = function(fen) {
       var headers = parse_pgn_header(header_string, options);
       for (var key in headers) {
         set_header([key, headers[key]]);
-          /* JP! start
-           */
           if (key.toLowerCase() == 'variant' &&
             headers[key].toLowerCase() == 'chess960') {
             game_type = GAME_960;
         }
-          /* JP! end
-           */
       }
 
       /* load the starting position indicated by [Setup '1'] and
       * [FEN position] */
       if (headers['SetUp'] === '1') {
-          if (!(('FEN' in headers) && load(headers['FEN']))) {
+          if (!(('FEN' in headers) && load(headers['FEN'], game_type))) {
             return false;
           }
       }
@@ -1605,7 +1601,7 @@ var Chess = function(fen) {
       ms = ms.replace(/(\{[^}]+\})+?/g, '');
 
       /* delete recursive annotation variations */
-      var rav_regex = /(\([^\(\)]+\))+?/g
+      var rav_regex = /(\([^\(\)]+\))+?/g;
       while (rav_regex.test(ms)) {
         ms = ms.replace(rav_regex, '');
       }
