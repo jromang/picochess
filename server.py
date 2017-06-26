@@ -407,12 +407,14 @@ class WebDisplay(DisplayMsg, threading.Thread):
             if 'ip_info' in self.shared:
                 if 'location' in self.shared['ip_info']:
                     pgn_game.headers['Site'] = self.shared['ip_info']['location']
+            print(pgn_game.headers)
 
         def _update_headers():
-            pgn_game = pgn.Game()
-            _create_game_header(pgn_game)
-            self.shared['headers'] = pgn_game.headers
-            EventHandler.write_to_clients({'event': 'Header', 'headers': pgn_game.headers})
+            # pgn_game = pgn.Game()
+            # _create_game_header(pgn_game)
+            # self.shared['headers'] = pgn_game.headers
+            # EventHandler.write_to_clients({'event': 'Header', 'headers': pgn_game.headers})
+            EventHandler.write_to_clients({'event': 'Header', 'headers': self.shared['headers']})
 
         def _update_title():
             EventHandler.write_to_clients({'event': 'Title', 'ip_info': self.shared['ip_info']})

@@ -60,6 +60,7 @@ gameHistory.variations = [];
 
 var setupBoardFen = START_FEN;
 var DataTableFen = START_FEN;
+var ChessGameType = 0; // 0=Standard ; 1=Chess960
 
 function updateDGTPosition(data) {
     if (!goToPosition(data.fen) || data.play === 'reload') {
@@ -376,6 +377,7 @@ $(function() {
                     remove_highlights();
                     break;
                 case 'Header':
+                    console.log(data);
                     setHeaders(data['headers']);
                     break;
                 case 'Title':
@@ -427,10 +429,10 @@ function create_game_pointer() {
     var tmp_game;
 
     if (currentPosition && currentPosition.fen) {
-        tmp_game = new Chess(currentPosition.fen);
+        tmp_game = new Chess(currentPosition.fen, ChessGameType);
     }
     else {
-        tmp_game = new Chess(setupBoardFen);
+        tmp_game = new Chess(setupBoardFen, ChessGameType);
     }
     return tmp_game;
 }
@@ -539,17 +541,21 @@ function WebExporter(columns) {
     };
 
     this.put_move = function(board, m) {
-        var old_fen = board.fen();
-        var tmp_board = new Chess(old_fen);
-        var out_move = tmp_board.move(m);
-        var fen = tmp_board.fen();
+        //var old_fen = board.fen();
+        //var tmp_board = new Chess(old_fen);
+        //var out_move = tmp_board.move(m);
+        //var fen = tmp_board.fen();
+        var out_move = board.move(m);
+        var fen = board.fen();
         var stripped_fen = strip_fen(fen);
         if (!out_move) {
             console.warn('put_move error');
-            console.log(tmp_board.ascii());
+            //console.log(tmp_board.ascii());
+            console.log(board.ascii());
             console.log(m);
             out_move = {'san': 'X' + m.from + m.to};
         }
+        board.undo();
         this.write_token('<span class="gameMove' + (board.fullmove_number) + '"><a href="#" class="fen" data-fen="' + fen + '" id="' + stripped_fen + '"> ' + figurinize_move(out_move.san) + ' </a></span>');
     };
 
@@ -652,14 +658,17 @@ function PgnExporter(columns) {
     };
 
     this.put_move = function(board, m) {
-        var tmp_board = new Chess(board.fen());
-        var out_move = tmp_board.move(m);
+        //var tmp_board = new Chess(board.fen());
+        //var out_move = tmp_board.move(m);
+        var out_move = board.move(m);
         if (!out_move) {
             console.warn('put_move error');
-            console.log(tmp_board.ascii());
+            //console.log(tmp_board.ascii());
+            console.log(board.ascii());
             console.log(m);
             out_move = {'san': 'X' + m.from + m.to};
         }
+        board.undo();
         this.write_token(out_move.san + " ");
     };
 
@@ -683,7 +692,7 @@ function PgnExporter(columns) {
 
 function export_game(root_node, exporter, include_comments, include_variations, _board, _after_variation) {
     if (_board === undefined) {
-        _board = new Chess(root_node.fen);
+        _board = new Chess(root_node.fen, ChessGameType);
     }
 
     // append fullmove number
@@ -993,7 +1002,12 @@ function loadGame(pgn_lines) {
 
     var tmp_game;
     if ('FEN' in game_headers && 'SetUp' in game_headers) {
-        tmp_game = new Chess(game_headers['FEN']);
+        if ('Variant' in game_headers && 'Chess960' === game_headers['Variant']) {
+            ChessGameType = 1; // values from chess960.js
+        } else {
+            ChessGameType = 0;
+        }
+        tmp_game = new Chess(game_headers['FEN'], ChessGameType);
         setupBoardFen = game_headers['FEN'];
     }
     else {
@@ -1319,7 +1333,7 @@ function formatEngineOutput(line) {
         var analysis_game = new Chess();
         var start_move_num = 1;
         if (currentPosition && currentPosition.fen) {
-            analysis_game.load(currentPosition.fen);
+            analysis_game.load(currentPosition.fen, ChessGameType);
             start_move_num = getCountPrevMoves(currentPosition) + 1;
         }
 
