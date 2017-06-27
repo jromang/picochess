@@ -486,8 +486,11 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self.hint_turn = None
         # Display the move
         side = self._get_clock_side(message.game.turn)
+        beep = self.dgttranslate.bl(BeepLevel.CONFIG)
+        pos960 = message.game.chess960_pos()
+        uci960 = pos960 is not None and pos960 != 518
         disp = Dgt.DISPLAY_MOVE(move=move, fen=message.game.fen(), side=side, wait=message.wait, maxtime=0,
-                                beep=self.dgttranslate.bl(BeepLevel.CONFIG), devs={'ser', 'i2c', 'web'})
+                                beep=beep, devs={'ser', 'i2c', 'web'}, uci960=uci960)
         DispatchDgt.fire(disp)
         DispatchDgt.fire(Dgt.LIGHT_SQUARES(uci_move=move.uci(), devs={'ser', 'web'}))
         self.leds_are_on = True

@@ -80,7 +80,7 @@ class DgtIface(DisplayDgt, Thread):
 
     def get_san(self, message, is_xl=False):
         """create a chess.board plus a text ready to display on clock."""
-        bit_board = Board(message.fen)
+        bit_board = Board(message.fen, message.uci960)
         if bit_board.is_legal(message.move):
             move_text = bit_board.san(message.move)
         else:

@@ -1006,6 +1006,7 @@ function loadGame(pgn_lines) {
     else {
         tmp_game = new Chess();
         setupBoardFen = START_FEN;
+        ChessGameType = 0;
     }
 
     var board_stack = [tmp_game];
@@ -1098,6 +1099,7 @@ function loadGame(pgn_lines) {
                 console.log(preparsed_move);
                 console.log('Fen: ' + board_stack[last_board_stack_index].fen());
                 console.log('faulty line: ' + line);
+                console.log('Chess960: ' + ChessGameType)
             }
 
             var props = {};
