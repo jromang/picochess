@@ -541,21 +541,17 @@ function WebExporter(columns) {
     };
 
     this.put_move = function(board, m) {
-        //var old_fen = board.fen();
-        //var tmp_board = new Chess(old_fen);
-        //var out_move = tmp_board.move(m);
-        //var fen = tmp_board.fen();
-        var out_move = board.move(m);
-        var fen = board.fen();
+        var old_fen = board.fen();
+        var tmp_board = new Chess(old_fen, ChessGameType);
+        var out_move = tmp_board.move(m);
+        var fen = tmp_board.fen();
         var stripped_fen = strip_fen(fen);
         if (!out_move) {
             console.warn('put_move error');
-            //console.log(tmp_board.ascii());
-            console.log(board.ascii());
+            console.log(tmp_board.ascii());
             console.log(m);
             out_move = {'san': 'X' + m.from + m.to};
         }
-        board.undo();
         this.write_token('<span class="gameMove' + (board.fullmove_number) + '"><a href="#" class="fen" data-fen="' + fen + '" id="' + stripped_fen + '"> ' + figurinize_move(out_move.san) + ' </a></span>');
     };
 
@@ -658,17 +654,14 @@ function PgnExporter(columns) {
     };
 
     this.put_move = function(board, m) {
-        //var tmp_board = new Chess(board.fen());
-        //var out_move = tmp_board.move(m);
-        var out_move = board.move(m);
+        var tmp_board = new Chess(board.fen(), ChessGameType);
+        var out_move = tmp_board.move(m);
         if (!out_move) {
             console.warn('put_move error');
-            //console.log(tmp_board.ascii());
-            console.log(board.ascii());
+            console.log(tmp_board.ascii());
             console.log(m);
             out_move = {'san': 'X' + m.from + m.to};
         }
-        board.undo();
         this.write_token(out_move.san + " ");
     };
 

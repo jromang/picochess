@@ -362,6 +362,49 @@ class WebDisplay(DisplayMsg, threading.Thread):
         if 'system_info' not in self.shared:
             self.shared['system_info'] = {}
 
+    def _create_headers(self):
+        if 'headers' not in self.shared:
+            pgn_game = pgn.Game()
+            self._build_game_header(pgn_game)
+            self.shared['headers'] = pgn_game.headers
+
+    def _build_game_header(self, pgn_game: chess.pgn.Game):
+        pgn_game.headers['Result'] = '*'
+        pgn_game.headers['White'] = 'None'
+        pgn_game.headers['Black'] = 'None'
+        pgn_game.headers['Event'] = 'PicoChess game'
+        pgn_game.headers['Date'] = datetime.datetime.now().date().strftime('%Y-%m-%d')
+        pgn_game.headers['Round'] = '?'
+        pgn_game.headers['Site'] = 'picochess.org'
+
+        user_name = 'User'
+        engine_name = 'Picochess'
+        if 'system_info' in self.shared:
+            if 'user_name' in self.shared['system_info']:
+                user_name = self.shared['system_info']['user_name']
+            if 'engine_name' in self.shared['system_info']:
+                engine_name = self.shared['system_info']['engine_name']
+
+        if 'game_info' in self.shared:
+            if 'play_mode' in self.shared['game_info']:
+                if 'level_text' in self.shared['game_info']:
+                    engine_name += ' [{0}]'.format(self.shared['game_info']['level_text'].m)
+                pgn_game.headers['Black'] = \
+                    engine_name if self.shared['game_info']['play_mode'] == PlayMode.USER_WHITE else user_name
+                pgn_game.headers['White'] = \
+                    engine_name if self.shared['game_info']['play_mode'] == PlayMode.USER_BLACK else user_name
+
+                comp_color = 'Black' if self.shared['game_info']['play_mode'] == PlayMode.USER_WHITE else 'White'
+                user_color = 'Black' if self.shared['game_info']['play_mode'] == PlayMode.USER_BLACK else 'White'
+                pgn_game.headers[comp_color + 'Elo'] = '2900'
+                pgn_game.headers[user_color + 'Elo'] = '-'
+
+        if 'ip_info' in self.shared:
+            if 'location' in self.shared['ip_info']:
+                pgn_game.headers['Site'] = self.shared['ip_info']['location']
+        # print(pgn_game.headers)
+        # print(' ')
+
     def task(self, message):
         def _oldstyle_fen(game: chess.Board):
             builder = []
@@ -373,55 +416,26 @@ class WebDisplay(DisplayMsg, threading.Thread):
             builder.append(str(game.fullmove_number))
             return ' '.join(builder)
 
-        def _create_game_header(pgn_game: chess.pgn.Game):
-            pgn_game.headers['Result'] = '*'
-            pgn_game.headers['White'] = 'None'
-            pgn_game.headers['Black'] = 'None'
-            pgn_game.headers['Event'] = 'PicoChess game'
-            pgn_game.headers['Date'] = datetime.datetime.now().date().strftime('%Y-%m-%d')
-            pgn_game.headers['Round'] = '?'
-            pgn_game.headers['Site'] = 'picochess.org'
+        def _build_headers():
+            self._create_headers()
+            pgn_game = pgn.Game()
+            self._build_game_header(pgn_game)
+            pgn_game.headers.update(self.shared['headers'])
+            print(self.shared['headers'])
+            self.shared['headers'] = pgn_game.headers
+            print(self.shared['headers'])
+            print(' ')
 
-            user_name = 'User'
-            engine_name = 'Picochess'
-            if 'system_info' in self.shared:
-                if 'user_name' in self.shared['system_info']:
-                    user_name = self.shared['system_info']['user_name']
-                if 'engine_name' in self.shared['system_info']:
-                    engine_name = self.shared['system_info']['engine_name']
-
-            if 'game_info' in self.shared:
-                if 'play_mode' in self.shared['game_info']:
-                    if 'level_text' in self.shared['game_info']:
-                        engine_name += ' [{0}]'.format(self.shared['game_info']['level_text'].m)
-                    pgn_game.headers['Black'] = \
-                        engine_name if self.shared['game_info']['play_mode'] == PlayMode.USER_WHITE else user_name
-                    pgn_game.headers['White'] = \
-                        engine_name if self.shared['game_info']['play_mode'] == PlayMode.USER_BLACK else user_name
-
-                    comp_color = 'Black' if self.shared['game_info']['play_mode'] == PlayMode.USER_WHITE else 'White'
-                    user_color = 'Black' if self.shared['game_info']['play_mode'] == PlayMode.USER_BLACK else 'White'
-                    pgn_game.headers[comp_color + 'Elo'] = '2900'
-                    pgn_game.headers[user_color + 'Elo'] = '-'
-
-            if 'ip_info' in self.shared:
-                if 'location' in self.shared['ip_info']:
-                    pgn_game.headers['Site'] = self.shared['ip_info']['location']
-            print(pgn_game.headers)
-
-        def _update_headers():
-            # pgn_game = pgn.Game()
-            # _create_game_header(pgn_game)
-            # self.shared['headers'] = pgn_game.headers
-            # EventHandler.write_to_clients({'event': 'Header', 'headers': pgn_game.headers})
+        def _send_headers():
             EventHandler.write_to_clients({'event': 'Header', 'headers': self.shared['headers']})
 
-        def _update_title():
+        def _send_title():
             EventHandler.write_to_clients({'event': 'Title', 'ip_info': self.shared['ip_info']})
 
         def _transfer(game: chess.Board):
             pgn_game = pgn.Game().from_board(game)
-            _create_game_header(pgn_game)
+            self._build_game_header(pgn_game)
+            self.shared['headers'] = pgn_game.headers
             return pgn_game.accept(pgn.StringExporter(headers=True, comments=False, variations=False))
 
         if False:  # switch-case
@@ -432,24 +446,28 @@ class WebDisplay(DisplayMsg, threading.Thread):
             result = {'pgn': pgn_str, 'fen': fen, 'event': 'Game', 'move': '0000', 'play': 'newgame'}
             self.shared['last_dgt_move_msg'] = result
             EventHandler.write_to_clients(result)
-            _update_headers()
+            _build_headers()
+            _send_headers()
 
         elif isinstance(message, Message.IP_INFO):
             self.shared['ip_info'] = message.info
-            _update_headers()
-            _update_title()
+            _build_headers()
+            _send_headers()
+            _send_title()
 
         elif isinstance(message, Message.SYSTEM_INFO):
             self.shared['system_info'] = message.info
             self.shared['system_info']['old_engine'] = self.shared['system_info']['engine_name']
-            _update_headers()
+            _build_headers()
+            _send_headers()
 
         elif isinstance(message, Message.ENGINE_READY):
             self._create_system_info()
             self.shared['system_info']['engine_name'] = message.engine_name
             if not message.has_levels and 'level_text' in self.shared['game_info']:
                 del self.shared['game_info']['level_text']
-            _update_headers()
+            _build_headers()
+            _send_headers()
 
         elif isinstance(message, Message.STARTUP_INFO):
             self.shared['game_info'] = message.info.copy()
@@ -473,12 +491,14 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 self.shared['system_info']['engine_name'] = 'Remote Player'
             else:
                 self.shared['system_info']['engine_name'] = self.shared['system_info']['old_engine']
-            _update_headers()
+            _build_headers()
+            _send_headers()
 
         elif isinstance(message, Message.PLAY_MODE):
             self._create_game_info()
             self.shared['game_info']['play_mode'] = message.play_mode
-            _update_headers()
+            _build_headers()
+            _send_headers()
 
         elif isinstance(message, Message.TIME_CONTROL):
             self._create_game_info()
@@ -487,11 +507,13 @@ class WebDisplay(DisplayMsg, threading.Thread):
         elif isinstance(message, Message.LEVEL):
             self._create_game_info()
             self.shared['game_info']['level_text'] = message.level_text
-            _update_headers()
+            _build_headers()
+            _send_headers()
 
         elif isinstance(message, Message.DGT_NO_CLOCK_ERROR):
-            result = {'event': 'Status', 'msg': 'Error clock'}
+            # result = {'event': 'Status', 'msg': 'Error clock'}
             # EventHandler.write_to_clients(result)
+            pass
 
         elif isinstance(message, Message.DGT_CLOCK_VERSION):
             if message.dev == 'ser':
