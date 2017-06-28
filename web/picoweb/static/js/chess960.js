@@ -619,16 +619,15 @@ var Chess = function(fen, gtype) {
         } else {
           /* king-side castling (CHESS 960) */
           var king_from = kings[us];
-          var king_to = us ? SQUARES.g1 : SQUARES.g8;
+          var king_to = us == 'w' ? SQUARES.g1 : SQUARES.g8;
           var rook_from = ROOKS[us][1].square;
-          var rook_to = us ? SQUARES.f1 : SQUARES.f8;
+          var rook_to = us == 'w' ? SQUARES.f1 : SQUARES.f8;
 
           /* is there a clear shot between the king-side rook and its castling_to
            * square (ignoring the friendly)?
            */
           var rook_unimpeded = true;
           if (rook_from == rook_to) {
-            //rook_unimpeded = false;  # JP! rook doesnt move => no problem!
           } else {
             var delta = (rook_from - rook_to > 0) ? -1 : 1;
             for (var i = rook_from + delta; i != rook_to; i += delta) {
@@ -641,11 +640,11 @@ var Chess = function(fen, gtype) {
 
           /* is there a clear shot between the king and its castling_to square
            * (ignoring the friendly king-side rook)?
+           * also check the king target for empty square like "Ng1, Rf1, Kd1" and "O-O"
            */
           var king_unimpeded = true;
           var checked = false;
           if (king_from == king_to) {
-            //king_unimpeded = false;  # JP! king doesnt move => no problem!
             checked = attacked(them, king_to);
           } else {
             var delta = (king_from - king_to > 0) ? -1 : 1;
@@ -658,6 +657,9 @@ var Chess = function(fen, gtype) {
                 checked = true;
                 break;
               }
+            }
+            if (board[king_to]) {
+                king_unimpeded = false;
             }
           }
 
@@ -702,6 +704,7 @@ var Chess = function(fen, gtype) {
 
           /* is there a clear shot between the king and its castling_to square
            * (ignoring the friendly queen-side rook)?
+           * also check the king target for empty square like "Qc1, Rd1, Kf1" and "O-O-O"
            */
           var king_unimpeded = true;
           var checked = false;
@@ -718,6 +721,9 @@ var Chess = function(fen, gtype) {
                 checked = true;
                 break;
               }
+            }
+            if (board[king_to]) {
+                king_unimpeded = false;
             }
           }
 

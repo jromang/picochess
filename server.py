@@ -421,11 +421,11 @@ class WebDisplay(DisplayMsg, threading.Thread):
             pgn_game = pgn.Game()
             self._build_game_header(pgn_game)
             pgn_game.headers.update(self.shared['headers'])
-            print('build_headers:')
-            print(self.shared['headers'])
-            self.shared['headers'] = pgn_game.headers
-            print(self.shared['headers'])
-            print(' ')
+            # print('build_headers:')
+            # print(self.shared['headers'])
+            # self.shared['headers'] = pgn_game.headers
+            # print(self.shared['headers'])
+            # print(' ')
 
         def _send_headers():
             EventHandler.write_to_clients({'event': 'Header', 'headers': self.shared['headers']})
