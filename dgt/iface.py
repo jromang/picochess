@@ -84,7 +84,8 @@ class DgtIface(DisplayDgt, Thread):
         if bit_board.is_legal(message.move):
             move_text = bit_board.san(message.move)
         else:
-            logging.warning('[%s] illegal move %s found - fen: %s', self.getName(), message.move, message.fen)
+            logging.warning('[%s] illegal move %s found - fen: %s - Chess960: %s', self.getName(), message.move,
+                            message.fen, message.uci960)
             move_text = 'er{}' if is_xl else 'err {}'
             move_text = move_text.format(message.move.uci()[:4])
 

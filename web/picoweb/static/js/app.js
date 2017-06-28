@@ -117,6 +117,13 @@ function setTitle(data) {
 
 // copied from loadGame()
 function setHeaders(data) {
+    if ('FEN' in data && 'SetUp' in data) {
+        if ('Variant' in data && 'Chess960' === data['Variant']) {
+            ChessGameType = 1; // values from chess960.js
+        } else {
+            ChessGameType = 0;
+        }
+    }
     gameHistory.gameHeader = getWebGameHeader(data);
     gameHistory.result = data.Result;
     gameHistory.originalHeader = data;
@@ -377,7 +384,6 @@ $(function() {
                     remove_highlights();
                     break;
                 case 'Header':
-                    console.log(data);
                     setHeaders(data['headers']);
                     break;
                 case 'Title':

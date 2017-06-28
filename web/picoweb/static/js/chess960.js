@@ -628,7 +628,7 @@ var Chess = function(fen, gtype) {
            */
           var rook_unimpeded = true;
           if (rook_from == rook_to) {
-            rook_unimpeded = false;
+            //rook_unimpeded = false;  # JP! rook doesnt move => no problem!
           } else {
             var delta = (rook_from - rook_to > 0) ? -1 : 1;
             for (var i = rook_from + delta; i != rook_to; i += delta) {
@@ -645,7 +645,7 @@ var Chess = function(fen, gtype) {
           var king_unimpeded = true;
           var checked = false;
           if (king_from == king_to) {
-            king_unimpeded = false;
+            //king_unimpeded = false;  # JP! king doesnt move => no problem!
             checked = attacked(them, king_to);
           } else {
             var delta = (king_from - king_to > 0) ? -1 : 1;

@@ -52,6 +52,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.play_turn = self.hint_turn = self.last_turn = None
         self.score = self.dgttranslate.text('N10_score', None)
         self.depth = None
+        self.uci960 = False
 
     def _exit_menu(self):
         if self.dgtmenu.inside_main_menu():
@@ -439,7 +440,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.time_control.reset()
         if message.newgame:
             pos960 = message.game.chess960_pos()
-            game_text = 'C10_newgame' if pos960 is None or pos960 == 518 else 'C10_ucigame'
+            self.uci960 = pos960 is not None and pos960 != 518
+            game_text = 'C10_ucigame' if self.uci960 else 'C10_newgame'
             DispatchDgt.fire(self.dgttranslate.text(game_text, str(pos960)))
         if self.dgtmenu.get_mode() in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
             time_left, time_right = self.time_control.current_clock_time(flip_board=self.dgtmenu.get_flip_board())
@@ -487,10 +489,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         # Display the move
         side = self._get_clock_side(message.game.turn)
         beep = self.dgttranslate.bl(BeepLevel.CONFIG)
-        pos960 = message.game.chess960_pos()
-        uci960 = pos960 is not None and pos960 != 518
         disp = Dgt.DISPLAY_MOVE(move=move, fen=message.game.fen(), side=side, wait=message.wait, maxtime=0,
-                                beep=beep, devs={'ser', 'i2c', 'web'}, uci960=uci960)
+                                beep=beep, devs={'ser', 'i2c', 'web'}, uci960=self.uci960)
         DispatchDgt.fire(disp)
         DispatchDgt.fire(Dgt.LIGHT_SQUARES(uci_move=move.uci(), devs={'ser', 'web'}))
         self.leds_are_on = True
