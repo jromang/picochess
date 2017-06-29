@@ -1190,7 +1190,7 @@ var Chess = function (fen, gtype) {
     }
 
     function ascii() {
-        var s = '   +------------------------+\n';
+        var s = '\n   +------------------------+\n';
         for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
             /* display the rank */
             if (file(i) === 0) {
@@ -1716,10 +1716,10 @@ var Chess = function (fen, gtype) {
             if (typeof move === 'string') {
                 move_obj = move_from_san(move, sloppy);
             } else if (typeof move === 'object') {
-                if (game_type !== GAME_STANDARD && 'flags' in move && (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE))) {
-                    console.log('MOVE: ', move);
-                    move_obj = move_from_san(move, sloppy);  // in chess960 & castle => use the SAN part (Kd8, Rb8 and O-O-O)
-                    console.log('OBJC: ', move_obj);
+                if (game_type !== GAME_STANDARD && 'flags' in move && (move.flags === FLAGS.KSIDE_CASTLE || move.flags === FLAGS.QSIDE_CASTLE)) {
+                    //console.log('CASTLE: ', move);
+                    move_obj = move_from_san(move.san, sloppy);  // in chess960 & castle => use the SAN part (Kd8, Rb8 and O-O-O)
+                    //console.log('OBJECT: ', move_obj);
                 } else {
                     var moves = generate_moves();
 
