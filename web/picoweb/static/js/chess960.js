@@ -569,8 +569,7 @@ var Chess = function(fen, gtype) {
           var square = i + PAWN_OFFSETS[us][j];
           if (square & 0x88) continue;
 
-          if (board[square] != null &&
-              board[square].color === them) {
+          if (board[square] != null && board[square].color === them) {
               add_move(board, moves, i, square, BITS.CAPTURE);
           } else if (square === ep_square) {
               add_move(board, moves, i, ep_square, BITS.EP_CAPTURE);
@@ -608,30 +607,29 @@ var Chess = function(fen, gtype) {
       /* king-side castling */
       if (castling[us] & BITS.KSIDE_CASTLE) {
         if (game_type === GAME_STANDARD) {
-          var castling_from = kings[us];
-          var castling_to = castling_from + 2;
+          var king_from = kings[us];
+          var king_to = king_from + 2;
 
-          if (board[castling_from + 1] == null &&
-              board[castling_to] == null && !attacked(them, kings[us]) && !attacked(them, castling_from + 1) && !attacked(them, castling_to)) {
-            add_move(board, moves, kings[us], castling_to,
-                BITS.KSIDE_CASTLE);
+          if (board[king_from + 1] === null && board[king_from + 2] === null
+              && !attacked(them, kings[us]) && !attacked(them, king_from + 1) && !attacked(them, king_to)) {
+            add_move(board, moves, kings[us], king_to, BITS.KSIDE_CASTLE);
           }
         } else {
           /* king-side castling (CHESS 960) */
           var king_from = kings[us];
-          var king_to = us == 'w' ? SQUARES.g1 : SQUARES.g8;
+          var king_to = us === 'w' ? SQUARES.g1 : SQUARES.g8;
           var rook_from = ROOKS[us][1].square;
-          var rook_to = us == 'w' ? SQUARES.f1 : SQUARES.f8;
+          var rook_to = us === 'w' ? SQUARES.f1 : SQUARES.f8;
 
           /* is there a clear shot between the king-side rook and its castling_to
            * square (ignoring the friendly)?
            */
           var rook_unimpeded = true;
-          if (rook_from == rook_to) {
+          if (rook_from === rook_to) {
           } else {
             var delta = (rook_from - rook_to > 0) ? -1 : 1;
-            for (var i = rook_from + delta; i != rook_to; i += delta) {
-              if (board[i] && i != kings[us]) {
+            for (var i = rook_from + delta; i !== rook_to; i += delta) {
+              if (board[i] && i !== kings[us]) {
                 rook_unimpeded = false;
                 break;
               }
@@ -644,12 +642,12 @@ var Chess = function(fen, gtype) {
            */
           var king_unimpeded = true;
           var checked = false;
-          if (king_from == king_to) {
+          if (king_from === king_to) {
             checked = attacked(them, king_to);
           } else {
             var delta = (king_from - king_to > 0) ? -1 : 1;
-            for (var i = king_from + delta; i != king_to; i += delta) {
-              if (board[i] && i != ROOKS[us][1].square) {
+            for (var i = king_from + delta; i !== king_to; i += delta) {
+              if (board[i] && i !== ROOKS[us][1].square) {
                 king_unimpeded = false;
                 break;
               }
@@ -658,7 +656,7 @@ var Chess = function(fen, gtype) {
                 break;
               }
             }
-            if (board[king_to]) {
+            if (board[king_to] && king_to !== ROOKS[us][1].square) {
                 king_unimpeded = false;
             }
           }
@@ -671,31 +669,29 @@ var Chess = function(fen, gtype) {
 
       /* queen-side castling */
       if (castling[us] & BITS.QSIDE_CASTLE) {
-        if (game_type == GAME_STANDARD) {
-          var castling_from = kings[us];
-          var castling_to = castling_from - 2;
+        if (game_type === GAME_STANDARD) {
+          var king_from = kings[us];
+          var king_to = king_from - 2;
 
-          if (board[castling_from - 1] == null &&
-              board[castling_from - 2] == null &&
-              board[castling_from - 3] == null && !attacked(them, kings[us]) && !attacked(them, castling_from - 1) && !attacked(them, castling_to)) {
-            add_move(board, moves, kings[us], castling_to,
-                BITS.QSIDE_CASTLE);
+          if (board[king_from - 1] === null && board[king_from - 2] === null && board[king_from - 3] === null
+              && !attacked(them, kings[us]) && !attacked(them, king_from - 1) && !attacked(them, king_to)) {
+            add_move(board, moves, kings[us], king_to, BITS.QSIDE_CASTLE);
           }
         } else {
           /* queen-side castling (CHESS 960) */
           var king_from = kings[us];
-          var king_to = (us == 'w') ? SQUARES.c1 : SQUARES.c8;
+          var king_to = (us === 'w') ? SQUARES.c1 : SQUARES.c8;
           var rook_from = ROOKS[us][0].square;
-          var rook_to = (us == 'w') ? SQUARES.d1 : SQUARES.d8;
+          var rook_to = (us === 'w') ? SQUARES.d1 : SQUARES.d8;
 
           /* is there a clear shot between the queen-side rook and its castling_to
            * square (ignoring the friendly king)?
            */
           var rook_unimpeded = true;
-          if (rook_from != rook_to) {
+          if (rook_from !== rook_to) {
             var delta = (rook_from - rook_to > 0) ? -1 : 1;
-            for (var i = rook_from + delta; i != rook_to; i += delta) {
-              if (board[i] && i != kings[us]) {
+            for (var i = rook_from + delta; i !== rook_to; i += delta) {
+              if (board[i] && i !== kings[us]) {
                 rook_unimpeded = false;
                 break;
               }
@@ -708,12 +704,12 @@ var Chess = function(fen, gtype) {
            */
           var king_unimpeded = true;
           var checked = false;
-          if (king_from == king_to) {
+          if (king_from === king_to) {
             checked = attacked(them, king_to);
           } else {
             var delta = (king_from - king_to > 0) ? -1 : 1;
-            for (var i = king_from + delta; i != king_to; i += delta) {
-              if (board[i] && i != ROOKS[us][0].square) {
+            for (var i = king_from + delta; i !== king_to; i += delta) {
+              if (board[i] && i !== ROOKS[us][0].square) {
                 king_unimpeded = false;
                 break;
               }
@@ -722,7 +718,7 @@ var Chess = function(fen, gtype) {
                 break;
               }
             }
-            if (board[king_to]) {
+            if (board[king_to] && king_to !== ROOKS[us][0].square) {
                 king_unimpeded = false;
             }
           }
@@ -734,14 +730,7 @@ var Chess = function(fen, gtype) {
       }
     }
 
-    /* if no parameters passed in, assume legal w/ algebraic moves */
-    //if (typeof settings == 'undefined') {
-    //  settings = {legal: true};
-    //}
-
-    /* return all pseudo-legal moves (this includes moves that allow the king
-     * to be captured)
-     */
+    /* return all pseudo-legal moves (this includes moves that allow the king to be captured) */
     if (!legal) {
       return moves;
     }
@@ -968,7 +957,7 @@ var Chess = function(fen, gtype) {
     push(move);
 
     /* 960 castling hack */
-    if (move.to != move.from) {
+    if (move.to !== move.from) {
       board[move.to] = board[move.from];
       board[move.from] = null;
     }
@@ -993,17 +982,17 @@ var Chess = function(fen, gtype) {
 
       /* if we castled, move the rook next to the king */
       if (move.flags & BITS.KSIDE_CASTLE) {
-        var rook_to = (us == 'w') ? SQUARES.f1 : SQUARES.f8;
+        var rook_to = (us === 'w') ? SQUARES.f1 : SQUARES.f8;
         var rook_from = ROOKS[us][1].square;
         board[rook_to] = {type: ROOK, color: us};
-        if (rook_to != rook_from && board[rook_from].type == ROOK) {
+        if (rook_to !== rook_from && board[rook_from].type == ROOK) {
           board[rook_from] = null;
         }
       } else if (move.flags & BITS.QSIDE_CASTLE) {
-        var rook_to = (us == 'w') ? SQUARES.d1 : SQUARES.d8;
+        var rook_to = (us === 'w') ? SQUARES.d1 : SQUARES.d8;
         var rook_from = ROOKS[us][0].square;
         board[rook_to] = {type: ROOK, color: us};
-        if (rook_to != rook_from && board[rook_from].type == ROOK) {
+        if (rook_to !== rook_from && board[rook_from].type == ROOK) {
           board[rook_from] = null;
         }
       }
@@ -1076,7 +1065,7 @@ var Chess = function(fen, gtype) {
     var them = swap_color(turn);
 
     /* 960 castling hack */
-    if (move.to != move.from) {
+    if (move.to !== move.from) {
       board[move.from] = board[move.to];
       board[move.from].type = move.piece;  // to undo any promotions
       board[move.to] = null;
@@ -1099,15 +1088,15 @@ var Chess = function(fen, gtype) {
       var rook_to, rook_from;
       if (move.flags & BITS.KSIDE_CASTLE) {
         rook_to = ROOKS[us][1].square;
-        rook_from = (us == 'w') ? SQUARES.f1 : SQUARES.f8;
+        rook_from = (us === 'w') ? SQUARES.f1 : SQUARES.f8;
       } else if (move.flags & BITS.QSIDE_CASTLE) {
         rook_to = ROOKS[us][0].square;
-        rook_from = (us == 'w') ? SQUARES.d1 : SQUARES.d8;
+        rook_from = (us === 'w') ? SQUARES.d1 : SQUARES.d8;
       }
       board[rook_to] = {type: ROOK, color: us};
 
       /* be sure rook_from isn't the king (in 960) */
-      if (rook_to != rook_from && board[rook_from].type == ROOK) {
+      if (rook_to !== rook_from && board[rook_from].type == ROOK) {
         board[rook_from] = null;
       }
     }
@@ -1250,7 +1239,7 @@ var Chess = function(fen, gtype) {
     return i & 15;
   }
 
-  function algebraic(i){
+  function algebraic(i) {
     var f = file(i), r = rank(i);
     return 'abcdefgh'.substring(f,f+1) + '87654321'.substring(r,r+1);
   }
@@ -1692,17 +1681,23 @@ var Chess = function(fen, gtype) {
       if (typeof move === 'string') {
         move_obj = move_from_san(move, sloppy);
       } else if (typeof move === 'object') {
-        var moves = generate_moves();
+        if (game_type !== GAME_STANDARD && 'flags' in move && (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE))) {
+          console.log('MOVE: ', move);
+          move_obj = move_from_san(move, sloppy);  // in chess960 & castle => use the SAN part (Kd8, Rb8 and O-O-O)
+          console.log('OBJC: ', move_obj);
+        } else {
+            var moves = generate_moves();
 
-        /* convert the pretty move object to an ugly move object */
-        for (var i = 0, len = moves.length; i < len; i++) {
-          if (move.from === algebraic(moves[i].from) &&
-              move.to === algebraic(moves[i].to) &&
-              (!('promotion' in moves[i]) ||
-              move.promotion === moves[i].promotion)) {
-            move_obj = moves[i];
-            break;
-          }
+          /* convert the pretty move object to an ugly move object */
+            for (var i = 0, len = moves.length; i < len; i++) {
+                if (move.from === algebraic(moves[i].from) &&
+                    move.to === algebraic(moves[i].to) &&
+                    (!('promotion' in moves[i]) ||
+                    move.promotion === moves[i].promotion)) {
+                    move_obj = moves[i];
+                    break;
+                }
+            }
         }
       }
 
