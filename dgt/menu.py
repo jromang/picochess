@@ -88,6 +88,8 @@ class MenuState(object):
     SYS_DISP_CNFRM_YESNO = 771100  # yes,no
     SYS_DISP_PONDER = 772000
     SYS_DISP_PONDER_INTERVAL = 772100  # 1-8
+    SYS_DISP_CAPITAL = 773000
+    SYS_DISP_CAPTIAL_YESNO = 773100  # yes, no
 
     SYS_BATTERY = 780000
 
@@ -96,12 +98,14 @@ class DgtMenu(object):
 
     """Handle the Dgt Menu."""
 
-    def __init__(self, disable_confirm: bool, ponder_interval: int, speed_voice: int, dgttranslate: DgtTranslate):
+    def __init__(self, disable_confirm: bool, ponder_interval: int, speed_voice: int, capital_letters: bool,
+                 dgttranslate: DgtTranslate):
         super(DgtMenu, self).__init__()
 
         self.current_text = None  # save the current text
         self.menu_system_display_confirm = disable_confirm
         self.menu_system_display_ponderinterval = ponder_interval
+        self.menu_system_display_capital = capital_letters
         self.dgttranslate = dgttranslate
         self.state = MenuState.TOP
 
@@ -232,6 +236,7 @@ class DgtMenu(object):
 
         self.res_system_display_confirm = self.menu_system_display_confirm
         self.res_system_display_ponderinterval = self.menu_system_display_ponderinterval
+        self.res_system_display_capital = self.menu_system_display_capital
         return False
 
     def set_engine_restart(self, flag: bool):
@@ -608,6 +613,19 @@ class DgtMenu(object):
         text = self.dgttranslate.text('B00_ponder_interval', str(self.menu_system_display_ponderinterval))
         return text
 
+    def enter_sys_disp_capital_menu(self):
+        """Set the menu state."""
+        self.state = MenuState.SYS_DISP_CAPITAL
+        text = self.dgttranslate.text(Display.CAPITAL.value)
+        return text
+
+    def enter_sys_disp_capital_yesno_menu(self):
+        """Set the menu state."""
+        self.state = MenuState.SYS_DISP_CAPTIAL_YESNO
+        msg = 'on' if self.menu_system_display_capital else 'off'
+        text = self.dgttranslate.text('B00_capital_' + msg)
+        return text
+
     def enter_sys_battery_menu(self):
         """Set the menu state."""
         self.state = MenuState.SYS_BATTERY
@@ -740,6 +758,12 @@ class DgtMenu(object):
 
         elif self.state == MenuState.SYS_DISP_PONDER_INTERVAL:
             text = self.enter_sys_disp_ponder_menu()
+
+        elif self.state == MenuState.SYS_DISP_CAPITAL:
+            text = self.enter_sys_disp_menu()
+
+        elif self.state == MenuState.SYS_DISP_CAPTIAL_YESNO:
+            text = self.enter_sys_disp_capital_menu()
 
         elif self.state == MenuState.SYS_BATTERY:
             text = self.enter_sys_menu()
@@ -1043,6 +1067,8 @@ class DgtMenu(object):
                 text = self.enter_sys_disp_ponder_menu()
             if self.menu_system_display == Display.CONFIRM:
                 text = self.enter_sys_disp_cnfrm_menu()
+            if self.menu_system_display == Display.CAPITAL:
+                text = self.enter_sys_disp_capital_menu()
 
         elif self.state == MenuState.SYS_DISP_CNFRM:
             text = self.enter_sys_disp_cnfrm_yesno_menu()
@@ -1066,6 +1092,21 @@ class DgtMenu(object):
             # do action!
             write_picochess_ini('ponder-interval', self.menu_system_display_ponderinterval)
             text = self.dgttranslate.text('B10_okponder')
+            DispatchDgt.fire(text)
+            text = self.save_choices()
+
+        elif self.state == MenuState.SYS_DISP_CAPITAL:
+            text = self.enter_sys_disp_capital_yesno_menu()
+
+        elif self.state == MenuState.SYS_DISP_CAPTIAL_YESNO:
+            # do action!
+            config = ConfigObj('picochess.ini')
+            if self.menu_system_display_capital:
+                config['capital-letters'] = self.menu_system_display_capital
+            elif 'capital-letters' in config:
+                del config['capital-letters']
+            config.write()
+            text = self.dgttranslate.text('B10_okcapital')
             DispatchDgt.fire(text)
             text = self.save_choices()
 
@@ -1277,7 +1318,7 @@ class DgtMenu(object):
             text = self.dgttranslate.text('B00_confirm_' + msg)
 
         elif self.state == MenuState.SYS_DISP_PONDER:
-            self.state = MenuState.SYS_DISP_CNFRM
+            self.state = MenuState.SYS_DISP_CAPITAL
             self.menu_system_display = DisplayLoop.prev(self.menu_system_display)
             text = self.dgttranslate.text(self.menu_system_display.value)
 
@@ -1286,6 +1327,16 @@ class DgtMenu(object):
             if self.menu_system_display_ponderinterval < 1:
                 self.menu_system_display_ponderinterval = 8
             text = self.dgttranslate.text('B00_ponder_interval', str(self.menu_system_display_ponderinterval))
+
+        elif self.state == MenuState.SYS_DISP_CAPITAL:
+            self.state = MenuState.SYS_DISP_CNFRM
+            self.menu_system_display = DisplayLoop.prev(self.menu_system_display)
+            text = self.dgttranslate.text(self.menu_system_display.value)
+
+        elif self.state == MenuState.SYS_DISP_CAPTIAL_YESNO:
+            self.menu_system_display_capital = not self.menu_system_display_capital
+            msg = 'on' if self.menu_system_display_capital else 'off'
+            text = self.dgttranslate.text('B00_capital_' + msg)
 
         elif self.state == MenuState.SYS_BATTERY:
             self.state = MenuState.SYS_DISP
@@ -1484,7 +1535,7 @@ class DgtMenu(object):
             text = self.dgttranslate.text(self.menu_system.value)
 
         elif self.state == MenuState.SYS_DISP_CNFRM:
-            self.state = MenuState.SYS_DISP_PONDER
+            self.state = MenuState.SYS_DISP_CAPITAL
             self.menu_system_display = DisplayLoop.next(self.menu_system_display)
             text = self.dgttranslate.text(self.menu_system_display.value)
 
@@ -1503,6 +1554,16 @@ class DgtMenu(object):
             if self.menu_system_display_ponderinterval > 8:
                 self.menu_system_display_ponderinterval = 1
             text = self.dgttranslate.text('B00_ponder_interval', str(self.menu_system_display_ponderinterval))
+
+        elif self.state == MenuState.SYS_DISP_CAPITAL:
+            self.state = MenuState.SYS_DISP_PONDER
+            self.menu_system_display = DisplayLoop.next(self.menu_system_display)
+            text = self.dgttranslate.text(self.menu_system_display.value)
+
+        elif self.state == MenuState.SYS_DISP_CAPTIAL_YESNO:
+            self.menu_system_display_capital = not self.menu_system_display_capital
+            msg = 'on' if self.menu_system_display_capital else 'off'
+            text = self.dgttranslate.text('B00_capital_' + msg)
 
         elif self.state == MenuState.SYS_BATTERY:
             self.state = MenuState.SYS_VERS

@@ -795,6 +795,13 @@ class DgtTranslate(object):
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
+        if text_id == 'display_capital_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='Cap Letters', m='Capital ', s='captal')
+            detxt = Dgt.DISPLAY_TEXT(l='Buchstaben ', m='Buchstab', s='buchst')
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
         if text_id == 'okconfirm':
             entxt = Dgt.DISPLAY_TEXT(l='ok confirm ', m='okConfrm', s='okconf')
             detxt = Dgt.DISPLAY_TEXT(l='ok Zugbest ', m='okZugbes', s='ok bes')
@@ -812,6 +819,27 @@ class DgtTranslate(object):
         if text_id == 'confirm_off':
             entxt = Dgt.DISPLAY_TEXT(l='Confirm off', m='Conf off', s='cnfoff')
             detxt = Dgt.DISPLAY_TEXT(l='Zugbest aus', m='Best aus', s='besaus')
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
+        if text_id == 'okcapital':
+            entxt = Dgt.DISPLAY_TEXT(l='ok Capital ', m='ok Capt ', s='ok cap')
+            detxt = Dgt.DISPLAY_TEXT(l='ok Buchstab', m='ok Bstab', s='ok bst')
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
+        if text_id == 'capital_on':
+            entxt = Dgt.DISPLAY_TEXT(l='Capital  on', m='Capt  on', s='cap on')
+            detxt = Dgt.DISPLAY_TEXT(l='Buchstb ein', m='Bstb ein', s='bstein')
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
+        if text_id == 'capital_off':
+            entxt = Dgt.DISPLAY_TEXT(l='Capital off', m='Capt off', s='capoff')
+            detxt = Dgt.DISPLAY_TEXT(l='Buchstb aus', m='Bstb aus', s='bstaus')
             nltxt = entxt
             frtxt = entxt
             estxt = entxt

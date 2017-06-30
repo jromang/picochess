@@ -328,6 +328,7 @@ class VoiceLoop(object):
 class Display(enum.Enum):
     PONDER = 'B00_display_ponder_menu'
     CONFIRM = 'B00_display_confirm_menu'
+    CAPITAL = 'B00_display_capital_menu'
 
 
 class DisplayLoop(object):
@@ -339,12 +340,16 @@ class DisplayLoop(object):
         if m == Display.PONDER:
             return Display.CONFIRM
         elif m == Display.CONFIRM:
+            return Display.CAPITAL
+        elif m == Display.CAPITAL:
             return Display.PONDER
         return 'errDispNext'
 
     @staticmethod
     def prev(m: Display):
         if m == Display.PONDER:
+            return Display.CAPITAL
+        elif m == Display.CAPITAL:
             return Display.CONFIRM
         elif m == Display.CONFIRM:
             return Display.PONDER
