@@ -132,8 +132,9 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         else:
             if self.last_move:
                 side = self._get_clock_side(self.last_turn)
+                beep = self.dgttranslate.bl(BeepLevel.BUTTON)
                 text = Dgt.DISPLAY_MOVE(move=self.last_move, fen=self.last_fen, side=side, wait=False, maxtime=1,
-                                        beep=self.dgttranslate.bl(BeepLevel.BUTTON), devs={'ser', 'i2c', 'web'})
+                                        beep=beep, devs={'ser', 'i2c', 'web'}, uci960=self.uci960)
             else:
                 text = self.dgttranslate.text('B10_nomove')
             DispatchDgt.fire(text)
@@ -180,8 +181,9 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         else:
             if self.hint_move:
                 side = self._get_clock_side(self.hint_turn)
+                beep = self.dgttranslate.bl(BeepLevel.BUTTON)
                 text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=False, maxtime=1,
-                                        beep=self.dgttranslate.bl(BeepLevel.BUTTON), devs={'ser', 'i2c', 'web'})
+                                        beep=beep, devs={'ser', 'i2c', 'web'}, uci960=self.uci960)
             else:
                 text = self.dgttranslate.text('B10_nomove')
             DispatchDgt.fire(text)
@@ -544,8 +546,9 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.hint_turn = message.game.turn
         if message.mode == Mode.ANALYSIS and not self._inside_main_menu():
             side = self._get_clock_side(self.hint_turn)
+            beep = self.dgttranslate.bl(BeepLevel.NO)
             disp = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=True, maxtime=0,
-                                    beep=self.dgttranslate.bl(BeepLevel.NO), devs={'ser', 'i2c', 'web'})
+                                    beep=beep, devs={'ser', 'i2c', 'web'}, uci960=self.uci960)
             DispatchDgt.fire(disp)
 
     def _process_startup_info(self, message):
@@ -596,8 +599,9 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             if self.show_move_or_value >= self.dgtmenu.get_ponderinterval():
                 if self.hint_move:
                     side = self._get_clock_side(self.hint_turn)
+                    beep = self.dgttranslate.bl(BeepLevel.NO)
                     text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=True, maxtime=1,
-                                            beep=self.dgttranslate.bl(BeepLevel.NO), devs={'ser', 'i2c', 'web'})
+                                            beep=beep, devs={'ser', 'i2c', 'web'}, uci960=self.uci960)
                 else:
                     text = self.dgttranslate.text('N10_nomove')
             else:
@@ -613,8 +617,9 @@ class DgtDisplay(DisplayMsg, threading.Thread):
     def _exit_display(self):
         if self.play_move and self.dgtmenu.get_mode() in (Mode.NORMAL, Mode.REMOTE):
             side = self._get_clock_side(self.play_turn)
+            beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side, wait=True, maxtime=1,
-                                    beep=self.dgttranslate.bl(BeepLevel.BUTTON), devs={'ser', 'i2c', 'web'})
+                                    beep=beep, devs={'ser', 'i2c', 'web'}, uci960=self.uci960)
         else:
             text = None
             if self._inside_main_menu():

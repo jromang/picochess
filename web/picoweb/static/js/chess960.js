@@ -1400,11 +1400,8 @@ var Chess = function (fen, gtype) {
 
             for (var i = 0, len = ugly_moves.length; i < len; i++) {
 
-                /* does the user want a full move object (most likely not), or just
-                 * SAN
-                 */
-                if (typeof options !== 'undefined' && 'verbose' in options &&
-                    options.verbose) {
+                /* does the user want a full move object (most likely not), or just SAN */
+                if (typeof options !== 'undefined' && 'verbose' in options && options.verbose) {
                     moves.push(make_pretty(ugly_moves[i]));
                 } else {
                     moves.push(move_to_san(ugly_moves[i], false));
@@ -1464,8 +1461,7 @@ var Chess = function (fen, gtype) {
             var newline = (typeof options === 'object' &&
             typeof options.newline_char === 'string') ?
                 options.newline_char : '\n';
-            var max_width = (typeof options === 'object' &&
-            typeof options.max_width === 'number') ?
+            var max_width = (typeof options === 'object' && typeof options.max_width === 'number') ?
                 options.max_width : 0;
             var result = [];
             var header_exists = false;
@@ -1717,9 +1713,7 @@ var Chess = function (fen, gtype) {
                 move_obj = move_from_san(move, sloppy);
             } else if (typeof move === 'object') {
                 if (game_type !== GAME_STANDARD && 'flags' in move && (move.flags === FLAGS.KSIDE_CASTLE || move.flags === FLAGS.QSIDE_CASTLE)) {
-                    //console.log('CASTLE: ', move);
                     move_obj = move_from_san(move.san, sloppy);  // in chess960 & castle => use the SAN part (Kd8, Rb8 and O-O-O)
-                    //console.log('OBJECT: ', move_obj);
                 } else {
                     var moves = generate_moves();
 
@@ -1745,9 +1739,7 @@ var Chess = function (fen, gtype) {
              * move is made
              */
             var pretty_move = make_pretty(move_obj);
-
             make_move(move_obj);
-
             return pretty_move;
         },
 
@@ -1788,8 +1780,7 @@ var Chess = function (fen, gtype) {
         history: function (options) {
             var reversed_history = [];
             var move_history = [];
-            var verbose = (typeof options !== 'undefined' && 'verbose' in options &&
-            options.verbose);
+            var verbose = (typeof options !== 'undefined' && 'verbose' in options && options.verbose);
 
             while (history.length > 0) {
                 reversed_history.push(undo_move());
