@@ -30,6 +30,7 @@ class DgtTranslate(object):
         self.beep_level = beep_level
         self.language = language
         self.version = picochess_version
+        self.capital = False  # Set from dgt.menu lateron
 
     def beep_to_config(self, beep: Beep):
         return dict(zip(self.ConfigToBeep.values(), self.ConfigToBeep.keys()))[beep]
@@ -47,6 +48,18 @@ class DgtTranslate(object):
     def set_language(self, language: str):
         self.language = language
 
+    def set_capital(self, capital: bool):
+        self.capital = capital
+
+    def capital_text(self, text, is_obj=True):
+        if self.capital:
+            if is_obj:
+                text.m = text.m.upper()
+                text.l = text.l.upper()
+            else:
+                return text.upper()
+        return text
+
     def move(self, text: str):
         directory = {}
         if self.language == 'de':
@@ -61,7 +74,7 @@ class DgtTranslate(object):
             directory = {'R': 'T', 'N': 'C', 'B': 'A', 'Q': 'D', 'K': '@'}
         for i, j in directory.items():
             text = text.replace(i, j)
-        return text.replace('@', 'R')  # replace the King "@" from fr, es, it languages
+        return self.capital_text(text.replace('@', 'R'), False)  # replace the King "@" from fr, es, it languages
 
     def text(self, str_code: str, msg='', devs=None):
         if devs is None:  # prevent W0102 error
@@ -908,13 +921,13 @@ class DgtTranslate(object):
             entxt = Dgt.DISPLAY_TEXT(l=text_id, m=text_id, s=text_id, wait=False, beep=beep, maxtime=0, devs=devs)
             logging.warning('unknown text_id %s', text_id)
         if self.language == 'de' and detxt is not None:
-            return detxt
+            return self.capital_text(detxt)
         if self.language == 'nl' and nltxt is not None:
-            return nltxt
+            return self.capital_text(nltxt)
         if self.language == 'fr' and frtxt is not None:
-            return frtxt
+            return self.capital_text(frtxt)
         if self.language == 'es' and estxt is not None:
-            return estxt
+            return self.capital_text(estxt)
         if self.language == 'it' and ittxt is not None:
-            return ittxt
-        return entxt
+            return self.capital_text(ittxt)
+        return self.capital_text(entxt)

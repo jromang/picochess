@@ -549,7 +549,7 @@ def main():
     if unknown:
         logging.warning('invalid parameter given %s', unknown)
     # wire some dgt classes
-    dgtboard = DgtBoard(args.dgt_port, args.disable_revelation_leds, args.dgtpi, args.capital_letters, args.disable_et)
+    dgtboard = DgtBoard(args.dgt_port, args.disable_revelation_leds, args.dgtpi, args.disable_et)
     dgttranslate = DgtTranslate(args.beep_config, args.beep_some_level, args.language, version)
     dgtmenu = DgtMenu(args.disable_confirm_message, args.ponder_interval, args.speed_voice, args.capital_letters,
                       dgttranslate)

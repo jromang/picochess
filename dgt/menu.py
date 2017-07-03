@@ -236,7 +236,7 @@ class DgtMenu(object):
 
         self.res_system_display_confirm = self.menu_system_display_confirm
         self.res_system_display_ponderinterval = self.menu_system_display_ponderinterval
-        self.res_system_display_capital = self.menu_system_display_capital
+        self.dgttranslate.set_capital(self.menu_system_display_capital)
         return False
 
     def set_engine_restart(self, flag: bool):

@@ -259,8 +259,6 @@ class WebVr(DgtIface):
         if self.getName() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)
             return True
-        if self.dgtboard.capital_letters:
-            text = text.upper()
         self.clock_show_time = False
         self._create_clock_text()
         self.shared['clock_text'] = text
@@ -279,8 +277,6 @@ class WebVr(DgtIface):
         if self.getName() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)
             return True
-        if self.dgtboard.capital_letters:
-            text = text.upper()
         self.clock_show_time = False
         self._create_clock_text()
         self.shared['clock_text'] = text
