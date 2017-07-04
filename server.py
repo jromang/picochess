@@ -398,8 +398,6 @@ class WebDisplay(DisplayMsg, threading.Thread):
         if 'ip_info' in self.shared:
             if 'location' in self.shared['ip_info']:
                 pgn_game.headers['Site'] = self.shared['ip_info']['location']
-        # print(pgn_game.headers)
-        # print(' ')
 
     def task(self, message):
         def _oldstyle_fen(game: chess.Board):
@@ -417,11 +415,6 @@ class WebDisplay(DisplayMsg, threading.Thread):
             pgn_game = pgn.Game()
             self._build_game_header(pgn_game)
             pgn_game.headers.update(self.shared['headers'])
-            # print('build_headers:')
-            # print(self.shared['headers'])
-            # self.shared['headers'] = pgn_game.headers
-            # print(self.shared['headers'])
-            # print(' ')
 
         def _send_headers():
             EventHandler.write_to_clients({'event': 'Header', 'headers': self.shared['headers']})
