@@ -30,7 +30,7 @@ from platform import machine
 
 class DgtPi(DgtIface):
 
-    """Handle the DgtPi communication"""
+    """Handle the DgtPi communication."""
 
     def __init__(self, dgttranslate: DgtTranslate, dgtboard: DgtBoard):
         super(DgtPi, self).__init__(dgttranslate, dgtboard)

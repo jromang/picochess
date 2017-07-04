@@ -218,7 +218,7 @@ class WebVr(DgtIface):
             self.time_left = hours_minutes_seconds(time_left)
         if self.time_side == ClockSide.RIGHT:
             hours, mins, secs = self.time_right
-            time_right = 3600*hours + 60*mins + secs - 1
+            time_right = 3600 * hours + 60 * mins + secs - 1
             if time_right <= 0:
                 logging.info('negative/zero time right: %s', time_right)
                 self.virtual_timer.stop()
