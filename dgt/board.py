@@ -32,6 +32,7 @@ import time
 
 
 class DgtBoard(object):
+
     """Handle the DGT board communication."""
 
     def __init__(self, device: str, disable_revelation_leds: bool, is_pi: bool, disable_end: bool):

@@ -25,6 +25,7 @@ from copy import deepcopy
 
 
 class Dispatcher(DispatchDgt, Thread):
+
     """A dispatcher taking the dispatch_queue and fill dgt_queue with the commands in time."""
 
     def __init__(self, dgtmenu: DgtMenu):

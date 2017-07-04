@@ -25,6 +25,7 @@ from dgt.board import DgtBoard
 
 
 class DgtHw(DgtIface):
+
     """Handle the DgtXL/3000 communication."""
 
     def __init__(self, dgttranslate: DgtTranslate, dgtboard: DgtBoard):

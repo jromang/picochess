@@ -27,6 +27,7 @@ from math import floor
 
 
 class TimeControl(object):
+
     """Control the picochess internal clock."""
 
     def __init__(self, mode=TimeMode.FIXED, fixed=0, blitz=0, fischer=0, clock_time=None):
@@ -46,8 +47,11 @@ class TimeControl(object):
             self.reset()
 
     def __eq__(self, other):
-        return self.mode == other.mode and self.seconds_per_move == other.seconds_per_move \
-               and self.minutes_per_game == other.minutes_per_game and self.fischer_increment == other.fischer_increment
+        chk_mode = self.mode == other.mode
+        chk_secs = self.seconds_per_move == other.seconds_per_move
+        chk_mins = self.minutes_per_game == other.minutes_per_game
+        chk_finc = self.fischer_increment == other.fischer_increment
+        return chk_mode and chk_secs and chk_mins and chk_finc
 
     def get_parameters(self):
         """Return the state of this class for generating a new instance."""

@@ -17,6 +17,7 @@
 
 
 class BaseClass(object):
+
     """Used for creating event, message, dgt classes."""
 
     def __init__(self, classtype):
@@ -45,6 +46,7 @@ def ClassFactory(name, argnames, BaseClass=BaseClass):
 
 
 class EventApi():
+
     """The api for the events."""
 
     # User events
@@ -84,6 +86,7 @@ class EventApi():
 
 
 class MessageApi():
+
     """The api for message."""
 
     # Messages to display devices
@@ -138,6 +141,7 @@ class MessageApi():
 
 
 class DgtApi():
+
     """The api for the dgt."""
 
     # Commands to the DgtHw/DgtPi/DgtVr
@@ -154,6 +158,7 @@ class DgtApi():
 
 
 class Dgt():
+
     """Used to define tasks for the communication towards the dgt hardware."""
 
     DISPLAY_MOVE = ClassFactory(DgtApi.DISPLAY_MOVE, ['move', 'fen', 'uci960', 'side', 'beep', 'maxtime', 'devs', 'wait', 'ld', 'rd'])
@@ -168,6 +173,7 @@ class Dgt():
 
 
 class Message():
+
     """General class for transmitting messages between several parts of picochess."""
 
     # Messages to display devices
@@ -222,6 +228,7 @@ class Message():
 
 
 class Event():
+
     """Event used to send towards picochess."""
 
     # User events

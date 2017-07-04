@@ -38,6 +38,7 @@ import mimetypes
 
 
 class Emailer(object):
+
     """Handle eMail with subject, body and an attached file."""
 
     def __init__(self, email=None, mailgun_key=None):
@@ -144,6 +145,7 @@ class Emailer(object):
 
 
 class PgnDisplay(DisplayMsg, threading.Thread):
+
     """Deal with DisplayMessages related to pgn."""
 
     def __init__(self, file_name: str, emailer: Emailer):

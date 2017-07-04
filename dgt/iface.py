@@ -27,6 +27,7 @@ from dgt.board import DgtBoard
 
 
 class DgtIface(DisplayDgt, Thread):
+
     """An Interface class for DgtHw, DgtPi, DgtVr."""
 
     def __init__(self, dgttranslate: DgtTranslate, dgtboard: DgtBoard):

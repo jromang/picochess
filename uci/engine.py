@@ -29,6 +29,7 @@ import configparser
 
 
 class UciEngine(object):
+
     """Handle the uci engine communication."""
 
     def __init__(self, file: str, hostname=None, username=None, key_file=None, password=None, home=''):

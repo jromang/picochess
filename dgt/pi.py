@@ -29,6 +29,7 @@ from platform import machine
 
 
 class DgtPi(DgtIface):
+
     """Handle the DgtPi communication"""
 
     def __init__(self, dgttranslate: DgtTranslate, dgtboard: DgtBoard):

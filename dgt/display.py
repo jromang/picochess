@@ -33,6 +33,7 @@ import threading
 
 
 class DgtDisplay(DisplayMsg, threading.Thread):
+
     """Dispatcher for Messages towards DGT hardware or back to the event system (picochess)."""
 
     def __init__(self, dgttranslate: DgtTranslate, dgtmenu: DgtMenu, time_control: TimeControl):

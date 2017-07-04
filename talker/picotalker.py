@@ -32,6 +32,7 @@ from shutil import which
 
 
 class PicoTalker():
+
     """Handle the human speaking of events."""
 
     def __init__(self, localisation_id_voice, speed_factor: float):
@@ -70,6 +71,7 @@ class PicoTalker():
 
 
 class PicoTalkerDisplay(DisplayMsg, threading.Thread):
+
     """Listen on messages for talking."""
 
     def __init__(self, user_voice: str, computer_voice: str, speed_factor: int):

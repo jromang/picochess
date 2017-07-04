@@ -190,6 +190,7 @@ class WebServer(threading.Thread):
 
 
 class WebVr(DgtIface):
+
     """Handle the web (clock) communication."""
 
     def __init__(self, shared, dgttranslate: DgtTranslate, dgtboard: DgtBoard):

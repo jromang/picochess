@@ -55,7 +55,9 @@ from logging.handlers import RotatingFileHandler
 
 
 class AlternativeMover:
+
     """Keep track of alternative moves."""
+
     def __init__(self):
         self.excludemoves = set()
 
