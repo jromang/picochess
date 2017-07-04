@@ -17,8 +17,7 @@
 
 
 class BaseClass(object):
-
-    """used for creating event, message, dgt classes."""
+    """Used for creating event, message, dgt classes."""
 
     def __init__(self, classtype):
         self._type = classtype
@@ -31,8 +30,7 @@ class BaseClass(object):
 
 
 def ClassFactory(name, argnames, BaseClass=BaseClass):
-
-    """factory for class generating."""
+    """Factory for class generating."""
 
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
@@ -47,8 +45,7 @@ def ClassFactory(name, argnames, BaseClass=BaseClass):
 
 
 class EventApi():
-
-    """the api for the events."""
+    """The api for the events."""
 
     # User events
     FEN = 'EVT_FEN'  # User has moved one or more pieces, and we have a new fen position
@@ -87,8 +84,7 @@ class EventApi():
 
 
 class MessageApi():
-
-    """the api for message."""
+    """The api for message."""
 
     # Messages to display devices
     COMPUTER_MOVE = 'MSG_COMPUTER_MOVE'  # Show computer move
@@ -142,8 +138,7 @@ class MessageApi():
 
 
 class DgtApi():
-
-    """the api for the dgt."""
+    """The api for the dgt."""
 
     # Commands to the DgtHw/DgtPi/DgtVr
     DISPLAY_MOVE = 'DGT_DISPLAY_MOVE'
@@ -159,8 +154,7 @@ class DgtApi():
 
 
 class Dgt():
-
-    """used to define tasks for the communication towards the dgt hardware."""
+    """Used to define tasks for the communication towards the dgt hardware."""
 
     DISPLAY_MOVE = ClassFactory(DgtApi.DISPLAY_MOVE, ['move', 'fen', 'uci960', 'side', 'beep', 'maxtime', 'devs', 'wait', 'ld', 'rd'])
     DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['l', 'm', 's', 'beep', 'maxtime', 'devs', 'wait', 'ld', 'rd'])
@@ -174,8 +168,7 @@ class Dgt():
 
 
 class Message():
-
-    """general class for transmitting messages between several parts of picochess."""
+    """General class for transmitting messages between several parts of picochess."""
 
     # Messages to display devices
     COMPUTER_MOVE = ClassFactory(MessageApi.COMPUTER_MOVE, ['move', 'ponder', 'game', 'wait'])
@@ -229,8 +222,7 @@ class Message():
 
 
 class Event():
-
-    """event used to send towards picochess."""
+    """Event used to send towards picochess."""
 
     # User events
     FEN = ClassFactory(EventApi.FEN, ['fen'])

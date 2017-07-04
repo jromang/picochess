@@ -27,8 +27,7 @@ from math import floor
 
 
 class TimeControl(object):
-
-    """control the picochess internal clock."""
+    """Control the picochess internal clock."""
 
     def __init__(self, mode=TimeMode.FIXED, fixed=0, blitz=0, fischer=0, clock_time=None):
         super(TimeControl, self).__init__()
@@ -47,8 +46,8 @@ class TimeControl(object):
             self.reset()
 
     def __eq__(self, other):
-        return self.mode == other.mode and self.seconds_per_move == other.seconds_per_move and \
-               self.minutes_per_game == other.minutes_per_game and self.fischer_increment == other.fischer_increment
+        return self.mode == other.mode and self.seconds_per_move == other.seconds_per_move \
+               and self.minutes_per_game == other.minutes_per_game and self.fischer_increment == other.fischer_increment
 
     def get_parameters(self):
         """Return the state of this class for generating a new instance."""
@@ -133,7 +132,7 @@ class TimeControl(object):
 
             self.timer.cancel()
             self.timer.join()
-            used_time = floor((time.time() - self.start_time)*10)/10
+            used_time = floor((time.time() - self.start_time) * 10) / 10
             if log:
                 logging.info('used time: %s secs', used_time)
             self.clock_time[self.active_color] -= used_time

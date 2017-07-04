@@ -22,8 +22,7 @@ from dgt.api import Event
 
 
 class Informer(chess.uci.InfoHandler):
-
-    """internal uci engine info handler."""
+    """Internal uci engine info handler."""
 
     def __init__(self):
         super(Informer, self).__init__()

@@ -33,7 +33,6 @@ import threading
 
 
 class DgtDisplay(DisplayMsg, threading.Thread):
-
     """Dispatcher for Messages towards DGT hardware or back to the event system (picochess)."""
 
     def __init__(self, dgttranslate: DgtTranslate, dgtmenu: DgtMenu, time_control: TimeControl):
@@ -108,7 +107,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             pass
         return score
 
-    def _get_clock_side(self, turn):
+    @classmethod
+    def _get_clock_side(cls, turn):
         side = ClockSide.LEFT if turn == chess.WHITE else ClockSide.RIGHT
         return side
 
@@ -800,7 +800,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             pass
 
     def run(self):
-        """called from threading.Thread by its start() function."""
+        """Called from threading.Thread by its start() function."""
         logging.info('msg_queue ready')
         while True:
             # Check if we have something to display

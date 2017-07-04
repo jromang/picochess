@@ -32,7 +32,6 @@ from shutil import which
 
 
 class PicoTalker():
-
     """Handle the human speaking of events."""
 
     def __init__(self, localisation_id_voice, speed_factor: float):
@@ -50,7 +49,7 @@ class PicoTalker():
             logging.warning('not valid voice parameter')
 
     def talk(self, sounds):
-        """speak out the sound part by using ogg123/play."""
+        """Speak out the sound part by using ogg123/play."""
         if self.voice_path:
             for part in sounds:
                 voice_file = self.voice_path + '/' + part
@@ -71,7 +70,6 @@ class PicoTalker():
 
 
 class PicoTalkerDisplay(DisplayMsg, threading.Thread):
-
     """Listen on messages for talking."""
 
     def __init__(self, user_voice: str, computer_voice: str, speed_factor: int):
@@ -102,6 +100,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
         self.user_picotalker = picotalker
 
     def set_speech(self, speed_factor):
+        """Set speech."""
         if self.computer_picotalker:
             self.computer_picotalker.speed_factor = speed_factor
         if self.user_picotalker:
@@ -247,6 +246,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
     def system_voice(self):
         """
         Return a voice object to use for system announcements (settings changes, etc).
+
         Attempts to return the computer voice first, otherwise returns the user voice.
         """
         if self.computer_picotalker:

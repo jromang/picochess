@@ -32,7 +32,6 @@ import logging
 
 
 class MenuState(object):
-
     """Keep the current DgtMenu State."""
 
     TOP = 100000
@@ -95,7 +94,6 @@ class MenuState(object):
 
 
 class DgtMenu(object):
-
     """Handle the Dgt Menu."""
 
     def __init__(self, disable_confirm: bool, ponder_interval: int, speed_voice: int, capital_letters: bool,
@@ -669,7 +667,7 @@ class DgtMenu(object):
         elif self.state == MenuState.TIME_BLITZ_CTRL:
             text = self.enter_time_blitz_menu()
 
-        elif self.state ==MenuState.TIME_FISCH:
+        elif self.state == MenuState.TIME_FISCH:
             text = self.enter_time_menu()
 
         elif self.state == MenuState.TIME_FISCH_CTRL:

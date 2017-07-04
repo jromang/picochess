@@ -21,7 +21,6 @@ import logging
 
 
 class DgtTranslate(object):
-
     """Handle translations for clock texts or moves."""
 
     def __init__(self, beep_config: str, beep_level: int, language: str, picochess_version: str):

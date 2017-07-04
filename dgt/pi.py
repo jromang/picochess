@@ -29,7 +29,6 @@ from platform import machine
 
 
 class DgtPi(DgtIface):
-
     """Handle the DgtPi communication"""
 
     def __init__(self, dgttranslate: DgtTranslate, dgtboard: DgtBoard):
@@ -125,7 +124,7 @@ class DgtPi(DgtIface):
             return True
 
     def display_text_on_clock(self, message):
-        """display a text on the dgtpi."""
+        """Display a text on the dgtpi."""
         text = message.l
         if text is None:
             text = message.m
@@ -137,7 +136,7 @@ class DgtPi(DgtIface):
         return self._display_on_dgt_pi(text, message.beep, left_icons, right_icons)
 
     def display_move_on_clock(self, message):
-        """display a move on the dgtpi."""
+        """Display a move on the dgtpi."""
         bit_board, text = self.get_san(message)
         text = '{:3d}{:s}'.format(bit_board.fullmove_number, text)
         if self.getName() not in message.devs:
@@ -148,7 +147,7 @@ class DgtPi(DgtIface):
         return self._display_on_dgt_pi(text, message.beep, left_icons, right_icons)
 
     def display_time_on_clock(self, message):
-        """display the time on the dgtpi."""
+        """Display the time on the dgtpi."""
         if self.getName() not in message.devs:
             logging.debug('ignored endText - devs: %s', message.devs)
             return True
@@ -170,15 +169,15 @@ class DgtPi(DgtIface):
         return True
 
     def light_squares_on_revelation(self, uci_move: str):
-        """handle this by hw.py."""
+        """Handle this by hw.py."""
         return True
 
     def clear_light_on_revelation(self):
-        """handle this by hw.py."""
+        """Handle this by hw.py."""
         return True
 
     def stop_clock(self, devs: set):
-        """stop the dgtpi."""
+        """Stop the dgtpi."""
         if self.getName() not in devs:
             logging.debug('ignored stopClock - devs: %s', devs)
             return True
@@ -212,7 +211,7 @@ class DgtPi(DgtIface):
             return True
 
     def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
-        """start the dgtpi."""
+        """Start the dgtpi."""
         if self.getName() not in devs:
             logging.debug('ignored startClock - devs: %s', devs)
             return True
@@ -244,4 +243,5 @@ class DgtPi(DgtIface):
             return True
 
     def getName(self):
+        """Get name."""
         return 'i2c'

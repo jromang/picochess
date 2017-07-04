@@ -42,7 +42,7 @@ client_ips = []
 
 
 def to_dests(board: chess.Board):
-    """create a dict for chessground.js from the given board."""
+    """Create a dict for chessground.js from the given board."""
     dests = {}
     for move in board.legal_moves:
         dests[chess.square_name(move.from_square)] = []
@@ -190,7 +190,6 @@ class WebServer(threading.Thread):
 
 
 class WebVr(DgtIface):
-
     """Handle the web (clock) communication."""
 
     def __init__(self, shared, dgttranslate: DgtTranslate, dgtboard: DgtBoard):
@@ -210,7 +209,7 @@ class WebVr(DgtIface):
     def _runclock(self):
         if self.time_side == ClockSide.LEFT:
             hours, mins, secs = self.time_left
-            time_left = 3600*hours + 60*mins + secs - 1
+            time_left = 3600 * hours + 60 * mins + secs - 1
             if time_left <= 0:
                 logging.info('negative/zero time left: %s', time_left)
                 self.virtual_timer.stop()
@@ -242,7 +241,7 @@ class WebVr(DgtIface):
             EventHandler.write_to_clients(result)
 
     def display_move_on_clock(self, message):
-        """display a move on the web clock."""
+        """Display a move on the web clock."""
         if self.enable_dgt_3000 or self.enable_dgt_pi:
             bit_board, text = self.get_san(message, not self.enable_dgt_pi)
             points = '...' if message.side == ClockSide.RIGHT else '.'
@@ -267,7 +266,7 @@ class WebVr(DgtIface):
         return True
 
     def display_text_on_clock(self, message):
-        """display a text on the web clock."""
+        """Display a text on the web clock."""
         if self.enable_dgt_pi:
             text = message.l
         else:
@@ -285,7 +284,7 @@ class WebVr(DgtIface):
         return True
 
     def display_time_on_clock(self, message):
-        """display the time on the web clock."""
+        """Display the time on the web clock."""
         if self.getName() not in message.devs:
             logging.debug('ignored endText - devs: %s', message.devs)
             return True
@@ -297,7 +296,7 @@ class WebVr(DgtIface):
         return True
 
     def stop_clock(self, devs: set):
-        """stop the time on the web clock."""
+        """Stop the time on the web clock."""
         if self.getName() not in devs:
             logging.debug('ignored stopClock - devs: %s', devs)
             return True
@@ -311,7 +310,7 @@ class WebVr(DgtIface):
         self.time_side = side
 
     def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
-        """start the time on the web clock."""
+        """Start the time on the web clock."""
         if self.getName() not in devs:
             logging.debug('ignored startClock - devs: %s', devs)
             return True
@@ -328,17 +327,20 @@ class WebVr(DgtIface):
         self._display_time(self.time_left, self.time_right)
         return True
 
-    def light_squares_on_revelation(self, squares):
-        result = {'event': 'Light', 'move': squares}
+    def light_squares_on_revelation(self, uci_move):
+        """Light the rev2 squares."""
+        result = {'event': 'Light', 'move': uci_move}
         EventHandler.write_to_clients(result)
         return True
 
     def clear_light_on_revelation(self):
+        """Clear all leds from rev2."""
         result = {'event': 'Clear'}
         EventHandler.write_to_clients(result)
         return True
 
     def getName(self):
+        """Return name."""
         return 'web'
 
     def _create_task(self, msg):
@@ -588,7 +590,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
         IOLoop.instance().add_callback(callback=lambda: self.task(msg))
 
     def run(self):
-        """called from threading.Thread by its start() function."""
+        """Called from threading.Thread by its start() function."""
         logging.info('msg_queue ready')
         while True:
             # Check if we have something to display

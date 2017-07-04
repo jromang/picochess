@@ -55,6 +55,7 @@ from logging.handlers import RotatingFileHandler
 
 
 class AlternativeMover:
+    """Keep track of alternative moves."""
     def __init__(self):
         self.excludemoves = set()
 
@@ -143,6 +144,7 @@ def main():
     def think(game: chess.Board, timec: TimeControl, msg: Message):
         """
         Start a new search on the current game.
+
         If a move is found in the opening book, fire an event in a few seconds.
         """
         start_clock()
@@ -171,7 +173,7 @@ def main():
         analyse(game, msg)
 
     def stop_search_and_clock():
-        """depending on the interaction mode stop search and clock."""
+        """Depending on the interaction mode stop search and clock."""
         if interaction_mode == Mode.NORMAL:
             stop_clock()
             if not engine.is_waiting():
@@ -535,13 +537,13 @@ def main():
 
     # Enable logging
     if args.log_file:
-        handler = RotatingFileHandler('logs' + os.sep + args.log_file, maxBytes=1.4*1024*1024, backupCount=6)
+        handler = RotatingFileHandler('logs' + os.sep + args.log_file, maxBytes=1.4 * 1024 * 1024, backupCount=6)
         logging.basicConfig(level=getattr(logging, args.log_level.upper()),
                             format='%(asctime)s.%(msecs)03d %(levelname)7s %(module)10s - %(funcName)s: %(message)s',
                             datefmt="%Y-%m-%d %H:%M:%S", handlers=[handler])
     logging.getLogger('chess.uci').setLevel(logging.INFO)  # don't want to get so many python-chess uci messages
 
-    logging.debug('#'*20 + ' PicoChess v%s ' + '#'*20, version)
+    logging.debug('#' * 20 + ' PicoChess v%s ' + '#' * 20, version)
     # log the startup parameters but hide the password fields
     a_copy = copy.copy(vars(args))
     a_copy['mailgun_key'] = a_copy['smtp_pass'] = a_copy['engine_remote_key'] = a_copy['engine_remote_pass'] = '*****'

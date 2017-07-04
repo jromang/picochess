@@ -25,8 +25,7 @@ from copy import deepcopy
 
 
 class Dispatcher(DispatchDgt, Thread):
-
-    """a dispatcher taking the dispatch_queue and fill dgt_queue with the commands in time."""
+    """A dispatcher taking the dispatch_queue and fill dgt_queue with the commands in time."""
 
     def __init__(self, dgtmenu: DgtMenu):
         super(Dispatcher, self).__init__()
@@ -43,6 +42,7 @@ class Dispatcher(DispatchDgt, Thread):
         self.process_lock = {}
 
     def register(self, device: str):
+        """Register new device to send DgtApi messsages."""
         logging.debug('device %s registered', device)
         self.devices.add(device)
         self.maxtimer[device] = None
@@ -119,7 +119,7 @@ class Dispatcher(DispatchDgt, Thread):
             logging.debug('(%s) hash ignore DgtApi: %s', dev, message)
 
     def stop_maxtimer(self, dev):
-        """stop the maxtimer."""
+        """Stop the maxtimer."""
         if self.maxtimer_running[dev]:
             self.maxtimer[dev].cancel()
             self.maxtimer[dev].join()
@@ -127,7 +127,7 @@ class Dispatcher(DispatchDgt, Thread):
             self.dgtmenu.disable_picochess_displayed(dev)
 
     def run(self):
-        """called from threading.Thread by its start() function."""
+        """Called from threading.Thread by its start() function."""
         logging.info('dispatch_queue ready')
         while True:
             # Check if we have something to display

@@ -25,7 +25,6 @@ from dgt.board import DgtBoard
 
 
 class DgtHw(DgtIface):
-
     """Handle the DgtXL/3000 communication."""
 
     def __init__(self, dgttranslate: DgtTranslate, dgtboard: DgtBoard):
@@ -57,7 +56,7 @@ class DgtHw(DgtIface):
             return res
 
     def display_text_on_clock(self, message):
-        """display a text on the dgtxl/3k."""
+        """Display a text on the dgtxl/3k."""
         display_m = self.enable_dgt_3000 and not self.dgtboard.use_revelation_leds
         text = message.m if display_m else message.s
         if text is None:
@@ -74,7 +73,7 @@ class DgtHw(DgtIface):
             return self._display_on_dgt_xl(text, message.beep, left_icons, right_icons)
 
     def display_move_on_clock(self, message):
-        """display a move on the dgtxl/3k."""
+        """Display a move on the dgtxl/3k."""
         display_m = self.enable_dgt_3000 and not self.dgtboard.use_revelation_leds
         if display_m:
             bit_board, text = self.get_san(message)
@@ -95,7 +94,7 @@ class DgtHw(DgtIface):
             return self._display_on_dgt_xl(text, message.beep, left_icons, right_icons)
 
     def display_time_on_clock(self, message):
-        """display the time on the dgtxl/3k."""
+        """Display the time on the dgtxl/3k."""
         if self.getName() not in message.devs:
             logging.debug('ignored endText - devs: %s', message.devs)
             return True
@@ -111,7 +110,7 @@ class DgtHw(DgtIface):
             return True
 
     def light_squares_on_revelation(self, uci_move: str):
-        """light the Rev2 leds."""
+        """Light the Rev2 leds."""
         if self.dgtboard.use_revelation_leds:
             logging.debug('(rev) leds turned on - move: %s', uci_move)
             fr_s = (8 - int(uci_move[1])) * 8 + ord(uci_move[0]) - ord('a')
@@ -120,14 +119,14 @@ class DgtHw(DgtIface):
         return True
 
     def clear_light_on_revelation(self):
-        """clear the Rev2 leds."""
+        """Clear the Rev2 leds."""
         if self.dgtboard.use_revelation_leds:
             logging.debug('(rev) leds turned off')
             self.dgtboard.write_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0x40, 0x40, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         return True
 
     def stop_clock(self, devs: set):
-        """stop the dgtxl/3k."""
+        """Stop the dgtxl/3k."""
         if self.getName() not in devs:
             logging.debug('ignored stopClock - devs: %s', devs)
             return True
@@ -157,7 +156,7 @@ class DgtHw(DgtIface):
             return self.dgtboard.end_text()  # this is needed for some(!) clocks
 
     def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
-        """start the dgtxl/3k."""
+        """Start the dgtxl/3k."""
         if self.getName() not in devs:
             logging.debug('ignored startClock - devs: %s', devs)
             return True
@@ -166,4 +165,5 @@ class DgtHw(DgtIface):
         return self._resume_clock(side)
 
     def getName(self):
+        """get Name."""
         return 'ser'

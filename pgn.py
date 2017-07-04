@@ -38,7 +38,6 @@ import mimetypes
 
 
 class Emailer(object):
-
     """Handle eMail with subject, body and an attached file."""
 
     def __init__(self, email=None, mailgun_key=None):
@@ -128,7 +127,7 @@ class Emailer(object):
         logging.debug(out)
 
     def set_smtp(self, sserver=None, sencryption=None, suser=None, spass=None, sfrom=None):
-        """store information for SMTP based mail delivery."""
+        """Store information for SMTP based mail delivery."""
         self.smtp_server = sserver
         self.smtp_encryption = sencryption
         self.smtp_user = suser
@@ -136,7 +135,7 @@ class Emailer(object):
         self.smtp_from = sfrom
 
     def send(self, subject: str, body: str, path: str):
-        """send the email out."""
+        """Send the email out."""
         if self.email:  # check if email adress to send the pgn to is provided
             if self.mailgun_key:  # check if we have mailgun-key available to send the pgn successful
                 self._use_mailgun(subject=subject, body=body)
@@ -145,7 +144,6 @@ class Emailer(object):
 
 
 class PgnDisplay(DisplayMsg, threading.Thread):
-
     """Deal with DisplayMessages related to pgn."""
 
     def __init__(self, file_name: str, emailer: Emailer):
@@ -238,7 +236,7 @@ class PgnDisplay(DisplayMsg, threading.Thread):
             pass
 
     def run(self):
-        """called from threading.Thread by its start() function."""
+        """Called from threading.Thread by its start() function."""
         logging.info('msg_queue ready')
         while True:
             # Check if we have something to display

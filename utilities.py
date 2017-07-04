@@ -48,7 +48,6 @@ dgtdispatch_devices = []
 
 
 class Observable(object):
-
     """Input devices are observable."""
 
     def __init__(self):
@@ -61,7 +60,6 @@ class Observable(object):
 
 
 class DispatchDgt(object):
-
     """Input devices are observable."""
 
     def __init__(self):
@@ -74,7 +72,6 @@ class DispatchDgt(object):
 
 
 class DisplayMsg(object):
-
     """Display devices (DGT XL clock, Piface LCD, pgn file...)."""
 
     def __init__(self):
@@ -90,7 +87,6 @@ class DisplayMsg(object):
 
 
 class DisplayDgt(object):
-
     """Display devices (DGT XL clock, Piface LCD, pgn file...)."""
 
     def __init__(self):
@@ -106,7 +102,6 @@ class DisplayDgt(object):
 
 
 class RepeatedTimer(object):
-
     """Call function on a given interval."""
 
     def __init__(self, interval, function, *args, **kwargs):
@@ -275,7 +270,7 @@ def get_location():
 
 
 def write_picochess_ini(key: str, value):
-    """update picochess.ini config file with key/value."""
+    """Update picochess.ini config file with key/value."""
     try:
         config = ConfigObj('picochess.ini')
         config[key] = value

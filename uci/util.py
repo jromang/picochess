@@ -23,12 +23,12 @@ from uci.engine import UciEngine
 
 
 def get_installed_engines(engine_shell, engine_file: str):
-    """create a library list."""
+    """Create a library list."""
     return read_engine_ini(engine_shell, (engine_file.rsplit(os.sep, 1))[0])
 
 
 def read_engine_ini(engine_shell=None, engine_path=None):
-    """read engine.ini and creates a library list out of it."""
+    """Read engine.ini and creates a library list out of it."""
     config = configparser.ConfigParser()
     config.optionxform = str
     try:
@@ -68,9 +68,9 @@ def read_engine_ini(engine_shell=None, engine_path=None):
 
 
 def write_engine_ini(engine_path=None):
-    """read the engine folder and create the engine.ini file."""
+    """Read the engine folder and create the engine.ini file."""
     def write_level_ini(engine_filename: str):
-        """write the level part for the engine.ini file."""
+        """Write the level part for the engine.ini file."""
         def calc_inc(diflevel: int):
             """calculate the increment for (max 20) levels."""
             if diflevel > 1000:
@@ -98,7 +98,7 @@ def write_engine_ini(engine_path=None):
                 sklevel = engine.get().options['Skill Level']
                 minlevel, maxlevel = int(sklevel[3]), int(sklevel[4])
                 minlevel, maxlevel = min(minlevel, maxlevel), max(minlevel, maxlevel)
-                for level in range(minlevel, maxlevel+1):
+                for level in range(minlevel, maxlevel + 1):
                     parser['Level@{:02d}'.format(level)] = {'Skill Level': str(level)}
             if engine.has_strength():
                 sklevel = engine.get().options['Strength']
@@ -116,11 +116,11 @@ def write_engine_ini(engine_path=None):
                 parser.write(configfile)
 
     def is_exe(fpath: str):
-        """check if fpath is an executable."""
+        """Check if fpath is an executable."""
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
     def name_build(parts: list, maxlength: int, default_name: str):
-        """get a (clever formed) cut name for the part list."""
+        """Get a (clever formed) cut name for the part list."""
         eng_name = ''
         for token in parts:
             if len(eng_name) + len(token) > maxlength:
