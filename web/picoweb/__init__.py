@@ -1,5 +1,5 @@
-from flask import Flask, url_for
 import os
+from flask import Flask, url_for
 
 picoweb = Flask(__name__)
 

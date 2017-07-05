@@ -15,15 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import chess
 import time
 import threading
-from utilities import Observable, hours_minutes_seconds
 import logging
-from dgt.api import Event
-from dgt.util import TimeMode
 import copy
 from math import floor
+
+from utilities import Observable, hours_minutes_seconds
+import chess
+from dgt.api import Event
+from dgt.util import TimeMode
 
 
 class TimeControl(object):
@@ -92,8 +93,9 @@ class TimeControl(object):
         if self.mode == TimeMode.FIXED:
             logging.debug('timeout - but in "MoveTime" mode, dont fire event')
         elif self.active_color is not None:
-            txt = 'current clock time (before subtracting) is {} and color is {}, out of time event started from {}'
-            logging.debug(txt.format(self.clock_time[self.active_color], self.active_color, time_start))
+            display_color = 'WHITE' if self.active_color == chess.WHITE else 'BLACK'
+            txt = 'current clock time (before subtracting) is %f and color is %s, out of time event started from %f'
+            logging.debug(txt, self.clock_time[self.active_color], display_color, time_start)
             Observable.fire(Event.OUT_OF_TIME(color=self.active_color))
 
     def add_inc(self, color):

@@ -16,19 +16,17 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import struct
-
-from dgt.util import DgtAck, DgtClk, DgtCmd, DgtMsg, ClockIcons, ClockSide, enum
-from dgt.api import Message, Dgt
-
-from utilities import RepeatedTimer, DisplayMsg, hours_minutes_seconds
 import logging
-
+import subprocess
 from threading import Timer, Lock
 from fcntl import fcntl, F_GETFL, F_SETFL
 from os import O_NONBLOCK, read, path, listdir
 from serial import Serial, SerialException, STOPBITS_ONE, PARITY_NONE, EIGHTBITS
-import subprocess
 import time
+
+from dgt.util import DgtAck, DgtClk, DgtCmd, DgtMsg, ClockIcons, ClockSide, enum
+from dgt.api import Message, Dgt
+from utilities import RepeatedTimer, DisplayMsg, hours_minutes_seconds
 
 
 class DgtBoard(object):
@@ -455,9 +453,9 @@ class DgtBoard(object):
             # check for new data from bluetoothctl
             try:
                 while True:
-                    b = read(self.btctl.stdout.fileno(), 1).decode(encoding='UTF-8', errors='ignore')
-                    self.bt_line += b
-                    if b == '' or b == '\n':
+                    bt_byte = read(self.btctl.stdout.fileno(), 1).decode(encoding='UTF-8', errors='ignore')
+                    self.bt_line += bt_byte
+                    if bt_byte == '' or bt_byte == '\n':
                         break
             except OSError:
                 time.sleep(0.1)

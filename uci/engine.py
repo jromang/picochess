@@ -15,17 +15,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import logging
+import os
+import configparser
+import spur
+import paramiko
+
 from dgt.api import Event
 from dgt.util import EngineStatus
 from utilities import Observable
-import logging
-import os
-import spur
-import paramiko
 import chess.uci
 from chess import Board
 from uci.informer import Informer
-import configparser
 
 
 class UciEngine(object):

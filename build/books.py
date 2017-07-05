@@ -22,8 +22,9 @@ import configparser
 
 
 def write_book_ini():
-    """read the books folder and write the result to book.ini."""
+    """Read the books folder and write the result to book.ini."""
     def is_book(fname):
+        """Check for a valid book file name."""
         return fname.endswith('.bin')
 
     program_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))

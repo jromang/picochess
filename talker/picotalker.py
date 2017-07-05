@@ -20,15 +20,16 @@
 # apt-get install sox
 
 import threading
-import chess
-from utilities import DisplayMsg
 import logging
 import subprocess
 import queue
-from dgt.api import Message
-from dgt.util import GameResult, PlayMode, Voice
 from pathlib import Path
 from shutil import which
+
+import chess
+from utilities import DisplayMsg
+from dgt.api import Message
+from dgt.util import GameResult, PlayMode, Voice
 
 
 class PicoTalker():

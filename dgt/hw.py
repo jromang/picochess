@@ -15,11 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from dgt.iface import DgtIface
-from utilities import hours_minutes_seconds
 import logging
-from dgt.util import ClockIcons, ClockSide, DgtClk, DgtCmd
 from threading import Lock
+
+from utilities import hours_minutes_seconds
+from dgt.iface import DgtIface
+from dgt.util import ClockIcons, ClockSide, DgtClk, DgtCmd
 from dgt.translate import DgtTranslate
 from dgt.board import DgtBoard
 
@@ -166,5 +167,5 @@ class DgtHw(DgtIface):
         return self._resume_clock(side)
 
     def getName(self):
-        """get Name."""
+        """Get name."""
         return 'ser'

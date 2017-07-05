@@ -17,6 +17,7 @@
 
 import datetime
 import threading
+import logging
 
 import chess
 import chess.pgn as pgn
@@ -27,11 +28,10 @@ from tornado.ioloop import IOLoop
 from tornado.websocket import WebSocketHandler
 
 from utilities import Observable, DisplayMsg, hours_minutes_seconds, RepeatedTimer
-import logging
-from dgt.api import Event, Message
-from dgt.util import GameResult, PlayMode, Mode, ClockSide
 from web.picoweb import picoweb as pw
 
+from dgt.api import Event, Message
+from dgt.util import GameResult, PlayMode, Mode, ClockSide
 from dgt.iface import DgtIface
 from dgt.translate import DgtTranslate
 from dgt.board import DgtBoard
@@ -184,7 +184,7 @@ class WebServer(threading.Thread):
         application.listen(port)
 
     def run(self):
-        """called from threading.Thread by its start() function."""
+        """Call by threading.Thread start() function."""
         logging.info('evt_queue ready')
         IOLoop.instance().start()
 
@@ -591,7 +591,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
         IOLoop.instance().add_callback(callback=lambda: self.task(msg))
 
     def run(self):
-        """Called from threading.Thread by its start() function."""
+        """Call by threading.Thread start() function."""
         logging.info('msg_queue ready')
         while True:
             # Check if we have something to display

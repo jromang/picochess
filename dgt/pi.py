@@ -15,17 +15,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from dgt.iface import DgtIface
-from utilities import DisplayMsg, hours_minutes_seconds
 import logging
 import time
+from threading import Lock, Timer
+from ctypes import cdll, c_byte, create_string_buffer, pointer
+from platform import machine
+
+from utilities import DisplayMsg, hours_minutes_seconds
 from dgt.api import Message
 from dgt.util import ClockIcons, ClockSide
 from dgt.translate import DgtTranslate
 from dgt.board import DgtBoard
-from threading import Lock, Timer
-from ctypes import cdll, c_byte, create_string_buffer, pointer
-from platform import machine
+from dgt.iface import DgtIface
 
 
 class DgtPi(DgtIface):

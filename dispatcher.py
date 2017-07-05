@@ -15,13 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from utilities import DisplayDgt, DispatchDgt, dispatch_queue
 import logging
 import queue
-from dgt.api import Dgt, DgtApi
-from dgt.menu import DgtMenu
 from threading import Timer, Thread, Lock
 from copy import deepcopy
+
+from utilities import DisplayDgt, DispatchDgt, dispatch_queue
+from dgt.api import Dgt, DgtApi
+from dgt.menu import DgtMenu
 
 
 class Dispatcher(DispatchDgt, Thread):
@@ -128,7 +129,7 @@ class Dispatcher(DispatchDgt, Thread):
             self.dgtmenu.disable_picochess_displayed(dev)
 
     def run(self):
-        """Called from threading.Thread by its start() function."""
+        """Call by threading.Thread start() function."""
         logging.info('dispatch_queue ready')
         while True:
             # Check if we have something to display

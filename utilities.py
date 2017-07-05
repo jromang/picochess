@@ -84,7 +84,7 @@ class DisplayMsg(object):
 
     @staticmethod
     def show(message):
-        """Sends a message on each display device."""
+        """Send a message on each display device."""
         for display in msgdisplay_devices:
             display.msg_queue.put(copy.deepcopy(message))
 
@@ -100,7 +100,7 @@ class DisplayDgt(object):
 
     @staticmethod
     def show(message):
-        """Sends a message on each display device."""
+        """Send a message on each display device."""
         for display in dgtdisplay_devices:
             display.dgt_queue.put(copy.deepcopy(message))
 

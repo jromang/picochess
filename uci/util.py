@@ -72,7 +72,7 @@ def write_engine_ini(engine_path=None):
     def write_level_ini(engine_filename: str):
         """Write the level part for the engine.ini file."""
         def calc_inc(diflevel: int):
-            """calculate the increment for (max 20) levels."""
+            """Calculate the increment for (max 20) levels."""
             if diflevel > 1000:
                 inc = int(diflevel / 100)
             else:

@@ -15,20 +15,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import os
+import logging
 from configobj import ConfigObj
 from collections import OrderedDict
+
+import chess
+from timecontrol import TimeControl
 from utilities import Observable, DispatchDgt, get_tags, version, write_picochess_ini
 from dgt.util import TimeMode, TimeModeLoop, Top, TopLoop, Mode, ModeLoop, Language, LanguageLoop, BeepLevel, BeepLoop
 from dgt.util import System, SystemLoop, Display, DisplayLoop, ClockIcons
 from dgt.util import Voice, VoiceLoop
-
 from dgt.api import Dgt, Event
-
-from timecontrol import TimeControl
 from dgt.translate import DgtTranslate
-import chess
-import os
-import logging
 
 
 class MenuState(object):
@@ -125,10 +124,10 @@ class DgtMenu(object):
         self.engine_has_960 = False
         self.engine_restart = False
         self.menu_engine_name = 0
-        self.installed_engines = None
+        self.installed_engines = []
 
         self.menu_book = 0
-        self.all_books = None
+        self.all_books = []
 
         self.menu_system = System.VERSION
         self.menu_system_sound_beep = self.dgttranslate.beep

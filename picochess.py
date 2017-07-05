@@ -19,39 +19,37 @@
 
 import sys
 import os
-
-import configargparse
-import chess
-import chess.polyglot
-import chess.uci
 import threading
 import copy
 import gc
+import logging
+from logging.handlers import RotatingFileHandler
+import time
+import queue
+import configargparse
 
 from uci.engine import UciEngine
 from uci.util import read_engine_ini, get_installed_engines
+import chess
+import chess.polyglot
+import chess.uci
 
 from timecontrol import TimeControl
 from utilities import get_location, update_picochess, get_opening_books, shutdown, reboot, checkout_tag
 from utilities import Observable, DisplayMsg, version, evt_queue, write_picochess_ini
-import logging
-import time
-import queue
-from dgt.api import Message, Event
-from dgt.util import GameResult, TimeMode, Mode, PlayMode
 from pgn import Emailer, PgnDisplay
 from server import WebServer
 from talker.picotalker import PicoTalkerDisplay
+from dispatcher import Dispatcher
 
+from dgt.api import Message, Event
+from dgt.util import GameResult, TimeMode, Mode, PlayMode
 from dgt.hw import DgtHw
 from dgt.pi import DgtPi
 from dgt.display import DgtDisplay
 from dgt.board import DgtBoard
 from dgt.translate import DgtTranslate
 from dgt.menu import DgtMenu
-from dispatcher import Dispatcher
-
-from logging.handlers import RotatingFileHandler
 
 
 class AlternativeMover:

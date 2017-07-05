@@ -15,9 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import logging
 from dgt.util import Beep, BeepLevel
 from dgt.api import Dgt
-import logging
 
 
 class DgtTranslate(object):

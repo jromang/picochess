@@ -15,13 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from chess import Board
-from utilities import hours_minutes_seconds, DisplayDgt, DispatchDgt
 import logging
 import queue
+from threading import Thread
+
+from chess import Board
+from utilities import hours_minutes_seconds, DisplayDgt, DispatchDgt
 from dgt.util import ClockIcons, ClockSide
 from dgt.api import Dgt
-from threading import Thread
 from dgt.translate import DgtTranslate
 from dgt.board import DgtBoard
 
@@ -155,7 +156,7 @@ class DgtIface(DisplayDgt, Thread):
             logging.warning('DgtApi command %s failed result: %s', msg, res)
 
     def run(self):
-        """Called from threading.Thread by its start() function."""
+        """Call by threading.Thread start() function."""
         logging.info('[%s] dgt_queue ready', self.getName())
         while True:
             # Check if we have something to display

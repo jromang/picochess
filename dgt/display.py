@@ -15,21 +15,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import chess
 from math import ceil
-
 import logging
 import copy
 import queue
+import threading
+
+import chess
 from utilities import DisplayMsg, Observable, DispatchDgt, write_picochess_ini
 from dgt.translate import DgtTranslate
 from dgt.menu import DgtMenu
 from dgt.util import ClockSide, ClockIcons, BeepLevel, Mode, GameResult, TimeMode
 from dgt.api import Dgt, Event, Message
-
 from timecontrol import TimeControl
 from uci.util import get_installed_engines
-import threading
 
 
 class DgtDisplay(DisplayMsg, threading.Thread):
@@ -801,7 +800,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             pass
 
     def run(self):
-        """Called from threading.Thread by its start() function."""
+        """Call by threading.Thread start() function."""
         logging.info('msg_queue ready')
         while True:
             # Check if we have something to display

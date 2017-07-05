@@ -15,10 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import chess.uci
 from threading import Timer
+
 from utilities import Observable
 from dgt.api import Event
+import chess.uci
 
 
 class Informer(chess.uci.InfoHandler):

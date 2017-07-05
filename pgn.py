@@ -17,17 +17,10 @@
 
 import threading
 import base64
-import chess
-import chess.pgn
 import datetime
 import logging
-import requests
-from utilities import DisplayMsg
 import os
 import queue
-from dgt.api import Message
-from dgt.util import GameResult, PlayMode, Mode
-
 from email import encoders
 from email.mime.multipart import MIMEMultipart
 from email.mime.audio import MIMEAudio
@@ -35,6 +28,13 @@ from email.mime.base import MIMEBase
 from email.mime.image import MIMEImage
 from email.mime.text import MIMEText
 import mimetypes
+import requests
+
+import chess
+import chess.pgn
+from utilities import DisplayMsg
+from dgt.api import Message
+from dgt.util import GameResult, PlayMode, Mode
 
 
 class Emailer(object):
@@ -238,7 +238,7 @@ class PgnDisplay(DisplayMsg, threading.Thread):
             pass
 
     def run(self):
-        """Called from threading.Thread by its start() function."""
+        """Call by threading.Thread start() function."""
         logging.info('msg_queue ready')
         while True:
             # Check if we have something to display
