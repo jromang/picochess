@@ -69,60 +69,22 @@ function updateDGTPosition(data) {
     }
 }
 
-function getAllInfo() {
-    $.get('/info', {action: 'get_system_info'}, function(data) {
-        window.system_info = data;
-    }).fail(function(jqXHR, textStatus) {
-        dgtClockStatusEl.html(textStatus);
-    });
-    $.get('/info', {action: 'get_ip_info'}, function(data) {
-        setTitle(data);
-    }).fail(function(jqXHR, textStatus) {
-        dgtClockStatusEl.html(textStatus);
-    });
-    $.get('/info', {action: 'get_headers'}, function(data) {
-        setHeaders(data);
-    }).fail(function(jqXHR, textStatus) {
-        dgtClockStatusEl.html(textStatus);
-    });
-    $.get('/info', {action: 'get_clock_text'}, function(data) {
-        dgtClockTextEl.html(data);
-    }).fail(function(jqXHR, textStatus) {
-        console.warn(textStatus);
-        dgtClockStatusEl.html(textStatus);
-    });
+function highlightBoard(uci_move, play) {
+    //remove_highlights();
+    var move = uci_move.match(/.{2}/g);
+    var brush = 'green';
+    if( play === 'computer') {
+        brush = 'yellow'
+    }
+    if( play === 'review') {
+        brush = 'blue';
+    }
+    var shapes = {orig: move[0], dest: move[1], brush: brush};
+    chessground_1.setShapes([shapes]);
 }
 
-function setTitle(data) {
-    window.ip_info = data;
-    var ip = '';
-    if (window.ip_info.ext_ip) {
-        ip += ' IP: ' + window.ip_info.ext_ip
-    }
-    var version = '';
-    if (window.ip_info.version) {
-        version = window.ip_info.version
-    } else if (window.system_info.version) {
-        version = window.system_info.version
-    }
-    document.title = 'Webserver Picochess ' + version + ip
-}
-
-// copied from loadGame()
-function setHeaders(data) {
-    if ('FEN' in data && 'SetUp' in data) {
-        if ('Variant' in data && 'Chess960' === data['Variant']) {
-            ChessGameType = 1; // values from chess960.js
-        } else {
-            ChessGameType = 0;
-        }
-    }
-    gameHistory.gameHeader = getWebGameHeader(data);
-    gameHistory.result = data.Result;
-    gameHistory.originalHeader = data;
-    var exporter = new WebExporter();
-    export_game(gameHistory, exporter, true, true, undefined, false);
-    writeVariationTree(pgnEl, exporter.toString(), gameHistory);
+function remove_highlights() {
+    chessground_1.setShapes([]);
 }
 
 function goToDGTFen() {
@@ -133,19 +95,6 @@ function goToDGTFen() {
         }
     }).fail(function(jqXHR, textStatus) {
         dgtClockStatusEl.html(textStatus);
-    });
-}
-
-function updateChessGround() {
-    var tmp_game = create_game_pointer();
-
-    chessground_1.set({
-        fen: currentPosition.fen,
-        turnColor: toColor(tmp_game),
-        movable: {
-            color: toColor(tmp_game),
-            dests: toDests(tmp_game)
-        }
     });
 }
 
@@ -302,24 +251,6 @@ GameDataTable.on('select', function( e, dt, type, indexes ) {
         });
     }
 });
-
-function highlightBoard(uci_move, play) {
-    //remove_highlights();
-    var move = uci_move.match(/.{2}/g);
-    var brush = 'green';
-    if( play === 'computer') {
-        brush = 'yellow'
-    }
-    if( play === 'review') {
-        brush = 'blue';
-    }
-    var shapes = {orig: move[0], dest: move[1], brush: brush};
-    chessground_1.setShapes([shapes]);
-}
-
-function remove_highlights() {
-    chessground_1.setShapes([]);
-}
 
 // do not pick up pieces if the game is over
 // only pick up pieces for the side to move
@@ -667,31 +598,6 @@ function updateCurrentPosition(move, tmp_game) {
     }
 }
 
-var onSnapEnd = function(source, target) {
-    stop_analysis();
-    var tmp_game = create_game_pointer();
-
-    if(!currentPosition) {
-        currentPosition = {};
-        currentPosition.fen = tmp_game.fen();
-        gameHistory = currentPosition;
-        gameHistory.gameHeader = '<h4>Player (-) vs Player (-)</h4><h5>Board game</h5>';
-        gameHistory.result = '*';
-    }
-
-    var move = tmp_game.move({
-        from: source,
-        to: target,
-        promotion: 'q' // NOTE: always promote to a pawn for example simplicity
-    });
-
-    updateCurrentPosition(move, tmp_game);
-    updateChessGround();
-    updateStatus();
-    $.post('/channel', {action: 'move', fen: currentPosition.fen, source: source, target: target}, function(data) {
-    });
-};
-
 var updateStatus = function() {
     var status = '';
     $('.fen').unbind('click', goToGameFen).one('click', goToGameFen);
@@ -746,25 +652,6 @@ var updateStatus = function() {
     $('#' + stripped_fen).addClass('highlight');
 };
 
-var cfg3 = {
-            movable: {
-                color: 'white',
-                free: false,
-                dests: toDests(Chess())
-            }
-        };
-
-var chessground_1 = new Chessground(document.getElementById('board'), cfg3 );
-
-chessground_1.set({
-    movable: { events: { after: playOtherSide() } }
-});
-
-
-$(window).resize(function() {
-    chessground_1.redrawAll();
-});
-
 function toDests(chess) {
     var dests = {};
     chess.SQUARES.forEach(function (s) {
@@ -779,9 +666,65 @@ function toColor(chess) {
     return (chess.turn() === 'w') ? 'white' : 'black';
 }
 
+var onSnapEnd = function(source, target) {
+    stop_analysis();
+    var tmp_game = create_game_pointer();
+
+    if(!currentPosition) {
+        currentPosition = {};
+        currentPosition.fen = tmp_game.fen();
+        gameHistory = currentPosition;
+        gameHistory.gameHeader = '<h4>Player (-) vs Player (-)</h4><h5>Board game</h5>';
+        gameHistory.result = '*';
+    }
+
+    var move = tmp_game.move({
+        from: source,
+        to: target,
+        promotion: 'q' // NOTE: always promote to a pawn for example simplicity
+    });
+
+    updateCurrentPosition(move, tmp_game);
+    updateChessGround();
+    updateStatus();
+    $.post('/channel', {action: 'move', fen: currentPosition.fen, source: source, target: target}, function(data) {
+    });
+};
+
+function updateChessGround() {
+    var tmp_game = create_game_pointer();
+
+    chessground_1.set({
+        fen: currentPosition.fen,
+        turnColor: toColor(tmp_game),
+        movable: {
+            color: toColor(tmp_game),
+            dests: toDests(tmp_game)
+        }
+    });
+}
+
 function playOtherSide() {
     return onSnapEnd;
 }
+
+var cfg3 = {
+            movable: {
+                color: 'white',
+                free: false,
+                dests: toDests(Chess())
+            }
+        };
+
+var chessground_1 = new Chessground(document.getElementById('board'), cfg3 );
+
+chessground_1.set({
+    movable: { events: { after: playOtherSide() } }
+});
+
+$(window).resize(function() {
+    chessground_1.redrawAll();
+});
 
 function addNewMove(m, current_position, fen, props) {
     var node = {};
@@ -1356,7 +1299,8 @@ function stockfishPNACLModuleDidLoad() {
 }
 
 function handleCrash(event) {
-    console.warn('Nacl Module crash handler method..');
+    console.warn('Nacl Module crash handler method');
+    console.warn(event);
     load_nacl_stockfish();
 }
 
@@ -1459,6 +1403,62 @@ function analyze(position_update) {
     window.stockfish.postMessage('position ' + startpos + ' moves ' + moves);
     window.stockfish.postMessage('setoption name multipv value ' + window.multipv);
     window.stockfish.postMessage('go infinite');
+}
+
+function setTitle(data) {
+    window.ip_info = data;
+    var ip = '';
+    if (window.ip_info.ext_ip) {
+        ip += ' IP: ' + window.ip_info.ext_ip
+    }
+    var version = '';
+    if (window.ip_info.version) {
+        version = window.ip_info.version
+    } else if (window.system_info.version) {
+        version = window.system_info.version
+    }
+    document.title = 'Webserver Picochess ' + version + ip
+}
+
+// copied from loadGame()
+function setHeaders(data) {
+    if ('FEN' in data && 'SetUp' in data) {
+        if ('Variant' in data && 'Chess960' === data['Variant']) {
+            ChessGameType = 1; // values from chess960.js
+        } else {
+            ChessGameType = 0;
+        }
+    }
+    gameHistory.gameHeader = getWebGameHeader(data);
+    gameHistory.result = data.Result;
+    gameHistory.originalHeader = data;
+    var exporter = new WebExporter();
+    export_game(gameHistory, exporter, true, true, undefined, false);
+    writeVariationTree(pgnEl, exporter.toString(), gameHistory);
+}
+
+function getAllInfo() {
+    $.get('/info', {action: 'get_system_info'}, function(data) {
+        window.system_info = data;
+    }).fail(function(jqXHR, textStatus) {
+        dgtClockStatusEl.html(textStatus);
+    });
+    $.get('/info', {action: 'get_ip_info'}, function(data) {
+        setTitle(data);
+    }).fail(function(jqXHR, textStatus) {
+        dgtClockStatusEl.html(textStatus);
+    });
+    $.get('/info', {action: 'get_headers'}, function(data) {
+        setHeaders(data);
+    }).fail(function(jqXHR, textStatus) {
+        dgtClockStatusEl.html(textStatus);
+    });
+    $.get('/info', {action: 'get_clock_text'}, function(data) {
+        dgtClockTextEl.html(data);
+    }).fail(function(jqXHR, textStatus) {
+        console.warn(textStatus);
+        dgtClockStatusEl.html(textStatus);
+    });
 }
 
 $('#flipOrientationBtn').on('click', boardFlip);
