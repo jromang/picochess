@@ -62,19 +62,12 @@ var setupBoardFen = START_FEN;
 var DataTableFen = START_FEN;
 var ChessGameType = 0; // 0=Standard ; 1=Chess960
 
-function updateDGTPosition(data) {
-    if (!goToPosition(data.fen) || data.play === 'reload') {
-        loadGame(data['pgn'].split("\n"));
-        goToPosition(data.fen);
-    }
-}
-
-function highlightBoard(uci_move, play) {
+function highlightBoard(ucimove, play) {
     //remove_highlights();
-    var move = uci_move.match(/.{2}/g);
+    var move = ucimove.match(/.{2}/g);
     var brush = 'green';
     if( play === 'computer') {
-        brush = 'yellow'
+        brush = 'yellow';
     }
     if( play === 'review') {
         brush = 'blue';
@@ -85,17 +78,6 @@ function highlightBoard(uci_move, play) {
 
 function remove_highlights() {
     chessground_1.setShapes([]);
-}
-
-function goToDGTFen() {
-    $.get('/dgt', {action: 'get_last_move'}, function(data) {
-        if (data) {
-            updateDGTPosition(data);
-            highlightBoard(data.move, data.play);
-        }
-    }).fail(function(jqXHR, textStatus) {
-        dgtClockStatusEl.html(textStatus);
-    });
 }
 
 var BookDataTable = $("#BookTable").DataTable( {
@@ -577,6 +559,10 @@ function export_game(root_node, exporter, include_comments, include_variations, 
     }
 }
 
+function writeVariationTree(dom, gameMoves, gameHistoryEl) {
+    $(dom).html(gameHistoryEl.gameHeader + '<div class="gameMoves">' + gameMoves + ' <span class="gameResult">' + gameHistoryEl.result + '</span></div>');
+}
+
 // update the board position after the piece snap
 // for castling, en passant, pawn promotion
 function updateCurrentPosition(move, tmp_game) {
@@ -958,10 +944,6 @@ function get_full_game() {
     export_game(gameHistory, exporter, true, true, undefined, false);
     var exporter_content = exporter.toString();
     return game_header + exporter_content;
-}
-
-function writeVariationTree(dom, gameMoves, gameHistoryEl) {
-    $(dom).html(gameHistoryEl.gameHeader + '<div class="gameMoves">' + gameMoves + ' <span class="gameResult">' + gameHistoryEl.result + '</span></div>');
 }
 
 function getPgnGameHeader(h) {
@@ -1403,6 +1385,24 @@ function analyze(position_update) {
     window.stockfish.postMessage('position ' + startpos + ' moves ' + moves);
     window.stockfish.postMessage('setoption name multipv value ' + window.multipv);
     window.stockfish.postMessage('go infinite');
+}
+
+function updateDGTPosition(data) {
+    if (!goToPosition(data.fen) || data.play === 'reload') {
+        loadGame(data['pgn'].split("\n"));
+        goToPosition(data.fen);
+    }
+}
+
+function goToDGTFen() {
+    $.get('/dgt', {action: 'get_last_move'}, function(data) {
+        if (data) {
+            updateDGTPosition(data);
+            highlightBoard(data.move, data.play);
+        }
+    }).fail(function(jqXHR, textStatus) {
+        dgtClockStatusEl.html(textStatus);
+    });
 }
 
 function setTitle(data) {
