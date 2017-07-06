@@ -1,41 +1,41 @@
-NAG_NULL = 0;
-var NAG_GOOD_MOVE = 1;
+const NAG_NULL = 0;
+const NAG_GOOD_MOVE = 1;
 //"""A good move. Can also be indicated by ``!`` in PGN notation."""
-var NAG_MISTAKE = 2;
+const NAG_MISTAKE = 2;
 //"""A mistake. Can also be indicated by ``?`` in PGN notation."""
-var NAG_BRILLIANT_MOVE = 3;
+const NAG_BRILLIANT_MOVE = 3;
 //"""A brilliant move. Can also be indicated by ``!!`` in PGN notation."""
-var NAG_BLUNDER = 4;
+const NAG_BLUNDER = 4;
 //"""A blunder. Can also be indicated by ``??`` in PGN notation."""
-var NAG_SPECULATIVE_MOVE = 5;
+const NAG_SPECULATIVE_MOVE = 5;
 //"""A speculative move. Can also be indicated by ``!?`` in PGN notation."""
-var NAG_DUBIOUS_MOVE = 6;
+const NAG_DUBIOUS_MOVE = 6;
 //"""A dubious move. Can also be indicated by ``?!`` in PGN notation."""
 
-simple_nags = {'1': '!', '2': '?', '3': '!!', '4': '??', '5': '!?', '6': '?!', '7': '&#9633', '8': '&#9632','11' : '=', '13': '&infin;', '14': '&#10866', '15': '&#10865', '16': '&plusmn;', '17': '&#8723', '18': '&#43; &minus;', '19': '&minus; &#43;', '36': '&rarr;','142': '&#8979','146': 'N'};
+var simple_nags = {'1': '!', '2': '?', '3': '!!', '4': '??', '5': '!?', '6': '?!', '7': '&#9633', '8': '&#9632','11' : '=', '13': '&infin;', '14': '&#10866', '15': '&#10865', '16': '&plusmn;', '17': '&#8723', '18': '&#43; &minus;', '19': '&minus; &#43;', '36': '&rarr;','142': '&#8979','146': 'N'};
 
 
-NAG_FORCED_MOVE = 7;
-NAG_SINGULAR_MOVE = 8;
-NAG_WORST_MOVE = 9;
-NAG_DRAWISH_POSITION = 10;
-NAG_QUIET_POSITION = 11;
-NAG_ACTIVE_POSITION = 12;
-NAG_UNCLEAR_POSITION = 13;
-NAG_WHITE_SLIGHT_ADVANTAGE = 14;
-NAG_BLACK_SLIGHT_ADVANTAGE = 15;
+const NAG_FORCED_MOVE = 7;
+const NAG_SINGULAR_MOVE = 8;
+const NAG_WORST_MOVE = 9;
+const NAG_DRAWISH_POSITION = 10;
+const NAG_QUIET_POSITION = 11;
+const NAG_ACTIVE_POSITION = 12;
+const NAG_UNCLEAR_POSITION = 13;
+const NAG_WHITE_SLIGHT_ADVANTAGE = 14;
+const NAG_BLACK_SLIGHT_ADVANTAGE = 15;
 
 //# TODO: Add more constants for example from
 //# https://en.wikipedia.org/wiki/Numeric_Annotation_Glyphs
 
-NAG_WHITE_MODERATE_COUNTERPLAY = 132;
-NAG_BLACK_MODERATE_COUNTERPLAY = 133;
-NAG_WHITE_DECISIVE_COUNTERPLAY = 134;
-NAG_BLACK_DECISIVE_COUNTERPLAY = 135;
-NAG_WHITE_MODERATE_TIME_PRESSURE = 136;
-NAG_BLACK_MODERATE_TIME_PRESSURE = 137;
-NAG_WHITE_SEVERE_TIME_PRESSURE = 138;
-NAG_BLACK_SEVERE_TIME_PRESSURE = 139;
+const NAG_WHITE_MODERATE_COUNTERPLAY = 132;
+const NAG_BLACK_MODERATE_COUNTERPLAY = 133;
+const NAG_WHITE_DECISIVE_COUNTERPLAY = 134;
+const NAG_BLACK_DECISIVE_COUNTERPLAY = 135;
+const NAG_WHITE_MODERATE_TIME_PRESSURE = 136;
+const NAG_BLACK_MODERATE_TIME_PRESSURE = 137;
+const NAG_WHITE_SEVERE_TIME_PRESSURE = 138;
+const NAG_BLACK_SEVERE_TIME_PRESSURE = 139;
 
 const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
@@ -45,8 +45,8 @@ var boardStatusEl = $('#BoardStatus'),
     pgnEl = $('#pgn');
 
 var gameHistory, fenHash, currentPosition;
-var backend_server_prefix = 'http://drshivaji.com:3334';
-//var backend_server_prefix = "http://localhost:7777";
+const BACKEND_SERVER_PREFIX = 'http://drshivaji.com:3334';
+//const BACKEND_SERVER_PREFIX = "http://localhost:7777";
 
 fenHash = {};
 
@@ -67,13 +67,6 @@ function updateDGTPosition(data) {
         loadGame(data['pgn'].split("\n"));
         goToPosition(data.fen);
     }
-}
-
-function load_nacl_stockfish() {
-    var listener = document.getElementById('listener');
-    listener.addEventListener('load', stockfishPNACLModuleDidLoad, true);
-    listener.addEventListener('message', handleMessage, true);
-    listener.addEventListener('crash', handleCrash, true);
 }
 
 function getAllInfo() {
@@ -182,7 +175,7 @@ var BookDataTable = $("#BookTable").DataTable( {
          }
       ],
     "ajax": {
-        "url": backend_server_prefix + "/query",
+        "url": BACKEND_SERVER_PREFIX + "/query",
         "dataSrc": "records",
         "dataType": "jsonp",
         "data": function ( d ) {
@@ -245,7 +238,7 @@ var GameDataTable = $("#GameTable").DataTable( {
           }
       ],
     "ajax": {
-        "url": backend_server_prefix + "/query",
+        "url": BACKEND_SERVER_PREFIX + "/query",
         "dataSrc": "records",
         "dataType": "jsonp",
         "data": function ( d ) {
@@ -296,7 +289,7 @@ GameDataTable.on('select', function( e, dt, type, indexes ) {
         var data = GameDataTable.rows(indexes).data().pluck('id')[0];
         $.ajax({
             dataType: 'jsonp',
-            url: backend_server_prefix + '/query?callback=game_callback',
+            url: BACKEND_SERVER_PREFIX + '/query?callback=game_callback',
             data: {
                 action: 'get_game_content',
                 game_num: data,
@@ -308,107 +301,6 @@ GameDataTable.on('select', function( e, dt, type, indexes ) {
             remove_highlights();
         });
     }
-});
-
-$(function() {
-    getAllInfo();
-
-    $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
-        updateStatus();
-    });
-    window.engine_lines = {};
-    window.multipv = 1;
-
-    $(document).keydown(function(e) {
-        if (e.keyCode === 39) { //right arrow
-            if (e.ctrlKey) {
-                $('#endBtn').click();
-            } else {
-                $('#fwdBtn').click();
-            }
-            return true;
-        }
-    });
-
-    $(document).keydown(function(e) {
-        if (e.keyCode === 37) { //left arrow
-            if (e.ctrlKey) {
-                $('#startBtn').click();
-            } else {
-                $('#backBtn').click();
-            }
-        }
-        return true;
-    });
-    updateStatus();
-
-    window.WebSocket = window.WebSocket || window.MozWebSocket || false;
-    if (!window.WebSocket) {
-        alert('No WebSocket Support');
-    }
-    else {
-        var ws = new WebSocket('ws://' + location.host + '/event');
-        // Process messages from picochess
-        ws.onmessage = function(e) {
-            var data = JSON.parse(e.data);
-            switch (data.event) {
-                case 'Fen':
-                    updateDGTPosition(data);
-                    updateStatus();
-                    if(data.play === 'reload') {
-                        remove_highlights();
-                    }
-                    if(data.play === 'user') {
-                        highlightBoard(data.move, 'user');
-                    }
-                    if(data.play === 'review') {
-                        highlightBoard(data.move, 'review');
-                    }
-                    break;
-                case 'Game':
-                    newBoard(data.fen);
-                    break;
-                case 'Message':
-                    boardStatusEl.html(data.msg);
-                    break;
-                case 'Clock':
-                    dgtClockTextEl.html(data.msg);
-                    break;
-                case 'Status':
-                    dgtClockStatusEl.html(data.msg);
-                    break;
-                case 'Light':
-                    highlightBoard(data.move, 'computer');
-                    break;
-                case 'Clear':
-                    remove_highlights();
-                    break;
-                case 'Header':
-                    setHeaders(data['headers']);
-                    break;
-                case 'Title':
-                    setTitle(data['ip_info']);
-                    break;
-                case 'Broadcast':
-                    boardStatusEl.html(data.msg);
-                    break;
-                default:
-                    console.warn(data);
-            }
-        };
-        ws.onclose = function() {
-            dgtClockStatusEl.html('closed');
-        };
-    }
-
-    if (navigator.mimeTypes['application/x-pnacl'] !== undefined) {
-        $('#analyzeBtn').prop('disabled', true);
-        load_nacl_stockfish();
-    }
-
-    $.fn.dataTable.ext.errMode = 'throw';
-
-    $('[data-toggle="tooltip"]').tooltip();
 });
 
 function highlightBoard(uci_move, play) {
@@ -891,38 +783,6 @@ function playOtherSide() {
     return onSnapEnd;
 }
 
-$('#flipOrientationBtn').on('click', boardFlip);
-$('#backBtn').on('click', goBack);
-$('#fwdBtn').on('click', goForward);
-$('#startBtn').on('click', goToStart);
-$('#endBtn').on('click', goToEnd);
-
-$('#DgtSyncBtn').on('click', goToDGTFen);
-$('#downloadBtn').on('click', download);
-$('#broadcastBtn').on('click', broadcastPosition);
-
-$('#analyzeBtn').on('click', analyze_pressed);
-
-$('#analyzePlus').on('click', multipv_increase);
-$('#analyzeMinus').on('click', multipv_decrease);
-
-$('#ClockBtn0').on('click', clockButton0);
-$('#ClockBtn1').on('click', clockButton1);
-$('#ClockBtn2').on('click', clockButton2);
-$('#ClockBtn3').on('click', clockButton3);
-$('#ClockBtn4').on('click', clockButton4);
-$('#ClockLeverBtn').on('click', toggleLeverButton);
-
-$('#consoleBtn').on('click', toggleConsoleButton);
-$('#getFenToConsoleBtn').on('click', getFenToConsole);
-
-$("#inputConsole").keyup(function(event) {
-    if(event.keyCode === 13) {
-        sendConsoleCommand();
-        $(this).val('');
-    }
-});
-
 function addNewMove(m, current_position, fen, props) {
     var node = {};
     node.variations = [];
@@ -1272,12 +1132,6 @@ function toggleConsoleButton() {
     $('#Database').toggle();
 }
 
-function goToGameFen() {
-    var fen = $(this).attr('data-fen');
-    goToPosition(fen);
-    remove_highlights();
-}
-
 function goToPosition(fen) {
     stop_analysis();
     currentPosition = fenHash[fen];
@@ -1287,6 +1141,12 @@ function goToPosition(fen) {
     updateChessGround();
     updateStatus();
     return true;
+}
+
+function goToGameFen() {
+    var fen = $(this).attr('data-fen');
+    goToPosition(fen);
+    remove_highlights();
 }
 
 function goToStart() {
@@ -1509,6 +1369,13 @@ function handleMessage(event) {
     $('.importPVBtn').on('click', import_pv);
 }
 
+function load_nacl_stockfish() {
+    var listener = document.getElementById('listener');
+    listener.addEventListener('load', stockfishPNACLModuleDidLoad, true);
+    listener.addEventListener('message', handleMessage, true);
+    listener.addEventListener('crash', handleCrash, true);
+}
+
 function stop_analysis() {
     if (!window.StockfishModule) {
         if (window.stockfish) {
@@ -1593,3 +1460,136 @@ function analyze(position_update) {
     window.stockfish.postMessage('setoption name multipv value ' + window.multipv);
     window.stockfish.postMessage('go infinite');
 }
+
+$('#flipOrientationBtn').on('click', boardFlip);
+$('#backBtn').on('click', goBack);
+$('#fwdBtn').on('click', goForward);
+$('#startBtn').on('click', goToStart);
+$('#endBtn').on('click', goToEnd);
+
+$('#DgtSyncBtn').on('click', goToDGTFen);
+$('#downloadBtn').on('click', download);
+$('#broadcastBtn').on('click', broadcastPosition);
+
+$('#analyzeBtn').on('click', analyze_pressed);
+
+$('#analyzePlus').on('click', multipv_increase);
+$('#analyzeMinus').on('click', multipv_decrease);
+
+$('#ClockBtn0').on('click', clockButton0);
+$('#ClockBtn1').on('click', clockButton1);
+$('#ClockBtn2').on('click', clockButton2);
+$('#ClockBtn3').on('click', clockButton3);
+$('#ClockBtn4').on('click', clockButton4);
+$('#ClockLeverBtn').on('click', toggleLeverButton);
+
+$('#consoleBtn').on('click', toggleConsoleButton);
+$('#getFenToConsoleBtn').on('click', getFenToConsole);
+
+$("#inputConsole").keyup(function(event) {
+    if(event.keyCode === 13) {
+        sendConsoleCommand();
+        $(this).val('');
+    }
+});
+
+$(function() {
+    getAllInfo();
+
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+        updateStatus();
+    });
+    window.engine_lines = {};
+    window.multipv = 1;
+
+    $(document).keydown(function(e) {
+        if (e.keyCode === 39) { //right arrow
+            if (e.ctrlKey) {
+                $('#endBtn').click();
+            } else {
+                $('#fwdBtn').click();
+            }
+            return true;
+        }
+    });
+
+    $(document).keydown(function(e) {
+        if (e.keyCode === 37) { //left arrow
+            if (e.ctrlKey) {
+                $('#startBtn').click();
+            } else {
+                $('#backBtn').click();
+            }
+        }
+        return true;
+    });
+    updateStatus();
+
+    window.WebSocket = window.WebSocket || window.MozWebSocket || false;
+    if (!window.WebSocket) {
+        alert('No WebSocket Support');
+    }
+    else {
+        var ws = new WebSocket('ws://' + location.host + '/event');
+        // Process messages from picochess
+        ws.onmessage = function(e) {
+            var data = JSON.parse(e.data);
+            switch (data.event) {
+                case 'Fen':
+                    updateDGTPosition(data);
+                    updateStatus();
+                    if(data.play === 'reload') {
+                        remove_highlights();
+                    }
+                    if(data.play === 'user') {
+                        highlightBoard(data.move, 'user');
+                    }
+                    if(data.play === 'review') {
+                        highlightBoard(data.move, 'review');
+                    }
+                    break;
+                case 'Game':
+                    newBoard(data.fen);
+                    break;
+                case 'Message':
+                    boardStatusEl.html(data.msg);
+                    break;
+                case 'Clock':
+                    dgtClockTextEl.html(data.msg);
+                    break;
+                case 'Status':
+                    dgtClockStatusEl.html(data.msg);
+                    break;
+                case 'Light':
+                    highlightBoard(data.move, 'computer');
+                    break;
+                case 'Clear':
+                    remove_highlights();
+                    break;
+                case 'Header':
+                    setHeaders(data['headers']);
+                    break;
+                case 'Title':
+                    setTitle(data['ip_info']);
+                    break;
+                case 'Broadcast':
+                    boardStatusEl.html(data.msg);
+                    break;
+                default:
+                    console.warn(data);
+            }
+        };
+        ws.onclose = function() {
+            dgtClockStatusEl.html('closed');
+        };
+    }
+
+    if (navigator.mimeTypes['application/x-pnacl'] !== undefined) {
+        $('#analyzeBtn').prop('disabled', true);
+        load_nacl_stockfish();
+    }
+
+    $.fn.dataTable.ext.errMode = 'throw';
+
+    $('[data-toggle="tooltip"]').tooltip();
+});
