@@ -62,6 +62,11 @@ var setupBoardFen = START_FEN;
 var DataTableFen = START_FEN;
 var ChessGameType = 0; // 0=Standard ; 1=Chess960
 
+
+function remove_highlights() {
+    chessground_1.setShapes([]);
+}
+
 function highlightBoard(ucimove, play) {
     //remove_highlights();
     var move = ucimove.match(/.{2}/g);
@@ -76,53 +81,49 @@ function highlightBoard(ucimove, play) {
     chessground_1.setShapes([shapes]);
 }
 
-function remove_highlights() {
-    chessground_1.setShapes([]);
-}
-
-var BookDataTable = $("#BookTable").DataTable( {
-    "processing": true,
-    "paging": false,
-    "info": false,
-    "searching": false,
-    "order": [[2, "desc"]],
-    "select": {
-        "style": "os",
-        "selector": "td:not(.control)"
+var BookDataTable = $('#BookTable').DataTable( {
+    'processing': true,
+    'paging': false,
+    'info': false,
+    'searching': false,
+    'order': [[2, 'desc']],
+    'select': {
+        'style': 'os',
+        'selector': 'td:not(.control)'
     },
-    "responsive": {
-        "details": {
-           "type": "column",
-           "target": 0
+    'responsive': {
+        'details': {
+           'type': 'column',
+           'target': 0
         }
       },
-      "columnDefs": [
+      'columnDefs': [
          {
-           "data": null,
-           "defaultContent": "",
-           "className": "control",
-           "orderable": false,
-           "targets": 0
+           'data': null,
+           'defaultContent': '',
+           'className': 'control',
+           'orderable': false,
+           'targets': 0
          }
       ],
-    "ajax": {
-        "url": BACKEND_SERVER_PREFIX + "/query",
-        "dataSrc": "records",
-        "dataType": "jsonp",
-        "data": function ( d ) {
-            d.action = "get_book_moves";
+    'ajax': {
+        'url': BACKEND_SERVER_PREFIX + '/query',
+        'dataSrc': 'records',
+        'dataType': 'jsonp',
+        'data': function ( d ) {
+            d.action = 'get_book_moves';
             d.fen = DataTableFen;
-            d.db = "#ref";
+            d.db = '#ref';
         }
     },
-    "columns": [
+    'columns': [
         {data: null},
-        {data: "move", render: function ( data, type, row ) { return figurinize_move(data) } },
-        {data: "freq", render: $.fn.dataTable.render.intlNumber()},
-        {data: "pct", render: $.fn.dataTable.render.number( ",", ".", 2, "", "%" )},
-        {data: "draws", render: $.fn.dataTable.render.intlNumber()},
-        {data: "wins", render: $.fn.dataTable.render.intlNumber()},
-        {data: "losses", render: $.fn.dataTable.render.intlNumber()}
+        {data: 'move', render: function ( data, type, row ) { return figurinize_move(data) } },
+        {data: 'freq', render: $.fn.dataTable.render.intlNumber()},
+        {data: 'pct', render: $.fn.dataTable.render.number( ',', '.', 2, '', '%' )},
+        {data: 'draws', render: $.fn.dataTable.render.intlNumber()},
+        {data: 'wins', render: $.fn.dataTable.render.intlNumber()},
+        {data: 'losses', render: $.fn.dataTable.render.intlNumber()}
     ]
 });
 BookDataTable.on('select', function( e, dt, type, indexes ) {
@@ -138,50 +139,50 @@ BookDataTable.on('select', function( e, dt, type, indexes ) {
     }
 });
 
-var GameDataTable = $("#GameTable").DataTable( {
-    "processing": true,
-    "serverSide": true,
-    "paging": true,
-    "info": true,
-    "searching": true,
-    "order": [[1, "desc"]],
-    "select": {
-        "style": "os",
-        "selector": "td:not(.control)"
+var GameDataTable = $('#GameTable').DataTable( {
+    'processing': true,
+    'serverSide': true,
+    'paging': true,
+    'info': true,
+    'searching': true,
+    'order': [[1, 'desc']],
+    'select': {
+        'style': 'os',
+        'selector': 'td:not(.control)'
     },
-    "responsive": {
-        "details": {
-           "type": "column",
-           "target": 0
+    'responsive': {
+        'details': {
+           'type': 'column',
+           'target': 0
         }
       },
-      "columnDefs": [
+      'columnDefs': [
           {
-              "data": null,
-              "defaultContent": "",
-              "className": "control",
-              "orderable": false,
-              "targets": 0
+              'data': null,
+              'defaultContent': '',
+              'className': 'control',
+              'orderable': false,
+              'targets': 0
           },
           {
-              "targets": [1],
-              "visible": false
+              'targets': [1],
+              'visible': false
           }
       ],
-    "ajax": {
-        "url": BACKEND_SERVER_PREFIX + "/query",
-        "dataSrc": "records",
-        "dataType": "jsonp",
-        "data": function ( d ) {
-            d.action = "get_games";
+    'ajax': {
+        'url': BACKEND_SERVER_PREFIX + '/query',
+        'dataSrc': 'records',
+        'dataType': 'jsonp',
+        'data': function ( d ) {
+            d.action = 'get_games';
             d.fen = DataTableFen;
-            d.db = "#ref";
+            d.db = '#ref';
         },
-        "error": function (xhr, error, thrown) {
+        'error': function (xhr, error, thrown) {
             console.warn(xhr);
         }
     },
-    "initComplete": function() {
+    'initComplete': function() {
         var searchInput = $('div.dataTables_filter input');
         searchInput.unbind();
         searchInput.bind('keyup', function(e) {
@@ -193,18 +194,18 @@ var GameDataTable = $("#GameTable").DataTable( {
             }
         });
     },
-    "columns": [
+    'columns': [
         {data: null},
         {data: 'id'},
-        {data: "white"},
-        {data: "white_elo"},
-        {data: "black"},
-        {data: "black_elo"},
-        {data: "result"},
-        {data: "date"},
-        {data: "event"},
-        {data: "site"},
-        {data: "eco"}
+        {data: 'white'},
+        {data: 'white_elo'},
+        {data: 'black'},
+        {data: 'black_elo'},
+        {data: 'result'},
+        {data: 'date'},
+        {data: 'event'},
+        {data: 'site'},
+        {data: 'eco'}
     ]
 });
 GameDataTable.on('xhr.dt', function( e, settings, json, xhr) {
@@ -1409,15 +1410,15 @@ function setTitle(data) {
     window.ip_info = data;
     var ip = '';
     if (window.ip_info.ext_ip) {
-        ip += ' IP: ' + window.ip_info.ext_ip
+        ip += ' IP: ' + window.ip_info.ext_ip;
     }
     var version = '';
     if (window.ip_info.version) {
-        version = window.ip_info.version
+        version = window.ip_info.version;
     } else if (window.system_info.version) {
         version = window.system_info.version
     }
-    document.title = 'Webserver Picochess ' + version + ip
+    document.title = 'Webserver Picochess ' + version + ip;
 }
 
 // copied from loadGame()

@@ -435,12 +435,15 @@ class DgtMenu(object):
         text = self.dgttranslate.text(Top.BOOK.value)
         return text
 
-    def enter_book_name_menu(self):
-        """Set the menu state."""
-        self.state = MenuState.BOOK_NAME
+    def _get_current_book_name(self):
         text = self.all_books[self.menu_book]['text']
         text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
         return text
+
+    def enter_book_name_menu(self):
+        """Set the menu state."""
+        self.state = MenuState.BOOK_NAME
+        return self._get_current_book_name()
 
     def enter_eng_menu(self):
         """Set the menu state."""
@@ -448,12 +451,15 @@ class DgtMenu(object):
         text = self.dgttranslate.text(Top.ENGINE.value)
         return text
 
-    def enter_eng_name_menu(self):
-        """Set the menu state."""
-        self.state = MenuState.ENG_NAME
+    def _get_current_engine_name(self):
         text = self.installed_engines[self.menu_engine_name]['text']
         text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
         return text
+
+    def enter_eng_name_menu(self):
+        """Set the menu state."""
+        self.state = MenuState.ENG_NAME
+        return self._get_current_engine_name()
 
     def enter_eng_name_level_menu(self):
         """Set the menu state."""
@@ -556,11 +562,7 @@ class DgtMenu(object):
         text = self.dgttranslate.text('B00_language_' + vkey + '_menu')
         return text
 
-    def enter_sys_voice_type_mute_lang_speak_menu(self):
-        """Set the menu state."""
-        self.state = MenuState.SYS_VOICE_TYPE_MUTE_LANG_SPEAK
-        vkey = self.voices_conf.keys()[self.menu_system_voice_lang]
-        speakers = self.voices_conf[vkey]
+    def _get_current_speaker(self, speakers):
         speaker = speakers[list(speakers)[self.menu_system_voice_speak]]
         text = Dgt.DISPLAY_TEXT(l=speaker['large'], m=speaker['medium'], s=speaker['small'])
         text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
@@ -568,6 +570,12 @@ class DgtMenu(object):
         text.maxtime = 0
         text.devs = {'ser', 'i2c', 'web'}
         return text
+
+    def enter_sys_voice_type_mute_lang_speak_menu(self):
+        """Set the menu state."""
+        self.state = MenuState.SYS_VOICE_TYPE_MUTE_LANG_SPEAK
+        vkey = self.voices_conf.keys()[self.menu_system_voice_lang]
+        return self._get_current_speaker(self.voices_conf[vkey])
 
     def enter_sys_voice_speed_menu(self):
         """Set the menu state."""
@@ -630,6 +638,14 @@ class DgtMenu(object):
         self.state = MenuState.SYS_BATTERY
         text = self.dgttranslate.text(self.menu_system.value)
         return text
+
+    def _fire_event(self, event: Event):
+        Observable.fire(event)
+        return self.save_choices()
+
+    def _fire_dispatchdgt(self, text):
+        DispatchDgt.fire(text)
+        return self.save_choices()
 
     def main_up(self):
         """Change the menu state after UP action."""
@@ -798,8 +814,7 @@ class DgtMenu(object):
             # do action!
             text = self.dgttranslate.text('B10_okmode')
             event = Event.SET_INTERACTION_MODE(mode=self.menu_mode, mode_text=text, show_ok=True)
-            Observable.fire(event)
-            text = self.save_choices()
+            text = self._fire_event(event)
 
         elif self.state == MenuState.POS:
             text = self.enter_pos_color_menu()
@@ -850,8 +865,7 @@ class DgtMenu(object):
             time_text = self.dgttranslate.text('B10_oktime')
             timectrl = self.tc_blitz_map[list(self.tc_blitz_map)[self.menu_time_blitz]]  # type: TimeControl
             event = Event.SET_TIME_CONTROL(tc_init=timectrl.get_parameters(), time_text=time_text, show_ok=True)
-            Observable.fire(event)
-            text = self.save_choices()
+            text = self._fire_event(event)
 
         elif self.state == MenuState.TIME_FISCH:
             text = self.enter_time_fisch_ctrl_menu()
@@ -861,8 +875,7 @@ class DgtMenu(object):
             time_text = self.dgttranslate.text('B10_oktime')
             timectrl = self.tc_fisch_map[list(self.tc_fisch_map)[self.menu_time_fisch]]  # type: TimeControl
             event = Event.SET_TIME_CONTROL(tc_init=timectrl.get_parameters(), time_text=time_text, show_ok=True)
-            Observable.fire(event)
-            text = self.save_choices()
+            text = self._fire_event(event)
 
         elif self.state == MenuState.TIME_FIXED:
             text = self.enter_time_fixed_ctrl_menu()
@@ -872,8 +885,7 @@ class DgtMenu(object):
             time_text = self.dgttranslate.text('B10_oktime')
             timectrl = self.tc_fixed_map[list(self.tc_fixed_map)[self.menu_time_fixed]]  # type: TimeControl
             event = Event.SET_TIME_CONTROL(tc_init=timectrl.get_parameters(), time_text=time_text, show_ok=True)
-            Observable.fire(event)
-            text = self.save_choices()
+            text = self._fire_event(event)
 
         elif self.state == MenuState.BOOK:
             text = self.enter_book_name_menu()
@@ -882,8 +894,7 @@ class DgtMenu(object):
             # do action!
             book_text = self.dgttranslate.text('B10_okbook')
             event = Event.SET_OPENING_BOOK(book=self.all_books[self.menu_book], book_text=book_text, show_ok=True)
-            Observable.fire(event)
-            text = self.save_choices()
+            text = self._fire_event(event)
 
         elif self.state == MenuState.ENG:
             text = self.enter_eng_name_menu()
@@ -913,9 +924,8 @@ class DgtMenu(object):
                 options = {}
             eng_text = self.dgttranslate.text('B10_okengine')
             event = Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options=options, show_ok=True)
-            Observable.fire(event)
+            text = self._fire_event(event)
             self.engine_restart = True
-            text = self.save_choices()
 
         elif self.state == MenuState.SYS:
             if self.menu_system == System.VERSION:
@@ -940,8 +950,7 @@ class DgtMenu(object):
             text = self.dgttranslate.text('B10_picochess')
             text.rd = ClockIcons.DOT
             text.wait = False
-            DispatchDgt.fire(text)
-            text = self.save_choices()
+            text = self._fire_dispatchdgt(text)
 
         elif self.state == MenuState.SYS_IP:
             # do action!
@@ -958,8 +967,7 @@ class DgtMenu(object):
                 text.wait = True
             else:
                 text = self.dgttranslate.text('B10_noipadr')
-            DispatchDgt.fire(text)
-            text = self.save_choices()
+            text = self._fire_dispatchdgt(text)
 
         elif self.state == MenuState.SYS_SOUND:
             text = self.enter_sys_sound_type_menu()
@@ -968,9 +976,7 @@ class DgtMenu(object):
             # do action!
             self.dgttranslate.set_beep(self.menu_system_sound_beep)
             write_picochess_ini('beep-config', self.dgttranslate.beep_to_config(self.menu_system_sound_beep))
-            text = self.dgttranslate.text('B10_okbeep')
-            DispatchDgt.fire(text)
-            text = self.save_choices()
+            text = self._fire_dispatchdgt(self.dgttranslate.text('B10_okbeep'))
 
         elif self.state == MenuState.SYS_LANG:
             text = self.enter_sys_lang_name_menu()
@@ -982,16 +988,12 @@ class DgtMenu(object):
             language = langs[self.menu_system_language_name]
             self.dgttranslate.set_language(language)
             write_picochess_ini('language', language)
-            text = self.dgttranslate.text('B10_oklang')
-            DispatchDgt.fire(text)
-            text = self.save_choices()
+            text = self._fire_dispatchdgt(self.dgttranslate.text('B10_oklang'))
 
         elif self.state == MenuState.SYS_LOG:
             # do action!
             Observable.fire(Event.EMAIL_LOG())
-            text = self.dgttranslate.text('B10_oklogfile')  # @todo give pos/neg feedback
-            DispatchDgt.fire(text)
-            text = self.save_choices()
+            text = self._fire_dispatchdgt(self.dgttranslate.text('B10_oklogfile'))  # @todo give pos/neg feedback
 
         elif self.state == MenuState.SYS_VOICE:
             if self.menu_system_voice == Voice.USER:
@@ -1021,9 +1023,7 @@ class DgtMenu(object):
                     config.write()
                 event = Event.SET_VOICE(type=self.menu_system_voice_type, lang='en', speaker='mute', speed=2)
                 Observable.fire(event)
-                text = self.dgttranslate.text('B10_okvoice')
-                DispatchDgt.fire(text)
-                text = self.save_choices()
+                text = self._fire_dispatchdgt(self.dgttranslate.text('B10_okvoice'))
 
         elif self.state == MenuState.SYS_VOICE_TYPE_MUTE_LANG:
             text = self.enter_sys_voice_type_mute_lang_speak_menu()
@@ -1040,9 +1040,7 @@ class DgtMenu(object):
             event = Event.SET_VOICE(type=self.menu_system_voice_type, lang=vkey, speaker=skey,
                                     speed=self.menu_system_voice_factor)
             Observable.fire(event)
-            text = self.dgttranslate.text('B10_okvoice')
-            DispatchDgt.fire(text)
-            text = self.save_choices()
+            text = self._fire_dispatchdgt(self.dgttranslate.text('B10_okvoice'))
 
         elif self.state == MenuState.SYS_VOICE_SPEED:
             self.menu_system_voice_type = Voice.SPEED
@@ -1057,9 +1055,7 @@ class DgtMenu(object):
             event = Event.SET_VOICE(type=self.menu_system_voice_type, lang=vkey, speaker=skey,
                                     speed=self.menu_system_voice_factor)
             Observable.fire(event)
-            text = self.dgttranslate.text('B10_okspeed')
-            DispatchDgt.fire(text)
-            text = self.save_choices()
+            text = self._fire_dispatchdgt(self.dgttranslate.text('B10_okspeed'))
 
         elif self.state == MenuState.SYS_DISP:
             if self.menu_system_display == Display.PONDER:
@@ -1080,9 +1076,7 @@ class DgtMenu(object):
             elif 'disable-confirm-message' in config:
                 del config['disable-confirm-message']
             config.write()
-            text = self.dgttranslate.text('B10_okconfirm')
-            DispatchDgt.fire(text)
-            text = self.save_choices()
+            text = self._fire_dispatchdgt(self.dgttranslate.text('B10_okconfirm'))
 
         elif self.state == MenuState.SYS_DISP_PONDER:
             text = self.enter_sys_disp_ponder_interval_menu()
@@ -1090,9 +1084,7 @@ class DgtMenu(object):
         elif self.state == MenuState.SYS_DISP_PONDER_INTERVAL:
             # do action!
             write_picochess_ini('ponder-interval', self.menu_system_display_ponderinterval)
-            text = self.dgttranslate.text('B10_okponder')
-            DispatchDgt.fire(text)
-            text = self.save_choices()
+            text = self._fire_dispatchdgt(self.dgttranslate.text('B10_okponder'))
 
         elif self.state == MenuState.SYS_DISP_CAPITAL:
             text = self.enter_sys_disp_capital_yesno_menu()
@@ -1105,15 +1097,11 @@ class DgtMenu(object):
             elif 'capital-letters' in config:
                 del config['capital-letters']
             config.write()
-            text = self.dgttranslate.text('B10_okcapital')
-            DispatchDgt.fire(text)
-            text = self.save_choices()
+            text = self._fire_dispatchdgt(self.dgttranslate.text('B10_okcapital'))
 
         elif self.state == MenuState.SYS_BATTERY:
             # do action!
-            text = self.dgttranslate.text('B10_bat_percent', self.battery)
-            DispatchDgt.fire(text)
-            text = self.save_choices()
+            text = self._fire_dispatchdgt(self.dgttranslate.text('B10_bat_percent', self.battery))
 
         else:  # Default
             pass
@@ -1199,8 +1187,7 @@ class DgtMenu(object):
 
         elif self.state == MenuState.BOOK_NAME:
             self.menu_book = (self.menu_book - 1) % len(self.all_books)
-            text = self.all_books[self.menu_book]['text']
-            text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
+            text = self._get_current_book_name()
 
         elif self.state == MenuState.ENG:
             self.state = MenuState.BOOK
@@ -1209,8 +1196,7 @@ class DgtMenu(object):
 
         elif self.state == MenuState.ENG_NAME:
             self.menu_engine_name = (self.menu_engine_name - 1) % len(self.installed_engines)
-            text = self.installed_engines[self.menu_engine_name]['text']
-            text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
+            text = self._get_current_engine_name()
 
         elif self.state == MenuState.ENG_NAME_LEVEL:
             level_dict = self.installed_engines[self.menu_engine_name]['level_dict']
@@ -1285,12 +1271,7 @@ class DgtMenu(object):
             vkey = self.voices_conf.keys()[self.menu_system_voice_lang]
             speakers = self.voices_conf[vkey]
             self.menu_system_voice_speak = (self.menu_system_voice_speak - 1) % len(speakers)
-            speaker = speakers[list(speakers)[self.menu_system_voice_speak]]
-            text = Dgt.DISPLAY_TEXT(l=speaker['large'], m=speaker['medium'], s=speaker['small'])
-            text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
-            text.wait = False
-            text.maxtime = 0
-            text.devs = {'ser', 'i2c', 'web'}
+            text = self._get_current_speaker(speakers)
 
         elif self.state == MenuState.SYS_VOICE_SPEED:
             self.state = MenuState.SYS_VOICE_USER
@@ -1426,8 +1407,7 @@ class DgtMenu(object):
 
         elif self.state == MenuState.BOOK_NAME:
             self.menu_book = (self.menu_book + 1) % len(self.all_books)
-            text = self.all_books[self.menu_book]['text']
-            text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
+            text = self._get_current_book_name()
 
         elif self.state == MenuState.ENG:
             self.state = MenuState.SYS
@@ -1436,8 +1416,7 @@ class DgtMenu(object):
 
         elif self.state == MenuState.ENG_NAME:
             self.menu_engine_name = (self.menu_engine_name + 1) % len(self.installed_engines)
-            text = self.installed_engines[self.menu_engine_name]['text']
-            text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
+            text = self._get_current_engine_name()
 
         elif self.state == MenuState.ENG_NAME_LEVEL:
             level_dict = self.installed_engines[self.menu_engine_name]['level_dict']
@@ -1512,12 +1491,7 @@ class DgtMenu(object):
             vkey = self.voices_conf.keys()[self.menu_system_voice_lang]
             speakers = self.voices_conf[vkey]
             self.menu_system_voice_speak = (self.menu_system_voice_speak + 1) % len(speakers)
-            speaker = speakers[list(speakers)[self.menu_system_voice_speak]]
-            text = Dgt.DISPLAY_TEXT(l=speaker['large'], m=speaker['medium'], s=speaker['small'])
-            text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
-            text.wait = False
-            text.maxtime = 0
-            text.devs = {'ser', 'i2c', 'web'}
+            text = self._get_current_speaker(speakers)
 
         elif self.state == MenuState.SYS_VOICE_SPEED:
             self.state = MenuState.SYS_VOICE_COMP
