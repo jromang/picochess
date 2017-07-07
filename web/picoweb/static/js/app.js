@@ -59,16 +59,16 @@ gameHistory.result = '';
 gameHistory.variations = [];
 
 var setupBoardFen = START_FEN;
-var DataTableFen = START_FEN;
-var ChessGameType = 0; // 0=Standard ; 1=Chess960
+var dataTableFen = START_FEN;
+var chessGameType = 0; // 0=Standard ; 1=Chess960
 
 
-function remove_highlights() {
+function removeHighlights() {
     chessground_1.setShapes([]);
 }
 
 function highlightBoard(ucimove, play) {
-    //remove_highlights();
+    //removeHighlights();
     var move = ucimove.match(/.{2}/g);
     var brush = 'green';
     if( play === 'computer') {
@@ -81,7 +81,18 @@ function highlightBoard(ucimove, play) {
     chessground_1.setShapes([shapes]);
 }
 
-var BookDataTable = $('#BookTable').DataTable( {
+function figurinizeMove(move) {
+    if (!move) return;
+    move = move.replace("N", "&#9816;");
+    move = move.replace("B", "&#9815;");
+    move = move.replace("R", "&#9814;");
+    move = move.replace("K", "&#9812;");
+    move = move.replace("Q", "&#9813;");
+    move = move.replace("X", "&#9888;"); // error code
+    return move;
+}
+
+var bookDataTable = $('#BookTable').DataTable( {
     'processing': true,
     'paging': false,
     'info': false,
@@ -112,13 +123,13 @@ var BookDataTable = $('#BookTable').DataTable( {
         'dataType': 'jsonp',
         'data': function ( d ) {
             d.action = 'get_book_moves';
-            d.fen = DataTableFen;
+            d.fen = dataTableFen;
             d.db = '#ref';
         }
     },
     'columns': [
         {data: null},
-        {data: 'move', render: function ( data, type, row ) { return figurinize_move(data) } },
+        {data: 'move', render: function ( data, type, row ) { return figurinizeMove(data); } },
         {data: 'freq', render: $.fn.dataTable.render.intlNumber()},
         {data: 'pct', render: $.fn.dataTable.render.number( ',', '.', 2, '', '%' )},
         {data: 'draws', render: $.fn.dataTable.render.intlNumber()},
@@ -126,20 +137,20 @@ var BookDataTable = $('#BookTable').DataTable( {
         {data: 'losses', render: $.fn.dataTable.render.intlNumber()}
     ]
 });
-BookDataTable.on('select', function( e, dt, type, indexes ) {
+bookDataTable.on('select', function(e, dt, type, indexes ) {
     if( type === 'row') {
-        var data = BookDataTable.rows(indexes).data().pluck('move')[0];
-        stop_analysis();
-        var tmp_game = create_game_pointer();
-        var move = tmp_game.move(data);
-        updateCurrentPosition(move, tmp_game);
+        var data = bookDataTable.rows(indexes).data().pluck('move')[0];
+        stopAnalysis();
+        var tmpGame = createGamePointer();
+        var move = tmpGame.move(data);
+        updateCurrentPosition(move, tmpGame);
         updateChessGround();
         updateStatus();
-        remove_highlights();
+        removeHighlights();
     }
 });
 
-var GameDataTable = $('#GameTable').DataTable( {
+var gameDataTable = $('#GameTable').DataTable( {
     'processing': true,
     'serverSide': true,
     'paging': true,
@@ -175,7 +186,7 @@ var GameDataTable = $('#GameTable').DataTable( {
         'dataType': 'jsonp',
         'data': function ( d ) {
             d.action = 'get_games';
-            d.fen = DataTableFen;
+            d.fen = dataTableFen;
             d.db = '#ref';
         },
         'error': function (xhr, error, thrown) {
@@ -187,10 +198,10 @@ var GameDataTable = $('#GameTable').DataTable( {
         searchInput.unbind();
         searchInput.bind('keyup', function(e) {
             if(this.value.length > 2) {
-                GameDataTable.search( this.value ).draw();
+                gameDataTable.search( this.value ).draw();
             }
             if(this.value === '') {
-                GameDataTable.search('').draw();
+                gameDataTable.search('').draw();
             }
         });
     },
@@ -208,7 +219,7 @@ var GameDataTable = $('#GameTable').DataTable( {
         {data: 'eco'}
     ]
 });
-GameDataTable.on('xhr.dt', function( e, settings, json, xhr) {
+gameDataTable.on('xhr.dt', function(e, settings, json, xhr) {
     if(json) {
         json['recordsTotal'] = json['totalRecordCount'];
         json['recordsFiltered'] = json['queryRecordCount'];
@@ -216,9 +227,9 @@ GameDataTable.on('xhr.dt', function( e, settings, json, xhr) {
         delete json['queryRecordCount'];
     }
 });
-GameDataTable.on('select', function( e, dt, type, indexes ) {
+gameDataTable.on('select', function(e, dt, type, indexes ) {
     if( type === 'row') {
-        var data = GameDataTable.rows(indexes).data().pluck('id')[0];
+        var data = gameDataTable.rows(indexes).data().pluck('id')[0];
         $.ajax({
             dataType: 'jsonp',
             url: BACKEND_SERVER_PREFIX + '/query?callback=game_callback',
@@ -230,40 +241,29 @@ GameDataTable.on('select', function( e, dt, type, indexes ) {
         }).done(function(data) {
             loadGame(data['pgn']);
             updateStatus();
-            remove_highlights();
+            removeHighlights();
         });
     }
 });
 
 // do not pick up pieces if the game is over
 // only pick up pieces for the side to move
-function create_game_pointer() {
-    var tmp_game;
+function createGamePointer() {
+    var tmpGame;
 
     if (currentPosition && currentPosition.fen) {
-        tmp_game = new Chess(currentPosition.fen, ChessGameType);
+        tmpGame = new Chess(currentPosition.fen, chessGameType);
     }
     else {
-        tmp_game = new Chess(setupBoardFen, ChessGameType);
+        tmpGame = new Chess(setupBoardFen, chessGameType);
     }
-    return tmp_game;
+    return tmpGame;
 }
 
-function strip_fen(fen) {
-    var stripped_fen = fen.replace(/\//g, "");
-    stripped_fen = stripped_fen.replace(/ /g, "");
+function stripFen(fen) {
+    var stripped_fen = fen.replace(/\//g, '');
+    stripped_fen = stripped_fen.replace(/ /g, '');
     return stripped_fen;
-}
-
-function figurinize_move(move) {
-    if (!move) return;
-    move = move.replace("N", "&#9816;");
-    move = move.replace("B", "&#9815;");
-    move = move.replace("R", "&#9814;");
-    move = move.replace("K", "&#9812;");
-    move = move.replace("Q", "&#9813;");
-    move = move.replace("X", "&#9888;"); // error code
-    return move;
 }
 
 String.prototype.trim = function() {
@@ -354,17 +354,17 @@ function WebExporter(columns) {
 
     this.put_move = function(board, m) {
         var old_fen = board.fen();
-        var tmp_board = new Chess(old_fen, ChessGameType);
+        var tmp_board = new Chess(old_fen, chessGameType);
         var out_move = tmp_board.move(m);
         var fen = tmp_board.fen();
-        var stripped_fen = strip_fen(fen);
+        var stripped_fen = stripFen(fen);
         if (!out_move) {
             console.warn('put_move error');
             console.log(tmp_board.ascii());
             console.log(m);
             out_move = {'san': 'X' + m.from + m.to};
         }
-        this.write_token('<span class="gameMove' + (board.fullmove_number) + '"><a href="#" class="fen" data-fen="' + fen + '" id="' + stripped_fen + '"> ' + figurinize_move(out_move.san) + ' </a></span>');
+        this.write_token('<span class="gameMove' + (board.fullmove_number) + '"><a href="#" class="fen" data-fen="' + fen + '" id="' + stripped_fen + '"> ' + figurinizeMove(out_move.san) + ' </a></span>');
     };
 
     this.put_result = function(result) {
@@ -466,7 +466,7 @@ function PgnExporter(columns) {
     };
 
     this.put_move = function(board, m) {
-        var tmp_board = new Chess(board.fen(), ChessGameType);
+        var tmp_board = new Chess(board.fen(), chessGameType);
         var out_move = tmp_board.move(m);
         if (!out_move) {
             console.warn('put_move error');
@@ -495,9 +495,9 @@ function PgnExporter(columns) {
     };
 }
 
-function export_game(root_node, exporter, include_comments, include_variations, _board, _after_variation) {
+function exportGame(root_node, exporter, include_comments, include_variations, _board, _after_variation) {
     if (_board === undefined) {
-        _board = new Chess(root_node.fen, ChessGameType);
+        _board = new Chess(root_node.fen, chessGameType);
     }
 
     // append fullmove number
@@ -540,7 +540,7 @@ function export_game(root_node, exporter, include_comments, include_variations, 
             }
             // Recursively append the next moves.
             _board.move(variation.move);
-            export_game(variation, exporter, include_comments, include_variations, _board, false);
+            exportGame(variation, exporter, include_comments, include_variations, _board, false);
             _board.undo();
 
             // End variation.
@@ -555,7 +555,7 @@ function export_game(root_node, exporter, include_comments, include_variations, 
         // Recursively append the next moves.
         _board.move(main_variation.move);
         _after_variation = (include_variations && (root_node.variations.length > 1));
-        export_game(main_variation, exporter, include_comments, include_variations, _board, _after_variation);
+        exportGame(main_variation, exporter, include_comments, include_variations, _board, _after_variation);
         _board.undo();
     }
 }
@@ -566,21 +566,21 @@ function writeVariationTree(dom, gameMoves, gameHistoryEl) {
 
 // update the board position after the piece snap
 // for castling, en passant, pawn promotion
-function updateCurrentPosition(move, tmp_game) {
-    var found_move = false;
+function updateCurrentPosition(move, tmpGame) {
+    var foundMove = false;
     if (currentPosition && currentPosition.variations) {
         for (var i = 0; i < currentPosition.variations.length; i++) {
             if (move.san === currentPosition.variations[i].move.san) {
                 currentPosition = currentPosition.variations[i];
-                found_move = true;
+                foundMove = true;
             }
         }
     }
-    if (!found_move) {
-        var __ret = addNewMove({'move': move}, currentPosition, tmp_game.fen());
+    if (!foundMove) {
+        var __ret = addNewMove({'move': move}, currentPosition, tmpGame.fen());
         currentPosition = __ret.node;
         var exporter = new WebExporter();
-        export_game(gameHistory, exporter, true, true, undefined, false);
+        exportGame(gameHistory, exporter, true, true, undefined, false);
         writeVariationTree(pgnEl, exporter.toString(), gameHistory);
     }
 }
@@ -590,12 +590,12 @@ var updateStatus = function() {
     $('.fen').unbind('click', goToGameFen).one('click', goToGameFen);
 
     var moveColor = 'White';
-    var tmp_game = create_game_pointer();
-    var fen = tmp_game.fen();
+    var tmpGame = createGamePointer();
+    var fen = tmpGame.fen();
 
-    var stripped_fen = strip_fen(fen);
+    var strippedFen = stripFen(fen);
 
-    if (tmp_game.turn() === 'b') {
+    if (tmpGame.turn() === 'b') {
         moveColor = 'Black';
         $('#sidetomove').html("<i class=\"fa fa-square fa-lg \"></i>");
     }
@@ -604,18 +604,18 @@ var updateStatus = function() {
     }
 
     // checkmate?
-    if (tmp_game.in_checkmate() === true) {
+    if (tmpGame.in_checkmate() === true) {
         status = moveColor + ' is in checkmate';
     }
     // draw?
-    else if (tmp_game.in_draw() === true) {
+    else if (tmpGame.in_draw() === true) {
         status = 'Drawn position';
     }
     // game still on
     else {
         status = moveColor + ' to move';
         // check?
-        if (tmp_game.in_check() === true) {
+        if (tmpGame.in_check() === true) {
             status += ' (in check)';
         }
     }
@@ -625,18 +625,18 @@ var updateStatus = function() {
         analyze(true);
     }
 
-    DataTableFen = fen;
-    BookDataTable.ajax.reload();
-    GameDataTable.ajax.reload();
+    dataTableFen = fen;
+    bookDataTable.ajax.reload();
+    gameDataTable.ajax.reload();
 
-    $(".highlight").removeClass('highlight');
+    //$(".highlight").removeClass('highlight');
 
-    if ($('#' + stripped_fen).position()) {
+    if ($('#' + strippedFen).position()) {
         pgnEl.scrollTop(0);
-        var y_position = $('#' + stripped_fen).position().top;
+        var y_position = $('#' + strippedFen).position().top;
         pgnEl.scrollTop(y_position);
     }
-    $('#' + stripped_fen).addClass('highlight');
+    //$('#' + stripped_fen).addClass('highlight');
 };
 
 function toDests(chess) {
@@ -654,24 +654,24 @@ function toColor(chess) {
 }
 
 var onSnapEnd = function(source, target) {
-    stop_analysis();
-    var tmp_game = create_game_pointer();
+    stopAnalysis();
+    var tmpGame = createGamePointer();
 
     if(!currentPosition) {
         currentPosition = {};
-        currentPosition.fen = tmp_game.fen();
+        currentPosition.fen = tmpGame.fen();
         gameHistory = currentPosition;
         gameHistory.gameHeader = '<h4>Player (-) vs Player (-)</h4><h5>Board game</h5>';
         gameHistory.result = '*';
     }
 
-    var move = tmp_game.move({
+    var move = tmpGame.move({
         from: source,
         to: target,
         promotion: 'q' // NOTE: always promote to a pawn for example simplicity
     });
 
-    updateCurrentPosition(move, tmp_game);
+    updateCurrentPosition(move, tmpGame);
     updateChessGround();
     updateStatus();
     $.post('/channel', {action: 'move', fen: currentPosition.fen, source: source, target: target}, function(data) {
@@ -679,14 +679,14 @@ var onSnapEnd = function(source, target) {
 };
 
 function updateChessGround() {
-    var tmp_game = create_game_pointer();
+    var tmpGame = createGamePointer();
 
     chessground_1.set({
         fen: currentPosition.fen,
-        turnColor: toColor(tmp_game),
+        turnColor: toColor(tmpGame),
         movable: {
-            color: toColor(tmp_game),
-            dests: toDests(tmp_game)
+            color: toColor(tmpGame),
+            dests: toDests(tmpGame)
         }
     });
 }
@@ -789,23 +789,23 @@ function loadGame(pgn_lines) {
         }
     }
 
-    var tmp_game;
+    var tmpGame;
     if ('FEN' in game_headers && 'SetUp' in game_headers) {
         if ('Variant' in game_headers && 'Chess960' === game_headers['Variant']) {
-            ChessGameType = 1; // values from chess960.js
+            chessGameType = 1; // values from chess960.js
         } else {
-            ChessGameType = 0;
+            chessGameType = 0;
         }
-        tmp_game = new Chess(game_headers['FEN'], ChessGameType);
+        tmpGame = new Chess(game_headers['FEN'], chessGameType);
         setupBoardFen = game_headers['FEN'];
     }
     else {
-        tmp_game = new Chess();
+        tmpGame = new Chess();
         setupBoardFen = START_FEN;
-        ChessGameType = 0;
+        chessGameType = 0;
     }
 
-    var board_stack = [tmp_game];
+    var board_stack = [tmpGame];
     var variation_stack = [current_position];
     var last_board_stack_index;
     var last_variation_stack_index;
@@ -895,7 +895,7 @@ function loadGame(pgn_lines) {
                 console.log(preparsed_move);
                 console.log('Fen: ' + board_stack[last_board_stack_index].fen());
                 console.log('faulty line: ' + line);
-                console.log('Chess960: ' + ChessGameType)
+                console.log('Chess960: ' + chessGameType)
             }
 
             var props = {};
@@ -912,7 +912,7 @@ function loadGame(pgn_lines) {
             variation_stack[last_variation_stack_index] = __ret.node;
         }
     }
-    fenHash['last'] = fenHash[tmp_game.fen()];
+    fenHash['last'] = fenHash[tmpGame.fen()];
 
     if (curr_fen === undefined) {
         currentPosition = fenHash['first'];
@@ -924,9 +924,9 @@ function loadGame(pgn_lines) {
     $('.fen').unbind('click', goToGameFen).one('click', goToGameFen);
 }
 
-function get_full_game() {
-    var game_header = getPgnGameHeader(gameHistory.originalHeader);
-    if (game_header.length <= 1) {
+function getFullGame() {
+    var gameHeader = getPgnGameHeader(gameHistory.originalHeader);
+    if (gameHeader.length <= 1) {
         gameHistory.originalHeader = {
             'White': '*',
             'Black': '*',
@@ -938,13 +938,13 @@ function get_full_game() {
             'BlackElo' : '-',
             'WhiteElo' : '-'
         };
-        game_header = getPgnGameHeader(gameHistory.originalHeader);
+        gameHeader = getPgnGameHeader(gameHistory.originalHeader);
     }
 
     var exporter = new PgnExporter();
-    export_game(gameHistory, exporter, true, true, undefined, false);
-    var exporter_content = exporter.toString();
-    return game_header + exporter_content;
+    exportGame(gameHistory, exporter, true, true, undefined, false);
+    var exporterContent = exporter.toString();
+    return gameHeader + exporterContent;
 }
 
 function getPgnGameHeader(h) {
@@ -968,7 +968,7 @@ function getWebGameHeader(h) {
 }
 
 function download() {
-    var content = get_full_game();
+    var content = getFullGame();
     var dl = document.createElement('a');
     dl.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
     dl.setAttribute('download', 'game.pgn');
@@ -977,7 +977,7 @@ function download() {
 }
 
 function newBoard(fen) {
-    stop_analysis();
+    stopAnalysis();
 
     currentPosition = {};
     currentPosition.fen = fen;
@@ -994,7 +994,7 @@ function newBoard(fen) {
 
 function broadcastPosition() {
     if (currentPosition) {
-        var content = get_full_game();
+        var content = getFullGame();
         $.post('/channel', {action: 'broadcast', fen: currentPosition.fen, pgn: content}, function (data) {
         });
     }
@@ -1049,8 +1049,8 @@ function sendConsoleCommand() {
 }
 
 function getFenToConsole() {
-    var tmp_game = create_game_pointer();
-    $('#inputConsole').val(tmp_game.fen());
+    var tmpGame = createGamePointer();
+    $('#inputConsole').val(tmpGame.fen());
 }
 
 function toggleConsoleButton() {
@@ -1059,7 +1059,7 @@ function toggleConsoleButton() {
 }
 
 function goToPosition(fen) {
-    stop_analysis();
+    stopAnalysis();
     currentPosition = fenHash[fen];
     if (!currentPosition) {
         return false;
@@ -1072,18 +1072,18 @@ function goToPosition(fen) {
 function goToGameFen() {
     var fen = $(this).attr('data-fen');
     goToPosition(fen);
-    remove_highlights();
+    removeHighlights();
 }
 
 function goToStart() {
-    stop_analysis();
+    stopAnalysis();
     currentPosition = gameHistory;
     updateChessGround();
     updateStatus();
 }
 
 function goToEnd() {
-    stop_analysis();
+    stopAnalysis();
     if (fenHash.last) {
         currentPosition = fenHash.last;
         updateChessGround();
@@ -1092,7 +1092,7 @@ function goToEnd() {
 }
 
 function goForward() {
-    stop_analysis();
+    stopAnalysis();
     if (currentPosition && currentPosition.variations[0]) {
         currentPosition = currentPosition.variations[0];
         if (currentPosition) {
@@ -1103,7 +1103,7 @@ function goForward() {
 }
 
 function goBack() {
-    stop_analysis();
+    stopAnalysis();
     if (currentPosition && currentPosition.previous) {
         currentPosition = currentPosition.previous;
         updateChessGround();
@@ -1120,7 +1120,7 @@ function formatEngineOutput(line) {
         var analysis_game = new Chess();
         var start_move_num = 1;
         if (currentPosition && currentPosition.fen) {
-            analysis_game.load(currentPosition.fen, ChessGameType);
+            analysis_game.load(currentPosition.fen, chessGameType);
             start_move_num = getCountPrevMoves(currentPosition) + 1;
         }
 
@@ -1196,7 +1196,7 @@ function formatEngineOutput(line) {
                 output += Math.floor((start_move_num + i + 1) / 2) + ". ";
             }
             if (history[i]) {
-                output += figurinize_move(history[i]) + " ";
+                output += figurinizeMove(history[i]) + " ";
             }
         }
         output += '</p></div></div><div class="list-group-separator"></div>';
@@ -1209,7 +1209,7 @@ function formatEngineOutput(line) {
     }
 }
 
-function multipv_increase() {
+function multiPvIncrease() {
     if (window.stockfish) {
         window.multipv += 1;
 
@@ -1229,13 +1229,13 @@ function multipv_increase() {
 
         if (!window.StockfishModule) {
             // Need to restart web worker as its not Chrome
-            stop_analysis();
+            stopAnalysis();
             analyze(true);
         }
     }
 }
 
-function multipv_decrease() {
+function multiPvDecrease() {
     if (window.multipv > 1) {
         $('#pv_' + window.multipv).remove();
 
@@ -1253,25 +1253,25 @@ function multipv_decrease() {
 
         if (!window.StockfishModule) {
             // Need to restart web worker as its not Chrome
-            stop_analysis();
+            stopAnalysis();
             analyze(true);
         }
     }
 }
 
-function import_pv(e) {
-    stop_analysis();
-    var tmp_game = create_game_pointer();
+function importPv(e) {
+    stopAnalysis();
+    var tmpGame = createGamePointer();
     for (var i = 0; i < window.engine_lines[$(this).context.id].line.length; ++i) {
         var text_move = window.engine_lines[$(this).context.id].line[i];
-        var move = tmp_game.move(text_move);
-        updateCurrentPosition(move, tmp_game);
+        var move = tmpGame.move(text_move);
+        updateCurrentPosition(move, tmpGame);
     }
     updateChessGround();
     updateStatus();
 }
 
-function analyze_pressed() {
+function analyzePressed() {
     analyze(false);
 }
 
@@ -1284,7 +1284,7 @@ function stockfishPNACLModuleDidLoad() {
 function handleCrash(event) {
     console.warn('Nacl Module crash handler method');
     console.warn(event);
-    load_nacl_stockfish();
+    loadNaclStockfish();
 }
 
 function handleMessage(event) {
@@ -1293,17 +1293,17 @@ function handleMessage(event) {
         $('#pv_' + output.pv_index).html(output.line);
     }
     $('#engineMultiPVStatus').html(window.multipv + " line(s)");
-    $('.importPVBtn').on('click', import_pv);
+    $('.importPVBtn').on('click', importPv);
 }
 
-function load_nacl_stockfish() {
+function loadNaclStockfish() {
     var listener = document.getElementById('listener');
     listener.addEventListener('load', stockfishPNACLModuleDidLoad, true);
     listener.addEventListener('message', handleMessage, true);
     listener.addEventListener('crash', handleCrash, true);
 }
 
-function stop_analysis() {
+function stopAnalysis() {
     if (!window.StockfishModule) {
         if (window.stockfish) {
             window.stockfish.terminate();
@@ -1354,7 +1354,7 @@ function analyze(position_update) {
         }
         else {
             $('#AnalyzeText').text('Analyze');
-            stop_analysis();
+            stopAnalysis();
             window.analysis = false;
             $('#engineStatus').html('');
             return;
@@ -1425,16 +1425,16 @@ function setTitle(data) {
 function setHeaders(data) {
     if ('FEN' in data && 'SetUp' in data) {
         if ('Variant' in data && 'Chess960' === data['Variant']) {
-            ChessGameType = 1; // values from chess960.js
+            chessGameType = 1; // values from chess960.js
         } else {
-            ChessGameType = 0;
+            chessGameType = 0;
         }
     }
     gameHistory.gameHeader = getWebGameHeader(data);
     gameHistory.result = data.Result;
     gameHistory.originalHeader = data;
     var exporter = new WebExporter();
-    export_game(gameHistory, exporter, true, true, undefined, false);
+    exportGame(gameHistory, exporter, true, true, undefined, false);
     writeVariationTree(pgnEl, exporter.toString(), gameHistory);
 }
 
@@ -1472,10 +1472,10 @@ $('#DgtSyncBtn').on('click', goToDGTFen);
 $('#downloadBtn').on('click', download);
 $('#broadcastBtn').on('click', broadcastPosition);
 
-$('#analyzeBtn').on('click', analyze_pressed);
+$('#analyzeBtn').on('click', analyzePressed);
 
-$('#analyzePlus').on('click', multipv_increase);
-$('#analyzeMinus').on('click', multipv_decrease);
+$('#analyzePlus').on('click', multiPvIncrease);
+$('#analyzeMinus').on('click', multiPvDecrease);
 
 $('#ClockBtn0').on('click', clockButton0);
 $('#ClockBtn1').on('click', clockButton1);
@@ -1540,7 +1540,7 @@ $(function() {
                     updateDGTPosition(data);
                     updateStatus();
                     if(data.play === 'reload') {
-                        remove_highlights();
+                        removeHighlights();
                     }
                     if(data.play === 'user') {
                         highlightBoard(data.move, 'user');
@@ -1565,7 +1565,7 @@ $(function() {
                     highlightBoard(data.move, 'computer');
                     break;
                 case 'Clear':
-                    remove_highlights();
+                    removeHighlights();
                     break;
                 case 'Header':
                     setHeaders(data['headers']);
@@ -1587,7 +1587,7 @@ $(function() {
 
     if (navigator.mimeTypes['application/x-pnacl'] !== undefined) {
         $('#analyzeBtn').prop('disabled', true);
-        load_nacl_stockfish();
+        loadNaclStockfish();
     }
 
     $.fn.dataTable.ext.errMode = 'throw';
