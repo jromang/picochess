@@ -360,6 +360,8 @@ function WebExporter(columns) {
         var stripped_fen = stripFen(fen);
         if (!out_move) {
             console.warn('put_move error');
+            console.log(board.ascii());
+            console.log(board.moves());
             console.log(tmp_board.ascii());
             console.log(m);
             out_move = {'san': 'X' + m.from + m.to};
@@ -670,7 +672,7 @@ var onSnapEnd = function(source, target) {
         to: target,
         promotion: 'q' // NOTE: always promote to a pawn for example simplicity
     });
-
+    console.log('SE=', move);
     updateCurrentPosition(move, tmpGame);
     updateChessGround();
     updateStatus();

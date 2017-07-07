@@ -1218,6 +1218,7 @@ var Chess = function (fen, gtype) {
     function move_from_san(move, sloppy) {
         // strip off any move decorations: e.g Nf3+?!
         var clean_move = stripped_san(move);
+        console.log('CM=', clean_move);
 
         // if we're using the sloppy parser run a regex to grab piece, to, and from
         // this should parse invalid SAN like: Pe2-e4, Rc1c4, Qf3xf7
@@ -1702,9 +1703,10 @@ var Chess = function (fen, gtype) {
             if (typeof move === 'string') {
                 move_obj = move_from_san(move, sloppy);
             } else if (typeof move === 'object') {
-                if (game_type !== GAME_STANDARD && 'flags' in move &&
+                if (/*game_type !== GAME_STANDARD &&*/ 'flags' in move &&
                     (move.flags === FLAGS.KSIDE_CASTLE || move.flags === FLAGS.QSIDE_CASTLE)) {
                     move_obj = move_from_san(move.san, sloppy);  // 960 & castle => use SAN - see: Kd8, Rb8 and O-O-O
+                    console.log('MO=', move_obj, move.san)
                 } else {
                     var moves = generate_moves();
 
