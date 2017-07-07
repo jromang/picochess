@@ -363,9 +363,10 @@ class WebDisplay(DisplayMsg, threading.Thread):
 
     def _create_headers(self):
         if 'headers' not in self.shared:
-            pgn_game = pgn.Game()
-            self._build_game_header(pgn_game)
-            self.shared['headers'] = pgn_game.headers
+            self.shared['headers'] = {}
+            # pgn_game = pgn.Game()
+            # self._build_game_header(pgn_game)
+            # self.shared['headers'] = pgn_game.headers
 
     def _build_game_header(self, pgn_game: chess.pgn.Game):
         pgn_game.headers['Result'] = '*'
@@ -417,7 +418,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
             self._create_headers()
             pgn_game = pgn.Game()
             self._build_game_header(pgn_game)
-            pgn_game.headers.update(self.shared['headers'])
+            self.shared['headers'].update(pgn_game.headers)
 
         def _send_headers():
             EventHandler.write_to_clients({'event': 'Header', 'headers': self.shared['headers']})
@@ -439,7 +440,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
             result = {'pgn': pgn_str, 'fen': fen, 'event': 'Game', 'move': '0000', 'play': 'newgame'}
             self.shared['last_dgt_move_msg'] = result
             EventHandler.write_to_clients(result)
-            _build_headers()
+            # _build_headers()
             _send_headers()
 
         elif isinstance(message, Message.IP_INFO):

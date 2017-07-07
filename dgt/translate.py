@@ -383,7 +383,7 @@ class DgtTranslate(object):
         if text_id == 'score':
             text_s = 'no scr' if msg is None else str(msg).rjust(6)
             text_m = 'no score' if msg is None else str(msg).rjust(8)
-            entxt = Dgt.DISPLAY_TEXT(l=text_m, m=text_m, s=text_s)
+            entxt = Dgt.DISPLAY_TEXT(l=text_m.rjust(11), m=text_m, s=text_s)
             detxt = entxt
             nltxt = entxt
             frtxt = entxt

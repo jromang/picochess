@@ -82,13 +82,13 @@ function highlightBoard(ucimove, play) {
 }
 
 function figurinizeMove(move) {
-    if (!move) return;
-    move = move.replace("N", "&#9816;");
-    move = move.replace("B", "&#9815;");
-    move = move.replace("R", "&#9814;");
-    move = move.replace("K", "&#9812;");
-    move = move.replace("Q", "&#9813;");
-    move = move.replace("X", "&#9888;"); // error code
+    if (!move) { return; }
+    move = move.replace('N', '&#9816;');
+    move = move.replace('B', '&#9815;');
+    move = move.replace('R', '&#9814;');
+    move = move.replace('K', '&#9812;');
+    move = move.replace('Q', '&#9813;');
+    move = move.replace('X', '&#9888;'); // error code
     return move;
 }
 

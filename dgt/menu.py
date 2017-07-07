@@ -647,6 +647,11 @@ class DgtMenu(object):
         DispatchDgt.fire(text)
         return self.save_choices()
 
+    def _fire_timectrl(self, timectrl: TimeControl):
+        time_text = self.dgttranslate.text('B10_oktime')
+        event = Event.SET_TIME_CONTROL(tc_init=timectrl.get_parameters(), time_text=time_text, show_ok=True)
+        return self._fire_event(event)
+
     def main_up(self):
         """Change the menu state after UP action."""
         text = self.dgttranslate.text('Y00_errormenu')
@@ -862,30 +867,21 @@ class DgtMenu(object):
 
         elif self.state == MenuState.TIME_BLITZ_CTRL:
             # do action!
-            time_text = self.dgttranslate.text('B10_oktime')
-            timectrl = self.tc_blitz_map[list(self.tc_blitz_map)[self.menu_time_blitz]]  # type: TimeControl
-            event = Event.SET_TIME_CONTROL(tc_init=timectrl.get_parameters(), time_text=time_text, show_ok=True)
-            text = self._fire_event(event)
+            text = self._fire_timectrl(self.tc_blitz_map[list(self.tc_blitz_map)[self.menu_time_blitz]])
 
         elif self.state == MenuState.TIME_FISCH:
             text = self.enter_time_fisch_ctrl_menu()
 
         elif self.state == MenuState.TIME_FISCH_CTRL:
             # do action!
-            time_text = self.dgttranslate.text('B10_oktime')
-            timectrl = self.tc_fisch_map[list(self.tc_fisch_map)[self.menu_time_fisch]]  # type: TimeControl
-            event = Event.SET_TIME_CONTROL(tc_init=timectrl.get_parameters(), time_text=time_text, show_ok=True)
-            text = self._fire_event(event)
+            text = self._fire_timectrl(self.tc_fisch_map[list(self.tc_fisch_map)[self.menu_time_fisch]])
 
         elif self.state == MenuState.TIME_FIXED:
             text = self.enter_time_fixed_ctrl_menu()
 
         elif self.state == MenuState.TIME_FIXED_CTRL:
             # do action!
-            time_text = self.dgttranslate.text('B10_oktime')
-            timectrl = self.tc_fixed_map[list(self.tc_fixed_map)[self.menu_time_fixed]]  # type: TimeControl
-            event = Event.SET_TIME_CONTROL(tc_init=timectrl.get_parameters(), time_text=time_text, show_ok=True)
-            text = self._fire_event(event)
+            text = self._fire_timectrl(self.tc_fixed_map[list(self.tc_fixed_map)[self.menu_time_fixed]])
 
         elif self.state == MenuState.BOOK:
             text = self.enter_book_name_menu()
