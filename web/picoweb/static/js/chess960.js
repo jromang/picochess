@@ -1705,6 +1705,7 @@ var Chess = function (fen, gtype) {
             } else if (typeof move === 'object') {
                 if (/*game_type !== GAME_STANDARD &&*/ 'flags' in move &&
                     (move.flags === FLAGS.KSIDE_CASTLE || move.flags === FLAGS.QSIDE_CASTLE)) {
+                    console.log('before=', move, sloppy);
                     move_obj = move_from_san(move.san, sloppy);  // 960 & castle => use SAN - see: Kd8, Rb8 and O-O-O
                     console.log('MO=', move_obj, move.san)
                 } else {
