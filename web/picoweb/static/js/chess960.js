@@ -622,7 +622,7 @@ var Chess = function (fen, gtype) {
                     var king_from = kings[us];
                     var king_to = king_from + 2;
 
-                    if (board[king_from + 1] === null && board[king_from + 2] === null
+                    if (!board[king_from + 1] && !board[king_from + 2]
                         && !attacked(them, kings[us]) && !attacked(them, king_from + 1) && !attacked(them, king_to)) {
                         add_move(board, moves, kings[us], king_to, BITS.KSIDE_CASTLE);
                     }
@@ -685,7 +685,7 @@ var Chess = function (fen, gtype) {
                     var king_from = kings[us];
                     var king_to = king_from - 2;
 
-                    if (board[king_from - 1] === null && board[king_from - 2] === null && board[king_from - 3] === null
+                    if (!board[king_from - 1] && !board[king_from - 2] && !board[king_from - 3]
                         && !attacked(them, kings[us]) && !attacked(them, king_from - 1) && !attacked(them, king_to)) {
                         add_move(board, moves, kings[us], king_to, BITS.QSIDE_CASTLE);
                     }
@@ -1218,7 +1218,6 @@ var Chess = function (fen, gtype) {
     function move_from_san(move, sloppy) {
         // strip off any move decorations: e.g Nf3+?!
         var clean_move = stripped_san(move);
-        console.log('CM=', clean_move);
 
         // if we're using the sloppy parser run a regex to grab piece, to, and from
         // this should parse invalid SAN like: Pe2-e4, Rc1c4, Qf3xf7
@@ -1705,9 +1704,7 @@ var Chess = function (fen, gtype) {
             } else if (typeof move === 'object') {
                 if (/*game_type !== GAME_STANDARD &&*/ 'flags' in move &&
                     (move.flags === FLAGS.KSIDE_CASTLE || move.flags === FLAGS.QSIDE_CASTLE)) {
-                    console.log('before=', move, sloppy);
                     move_obj = move_from_san(move.san, sloppy);  // 960 & castle => use SAN - see: Kd8, Rb8 and O-O-O
-                    console.log('MO=', move_obj, move.san)
                 } else {
                     var moves = generate_moves();
 

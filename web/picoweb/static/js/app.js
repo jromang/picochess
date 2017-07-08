@@ -541,7 +541,6 @@ function exportGame(root_node, exporter, include_comments, include_variations, _
                 }
             }
             // Recursively append the next moves.
-            console.log('VM=', variation.move);
             _board.move(variation.move);
             exportGame(variation, exporter, include_comments, include_variations, _board, false);
             _board.undo();
@@ -556,7 +555,6 @@ function exportGame(root_node, exporter, include_comments, include_variations, _
         main_variation = root_node.variations[0];
 
         // Recursively append the next moves.
-        console.log('RN=', main_variation.move);
         _board.move(main_variation.move);
         _after_variation = (include_variations && (root_node.variations.length > 1));
         exportGame(main_variation, exporter, include_comments, include_variations, _board, _after_variation);
@@ -674,7 +672,6 @@ var onSnapEnd = function(source, target) {
         to: target,
         promotion: 'q' // NOTE: always promote to a pawn for example simplicity
     });
-    console.log('SE=', move);
     updateCurrentPosition(move, tmpGame);
     updateChessGround();
     updateStatus();
