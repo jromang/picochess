@@ -760,62 +760,6 @@ var Chess = function (fen, gtype) {
         return legal_moves;
     }
 
-    /* convert a move from 0x88 coordinates to Standard Algebraic Notation (SAN)
-     *
-     * @param {boolean} sloppy Use the sloppy SAN generator to work around over
-     * disambiguation bugs in Fritz and Chessbase.  See below:
-     *
-     * r1bqkbnr/ppp2ppp/2n5/1B1pP3/4P3/8/PPPP2PP/RNBQK1NR b KQkq - 2 4
-     * 4. ... Nge7 is overly disambiguated because the knight on c6 is pinned
-     * 4. ... Ne7 is technically the valid SAN
-     */
-    function move_to_san(move, sloppy) {
-
-        var output = '';
-
-        if (move.flags & BITS.KSIDE_CASTLE) {
-            output = 'O-O';
-        } else if (move.flags & BITS.QSIDE_CASTLE) {
-            output = 'O-O-O';
-        } else {
-            var disambiguator = get_disambiguator(move, sloppy);
-
-            if (move.piece !== PAWN) {
-                output += move.piece.toUpperCase() + disambiguator;
-            }
-
-            if (move.flags & (BITS.CAPTURE | BITS.EP_CAPTURE)) {
-                if (move.piece === PAWN) {
-                    output += algebraic(move.from)[0];
-                }
-                output += 'x';
-            }
-
-            output += algebraic(move.to);
-
-            if (move.flags & BITS.PROMOTION) {
-                output += '=' + move.promotion.toUpperCase();
-            }
-        }
-
-        make_move(move);
-        if (in_check()) {
-            if (in_checkmate()) {
-                output += '#';
-            } else {
-                output += '+';
-            }
-        }
-        undo_move();
-
-        return output;
-    }
-
-    // parses all of the decorators out of a SAN string
-    function stripped_san(move) {
-        return move.replace(/=/, '').replace(/[+#]?[?!]*$/, '');
-    }
-
     function attacked(color, square) {
         for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
             /* did we run off the end of the board */
@@ -1214,6 +1158,62 @@ var Chess = function (fen, gtype) {
         return s;
     }
 
+    /* convert a move from 0x88 coordinates to Standard Algebraic Notation (SAN)
+     *
+     * @param {boolean} sloppy Use the sloppy SAN generator to work around over
+     * disambiguation bugs in Fritz and Chessbase.  See below:
+     *
+     * r1bqkbnr/ppp2ppp/2n5/1B1pP3/4P3/8/PPPP2PP/RNBQK1NR b KQkq - 2 4
+     * 4. ... Nge7 is overly disambiguated because the knight on c6 is pinned
+     * 4. ... Ne7 is technically the valid SAN
+     */
+    function move_to_san(move, sloppy) {
+
+        var output = '';
+
+        if (move.flags & BITS.KSIDE_CASTLE) {
+            output = 'O-O';
+        } else if (move.flags & BITS.QSIDE_CASTLE) {
+            output = 'O-O-O';
+        } else {
+            var disambiguator = get_disambiguator(move, sloppy);
+
+            if (move.piece !== PAWN) {
+                output += move.piece.toUpperCase() + disambiguator;
+            }
+
+            if (move.flags & (BITS.CAPTURE | BITS.EP_CAPTURE)) {
+                if (move.piece === PAWN) {
+                    output += algebraic(move.from)[0];
+                }
+                output += 'x';
+            }
+
+            output += algebraic(move.to);
+
+            if (move.flags & BITS.PROMOTION) {
+                output += '=' + move.promotion.toUpperCase();
+            }
+        }
+
+        make_move(move);
+        if (in_check()) {
+            if (in_checkmate()) {
+                output += '#';
+            } else {
+                output += '+';
+            }
+        }
+        undo_move();
+
+        return output;
+    }
+
+    // parses all of the decorators out of a SAN string
+    function stripped_san(move) {
+        return move.replace(/=/, '').replace(/[+#]?[?!]*$/, '');
+    }
+
     // convert a move from Standard Algebraic Notation (SAN) to 0x88 coordinates
     function move_from_san(move, sloppy) {
         // strip off any move decorations: e.g Nf3+?!
@@ -1392,7 +1392,6 @@ var Chess = function (fen, gtype) {
             var moves = [];
 
             for (var i = 0, len = ugly_moves.length; i < len; i++) {
-
                 /* does the user want a full move object (most likely not), or just SAN */
                 if (typeof options !== 'undefined' && 'verbose' in options && options.verbose) {
                     moves.push(make_pretty(ugly_moves[i]));
@@ -1400,7 +1399,6 @@ var Chess = function (fen, gtype) {
                     moves.push(move_to_san(ugly_moves[i], false));
                 }
             }
-
             return moves;
         },
 
