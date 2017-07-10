@@ -369,7 +369,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
             # self.shared['headers'] = pgn_game.headers
 
     def _build_game_header(self, pgn_game: chess.pgn.Game):
-        pgn_game.headers['Result'] = '*'
+        # pgn_game.headers['Result'] = '*'
         pgn_game.headers['White'] = 'None'
         pgn_game.headers['Black'] = 'None'
         pgn_game.headers['Event'] = 'PicoChess game'
@@ -573,16 +573,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
             EventHandler.write_to_clients(result)
 
         elif isinstance(message, Message.GAME_ENDS):
-            if message.game.move_stack:
-                result = None
-                if message.result == GameResult.DRAW:
-                    result = '1/2-1/2'
-                elif message.result in (GameResult.WIN_WHITE, GameResult.WIN_BLACK):
-                    result = '1-0' if message.result == GameResult.WIN_WHITE else '0-1'
-                elif message.result == GameResult.OUT_OF_TIME:
-                    result = '0-1' if message.game.turn == chess.WHITE else '1-0'
-                if result:
-                    EventHandler.write_to_clients({'event': 'Message', 'msg': 'Result: ' + result})
+            pass
 
         else:  # Default
             # print(message)

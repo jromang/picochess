@@ -350,6 +350,7 @@ def main():
         # Player had done the computer or remote move on the board
         elif fen == done_computer_fen:
             assert interaction_mode in (Mode.NORMAL, Mode.REMOTE), 'wrong mode: %s' % interaction_mode
+            DisplayMsg.show(Message.COMPUTER_MOVE_DONE())
             game.push(done_move)
             done_computer_fen = None
             done_move = chess.Move.null()
@@ -358,7 +359,6 @@ def main():
                 time_control.add_inc(not game.turn)
                 if time_control.mode != TimeMode.FIXED:
                     start_clock()
-                DisplayMsg.show(Message.COMPUTER_MOVE_DONE())
                 legal_fens = compute_legal_fens(game.copy())
             else:
                 legal_fens = []

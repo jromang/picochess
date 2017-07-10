@@ -631,14 +631,11 @@ var updateStatus = function() {
     bookDataTable.ajax.reload();
     gameDataTable.ajax.reload();
 
-    //$(".highlight").removeClass('highlight');
-
     if ($('#' + strippedFen).position()) {
         pgnEl.scrollTop(0);
         var y_position = $('#' + strippedFen).position().top;
         pgnEl.scrollTop(y_position);
     }
-    //$('#' + stripped_fen).addClass('highlight');
 };
 
 function toDests(chess) {
