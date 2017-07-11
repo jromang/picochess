@@ -31,7 +31,7 @@ from utilities import Observable, DisplayMsg, hours_minutes_seconds, RepeatedTim
 from web.picoweb import picoweb as pw
 
 from dgt.api import Event, Message
-from dgt.util import GameResult, PlayMode, Mode, ClockSide
+from dgt.util import PlayMode, Mode, ClockSide
 from dgt.iface import DgtIface
 from dgt.translate import DgtTranslate
 from dgt.board import DgtBoard

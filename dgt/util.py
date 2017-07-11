@@ -22,6 +22,9 @@ except ImportError:
 
 
 class AutoNumber(enum.Enum):
+
+    """AutoNumber Class."""
+
     def __new__(cls):  # Autonumber
         value = len(cls.__members__) + 1
         obj = object.__new__(cls)
@@ -31,6 +34,9 @@ class AutoNumber(enum.Enum):
 
 @enum.unique
 class Top(enum.Enum):
+
+    """Top Class."""
+
     MODE = 'B00_top_mode_menu'  # Mode Menu
     POSITION = 'B00_top_position_menu'  # Setup position menu
     TIME = 'B00_top_time_menu'  # Time controls menu
@@ -40,44 +46,52 @@ class Top(enum.Enum):
 
 
 class TopLoop(object):
+
+    """TopLoop Class."""
+
     def __init__(self):
         super(TopLoop, self).__init__()
 
     @staticmethod
-    def next(m: Top):
-        if m == Top.MODE:
+    def next(item: Top):
+        """Get next item."""
+        if item == Top.MODE:
             return Top.POSITION
-        elif m == Top.POSITION:
+        elif item == Top.POSITION:
             return Top.TIME
-        elif m == Top.TIME:
+        elif item == Top.TIME:
             return Top.BOOK
-        elif m == Top.BOOK:
+        elif item == Top.BOOK:
             return Top.ENGINE
-        elif m == Top.ENGINE:
+        elif item == Top.ENGINE:
             return Top.SYSTEM
-        elif m == Top.SYSTEM:
+        elif item == Top.SYSTEM:
             return Top.MODE
         return 'errMenuNext'
 
     @staticmethod
-    def prev(m: Top):
-        if m == Top.MODE:
+    def prev(item: Top):
+        """Get previous item."""
+        if item == Top.MODE:
             return Top.SYSTEM
-        elif m == Top.POSITION:
+        elif item == Top.POSITION:
             return Top.MODE
-        elif m == Top.TIME:
+        elif item == Top.TIME:
             return Top.POSITION
-        elif m == Top.BOOK:
+        elif item == Top.BOOK:
             return Top.TIME
-        elif m == Top.ENGINE:
+        elif item == Top.ENGINE:
             return Top.BOOK
-        elif m == Top.SYSTEM:
+        elif item == Top.SYSTEM:
             return Top.ENGINE
         return 'errMenuPrev'
 
 
 @enum.unique
 class Mode(enum.Enum):
+
+    """Mode Class."""
+
     NORMAL = 'B00_mode_normal_menu'
     ANALYSIS = 'B00_mode_analysis_menu'
     KIBITZ = 'B00_mode_kibitz_menu'
@@ -87,80 +101,99 @@ class Mode(enum.Enum):
 
 
 class ModeLoop(object):
+
+    """ModeLoop Class."""
+
     def __init__(self):
         super(ModeLoop, self).__init__()
 
     @staticmethod
-    def next(m: Mode):
-        if m == Mode.NORMAL:
+    def next(item: Mode):
+        """Get next item."""
+        if item == Mode.NORMAL:
             return Mode.ANALYSIS
-        elif m == Mode.ANALYSIS:
+        elif item == Mode.ANALYSIS:
             return Mode.KIBITZ
-        elif m == Mode.KIBITZ:
+        elif item == Mode.KIBITZ:
             return Mode.OBSERVE
-        elif m == Mode.OBSERVE:
+        elif item == Mode.OBSERVE:
             return Mode.REMOTE
-        elif m == Mode.REMOTE:
+        elif item == Mode.REMOTE:
             return Mode.PONDER
-        elif m == Mode.PONDER:
+        elif item == Mode.PONDER:
             return Mode.NORMAL
         return 'errModeNext'
 
     @staticmethod
-    def prev(m: Mode):
-        if m == Mode.NORMAL:
+    def prev(item: Mode):
+        """Get previous item."""
+        if item == Mode.NORMAL:
             return Mode.PONDER
-        elif m == Mode.ANALYSIS:
+        elif item == Mode.ANALYSIS:
             return Mode.NORMAL
-        elif m == Mode.KIBITZ:
+        elif item == Mode.KIBITZ:
             return Mode.ANALYSIS
-        elif m == Mode.OBSERVE:
+        elif item == Mode.OBSERVE:
             return Mode.KIBITZ
-        elif m == Mode.REMOTE:
+        elif item == Mode.REMOTE:
             return Mode.OBSERVE
-        elif m == Mode.PONDER:
+        elif item == Mode.PONDER:
             return Mode.REMOTE
         return 'errModePrev'
 
 
 @enum.unique
 class PlayMode(enum.Enum):
+
+    """PlayMode Class."""
+
     USER_WHITE = 'B10_playmode_white_user'
     USER_BLACK = 'B10_playmode_black_user'
 
 
 class TimeMode(enum.Enum):
+
+    """TimeMode Class."""
+
     FIXED = 'B00_timemode_fixed_menu'  # Fixed seconds per move
     BLITZ = 'B00_timemode_blitz_menu'  # Fixed time per game
     FISCHER = 'B00_timemode_fischer_menu'  # Fischer increment
 
 
 class TimeModeLoop(object):
+
+    """TimeModeLoop Class."""
+
     def __init__(self):
         super(TimeModeLoop, self).__init__()
 
     @staticmethod
-    def next(m: TimeMode):
-        if m == TimeMode.FIXED:
+    def next(item: TimeMode):
+        """Get next item."""
+        if item == TimeMode.FIXED:
             return TimeMode.BLITZ
-        elif m == TimeMode.BLITZ:
+        elif item == TimeMode.BLITZ:
             return TimeMode.FISCHER
-        elif m == TimeMode.FISCHER:
+        elif item == TimeMode.FISCHER:
             return TimeMode.FIXED
         return 'errTiMoNext'
 
     @staticmethod
-    def prev(m: TimeMode):
-        if m == TimeMode.FIXED:
+    def prev(item: TimeMode):
+        """Get previous item."""
+        if item == TimeMode.FIXED:
             return TimeMode.FISCHER
-        elif m == TimeMode.BLITZ:
+        elif item == TimeMode.BLITZ:
             return TimeMode.FIXED
-        elif m == TimeMode.FISCHER:
+        elif item == TimeMode.FISCHER:
             return TimeMode.BLITZ
         return 'errTiMoPrev'
 
 
 class System(enum.Enum):
+
+    """System Class."""
+
     VERSION = 'B00_system_version_menu'
     IPADR = 'B00_system_ipadr_menu'
     SOUND = 'B00_system_sound_menu'
@@ -172,51 +205,59 @@ class System(enum.Enum):
 
 
 class SystemLoop(object):
+
+    """SystemLoop Class."""
+
     def __init__(self):
         super(SystemLoop, self).__init__()
 
     @staticmethod
-    def next(m: System):
-        if m == System.VERSION:
+    def next(item: System):
+        """Get next item."""
+        if item == System.VERSION:
             return System.IPADR
-        elif m == System.IPADR:
+        elif item == System.IPADR:
             return System.SOUND
-        elif m == System.SOUND:
+        elif item == System.SOUND:
             return System.LANGUAGE
-        elif m == System.LANGUAGE:
+        elif item == System.LANGUAGE:
             return System.LOGFILE
-        elif m == System.LOGFILE:
+        elif item == System.LOGFILE:
             return System.VOICE
-        elif m == System.VOICE:
+        elif item == System.VOICE:
             return System.DISPLAY
-        elif m == System.DISPLAY:
+        elif item == System.DISPLAY:
             return System.BATTERY
-        elif m == System.BATTERY:
+        elif item == System.BATTERY:
             return System.VERSION
         return 'errSystNext'
 
     @staticmethod
-    def prev(m: System):
-        if m == System.VERSION:
+    def prev(item: System):
+        """Get previous item."""
+        if item == System.VERSION:
             return System.BATTERY
-        if m == System.BATTERY:
+        if item == System.BATTERY:
             return System.DISPLAY
-        if m == System.DISPLAY:
+        if item == System.DISPLAY:
             return System.VOICE
-        if m == System.VOICE:
+        if item == System.VOICE:
             return System.LOGFILE
-        if m == System.LOGFILE:
+        if item == System.LOGFILE:
             return System.LANGUAGE
-        if m == System.LANGUAGE:
+        if item == System.LANGUAGE:
             return System.SOUND
-        elif m == System.SOUND:
+        elif item == System.SOUND:
             return System.IPADR
-        elif m == System.IPADR:
+        elif item == System.IPADR:
             return System.VERSION
         return 'errSystPrev'
 
 
 class Language(enum.Enum):
+
+    """Language Class."""
+
     EN = 'B00_language_en_menu'
     DE = 'B00_language_de_menu'
     NL = 'B00_language_nl_menu'
@@ -226,132 +267,160 @@ class Language(enum.Enum):
 
 
 class LanguageLoop(object):
+
+    """LanguageLoop Class."""
+
     def __init__(self):
         super(LanguageLoop, self).__init__()
 
     @staticmethod
-    def next(m: Language):
-        if m == Language.EN:
+    def next(item: Language):
+        """Get next item."""
+        if item == Language.EN:
             return Language.DE
-        elif m == Language.DE:
+        elif item == Language.DE:
             return Language.NL
-        elif m == Language.NL:
+        elif item == Language.NL:
             return Language.FR
-        elif m == Language.FR:
+        elif item == Language.FR:
             return Language.ES
-        elif m == Language.ES:
+        elif item == Language.ES:
             return Language.IT
-        elif m == Language.IT:
+        elif item == Language.IT:
             return Language.EN
         return 'errLangNext'
 
     @staticmethod
-    def prev(m: Language):
-        if m == Language.EN:
+    def prev(item: Language):
+        """Get previous item."""
+        if item == Language.EN:
             return Language.IT
-        if m == Language.IT:
+        if item == Language.IT:
             return Language.ES
-        if m == Language.ES:
+        if item == Language.ES:
             return Language.FR
-        if m == Language.FR:
+        if item == Language.FR:
             return Language.NL
-        elif m == Language.NL:
+        elif item == Language.NL:
             return Language.DE
-        elif m == Language.DE:
+        elif item == Language.DE:
             return Language.EN
         return 'errLangPrev'
 
 
 class Beep(enum.Enum):
+
+    """Beep Class."""
+
     OFF = 'B00_beep_off_menu'
     SOME = 'B00_beep_some_menu'
     ON = 'B00_beep_on_menu'
 
 
 class BeepLoop(object):
+
+    """BeepLoop Class."""
+
     def __init__(self):
         super(BeepLoop, self).__init__()
 
     @staticmethod
-    def next(m: Beep):
-        if m == Beep.OFF:
+    def next(item: Beep):
+        """Get next item."""
+        if item == Beep.OFF:
             return Beep.SOME
-        elif m == Beep.SOME:
+        elif item == Beep.SOME:
             return Beep.ON
-        elif m == Beep.ON:
+        elif item == Beep.ON:
             return Beep.OFF
         return 'errBeepNext'
 
     @staticmethod
-    def prev(m: Beep):
-        if m == Beep.OFF:
+    def prev(item: Beep):
+        if item == Beep.OFF:
             return Beep.ON
-        if m == Beep.ON:
+        if item == Beep.ON:
             return Beep.SOME
-        if m == Beep.SOME:
+        if item == Beep.SOME:
             return Beep.OFF
         return 'errBeepPrev'
 
 
 class Voice(enum.Enum):
+
+    """Voice Class."""
+
     SPEED = 'B00_voice_speed_menu'
     USER = 'B00_voice_user_menu'
     COMP = 'B00_voice_comp_menu'
 
 
 class VoiceLoop(object):
+
+    """VoiceLoop Class."""
+
     def __init__(self):
         super(VoiceLoop, self).__init__()
 
     @staticmethod
-    def next(m: Voice):
-        if m == Voice.SPEED:
+    def next(item: Voice):
+        """Get next item."""
+        if item == Voice.SPEED:
             return Voice.COMP
-        elif m == Voice.COMP:
+        elif item == Voice.COMP:
             return Voice.USER
-        elif m == Voice.USER:
+        elif item == Voice.USER:
             return Voice.SPEED
         return 'errVoicNext'
 
     @staticmethod
-    def prev(m: Voice):
-        if m == Voice.SPEED:
+    def prev(item: Voice):
+        """Get previous item."""
+        if item == Voice.SPEED:
             return Voice.USER
-        elif m == Voice.USER:
+        elif item == Voice.USER:
             return Voice.COMP
-        elif m == Voice.COMP:
+        elif item == Voice.COMP:
             return Voice.SPEED
         return 'errVoicPrev'
 
 
 @enum.unique
 class Display(enum.Enum):
+
+    """Display Class."""
+
     PONDER = 'B00_display_ponder_menu'
     CONFIRM = 'B00_display_confirm_menu'
     CAPITAL = 'B00_display_capital_menu'
 
 
 class DisplayLoop(object):
+
+    """DisplayLoop Class."""
+
     def __init__(self):
         super(DisplayLoop, self).__init__()
 
     @staticmethod
-    def next(m: Display):
-        if m == Display.PONDER:
+    def next(item: Display):
+        """Get next item."""
+        if item == Display.PONDER:
             return Display.CONFIRM
-        elif m == Display.CONFIRM:
+        elif item == Display.CONFIRM:
             return Display.CAPITAL
-        elif m == Display.CAPITAL:
+        elif item == Display.CAPITAL:
             return Display.PONDER
         return 'errDispNext'
 
     @staticmethod
-    def prev(m: Display):
-        if m == Display.PONDER:
+    def prev(item: Display):
+        """Get previous item."""
+        if item == Display.PONDER:
             return Display.CAPITAL
-        elif m == Display.CAPITAL:
+        elif item == Display.CAPITAL:
             return Display.CONFIRM
-        elif m == Display.CONFIRM:
+        elif item == Display.CONFIRM:
             return Display.PONDER
         return 'errDispPrev'
 

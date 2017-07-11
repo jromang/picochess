@@ -31,6 +31,7 @@ class BaseClass(object):
 
 
 def ClassFactory(name, argnames, BaseClass=BaseClass):
+
     """Class factory for generating."""
 
     def __init__(self, **kwargs):

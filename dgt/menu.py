@@ -197,12 +197,15 @@ class DgtMenu(object):
         self.battery = '-NA'  # standard value: NotAvailable (discharging)
 
     def inside_updt_menu(self):
+        """Inside update menu."""
         return self.updt_top
 
     def disable_picochess_displayed(self, dev):
+        """Disable picochess display."""
         self.picochess_displayed.discard(dev)
 
     def enable_picochess_displayed(self, dev):
+        """Enable picochess display."""
         self.picochess_displayed.add(dev)
         self.updt_tags = get_tags()
         try:
@@ -211,6 +214,7 @@ class DgtMenu(object):
             self.updt_version = len(self.updt_tags) - 1
 
     def inside_picochess_time(self, dev):
+        """Picochess displayed on clock."""
         return dev in self.picochess_displayed
 
     def save_choices(self):
