@@ -37,33 +37,33 @@ var Chess = function (fen, gtype) {
 
     /* jshint indent: false */
 
-    var BLACK = 'b';
-    var WHITE = 'w';
+    const BLACK = 'b';
+    const WHITE = 'w';
 
-    var EMPTY = -1;
+    const EMPTY = -1;
 
-    var PAWN = 'p';
-    var KNIGHT = 'n';
-    var BISHOP = 'b';
-    var ROOK = 'r';
-    var QUEEN = 'q';
-    var KING = 'k';
+    const PAWN = 'p';
+    const KNIGHT = 'n';
+    const BISHOP = 'b';
+    const ROOK = 'r';
+    const QUEEN = 'q';
+    const KING = 'k';
 
-    var SYMBOLS = 'pnbrqkPNBRQK';
+    const SYMBOLS = 'pnbrqkPNBRQK';
 
-    var DEFAULT_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+    const DEFAULT_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
-    var POSSIBLE_RESULTS = ['1-0', '0-1', '1/2-1/2', '*'];
+    const POSSIBLE_RESULTS = ['1-0', '0-1', '1/2-1/2', '*'];
 
-    var GAME_STANDARD = 0;
-    var GAME_960 = 1;
+    const GAME_STANDARD = 0;
+    const GAME_960 = 1;
 
-    var PAWN_OFFSETS = {
+    const PAWN_OFFSETS = {
         b: [16, 32, 17, 15],
         w: [-16, -32, -17, -15]
     };
 
-    var PIECE_OFFSETS = {
+    const PIECE_OFFSETS = {
         n: [-18, -33, -31, -14, 18, 33, 31, 14],
         b: [-17, -15, 17, 15],
         r: [-16, 1, 16, -1],
@@ -71,7 +71,7 @@ var Chess = function (fen, gtype) {
         k: [-17, -16, -15, 1, 17, 16, 15, -1]
     };
 
-    var ATTACKS = [
+    const ATTACKS = [
         20, 0, 0, 0, 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 20, 0,
         0, 20, 0, 0, 0, 0, 0, 24, 0, 0, 0, 0, 0, 20, 0, 0,
         0, 0, 20, 0, 0, 0, 0, 24, 0, 0, 0, 0, 20, 0, 0, 0,
@@ -89,7 +89,7 @@ var Chess = function (fen, gtype) {
         20, 0, 0, 0, 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 20
     ];
 
-    var RAYS = [
+    const RAYS = [
         17, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 15, 0,
         0, 17, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 15, 0, 0,
         0, 0, 17, 0, 0, 0, 0, 16, 0, 0, 0, 0, 15, 0, 0, 0,
@@ -107,9 +107,9 @@ var Chess = function (fen, gtype) {
         -15, 0, 0, 0, 0, 0, 0, -16, 0, 0, 0, 0, 0, 0, -17
     ];
 
-    var SHIFTS = {p: 0, n: 1, b: 2, r: 3, q: 4, k: 5};
+    const SHIFTS = {p: 0, n: 1, b: 2, r: 3, q: 4, k: 5};
 
-    var FLAGS = {
+    const FLAGS = {
         NORMAL: 'n',
         CAPTURE: 'c',
         BIG_PAWN: 'b',
@@ -119,7 +119,7 @@ var Chess = function (fen, gtype) {
         QSIDE_CASTLE: 'q'
     };
 
-    var BITS = {
+    const BITS = {
         NORMAL: 1,
         CAPTURE: 2,
         BIG_PAWN: 4,
@@ -129,16 +129,16 @@ var Chess = function (fen, gtype) {
         QSIDE_CASTLE: 64
     };
 
-    var RANK_1 = 7;
-    var RANK_2 = 6;
-    var RANK_3 = 5;
-    var RANK_4 = 4;
-    var RANK_5 = 3;
-    var RANK_6 = 2;
-    var RANK_7 = 1;
-    var RANK_8 = 0;
+    const RANK_1 = 7;
+    const RANK_2 = 6;
+    const RANK_3 = 5;
+    const RANK_4 = 4;
+    const RANK_5 = 3;
+    const RANK_6 = 2;
+    const RANK_7 = 1;
+    const RANK_8 = 0;
 
-    var SQUARES = {
+    const SQUARES = {
         a8: 0, b8: 1, c8: 2, d8: 3, e8: 4, f8: 5, g8: 6, h8: 7,
         a7: 16, b7: 17, c7: 18, d7: 19, e7: 20, f7: 21, g7: 22, h7: 23,
         a6: 32, b6: 33, c6: 34, d6: 35, e6: 36, f6: 37, g6: 38, h6: 39,
@@ -349,8 +349,8 @@ var Chess = function (fen, gtype) {
             }
         }
 
-        if ((tokens[3][1] === '3' && tokens[1] === 'w') ||
-            (tokens[3][1] === '6' && tokens[1] === 'b')) {
+        if ((tokens[3][1] === '3' && tokens[1] === WHITE) ||
+            (tokens[3][1] === '6' && tokens[1] === BLACK)) {
             return {valid: false, error_number: 11, error: errors[11]};
         }
 
@@ -490,29 +490,34 @@ var Chess = function (fen, gtype) {
         return piece;
     }
 
-    function build_move(board, from, to, flags, promotion) {
-        var move = {
-            color: turn,
-            from: from,
-            to: to,
-            flags: flags,
-            piece: board[from].type
-        };
-
-        if (promotion) {
-            move.flags |= BITS.PROMOTION;
-            move.promotion = promotion;
-        }
-
-        if (board[to]) {
-            move.captured = board[to].type;
-        } else if (flags & BITS.EP_CAPTURE) {
-            move.captured = PAWN;
-        }
-        return move;
-    }
-
     function generate_moves(options) {
+
+        function build_move(board, from, to, flags, promotion) {
+            var move = {
+                color: turn,
+                from: from,
+                to: to,
+                flags: flags,
+                piece: board[from].type
+            };
+
+            if (promotion) {
+                move.flags |= BITS.PROMOTION;
+                move.promotion = promotion;
+            }
+
+            if (flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
+                // dont check on castle & uci960 taking the rook
+            } else {
+                if (board[to]) {
+                    move.captured = board[to].type;
+                } else if (flags & BITS.EP_CAPTURE) {
+                    move.captured = PAWN;
+                }
+            }
+            return move;
+        }
+
         function add_move(board, moves, from, to, flags) {
             /* if pawn promotion */
             if (board[from].type === PAWN &&
@@ -536,8 +541,7 @@ var Chess = function (fen, gtype) {
         var single_square = false;
 
         /* do we want legal moves? */
-        var legal = (typeof options !== 'undefined' && 'legal' in options) ?
-            options.legal : true;
+        var legal = (typeof options !== 'undefined' && 'legal' in options) ? options.legal : true;
 
         /* are we generating moves for a single square? */
         if (typeof options !== 'undefined' && 'square' in options) {
@@ -605,7 +609,7 @@ var Chess = function (fen, gtype) {
                         }
 
                         /* break, if knight or king */
-                        if (piece.type === 'n' || piece.type === 'k') break;
+                        if (piece.type === KNIGHT || piece.type === KING) break;
                     }
                 }
             }
@@ -629,9 +633,9 @@ var Chess = function (fen, gtype) {
                 } else {
                     /* king-side castling (CHESS 960) */
                     var king_from = kings[us];
-                    var king_to = us === 'w' ? SQUARES.g1 : SQUARES.g8;
+                    var king_to = us === WHITE ? SQUARES.g1 : SQUARES.g8;
                     var rook_from = ROOKS[us][1].square;
-                    var rook_to = us === 'w' ? SQUARES.f1 : SQUARES.f8;
+                    var rook_to = us === WHITE ? SQUARES.f1 : SQUARES.f8;
 
                     /* is there a clear shot between the king-side rook and its castling_to
                      * square (ignoring the friendly)?
@@ -653,9 +657,11 @@ var Chess = function (fen, gtype) {
                      * also check the king target for empty square like "Ng1, Rf1, Kd1" and "O-O"
                      */
                     var king_unimpeded = true;
-                    var checked = false;
+                    var checked = attacked(them, king_from);
                     if (king_from === king_to) {
-                        checked = attacked(them, king_to);
+                        if (board[rook_to]) {  // test for Bf1, Kg1, Rh1
+                            king_unimpeded = false;
+                        }
                     } else {
                         var delta = (king_from - king_to > 0) ? -1 : 1;
                         for (var i = king_from + delta; i !== king_to; i += delta) {
@@ -674,7 +680,7 @@ var Chess = function (fen, gtype) {
                     }
 
                     if (rook_unimpeded && king_unimpeded && !checked) {
-                        add_move(board, moves, kings[us], king_to, BITS.KSIDE_CASTLE);
+                        add_move(board, moves, kings[us], /*king_to*/rook_from, BITS.KSIDE_CASTLE);
                     }
                 }
             }
@@ -692,9 +698,9 @@ var Chess = function (fen, gtype) {
                 } else {
                     /* queen-side castling (CHESS 960) */
                     var king_from = kings[us];
-                    var king_to = (us === 'w') ? SQUARES.c1 : SQUARES.c8;
+                    var king_to = (us === WHITE) ? SQUARES.c1 : SQUARES.c8;
                     var rook_from = ROOKS[us][0].square;
-                    var rook_to = (us === 'w') ? SQUARES.d1 : SQUARES.d8;
+                    var rook_to = (us === WHITE) ? SQUARES.d1 : SQUARES.d8;
 
                     /* is there a clear shot between the queen-side rook and its castling_to
                      * square (ignoring the friendly king)?
@@ -715,9 +721,11 @@ var Chess = function (fen, gtype) {
                      * also check the king target for empty square like "Qc1, Rd1, Kf1" and "O-O-O"
                      */
                     var king_unimpeded = true;
-                    var checked = false;
+                    var checked = attacked(them, king_from);
                     if (king_from === king_to) {
-                        checked = attacked(them, king_to);
+                        if (board[rook_to]) {  // test for Bd1, Kc1, Rb1
+                            king_unimpeded = false;
+                        }
                     } else {
                         var delta = (king_from - king_to > 0) ? -1 : 1;
                         for (var i = king_from + delta; i !== king_to; i += delta) {
@@ -736,7 +744,7 @@ var Chess = function (fen, gtype) {
                     }
 
                     if (rook_unimpeded && king_unimpeded && !checked) {
-                        add_move(board, moves, kings[us], king_to, BITS.QSIDE_CASTLE);
+                        add_move(board, moves, kings[us], /*king_to*/rook_from, BITS.QSIDE_CASTLE);
                     }
                 }
             }
@@ -924,9 +932,10 @@ var Chess = function (fen, gtype) {
         var us = turn;
         var them = swap_color(us);
         push(move);
-
-        /* 960 castling hack */
-        if (move.to !== move.from) {
+        //if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
+        if (move.piece === KING) {
+            /* castling handled below */
+        } else {
             board[move.to] = board[move.from];
             board[move.from] = null;
         }
@@ -946,26 +955,29 @@ var Chess = function (fen, gtype) {
         }
 
         /* if we moved the king */
-        if (board[move.to].type === KING) {
-            kings[board[move.to].color] = move.to;
-
-            /* if we castled, move the rook next to the king */
-            if (move.flags & BITS.KSIDE_CASTLE) {
-                var rook_to = (us === 'w') ? SQUARES.f1 : SQUARES.f8;
-                var rook_from = ROOKS[us][1].square;
-                board[rook_to] = {type: ROOK, color: us};
-                if (rook_to !== rook_from && board[rook_from].type === ROOK) {
-                    board[rook_from] = null;
+        if (move.piece === KING) {
+            var king_to = move.to;
+            var king_from = move.from;
+            if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
+                var rook_to, rook_from;
+                /* if we castled, move the rook next to the king */
+                if (move.flags & BITS.KSIDE_CASTLE) {
+                    king_to = (us === WHITE) ? SQUARES.g1 : SQUARES.g8;
+                    rook_to = (us === WHITE) ? SQUARES.f1 : SQUARES.f8;
+                    rook_from = ROOKS[us][1].square;
+                } else if (move.flags & BITS.QSIDE_CASTLE) {
+                    king_to = (us === WHITE) ? SQUARES.c1 : SQUARES.c8;
+                    rook_to = (us === WHITE) ? SQUARES.d1 : SQUARES.d8;
+                    rook_from = ROOKS[us][0].square;
                 }
-            } else if (move.flags & BITS.QSIDE_CASTLE) {
-                var rook_to = (us === 'w') ? SQUARES.d1 : SQUARES.d8;
-                var rook_from = ROOKS[us][0].square;
-                board[rook_to] = {type: ROOK, color: us};
-                if (rook_to !== rook_from && board[rook_from].type === ROOK) {
-                    board[rook_from] = null;
-                }
+                board[rook_from] = null;
+                board[rook_to] = {type: ROOK, color: us};  // this could delete a king(_from), see next comment
             }
-
+            if (board[king_from].type !== ROOK) {  // careful: Kf1,Rh1 in uci960
+                board[king_from] = null;
+            }
+            board[king_to] = {type: KING, color: us};
+            kings[us] = king_to;
             /* turn off castling */
             castling[us] = '';
         }
@@ -994,7 +1006,7 @@ var Chess = function (fen, gtype) {
 
         /* if big pawn move, update the en passant square */
         if (move.flags & BITS.BIG_PAWN) {
-            if (turn === 'b') {
+            if (turn === BLACK) {
                 ep_square = move.to - 16;
             } else {
                 ep_square = move.to + 16;
@@ -1035,8 +1047,9 @@ var Chess = function (fen, gtype) {
         var us = turn;
         var them = swap_color(turn);
 
-        /* 960 castling hack */
-        if (move.to !== move.from) {
+        if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
+            /* castling handled below */
+        } else {
             board[move.from] = board[move.to];
             board[move.from].type = move.piece;  // to undo any promotions
             board[move.to] = null;
@@ -1056,19 +1069,23 @@ var Chess = function (fen, gtype) {
 
         if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
             var rook_to, rook_from;
+            var king_to = move.from;
+            var king_from = move.to;
             if (move.flags & BITS.KSIDE_CASTLE) {
                 rook_to = ROOKS[us][1].square;
-                rook_from = (us === 'w') ? SQUARES.f1 : SQUARES.f8;
+                rook_from = (us === WHITE) ? SQUARES.f1 : SQUARES.f8;
+                king_from = (us === WHITE) ? SQUARES.g1 : SQUARES.g8;
             } else if (move.flags & BITS.QSIDE_CASTLE) {
                 rook_to = ROOKS[us][0].square;
-                rook_from = (us === 'w') ? SQUARES.d1 : SQUARES.d8;
+                rook_from = (us === WHITE) ? SQUARES.d1 : SQUARES.d8;
+                king_from = (us === WHITE) ? SQUARES.c1 : SQUARES.c8;
             }
+            board[rook_from] = null;
             board[rook_to] = {type: ROOK, color: us};
-
-            /* be sure rook_from isn't the king (in 960) */
-            if (rook_to !== rook_from && board[rook_from].type === ROOK) {
-                board[rook_from] = null;
+            if (board[king_from].type !== ROOK) {  // careful: Kf1,Rh1 in uci960
+                board[king_from] = null;
             }
+            board[king_to] = {type: KING, color: us};
         }
 
         return move;
@@ -1484,9 +1501,9 @@ var Chess = function (fen, gtype) {
                 var move = reversed_history.pop();
 
                 /* if the position started with black to move, start PGN with 1. ... */
-                if (!history.length && move.color === 'b') {
+                if (!history.length && move.color === BLACK) {
                     move_string = move_number + '. ...';
-                } else if (move.color === 'w') {
+                } else if (move.color === WHITE) {
                     /* store the previous generated move_string if we have one */
                     if (move_string.length) {
                         moves.push(move_string);
@@ -1700,8 +1717,7 @@ var Chess = function (fen, gtype) {
             if (typeof move === 'string') {
                 move_obj = move_from_san(move, sloppy);
             } else if (typeof move === 'object') {
-                if (/*game_type !== GAME_STANDARD &&*/ 'flags' in move &&
-                    (move.flags === FLAGS.KSIDE_CASTLE || move.flags === FLAGS.QSIDE_CASTLE)) {
+                if ('flags' in move && (move.flags === FLAGS.KSIDE_CASTLE || move.flags === FLAGS.QSIDE_CASTLE)) {
                     move_obj = move_from_san(move.san, sloppy);  // 960 & castle => use SAN - see: Kd8, Rb8 and O-O-O
                 } else {
                     var moves = generate_moves();
