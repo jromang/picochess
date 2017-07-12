@@ -121,7 +121,7 @@
 ### = PicoChess related options =
 ### =============================
 ## log-file points to a file that is used to write the log information.
-## This file is created in the 'log' folder. Alltogether there are 6 log files kept (rotating logs)
+## This file is created in the 'log' folder. Altogether there are 6 log files kept (rotating logs)
 # log-file = picochess.log
 ## What log level should be used 
 ## Loglevel options are [debug, info, warning, error, critical]
