@@ -845,9 +845,8 @@ class DgtMenu(object):
                 logging.debug('flipping the board')
                 fen = fen[::-1]
             fen += " {0} KQkq - 0 1".format(to_move)
-            bit_board = chess.Board(fen, self.menu_position_uci960)
             # ask python-chess to correct the castling string
-            bit_board.set_fen(bit_board.fen())
+            bit_board = chess.Board(fen, self.menu_position_uci960)
             if bit_board.is_valid():
                 self.flip_board = self.menu_position_reverse
                 event = Event.SETUP_POSITION(fen=bit_board.fen(), uci960=self.menu_position_uci960)
@@ -1146,7 +1145,7 @@ class DgtMenu(object):
                 text = self.dgttranslate.text('Y00_error960')
 
         elif self.state == MenuState.POS_READ:
-            pass
+            text = self.dgttranslate.text('B00_nofunction')
 
         elif self.state == MenuState.TIME:
             self.state = MenuState.POS
@@ -1366,7 +1365,7 @@ class DgtMenu(object):
                 text = self.dgttranslate.text('Y00_error960')
 
         elif self.state == MenuState.POS_READ:
-            pass
+            text = self.dgttranslate.text('B00_nofunction')
 
         elif self.state == MenuState.TIME:
             self.state = MenuState.BOOK
