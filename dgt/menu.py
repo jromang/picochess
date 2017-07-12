@@ -856,6 +856,7 @@ class DgtMenu(object):
             else:
                 DispatchDgt.fire(self.dgttranslate.text('Y05_illegalpos'))
                 text = self.dgttranslate.text('B00_scanboard')
+                text.wait = True
 
         elif self.state == MenuState.TIME:
             if self.menu_time_mode == TimeMode.BLITZ:

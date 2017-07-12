@@ -472,8 +472,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             DispatchDgt.fire(Dgt.LIGHT_CLEAR(devs={'ser', 'web'}))
         move = message.move
         ponder = message.ponder
-        # fen = message.fen
-        # turn = message.turn
         self.engine_finished = True
         self.play_move = move
         self.play_fen = message.game.fen()

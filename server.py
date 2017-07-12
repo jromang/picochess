@@ -41,16 +41,6 @@ from dgt.board import DgtBoard
 client_ips = []
 
 
-def to_dests(board: chess.Board):
-    """Create a dict for chessground.js from the given board."""
-    dests = {}
-    for move in board.legal_moves:
-        dests[chess.square_name(move.from_square)] = []
-    for move in board.legal_moves:
-        dests[chess.square_name(move.from_square)].append(chess.square_name(move.to_square))
-    return dests
-
-
 class ServerRequestHandler(tornado.web.RequestHandler):
     def initialize(self, shared=None):
         self.shared = shared
@@ -364,9 +354,6 @@ class WebDisplay(DisplayMsg, threading.Thread):
     def _create_headers(self):
         if 'headers' not in self.shared:
             self.shared['headers'] = {}
-            # pgn_game = pgn.Game()
-            # self._build_game_header(pgn_game)
-            # self.shared['headers'] = pgn_game.headers
 
     def _build_game_header(self, pgn_game: chess.pgn.Game):
         # pgn_game.headers['Result'] = '*'
@@ -440,8 +427,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
             result = {'pgn': pgn_str, 'fen': fen, 'event': 'Game', 'move': '0000', 'play': 'newgame'}
             self.shared['last_dgt_move_msg'] = result
             EventHandler.write_to_clients(result)
-            # _build_headers()
-            _send_headers()
+            _send_headers()  # don't need _build_headers()
 
         elif isinstance(message, Message.IP_INFO):
             self.shared['ip_info'] = message.info
