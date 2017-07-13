@@ -367,7 +367,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
         user_name = 'User'
         engine_name = 'Picochess'
         user_elo = '-'
-        comp_elo = 2900
+        comp_elo = None
         if 'system_info' in self.shared:
             if 'user_name' in self.shared['system_info']:
                 user_name = self.shared['system_info']['user_name']
@@ -377,12 +377,12 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 user_elo = self.shared['system_info']['user_elo']
 
         if 'game_info' in self.shared:
-            if 'level_text' in self.shared['game_info']:
-                engine_name += ' [{0}]'.format(self.shared['game_info']['level_text'].m)
             if 'level_name' in self.shared['game_info']:
                 level_name = self.shared['game_info']['level_name']
                 if level_name.startswith('Elo@'):
                     comp_elo = int(level_name[4:])
+            if 'level_text' in self.shared['game_info'] and not comp_elo:
+                engine_name += ' [{0}]'.format(self.shared['game_info']['level_text'].m)
             if 'play_mode' in self.shared['game_info']:
                 pgn_game.headers['Black'] = \
                     engine_name if self.shared['game_info']['play_mode'] == PlayMode.USER_WHITE else user_name
@@ -391,6 +391,8 @@ class WebDisplay(DisplayMsg, threading.Thread):
 
                 comp_color = 'Black' if self.shared['game_info']['play_mode'] == PlayMode.USER_WHITE else 'White'
                 user_color = 'Black' if self.shared['game_info']['play_mode'] == PlayMode.USER_BLACK else 'White'
+                if not comp_elo:
+                    comp_elo = 2900
                 pgn_game.headers[comp_color + 'Elo'] = comp_elo
                 pgn_game.headers[user_color + 'Elo'] = user_elo
 
