@@ -33,9 +33,11 @@ class DgtTranslate(object):
         self.capital = False  # Set from dgt.menu lateron
 
     def beep_to_config(self, beep: Beep):
+        """Transfer beep to dict."""
         return dict(zip(self.ConfigToBeep.values(), self.ConfigToBeep.keys()))[beep]
 
     def bl(self, beeplevel: BeepLevel):
+        """Transfer beeplevel to bool."""
         if self.beep == Beep.ON:
             return True
         if self.beep == Beep.OFF:
@@ -43,15 +45,19 @@ class DgtTranslate(object):
         return bool(self.beep_level & beeplevel.value)
 
     def set_beep(self, beep: Beep):
+        """Set beep."""
         self.beep = beep
 
     def set_language(self, language: str):
+        """Set language."""
         self.language = language
 
     def set_capital(self, capital: bool):
+        """Set capital letters."""
         self.capital = capital
 
     def capital_text(self, text, is_obj=True):
+        """Transfer text to capital text or not."""
         if self.capital:
             if is_obj:
                 text.m = text.m.upper()
@@ -61,6 +67,7 @@ class DgtTranslate(object):
         return text
 
     def move(self, text: str):
+        """Return move text for clock display."""
         directory = {}
         if self.language == 'de':
             directory = {'R': 'T', 'N': 'S', 'B': 'L', 'Q': 'D'}
@@ -77,6 +84,7 @@ class DgtTranslate(object):
         return self.capital_text(text.replace('@', 'R'), False)  # replace the King "@" from fr, es, it languages
 
     def text(self, str_code: str, msg='', devs=None):
+        """Return standard text for clock display."""
         if devs is None:  # prevent W0102 error
             devs = {'ser', 'i2c', 'web'}
 

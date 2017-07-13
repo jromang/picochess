@@ -94,7 +94,7 @@ class AlternativeMover:
 
 
 def main():
-
+    """Main function."""
     def display_ip_info():
         """Fire an IP_INFO message with the IP adr."""
         location, ext_ip, int_ip = get_location()
