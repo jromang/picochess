@@ -366,16 +366,24 @@ class WebDisplay(DisplayMsg, threading.Thread):
 
         user_name = 'User'
         engine_name = 'Picochess'
+        user_elo = '-'
+        comp_elo = 2900
         if 'system_info' in self.shared:
             if 'user_name' in self.shared['system_info']:
                 user_name = self.shared['system_info']['user_name']
             if 'engine_name' in self.shared['system_info']:
                 engine_name = self.shared['system_info']['engine_name']
+            if 'user_elo' in self.shared['system_info']:
+                user_elo = self.shared['system_info']['user_elo']
 
         if 'game_info' in self.shared:
+            if 'level_text' in self.shared['game_info']:
+                engine_name += ' [{0}]'.format(self.shared['game_info']['level_text'].m)
+            if 'level_name' in self.shared['game_info']:
+                level_name = self.shared['game_info']['level_name']
+                if level_name.startswith('Elo@'):
+                    comp_elo = int(level_name[4:])
             if 'play_mode' in self.shared['game_info']:
-                if 'level_text' in self.shared['game_info']:
-                    engine_name += ' [{0}]'.format(self.shared['game_info']['level_text'].m)
                 pgn_game.headers['Black'] = \
                     engine_name if self.shared['game_info']['play_mode'] == PlayMode.USER_WHITE else user_name
                 pgn_game.headers['White'] = \
@@ -383,8 +391,8 @@ class WebDisplay(DisplayMsg, threading.Thread):
 
                 comp_color = 'Black' if self.shared['game_info']['play_mode'] == PlayMode.USER_WHITE else 'White'
                 user_color = 'Black' if self.shared['game_info']['play_mode'] == PlayMode.USER_BLACK else 'White'
-                pgn_game.headers[comp_color + 'Elo'] = '2900'
-                pgn_game.headers[user_color + 'Elo'] = '-'
+                pgn_game.headers[comp_color + 'Elo'] = comp_elo
+                pgn_game.headers[user_color + 'Elo'] = user_elo
 
         if 'ip_info' in self.shared:
             if 'location' in self.shared['ip_info']:
@@ -444,8 +452,11 @@ class WebDisplay(DisplayMsg, threading.Thread):
         elif isinstance(message, Message.ENGINE_READY):
             self._create_system_info()
             self.shared['system_info']['engine_name'] = message.engine_name
-            if not message.has_levels and 'level_text' in self.shared['game_info']:
-                del self.shared['game_info']['level_text']
+            if not message.has_levels:
+                if 'level_text' in self.shared['game_info']:
+                    del self.shared['game_info']['level_text']
+                if 'level_name' in self.shared['game_info']:
+                    del self.shared['game_info']['level_name']
             _build_headers()
             _send_headers()
 
@@ -459,6 +470,8 @@ class WebDisplay(DisplayMsg, threading.Thread):
 
             if message.info['level_text'] is None:
                 del self.shared['game_info']['level_text']
+            if message.info['level_name'] is None:
+                del self.shared['game_info']['level_name']
 
         elif isinstance(message, Message.OPENING_BOOK):
             self._create_game_info()
@@ -487,6 +500,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
         elif isinstance(message, Message.LEVEL):
             self._create_game_info()
             self.shared['game_info']['level_text'] = message.level_text
+            self.shared['game_info']['level_name'] = message.level_name
             _build_headers()
             _send_headers()
 

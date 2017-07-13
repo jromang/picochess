@@ -316,7 +316,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 text.wait = self._exit_menu()
                 logging.debug('map: New level %s', msg)
                 write_picochess_ini('engine-level', msg)
-                Observable.fire(Event.LEVEL(options=level_dict[msg], level_text=text))
+                Observable.fire(Event.LEVEL(options=level_dict[msg], level_text=text, level_name=msg))
             else:
                 logging.debug('engine doesnt support levels')
         elif fen in book_map:
@@ -349,7 +349,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                             self.dgtmenu.set_engine_level(len_level - 1)
                         msg = sorted(level_dict)[self.dgtmenu.get_engine_level()]
                         options = level_dict[msg]  # cause of "new-engine", send options lateron - now only {}
-                        Observable.fire(Event.LEVEL(options={}, level_text=self.dgttranslate.text('M10_level', msg)))
+                        Observable.fire(Event.LEVEL(options={}, level_text=self.dgttranslate.text('M10_level', msg),
+                                                    level_name=msg))
                     else:
                         msg = None
                         options = {}

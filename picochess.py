@@ -495,6 +495,7 @@ def main():
     parser.add_argument('-lf', '--log-file', type=str, help='log to the given file')
     parser.add_argument('-pf', '--pgn-file', type=str, help='pgn file used to store the games', default='games.pgn')
     parser.add_argument('-pu', '--pgn-user', type=str, help='user name for the pgn file', default=None)
+    parser.add_argument('-pe', '--pgn-elo', type=str, help='user elo for the pgn file', default='-')
     parser.add_argument('-w', '--web-server', dest='web_server_port', nargs='?', const=80, type=int, metavar='PORT',
                         help='launch web server')
     parser.add_argument('-m', '--email', type=str, help='email used to send pgn/log files', default=None)
@@ -639,17 +640,20 @@ def main():
     engine.startup(engine_opt)
 
     # Startup - external
-    if args.engine_level:
-        level_text = dgttranslate.text('B00_level', args.engine_level)
+    level_name = args.engine_level
+    if level_name:
+        level_text = dgttranslate.text('B00_level', level_name)
         level_text.beep = False
     else:
         level_text = None
+    sys_info = {'version': version, 'engine_name': engine_name, 'user_name': user_name, 'user_elo': args.pgn_elo}
     DisplayMsg.show(Message.STARTUP_INFO(info={'interaction_mode': interaction_mode, 'play_mode': play_mode,
-                                               'books': all_books, 'book_index': book_index, 'level_text': level_text,
+                                               'books': all_books, 'book_index': book_index,
+                                               'level_text': level_text, 'level_name': level_name,
                                                'time_control': time_control, 'time_text': time_text}))
     DisplayMsg.show(Message.ENGINE_STARTUP(shell=engine.get_shell(), file=engine.get_file(), level_index=level_index,
                                            has_levels=engine.has_levels(), has_960=engine.has_chess960()))
-    DisplayMsg.show(Message.SYSTEM_INFO(info={'version': version, 'engine_name': engine_name, 'user_name': user_name}))
+    DisplayMsg.show(Message.SYSTEM_INFO(info=sys_info))
 
     ip_info_thread = threading.Timer(10, display_ip_info)  # give RaspberyPi 10sec time to startup its network devices
     ip_info_thread.start()
@@ -686,7 +690,8 @@ def main():
             elif isinstance(event, Event.LEVEL):
                 if event.options:
                     engine.startup(event.options, False)
-                DisplayMsg.show(Message.LEVEL(level_text=event.level_text, do_speak=bool(event.options)))
+                DisplayMsg.show(Message.LEVEL(level_text=event.level_text, level_name=event.level_name,
+                                              do_speak=bool(event.options)))
                 stop_fen_timer()
 
             elif isinstance(event, Event.NEW_ENGINE):
@@ -730,8 +735,7 @@ def main():
                     # All done - rock'n'roll
                     if not engine_fallback:
                         msg = Message.ENGINE_READY(eng=event.eng, engine_name=engine_name,
-                                                   eng_text=event.eng_text,
-                                                   has_levels=engine.has_levels(),
+                                                   eng_text=event.eng_text, has_levels=engine.has_levels(),
                                                    has_960=engine.has_chess960(), show_ok=event.show_ok)
                     else:
                         msg = Message.ENGINE_FAIL()

@@ -185,7 +185,7 @@ class Message():
     ENGINE_READY = ClassFactory(MessageApi.ENGINE_READY, ['eng', 'eng_text', 'engine_name', 'has_levels', 'has_960', 'show_ok'])
     ENGINE_STARTUP = ClassFactory(MessageApi.ENGINE_STARTUP, ['shell', 'file', 'level_index', 'has_levels', 'has_960'])
     ENGINE_FAIL = ClassFactory(MessageApi.ENGINE_FAIL, [])
-    LEVEL = ClassFactory(MessageApi.LEVEL, ['level_text', 'do_speak'])
+    LEVEL = ClassFactory(MessageApi.LEVEL, ['level_text', 'level_name', 'do_speak'])
     TIME_CONTROL = ClassFactory(MessageApi.TIME_CONTROL, ['time_text', 'show_ok', 'tc_init'])
     OPENING_BOOK = ClassFactory(MessageApi.OPENING_BOOK, ['book_text', 'show_ok'])
 
@@ -234,7 +234,7 @@ class Event():
 
     # User events
     FEN = ClassFactory(EventApi.FEN, ['fen'])
-    LEVEL = ClassFactory(EventApi.LEVEL, ['options', 'level_text'])
+    LEVEL = ClassFactory(EventApi.LEVEL, ['options', 'level_text', 'level_name'])
     NEW_GAME = ClassFactory(EventApi.NEW_GAME, ['pos960'])
     DRAWRESIGN = ClassFactory(EventApi.DRAWRESIGN, ['result'])
     KEYBOARD_MOVE = ClassFactory(EventApi.KEYBOARD_MOVE, ['move'])

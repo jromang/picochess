@@ -918,7 +918,7 @@ class DgtMenu(object):
                 msg = sorted(level_dict)[self.menu_engine_level]
                 options = level_dict[msg]
                 write_picochess_ini('engine-level', msg)
-                event = Event.LEVEL(options={}, level_text=self.dgttranslate.text('B10_level', msg))
+                event = Event.LEVEL(options={}, level_text=self.dgttranslate.text('B10_level', msg), level_name=msg)
                 Observable.fire(event)
             else:
                 options = {}
