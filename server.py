@@ -357,12 +357,12 @@ class WebDisplay(DisplayMsg, threading.Thread):
 
     def _build_game_header(self, pgn_game: chess.pgn.Game):
         # pgn_game.headers['Result'] = '*'
-        pgn_game.headers['White'] = 'None'
-        pgn_game.headers['Black'] = 'None'
         pgn_game.headers['Event'] = 'PicoChess game'
-        pgn_game.headers['Date'] = datetime.datetime.now().date().strftime('%Y-%m-%d')
-        pgn_game.headers['Round'] = '?'
         pgn_game.headers['Site'] = 'picochess.org'
+        pgn_game.headers['Date'] = datetime.datetime.today().strftime('%Y.%m.%d')
+        pgn_game.headers['Round'] = '?'
+        pgn_game.headers['White'] = '?'
+        pgn_game.headers['Black'] = '?'
 
         user_name = 'User'
         engine_name = 'Picochess'
@@ -378,21 +378,25 @@ class WebDisplay(DisplayMsg, threading.Thread):
 
         if 'game_info' in self.shared:
             if 'level_text' in self.shared['game_info']:
-                engine_name += ' [{0}]'.format(self.shared['game_info']['level_text'].m)
+                engine_level = ' ({0})'.format(self.shared['game_info']['level_text'].m)
+            else:
+                engine_level = ''
             if 'level_name' in self.shared['game_info']:
                 level_name = self.shared['game_info']['level_name']
                 if level_name.startswith('Elo@'):
                     comp_elo = int(level_name[4:])
+                    engine_level = ''
             if 'play_mode' in self.shared['game_info']:
-                pgn_game.headers['Black'] = \
-                    engine_name if self.shared['game_info']['play_mode'] == PlayMode.USER_WHITE else user_name
-                pgn_game.headers['White'] = \
-                    engine_name if self.shared['game_info']['play_mode'] == PlayMode.USER_BLACK else user_name
-
-                comp_color = 'Black' if self.shared['game_info']['play_mode'] == PlayMode.USER_WHITE else 'White'
-                user_color = 'Black' if self.shared['game_info']['play_mode'] == PlayMode.USER_BLACK else 'White'
-                pgn_game.headers[comp_color + 'Elo'] = comp_elo
-                pgn_game.headers[user_color + 'Elo'] = user_elo
+                if self.shared['game_info']['play_mode'] == PlayMode.USER_WHITE:
+                    pgn_game.headers['White'] = user_name
+                    pgn_game.headers['Black'] = engine_name + engine_level
+                    pgn_game.headers['WhiteElo'] = user_elo
+                    pgn_game.headers['BlackElo'] = comp_elo
+                else:
+                    pgn_game.headers['White'] = engine_name + engine_level
+                    pgn_game.headers['Black'] = user_name
+                    pgn_game.headers['WhiteElo'] = comp_elo
+                    pgn_game.headers['BlackElo'] = user_elo
 
         if 'ip_info' in self.shared:
             if 'location' in self.shared['ip_info']:

@@ -153,11 +153,13 @@ class PgnDisplay(DisplayMsg, threading.Thread):
         self.file_name = file_name
         self.emailer = emailer
 
-        self.engine_name = ''
-        self.old_engine = ''
-        self.user_name = ''
-        self.location = ''
+        self.engine_name = '?'
+        self.old_engine = '?'
+        self.user_name = '?'
+        self.location = '?'
         self.level_text = None
+        self.level_name = ''
+        self.user_elo = '-'
 
     def _save_and_email_pgn(self, message):
         logging.debug('Saving game to [' + self.file_name + ']')
@@ -178,18 +180,24 @@ class PgnDisplay(DisplayMsg, threading.Thread):
         if self.level_text is None:
             engine_level = ''
         else:
-            engine_level = " ({})".format(self.level_text.m)
+            engine_level = ' ({})'.format(self.level_text.m)
+
+        if self.level_name.startswith('Elo@'):
+            comp_elo = int(self.level_name[4:])
+            engine_level = ''
+        else:
+            comp_elo = 2900
 
         if message.play_mode == PlayMode.USER_WHITE:
             pgn_game.headers['White'] = self.user_name
             pgn_game.headers['Black'] = self.engine_name + engine_level
-            pgn_game.headers['WhiteElo'] = '-'
-            pgn_game.headers['BlackElo'] = '2900'
+            pgn_game.headers['WhiteElo'] = self.user_elo
+            pgn_game.headers['BlackElo'] = comp_elo
         if message.play_mode == PlayMode.USER_BLACK:
             pgn_game.headers['White'] = self.engine_name + engine_level
             pgn_game.headers['Black'] = self.user_name
-            pgn_game.headers['WhiteElo'] = '2900'
-            pgn_game.headers['BlackElo'] = '-'
+            pgn_game.headers['WhiteElo'] = comp_elo
+            pgn_game.headers['BlackElo'] = self.user_elo
 
         # Save to file
         file = open(self.file_name, 'a')
@@ -207,15 +215,18 @@ class PgnDisplay(DisplayMsg, threading.Thread):
             self.engine_name = message.info['engine_name']
             self.old_engine = self.engine_name
             self.user_name = message.info['user_name']
+            self.user_elo = message.info['user_elo']
 
         elif isinstance(message, Message.IP_INFO):
             self.location = message.info['location']
 
         elif isinstance(message, Message.STARTUP_INFO):
             self.level_text = message.info['level_text']
+            self.level_name = message.info['level_name']
 
         elif isinstance(message, Message.LEVEL):
             self.level_text = message.level_text
+            self.level_name = message.level_name
 
         elif isinstance(message, Message.INTERACTION_MODE):
             if message.mode == Mode.REMOTE:
@@ -228,6 +239,7 @@ class PgnDisplay(DisplayMsg, threading.Thread):
             self.engine_name = message.engine_name
             if not message.has_levels:
                 self.level_text = None
+                self.level_name = ''
 
         elif isinstance(message, Message.GAME_ENDS):
             if message.game.move_stack:
