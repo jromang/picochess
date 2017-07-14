@@ -646,6 +646,7 @@ def main():
         level_text.beep = False
     else:
         level_text = None
+        level_name = ''
     sys_info = {'version': version, 'engine_name': engine_name, 'user_name': user_name, 'user_elo': args.pgn_elo}
     DisplayMsg.show(Message.STARTUP_INFO(info={'interaction_mode': interaction_mode, 'play_mode': play_mode,
                                                'books': all_books, 'book_index': book_index,
