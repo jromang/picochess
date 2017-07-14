@@ -18,6 +18,7 @@
 import datetime
 import threading
 import logging
+from collections import OrderedDict
 
 import chess
 import chess.pgn as pgn
@@ -353,7 +354,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
 
     def _create_headers(self):
         if 'headers' not in self.shared:
-            self.shared['headers'] = {}
+            self.shared['headers'] = OrderedDict()
 
     def _build_game_header(self, pgn_game: chess.pgn.Game):
         # pgn_game.headers['Result'] = '*'
