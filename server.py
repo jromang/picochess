@@ -377,6 +377,14 @@ class WebDisplay(DisplayMsg, threading.Thread):
             if 'user_elo' in self.shared['system_info']:
                 user_elo = self.shared['system_info']['user_elo']
 
+        # @todo find a better way to setup engine elo
+        engine_elo = {'stockfish': 3100, 'texel': 2900, 'rodent': 2650,
+                      'zurichess': 2450, 'floyd': 2300, 'cinnamon': 2100, 'claudia': 1650}
+        for name, elo in engine_elo.items():
+            if engine_name.lower().startswith(name):
+                comp_elo = elo
+                break
+
         if 'game_info' in self.shared:
             if 'level_text' in self.shared['game_info']:
                 engine_level = ' ({0})'.format(self.shared['game_info']['level_text'].m)

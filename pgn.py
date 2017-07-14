@@ -187,6 +187,13 @@ class PgnDisplay(DisplayMsg, threading.Thread):
             engine_level = ''
         else:
             comp_elo = 2900
+            # @todo find a better way to setup engine elo
+            engine_elo = {'stockfish': 3100, 'texel': 2900, 'rodent': 2650,
+                          'zurichess': 2450, 'floyd': 2300, 'cinnamon': 2100, 'claudia': 1650}
+            for name, elo in engine_elo.items():
+                if self.engine_name.lower().startswith(name):
+                    comp_elo = elo
+                    break
 
         if message.play_mode == PlayMode.USER_WHITE:
             pgn_game.headers['White'] = self.user_name
