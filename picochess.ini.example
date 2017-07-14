@@ -138,7 +138,10 @@
 # speed-voice = 2
 ## PicoChess writes pgn files at end of game. This file is created in the 'games' folder
 # pgn-file = games.pgn
+## If you want to have your own name in the pgn file uncomment the next line and change accordingly
 # pgn-user = player
+## If you want your own ELO-ranking in the pgn file uncomment the next line and change accordingly
+# pgn-elo = 1987
 ## Picochess will check for a new version at startup.
 ## This is by default not actived. If you want this feature, please uncomment the next line
 # enable-update = True
