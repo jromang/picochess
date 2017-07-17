@@ -86,8 +86,9 @@ def write_engine_ini(engine_path=None):
         if not parser.read(engine_path + os.sep + engine_filename + '.uci'):
             if engine.has_limit_strength():
                 uelevel = engine.get().options['UCI_Elo']
-                elo_1, elo_2 = int(uelevel[2]), int(uelevel[3])
-                minlevel, maxlevel = min(elo_1, elo_2), max(elo_1, elo_2)
+                minelo = uelevel.min
+                maxelo = uelevel.max
+                minlevel, maxlevel = min(minelo, maxelo), max(minelo, maxelo)
                 lvl_inc = calc_inc(maxlevel - minlevel)
                 level = minlevel
                 while level < maxlevel:
@@ -96,13 +97,15 @@ def write_engine_ini(engine_path=None):
                 parser['Elo@{:04d}'.format(maxlevel)] = {'UCI_LimitStrength': 'false', 'UCI_Elo': str(maxlevel)}
             if engine.has_skill_level():
                 sklevel = engine.get().options['Skill Level']
-                minlevel, maxlevel = int(sklevel[3]), int(sklevel[4])
+                minlevel = sklevel.min
+                maxlevel = sklevel.max
                 minlevel, maxlevel = min(minlevel, maxlevel), max(minlevel, maxlevel)
                 for level in range(minlevel, maxlevel + 1):
                     parser['Level@{:02d}'.format(level)] = {'Skill Level': str(level)}
             if engine.has_strength():
                 sklevel = engine.get().options['Strength']
-                minlevel, maxlevel = int(sklevel[3]), int(sklevel[4])
+                minlevel = sklevel.min
+                maxlevel = sklevel.max
                 minlevel, maxlevel = min(minlevel, maxlevel), max(minlevel, maxlevel)
                 lvl_inc = calc_inc(maxlevel - minlevel)
                 level = minlevel
