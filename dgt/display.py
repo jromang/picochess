@@ -554,29 +554,45 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.dgtmenu.set_mode(message.info['interaction_mode'])
         self.dgtmenu.set_book(message.info['book_index'])
         self.dgtmenu.all_books = message.info['books']
-        timectrl = self.time_control = message.info['time_control']
+        timectrl = self.time_control = message.info['time_control']  # type: TimeControl
         self.dgtmenu.set_time_mode(timectrl.mode)
         # try to find the index from the given time_control (timectrl)
-        # if user gave a non-existent timectrl value stay at standard
+        # if user gave a non-existent timectrl value update map & list
         index = 0
+        isnew = True
         if timectrl.mode == TimeMode.FIXED:
             for val in self.dgtmenu.tc_fixed_map.values():
                 if val == timectrl:
                     self.dgtmenu.set_time_fixed(index)
+                    isnew = False
                     break
                 index += 1
+            if isnew:
+                self.dgtmenu.tc_fixed_map.update({('', timectrl)})
+                self.dgtmenu.tc_fixed_list.append('{:2d}'.format(timectrl.seconds_per_move))
+                self.dgtmenu.set_time_fixed(index)
         elif timectrl.mode == TimeMode.BLITZ:
             for val in self.dgtmenu.tc_blitz_map.values():
                 if val == timectrl:
                     self.dgtmenu.set_time_blitz(index)
+                    isnew = False
                     break
                 index += 1
+            if isnew:
+                self.dgtmenu.tc_blitz_map.update({('', timectrl)})
+                self.dgtmenu.tc_blitz_list.append('{:2d}'.format(timectrl.minutes_per_game))
+                self.dgtmenu.set_time_blitz(index)
         elif timectrl.mode == TimeMode.FISCHER:
             for val in self.dgtmenu.tc_fisch_map.values():
                 if val == timectrl:
                     self.dgtmenu.set_time_fisch(index)
+                    isnew = False
                     break
                 index += 1
+            if isnew:
+                self.dgtmenu.tc_fisch_map.update({('', timectrl)})
+                self.dgtmenu.tc_fisch_list.append('{:2d} {:2d}'.format(timectrl.minutes_per_game, timectrl.fischer_increment))
+                self.dgtmenu.set_time_fisch(index)
 
     def _process_clock_start(self, message):
         timectrl = self.time_control = TimeControl(**message.tc_init)

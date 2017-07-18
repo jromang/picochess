@@ -54,6 +54,10 @@ class TimeControl(object):
         chk_finc = self.fischer_increment == other.fischer_increment
         return chk_mode and chk_secs and chk_mins and chk_finc
 
+    def __hash__(self):
+        value = str(self.mode) + str(self.seconds_per_move) + str(self.minutes_per_game) + str(self.fischer_increment)
+        return hash(value)
+
     def get_parameters(self):
         """Return the state of this class for generating a new instance."""
         return {'mode': self.mode, 'fixed': self.seconds_per_move, 'blitz': self.minutes_per_game,
