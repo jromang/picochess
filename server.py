@@ -378,8 +378,8 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 user_elo = self.shared['system_info']['user_elo']
 
         # @todo find a better way to setup engine elo
-        engine_elo = {'stockfish': 3100, 'texel': 2900, 'rodent': 2650,
-                      'zurichess': 2450, 'floyd': 2300, 'cinnamon': 2100, 'claudia': 1650}
+        engine_elo = {'stockfish': 3300, 'texel': 3140, 'rodent': 2920,
+                      'zurichess': 2790, 'floyd': 2660, 'cinnamon': 2060}
         for name, elo in engine_elo.items():
             if engine_name.lower().startswith(name):
                 comp_elo = elo
