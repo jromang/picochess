@@ -433,7 +433,10 @@ def main():
         """Transfer the time list to a TimeControl Object and a Text Object."""
         def _num(time_str):
             try:
-                return int(time_str)
+                value = int(time_str)
+                if value > 99:
+                    value = 99
+                return value
             except ValueError:
                 return 1
 
@@ -488,7 +491,8 @@ def main():
     parser.add_argument('-b', '--book', type=str, help="path of book such as 'books/b-flank.bin'",
                         default='books/h-varied.bin')
     parser.add_argument('-t', '--time', type=str, default='5 0',
-                        help="Time settings <FixSec> or <StMin IncSec> like '10'(move) or '5 0'(game) '3 2'(fischer)")
+                        help="Time settings <FixSec> or <StMin IncSec> like '10'(move) or '5 0'(game) '3 2'(fischer). \
+                        All values must be below 100")
     parser.add_argument('-norl', '--disable-revelation-leds', action='store_true', help='disable Revelation leds')
     parser.add_argument('-l', '--log-level', choices=['notset', 'debug', 'info', 'warning', 'error', 'critical'],
                         default='warning', help='logging level')
