@@ -1183,8 +1183,10 @@ function formatEngineOutput(line) {
             '</div><div class="row-content">';
 
         if (score !== null) {
+            /*
             output += '<div class="least-content">' +
                 '<i class="fa fa-paste"></i></div>';
+            */
             output += '<h4 class="list-group-item-heading" id="pv_' + multipv + '_score">' +
                 '<span style="color:blue">' + score + '/' + depth + '</span></h4>';
         }
@@ -1259,11 +1261,20 @@ function multiPvDecrease() {
 
 function importPv(e) {
     stopAnalysis();
+    console.log(e);
     var tmpGame = createGamePointer();
+    console.log(window.engine_lines[$(this).context.id].line);
     for (var i = 0; i < window.engine_lines[$(this).context.id].line.length; ++i) {
         var text_move = window.engine_lines[$(this).context.id].line[i];
         var move = tmpGame.move(text_move);
-        updateCurrentPosition(move, tmpGame);
+        if(move) {
+            updateCurrentPosition(move, tmpGame);
+        } else {
+            console.warn('import_pv error');
+            console.log(tmpGame.ascii());
+            console.log(text_move);
+            break;
+        }
     }
     updateChessGround();
     updateStatus();
