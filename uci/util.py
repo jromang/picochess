@@ -102,6 +102,13 @@ def write_engine_ini(engine_path=None):
                 minlevel, maxlevel = min(minlevel, maxlevel), max(minlevel, maxlevel)
                 for level in range(minlevel, maxlevel + 1):
                     parser['Level@{:02d}'.format(level)] = {'Skill Level': str(level)}
+            if engine.has_handicap_level():
+                sklevel = engine.get().options['Handicap Level']
+                minlevel = sklevel.min
+                maxlevel = sklevel.max
+                minlevel, maxlevel = min(minlevel, maxlevel), max(minlevel, maxlevel)
+                for level in range(minlevel, maxlevel + 1):
+                    parser['Level@{:02d}'.format(level)] = {'Handicap Level': str(level)}
             if engine.has_strength():
                 sklevel = engine.get().options['Strength']
                 minlevel = sklevel.min

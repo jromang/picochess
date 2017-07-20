@@ -88,11 +88,16 @@ class UciEngine(object):
 
     def has_levels(self):
         """Return engine level support."""
-        return self.level_support or self.has_skill_level() or self.has_limit_strength() or self.has_strength()
+        has_lv = self.has_skill_level() or self.has_handicap_level() or self.has_limit_strength() or self.has_strength()
+        return self.level_support or has_lv
 
     def has_skill_level(self):
         """Return engine skill level support."""
         return 'Skill Level' in self.engine.options
+
+    def has_handicap_level(self):
+        """Return engine handicap level support."""
+        return 'Handicap Level' in self.engine.options
 
     def has_limit_strength(self):
         """Return engine limit strength support."""
