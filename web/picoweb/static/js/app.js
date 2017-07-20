@@ -1178,17 +1178,12 @@ function formatEngineOutput(line) {
             turn_sep = '..';
         }
 
-        output = '<div class="list-group-item"><div class="row-picture" style="padding-right: 0.2vw;">' +
-            '<button id="import_pv_' + multipv + '" class="importPVBtn btn btn-default btn-xs"><i class="fa fa-paste"></i></button>' +
-            '</div><div class="row-content">';
-
+        output = '<div class="list-group-item">';
         if (score !== null) {
-            /*
-            output += '<div class="least-content">' +
-                '<i class="fa fa-paste"></i></div>';
-            */
-            output += '<h4 class="list-group-item-heading" id="pv_' + multipv + '_score">' +
-                '<span style="color:blue">' + score + '/' + depth + '</span></h4>';
+            output += '<h4 class="list-group-item-heading" id="pv_' + multipv + '_score">';
+            output += '<button id="import_pv_' + multipv + '" style="margin-top: 0px;" class="importPVBtn btn btn-raised btn-info btn-xs" onclick="importPv(multipv)" data-placement="auto" data-toggle="tooltip" title="copy to game record"><i class="fa fa-copy"></i><span>&nbsp;Copy</span></button>';
+            output += '<span style="color:blue; font-size: 1.8vw; margin-left: 1vw;">' + score + '/' + depth + '</span>';
+            output += '</h4>';
         }
         output += '<p class="list-group-item-text">' + turn_sep;
         for (i = 0; i < history.length; ++i) {
@@ -1199,7 +1194,7 @@ function formatEngineOutput(line) {
                 output += figurinizeMove(history[i]) + " ";
             }
         }
-        output += '</p></div></div><div class="list-group-separator"></div>';
+        output += '</p></div>';
 
         analysis_game = null;
         return {line: output, pv_index: multipv};
@@ -1224,7 +1219,7 @@ function multiPvIncrease() {
             }
         }
 
-        var new_div_str = "<div id=\"pv_" + window.multipv + "\"></div>";
+        var new_div_str = "<div id=\"pv_" + window.multipv + "\"  style=\"margin-bottom: 3vh;\"></div>";
         $("#pv_output").append(new_div_str);
 
         if (!window.StockfishModule) {
@@ -1259,13 +1254,12 @@ function multiPvDecrease() {
     }
 }
 
-function importPv(e) {
+function importPv(multipv) {
     stopAnalysis();
-    console.log(e);
     var tmpGame = createGamePointer();
-    console.log(window.engine_lines[$(this).context.id].line);
-    for (var i = 0; i < window.engine_lines[$(this).context.id].line.length; ++i) {
-        var text_move = window.engine_lines[$(this).context.id].line[i];
+    var line = window.engine_lines['import_pv_' + multipv].line;
+    for (var i = 0; i < line.length; ++i) {
+        var text_move = line[i];
         var move = tmpGame.move(text_move);
         if(move) {
             updateCurrentPosition(move, tmpGame);
@@ -1302,7 +1296,6 @@ function handleMessage(event) {
         $('#pv_' + output.pv_index).html(output.line);
     }
     $('#engineMultiPVStatus').html(window.multipv + " line(s)");
-    $('.importPVBtn').on('click', importPv);
 }
 
 function loadNaclStockfish() {
