@@ -19,42 +19,43 @@
 
 import sys
 import os
-
-import configargparse
-import chess
-import chess.polyglot
-import chess.uci
 import threading
 import copy
 import gc
+import logging
+from logging.handlers import RotatingFileHandler
+import time
+import queue
+import configargparse
 
 from uci.engine import UciEngine
 from uci.util import read_engine_ini, get_installed_engines
+import chess
+import chess.polyglot
+import chess.uci
 
 from timecontrol import TimeControl
 from utilities import get_location, update_picochess, get_opening_books, shutdown, reboot, checkout_tag
 from utilities import Observable, DisplayMsg, version, evt_queue, write_picochess_ini
-import logging
-import time
-import queue
-from dgt.api import Message, Event
-from dgt.util import GameResult, TimeMode, Mode, PlayMode
 from pgn import Emailer, PgnDisplay
 from server import WebServer
 from talker.picotalker import PicoTalkerDisplay
+from dispatcher import Dispatcher
 
+from dgt.api import Message, Event
+from dgt.util import GameResult, TimeMode, Mode, PlayMode
 from dgt.hw import DgtHw
 from dgt.pi import DgtPi
 from dgt.display import DgtDisplay
 from dgt.board import DgtBoard
 from dgt.translate import DgtTranslate
 from dgt.menu import DgtMenu
-from dispatcher import Dispatcher
-
-from logging.handlers import RotatingFileHandler
 
 
 class AlternativeMover:
+
+    """Keep track of alternative moves."""
+
     def __init__(self):
         self.excludemoves = set()
 
@@ -93,7 +94,7 @@ class AlternativeMover:
 
 
 def main():
-
+    """Main function."""
     def display_ip_info():
         """Fire an IP_INFO message with the IP adr."""
         location, ext_ip, int_ip = get_location()
@@ -143,6 +144,7 @@ def main():
     def think(game: chess.Board, timec: TimeControl, msg: Message):
         """
         Start a new search on the current game.
+
         If a move is found in the opening book, fire an event in a few seconds.
         """
         start_clock()
@@ -171,7 +173,7 @@ def main():
         analyse(game, msg)
 
     def stop_search_and_clock():
-        """depending on the interaction mode stop search and clock."""
+        """Depending on the interaction mode stop search and clock."""
         if interaction_mode == Mode.NORMAL:
             stop_clock()
             if not engine.is_waiting():
@@ -348,6 +350,7 @@ def main():
         # Player had done the computer or remote move on the board
         elif fen == done_computer_fen:
             assert interaction_mode in (Mode.NORMAL, Mode.REMOTE), 'wrong mode: %s' % interaction_mode
+            DisplayMsg.show(Message.COMPUTER_MOVE_DONE())
             game.push(done_move)
             done_computer_fen = None
             done_move = chess.Move.null()
@@ -356,7 +359,6 @@ def main():
                 time_control.add_inc(not game.turn)
                 if time_control.mode != TimeMode.FIXED:
                     start_clock()
-                DisplayMsg.show(Message.COMPUTER_MOVE_DONE())
                 legal_fens = compute_legal_fens(game.copy())
             else:
                 legal_fens = []
@@ -431,7 +433,10 @@ def main():
         """Transfer the time list to a TimeControl Object and a Text Object."""
         def _num(time_str):
             try:
-                return int(time_str)
+                value = int(time_str)
+                if value > 99:
+                    value = 99
+                return value
             except ValueError:
                 return 1
 
@@ -486,13 +491,15 @@ def main():
     parser.add_argument('-b', '--book', type=str, help="path of book such as 'books/b-flank.bin'",
                         default='books/h-varied.bin')
     parser.add_argument('-t', '--time', type=str, default='5 0',
-                        help="Time settings <FixSec> or <StMin IncSec> like '10'(move) or '5 0'(game) '3 2'(fischer)")
+                        help="Time settings <FixSec> or <StMin IncSec> like '10'(move) or '5 0'(game) '3 2'(fischer). \
+                        All values must be below 100")
     parser.add_argument('-norl', '--disable-revelation-leds', action='store_true', help='disable Revelation leds')
     parser.add_argument('-l', '--log-level', choices=['notset', 'debug', 'info', 'warning', 'error', 'critical'],
                         default='warning', help='logging level')
     parser.add_argument('-lf', '--log-file', type=str, help='log to the given file')
     parser.add_argument('-pf', '--pgn-file', type=str, help='pgn file used to store the games', default='games.pgn')
     parser.add_argument('-pu', '--pgn-user', type=str, help='user name for the pgn file', default=None)
+    parser.add_argument('-pe', '--pgn-elo', type=str, help='user elo for the pgn file', default='-')
     parser.add_argument('-w', '--web-server', dest='web_server_port', nargs='?', const=80, type=int, metavar='PORT',
                         help='launch web server')
     parser.add_argument('-m', '--email', type=str, help='email used to send pgn/log files', default=None)
@@ -535,13 +542,13 @@ def main():
 
     # Enable logging
     if args.log_file:
-        handler = RotatingFileHandler('logs' + os.sep + args.log_file, maxBytes=1.4*1024*1024, backupCount=6)
+        handler = RotatingFileHandler('logs' + os.sep + args.log_file, maxBytes=1.4 * 1024 * 1024, backupCount=6)
         logging.basicConfig(level=getattr(logging, args.log_level.upper()),
                             format='%(asctime)s.%(msecs)03d %(levelname)7s %(module)10s - %(funcName)s: %(message)s',
                             datefmt="%Y-%m-%d %H:%M:%S", handlers=[handler])
     logging.getLogger('chess.uci').setLevel(logging.INFO)  # don't want to get so many python-chess uci messages
 
-    logging.debug('#'*20 + ' PicoChess v%s ' + '#'*20, version)
+    logging.debug('#' * 20 + ' PicoChess v%s ' + '#' * 20, version)
     # log the startup parameters but hide the password fields
     a_copy = copy.copy(vars(args))
     a_copy['mailgun_key'] = a_copy['smtp_pass'] = a_copy['engine_remote_key'] = a_copy['engine_remote_pass'] = '*****'
@@ -549,9 +556,10 @@ def main():
     if unknown:
         logging.warning('invalid parameter given %s', unknown)
     # wire some dgt classes
-    dgtboard = DgtBoard(args.dgt_port, args.disable_revelation_leds, args.dgtpi, args.capital_letters, args.disable_et)
+    dgtboard = DgtBoard(args.dgt_port, args.disable_revelation_leds, args.dgtpi, args.disable_et)
     dgttranslate = DgtTranslate(args.beep_config, args.beep_some_level, args.language, version)
-    dgtmenu = DgtMenu(args.disable_confirm_message, args.ponder_interval, args.speed_voice, dgttranslate)
+    dgtmenu = DgtMenu(args.disable_confirm_message, args.ponder_interval, args.speed_voice, args.capital_letters,
+                      dgttranslate)
     dgtdispatcher = Dispatcher(dgtmenu)
 
     time_control, time_text = transfer_time(args.time.split())
@@ -636,17 +644,21 @@ def main():
     engine.startup(engine_opt)
 
     # Startup - external
-    if args.engine_level:
-        level_text = dgttranslate.text('B00_level', args.engine_level)
+    level_name = args.engine_level
+    if level_name:
+        level_text = dgttranslate.text('B00_level', level_name)
         level_text.beep = False
     else:
         level_text = None
+        level_name = ''
+    sys_info = {'version': version, 'engine_name': engine_name, 'user_name': user_name, 'user_elo': args.pgn_elo}
     DisplayMsg.show(Message.STARTUP_INFO(info={'interaction_mode': interaction_mode, 'play_mode': play_mode,
-                                               'books': all_books, 'book_index': book_index, 'level_text': level_text,
+                                               'books': all_books, 'book_index': book_index,
+                                               'level_text': level_text, 'level_name': level_name,
                                                'time_control': time_control, 'time_text': time_text}))
     DisplayMsg.show(Message.ENGINE_STARTUP(shell=engine.get_shell(), file=engine.get_file(), level_index=level_index,
                                            has_levels=engine.has_levels(), has_960=engine.has_chess960()))
-    DisplayMsg.show(Message.SYSTEM_INFO(info={'version': version, 'engine_name': engine_name, 'user_name': user_name}))
+    DisplayMsg.show(Message.SYSTEM_INFO(info=sys_info))
 
     ip_info_thread = threading.Timer(10, display_ip_info)  # give RaspberyPi 10sec time to startup its network devices
     ip_info_thread.start()
@@ -683,7 +695,8 @@ def main():
             elif isinstance(event, Event.LEVEL):
                 if event.options:
                     engine.startup(event.options, False)
-                DisplayMsg.show(Message.LEVEL(level_text=event.level_text, do_speak=bool(event.options)))
+                DisplayMsg.show(Message.LEVEL(level_text=event.level_text, level_name=event.level_name,
+                                              do_speak=bool(event.options)))
                 stop_fen_timer()
 
             elif isinstance(event, Event.NEW_ENGINE):
@@ -727,8 +740,7 @@ def main():
                     # All done - rock'n'roll
                     if not engine_fallback:
                         msg = Message.ENGINE_READY(eng=event.eng, engine_name=engine_name,
-                                                   eng_text=event.eng_text,
-                                                   has_levels=engine.has_levels(),
+                                                   eng_text=event.eng_text, has_levels=engine.has_levels(),
                                                    has_960=engine.has_chess960(), show_ok=event.show_ok)
                     else:
                         msg = Message.ENGINE_FAIL()

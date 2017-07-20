@@ -15,20 +15,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from chess import Board
-from utilities import hours_minutes_seconds, DisplayDgt, DispatchDgt
 import logging
 import queue
+from threading import Thread
+
+from chess import Board
+from utilities import hours_minutes_seconds, DisplayDgt, DispatchDgt
 from dgt.util import ClockIcons, ClockSide
 from dgt.api import Dgt
-from threading import Thread
 from dgt.translate import DgtTranslate
 from dgt.board import DgtBoard
 
 
 class DgtIface(DisplayDgt, Thread):
 
-    """an Interface class for DgtHw, DgtPi, DgtVr."""
+    """An Interface class for DgtHw, DgtPi, DgtVr."""
 
     def __init__(self, dgttranslate: DgtTranslate, dgtboard: DgtBoard):
         super(DgtIface, self).__init__()
@@ -43,48 +44,49 @@ class DgtIface(DisplayDgt, Thread):
         self.case_res = True
 
     def display_text_on_clock(self, message):
-        """override this function."""
+        """Override this function."""
         raise NotImplementedError()
 
     def display_move_on_clock(self, message):
-        """override this function."""
+        """Override this function."""
         raise NotImplementedError()
 
     def display_time_on_clock(self, message):
-        """override this function."""
+        """Override this function."""
         raise NotImplementedError()
 
-    def light_squares_on_revelation(self, squares):
-        """override this function."""
+    def light_squares_on_revelation(self, uci_move):
+        """Override this function."""
         raise NotImplementedError()
 
     def clear_light_on_revelation(self):
-        """override this function."""
+        """Override this function."""
         raise NotImplementedError()
 
     def stop_clock(self, devs):
-        """override this function."""
+        """Override this function."""
         raise NotImplementedError()
 
     def _resume_clock(self, side):
-        """override this function."""
+        """Override this function."""
         raise NotImplementedError()
 
     def start_clock(self, time_left, time_right, side, devs):
-        """override this function."""
+        """Override this function."""
         raise NotImplementedError()
 
     def getName(self):
-        """override this function."""
+        """Override this function."""
         raise NotImplementedError()
 
     def get_san(self, message, is_xl=False):
-        """create a chess.board plus a text ready to display on clock."""
-        bit_board = Board(message.fen)
+        """Create a chess.board plus a text ready to display on clock."""
+        bit_board = Board(message.fen, message.uci960)
         if bit_board.is_legal(message.move):
             move_text = bit_board.san(message.move)
         else:
-            logging.warning('[%s] illegal move %s found - fen: %s', self.getName(), message.move, message.fen)
+            logging.warning('[%s] illegal move %s found - fen: %s - Chess960: %s', self.getName(), message.move,
+                            message.fen, message.uci960)
             move_text = 'er{}' if is_xl else 'err {}'
             move_text = move_text.format(message.move.uci()[:4])
 
@@ -154,7 +156,7 @@ class DgtIface(DisplayDgt, Thread):
             logging.warning('DgtApi command %s failed result: %s', msg, res)
 
     def run(self):
-        """called from threading.Thread by its start() function."""
+        """Call by threading.Thread start() function."""
         logging.info('[%s] dgt_queue ready', self.getName())
         while True:
             # Check if we have something to display

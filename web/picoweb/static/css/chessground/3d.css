@@ -1,0 +1,85 @@
+.in3d {
+  width: 100%;
+  height: 93.5714%;
+  /* height: 73.5714%; */
+  /* padding-bottom: 6.4285703125%; */
+  /* padding-bottom: 36.4285703125%; */
+  position: relative;
+}
+.in3d .ghost,
+.in3d .over {
+  display: none;
+}
+.in3d .cg-board-wrap {
+  background-size: cover;
+  background-image: url('images/board/3d/woodi.1024.png');
+}
+.in3d .cg-board {
+  top: 0.6168702%;
+  height: 97.0229%;
+}
+.in3d square[data-coord-x]::after {
+  bottom: calc(-10px - 22%);
+}
+.in3d piece {
+  /* original size:
+  width: 140.625%;
+  height: 179.6875%; */
+  /* size on 3D board, with height/width = 90.78571% */
+  width: 16.741%;
+  height: 23.563%;
+  left: -1.85%;
+  top: -9.1%;
+}
+.cg-board piece.dragging {
+  cursor: move;
+  z-index: 70!important;
+}
+.in3d .cg-board-wrap piece.pawn.white {
+  background-image: url('images/pieces/staunton/basic/White-Pawn.png');
+}
+.in3d .cg-board-wrap piece.bishop.white {
+  background-image: url('images/pieces/staunton/basic/White-Bishop.png');
+}
+.in3d .cg-board-wrap.orientation-black div.bishop.white {
+  background-image: url('images/pieces/staunton/basic/White-Bishop-Flipped.png');
+}
+.in3d .cg-board-wrap piece.knight.white {
+  background-image: url('images/pieces/staunton/basic/White-Knight.png');
+}
+.in3d .cg-board-wrap.orientation-black div.knight.white {
+  background-image: url('images/pieces/staunton/basic/White-Knight-Flipped.png');
+}
+.in3d .cg-board-wrap piece.rook.white {
+  background-image: url('images/pieces/staunton/basic/White-Rook.png');
+}
+.in3d .cg-board-wrap piece.queen.white {
+  background-image: url('images/pieces/staunton/basic/White-Queen.png');
+}
+.in3d .cg-board-wrap piece.king.white {
+  background-image: url('images/pieces/staunton/basic/White-King.png');
+}
+.in3d .cg-board-wrap piece.pawn.black {
+  background-image: url('images/pieces/staunton/basic/Black-Pawn.png');
+}
+.in3d .cg-board-wrap piece.bishop.black {
+  background-image: url('images/pieces/staunton/basic/Black-Bishop.png');
+}
+.in3d .cg-board-wrap.orientation-white div.bishop.black {
+  background-image: url('images/pieces/staunton/basic/Black-Bishop-Flipped.png');
+}
+.in3d .cg-board-wrap piece.knight.black {
+  background-image: url('images/pieces/staunton/basic/Black-Knight.png');
+}
+.in3d .cg-board-wrap.orientation-white div.knight.black {
+  background-image: url('images/pieces/staunton/basic/Black-Knight-Flipped.png');
+}
+.in3d .cg-board-wrap piece.rook.black {
+  background-image: url('images/pieces/staunton/basic/Black-Rook.png');
+}
+.in3d .cg-board-wrap piece.queen.black {
+  background-image: url('images/pieces/staunton/basic/Black-Queen.png');
+}
+.in3d .cg-board-wrap piece.king.black {
+  background-image: url('images/pieces/staunton/basic/Black-King.png');
+}

@@ -15,22 +15,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import logging
+import os
+import configparser
+import spur
+import paramiko
+
 from dgt.api import Event
 from dgt.util import EngineStatus
 from utilities import Observable
-import logging
-import os
-import spur
-import paramiko
 import chess.uci
 from chess import Board
 from uci.informer import Informer
-import configparser
 
 
 class UciEngine(object):
 
-    """handle the uci engine communication."""
+    """Handle the uci engine communication."""
 
     def __init__(self, file: str, hostname=None, username=None, key_file=None, password=None, home=''):
         super(UciEngine, self).__init__()
@@ -70,62 +71,88 @@ class UciEngine(object):
             logging.exception('engine executable not found')
 
     def get(self):
+        """Get Engine."""
         return self.engine
 
     def option(self, name, value):
+        """Set OptionName with value."""
         self.options[name] = value
 
     def send(self):
+        """Send options to engine."""
         self.engine.setoption(self.options)
 
     def level(self, options: dict):
+        """Set options."""
         self.options = options
 
     def has_levels(self):
-        return self.level_support or self.has_skill_level() or self.has_limit_strength() or self.has_strength()
+        """Return engine level support."""
+        has_lv = self.has_skill_level() or self.has_handicap_level() or self.has_limit_strength() or self.has_strength()
+        return self.level_support or has_lv
 
     def has_skill_level(self):
+        """Return engine skill level support."""
         return 'Skill Level' in self.engine.options
 
+    def has_handicap_level(self):
+        """Return engine handicap level support."""
+        return 'Handicap Level' in self.engine.options
+
     def has_limit_strength(self):
+        """Return engine limit strength support."""
         return 'UCI_LimitStrength' in self.engine.options
 
     def has_strength(self):
+        """Return engine strength support."""
         return 'Strength' in self.engine.options
 
     def has_chess960(self):
+        """Return chess960 support."""
         return 'UCI_Chess960' in self.engine.options
 
     def get_file(self):
+        """Get File."""
         return self.file
 
     def get_shell(self):
+        """Get Shell."""
         return self.shell  # shell is only "not none" if its a local engine - see __init__
 
     def position(self, game: Board):
+        """Set position."""
         self.engine.position(game)
 
     def quit(self):
+        """Quit engine."""
         return self.engine.quit()
 
     def terminate(self):
+        """Terminate engine."""
         return self.engine.terminate()
 
     def kill(self):
+        """Kill engine."""
         return self.engine.kill()
 
     def uci(self):
+        """Send start uci command."""
         self.engine.uci()
 
     def stop(self, show_best=False):
+        """Stop engine."""
         if self.is_waiting():
             logging.info('engine already stopped')
             return self.res
         self.show_best = show_best
-        self.engine.stop()
+        try:
+            self.engine.stop()
+        except chess.uci.EngineTerminatedException:
+            logging.error('Engine terminated')
         return self.future.result()
 
     def go(self, time_dict: dict):
+        """Go engine."""
         if not self.is_waiting():
             logging.warning('engine (still) not waiting - strange!')
         self.status = EngineStatus.THINK
@@ -137,6 +164,7 @@ class UciEngine(object):
         return self.future
 
     def ponder(self):
+        """Ponder engine."""
         if not self.is_waiting():
             logging.warning('engine (still) not waiting - strange!')
         self.status = EngineStatus.PONDER
@@ -147,6 +175,7 @@ class UciEngine(object):
         return self.future
 
     def callback(self, command):
+        """Callback function."""
         self.res = command.result()
 
         Observable.fire(Event.STOP_SEARCH(engine_status=self.status))
@@ -157,15 +186,19 @@ class UciEngine(object):
         self.status = EngineStatus.WAIT
 
     def is_thinking(self):
+        """Engine thinking."""
         return self.status == EngineStatus.THINK
 
     def is_pondering(self):
+        """Engine pondering."""
         return self.status == EngineStatus.PONDER
 
     def is_waiting(self):
+        """Engine waiting."""
         return self.status == EngineStatus.WAIT
 
     def startup(self, options: dict, show=True):
+        """Startup engine."""
         parser = configparser.ConfigParser()
         parser.optionxform = str
         if not options and parser.read(self.get_file() + '.uci'):

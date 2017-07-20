@@ -15,22 +15,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from dgt.iface import DgtIface
-from utilities import DisplayMsg, hours_minutes_seconds
 import logging
 import time
-from dgt.api import Message
-from dgt.util import ClockIcons, ClockSide
-from dgt.translate import DgtTranslate
-from dgt.board import DgtBoard
 from threading import Lock, Timer
 from ctypes import cdll, c_byte, create_string_buffer, pointer
 from platform import machine
 
+from utilities import DisplayMsg, hours_minutes_seconds
+from dgt.api import Message
+from dgt.util import ClockIcons, ClockSide
+from dgt.translate import DgtTranslate
+from dgt.board import DgtBoard
+from dgt.iface import DgtIface
+
 
 class DgtPi(DgtIface):
 
-    """Handle the DgtPi communication"""
+    """Handle the DgtPi communication."""
 
     def __init__(self, dgttranslate: DgtTranslate, dgtboard: DgtBoard):
         super(DgtPi, self).__init__(dgttranslate, dgtboard)
@@ -108,8 +109,6 @@ class DgtPi(DgtIface):
         if len(text) > 11:
             logging.warning('(i2c) clock message too long [%s]', text)
         logging.debug(text)
-        if self.dgtboard.capital_letters:
-            text = text.upper()
         text = bytes(text, 'utf-8')
         with self.lib_lock:
             res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, left_icons.value, right_icons.value)
@@ -127,7 +126,7 @@ class DgtPi(DgtIface):
             return True
 
     def display_text_on_clock(self, message):
-        """display a text on the dgtpi."""
+        """Display a text on the dgtpi."""
         text = message.l
         if text is None:
             text = message.m
@@ -139,7 +138,7 @@ class DgtPi(DgtIface):
         return self._display_on_dgt_pi(text, message.beep, left_icons, right_icons)
 
     def display_move_on_clock(self, message):
-        """display a move on the dgtpi."""
+        """Display a move on the dgtpi."""
         bit_board, text = self.get_san(message)
         text = '{:3d}{:s}'.format(bit_board.fullmove_number, text)
         if self.getName() not in message.devs:
@@ -150,7 +149,7 @@ class DgtPi(DgtIface):
         return self._display_on_dgt_pi(text, message.beep, left_icons, right_icons)
 
     def display_time_on_clock(self, message):
-        """display the time on the dgtpi."""
+        """Display the time on the dgtpi."""
         if self.getName() not in message.devs:
             logging.debug('ignored endText - devs: %s', message.devs)
             return True
@@ -172,15 +171,15 @@ class DgtPi(DgtIface):
         return True
 
     def light_squares_on_revelation(self, uci_move: str):
-        """handle this by hw.py."""
+        """Handle this by hw.py."""
         return True
 
     def clear_light_on_revelation(self):
-        """handle this by hw.py."""
+        """Handle this by hw.py."""
         return True
 
     def stop_clock(self, devs: set):
-        """stop the dgtpi."""
+        """Stop the dgtpi."""
         if self.getName() not in devs:
             logging.debug('ignored stopClock - devs: %s', devs)
             return True
@@ -214,7 +213,7 @@ class DgtPi(DgtIface):
             return True
 
     def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
-        """start the dgtpi."""
+        """Start the dgtpi."""
         if self.getName() not in devs:
             logging.debug('ignored startClock - devs: %s', devs)
             return True
@@ -246,4 +245,5 @@ class DgtPi(DgtIface):
             return True
 
     def getName(self):
+        """Get name."""
         return 'i2c'

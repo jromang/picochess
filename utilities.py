@@ -36,7 +36,7 @@ from dgt.api import Dgt
 from configobj import ConfigObj, ConfigObjError, DuplicateError
 
 # picochess version
-version = '089'
+version = '09b'
 
 evt_queue = queue.Queue()
 dispatch_queue = queue.Queue()
@@ -84,7 +84,7 @@ class DisplayMsg(object):
 
     @staticmethod
     def show(message):
-        """Sends a message on each display device."""
+        """Send a message on each display device."""
         for display in msgdisplay_devices:
             display.msg_queue.put(copy.deepcopy(message))
 
@@ -100,7 +100,7 @@ class DisplayDgt(object):
 
     @staticmethod
     def show(message):
-        """Sends a message on each display device."""
+        """Send a message on each display device."""
         for display in dgtdisplay_devices:
             display.dgt_queue.put(copy.deepcopy(message))
 
@@ -275,7 +275,7 @@ def get_location():
 
 
 def write_picochess_ini(key: str, value):
-    """update picochess.ini config file with key/value."""
+    """Update picochess.ini config file with key/value."""
     try:
         config = ConfigObj('picochess.ini')
         config[key] = value

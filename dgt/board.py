@@ -16,33 +16,30 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import struct
-
-from dgt.util import DgtAck, DgtClk, DgtCmd, DgtMsg, ClockIcons, ClockSide, enum
-from dgt.api import Message, Dgt
-
-from utilities import RepeatedTimer, DisplayMsg, hours_minutes_seconds
 import logging
-
+import subprocess
 from threading import Timer, Lock
 from fcntl import fcntl, F_GETFL, F_SETFL
 from os import O_NONBLOCK, read, path, listdir
 from serial import Serial, SerialException, STOPBITS_ONE, PARITY_NONE, EIGHTBITS
-import subprocess
 import time
+
+from dgt.util import DgtAck, DgtClk, DgtCmd, DgtMsg, ClockIcons, ClockSide, enum
+from dgt.api import Message, Dgt
+from utilities import RepeatedTimer, DisplayMsg, hours_minutes_seconds
 
 
 class DgtBoard(object):
 
     """Handle the DGT board communication."""
 
-    def __init__(self, device: str, disable_revelation_leds: bool, is_pi: bool, capital_letters: bool, disable_end: bool):
+    def __init__(self, device: str, disable_revelation_leds: bool, is_pi: bool, disable_end: bool):
         super(DgtBoard, self).__init__()
         self.given_device = device
         self.device = device
         self.use_revelation_leds = False
         self.disable_revelation_leds = disable_revelation_leds
         self.is_pi = is_pi
-        self.capital_letters = capital_letters
         self.disable_end = disable_end  # @todo for test - XL needs a "end_text" maybe!
 
         self.serial = None
@@ -71,7 +68,7 @@ class DgtBoard(object):
         self.bconn_text = None
 
     def write_command(self, message: list):
-        """write the message list to the dgt board."""
+        """Write the message list to the dgt board."""
         mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
         if not mes == DgtCmd.DGT_RETURN_SERIALNR:
             logging.debug('(ser) board put [%s] length: %i', mes, len(message))
@@ -87,11 +84,11 @@ class DgtBoard(object):
             '\\': 0x64, '?': 0x53, '@': 0x65, '=': 0x48, '_': 0x08
         }
         for item in message:
-            if type(item) is int:
+            if isinstance(item, int):
                 array.append(item)
             elif isinstance(item, enum.Enum):
                 array.append(item.value)
-            elif type(item) is str:
+            elif isinstance(item, str):
                 for character in item:
                     array.append(char_to_xl[character.lower()])
             else:
@@ -399,10 +396,11 @@ class DgtBoard(object):
                 pass
 
     def ask_battery_status(self):
+        """Ask the BT board for the battery status."""
         self.write_command([DgtCmd.DGT_SEND_BATTERY_STATUS])  # Get battery status
 
     def startup_serial_clock(self):
-        """ask the clock for its version."""
+        """Ask the clock for its version."""
         self.clock_lock = False
         self.enable_ser_clock = False
         command = [DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
@@ -455,9 +453,9 @@ class DgtBoard(object):
             # check for new data from bluetoothctl
             try:
                 while True:
-                    b = read(self.btctl.stdout.fileno(), 1).decode(encoding='UTF-8', errors='ignore')
-                    self.bt_line += b
-                    if b == '' or b == '\n':
+                    bt_byte = read(self.btctl.stdout.fileno(), 1).decode(encoding='UTF-8', errors='ignore')
+                    self.bt_line += bt_byte
+                    if bt_byte == '' or bt_byte == '\n':
                         break
             except OSError:
                 time.sleep(0.1)
@@ -629,7 +627,7 @@ class DgtBoard(object):
             logging.debug('(ser) clock is released now')
 
     def set_text_3k(self, text: str, beep: int):
-        """display a text on a 3000 Clock."""
+        """Display a text on a 3000 Clock."""
         self._wait_for_clock('SetText3K()')
         res = self.write_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x0c, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
                                   DgtClk.DGT_CMD_CLOCK_ASCII,
@@ -638,7 +636,7 @@ class DgtBoard(object):
         return res
 
     def set_text_xl(self, text: str, beep: int, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
-        """display a text on a XL clock."""
+        """Display a text on a XL clock."""
         def _transfer(icons: ClockIcons):
             result = 0
             if icons == ClockIcons.DOT:
@@ -656,7 +654,7 @@ class DgtBoard(object):
         return res
 
     def set_and_run(self, lr: int, lh: int, lm: int, ls: int, rr: int, rh: int, rm: int, rs: int):
-        """set the clock with times and let it run."""
+        """Set the clock with times and let it run."""
         self._wait_for_clock('SetAndRun()')
         side = ClockSide.NONE
         if lr == 1 and rr == 0:
@@ -670,7 +668,7 @@ class DgtBoard(object):
         return res
 
     def end_text(self):
-        """return the clock display to time display."""
+        """Return the clock display to time display."""
         self._wait_for_clock('EndText()')
         res = self.write_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x03, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
                                   DgtClk.DGT_CMD_CLOCK_END,

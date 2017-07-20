@@ -15,20 +15,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import chess
 import time
 import threading
-from utilities import Observable, hours_minutes_seconds
 import logging
-from dgt.api import Event
-from dgt.util import TimeMode
 import copy
 from math import floor
+
+from utilities import Observable, hours_minutes_seconds
+import chess
+from dgt.api import Event
+from dgt.util import TimeMode
 
 
 class TimeControl(object):
 
-    """control the picochess internal clock."""
+    """Control the picochess internal clock."""
 
     def __init__(self, mode=TimeMode.FIXED, fixed=0, blitz=0, fischer=0, clock_time=None):
         super(TimeControl, self).__init__()
@@ -47,8 +48,15 @@ class TimeControl(object):
             self.reset()
 
     def __eq__(self, other):
-        return self.mode == other.mode and self.seconds_per_move == other.seconds_per_move and \
-               self.minutes_per_game == other.minutes_per_game and self.fischer_increment == other.fischer_increment
+        chk_mode = self.mode == other.mode
+        chk_secs = self.seconds_per_move == other.seconds_per_move
+        chk_mins = self.minutes_per_game == other.minutes_per_game
+        chk_finc = self.fischer_increment == other.fischer_increment
+        return chk_mode and chk_secs and chk_mins and chk_finc
+
+    def __hash__(self):
+        value = str(self.mode) + str(self.seconds_per_move) + str(self.minutes_per_game) + str(self.fischer_increment)
+        return hash(value)
 
     def get_parameters(self):
         """Return the state of this class for generating a new instance."""
@@ -89,8 +97,9 @@ class TimeControl(object):
         if self.mode == TimeMode.FIXED:
             logging.debug('timeout - but in "MoveTime" mode, dont fire event')
         elif self.active_color is not None:
-            txt = 'current clock time (before subtracting) is {} and color is {}, out of time event started from {}'
-            logging.debug(txt.format(self.clock_time[self.active_color], self.active_color, time_start))
+            display_color = 'WHITE' if self.active_color == chess.WHITE else 'BLACK'
+            txt = 'current clock time (before subtracting) is %f and color is %s, out of time event started from %f'
+            logging.debug(txt, self.clock_time[self.active_color], display_color, time_start)
             Observable.fire(Event.OUT_OF_TIME(color=self.active_color))
 
     def add_inc(self, color):
@@ -133,7 +142,7 @@ class TimeControl(object):
 
             self.timer.cancel()
             self.timer.join()
-            used_time = floor((time.time() - self.start_time)*10)/10
+            used_time = floor((time.time() - self.start_time) * 10) / 10
             if log:
                 logging.info('used time: %s secs', used_time)
             self.clock_time[self.active_color] -= used_time

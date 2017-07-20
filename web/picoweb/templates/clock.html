@@ -13,10 +13,11 @@
     <link rel="stylesheet" href="/static/css/material-design/ripples.min.css"/>
     <link rel="stylesheet" href="/static/css/material-design/bootstrap-material-design.min.css"/>
 
-    <link rel="stylesheet" href="/static/css/normalize-4.1.1.css"/>
-    <link rel="stylesheet" href="/static/css/chessboard.css"/>
+    <link rel="stylesheet" href="/static/css/normalize-7.0.0.css"/>
     <link rel="stylesheet" href="/static/css/font-awesome.min.css"/>
     <link rel="stylesheet" href="/static/css/datatables.min.css"/>
+    <link rel="stylesheet" href="/static/css/chessground/chessground.css"/>
+    <link rel="stylesheet" href="/static/css/chessground/theme.css"/>
     <link rel="stylesheet" href="/static/css/custom.css"/>
 
     <script src="/static/js/jquery-2.2.4.min.js"></script>
@@ -28,9 +29,8 @@
     <script src="/static/js/ladda.min.js"></script>
     <script src="/static/js/datatables.min.js"></script>
     <script src="/static/js/intl.js"></script>
-    <script src="/static/js/enginegame.js"></script>
-    <script src="/static/js/chessboard.js"></script>
-    <script src="/static/js/chess.js"></script>
+    <script src="/static/js/chess960.js"></script>
+    <script src="/static/js/chessground.min.js"></script>
 
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
     <meta http-equiv="Pragma" content="no-cache"/>
@@ -137,7 +137,9 @@
         <div class="col-xs-6">
             <div id="board_panel" class="panel panel-primary">
                 <div class="panel-body" style="position:relative;">
-                    <div id="board" style="margin-bottom: 10px;"></div>
+                    <section id="boardsection" class="blue merida svg-container">
+                        <div id="board" class="svg-content" style="margin-bottom: 10px;"></div>
+                    </section>
                     <div class="pull-left">
                         <span id="sidetomove"></span>&nbsp;<span id="BoardStatus"></span>
                     </div>
@@ -244,7 +246,7 @@
                         </div>
                         <div class="row">
                             <div id="pv_output" class="gameMoves list-group">
-                                <div id="pv_1"></div>
+                                <div id="pv_1" style="margin-bottom: 3vh;"></div>
                             </div>
                         </div>
                     </div>

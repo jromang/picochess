@@ -17,6 +17,8 @@
 
 import datetime
 import threading
+import logging
+from collections import OrderedDict
 
 import chess
 import chess.pgn as pgn
@@ -27,11 +29,10 @@ from tornado.ioloop import IOLoop
 from tornado.websocket import WebSocketHandler
 
 from utilities import Observable, DisplayMsg, hours_minutes_seconds, RepeatedTimer
-import logging
-from dgt.api import Event, Message
-from dgt.util import GameResult, PlayMode, Mode, ClockSide
 from web.picoweb import picoweb as pw
 
+from dgt.api import Event, Message
+from dgt.util import PlayMode, Mode, ClockSide
 from dgt.iface import DgtIface
 from dgt.translate import DgtTranslate
 from dgt.board import DgtBoard
@@ -174,7 +175,7 @@ class WebServer(threading.Thread):
         application.listen(port)
 
     def run(self):
-        """called from threading.Thread by its start() function."""
+        """Call by threading.Thread start() function."""
         logging.info('evt_queue ready')
         IOLoop.instance().start()
 
@@ -200,7 +201,7 @@ class WebVr(DgtIface):
     def _runclock(self):
         if self.time_side == ClockSide.LEFT:
             hours, mins, secs = self.time_left
-            time_left = 3600*hours + 60*mins + secs - 1
+            time_left = 3600 * hours + 60 * mins + secs - 1
             if time_left <= 0:
                 logging.info('negative/zero time left: %s', time_left)
                 self.virtual_timer.stop()
@@ -208,7 +209,7 @@ class WebVr(DgtIface):
             self.time_left = hours_minutes_seconds(time_left)
         if self.time_side == ClockSide.RIGHT:
             hours, mins, secs = self.time_right
-            time_right = 3600*hours + 60*mins + secs - 1
+            time_right = 3600 * hours + 60 * mins + secs - 1
             if time_right <= 0:
                 logging.info('negative/zero time right: %s', time_right)
                 self.virtual_timer.stop()
@@ -232,7 +233,7 @@ class WebVr(DgtIface):
             EventHandler.write_to_clients(result)
 
     def display_move_on_clock(self, message):
-        """display a move on the web clock."""
+        """Display a move on the web clock."""
         if self.enable_dgt_3000 or self.enable_dgt_pi:
             bit_board, text = self.get_san(message, not self.enable_dgt_pi)
             points = '...' if message.side == ClockSide.RIGHT else '.'
@@ -249,8 +250,6 @@ class WebVr(DgtIface):
         if self.getName() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)
             return True
-        if self.dgtboard.capital_letters:
-            text = text.upper()
         self.clock_show_time = False
         self._create_clock_text()
         self.shared['clock_text'] = text
@@ -259,7 +258,7 @@ class WebVr(DgtIface):
         return True
 
     def display_text_on_clock(self, message):
-        """display a text on the web clock."""
+        """Display a text on the web clock."""
         if self.enable_dgt_pi:
             text = message.l
         else:
@@ -269,8 +268,6 @@ class WebVr(DgtIface):
         if self.getName() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)
             return True
-        if self.dgtboard.capital_letters:
-            text = text.upper()
         self.clock_show_time = False
         self._create_clock_text()
         self.shared['clock_text'] = text
@@ -279,7 +276,7 @@ class WebVr(DgtIface):
         return True
 
     def display_time_on_clock(self, message):
-        """display the time on the web clock."""
+        """Display the time on the web clock."""
         if self.getName() not in message.devs:
             logging.debug('ignored endText - devs: %s', message.devs)
             return True
@@ -291,7 +288,7 @@ class WebVr(DgtIface):
         return True
 
     def stop_clock(self, devs: set):
-        """stop the time on the web clock."""
+        """Stop the time on the web clock."""
         if self.getName() not in devs:
             logging.debug('ignored stopClock - devs: %s', devs)
             return True
@@ -305,7 +302,7 @@ class WebVr(DgtIface):
         self.time_side = side
 
     def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
-        """start the time on the web clock."""
+        """Start the time on the web clock."""
         if self.getName() not in devs:
             logging.debug('ignored startClock - devs: %s', devs)
             return True
@@ -322,17 +319,20 @@ class WebVr(DgtIface):
         self._display_time(self.time_left, self.time_right)
         return True
 
-    def light_squares_on_revelation(self, squares):
-        result = {'event': 'Light', 'move': squares}
+    def light_squares_on_revelation(self, uci_move):
+        """Light the rev2 squares."""
+        result = {'event': 'Light', 'move': uci_move}
         EventHandler.write_to_clients(result)
         return True
 
     def clear_light_on_revelation(self):
+        """Clear all leds from rev2."""
         result = {'event': 'Clear'}
         EventHandler.write_to_clients(result)
         return True
 
     def getName(self):
+        """Return name."""
         return 'web'
 
     def _create_task(self, msg):
@@ -352,6 +352,65 @@ class WebDisplay(DisplayMsg, threading.Thread):
         if 'system_info' not in self.shared:
             self.shared['system_info'] = {}
 
+    def _create_headers(self):
+        if 'headers' not in self.shared:
+            self.shared['headers'] = OrderedDict()
+
+    def _build_game_header(self, pgn_game: chess.pgn.Game):
+        # pgn_game.headers['Result'] = '*'
+        pgn_game.headers['Event'] = 'PicoChess game'
+        pgn_game.headers['Site'] = 'picochess.org'
+        pgn_game.headers['Date'] = datetime.datetime.today().strftime('%Y.%m.%d')
+        pgn_game.headers['Round'] = '?'
+        pgn_game.headers['White'] = '?'
+        pgn_game.headers['Black'] = '?'
+
+        user_name = 'User'
+        engine_name = 'Picochess'
+        user_elo = '-'
+        comp_elo = 2900
+        if 'system_info' in self.shared:
+            if 'user_name' in self.shared['system_info']:
+                user_name = self.shared['system_info']['user_name']
+            if 'engine_name' in self.shared['system_info']:
+                engine_name = self.shared['system_info']['engine_name']
+            if 'user_elo' in self.shared['system_info']:
+                user_elo = self.shared['system_info']['user_elo']
+
+        # @todo find a better way to setup engine elo
+        engine_elo = {'stockfish': 3300, 'texel': 3140, 'rodent': 2920,
+                      'zurichess': 2790, 'floyd': 2660, 'cinnamon': 2060}
+        for name, elo in engine_elo.items():
+            if engine_name.lower().startswith(name):
+                comp_elo = elo
+                break
+
+        if 'game_info' in self.shared:
+            if 'level_text' in self.shared['game_info']:
+                engine_level = ' ({0})'.format(self.shared['game_info']['level_text'].m)
+            else:
+                engine_level = ''
+            if 'level_name' in self.shared['game_info']:
+                level_name = self.shared['game_info']['level_name']
+                if level_name.startswith('Elo@'):
+                    comp_elo = int(level_name[4:])
+                    engine_level = ''
+            if 'play_mode' in self.shared['game_info']:
+                if self.shared['game_info']['play_mode'] == PlayMode.USER_WHITE:
+                    pgn_game.headers['White'] = user_name
+                    pgn_game.headers['Black'] = engine_name + engine_level
+                    pgn_game.headers['WhiteElo'] = user_elo
+                    pgn_game.headers['BlackElo'] = comp_elo
+                else:
+                    pgn_game.headers['White'] = engine_name + engine_level
+                    pgn_game.headers['Black'] = user_name
+                    pgn_game.headers['WhiteElo'] = comp_elo
+                    pgn_game.headers['BlackElo'] = user_elo
+
+        if 'ip_info' in self.shared:
+            if 'location' in self.shared['ip_info']:
+                pgn_game.headers['Site'] = self.shared['ip_info']['location']
+
     def task(self, message):
         def _oldstyle_fen(game: chess.Board):
             builder = []
@@ -363,53 +422,22 @@ class WebDisplay(DisplayMsg, threading.Thread):
             builder.append(str(game.fullmove_number))
             return ' '.join(builder)
 
-        def _create_game_header(pgn_game: chess.pgn.Game):
-            pgn_game.headers['Result'] = '*'
-            pgn_game.headers['White'] = 'None'
-            pgn_game.headers['Black'] = 'None'
-            pgn_game.headers['Event'] = 'PicoChess game'
-            pgn_game.headers['Date'] = datetime.datetime.now().date().strftime('%Y-%m-%d')
-            pgn_game.headers['Round'] = '?'
-            pgn_game.headers['Site'] = 'picochess.org'
-
-            user_name = 'User'
-            engine_name = 'Picochess'
-            if 'system_info' in self.shared:
-                if 'user_name' in self.shared['system_info']:
-                    user_name = self.shared['system_info']['user_name']
-                if 'engine_name' in self.shared['system_info']:
-                    engine_name = self.shared['system_info']['engine_name']
-
-            if 'game_info' in self.shared:
-                if 'play_mode' in self.shared['game_info']:
-                    if 'level_text' in self.shared['game_info']:
-                        engine_name += ' [{0}]'.format(self.shared['game_info']['level_text'].m)
-                    pgn_game.headers['Black'] = \
-                        engine_name if self.shared['game_info']['play_mode'] == PlayMode.USER_WHITE else user_name
-                    pgn_game.headers['White'] = \
-                        engine_name if self.shared['game_info']['play_mode'] == PlayMode.USER_BLACK else user_name
-
-                    comp_color = 'Black' if self.shared['game_info']['play_mode'] == PlayMode.USER_WHITE else 'White'
-                    user_color = 'Black' if self.shared['game_info']['play_mode'] == PlayMode.USER_BLACK else 'White'
-                    pgn_game.headers[comp_color + 'Elo'] = '2900'
-                    pgn_game.headers[user_color + 'Elo'] = '-'
-
-            if 'ip_info' in self.shared:
-                if 'location' in self.shared['ip_info']:
-                    pgn_game.headers['Site'] = self.shared['ip_info']['location']
-
-        def _update_headers():
+        def _build_headers():
+            self._create_headers()
             pgn_game = pgn.Game()
-            _create_game_header(pgn_game)
-            self.shared['headers'] = pgn_game.headers
-            EventHandler.write_to_clients({'event': 'Header', 'headers': pgn_game.headers})
+            self._build_game_header(pgn_game)
+            self.shared['headers'].update(pgn_game.headers)
 
-        def _update_title():
+        def _send_headers():
+            EventHandler.write_to_clients({'event': 'Header', 'headers': self.shared['headers']})
+
+        def _send_title():
             EventHandler.write_to_clients({'event': 'Title', 'ip_info': self.shared['ip_info']})
 
         def _transfer(game: chess.Board):
             pgn_game = pgn.Game().from_board(game)
-            _create_game_header(pgn_game)
+            self._build_game_header(pgn_game)
+            self.shared['headers'] = pgn_game.headers
             return pgn_game.accept(pgn.StringExporter(headers=True, comments=False, variations=False))
 
         if False:  # switch-case
@@ -420,24 +448,30 @@ class WebDisplay(DisplayMsg, threading.Thread):
             result = {'pgn': pgn_str, 'fen': fen, 'event': 'Game', 'move': '0000', 'play': 'newgame'}
             self.shared['last_dgt_move_msg'] = result
             EventHandler.write_to_clients(result)
-            _update_headers()
+            _send_headers()  # don't need _build_headers()
 
         elif isinstance(message, Message.IP_INFO):
             self.shared['ip_info'] = message.info
-            _update_headers()
-            _update_title()
+            _build_headers()
+            _send_headers()
+            _send_title()
 
         elif isinstance(message, Message.SYSTEM_INFO):
             self.shared['system_info'] = message.info
             self.shared['system_info']['old_engine'] = self.shared['system_info']['engine_name']
-            _update_headers()
+            _build_headers()
+            _send_headers()
 
         elif isinstance(message, Message.ENGINE_READY):
             self._create_system_info()
             self.shared['system_info']['engine_name'] = message.engine_name
-            if not message.has_levels and 'level_text' in self.shared['game_info']:
-                del self.shared['game_info']['level_text']
-            _update_headers()
+            if not message.has_levels:
+                if 'level_text' in self.shared['game_info']:
+                    del self.shared['game_info']['level_text']
+                if 'level_name' in self.shared['game_info']:
+                    del self.shared['game_info']['level_name']
+            _build_headers()
+            _send_headers()
 
         elif isinstance(message, Message.STARTUP_INFO):
             self.shared['game_info'] = message.info.copy()
@@ -449,6 +483,8 @@ class WebDisplay(DisplayMsg, threading.Thread):
 
             if message.info['level_text'] is None:
                 del self.shared['game_info']['level_text']
+            if message.info['level_name'] is None:
+                del self.shared['game_info']['level_name']
 
         elif isinstance(message, Message.OPENING_BOOK):
             self._create_game_info()
@@ -461,12 +497,14 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 self.shared['system_info']['engine_name'] = 'Remote Player'
             else:
                 self.shared['system_info']['engine_name'] = self.shared['system_info']['old_engine']
-            _update_headers()
+            _build_headers()
+            _send_headers()
 
         elif isinstance(message, Message.PLAY_MODE):
             self._create_game_info()
             self.shared['game_info']['play_mode'] = message.play_mode
-            _update_headers()
+            _build_headers()
+            _send_headers()
 
         elif isinstance(message, Message.TIME_CONTROL):
             self._create_game_info()
@@ -475,11 +513,14 @@ class WebDisplay(DisplayMsg, threading.Thread):
         elif isinstance(message, Message.LEVEL):
             self._create_game_info()
             self.shared['game_info']['level_text'] = message.level_text
-            _update_headers()
+            self.shared['game_info']['level_name'] = message.level_name
+            _build_headers()
+            _send_headers()
 
         elif isinstance(message, Message.DGT_NO_CLOCK_ERROR):
-            result = {'event': 'Status', 'msg': 'Error clock'}
+            # result = {'event': 'Status', 'msg': 'Error clock'}
             # EventHandler.write_to_clients(result)
+            pass
 
         elif isinstance(message, Message.DGT_CLOCK_VERSION):
             if message.dev == 'ser':
@@ -545,16 +586,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
             EventHandler.write_to_clients(result)
 
         elif isinstance(message, Message.GAME_ENDS):
-            if message.game.move_stack:
-                result = None
-                if message.result == GameResult.DRAW:
-                    result = '1/2-1/2'
-                elif message.result in (GameResult.WIN_WHITE, GameResult.WIN_BLACK):
-                    result = '1-0' if message.result == GameResult.WIN_WHITE else '0-1'
-                elif message.result == GameResult.OUT_OF_TIME:
-                    result = '0-1' if message.game.turn == chess.WHITE else '1-0'
-                if result:
-                    EventHandler.write_to_clients({'event': 'Message', 'msg': 'Result: ' + result})
+            pass
 
         else:  # Default
             # print(message)
@@ -564,7 +596,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
         IOLoop.instance().add_callback(callback=lambda: self.task(msg))
 
     def run(self):
-        """called from threading.Thread by its start() function."""
+        """Call by threading.Thread start() function."""
         logging.info('msg_queue ready')
         while True:
             # Check if we have something to display

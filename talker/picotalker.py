@@ -20,15 +20,16 @@
 # apt-get install sox
 
 import threading
-import chess
-from utilities import DisplayMsg
 import logging
 import subprocess
 import queue
-from dgt.api import Message
-from dgt.util import GameResult, PlayMode, Voice
 from pathlib import Path
 from shutil import which
+
+import chess
+from utilities import DisplayMsg
+from dgt.api import Message
+from dgt.util import GameResult, PlayMode, Voice
 
 
 class PicoTalker():
@@ -50,7 +51,7 @@ class PicoTalker():
             logging.warning('not valid voice parameter')
 
     def talk(self, sounds):
-        """speak out the sound part by using ogg123/play."""
+        """Speak out the sound part by using ogg123/play."""
         if self.voice_path:
             for part in sounds:
                 voice_file = self.voice_path + '/' + part
@@ -102,6 +103,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
         self.user_picotalker = picotalker
 
     def set_speech(self, speed_factor):
+        """Set speech."""
         if self.computer_picotalker:
             self.computer_picotalker.speed_factor = speed_factor
         if self.user_picotalker:
@@ -247,6 +249,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
     def system_voice(self):
         """
         Return a voice object to use for system announcements (settings changes, etc).
+
         Attempts to return the computer voice first, otherwise returns the user voice.
         """
         if self.computer_picotalker:

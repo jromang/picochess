@@ -1,6 +1,6 @@
-### ===============================
-### = picochess.ini.example v0.89 =
-### ===============================
+### ===================================
+### = picochess.ini.example v0.9[a-z] =
+### ===================================
 ### Example and description how to configure PicoChess
 ### To use this file, simply copy this file to picochess.ini and edit the appropriate settings
 ### When you want to activate a flag/line, please remove the "# " infront of it f.e. "# book = ..." becomes "book = ..."
@@ -45,7 +45,7 @@
 ### ========================
 ### Options for the UCI-Chess engine
 ## Sets the UCI engine used at startup
-## handle with care. If you setup this section wrong, picochess wont start.
+## handle with care. If you setup this section wrong, picochess won't start.
 ## Path to the engine relative to the 'picochess' folder (local engine - standard case)
 ## If you use a remote engine server, please make sure that you also set 'engine-remote-home' accordingly
 # engine = engines/armv7l/a-stockf
@@ -121,23 +121,27 @@
 ### = PicoChess related options =
 ### =============================
 ## log-file points to a file that is used to write the log information.
-## This file is created in the log folder. Alltogether there are 6 log files kept (rotating logs)
+## This file is created in the 'log' folder. Altogether there are 6 log files kept (rotating logs)
 # log-file = picochess.log
 ## What log level should be used 
 ## Loglevel options are [debug, info, warning, error, critical]
 # log-level = debug
 ## PicoChess can use human voices for announcement
+## Valid voice names are formed from 'talker/voices' folder structure. Please take a look there.
 ## If you want voice output, please uncomment these settings
 ## user-voice used for user moves announcement
 # user-voice = en:al
 ## computer-voice for computer moves announcement
 # computer-voice = en:christina
-## Increase, Decrease the voice speed factor. Must be between 0 to 9. Default is 2 (100%)
+## Increase, decrease the voice speed factor. Must be between 0 to 9. Default is 2 (100%)
 ## Each step is 5% starting from 90% towards 135%. Sets factor for both voices (user/computer)
 # speed-voice = 2
-## PicoChess writes pgn files at end of game. This file is created in the games folder
+## PicoChess writes pgn files at end of game. This file is created in the 'games' folder
 # pgn-file = games.pgn
+## If you want to have your own name in the pgn file uncomment the next line and change accordingly
 # pgn-user = player
+## If you want your own ELO-ranking in the pgn file uncomment the next line and change accordingly
+# pgn-elo = 1987
 ## Picochess will check for a new version at startup.
 ## This is by default not actived. If you want this feature, please uncomment the next line
 # enable-update = True
@@ -152,7 +156,8 @@
 ## When in ponder mode decides how long each info is displayed. Default is 3 secs.
 ## Must be between 1 to 8 secs.
 # ponder-interval = 3
-## Displays messages with only capital letters. If so, please uncomment the next line.
+## Displays messages with only capital letters. Doesn't work on DGTXL/Revelation II due to hardware limits.
+## If so, please uncomment the next line.
 # capital-letters = True
 ## Should a confirmation message be displayed? If not, please active the next line
 # disable-confirm-message = True

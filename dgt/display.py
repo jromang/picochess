@@ -15,21 +15,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import chess
 from math import ceil
-
 import logging
 import copy
 import queue
+import threading
+
+import chess
 from utilities import DisplayMsg, Observable, DispatchDgt, write_picochess_ini
 from dgt.translate import DgtTranslate
 from dgt.menu import DgtMenu
 from dgt.util import ClockSide, ClockIcons, BeepLevel, Mode, GameResult, TimeMode
 from dgt.api import Dgt, Event, Message
-
 from timecontrol import TimeControl
 from uci.util import get_installed_engines
-import threading
 
 
 class DgtDisplay(DisplayMsg, threading.Thread):
@@ -52,6 +51,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.play_turn = self.hint_turn = self.last_turn = None
         self.score = self.dgttranslate.text('N10_score', None)
         self.depth = None
+        self.uci960 = False
 
     def _exit_menu(self):
         if self.dgtmenu.inside_main_menu():
@@ -107,7 +107,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             pass
         return score
 
-    def _get_clock_side(self, turn):
+    @classmethod
+    def _get_clock_side(cls, turn):
         side = ClockSide.LEFT if turn == chess.WHITE else ClockSide.RIGHT
         return side
 
@@ -131,8 +132,9 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         else:
             if self.last_move:
                 side = self._get_clock_side(self.last_turn)
+                beep = self.dgttranslate.bl(BeepLevel.BUTTON)
                 text = Dgt.DISPLAY_MOVE(move=self.last_move, fen=self.last_fen, side=side, wait=False, maxtime=1,
-                                        beep=self.dgttranslate.bl(BeepLevel.BUTTON), devs={'ser', 'i2c', 'web'})
+                                        beep=beep, devs={'ser', 'i2c', 'web'}, uci960=self.uci960)
             else:
                 text = self.dgttranslate.text('B10_nomove')
             DispatchDgt.fire(text)
@@ -179,8 +181,9 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         else:
             if self.hint_move:
                 side = self._get_clock_side(self.hint_turn)
+                beep = self.dgttranslate.bl(BeepLevel.BUTTON)
                 text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=False, maxtime=1,
-                                        beep=self.dgttranslate.bl(BeepLevel.BUTTON), devs={'ser', 'i2c', 'web'})
+                                        beep=beep, devs={'ser', 'i2c', 'web'}, uci960=self.uci960)
             else:
                 text = self.dgttranslate.text('B10_nomove')
             DispatchDgt.fire(text)
@@ -313,7 +316,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 text.wait = self._exit_menu()
                 logging.debug('map: New level %s', msg)
                 write_picochess_ini('engine-level', msg)
-                Observable.fire(Event.LEVEL(options=level_dict[msg], level_text=text))
+                Observable.fire(Event.LEVEL(options=level_dict[msg], level_text=text, level_name=msg))
             else:
                 logging.debug('engine doesnt support levels')
         elif fen in book_map:
@@ -346,7 +349,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                             self.dgtmenu.set_engine_level(len_level - 1)
                         msg = sorted(level_dict)[self.dgtmenu.get_engine_level()]
                         options = level_dict[msg]  # cause of "new-engine", send options lateron - now only {}
-                        Observable.fire(Event.LEVEL(options={}, level_text=self.dgttranslate.text('M10_level', msg)))
+                        Observable.fire(Event.LEVEL(options={}, level_text=self.dgttranslate.text('M10_level', msg),
+                                                    level_name=msg))
                     else:
                         msg = None
                         options = {}
@@ -439,7 +443,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.time_control.reset()
         if message.newgame:
             pos960 = message.game.chess960_pos()
-            game_text = 'C10_newgame' if pos960 is None or pos960 == 518 else 'C10_ucigame'
+            self.uci960 = pos960 is not None and pos960 != 518
+            game_text = 'C10_ucigame' if self.uci960 else 'C10_newgame'
             DispatchDgt.fire(self.dgttranslate.text(game_text, str(pos960)))
         if self.dgtmenu.get_mode() in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
             time_left, time_right = self.time_control.current_clock_time(flip_board=self.dgtmenu.get_flip_board())
@@ -468,8 +473,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             DispatchDgt.fire(Dgt.LIGHT_CLEAR(devs={'ser', 'web'}))
         move = message.move
         ponder = message.ponder
-        # fen = message.fen
-        # turn = message.turn
         self.engine_finished = True
         self.play_move = move
         self.play_fen = message.game.fen()
@@ -486,8 +489,9 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self.hint_turn = None
         # Display the move
         side = self._get_clock_side(message.game.turn)
+        beep = self.dgttranslate.bl(BeepLevel.CONFIG)
         disp = Dgt.DISPLAY_MOVE(move=move, fen=message.game.fen(), side=side, wait=message.wait, maxtime=0,
-                                beep=self.dgttranslate.bl(BeepLevel.CONFIG), devs={'ser', 'i2c', 'web'})
+                                beep=beep, devs={'ser', 'i2c', 'web'}, uci960=self.uci960)
         DispatchDgt.fire(disp)
         DispatchDgt.fire(Dgt.LIGHT_SQUARES(uci_move=move.uci(), devs={'ser', 'web'}))
         self.leds_are_on = True
@@ -541,37 +545,54 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.hint_turn = message.game.turn
         if message.mode == Mode.ANALYSIS and not self._inside_main_menu():
             side = self._get_clock_side(self.hint_turn)
+            beep = self.dgttranslate.bl(BeepLevel.NO)
             disp = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=True, maxtime=0,
-                                    beep=self.dgttranslate.bl(BeepLevel.NO), devs={'ser', 'i2c', 'web'})
+                                    beep=beep, devs={'ser', 'i2c', 'web'}, uci960=self.uci960)
             DispatchDgt.fire(disp)
 
     def _process_startup_info(self, message):
         self.dgtmenu.set_mode(message.info['interaction_mode'])
         self.dgtmenu.set_book(message.info['book_index'])
         self.dgtmenu.all_books = message.info['books']
-        timectrl = self.time_control = message.info['time_control']
+        timectrl = self.time_control = message.info['time_control']  # type: TimeControl
         self.dgtmenu.set_time_mode(timectrl.mode)
         # try to find the index from the given time_control (timectrl)
-        # if user gave a non-existent timectrl value stay at standard
+        # if user gave a non-existent timectrl value update map & list
         index = 0
+        isnew = True
         if timectrl.mode == TimeMode.FIXED:
             for val in self.dgtmenu.tc_fixed_map.values():
                 if val == timectrl:
                     self.dgtmenu.set_time_fixed(index)
+                    isnew = False
                     break
                 index += 1
+            if isnew:
+                self.dgtmenu.tc_fixed_map.update({('', timectrl)})
+                self.dgtmenu.tc_fixed_list.append('{:2d}'.format(timectrl.seconds_per_move))
+                self.dgtmenu.set_time_fixed(index)
         elif timectrl.mode == TimeMode.BLITZ:
             for val in self.dgtmenu.tc_blitz_map.values():
                 if val == timectrl:
                     self.dgtmenu.set_time_blitz(index)
+                    isnew = False
                     break
                 index += 1
+            if isnew:
+                self.dgtmenu.tc_blitz_map.update({('', timectrl)})
+                self.dgtmenu.tc_blitz_list.append('{:2d}'.format(timectrl.minutes_per_game))
+                self.dgtmenu.set_time_blitz(index)
         elif timectrl.mode == TimeMode.FISCHER:
             for val in self.dgtmenu.tc_fisch_map.values():
                 if val == timectrl:
                     self.dgtmenu.set_time_fisch(index)
+                    isnew = False
                     break
                 index += 1
+            if isnew:
+                self.dgtmenu.tc_fisch_map.update({('', timectrl)})
+                self.dgtmenu.tc_fisch_list.append('{:2d} {:2d}'.format(timectrl.minutes_per_game, timectrl.fischer_increment))
+                self.dgtmenu.set_time_fisch(index)
 
     def _process_clock_start(self, message):
         timectrl = self.time_control = TimeControl(**message.tc_init)
@@ -593,8 +614,9 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             if self.show_move_or_value >= self.dgtmenu.get_ponderinterval():
                 if self.hint_move:
                     side = self._get_clock_side(self.hint_turn)
+                    beep = self.dgttranslate.bl(BeepLevel.NO)
                     text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=True, maxtime=1,
-                                            beep=self.dgttranslate.bl(BeepLevel.NO), devs={'ser', 'i2c', 'web'})
+                                            beep=beep, devs={'ser', 'i2c', 'web'}, uci960=self.uci960)
                 else:
                     text = self.dgttranslate.text('N10_nomove')
             else:
@@ -610,8 +632,9 @@ class DgtDisplay(DisplayMsg, threading.Thread):
     def _exit_display(self):
         if self.play_move and self.dgtmenu.get_mode() in (Mode.NORMAL, Mode.REMOTE):
             side = self._get_clock_side(self.play_turn)
+            beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side, wait=True, maxtime=1,
-                                    beep=self.dgttranslate.bl(BeepLevel.BUTTON), devs={'ser', 'i2c', 'web'})
+                                    beep=beep, devs={'ser', 'i2c', 'web'}, uci960=self.uci960)
         else:
             text = None
             if self._inside_main_menu():
@@ -792,7 +815,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             pass
 
     def run(self):
-        """called from threading.Thread by its start() function."""
+        """Call by threading.Thread start() function."""
         logging.info('msg_queue ready')
         while True:
             # Check if we have something to display

@@ -1,23 +1,32 @@
-[Elo@0800]
-strength = 0
+[Level@00]
+Strength = 0
 
-[Elo@1100]
-strength = 142
+[Level@01]
+Strength = 100
 
-[Elo@1400]
-strength = 285
+[Level@02]
+Strength = 200
 
-[Elo@1700]
-strength = 428
+[Level@03]
+Strength = 300
 
-[Elo@2000]
-strength = 571
+[Level@04]
+Strength = 400
 
-[Elo@2300]
-strength = 714
+[Level@05]
+Strength = 500
 
-[Elo@2600]
-strength = 857
+[Level@06]
+Strength = 600
 
-[Elo@2900]
-strength = 1000
+[Level@07]
+Strength = 700
+
+[Level@08]
+Strength = 800
+
+[Level@09]
+Strength = 900
+
+[Level@10]
+Strength = 1000

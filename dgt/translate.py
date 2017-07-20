@@ -15,9 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import logging
 from dgt.util import Beep, BeepLevel
 from dgt.api import Dgt
-import logging
 
 
 class DgtTranslate(object):
@@ -30,11 +30,14 @@ class DgtTranslate(object):
         self.beep_level = beep_level
         self.language = language
         self.version = picochess_version
+        self.capital = False  # Set from dgt.menu lateron
 
     def beep_to_config(self, beep: Beep):
+        """Transfer beep to dict."""
         return dict(zip(self.ConfigToBeep.values(), self.ConfigToBeep.keys()))[beep]
 
     def bl(self, beeplevel: BeepLevel):
+        """Transfer beeplevel to bool."""
         if self.beep == Beep.ON:
             return True
         if self.beep == Beep.OFF:
@@ -42,12 +45,29 @@ class DgtTranslate(object):
         return bool(self.beep_level & beeplevel.value)
 
     def set_beep(self, beep: Beep):
+        """Set beep."""
         self.beep = beep
 
     def set_language(self, language: str):
+        """Set language."""
         self.language = language
 
+    def set_capital(self, capital: bool):
+        """Set capital letters."""
+        self.capital = capital
+
+    def capital_text(self, text, is_obj=True):
+        """Transfer text to capital text or not."""
+        if self.capital:
+            if is_obj:
+                text.m = text.m.upper()
+                text.l = text.l.upper()
+            else:
+                return text.upper()
+        return text
+
     def move(self, text: str):
+        """Return move text for clock display."""
         directory = {}
         if self.language == 'de':
             directory = {'R': 'T', 'N': 'S', 'B': 'L', 'Q': 'D'}
@@ -61,9 +81,10 @@ class DgtTranslate(object):
             directory = {'R': 'T', 'N': 'C', 'B': 'A', 'Q': 'D', 'K': '@'}
         for i, j in directory.items():
             text = text.replace(i, j)
-        return text.replace('@', 'R')  # replace the King "@" from fr, es, it languages
+        return self.capital_text(text.replace('@', 'R'), False)  # replace the King "@" from fr, es, it languages
 
     def text(self, str_code: str, msg='', devs=None):
+        """Return standard text for clock display."""
         if devs is None:  # prevent W0102 error
             devs = {'ser', 'i2c', 'web'}
 
@@ -370,7 +391,7 @@ class DgtTranslate(object):
         if text_id == 'score':
             text_s = 'no scr' if msg is None else str(msg).rjust(6)
             text_m = 'no score' if msg is None else str(msg).rjust(8)
-            entxt = Dgt.DISPLAY_TEXT(l=text_m, m=text_m, s=text_s)
+            entxt = Dgt.DISPLAY_TEXT(l=text_m.rjust(11), m=text_m, s=text_s)
             detxt = entxt
             nltxt = entxt
             frtxt = entxt
@@ -795,6 +816,13 @@ class DgtTranslate(object):
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
+        if text_id == 'display_capital_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='Cap Letters', m='Capital ', s='captal')
+            detxt = Dgt.DISPLAY_TEXT(l='Buchstaben ', m='Buchstab', s='buchst')
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
         if text_id == 'okconfirm':
             entxt = Dgt.DISPLAY_TEXT(l='ok confirm ', m='okConfrm', s='okconf')
             detxt = Dgt.DISPLAY_TEXT(l='ok Zugbest ', m='okZugbes', s='ok bes')
@@ -812,6 +840,27 @@ class DgtTranslate(object):
         if text_id == 'confirm_off':
             entxt = Dgt.DISPLAY_TEXT(l='Confirm off', m='Conf off', s='cnfoff')
             detxt = Dgt.DISPLAY_TEXT(l='Zugbest aus', m='Best aus', s='besaus')
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
+        if text_id == 'okcapital':
+            entxt = Dgt.DISPLAY_TEXT(l='ok Capital ', m='ok Capt ', s='ok cap')
+            detxt = Dgt.DISPLAY_TEXT(l='ok Buchstab', m='ok Bstab', s='ok bst')
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
+        if text_id == 'capital_on':
+            entxt = Dgt.DISPLAY_TEXT(l='Capital  on', m='Capt  on', s='cap on')
+            detxt = Dgt.DISPLAY_TEXT(l='Buchstb ein', m='Bstb ein', s='bstein')
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
+        if text_id == 'capital_off':
+            entxt = Dgt.DISPLAY_TEXT(l='Capital off', m='Capt off', s='capoff')
+            detxt = Dgt.DISPLAY_TEXT(l='Buchstb aus', m='Bstb aus', s='bstaus')
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
@@ -880,13 +929,13 @@ class DgtTranslate(object):
             entxt = Dgt.DISPLAY_TEXT(l=text_id, m=text_id, s=text_id, wait=False, beep=beep, maxtime=0, devs=devs)
             logging.warning('unknown text_id %s', text_id)
         if self.language == 'de' and detxt is not None:
-            return detxt
+            return self.capital_text(detxt)
         if self.language == 'nl' and nltxt is not None:
-            return nltxt
+            return self.capital_text(nltxt)
         if self.language == 'fr' and frtxt is not None:
-            return frtxt
+            return self.capital_text(frtxt)
         if self.language == 'es' and estxt is not None:
-            return estxt
+            return self.capital_text(estxt)
         if self.language == 'it' and ittxt is not None:
-            return ittxt
-        return entxt
+            return self.capital_text(ittxt)
+        return self.capital_text(entxt)

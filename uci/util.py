@@ -1,3 +1,20 @@
+# Copyright (C) 2013-2017 Jean-Francois Romang (jromang@posteo.de)
+#                         Shivkumar Shivaji ()
+#                         Jürgen Précour (LocutusOfPenguin@posteo.de)
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
 import platform
 import configparser
 import os
@@ -6,12 +23,12 @@ from uci.engine import UciEngine
 
 
 def get_installed_engines(engine_shell, engine_file: str):
-    """create a library list."""
+    """Create a library list."""
     return read_engine_ini(engine_shell, (engine_file.rsplit(os.sep, 1))[0])
 
 
 def read_engine_ini(engine_shell=None, engine_path=None):
-    """read engine.ini and creates a library list out of it."""
+    """Read engine.ini and creates a library list out of it."""
     config = configparser.ConfigParser()
     config.optionxform = str
     try:
@@ -51,11 +68,11 @@ def read_engine_ini(engine_shell=None, engine_path=None):
 
 
 def write_engine_ini(engine_path=None):
-    """read the engine folder and create the engine.ini file."""
+    """Read the engine folder and create the engine.ini file."""
     def write_level_ini(engine_filename: str):
-        """write the level part for the engine.ini file."""
+        """Write the level part for the engine.ini file."""
         def calc_inc(diflevel: int):
-            """calculate the increment for (max 20) levels."""
+            """Calculate the increment for (max 20) levels."""
             if diflevel > 1000:
                 inc = int(diflevel / 100)
             else:
@@ -69,8 +86,9 @@ def write_engine_ini(engine_path=None):
         if not parser.read(engine_path + os.sep + engine_filename + '.uci'):
             if engine.has_limit_strength():
                 uelevel = engine.get().options['UCI_Elo']
-                elo_1, elo_2 = int(uelevel[2]), int(uelevel[3])
-                minlevel, maxlevel = min(elo_1, elo_2), max(elo_1, elo_2)
+                minelo = uelevel.min
+                maxelo = uelevel.max
+                minlevel, maxlevel = min(minelo, maxelo), max(minelo, maxelo)
                 lvl_inc = calc_inc(maxlevel - minlevel)
                 level = minlevel
                 while level < maxlevel:
@@ -79,13 +97,22 @@ def write_engine_ini(engine_path=None):
                 parser['Elo@{:04d}'.format(maxlevel)] = {'UCI_LimitStrength': 'false', 'UCI_Elo': str(maxlevel)}
             if engine.has_skill_level():
                 sklevel = engine.get().options['Skill Level']
-                minlevel, maxlevel = int(sklevel[3]), int(sklevel[4])
+                minlevel = sklevel.min
+                maxlevel = sklevel.max
                 minlevel, maxlevel = min(minlevel, maxlevel), max(minlevel, maxlevel)
-                for level in range(minlevel, maxlevel+1):
+                for level in range(minlevel, maxlevel + 1):
                     parser['Level@{:02d}'.format(level)] = {'Skill Level': str(level)}
+            if engine.has_handicap_level():
+                sklevel = engine.get().options['Handicap Level']
+                minlevel = sklevel.min
+                maxlevel = sklevel.max
+                minlevel, maxlevel = min(minlevel, maxlevel), max(minlevel, maxlevel)
+                for level in range(minlevel, maxlevel + 1):
+                    parser['Level@{:02d}'.format(level)] = {'Handicap Level': str(level)}
             if engine.has_strength():
                 sklevel = engine.get().options['Strength']
-                minlevel, maxlevel = int(sklevel[3]), int(sklevel[4])
+                minlevel = sklevel.min
+                maxlevel = sklevel.max
                 minlevel, maxlevel = min(minlevel, maxlevel), max(minlevel, maxlevel)
                 lvl_inc = calc_inc(maxlevel - minlevel)
                 level = minlevel
@@ -99,11 +126,11 @@ def write_engine_ini(engine_path=None):
                 parser.write(configfile)
 
     def is_exe(fpath: str):
-        """check if fpath is an executable."""
+        """Check if fpath is an executable."""
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
     def name_build(parts: list, maxlength: int, default_name: str):
-        """get a (clever formed) cut name for the part list."""
+        """Get a (clever formed) cut name for the part list."""
         eng_name = ''
         for token in parts:
             if len(eng_name) + len(token) > maxlength:
