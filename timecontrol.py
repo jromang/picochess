@@ -63,6 +63,16 @@ class TimeControl(object):
         return {'mode': self.mode, 'fixed': self.seconds_per_move, 'blitz': self.minutes_per_game,
                 'fischer': self.fischer_increment, 'clock_time': self.clock_time}
 
+    def get_list_text(self):
+        """Get the clock list text for the current time setting."""
+        if self.mode == TimeMode.FIXED:
+            return '{:2d}'.format(self.seconds_per_move)
+        if self.mode == TimeMode.BLITZ:
+            return '{:2d}'.format(self.minutes_per_game)
+        if self.mode == TimeMode.FISCHER:
+            return '{:2d} {:2d}'.format(self.minutes_per_game, self.fischer_increment)
+        return 'errtm'
+
     def reset(self):
         """Reset the clock's times for both players."""
         if self.mode == TimeMode.BLITZ:

@@ -443,19 +443,19 @@ def main():
         if len(time_list) == 1:
             fixed = _num(time_list[0])
             timec = TimeControl(TimeMode.FIXED, fixed=fixed)
-            textc = dgttranslate.text('B00_tc_fixed', '{:2d}'.format(fixed))
+            textc = dgttranslate.text('B00_tc_fixed', timec.get_list_text())
         elif len(time_list) == 2:
             blitz = _num(time_list[0])
             fisch = _num(time_list[1])
             if fisch == 0:
                 timec = TimeControl(TimeMode.BLITZ, blitz=blitz)
-                textc = dgttranslate.text('B00_tc_blitz', '{:2d}'.format(blitz))
+                textc = dgttranslate.text('B00_tc_blitz', timec.get_list_text())
             else:
                 timec = TimeControl(TimeMode.FISCHER, blitz=blitz, fischer=fisch)
-                textc = dgttranslate.text('B00_tc_fisch', '{:2d} {:2d}'.format(blitz, fisch))
+                textc = dgttranslate.text('B00_tc_fisch', timec.get_list_text())
         else:
             timec = TimeControl(TimeMode.BLITZ, blitz=5)
-            textc = dgttranslate.text('B00_tc_blitz', ' 5')
+            textc = dgttranslate.text('B00_tc_blitz', timec.get_list_text())
         return timec, textc
 
     def get_engine_level_dict(engine_level):

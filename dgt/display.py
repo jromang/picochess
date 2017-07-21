@@ -293,6 +293,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
 
         if self.dgtmenu.get_flip_board() and raw:  # Flip the board if needed
             fen = fen[::-1]
+        # bit_board = chess.Board(fen[::1] + ' w - - 0 1')  # try a revered board and check for any starting pos
+        # if not bit_board.chess960_pos(ignore_castling=True):
         if fen == 'RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr':  # Check if we have to flip the board
             logging.debug('flipping the board')
             self.dgtmenu.set_position_reverse_to_flipboard()  # set standard for setup orientation too
@@ -569,7 +571,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 index += 1
             if isnew:
                 self.dgtmenu.tc_fixed_map.update({('', timectrl)})
-                self.dgtmenu.tc_fixed_list.append('{:2d}'.format(timectrl.seconds_per_move))
+                self.dgtmenu.tc_fixed_list.append(timectrl.get_list_text())
                 self.dgtmenu.set_time_fixed(index)
         elif timectrl.mode == TimeMode.BLITZ:
             for val in self.dgtmenu.tc_blitz_map.values():
@@ -580,7 +582,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 index += 1
             if isnew:
                 self.dgtmenu.tc_blitz_map.update({('', timectrl)})
-                self.dgtmenu.tc_blitz_list.append('{:2d}'.format(timectrl.minutes_per_game))
+                self.dgtmenu.tc_blitz_list.append(timectrl.get_list_text())
                 self.dgtmenu.set_time_blitz(index)
         elif timectrl.mode == TimeMode.FISCHER:
             for val in self.dgtmenu.tc_fisch_map.values():
@@ -591,7 +593,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 index += 1
             if isnew:
                 self.dgtmenu.tc_fisch_map.update({('', timectrl)})
-                self.dgtmenu.tc_fisch_list.append('{:2d} {:2d}'.format(timectrl.minutes_per_game, timectrl.fischer_increment))
+                self.dgtmenu.tc_fisch_list.append(timectrl.get_list_text())
                 self.dgtmenu.set_time_fisch(index)
 
     def _process_clock_start(self, message):
@@ -605,8 +607,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             if time_right < 0:
                 time_right = 0
         side = ClockSide.LEFT if (message.turn == chess.WHITE) != self.dgtmenu.get_flip_board() else ClockSide.RIGHT
-        DispatchDgt.fire(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side, wait=False,
-                                         devs=message.devs))
+        text = Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side, wait=False, devs=message.devs)
+        DispatchDgt.fire(text)
 
     def _process_dgt_serial_nr(self):
         # logging.debug('Serial number {}'.format(message.number))  # actually used for watchdog (once a second)
