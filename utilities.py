@@ -28,7 +28,6 @@ import configparser
 
 from threading import Timer
 from subprocess import Popen, PIPE
-from re import compile, sub
 
 from dgt.translate import DgtTranslate
 from dgt.api import Dgt
@@ -196,8 +195,8 @@ def git_name():
 def get_tags():
     """Get the last 3 tags from git."""
     git = git_name()
-    tags = [(tags, compile(r'[^\d]+').sub('', tags)) for tags in do_popen([git, 'tag'], log=False).split('\n')[-4:-1]]
-    return tags  # returns something like [('v0.86', 086'), ('v0.87', '087'), ('v0.88', '088')]
+    tags = [(tags, tags[1] + tags[-2:]) for tags in do_popen([git, 'tag'], log=False).split('\n')[-4:-1]]
+    return tags  # returns something like [('v0.9a', 09a'), ('v0.9b', '09b'), ('v0.9c', '09c')]
 
 
 def checkout_tag(tag):
