@@ -838,15 +838,14 @@ class DgtMenu(object):
 
         elif self.state == MenuState.POS_READ:
             # do action!
-            to_move = 'w' if self.menu_position_whitetomove else 'b'
             fen = self.dgt_fen
             if self.flip_board != self.menu_position_reverse:
                 logging.debug('flipping the board - %s infront now', 'B' if self.menu_position_reverse else 'W')
                 fen = fen[::-1]
-            fen += ' {0} KQkq - 0 1'.format(to_move)
+            fen += ' {0} KQkq - 0 1'.format('w' if self.menu_position_whitetomove else 'b')
             # ask python-chess to correct the castling string
             bit_board = chess.Board(fen, self.menu_position_uci960)
-            bit_board = chess.Board(bit_board.fen(), self.menu_position_uci960)
+            bit_board.set_fen(bit_board.fen())
             if bit_board.is_valid():
                 self.flip_board = self.menu_position_reverse
                 event = Event.SETUP_POSITION(fen=bit_board.fen(), uci960=self.menu_position_uci960)
