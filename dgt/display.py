@@ -291,14 +291,17 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                           '8/8/8/8/3kK3/8/8/8': GameResult.DRAW,
                           '8/8/8/8/3Kk3/8/8/8': GameResult.DRAW}
 
+        bit_board = chess.Board(fen + ' w - - 0 1')  # try a standard board and check for any starting pos
+        if bit_board.chess960_pos(ignore_castling=True):
+            logging.debug('flipping the board - W infront')
+            self.dgtmenu.set_position_reverse_flipboard(False)
+        bit_board = chess.Board(fen[::-1] + ' w - - 0 1')  # try a revered board and check for any starting pos
+        if bit_board.chess960_pos(ignore_castling=True):
+            logging.debug('flipping the board - B infront')
+            self.dgtmenu.set_position_reverse_flipboard(True)
         if self.dgtmenu.get_flip_board() and raw:  # Flip the board if needed
             fen = fen[::-1]
-        # bit_board = chess.Board(fen[::1] + ' w - - 0 1')  # try a revered board and check for any starting pos
-        # if not bit_board.chess960_pos(ignore_castling=True):
-        if fen == 'RNBKQBNR/PPPPPPPP/8/8/8/8/pppppppp/rnbkqbnr':  # Check if we have to flip the board
-            logging.debug('flipping the board')
-            self.dgtmenu.set_position_reverse_to_flipboard()  # set standard for setup orientation too
-            fen = fen[::-1]
+
         logging.debug('DGT-Fen [%s]', fen)
         if fen == self.dgtmenu.get_dgt_fen():
             logging.debug('ignore same fen')

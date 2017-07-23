@@ -295,7 +295,7 @@ def main():
         handled_fen = True
         # Check for same position
         if fen == game.board_fen():
-            logging.debug('Already in this fen: ' + fen)
+            logging.debug('Already in this fen: %s', fen)
 
         # Check if we have to undo a previous move (sliding)
         elif fen in last_legal_fens:
@@ -303,30 +303,30 @@ def main():
                 if is_not_user_turn(game.turn):
                     stop_search()
                     game.pop()
-                    logging.debug('user move in computer turn, reverting to: ' + game.board_fen())
+                    logging.debug('user move in computer turn, reverting to: %s', game.board_fen())
                 elif done_computer_fen:
                     done_computer_fen = None
                     done_move = chess.Move.null()
                     game.pop()
-                    logging.debug('user move while computer move is displayed, reverting to: ' + game.board_fen())
+                    logging.debug('user move while computer move is displayed, reverting to: %s', game.board_fen())
                 else:
                     handled_fen = False
                     logging.error('last_legal_fens not cleared: ' + game.board_fen())
             elif interaction_mode == Mode.REMOTE:
                 if is_not_user_turn(game.turn):
                     game.pop()
-                    logging.debug('user move in remote turn, reverting to: ' + game.board_fen())
+                    logging.debug('user move in remote turn, reverting to: %s', game.board_fen())
                 elif done_computer_fen:
                     done_computer_fen = None
                     done_move = chess.Move.null()
                     game.pop()
-                    logging.debug('user move while remote move is displayed, reverting to: ' + game.board_fen())
+                    logging.debug('user move while remote move is displayed, reverting to: %s', game.board_fen())
                 else:
                     handled_fen = False
                     logging.error('last_legal_fens not cleared: ' + game.board_fen())
             else:
                 game.pop()
-                logging.debug('wrong color move -> sliding, reverting to: ' + game.board_fen())
+                logging.debug('wrong color move -> sliding, reverting to: %s', game.board_fen())
             legal_moves = list(game.legal_moves)
             move = legal_moves[last_legal_fens.index(fen)]  # type: chess.Move
             user_move(move)

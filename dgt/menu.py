@@ -330,10 +330,9 @@ class DgtMenu(object):
         """Get the flag."""
         return self.res_time_fisch
 
-    def set_position_reverse_to_flipboard(self):
+    def set_position_reverse_flipboard(self, flip_board):
         """Set the flag."""
-        self.flip_board = not self.flip_board  # Flip the board
-        self.res_position_reverse = self.flip_board
+        self.res_position_reverse = self.flip_board = flip_board
 
     def get_ponderinterval(self):
         """Get the flag."""
@@ -842,11 +841,12 @@ class DgtMenu(object):
             to_move = 'w' if self.menu_position_whitetomove else 'b'
             fen = self.dgt_fen
             if self.flip_board != self.menu_position_reverse:
-                logging.debug('flipping the board')
+                logging.debug('flipping the board - %s infront now', 'B' if self.menu_position_reverse else 'W')
                 fen = fen[::-1]
-            fen += " {0} KQkq - 0 1".format(to_move)
+            fen += ' {0} KQkq - 0 1'.format(to_move)
             # ask python-chess to correct the castling string
             bit_board = chess.Board(fen, self.menu_position_uci960)
+            bit_board = chess.Board(bit_board.fen(), self.menu_position_uci960)
             if bit_board.is_valid():
                 self.flip_board = self.menu_position_reverse
                 event = Event.SETUP_POSITION(fen=bit_board.fen(), uci960=self.menu_position_uci960)
@@ -854,6 +854,7 @@ class DgtMenu(object):
                 # self._reset_moves_and_score() done in "START_NEW_GAME"
                 text = self.save_choices()
             else:
+                logging.debug('illegal fen %s', fen)
                 DispatchDgt.fire(self.dgttranslate.text('Y05_illegalpos'))
                 text = self.dgttranslate.text('B00_scanboard')
                 text.wait = True
