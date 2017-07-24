@@ -48,6 +48,12 @@ var gameHistory, fenHash, currentPosition;
 const BACKEND_SERVER_PREFIX = 'http://drshivaji.com:3334';
 //const BACKEND_SERVER_PREFIX = "http://localhost:7777";
 
+// remote begin
+var remote_server_prefix = "drshivaji.com:9876";
+//var remote_server_prefix = "localhost:5432";
+var remote_ws = null;
+// remote end
+
 fenHash = {};
 
 currentPosition = {};
@@ -1041,7 +1047,7 @@ function clockButtonPower() {
 
 function sendConsoleCommand() {
     var cmd = $('#inputConsole').val();
-    $('#consoleTextarea').append(cmd + '&#13;');
+    $('#consoleLogArea').append('<li>' + cmd + '</li>');
     $.post('/channel', {action: 'command', command: cmd}, function (data) {
     });
 }
@@ -1112,6 +1118,166 @@ function goBack() {
 function boardFlip() {
     chessground_1.toggleOrientation();
 }
+
+// remote begin
+function sendRemoteMsg() {
+    if(remote_ws) {
+        var text_msg_obj = {"event": "text", "payload": $('#remoteText').val()};
+        $("#remoteText").val("");
+        $("#remoteText").focus();
+        var jmsg = JSON.stringify(text_msg_obj);
+        remote_ws.send(jmsg);
+    } else {
+        console.log('cant send message cause of closed connection!');
+    }
+}
+
+function setInsideRoom() {
+    $('#leaveRoomBtn').removeAttr('disabled').show();
+    $('#SendTextRemoteBtn').removeAttr('disabled');
+    $('#enterRoomBtn').attr('disabled', 'disabled').hide();
+    $('#RemoteRoom').attr('disabled', 'disabled');
+    $('#RemoteNick').attr('disabled', 'disabled');
+    $('#broadcastBtn').removeAttr('disabled');
+}
+
+function setOutsideRoom() {
+    $('#leaveRoomBtn').attr('disabled', 'disabled').hide();
+    $('#SendTextRemoteBtn').attr('disabled', 'disabled');
+    $('#enterRoomBtn').removeAttr('disabled').show();
+    $('#RemoteRoom').removeAttr('disabled');
+    $('#RemoteNick').removeAttr('disabled');
+    $('#broadcastBtn').attr('disabled', 'disabled');
+}
+
+function leaveRoom() {
+    setOutsideRoom();
+    if(remote_ws) {
+        remote_ws.close();
+    }
+}
+
+function enterRoom() {
+    $.ajax({
+        dataType: 'jsonp',
+        url: 'http://' + remote_server_prefix,
+        data: {
+            room: $('#RemoteRoom').val(),
+            nick: $('#RemoteNick').val()
+        }
+    }).done(function(data) {
+        console.log(data);
+        if(data.result === 'OK') {
+            setInsideRoom();
+
+            remote_ws = new WebSocket("ws://" + remote_server_prefix + "/ws/" + data.client_id);
+
+            remote_ws.onopen = function (event) {
+                console.log("RemoteChessServerSocket opened");
+            };
+
+            remote_ws.onclose = function () {
+                console.log("RemoteChessServerSocket closed");
+                setOutsideRoom();
+            };
+
+            remote_ws.onerror = function (event) {
+                console.warn("RemoteChessServerSocket error");
+                dgtClockStatusEl.html(event.data);
+            };
+
+            remote_ws.onmessage = receive_message;
+        }
+
+    }).fail(function(jqXHR, textStatus) {
+        console.warn('Failed ajax request');
+        console.log(jqXHR);
+        dgtClockStatusEl.html(textStatus);
+    });
+}
+
+function receive_message(wsevent) {
+    console.log("received message: " + wsevent.data);
+    var msg_obj = $.parseJSON(wsevent.data);
+    switch (msg_obj.event) {
+        case "join":
+            $('#consoleLogArea').append('<li>' + msg_obj.username + msg_obj.payload + '</li>');
+            break;
+        case "leave":
+            $('#consoleLogArea').append('<li>' + msg_obj.username + msg_obj.payload + '</li>');
+            break;
+        case "nick_list":
+            $('#consoleLogArea').append('<li>' + 'current users: ' + msg_obj.payload.toString() + '</li>');
+            break;
+        case "text":
+            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' +  msg_obj.payload + '</li>');
+            break;
+        // picochess events!
+        case 'Clock':
+            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'Clock: ' + msg_obj.msg + '</li>');
+            break;
+        case 'Light':
+            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'Light: ' + msg_obj.move + '</li>');
+            break;
+        case 'Clear':
+            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'Clear' + '</li>');
+            break;
+        case 'Fen':
+            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'Fen: ' + msg_obj.fen + ' move: ' + msg_obj.move + ' play: ' + msg_obj.play + '</li>');
+            break;
+        case 'Game':
+            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'NewGame' + '</li>');
+            break;
+        case 'Message':
+            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'Message: ' + msg_obj.msg + '</li>');
+            break;
+        case 'Status':
+            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'ClockStatus: ' + msg_obj.msg + '</li>');
+            break;
+        case 'Header':
+            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'Header: ' + msg_obj.headers.toString() + '</li>');
+            break;
+        case 'Title':
+            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'Title: ' + msg_obj.ip_info.toString() + '</li>');
+            break;
+        case 'Broadcast':
+            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'Broadcast: ' + msg_obj.msg + 'fen: ' + msg_obj.fen + '</li>');
+            break;
+        default:
+            console.log(msg_obj.event);
+            console.log(msg_obj);
+            console.log(' ');
+    }
+}
+
+/*
+function getCookie(name) {
+    console.log('getCookie');
+    console.log(document.cookie);
+    console.log(' ');
+    var pattern = new RegExp(name + "=.[^;]*");
+    var matched = document.cookie.match(pattern);
+    if (matched) {
+        var cookie = matched[0].split('=');
+        return cookie[1]
+    }
+    return false
+}
+
+function deleteCookie( name, path, domain ) {
+    if ( getCookie( name ) ) {
+        var pico_cookie = name + "=" +
+            ( ( path ) ? ";path=" + path : "") +
+            ( ( domain ) ? ";domain=" + domain : "" ) +
+            ";expires=Thu, 01-Jan-1970 00:00:01 GMT";
+        console.log('deleteCookie');
+        console.log(pico_cookie);
+        console.log(' ');
+        document.cookie = pico_cookie;
+    }
+}
+*/
+// remote end
 
 function formatEngineOutput(line) {
     if (line.search('depth') > 0 && line.search('currmove') < 0) {
@@ -1489,6 +1655,12 @@ $('#ClockLeverBtn').on('click', toggleLeverButton);
 $('#consoleBtn').on('click', toggleConsoleButton);
 $('#getFenToConsoleBtn').on('click', getFenToConsole);
 
+// remote begin
+$('#enterRoomBtn').on('click', enterRoom);
+$('#leaveRoomBtn').on('click', leaveRoom);
+$('#SendTextRemoteBtn').on('click', sendRemoteMsg);
+// remote end
+
 $("#inputConsole").keyup(function(event) {
     if(event.keyCode === 13) {
         sendConsoleCommand();
@@ -1504,6 +1676,20 @@ $(function() {
     });
     window.engine_lines = {};
     window.multipv = 1;
+
+// remote begin
+    setOutsideRoom();
+    $("#RemoteRoom").keyup(function(event) { remote_send(); } );
+    $("#RemoteNick").keyup(function(event) { remote_send(); } );
+
+    function remote_send() {
+        if ( $("#RemoteRoom").val() !== "" && $("#RemoteNick").val() !== "") {
+            $("#enterRoomBtn").removeAttr("disabled");
+        } else {
+            $("#enterRoomBtn").attr("disabled", "disabled");
+        }
+    }
+// remote end
 
     $(document).keydown(function(e) {
         if (e.keyCode === 39) { //right arrow
