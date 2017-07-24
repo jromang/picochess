@@ -1041,7 +1041,7 @@ function clockButtonPower() {
 
 function sendConsoleCommand() {
     var cmd = $('#inputConsole').val();
-    $('#consoleTextarea').append(cmd + '&#13;');
+    $('#consoleLogArea').append('<li>' + cmd + '</li>');
     $.post('/channel', {action: 'command', command: cmd}, function (data) {
     });
 }
