@@ -295,7 +295,7 @@ def main():
         handled_fen = True
         # Check for same position
         if fen == game.board_fen():
-            logging.debug('Already in this fen: ' + fen)
+            logging.debug('Already in this fen: %s', fen)
 
         # Check if we have to undo a previous move (sliding)
         elif fen in last_legal_fens:
@@ -303,30 +303,30 @@ def main():
                 if is_not_user_turn(game.turn):
                     stop_search()
                     game.pop()
-                    logging.debug('user move in computer turn, reverting to: ' + game.board_fen())
+                    logging.debug('user move in computer turn, reverting to: %s', game.board_fen())
                 elif done_computer_fen:
                     done_computer_fen = None
                     done_move = chess.Move.null()
                     game.pop()
-                    logging.debug('user move while computer move is displayed, reverting to: ' + game.board_fen())
+                    logging.debug('user move while computer move is displayed, reverting to: %s', game.board_fen())
                 else:
                     handled_fen = False
                     logging.error('last_legal_fens not cleared: ' + game.board_fen())
             elif interaction_mode == Mode.REMOTE:
                 if is_not_user_turn(game.turn):
                     game.pop()
-                    logging.debug('user move in remote turn, reverting to: ' + game.board_fen())
+                    logging.debug('user move in remote turn, reverting to: %s', game.board_fen())
                 elif done_computer_fen:
                     done_computer_fen = None
                     done_move = chess.Move.null()
                     game.pop()
-                    logging.debug('user move while remote move is displayed, reverting to: ' + game.board_fen())
+                    logging.debug('user move while remote move is displayed, reverting to: %s', game.board_fen())
                 else:
                     handled_fen = False
                     logging.error('last_legal_fens not cleared: ' + game.board_fen())
             else:
                 game.pop()
-                logging.debug('wrong color move -> sliding, reverting to: ' + game.board_fen())
+                logging.debug('wrong color move -> sliding, reverting to: %s', game.board_fen())
             legal_moves = list(game.legal_moves)
             move = legal_moves[last_legal_fens.index(fen)]  # type: chess.Move
             user_move(move)
@@ -443,19 +443,19 @@ def main():
         if len(time_list) == 1:
             fixed = _num(time_list[0])
             timec = TimeControl(TimeMode.FIXED, fixed=fixed)
-            textc = dgttranslate.text('B00_tc_fixed', '{:2d}'.format(fixed))
+            textc = dgttranslate.text('B00_tc_fixed', timec.get_list_text())
         elif len(time_list) == 2:
             blitz = _num(time_list[0])
             fisch = _num(time_list[1])
             if fisch == 0:
                 timec = TimeControl(TimeMode.BLITZ, blitz=blitz)
-                textc = dgttranslate.text('B00_tc_blitz', '{:2d}'.format(blitz))
+                textc = dgttranslate.text('B00_tc_blitz', timec.get_list_text())
             else:
                 timec = TimeControl(TimeMode.FISCHER, blitz=blitz, fischer=fisch)
-                textc = dgttranslate.text('B00_tc_fisch', '{:2d} {:2d}'.format(blitz, fisch))
+                textc = dgttranslate.text('B00_tc_fisch', timec.get_list_text())
         else:
             timec = TimeControl(TimeMode.BLITZ, blitz=5)
-            textc = dgttranslate.text('B00_tc_blitz', ' 5')
+            textc = dgttranslate.text('B00_tc_blitz', timec.get_list_text())
         return timec, textc
 
     def get_engine_level_dict(engine_level):
