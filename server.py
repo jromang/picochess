@@ -85,8 +85,8 @@ class ChannelHandler(ServerRequestHandler):
             result = {'event': 'Broadcast', 'msg': 'Position from Spectators!', 'pgn': pgn_str, 'fen': fen}
             EventHandler.write_to_clients(result)
         elif action == 'move':
-            uci_move = self.get_argument('source') + self.get_argument('target')
-            Observable.fire(Event.REMOTE_MOVE(uci_move=uci_move, fen=self.get_argument('fen')))
+            move = chess.Move.from_uci(self.get_argument('source') + self.get_argument('target'))
+            Observable.fire(Event.REMOTE_MOVE(move=move, fen=self.get_argument('fen')))
         elif action == 'clockbutton':
             Observable.fire(Event.KEYBOARD_BUTTON(button=self.get_argument('button'), dev='web'))
         elif action == 'command':
@@ -440,6 +440,13 @@ class WebDisplay(DisplayMsg, threading.Thread):
             self.shared['headers'] = pgn_game.headers
             return pgn_game.accept(pgn.StringExporter(headers=True, comments=False, variations=False))
 
+        def peek_uci(game: chess.Board):
+            """Return last move in uci format."""
+            try:
+                return game.peek().uci()
+            except IndexError:
+                return chess.Move.null().uci()
+
         if False:  # switch-case
             pass
         elif isinstance(message, Message.START_NEW_GAME):
@@ -564,7 +571,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
         elif isinstance(message, Message.ALTERNATIVE_MOVE):
             pgn_str = _transfer(message.game)
             fen = _oldstyle_fen(message.game)
-            mov = message.game.peek().uci()
+            mov = peek_uci(message.game)
             result = {'pgn': pgn_str, 'fen': fen, 'event': 'Fen', 'move': mov, 'play': 'reload'}
             self.shared['last_dgt_move_msg'] = result
             EventHandler.write_to_clients(result)
@@ -580,7 +587,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
         elif isinstance(message, Message.TAKE_BACK):
             pgn_str = _transfer(message.game)
             fen = _oldstyle_fen(message.game)
-            mov = message.game.peek().uci()
+            mov = peek_uci(message.game)
             result = {'pgn': pgn_str, 'fen': fen, 'event': 'Fen', 'move': mov, 'play': 'reload'}
             self.shared['last_dgt_move_msg'] = result
             EventHandler.write_to_clients(result)

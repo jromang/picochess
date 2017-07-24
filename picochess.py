@@ -195,7 +195,7 @@ def main():
             DisplayMsg.show(Message.CLOCK_STOP(devs={'ser', 'i2c', 'web'}))
             time.sleep(0.4)  # @todo give some time to clock to really do it. Find a better solution!
         else:
-            logging.warning('wrong function call! mode: %s', interaction_mode)
+            logging.warning('wrong function call [stop]! mode: %s', interaction_mode)
 
     def start_clock():
         """Start the clock."""
@@ -205,7 +205,7 @@ def main():
             DisplayMsg.show(Message.CLOCK_START(turn=game.turn, tc_init=tc_init, devs={'ser', 'i2c', 'web'}))
             time.sleep(0.4)  # @todo give some time to clock to really do it. Find a better solution!
         else:
-            logging.warning('wrong function call! mode: %s', interaction_mode)
+            logging.warning('wrong function call [start]! mode: %s', interaction_mode)
 
     def check_game_state(game: chess.Board, play_mode: PlayMode):
         """
@@ -739,6 +739,7 @@ def main():
                     engine.startup(event.options)
                     # All done - rock'n'roll
                     if not engine_fallback:
+                        searchmoves.reset()
                         msg = Message.ENGINE_READY(eng=event.eng, engine_name=engine_name,
                                                    eng_text=event.eng_text, has_levels=engine.has_levels(),
                                                    has_960=engine.has_chess960(), show_ok=event.show_ok)
@@ -862,14 +863,14 @@ def main():
             elif isinstance(event, Event.REMOTE_MOVE):
                 if interaction_mode == Mode.REMOTE and is_not_user_turn(game.turn):
                     stop_search_and_clock()
-                    move = chess.Move.from_uci(event.uci_move)
-                    DisplayMsg.show(Message.COMPUTER_MOVE(move=move, game=game.copy(), wait=False))
+                    DisplayMsg.show(Message.COMPUTER_MOVE(move=event.move, game=game.copy(), wait=False))
                     game_copy = game.copy()
                     game_copy.push(event.move)
-                    done_computer_fen = game.board_fen()
+                    done_computer_fen = game_copy.board_fen()
                     done_move = event.move
                 else:
-                    logging.warning('wrong function call! mode: %s turn: %s', interaction_mode, game.turn)
+                    print(event.move)
+                    logging.warning('wrong function call [remote]! mode: %s turn: %s', interaction_mode, game.turn)
 
             elif isinstance(event, Event.BEST_MOVE):
                 if interaction_mode == Mode.NORMAL and is_not_user_turn(game.turn):
@@ -885,7 +886,8 @@ def main():
                     done_computer_fen = game_copy.board_fen()
                     done_move = event.move
                 else:
-                    logging.warning('wrong function call! mode: %s turn: %s', interaction_mode, game.turn)
+                    print(event.move)
+                    logging.warning('wrong function call [best]! mode: %s turn: %s', interaction_mode, game.turn)
 
             elif isinstance(event, Event.NEW_PV):
                 # illegal moves can occur if a pv from the engine arrives at the same time as a user move.
