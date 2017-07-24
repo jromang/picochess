@@ -814,7 +814,12 @@ def main():
                 if done_computer_fen:
                     done_computer_fen = None
                     done_move = chess.Move.null()
-                    think(game, time_control, Message.ALTERNATIVE_MOVE(game=game.copy()))
+                    if interaction_mode == Mode.NORMAL:
+                        nonlocal play_mode  # set computer to move - in case the user just changed the engine
+                        play_mode = PlayMode.USER_WHITE if game.turn == chess.BLACK else PlayMode.USER_BLACK
+                        think(game, time_control, Message.ALTERNATIVE_MOVE(game=game.copy()))
+                    else:
+                        logging.warning('wrong function call [alternative]! mode: %s', interaction_mode)
 
             elif isinstance(event, Event.SWITCH_SIDES):
                 if interaction_mode == Mode.NORMAL:
@@ -887,6 +892,7 @@ def main():
                     done_move = event.move
                 else:
                     print(event.move)
+                    print(play_mode)
                     logging.warning('wrong function call [best]! mode: %s turn: %s', interaction_mode, game.turn)
 
             elif isinstance(event, Event.NEW_PV):
