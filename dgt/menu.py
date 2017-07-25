@@ -655,6 +655,14 @@ class DgtMenu(object):
         event = Event.SET_TIME_CONTROL(tc_init=timectrl.get_parameters(), time_text=time_text, show_ok=True)
         return self._fire_event(event)
 
+    def exit_menu(self):
+        """Exit the menu."""
+        if self.inside_main_menu():
+            self.enter_top_menu()
+            if not self.get_confirm():
+                return True
+        return False
+
     def main_up(self):
         """Change the menu state after UP action."""
         text = self.dgttranslate.text('Y00_errormenu')

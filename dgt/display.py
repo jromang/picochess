@@ -54,11 +54,9 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.uci960 = False
 
     def _exit_menu(self):
-        if self.dgtmenu.inside_main_menu():
-            self.dgtmenu.enter_top_menu()
-            if not self.dgtmenu.get_confirm():
-                # DispatchDgt.fire(self.dgttranslate.text('K05_exitmenu'))
-                return True
+        if self.dgtmenu.exit_menu():
+            # DispatchDgt.fire(self.dgttranslate.text('K05_exitmenu'))
+            return True
         return False
 
     def _power_off(self, dev='web'):
@@ -467,6 +465,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.play_fen = None
         self.play_turn = None
         self.engine_finished = False
+        self._exit_menu()
         if not self.dgtmenu.get_confirm():
             DispatchDgt.fire(self.dgttranslate.text('K05_okpico'))
         if self.time_control.mode == TimeMode.FIXED:  # go back to a stoped time display
@@ -510,6 +509,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.last_fen = message.fen
         self.last_turn = message.turn
         self.engine_finished = False
+        self._exit_menu()
         if not self.dgtmenu.get_confirm():
             DispatchDgt.fire(self.dgttranslate.text('K05_okuser'))
 
@@ -521,6 +521,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.last_move = message.move
         self.last_fen = message.fen
         self.last_turn = message.turn
+        self._exit_menu()
         if not self.dgtmenu.get_confirm():
             DispatchDgt.fire(self.dgttranslate.text('K05_okmove'))
 
