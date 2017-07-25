@@ -816,7 +816,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self.dgtmenu.battery = percent
 
         else:  # Default
-            # print(message)
             pass
 
     def run(self):

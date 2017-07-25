@@ -253,7 +253,6 @@ class PgnDisplay(DisplayMsg, threading.Thread):
                 self._save_and_email_pgn(message)
 
         else:  # Default
-            # print(message)
             pass
 
     def run(self):

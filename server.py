@@ -596,7 +596,6 @@ class WebDisplay(DisplayMsg, threading.Thread):
             pass
 
         else:  # Default
-            # print(message)
             pass
 
     def _create_task(self, msg):
