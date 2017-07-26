@@ -39,6 +39,9 @@ class TimeControl(object):
         self.fischer_increment = fischer
         self.clock_time = clock_time
 
+        self.clock_time_white = 0  # saves the sended clock time for white
+        self.clock_time_black = 0  # saves the sended clock time for black
+
         self.timer = None
         self.run_color = None
         self.active_color = None
@@ -76,14 +79,16 @@ class TimeControl(object):
     def reset(self):
         """Reset the clock's times for both players."""
         if self.mode == TimeMode.BLITZ:
-            self.clock_time = {chess.WHITE: float(self.minutes_per_game * 60),
-                               chess.BLACK: float(self.minutes_per_game * 60)}
+            self.clock_time_white = self.clock_time_black = self.minutes_per_game * 60
+
         elif self.mode == TimeMode.FISCHER:
-            self.clock_time = {chess.WHITE: float(self.minutes_per_game * 60 + self.fischer_increment),
-                               chess.BLACK: float(self.minutes_per_game * 60 + self.fischer_increment)}
+            self.clock_time_white = self.clock_time_black = self.minutes_per_game * 60 + self.fischer_increment
+
         elif self.mode == TimeMode.FIXED:
-            self.clock_time = {chess.WHITE: float(self.seconds_per_move),
-                               chess.BLACK: float(self.seconds_per_move)}
+            self.clock_time_white = self.clock_time_black = self.seconds_per_move
+
+        self.clock_time = {chess.WHITE: float(self.clock_time_white),
+                           chess.BLACK: float(self.clock_time_black)}
         self.active_color = None
 
     def _log_time(self):
@@ -96,6 +101,12 @@ class TimeControl(object):
         if flip_board:
             c_time[chess.WHITE], c_time[chess.BLACK] = c_time[chess.BLACK], c_time[chess.WHITE]
         return int(c_time[chess.WHITE]), int(c_time[chess.BLACK])
+
+    def set_clock_times(self, white_time: int, black_time: int):
+        """Set the times send from the clock."""
+        self.clock_time_white = white_time
+        self.clock_time_black = black_time
+        print('ClockTime: w:{} b:{}'.format(hours_minutes_seconds(white_time), hours_minutes_seconds(black_time)))
 
     def reset_start_time(self):
         """Set the start time to the current time."""

@@ -756,7 +756,10 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self._process_button(message)
 
         elif isinstance(message, Message.DGT_FEN):
-            self._process_fen(message.fen, message.raw)
+            if self.dgtmenu.inside_updt_menu():
+                logging.debug('inside update menu => ignore fen %s', message.fen)
+            else:
+                self._process_fen(message.fen, message.raw)
 
         elif isinstance(message, Message.DGT_CLOCK_VERSION):
             DispatchDgt.fire(Dgt.CLOCK_VERSION(main=message.main, sub=message.sub, devs={message.dev}))
@@ -769,6 +772,11 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         elif isinstance(message, Message.DGT_CLOCK_TIME):
             DispatchDgt.fire(Dgt.CLOCK_TIME(time_left=message.time_left, time_right=message.time_right,
                                             devs={message.dev}))
+            time_white = message.time_left
+            time_black = message.time_right
+            if self.dgtmenu.get_flip_board():
+                time_white, time_black = time_black, time_white
+            Observable.fire(Event.CLOCK_TIME(time_white=time_white, time_black=time_black))
 
         elif isinstance(message, Message.DGT_SERIAL_NR):
             self._process_dgt_serial_nr()

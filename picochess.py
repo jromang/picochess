@@ -948,6 +948,13 @@ def main():
                 DisplayMsg.show(text)
                 stop_fen_timer()
 
+            elif isinstance(event, Event.CLOCK_TIME):
+                w_hours, w_mins, w_secs = event.time_white
+                b_hours, b_mins, b_secs = event.time_black
+                w_time = w_hours * 3600 + w_mins * 60 + w_secs
+                b_time = b_hours * 3600 + b_mins * 60 + b_secs
+                time_control.set_clock_times(white_time=w_time, black_time=b_time)
+                
             elif isinstance(event, Event.OUT_OF_TIME):
                 stop_search_and_clock()
                 result = GameResult.OUT_OF_TIME
