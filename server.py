@@ -28,7 +28,7 @@ import tornado.wsgi
 from tornado.ioloop import IOLoop
 from tornado.websocket import WebSocketHandler
 
-from utilities import Observable, DisplayMsg, hours_minutes_seconds, RepeatedTimer
+from utilities import Observable, DisplayMsg, hms_time, RepeatedTimer
 from web.picoweb import picoweb as pw
 
 from dgt.api import Event, Message
@@ -206,7 +206,7 @@ class WebVr(DgtIface):
                 logging.info('negative/zero time left: %s', time_left)
                 self.virtual_timer.stop()
                 self.time_left = 0
-            self.time_left = hours_minutes_seconds(time_left)
+            self.time_left = hms_time(time_left)
         if self.time_side == ClockSide.RIGHT:
             hours, mins, secs = self.time_right
             time_right = 3600 * hours + 60 * mins + secs - 1
@@ -214,7 +214,7 @@ class WebVr(DgtIface):
                 logging.info('negative/zero time right: %s', time_right)
                 self.virtual_timer.stop()
                 self.time_right = 0
-            self.time_right = hours_minutes_seconds(time_right)
+            self.time_right = hms_time(time_right)
         self._display_time(self.time_left, self.time_right)
 
     def _display_time(self, time_l, time_r):
@@ -314,8 +314,8 @@ class WebVr(DgtIface):
         self._resume_clock(side)
         self.clock_show_time = True
         # simulate the "start_clock" function from dgthw/pi
-        self.time_left = hours_minutes_seconds(time_left)
-        self.time_right = hours_minutes_seconds(time_right)
+        self.time_left = hms_time(time_left)
+        self.time_right = hms_time(time_right)
         self._display_time(self.time_left, self.time_right)
         return True
 

@@ -18,7 +18,7 @@
 import logging
 from threading import Lock
 
-from utilities import hours_minutes_seconds
+from utilities import hms_time
 from dgt.iface import DgtIface
 from dgt.util import ClockIcons, ClockSide, DgtClk, DgtCmd
 from dgt.translate import DgtTranslate
@@ -162,8 +162,8 @@ class DgtHw(DgtIface):
         if self.getName() not in devs:
             logging.debug('ignored startClock - devs: %s', devs)
             return True
-        self.time_left = hours_minutes_seconds(time_left)
-        self.time_right = hours_minutes_seconds(time_right)
+        self.time_left = hms_time(time_left)
+        self.time_right = hms_time(time_right)
         return self._resume_clock(side)
 
     def getName(self):

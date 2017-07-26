@@ -606,10 +606,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             time_left = time_right = timectrl.seconds_per_move
         else:
             time_left, time_right = timectrl.current_clock_time(flip_board=self.dgtmenu.get_flip_board())
-            if time_left < 0:
-                time_left = 0
-            if time_right < 0:
-                time_right = 0
         side = ClockSide.LEFT if (message.turn == chess.WHITE) != self.dgtmenu.get_flip_board() else ClockSide.RIGHT
         text = Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side, wait=False, devs=message.devs)
         DispatchDgt.fire(text)

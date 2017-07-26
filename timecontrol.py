@@ -21,7 +21,7 @@ import logging
 import copy
 from math import floor
 
-from utilities import Observable, hours_minutes_seconds
+from utilities import Observable, hms_time
 import chess
 from dgt.api import Event
 from dgt.util import TimeMode
@@ -47,7 +47,10 @@ class TimeControl(object):
         self.active_color = None
         self.start_time = None
 
-        if not clock_time:
+        if clock_time:  # preset the clock (received) time already
+            self.clock_time_white = int(clock_time[chess.WHITE])
+            self.clock_time_black = int(clock_time[chess.BLACK])
+        else:
             self.reset()
 
     def __eq__(self, other):
@@ -93,7 +96,7 @@ class TimeControl(object):
 
     def _log_time(self):
         time_w, time_b = self.current_clock_time(flip_board=False)
-        return hours_minutes_seconds(time_w), hours_minutes_seconds(time_b)
+        return hms_time(time_w), hms_time(time_b)
 
     def current_clock_time(self, flip_board=False):
         """Return the startup time for setting the clock at beginning."""
@@ -106,7 +109,7 @@ class TimeControl(object):
         """Set the times send from the clock."""
         self.clock_time_white = white_time
         self.clock_time_black = black_time
-        print('ClockTime: w:{} b:{}'.format(hours_minutes_seconds(white_time), hours_minutes_seconds(black_time)))
+        print('ClockTime: w:{} b:{}'.format(hms_time(white_time), hms_time(black_time)))
 
     def reset_start_time(self):
         """Set the start time to the current time."""
@@ -146,6 +149,8 @@ class TimeControl(object):
             if log:
                 w_hms, b_hms = self._log_time()
                 logging.info('start internal time w:%s - b:%s', w_hms, b_hms)
+                logging.info('received clock time w:%s - b:%s',
+                             hms_time(self.clock_time_white), hms_time(self.clock_time_black))
 
             # Only start thread if not already started for same color, and the player has not already lost on time
             if self.clock_time[color] > 0 and self.active_color is not None and self.run_color != self.active_color:
@@ -167,6 +172,8 @@ class TimeControl(object):
             if log:
                 logging.info('used time: %s secs', used_time)
             self.clock_time[self.active_color] -= used_time
+            if self.clock_time[self.active_color] < 0:
+                self.clock_time[self.active_color] = 0
 
             if log:
                 w_hms, b_hms = self._log_time()

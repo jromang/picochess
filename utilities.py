@@ -164,8 +164,8 @@ def get_opening_books():
     return library
 
 
-def hours_minutes_seconds(seconds: int):
-    """Return the match method once, then stop."""
+def hms_time(seconds: int):
+    """Transfer a seconds integer to hours,mins,secs."""
     if seconds < 0:
         logging.warning('negative time %i', seconds)
         return 0, 0, 0
