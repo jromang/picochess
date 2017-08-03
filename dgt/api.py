@@ -31,9 +31,7 @@ class BaseClass(object):
 
 
 def ClassFactory(name, argnames, BaseClass=BaseClass):
-
     """Class factory for generating."""
-
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             # here, the argnames variable is the one passed to the ClassFactory call
@@ -264,7 +262,7 @@ class Event():
     STOP_SEARCH = ClassFactory(EventApi.STOP_SEARCH, ['engine_status'])
     # Timecontrol events
     OUT_OF_TIME = ClassFactory(EventApi.OUT_OF_TIME, ['color'])
-    CLOCK_TIME  = ClassFactory(EventApi.CLOCK_TIME, ['time_white', 'time_black'])
+    CLOCK_TIME = ClassFactory(EventApi.CLOCK_TIME, ['time_white', 'time_black'])
     # special events
     EXIT_MENU = ClassFactory(EventApi.EXIT_MENU, [])
     UPDATE_PICO = ClassFactory(EventApi.UPDATE_PICO, ['tag'])
