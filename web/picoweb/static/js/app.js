@@ -12,7 +12,9 @@ const NAG_SPECULATIVE_MOVE = 5;
 const NAG_DUBIOUS_MOVE = 6;
 //"""A dubious move. Can also be indicated by ``?!`` in PGN notation."""
 
-var simple_nags = {'1': '!', '2': '?', '3': '!!', '4': '??', '5': '!?', '6': '?!', '7': '&#9633', '8': '&#9632','11' : '=', '13': '&infin;', '14': '&#10866', '15': '&#10865', '16': '&plusmn;', '17': '&#8723', '18': '&#43; &minus;', '19': '&minus; &#43;', '36': '&rarr;','142': '&#8979','146': 'N'};
+var simpleNags = {'1': '!', '2': '?', '3': '!!', '4': '??', '5': '!?', '6': '?!', '7': '&#9633', '8': '&#9632',
+    '11': '=', '13': '&infin;', '14': '&#10866', '15': '&#10865', '16': '&plusmn;', '17': '&#8723',
+    '18': '&#43; &minus;', '19': '&minus; &#43;', '36': '&rarr;','142': '&#8979','146': 'N'};
 
 
 const NAG_FORCED_MOVE = 7;
@@ -64,7 +66,7 @@ var chessGameType = 0; // 0=Standard ; 1=Chess960
 
 
 function removeHighlights() {
-    chessground_1.setShapes([]);
+    chessground1.setShapes([]);
 }
 
 function highlightBoard(ucimove, play) {
@@ -78,7 +80,7 @@ function highlightBoard(ucimove, play) {
         brush = 'blue';
     }
     var shapes = {orig: move[0], dest: move[1], brush: brush};
-    chessground_1.setShapes([shapes]);
+    chessground1.setShapes([shapes]);
 }
 
 function figurinizeMove(move) {
@@ -261,9 +263,9 @@ function createGamePointer() {
 }
 
 function stripFen(fen) {
-    var stripped_fen = fen.replace(/\//g, '');
-    stripped_fen = stripped_fen.replace(/ /g, '');
-    return stripped_fen;
+    var strippedFen = fen.replace(/\//g, '');
+    strippedFen = strippedFen.replace(/ /g, '');
+    return strippedFen;
 }
 
 String.prototype.trim = function() {
@@ -308,11 +310,11 @@ function WebExporter(columns) {
     };
 
     this.start_variation = function() {
-        this.write_token("<span class='gameVariation'> [ ");
+        this.write_token('<span class="gameVariation"> [ ');
     };
 
     this.end_variation = function() {
-        this.write_token(" ] </span>");
+        this.write_token(' ] </span>');
     };
 
     this.put_starting_comment = function(comment) {
@@ -335,8 +337,8 @@ function WebExporter(columns) {
 
     this.put_nag = function(nag) {
         var int_nag = parseInt(nag);
-        if (simple_nags[int_nag]) {
-            this.write_token(" " + simple_nags[int_nag] + " ");
+        if (simpleNags[int_nag]) {
+            this.write_token(" " + simpleNags[int_nag] + " ");
         }
         else {
             this.write_token("$" + String(nag) + " ");
@@ -679,7 +681,7 @@ var onSnapEnd = function(source, target) {
 function updateChessGround() {
     var tmpGame = createGamePointer();
 
-    chessground_1.set({
+    chessground1.set({
         fen: currentPosition.fen,
         turnColor: toColor(tmpGame),
         movable: {
@@ -701,14 +703,14 @@ var cfg3 = {
             }
         };
 
-var chessground_1 = new Chessground(document.getElementById('board'), cfg3 );
+var chessground1 = new Chessground(document.getElementById('board'), cfg3 );
 
-chessground_1.set({
+chessground1.set({
     movable: { events: { after: playOtherSide() } }
 });
 
 $(window).resize(function() {
-    chessground_1.redrawAll();
+    chessground1.redrawAll();
 });
 
 function addNewMove(m, current_position, fen, props) {
@@ -1110,7 +1112,7 @@ function goBack() {
 }
 
 function boardFlip() {
-    chessground_1.toggleOrientation();
+    chessground1.toggleOrientation();
 }
 
 function formatEngineOutput(line) {
@@ -1418,7 +1420,7 @@ function setTitle(data) {
     if (window.ip_info.version) {
         version = window.ip_info.version;
     } else if (window.system_info.version) {
-        version = window.system_info.version
+        version = window.system_info.version;
     }
     document.title = 'Webserver Picochess ' + version + ip;
 }
