@@ -241,7 +241,6 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                     system_picotalker = self.system_voice()
 
                 else:  # Default
-                    # print(message)
                     pass
             except queue.Empty:
                 pass

@@ -20,7 +20,7 @@ import queue
 from threading import Thread
 
 from chess import Board
-from utilities import hours_minutes_seconds, DisplayDgt, DispatchDgt
+from utilities import hms_time, DisplayDgt, DispatchDgt
 from dgt.util import ClockIcons, ClockSide
 from dgt.api import Dgt
 from dgt.translate import DgtTranslate
@@ -123,8 +123,8 @@ class DgtIface(DisplayDgt, Thread):
                 logging.debug('(%s) clock is already stopped', ','.join(message.devs))
         elif isinstance(message, Dgt.CLOCK_START):
             # log times
-            l_hms = hours_minutes_seconds(message.time_left)
-            r_hms = hours_minutes_seconds(message.time_right)
+            l_hms = hms_time(message.time_left)
+            r_hms = hms_time(message.time_right)
             logging.debug('(%s) clock received last time from clock l:%s r:%s',
                           ','.join(message.devs), self.time_left, self.time_right)
             logging.debug('(%s) clock sending start time to clock l:%s r:%s', ','.join(message.devs), l_hms, r_hms)

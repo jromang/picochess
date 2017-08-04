@@ -655,6 +655,14 @@ class DgtMenu(object):
         event = Event.SET_TIME_CONTROL(tc_init=timectrl.get_parameters(), time_text=time_text, show_ok=True)
         return self._fire_event(event)
 
+    def exit_menu(self):
+        """Exit the menu."""
+        if self.inside_main_menu():
+            self.enter_top_menu()
+            if not self.get_confirm():
+                return True
+        return False
+
     def main_up(self):
         """Change the menu state after UP action."""
         text = self.dgttranslate.text('Y00_errormenu')
@@ -1581,6 +1589,7 @@ class DgtMenu(object):
         return text
 
     def updt_middle(self, dev):
+        """Change the menu state after MIDDLE action."""
         self.updt_devs.add(dev)
         text = self.dgttranslate.text('B00_updt_version', self.updt_tags[self.updt_version][1], devs=self.updt_devs)
         text.rd = ClockIcons.DOT
@@ -1589,18 +1598,21 @@ class DgtMenu(object):
         return text
 
     def updt_right(self):
+        """Change the menu state after RIGHT action."""
         self.updt_version = (self.updt_version + 1) % len(self.updt_tags)
         text = self.dgttranslate.text('B00_updt_version', self.updt_tags[self.updt_version][1], devs=self.updt_devs)
         text.rd = ClockIcons.DOT
         return text
 
     def updt_left(self):
+        """Change the menu state after LEFT action."""
         self.updt_version = (self.updt_version - 1) % len(self.updt_tags)
         text = self.dgttranslate.text('B00_updt_version', self.updt_tags[self.updt_version][1], devs=self.updt_devs)
         text.rd = ClockIcons.DOT
         return text
 
     def updt_down(self, dev):
+        """Change the menu state after DOWN action."""
         logging.debug('leave update menu dev: %s', dev)
         self.updt_top = False
         self.updt_devs.discard(dev)
@@ -1608,6 +1620,7 @@ class DgtMenu(object):
         return self.updt_tags[self.updt_version][0]
 
     def updt_up(self, dev):
+        """Change the menu state after UP action."""
         logging.debug('leave update menu dev: %s', dev)
         self.updt_top = False
         self.updt_devs.discard(dev)

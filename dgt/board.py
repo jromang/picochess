@@ -26,7 +26,7 @@ import time
 
 from dgt.util import DgtAck, DgtClk, DgtCmd, DgtMsg, ClockIcons, ClockSide, enum
 from dgt.api import Message, Dgt
-from utilities import RepeatedTimer, DisplayMsg, hours_minutes_seconds
+from utilities import RepeatedTimer, DisplayMsg, hms_time
 
 
 class DgtBoard(object):
@@ -240,7 +240,7 @@ class DgtBoard(object):
                     logging.warning('(ser) clock illegal new time received %s', message)
                 elif r_time > self.r_time or l_time > self.l_time:  # the new time is higher as the old => ignore
                     logging.warning('(ser) clock strange old time received %s l:%s r:%s',
-                                    message, hours_minutes_seconds(self.l_time), hours_minutes_seconds(self.r_time))
+                                    message, hms_time(self.l_time), hms_time(self.r_time))
                 else:
                     status = message[6] & 0x3f
                     if status & 0x20:

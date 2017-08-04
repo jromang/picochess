@@ -54,11 +54,9 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.uci960 = False
 
     def _exit_menu(self):
-        if self.dgtmenu.inside_main_menu():
-            self.dgtmenu.enter_top_menu()
-            if not self.dgtmenu.get_confirm():
-                # DispatchDgt.fire(self.dgttranslate.text('K05_exitmenu'))
-                return True
+        if self.dgtmenu.exit_menu():
+            # DispatchDgt.fire(self.dgttranslate.text('K05_exitmenu'))
+            return True
         return False
 
     def _power_off(self, dev='web'):
@@ -467,6 +465,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.play_fen = None
         self.play_turn = None
         self.engine_finished = False
+        self._exit_menu()
         if not self.dgtmenu.get_confirm():
             DispatchDgt.fire(self.dgttranslate.text('K05_okpico'))
         if self.time_control.mode == TimeMode.FIXED:  # go back to a stoped time display
@@ -510,6 +509,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.last_fen = message.fen
         self.last_turn = message.turn
         self.engine_finished = False
+        self._exit_menu()
         if not self.dgtmenu.get_confirm():
             DispatchDgt.fire(self.dgttranslate.text('K05_okuser'))
 
@@ -521,6 +521,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.last_move = message.move
         self.last_fen = message.fen
         self.last_turn = message.turn
+        self._exit_menu()
         if not self.dgtmenu.get_confirm():
             DispatchDgt.fire(self.dgttranslate.text('K05_okmove'))
 
@@ -605,10 +606,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             time_left = time_right = timectrl.seconds_per_move
         else:
             time_left, time_right = timectrl.current_clock_time(flip_board=self.dgtmenu.get_flip_board())
-            if time_left < 0:
-                time_left = 0
-            if time_right < 0:
-                time_right = 0
         side = ClockSide.LEFT if (message.turn == chess.WHITE) != self.dgtmenu.get_flip_board() else ClockSide.RIGHT
         text = Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side, wait=False, devs=message.devs)
         DispatchDgt.fire(text)
@@ -755,7 +752,10 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self._process_button(message)
 
         elif isinstance(message, Message.DGT_FEN):
-            self._process_fen(message.fen, message.raw)
+            if self.dgtmenu.inside_updt_menu():
+                logging.debug('inside update menu => ignore fen %s', message.fen)
+            else:
+                self._process_fen(message.fen, message.raw)
 
         elif isinstance(message, Message.DGT_CLOCK_VERSION):
             DispatchDgt.fire(Dgt.CLOCK_VERSION(main=message.main, sub=message.sub, devs={message.dev}))
@@ -768,6 +768,11 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         elif isinstance(message, Message.DGT_CLOCK_TIME):
             DispatchDgt.fire(Dgt.CLOCK_TIME(time_left=message.time_left, time_right=message.time_right,
                                             devs={message.dev}))
+            time_white = message.time_left
+            time_black = message.time_right
+            if self.dgtmenu.get_flip_board():
+                time_white, time_black = time_black, time_white
+            Observable.fire(Event.CLOCK_TIME(time_white=time_white, time_black=time_black))
 
         elif isinstance(message, Message.DGT_SERIAL_NR):
             self._process_dgt_serial_nr()
@@ -816,7 +821,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self.dgtmenu.battery = percent
 
         else:  # Default
-            # print(message)
             pass
 
     def run(self):

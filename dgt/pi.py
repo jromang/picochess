@@ -21,7 +21,7 @@ from threading import Lock, Timer
 from ctypes import cdll, c_byte, create_string_buffer, pointer
 from platform import machine
 
-from utilities import DisplayMsg, hours_minutes_seconds
+from utilities import DisplayMsg, hms_time
 from dgt.api import Message
 from dgt.util import ClockIcons, ClockSide
 from dgt.translate import DgtTranslate
@@ -217,8 +217,8 @@ class DgtPi(DgtIface):
         if self.getName() not in devs:
             logging.debug('ignored startClock - devs: %s', devs)
             return True
-        self.time_left = hours_minutes_seconds(time_left)
-        self.time_right = hours_minutes_seconds(time_right)
+        self.time_left = hms_time(time_left)
+        self.time_right = hms_time(time_right)
         l_hms = self.time_left
         r_hms = self.time_right
 

@@ -33,6 +33,7 @@ class Informer(chess.uci.InfoHandler):
         self.allow_depth = True
 
     def on_go(self):
+        """Engine sends GO."""
         self.allow_score = True
         self.allow_pv = True
         self.allow_depth = True
@@ -72,16 +73,19 @@ class Informer(chess.uci.InfoHandler):
             return False
 
     def score(self, cp, mate, lowerbound, upperbound):
+        """Engine sends SCORE."""
         if self._allow_fire_score():
             Observable.fire(Event.NEW_SCORE(score=cp, mate=mate))
         super().score(cp, mate, lowerbound, upperbound)
 
     def pv(self, moves):
+        """Call when engine sends PV."""
         if self._allow_fire_pv() and moves:
             Observable.fire(Event.NEW_PV(pv=moves))
         super().pv(moves)
 
     def depth(self, dep):
+        """Engine sends DEPTH."""
         if self._allow_fire_depth():
             Observable.fire(Event.NEW_DEPTH(depth=dep))
         super().depth(dep)

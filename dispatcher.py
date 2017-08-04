@@ -103,17 +103,17 @@ class Dispatcher(DispatchDgt, Thread):
                         self.dgtmenu.enable_picochess_displayed(dev)
                     if self.dgtmenu.inside_updt_menu():
                         if message.maxtime == 0.1:  # 0.1=eboard error
-                            logging.debug('(%s) inside menu => board errors not displayed', dev)
+                            logging.debug('(%s) inside update menu => board errors not displayed', dev)
                             return
                         if message.maxtime == 1.1:  # 1.1=eBoard connect
-                            logging.debug('(%s) inside menu => board connect not displayed', dev)
+                            logging.debug('(%s) inside update menu => board connect not displayed', dev)
                             return
                 self.maxtimer[dev] = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer, [dev])
                 self.maxtimer[dev].start()
                 logging.debug('(%s) showing %s for %.1f secs', dev, message, message.maxtime * self.time_factor)
                 self.maxtimer_running[dev] = True
             if repr(message) == DgtApi.CLOCK_START and self.dgtmenu.inside_updt_menu():
-                logging.debug('(%s) inside menu => clock not started', dev)
+                logging.debug('(%s) inside update menu => clock not started', dev)
                 return
             message.devs = {dev}  # on new system, we only have ONE device each message - force this!
             DisplayDgt.show(message)

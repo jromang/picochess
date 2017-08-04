@@ -195,7 +195,7 @@ def main():
             DisplayMsg.show(Message.CLOCK_STOP(devs={'ser', 'i2c', 'web'}))
             time.sleep(0.4)  # @todo give some time to clock to really do it. Find a better solution!
         else:
-            logging.warning('wrong function call! mode: %s', interaction_mode)
+            logging.warning('wrong function call [stop]! mode: %s', interaction_mode)
 
     def start_clock():
         """Start the clock."""
@@ -205,7 +205,7 @@ def main():
             DisplayMsg.show(Message.CLOCK_START(turn=game.turn, tc_init=tc_init, devs={'ser', 'i2c', 'web'}))
             time.sleep(0.4)  # @todo give some time to clock to really do it. Find a better solution!
         else:
-            logging.warning('wrong function call! mode: %s', interaction_mode)
+            logging.warning('wrong function call [start]! mode: %s', interaction_mode)
 
     def check_game_state(game: chess.Board, play_mode: PlayMode):
         """
@@ -739,6 +739,7 @@ def main():
                     engine.startup(event.options)
                     # All done - rock'n'roll
                     if not engine_fallback:
+                        searchmoves.reset()
                         msg = Message.ENGINE_READY(eng=event.eng, engine_name=engine_name,
                                                    eng_text=event.eng_text, has_levels=engine.has_levels(),
                                                    has_960=engine.has_chess960(), show_ok=event.show_ok)
@@ -813,7 +814,12 @@ def main():
                 if done_computer_fen:
                     done_computer_fen = None
                     done_move = chess.Move.null()
-                    think(game, time_control, Message.ALTERNATIVE_MOVE(game=game.copy()))
+                    if interaction_mode == Mode.NORMAL:  # @todo handle Remote too
+                        # set computer to move - in case the user just changed the engine
+                        play_mode = PlayMode.USER_WHITE if game.turn == chess.BLACK else PlayMode.USER_BLACK
+                        think(game, time_control, Message.ALTERNATIVE_MOVE(game=game.copy()))
+                    else:
+                        logging.warning('wrong function call [alternative]! mode: %s', interaction_mode)
 
             elif isinstance(event, Event.SWITCH_SIDES):
                 if interaction_mode == Mode.NORMAL:
@@ -862,14 +868,13 @@ def main():
             elif isinstance(event, Event.REMOTE_MOVE):
                 if interaction_mode == Mode.REMOTE and is_not_user_turn(game.turn):
                     stop_search_and_clock()
-                    move = chess.Move.from_uci(event.uci_move)
-                    DisplayMsg.show(Message.COMPUTER_MOVE(move=move, game=game.copy(), wait=False))
+                    DisplayMsg.show(Message.COMPUTER_MOVE(move=event.move, game=game.copy(), wait=False))
                     game_copy = game.copy()
                     game_copy.push(event.move)
-                    done_computer_fen = game.board_fen()
+                    done_computer_fen = game_copy.board_fen()
                     done_move = event.move
                 else:
-                    logging.warning('wrong function call! mode: %s turn: %s', interaction_mode, game.turn)
+                    logging.warning('wrong function call [remote]! mode: %s turn: %s', interaction_mode, game.turn)
 
             elif isinstance(event, Event.BEST_MOVE):
                 if interaction_mode == Mode.NORMAL and is_not_user_turn(game.turn):
@@ -885,7 +890,7 @@ def main():
                     done_computer_fen = game_copy.board_fen()
                     done_move = event.move
                 else:
-                    logging.warning('wrong function call! mode: %s turn: %s', interaction_mode, game.turn)
+                    logging.warning('wrong function call [best]! mode: %s turn: %s', interaction_mode, game.turn)
 
             elif isinstance(event, Event.NEW_PV):
                 # illegal moves can occur if a pv from the engine arrives at the same time as a user move.
@@ -942,6 +947,13 @@ def main():
                 text = Message.TIME_CONTROL(time_text=event.time_text, show_ok=event.show_ok, tc_init=tc_init)
                 DisplayMsg.show(text)
                 stop_fen_timer()
+
+            elif isinstance(event, Event.CLOCK_TIME):
+                w_hours, w_mins, w_secs = event.time_white
+                b_hours, b_mins, b_secs = event.time_black
+                w_time = w_hours * 3600 + w_mins * 60 + w_secs
+                b_time = b_hours * 3600 + b_mins * 60 + b_secs
+                time_control.set_clock_times(white_time=w_time, black_time=b_time)
 
             elif isinstance(event, Event.OUT_OF_TIME):
                 stop_search_and_clock()
