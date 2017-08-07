@@ -53,6 +53,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.depth = None
         self.uci960 = False
 
+        self.inside_room = False
+
     def _exit_menu(self):
         if self.dgtmenu.exit_menu():
             # DispatchDgt.fire(self.dgttranslate.text('K05_exitmenu'))
@@ -819,6 +821,9 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             else:
                 percent = str(message.percent)
             self.dgtmenu.battery = percent
+
+        elif isinstance(message, Message.REMOTE_ROOM):
+            self.inside_room = message.inside
 
         else:  # Default
             pass
