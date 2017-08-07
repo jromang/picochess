@@ -90,7 +90,7 @@ class ChannelHandler(ServerRequestHandler):
         elif action == 'clockbutton':
             Observable.fire(Event.KEYBOARD_BUTTON(button=self.get_argument('button'), dev='web'))
         elif action == 'room':
-            inside = self.get_argument('inside')
+            inside = self.get_argument('room') == 'inside'
             Observable.fire(Event.REMOTE_ROOM(inside=inside))
         elif action == 'command':
             self.process_console_command(self.get_argument('command'))

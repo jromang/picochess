@@ -780,6 +780,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self._process_dgt_serial_nr()
 
         elif isinstance(message, Message.DGT_JACK_CONNECTED_ERROR):  # only working in case of 2 clocks connected!
+            print('JACK')
             DispatchDgt.fire(self.dgttranslate.text('Y00_errorjack'))
 
         elif isinstance(message, Message.DGT_EBOARD_VERSION):

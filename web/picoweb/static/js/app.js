@@ -1142,7 +1142,7 @@ function setInsideRoom() {
     $('#RemoteNick').attr('disabled', 'disabled');
     $('#broadcastBtn').removeAttr('disabled');
 
-    $.post('/channel', {action: 'room', inside: true}, function (data) {
+    $.post('/channel', {action: 'room', room: 'inside'}, function (data) {
     });
 }
 
@@ -1154,7 +1154,7 @@ function setOutsideRoom() {
     $('#RemoteNick').removeAttr('disabled');
     $('#broadcastBtn').attr('disabled', 'disabled');
 
-    $.post('/channel', {action: 'room', inside: false}, function (data) {
+    $.post('/channel', {action: 'room', room: 'outside'}, function (data) {
     });
 }
 

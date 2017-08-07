@@ -921,7 +921,6 @@ def main():
 
             elif isinstance(event, Event.SET_INTERACTION_MODE):
                 if event.mode == Mode.REMOTE and not inside_room:
-                    print('ILLEGAL MODE')
                     DisplayMsg.show(Message.DGT_JACK_CONNECTED_ERROR())  # @todo fix string
                 else:
                     if event.mode not in (Mode.NORMAL, Mode.REMOTE) and done_computer_fen:

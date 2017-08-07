@@ -828,8 +828,8 @@ class DgtMenu(object):
 
         elif self.state == MenuState.MODE_TYPE:
             # do action!
-            text = self.dgttranslate.text('B10_okmode')
-            event = Event.SET_INTERACTION_MODE(mode=self.menu_mode, mode_text=text, show_ok=True)
+            mode_text = self.dgttranslate.text('B10_okmode')
+            event = Event.SET_INTERACTION_MODE(mode=self.menu_mode, mode_text=mode_text, show_ok=True)
             text = self._fire_event(event)
 
         elif self.state == MenuState.POS:
