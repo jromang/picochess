@@ -357,6 +357,13 @@ class DgtTranslate(object):
             frtxt = Dgt.DISPLAY_TEXT(l='jack error ', m='jack err', s='jack  ')
             estxt = Dgt.DISPLAY_TEXT(l='jack error ', m='jack err', s='jack  ')
             ittxt = Dgt.DISPLAY_TEXT(l='errore jack', m='err jack', s='jack  ')
+        if text_id == 'errorroom':
+            entxt = Dgt.DISPLAY_TEXT(l='error room ', m='err room', s='noroom')
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
         if text_id == 'level':
             if msg.startswith('Elo@'):
                 msg = str(int(msg[4:])).rjust(4)

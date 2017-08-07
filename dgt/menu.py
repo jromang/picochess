@@ -195,6 +195,7 @@ class DgtMenu(object):
         self.updt_version = 0  # index to current version
 
         self.battery = '-NA'  # standard value: NotAvailable (discharging)
+        self.inside_room = False
 
     def inside_updt_menu(self):
         """Inside update menu."""
@@ -827,10 +828,13 @@ class DgtMenu(object):
             text = self.enter_mode_type_menu()
 
         elif self.state == MenuState.MODE_TYPE:
-            # do action!
-            mode_text = self.dgttranslate.text('B10_okmode')
-            event = Event.SET_INTERACTION_MODE(mode=self.menu_mode, mode_text=mode_text, show_ok=True)
-            text = self._fire_event(event)
+            # maybe do action!
+            if self.menu_mode == Mode.REMOTE and not self.inside_room:
+                text = self.dgttranslate.text('Y00_errorroom')
+            else:
+                mode_text = self.dgttranslate.text('B10_okmode')
+                event = Event.SET_INTERACTION_MODE(mode=self.menu_mode, mode_text=mode_text, show_ok=True)
+                text = self._fire_event(event)
 
         elif self.state == MenuState.POS:
             text = self.enter_pos_color_menu()

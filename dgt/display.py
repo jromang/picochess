@@ -53,8 +53,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.depth = None
         self.uci960 = False
 
-        self.inside_room = False
-
     def _exit_menu(self):
         if self.dgtmenu.exit_menu():
             # DispatchDgt.fire(self.dgttranslate.text('K05_exitmenu'))
@@ -368,12 +366,15 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 DispatchDgt.fire(self.dgttranslate.text('Y00_erroreng'))
         elif fen in mode_map:
             logging.debug('map: Interaction mode [%s]', mode_map[fen])
-            self.dgtmenu.set_mode(mode_map[fen])
-            text = self.dgttranslate.text(mode_map[fen].value)
-            text.beep = self.dgttranslate.bl(BeepLevel.MAP)
-            text.maxtime = 1  # wait 1sec not forever
-            text.wait = self._exit_menu()
-            Observable.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], mode_text=text, show_ok=False))
+            if mode_map[fen] == Mode.REMOTE and not self.dgtmenu.inside_room:
+                DispatchDgt.fire(self.dgttranslate.text('Y00_errorroom'))
+            else:
+                self.dgtmenu.set_mode(mode_map[fen])
+                text = self.dgttranslate.text(mode_map[fen].value)
+                text.beep = self.dgttranslate.bl(BeepLevel.MAP)
+                text.maxtime = 1  # wait 1sec not forever
+                text.wait = self._exit_menu()
+                Observable.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], mode_text=text, show_ok=False))
         elif fen in self.dgtmenu.tc_fixed_map:
             logging.debug('map: Time control fixed')
             self.dgtmenu.set_time_mode(TimeMode.FIXED)
@@ -780,7 +781,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self._process_dgt_serial_nr()
 
         elif isinstance(message, Message.DGT_JACK_CONNECTED_ERROR):  # only working in case of 2 clocks connected!
-            print('JACK')
             DispatchDgt.fire(self.dgttranslate.text('Y00_errorjack'))
 
         elif isinstance(message, Message.DGT_EBOARD_VERSION):
@@ -824,7 +824,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self.dgtmenu.battery = percent
 
         elif isinstance(message, Message.REMOTE_ROOM):
-            self.inside_room = message.inside
+            self.dgtmenu.inside_room = message.inside
 
         else:  # Default
             pass

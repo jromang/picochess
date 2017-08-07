@@ -472,11 +472,6 @@ def main():
                     break
         return {}, None
 
-    def set_inside_room(inside: bool):
-        """Set the flag if we are inside a remote room."""
-        nonlocal inside_room
-        inside_room = inside
-
     # Enable garbage collection - needed for engine swapping as objects orphaned
     gc.enable()
 
@@ -671,8 +666,6 @@ def main():
     fen_timer = threading.Timer(3, expired_fen_timer)
     fen_timer_running = False
     error_fen = None
-
-    inside_room = False
 
     # Event loop
     logging.info('evt_queue ready')
@@ -875,7 +868,8 @@ def main():
             elif isinstance(event, Event.REMOTE_MOVE):
                 if interaction_mode == Mode.REMOTE and is_not_user_turn(game.turn):
                     stop_search_and_clock()
-                    DisplayMsg.show(Message.COMPUTER_MOVE(move=event.move, game=game.copy(), wait=False))
+                    DisplayMsg.show(Message.COMPUTER_MOVE(move=event.move, ponder=chess.Move.null(), game=game.copy(),
+                                                          wait=False))
                     game_copy = game.copy()
                     game_copy.push(event.move)
                     done_computer_fen = game_copy.board_fen()
@@ -920,22 +914,19 @@ def main():
                 DisplayMsg.show(Message.SEARCH_STOPPED(engine_status=event.engine_status))
 
             elif isinstance(event, Event.SET_INTERACTION_MODE):
-                if event.mode == Mode.REMOTE and not inside_room:
-                    DisplayMsg.show(Message.DGT_JACK_CONNECTED_ERROR())  # @todo fix string
-                else:
-                    if event.mode not in (Mode.NORMAL, Mode.REMOTE) and done_computer_fen:
-                        event.mode = interaction_mode  # @todo display an error message at clock
-                        logging.warning('mode cant be changed to a pondering mode as long as a move is displayed')
+                if event.mode not in (Mode.NORMAL, Mode.REMOTE) and done_computer_fen:
+                    event.mode = interaction_mode  # @todo display an error message at clock
+                    logging.warning('mode cant be changed to a pondering mode as long as a move is displayed')
 
-                    if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
-                        stop_clock()
-                    interaction_mode = event.mode
-                    if engine.is_thinking():
-                        stop_search()
-                    if engine.is_pondering():
-                        stop_search()
-                    msg = Message.INTERACTION_MODE(mode=event.mode, mode_text=event.mode_text, show_ok=event.show_ok)
-                    set_wait_state(msg)
+                if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
+                    stop_clock()
+                interaction_mode = event.mode
+                if engine.is_thinking():
+                    stop_search()
+                if engine.is_pondering():
+                    stop_search()
+                msg = Message.INTERACTION_MODE(mode=event.mode, mode_text=event.mode_text, show_ok=event.show_ok)
+                set_wait_state(msg)
 
             elif isinstance(event, Event.SET_OPENING_BOOK):
                 write_picochess_ini('book', event.book['file'])
@@ -1009,7 +1000,6 @@ def main():
                 DisplayMsg.show(Message.EXIT_MENU())
 
             elif isinstance(event, Event.REMOTE_ROOM):
-                set_inside_room(event.inside)
                 DisplayMsg.show(Message.REMOTE_ROOM(inside=event.inside))
 
             else:  # Default
