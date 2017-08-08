@@ -565,7 +565,8 @@ def main():
     time_control, time_text = transfer_time(args.time.split())
     time_text.beep = False
     # The class dgtDisplay fires Event (Observable) & DispatchDgt (Dispatcher)
-    DgtDisplay(dgttranslate, dgtmenu, time_control).start()
+    dgtdisplay = DgtDisplay(dgttranslate, dgtmenu, time_control)  # var needed for force_leds_off
+    dgtdisplay.start()
 
     # Create PicoTalker for speech output
     PicoTalkerDisplay(args.user_voice, args.computer_voice, args.speed_voice).start()
@@ -915,8 +916,10 @@ def main():
 
             elif isinstance(event, Event.SET_INTERACTION_MODE):
                 if event.mode not in (Mode.NORMAL, Mode.REMOTE) and done_computer_fen:
-                    event.mode = interaction_mode  # @todo display an error message at clock
-                    logging.warning('mode cant be changed to a pondering mode as long as a move is displayed')
+                    logging.info('displayed move %s ignored cause mode changed to %s', done_move, event.mode)
+                    dgtdisplay.force_leds_off()
+                    done_computer_fen = None
+                    done_move = chess.Move.null()
 
                 if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
                     stop_clock()

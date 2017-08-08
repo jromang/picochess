@@ -440,10 +440,16 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 self.dgtmenu.set_engine_has_960(message.has_960)
                 self.dgtmenu.set_engine_level(message.level_index)
 
-    def _process_start_new_game(self, message):
+    def force_leds_off(self, log=False):
+        """Clear the rev2 lights if they still on."""
         if self.leds_are_on:
+            if log:
+                logging.warning('(rev) leds still on')
             DispatchDgt.fire(Dgt.LIGHT_CLEAR(devs={'ser', 'web'}))
             self.leds_are_on = False
+
+    def _process_start_new_game(self, message):
+        self.force_leds_off()
         self._reset_moves_and_score()
         self.engine_finished = False
         self.time_control.reset()
@@ -458,9 +464,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                                              wait=True, devs={'ser', 'i2c', 'web'}))
 
     def _process_computer_move_done(self):
-        if self.leds_are_on:
-            DispatchDgt.fire(Dgt.LIGHT_CLEAR(devs={'ser', 'web'}))
-            self.leds_are_on = False
+        self.force_leds_off()
         self.last_move = self.play_move
         self.last_fen = self.play_fen
         self.last_turn = self.play_turn
@@ -475,9 +479,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs={'ser', 'i2c', 'web'}))
 
     def _process_computer_move(self, message):
-        if self.leds_are_on:  # can happen in case of a book move
-            logging.warning('(rev) leds still on')
-            DispatchDgt.fire(Dgt.LIGHT_CLEAR(devs={'ser', 'web'}))
+        self.force_leds_off(log=True)  # can happen in case of a book move
         move = message.move
         ponder = message.ponder
         self.engine_finished = True
@@ -504,10 +506,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.leds_are_on = True
 
     def _process_user_move_done(self, message):
-        if self.leds_are_on:  # can happen in case of a sliding move
-            logging.warning('(rev) leds still on')
-            DispatchDgt.fire(Dgt.LIGHT_CLEAR(devs={'ser', 'web'}))
-            self.leds_are_on = False
+        self.force_leds_off(log=True)  # can happen in case of a sliding move
         self.last_move = message.move
         self.last_fen = message.fen
         self.last_turn = message.turn
@@ -517,10 +516,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             DispatchDgt.fire(self.dgttranslate.text('K05_okuser'))
 
     def _process_review_move_done(self, message):
-        if self.leds_are_on:  # can happen in case of a sliding move
-            logging.warning('(rev) leds still on')
-            DispatchDgt.fire(Dgt.LIGHT_CLEAR(devs={'ser', 'web'}))
-            self.leds_are_on = False
+        self.force_leds_off(log=True)  # can happen in case of a sliding move
         self.last_move = message.move
         self.last_fen = message.fen
         self.last_turn = message.turn
@@ -679,9 +675,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self._process_review_move_done(message)
 
         elif isinstance(message, Message.ALTERNATIVE_MOVE):
-            if self.leds_are_on:
-                DispatchDgt.fire(Dgt.LIGHT_CLEAR(devs={'ser', 'web'}))
-                self.leds_are_on = False
+            self.force_leds_off()
             DispatchDgt.fire(self.dgttranslate.text('B05_altmove'))
 
         elif isinstance(message, Message.LEVEL):
@@ -696,9 +690,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 DispatchDgt.fire(message.book_text)
 
         elif isinstance(message, Message.TAKE_BACK):
-            if self.leds_are_on:
-                DispatchDgt.fire(Dgt.LIGHT_CLEAR(devs={'ser', 'web'}))
-                self.leds_are_on = False
+            self.force_leds_off()
             self._reset_moves_and_score()
             self.engine_finished = False
             DispatchDgt.fire(self.dgttranslate.text('C10_takeback'))
