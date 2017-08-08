@@ -1,51 +1,62 @@
 [Level@00]
-skill level = 0
+Handicap Level = 0
 
 [Level@01]
-skill level = 1
+Handicap Level = 1
 
 [Level@02]
-skill level = 2
+Handicap Level = 2
 
 [Level@03]
-skill level = 3
+Handicap Level = 3
 
 [Level@04]
-skill level = 4
+Handicap Level = 4
 
 [Level@05]
-skill level = 5
+Handicap Level = 5
 
 [Level@06]
-skill level = 6
+Handicap Level = 6
 
 [Level@07]
-skill level = 7
+Handicap Level = 7
 
 [Level@08]
-skill level = 8
+Handicap Level = 8
 
 [Level@09]
-skill level = 9
+Handicap Level = 9
 
 [Level@10]
-skill level = 10
+Handicap Level = 10
 
 [Level@11]
-skill level = 11
+Handicap Level = 11
 
 [Level@12]
-skill level = 12
+Handicap Level = 12
 
 [Level@13]
-skill level = 13
+Handicap Level = 13
 
 [Level@14]
-skill level = 14
+Handicap Level = 14
 
 [Level@15]
-skill level = 15
+Handicap Level = 15
 
 [Level@16]
-skill level = 16
+Handicap Level = 16
 
+[Level@17]
+Handicap Level = 17
+
+[Level@18]
+Handicap Level = 18
+
+[Level@19]
+Handicap Level = 19
+
+[Level@20]
+Handicap Level = 20
