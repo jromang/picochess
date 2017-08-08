@@ -777,19 +777,20 @@ class DgtDisplay(DisplayMsg, threading.Thread):
 
         elif isinstance(message, Message.DGT_EBOARD_VERSION):
             if self.dgtmenu.inside_updt_menu():
-                logging.debug('inside menu => board channel not displayed')
+                logging.debug('inside update menu => board channel not displayed')
             else:
                 DispatchDgt.fire(message.text)
                 DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs={'i2c'}))
 
         elif isinstance(message, Message.DGT_NO_EBOARD_ERROR):
             if self.dgtmenu.inside_updt_menu() or self.dgtmenu.inside_main_menu():
-                logging.debug('inside menu => board error not displayed')
+                logging.debug('inside update menu => board error not displayed')
             else:
                 DispatchDgt.fire(message.text)
 
         elif isinstance(message, Message.DGT_NO_CLOCK_ERROR):
             pass
+
         elif isinstance(message, Message.SWITCH_SIDES):
             self.engine_finished = False
             self.hint_move = chess.Move.null()
