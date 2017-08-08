@@ -363,11 +363,11 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 except IndexError:
                     pass
             else:
-                DispatchDgt.fire(self.dgttranslate.text('Y00_erroreng'))
+                DispatchDgt.fire(self.dgttranslate.text('Y10_erroreng'))
         elif fen in mode_map:
             logging.debug('map: Interaction mode [%s]', mode_map[fen])
             if mode_map[fen] == Mode.REMOTE and not self.dgtmenu.inside_room:
-                DispatchDgt.fire(self.dgttranslate.text('Y00_errorroom'))
+                DispatchDgt.fire(self.dgttranslate.text('Y10_errorroom'))
             else:
                 self.dgtmenu.set_mode(mode_map[fen])
                 text = self.dgttranslate.text(mode_map[fen].value)
@@ -657,7 +657,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self._process_engine_startup(message)
 
         elif isinstance(message, Message.ENGINE_FAIL):
-            DispatchDgt.fire(self.dgttranslate.text('Y00_erroreng'))
+            DispatchDgt.fire(self.dgttranslate.text('Y10_erroreng'))
 
         elif isinstance(message, Message.COMPUTER_MOVE):
             self._process_computer_move(message)
