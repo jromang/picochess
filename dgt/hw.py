@@ -132,11 +132,13 @@ class DgtHw(DgtIface):
         if self.getName() not in devs:
             logging.debug('ignored stopClock - devs: %s', devs)
             return True
+        logging.debug('(%s) clock sending stop time to clock l:%s r:%s',
+                      ','.join(devs), self.dgtboard.time_left, self.dgtboard.time_right)
         return self._resume_clock(ClockSide.NONE)
 
     def _resume_clock(self, side: ClockSide):
-        l_hms = self.time_left
-        r_hms = self.time_right
+        l_hms = self.dgtboard.time_left
+        r_hms = self.dgtboard.time_right
         if l_hms is None or r_hms is None:
             logging.debug('time values not set - abort function')
             return False
@@ -162,8 +164,12 @@ class DgtHw(DgtIface):
         if self.getName() not in devs:
             logging.debug('ignored startClock - devs: %s', devs)
             return True
-        self.time_left = hms_time(time_left)
-        self.time_right = hms_time(time_right)
+        logging.debug('(%s) clock received last time from clock l:%s r:%s', ','.join(devs),
+                      self.dgtboard.time_left, self.dgtboard.time_right)
+        self.dgtboard.time_left = hms_time(time_left)
+        self.dgtboard.time_right = hms_time(time_right)
+        logging.debug('(%s) clock sending start time to clock l:%s r:%s', ','.join(devs),
+                      self.dgtboard.time_left, self.dgtboard.time_right)
         return self._resume_clock(side)
 
     def getName(self):

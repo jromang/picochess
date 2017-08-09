@@ -39,8 +39,8 @@ class DgtIface(DisplayDgt, Thread):
 
         self.clock_running = False
         self.enable_dgt_3000 = False
-        self.time_left = None
-        self.time_right = None
+        # self.time_left = None
+        # self.time_right = None
         self.case_res = True
 
     def display_text_on_clock(self, message):
@@ -115,8 +115,8 @@ class DgtIface(DisplayDgt, Thread):
         elif isinstance(message, Dgt.LIGHT_SQUARES):
             self.case_res = self.light_squares_on_revelation(message.uci_move)
         elif isinstance(message, Dgt.CLOCK_STOP):
-            logging.debug('(%s) clock sending stop time to clock l:%s r:%s',
-                          ','.join(message.devs), self.time_left, self.time_right)
+            # logging.debug('(%s) clock sending stop time to clock l:%s r:%s',
+            #               ','.join(message.devs), self.time_left, self.time_right)
             if self.clock_running:
                 self.case_res = self.stop_clock(message.devs)
             else:
@@ -125,9 +125,9 @@ class DgtIface(DisplayDgt, Thread):
             # log times
             l_hms = hms_time(message.time_left)
             r_hms = hms_time(message.time_right)
-            logging.debug('(%s) clock received last time from clock l:%s r:%s',
-                          ','.join(message.devs), self.time_left, self.time_right)
-            logging.debug('(%s) clock sending start time to clock l:%s r:%s', ','.join(message.devs), l_hms, r_hms)
+            # logging.debug('(%s) clock received last time from clock l:%s r:%s',
+            #               ','.join(message.devs), self.time_left, self.time_right)
+            # logging.debug('(%s) clock sending start time to clock l:%s r:%s', ','.join(message.devs), l_hms, r_hms)
             self.case_res = self.start_clock(message.time_left, message.time_right, message.side, message.devs)
         elif isinstance(message, Dgt.CLOCK_VERSION):
             text = self.dgttranslate.text('Y21_picochess', devs=message.devs)
@@ -140,11 +140,11 @@ class DgtIface(DisplayDgt, Thread):
             else:
                 if message.main == 2:
                     self.enable_dgt_3000 = True
-        elif isinstance(message, Dgt.CLOCK_TIME):
-            logging.debug('(%s) clock received current time from clock l:%s r:%s',
-                          ','.join(message.devs), message.time_left, message.time_right)
-            self.time_left = message.time_left
-            self.time_right = message.time_right
+        # elif isinstance(message, Dgt.CLOCK_TIME):
+        #     logging.debug('(%s) clock received current time from clock l:%s r:%s',
+        #                   ','.join(message.devs), message.time_left, message.time_right)
+        #     self.time_left = message.time_left
+        #     self.time_right = message.time_right
         else:  # switch-default
             pass
         logging.debug('(%s) handle DgtApi: %s ended', ','.join(message.devs), message)

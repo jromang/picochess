@@ -761,8 +761,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                                              wait=True, devs={message.dev}))
 
         elif isinstance(message, Message.DGT_CLOCK_TIME):
-            DispatchDgt.fire(Dgt.CLOCK_TIME(time_left=message.time_left, time_right=message.time_right,
-                                            devs={message.dev}))
+            # DispatchDgt.fire(Dgt.CLOCK_TIME(time_left=message.time_left, time_right=message.time_right,
+            #                                 devs={message.dev}))
             time_white = message.time_left
             time_black = message.time_right
             if self.dgtmenu.get_flip_board():

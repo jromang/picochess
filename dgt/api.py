@@ -155,7 +155,7 @@ class DgtApi():
     CLOCK_STOP = 'DGT_CLOCK_STOP'
     CLOCK_START = 'DGT_CLOCK_START'
     CLOCK_VERSION = 'DGT_CLOCK_VERSION'
-    CLOCK_TIME = 'DGT_CLOCK_TIME'
+    # CLOCK_TIME = 'DGT_CLOCK_TIME'
     SERIALNR = 'DGT_SERIALNR'
 
 
@@ -171,7 +171,7 @@ class Dgt():
     CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, ['devs'])
     CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side', 'devs', 'wait'])
     CLOCK_VERSION = ClassFactory(DgtApi.CLOCK_VERSION, ['main', 'sub', 'devs'])
-    CLOCK_TIME = ClassFactory(DgtApi.CLOCK_TIME, ['time_left', 'time_right', 'devs'])
+    # CLOCK_TIME = ClassFactory(DgtApi.CLOCK_TIME, ['time_left', 'time_right', 'devs'])
 
 
 class Message():

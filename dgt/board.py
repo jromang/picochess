@@ -67,6 +67,9 @@ class DgtBoard(object):
 
         self.bconn_text = None
 
+        self.time_left = None
+        self.time_right = None
+
     def write_command(self, message: list):
         """Write the message list to the dgt board."""
         mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
@@ -249,10 +252,11 @@ class DgtBoard(object):
                             DisplayMsg.show(Message.DGT_NO_CLOCK_ERROR(text='dont_use'))
                         self.lever_pos = None
                     else:
-                        rtime = [r_hours, r_mins, r_secs]
-                        ltime = [l_hours, l_mins, l_secs]
-                        logging.info('(ser) clock new time received l:%s r:%s', ltime, rtime)
-                        DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=ltime, time_right=rtime, dev='ser'))
+                        self.time_right = [r_hours, r_mins, r_secs]
+                        self.time_left = [l_hours, l_mins, l_secs]
+                        logging.info('(ser) clock new time received l:%s r:%s', self.time_left, self.time_right)
+                        DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=self.time_left, time_right=self.time_right,
+                                                               dev='ser'))
 
                         if not self.enable_ser_clock:
                             if self.watchdog_timer.is_running():  # a running watchdog means: board already found

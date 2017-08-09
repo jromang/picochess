@@ -78,7 +78,7 @@ class Dispatcher(DispatchDgt, Thread):
 
     def _process_message(self, message, dev: str):
         do_handle = True
-        if repr(message) in (DgtApi.CLOCK_START, DgtApi.CLOCK_STOP, DgtApi.CLOCK_TIME):
+        if repr(message) in (DgtApi.CLOCK_START, DgtApi.CLOCK_STOP):
             self.display_hash[dev] = None  # Cant know the clock display if command changing the running status
         else:
             if repr(message) in (DgtApi.DISPLAY_MOVE, DgtApi.DISPLAY_TEXT):

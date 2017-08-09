@@ -39,6 +39,9 @@ class DgtPi(DgtIface):
         self.lib_lock = Lock()
         self.lib = cdll.LoadLibrary('etc/dgtpicom.x86.so' if machine() == 'x86_64' else 'etc/dgtpicom.so')
 
+        self.time_left = None
+        self.time_right = None
+
         self._startup_i2c_clock()
         incoming_clock_thread = Timer(0, self._process_incoming_clock_forever)
         incoming_clock_thread.start()
@@ -102,7 +105,9 @@ class DgtPi(DgtIface):
             times = list(clktime.raw)
             counter = (counter + 1) % 10
             if counter == 0:
-                DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=times[:3], time_right=times[3:], dev='i2c'))
+                self.time_left = times[:3]
+                self.time_right = times[3:]
+                DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=self.time_left, time_right=self.time_right, dev='i2c'))
             time.sleep(0.1)
 
     def _display_on_dgt_pi(self, text: str, beep=False, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
@@ -183,6 +188,8 @@ class DgtPi(DgtIface):
         if self.getName() not in devs:
             logging.debug('ignored stopClock - devs: %s', devs)
             return True
+        logging.debug('(%s) clock sending stop time to clock l:%s r:%s',
+                      ','.join(devs), self.dgtboard.time_left, self.dgtboard.time_right)
         return self._resume_clock(ClockSide.NONE)
 
     def _resume_clock(self, side: ClockSide):
@@ -217,10 +224,12 @@ class DgtPi(DgtIface):
         if self.getName() not in devs:
             logging.debug('ignored startClock - devs: %s', devs)
             return True
-        self.time_left = hms_time(time_left)
-        self.time_right = hms_time(time_right)
-        l_hms = self.time_left
-        r_hms = self.time_right
+        logging.debug('(%s) clock received last time from clock l:%s r:%s', ','.join(devs),
+                      self.dgtboard.time_left, self.dgtboard.time_right)
+        l_hms = self.time_left = hms_time(time_left)
+        r_hms = self.time_right = hms_time(time_right)
+        logging.debug('(%s) clock sending start time to clock l:%s r:%s', ','.join(devs),
+                      self.dgtboard.time_left, self.dgtboard.time_right)
 
         l_run = r_run = 0
         if side == ClockSide.LEFT:
