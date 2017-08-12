@@ -102,7 +102,7 @@ class DgtHw(DgtIface):
             return True
         if self.clock_running or message.force:
             with self.lib_lock:
-                if self.time_left is None or self.time_right is None:
+                if self.dgtboard.time_left is None or self.dgtboard.time_right is None:
                     logging.debug('time values not set - abort function')
                     return False
                 else:
