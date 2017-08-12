@@ -117,10 +117,10 @@ class ModeLoop(object):
         elif item == Mode.KIBITZ:
             return Mode.OBSERVE
         elif item == Mode.OBSERVE:
-            return Mode.REMOTE
-        elif item == Mode.REMOTE:
             return Mode.PONDER
         elif item == Mode.PONDER:
+            return Mode.REMOTE
+        elif item == Mode.REMOTE:
             return Mode.NORMAL
         return 'errModeNext'
 
@@ -128,17 +128,17 @@ class ModeLoop(object):
     def prev(item: Mode):
         """Get previous item."""
         if item == Mode.NORMAL:
-            return Mode.PONDER
+            return Mode.REMOTE
         elif item == Mode.ANALYSIS:
             return Mode.NORMAL
         elif item == Mode.KIBITZ:
             return Mode.ANALYSIS
         elif item == Mode.OBSERVE:
             return Mode.KIBITZ
-        elif item == Mode.REMOTE:
-            return Mode.OBSERVE
         elif item == Mode.PONDER:
-            return Mode.REMOTE
+            return Mode.OBSERVE
+        elif item == Mode.REMOTE:
+            return Mode.PONDER
         return 'errModePrev'
 
 

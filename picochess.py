@@ -546,7 +546,7 @@ def main():
         logging.basicConfig(level=getattr(logging, args.log_level.upper()),
                             format='%(asctime)s.%(msecs)03d %(levelname)7s %(module)10s - %(funcName)s: %(message)s',
                             datefmt="%Y-%m-%d %H:%M:%S", handlers=[handler])
-    logging.getLogger('chess.uci').setLevel(logging.INFO)  # don't want to get so many python-chess uci messages
+    logging.getLogger('chess.engine').setLevel(logging.INFO)  # don't want to get so many python-chess uci messages
 
     logging.debug('#' * 20 + ' PicoChess v%s ' + '#' * 20, version)
     # log the startup parameters but hide the password fields
@@ -565,8 +565,7 @@ def main():
     time_control, time_text = transfer_time(args.time.split())
     time_text.beep = False
     # The class dgtDisplay fires Event (Observable) & DispatchDgt (Dispatcher)
-    dgtdisplay = DgtDisplay(dgttranslate, dgtmenu, time_control)  # var needed for force_leds_off
-    dgtdisplay.start()
+    DgtDisplay(dgttranslate, dgtmenu, time_control).start()
 
     # Create PicoTalker for speech output
     PicoTalkerDisplay(args.user_voice, args.computer_voice, args.speed_voice).start()
@@ -916,20 +915,22 @@ def main():
 
             elif isinstance(event, Event.SET_INTERACTION_MODE):
                 if event.mode not in (Mode.NORMAL, Mode.REMOTE) and done_computer_fen:
-                    logging.info('displayed move %s ignored cause mode changed to %s', done_move, event.mode)
-                    dgtdisplay.force_leds_off()
-                    done_computer_fen = None
-                    done_move = chess.Move.null()
-
-                if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
-                    stop_clock()
-                interaction_mode = event.mode
-                if engine.is_thinking():
-                    stop_search()
-                if engine.is_pondering():
-                    stop_search()
-                msg = Message.INTERACTION_MODE(mode=event.mode, mode_text=event.mode_text, show_ok=event.show_ok)
-                set_wait_state(msg)
+                    dgtmenu.set_mode(interaction_mode)  # undo the button4 stuff
+                    logging.warning('mode cant be changed to a pondering mode as long as a move is displayed')
+                    # DisplayMsg.show(Message.DGT_JACK_CONNECTED_ERROR())  # @todo correct text
+                    mode_text = dgttranslate.text('Y00_default', 'errmode')
+                    msg = Message.INTERACTION_MODE(mode=interaction_mode, mode_text=mode_text, show_ok=False)
+                    DisplayMsg.show(msg)
+                else:
+                    if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
+                        stop_clock()
+                    interaction_mode = event.mode
+                    if engine.is_thinking():
+                        stop_search()
+                    if engine.is_pondering():
+                        stop_search()
+                    msg = Message.INTERACTION_MODE(mode=event.mode, mode_text=event.mode_text, show_ok=event.show_ok)
+                    set_wait_state(msg)
 
             elif isinstance(event, Event.SET_OPENING_BOOK):
                 write_picochess_ini('book', event.book['file'])
