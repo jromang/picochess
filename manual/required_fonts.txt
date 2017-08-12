@@ -1,6 +1,1 @@
-To maintain the layout you need two free fonts.
-
-- DejaVu: http://dejavu-fonts.org/wiki/Download
-- Merida Chess: http://www.enpassant.dk/chess/fontimg/merida.htm
-
-Download both fonts and install these fonts.
+To maintain the layout you need to install the provided ChessAlpha2 font
