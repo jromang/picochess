@@ -102,7 +102,7 @@ class DgtHw(DgtIface):
             return True
         if self.clock_running or message.force:
             with self.lib_lock:
-                if self.dgtboard.time_left is None or self.dgtboard.time_right is None:
+                if self.dgtboard.l_time >= 3600 * 10 or self.dgtboard.r_time >= 3600 * 10:
                     logging.debug('time values not set - abort function')
                     return False
                 else:
@@ -132,14 +132,12 @@ class DgtHw(DgtIface):
         if self.getName() not in devs:
             logging.debug('ignored stopClock - devs: %s', devs)
             return True
-        logging.debug('(%s) clock sending stop time to clock l:%s r:%s',
-                      ','.join(devs), self.dgtboard.time_left, self.dgtboard.time_right)
+        logging.debug('(%s) clock sending stop time to clock l:%s r:%s', ','.join(devs),
+                      hms_time(self.dgtboard.l_time), hms_time(self.dgtboard.r_time))
         return self._resume_clock(ClockSide.NONE)
 
     def _resume_clock(self, side: ClockSide):
-        l_hms = self.dgtboard.time_left
-        r_hms = self.dgtboard.time_right
-        if l_hms is None or r_hms is None:
+        if self.dgtboard.l_time >= 3600 * 10 or self.dgtboard.r_time >= 3600 * 10:
             logging.debug('time values not set - abort function')
             return False
 
@@ -149,6 +147,8 @@ class DgtHw(DgtIface):
         if side == ClockSide.RIGHT:
             r_run = 1
         with self.lib_lock:
+            l_hms = hms_time(self.dgtboard.l_time)
+            r_hms = hms_time(self.dgtboard.r_time)
             res = self.dgtboard.set_and_run(l_run, l_hms[0], l_hms[1], l_hms[2], r_run, r_hms[0], r_hms[1], r_hms[2])
             if not res:
                 logging.warning('finally failed %i', res)
@@ -165,11 +165,11 @@ class DgtHw(DgtIface):
             logging.debug('ignored startClock - devs: %s', devs)
             return True
         logging.debug('(%s) clock received last time from clock l:%s r:%s', ','.join(devs),
-                      self.dgtboard.time_left, self.dgtboard.time_right)
-        self.dgtboard.time_left = hms_time(time_left)
-        self.dgtboard.time_right = hms_time(time_right)
+                      hms_time(self.dgtboard.l_time), hms_time(self.dgtboard.r_time))
+        self.dgtboard.l_time = time_left
+        self.dgtboard.r_time = time_right
         logging.debug('(%s) clock sending start time to clock l:%s r:%s', ','.join(devs),
-                      self.dgtboard.time_left, self.dgtboard.time_right)
+                      hms_time(time_left), hms_time(time_right))
         return self._resume_clock(side)
 
     def getName(self):
