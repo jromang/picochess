@@ -761,8 +761,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                                              wait=True, devs={message.dev}))
 
         elif isinstance(message, Message.DGT_CLOCK_TIME):
-            # DispatchDgt.fire(Dgt.CLOCK_TIME(time_left=message.time_left, time_right=message.time_right,
-            #                                 devs={message.dev}))
             time_white = message.time_left
             time_black = message.time_right
             if self.dgtmenu.get_flip_board():
@@ -784,7 +782,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
 
         elif isinstance(message, Message.DGT_NO_EBOARD_ERROR):
             if self.dgtmenu.inside_updt_menu() or self.dgtmenu.inside_main_menu():
-                logging.debug('inside update menu => board error not displayed')
+                logging.debug('inside menu => board error not displayed')
             else:
                 DispatchDgt.fire(message.text)
 

@@ -197,35 +197,39 @@ class WebVr(DgtIface):
         DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=2, sub=sub, dev='web', text=None))
         self.clock_show_time = True
 
+        # keep the last time to find out errorous DGT_MSG_BWTIME messages (error: current time > last time)
+        self.r_time = 3600 * 10  # max value cause 10h cant be reached by clock
+        self.l_time = 3600 * 10  # max value cause 10h cant be reached by clock
+
     def _create_clock_text(self):
         if 'clock_text' not in self.shared:
             self.shared['clock_text'] = {}
 
     def _runclock(self):
         if self.time_side == ClockSide.LEFT:
-            hours, mins, secs = self.time_left
-            time_left = 3600 * hours + 60 * mins + secs - 1
+            time_left = self.l_time - 1
             if time_left <= 0:
                 logging.info('negative/zero time left: %s', time_left)
                 self.virtual_timer.stop()
-                self.time_left = 0
-            self.time_left = hms_time(time_left)
+                time_left = 0
+            self.l_time = time_left
         if self.time_side == ClockSide.RIGHT:
-            hours, mins, secs = self.time_right
-            time_right = 3600 * hours + 60 * mins + secs - 1
+            time_right = self.r_time - 1
             if time_right <= 0:
                 logging.info('negative/zero time right: %s', time_right)
                 self.virtual_timer.stop()
-                self.time_right = 0
-            self.time_right = hms_time(time_right)
-        self._display_time(self.time_left, self.time_right)
+                time_right = 0
+            self.r_time = time_right
+        self._display_time(self.l_time, self.r_time)
 
-    def _display_time(self, time_l, time_r):
-        if time_l is None or time_r is None:
+    def _display_time(self, time_left: int, time_right: int):
+        if time_left >= 3600 * 10 or time_right >= 3600 * 10:
             logging.debug('time values not set - abort function')
         elif self.clock_show_time:
-            text_l = '{}:{:02d}.{:02d}'.format(time_l[0], time_l[1], time_l[2])
-            text_r = '{}:{:02d}.{:02d}'.format(time_r[0], time_r[1], time_r[2])
+            l_hms = hms_time(time_left)
+            r_hms = hms_time(time_right)
+            text_l = '{}:{:02d}.{:02d}'.format(l_hms[0], l_hms[1], l_hms[2])
+            text_r = '{}:{:02d}.{:02d}'.format(r_hms[0], r_hms[1], r_hms[2])
             icon_d = 'fa-caret-right' if self.time_side == ClockSide.RIGHT else 'fa-caret-left'
             if self.time_side == ClockSide.NONE:
                 icon_d = 'fa-sort'
@@ -285,7 +289,7 @@ class WebVr(DgtIface):
             return True
         if self.clock_running or message.force:
             self.clock_show_time = True
-            self._display_time(self.time_left, self.time_right)
+            self._display_time(self.l_time, self.r_time)
         else:
             logging.debug('(web) clock isnt running - no need for endText')
         return True
@@ -297,12 +301,12 @@ class WebVr(DgtIface):
             return True
         if self.virtual_timer:
             self.virtual_timer.stop()
-        self._resume_clock(ClockSide.NONE)
-        return True
+        return self._resume_clock(ClockSide.NONE)
 
     def _resume_clock(self, side: ClockSide):
         self.clock_running = (side != ClockSide.NONE)
         self.time_side = side
+        return True
 
     def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
         """Start the time on the web clock."""
@@ -317,9 +321,9 @@ class WebVr(DgtIface):
         self._resume_clock(side)
         self.clock_show_time = True
         # simulate the "start_clock" function from dgthw/pi
-        self.time_left = hms_time(time_left)
-        self.time_right = hms_time(time_right)
-        self._display_time(self.time_left, self.time_right)
+        self.l_time = time_left
+        self.r_time = time_right
+        self._display_time(self.l_time, self.r_time)
         return True
 
     def light_squares_on_revelation(self, uci_move):
