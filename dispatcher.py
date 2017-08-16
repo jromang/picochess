@@ -54,6 +54,14 @@ class Dispatcher(DispatchDgt, Thread):
         self.tasks[device] = []
         self.display_hash[device] = None
 
+    def get_prio_device(self):
+        """Return the most prio registered device."""
+        if 'i2c' in self.devices:
+            return 'i2c'
+        if 'ser' in self.devices:
+            return 'ser'
+        return 'web'
+
     def _stopped_maxtimer(self, dev: str):
         self.maxtimer_running[dev] = False
         self.dgtmenu.disable_picochess_displayed(dev)

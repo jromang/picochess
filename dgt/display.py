@@ -765,7 +765,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             time_black = message.time_right
             if self.dgtmenu.get_flip_board():
                 time_white, time_black = time_black, time_white
-            Observable.fire(Event.CLOCK_TIME(time_white=time_white, time_black=time_black))
+            Observable.fire(Event.CLOCK_TIME(time_white=time_white, time_black=time_black, dev=message.dev))
 
         elif isinstance(message, Message.DGT_SERIAL_NR):
             self._process_dgt_serial_nr()

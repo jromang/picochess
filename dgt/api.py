@@ -171,7 +171,6 @@ class Dgt():
     CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, ['devs'])
     CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side', 'devs', 'wait'])
     CLOCK_VERSION = ClassFactory(DgtApi.CLOCK_VERSION, ['main', 'sub', 'devs'])
-    # CLOCK_TIME = ClassFactory(DgtApi.CLOCK_TIME, ['time_left', 'time_right', 'devs'])
 
 
 class Message():
@@ -265,7 +264,7 @@ class Event():
     STOP_SEARCH = ClassFactory(EventApi.STOP_SEARCH, ['engine_status'])
     # Timecontrol events
     OUT_OF_TIME = ClassFactory(EventApi.OUT_OF_TIME, ['color'])
-    CLOCK_TIME = ClassFactory(EventApi.CLOCK_TIME, ['time_white', 'time_black'])
+    CLOCK_TIME = ClassFactory(EventApi.CLOCK_TIME, ['time_white', 'time_black', 'dev'])
     # special events
     EXIT_MENU = ClassFactory(EventApi.EXIT_MENU, [])
     UPDATE_PICO = ClassFactory(EventApi.UPDATE_PICO, ['tag'])

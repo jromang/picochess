@@ -109,7 +109,6 @@ class TimeControl(object):
         """Set the times send from the clock."""
         self.clock_time_white = white_time
         self.clock_time_black = black_time
-        # print('ClockTime: w:{} b:{}'.format(hms_time(white_time), hms_time(black_time)))
 
     def reset_start_time(self):
         """Set the start time to the current time."""

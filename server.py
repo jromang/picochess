@@ -220,6 +220,8 @@ class WebVr(DgtIface):
                 self.virtual_timer.stop()
                 time_right = 0
             self.r_time = time_right
+        logging.info('(web) clock new time received l:%s r:%s', hms_time(self.l_time), hms_time(self.r_time))
+        DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=self.l_time, time_right=self.r_time, dev='web'))
         self._display_time(self.l_time, self.r_time)
 
     def _display_time(self, time_left: int, time_right: int):
