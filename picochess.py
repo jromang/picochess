@@ -917,7 +917,6 @@ def main():
                 if event.mode not in (Mode.NORMAL, Mode.REMOTE) and done_computer_fen:
                     dgtmenu.set_mode(interaction_mode)  # undo the button4 stuff
                     logging.warning('mode cant be changed to a pondering mode as long as a move is displayed')
-                    # DisplayMsg.show(Message.DGT_JACK_CONNECTED_ERROR())  # @todo correct text
                     mode_text = dgttranslate.text('Y00_default', 'errmode')
                     msg = Message.INTERACTION_MODE(mode=interaction_mode, mode_text=mode_text, show_ok=False)
                     DisplayMsg.show(msg)

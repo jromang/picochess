@@ -38,7 +38,8 @@ class PicoTalker():
 
     def __init__(self, localisation_id_voice, speed_factor: float):
         self.voice_path = None
-        self.speed_factor = speed_factor if which('play') else 1.0  # check for "sox" package
+        self.speed_factor = 1.0
+        self.set_speed_factor(speed_factor)
 
         try:
             (localisation_id, voice_name) = localisation_id_voice.split(':')
@@ -50,11 +51,16 @@ class PicoTalker():
         except ValueError:
             logging.warning('not valid voice parameter')
 
+    def set_speed_factor(self, speed_factor: float):
+        """Set the speed voice factor."""
+        self.speed_factor = speed_factor if which('play') else 1.0  # check for "sox" package
+
     def talk(self, sounds):
         """Speak out the sound part by using ogg123/play."""
         if self.voice_path:
+            vpath = self.voice_path
             for part in sounds:
-                voice_file = self.voice_path + '/' + part
+                voice_file = vpath + '/' + part
                 if Path(voice_file).is_file():
                     if self.speed_factor == 1.0:
                         command = ['ogg123', voice_file]
@@ -80,12 +86,12 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
         Initialize a PicoTalkerDisplay with voices for the user and/or computer players.
 
         :param user_voice: The voice to use for the user (eg. en:al).
-        :param computer_voice:  The voice to use for the computer (eg. en:christina).
+        :param computer_voice: The voice to use for the computer (eg. en:christina).
         """
         super(PicoTalkerDisplay, self).__init__()
-        self.user_picotalker = None
-        self.computer_picotalker = None
-        self.speed_factor = 0.9 + (speed_factor % 10) * 0.05
+        self.user_picotalker = None  # type: PicoTalker
+        self.computer_picotalker = None  # type: PicoTalker
+        self.speed_factor = (90 + (speed_factor % 10) * 5) / 100
 
         if user_voice:
             logging.debug('creating user voice: [%s]', str(user_voice))
@@ -105,9 +111,9 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
     def set_speech(self, speed_factor):
         """Set speech."""
         if self.computer_picotalker:
-            self.computer_picotalker.speed_factor = speed_factor
+            self.computer_picotalker.set_speed_factor(speed_factor)
         if self.user_picotalker:
-            self.user_picotalker.speed_factor = speed_factor
+            self.user_picotalker.set_speed_factor(speed_factor)
 
     def run(self):
         """Start listening for Messages on our queue and generate speech as appropriate."""
@@ -230,7 +236,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                     system_picotalker.talk(['pleasewait.ogg'])
 
                 elif isinstance(message, Message.SET_VOICE):
-                    self.speed_factor = 0.9 + (message.speed % 10) * 0.05
+                    self.speed_factor = (90 + (message.speed % 10) * 5) / 100
                     picotalker = PicoTalker(message.lang + ':' + message.speaker, self.speed_factor)
                     if message.type == Voice.USER:
                         self.set_user(picotalker)
