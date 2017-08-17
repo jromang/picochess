@@ -36,7 +36,7 @@ import chess.uci
 
 from timecontrol import TimeControl
 from utilities import get_location, update_picochess, get_opening_books, shutdown, reboot, checkout_tag
-from utilities import Observable, DisplayMsg, version, evt_queue, write_picochess_ini
+from utilities import Observable, DisplayMsg, version, evt_queue, write_picochess_ini, hms_time
 from pgn import Emailer, PgnDisplay
 from server import WebServer
 from talker.picotalker import PicoTalkerDisplay
@@ -954,7 +954,8 @@ def main():
 
             elif isinstance(event, Event.CLOCK_TIME):
                 if dgtdispatcher.get_prio_device() == event.dev:  # transfer only the most prio clock's time
-                    logging.debug('setting clock time - prio: %s w: %s b: %s', event.dev, event.time_white, event.time_black)
+                    logging.debug('setting tc clock time - prio: %s w: %s b: %s', event.dev,
+                                  hms_time(event.time_white), hms_time(event.time_black))
                     time_control.set_clock_times(white_time=event.time_white, black_time=event.time_black)
                 else:
                     logging.debug('ignore clock time - too low prio: %s', event.dev)

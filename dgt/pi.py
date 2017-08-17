@@ -110,6 +110,7 @@ class DgtPi(DgtIface):
                 r_hms = times[3:]
                 self.l_time = l_hms[0] * 3600 + l_hms[1] * 60 + l_hms[2]
                 self.r_time = r_hms[0] * 3600 + r_hms[1] * 60 + r_hms[2]
+                logging.info('(i2c) clock new time received l:%s r:%s', l_hms, r_hms)
                 DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=self.l_time, time_right=self.r_time, dev='i2c'))
             time.sleep(0.1)
 

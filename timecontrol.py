@@ -107,6 +107,7 @@ class TimeControl(object):
 
     def set_clock_times(self, white_time: int, black_time: int):
         """Set the times send from the clock."""
+        logging.info('sended clock values are not used anywhere => wip! w: %s b: %s', white_time, black_time)
         self.clock_time_white = white_time
         self.clock_time_black = black_time
 
@@ -148,7 +149,7 @@ class TimeControl(object):
             if log:
                 w_hms, b_hms = self._log_time()
                 logging.info('start internal time w:%s - b:%s', w_hms, b_hms)
-                logging.info('received clock time w:%s - b:%s',
+                logging.info('received prio clock time w:%s - b:%s',
                              hms_time(self.clock_time_white), hms_time(self.clock_time_black))
             if False and self.mode != TimeMode.FISCHER:  # @todo make this also work for fischer
                 self.clock_time[chess.WHITE] = self.clock_time_white
