@@ -148,7 +148,7 @@ class UciEngine(object):
         try:
             self.engine.stop()
         except chess.uci.EngineTerminatedException:
-            logging.error('Engine terminated')
+            logging.error('Engine terminated')  # @todo find out, why this can happen!
         return self.future.result()
 
     def go(self, time_dict: dict):
@@ -176,7 +176,11 @@ class UciEngine(object):
 
     def callback(self, command):
         """Callback function."""
-        self.res = command.result()
+        try:
+            self.res = command.result()
+        except chess.uci.EngineTerminatedException:
+            logging.error('Engine terminated')  # @todo find out, why this can happen!
+            self.show_best = False
 
         Observable.fire(Event.STOP_SEARCH(engine_status=self.status))
         if self.show_best:
