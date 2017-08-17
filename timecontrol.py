@@ -37,7 +37,7 @@ class TimeControl(object):
         self.seconds_per_move = fixed
         self.minutes_per_game = blitz
         self.fischer_increment = fischer
-        self.clock_time = clock_time
+        self.internal_time = clock_time
 
         self.clock_time_white = 0  # saves the sended clock time for white
         self.clock_time_black = 0  # saves the sended clock time for black
@@ -67,7 +67,7 @@ class TimeControl(object):
     def get_parameters(self):
         """Return the state of this class for generating a new instance."""
         return {'mode': self.mode, 'fixed': self.seconds_per_move, 'blitz': self.minutes_per_game,
-                'fischer': self.fischer_increment, 'clock_time': self.clock_time}
+                'fischer': self.fischer_increment, 'clock_time': self.internal_time}
 
     def get_list_text(self):
         """Get the clock list text for the current time setting."""
@@ -90,8 +90,8 @@ class TimeControl(object):
         elif self.mode == TimeMode.FIXED:
             self.clock_time_white = self.clock_time_black = self.seconds_per_move
 
-        self.clock_time = {chess.WHITE: float(self.clock_time_white),
-                           chess.BLACK: float(self.clock_time_black)}
+        self.internal_time = {chess.WHITE: float(self.clock_time_white),
+                              chess.BLACK: float(self.clock_time_black)}
         self.active_color = None
 
     def _log_time(self):
@@ -100,7 +100,7 @@ class TimeControl(object):
 
     def current_clock_time(self, flip_board=False):
         """Return the startup time for setting the clock at beginning."""
-        c_time = copy.copy(self.clock_time)
+        c_time = copy.copy(self.internal_time)
         if flip_board:
             c_time[chess.WHITE], c_time[chess.BLACK] = c_time[chess.BLACK], c_time[chess.WHITE]
         return int(c_time[chess.WHITE]), int(c_time[chess.BLACK])
@@ -123,7 +123,7 @@ class TimeControl(object):
         elif self.active_color is not None:
             display_color = 'WHITE' if self.active_color == chess.WHITE else 'BLACK'
             txt = 'current clock time (before subtracting) is %f and color is %s, out of time event started from %f'
-            logging.debug(txt, self.clock_time[self.active_color], display_color, time_start)
+            logging.debug(txt, self.internal_time[self.active_color], display_color, time_start)
             Observable.fire(Event.OUT_OF_TIME(color=self.active_color))
 
     def add_inc(self, color):
@@ -133,7 +133,11 @@ class TimeControl(object):
             w_hms, b_hms = self._log_time()
             logging.info('before internal time w:%s - b:%s', w_hms, b_hms)
 
-            self.clock_time[color] += self.fischer_increment
+            self.internal_time[color] += self.fischer_increment
+            if color == chess.WHITE:
+                self.clock_time_white += self.fischer_increment
+            else:
+                self.clock_time_black += self.fischer_increment
 
             # log times - issue #184
             w_hms, b_hms = self._log_time()
@@ -152,13 +156,13 @@ class TimeControl(object):
                 logging.info('received prio clock time w:%s - b:%s',
                              hms_time(self.clock_time_white), hms_time(self.clock_time_black))
             if False and self.mode != TimeMode.FISCHER:  # @todo make this also work for fischer
-                self.clock_time[chess.WHITE] = self.clock_time_white
-                self.clock_time[chess.BLACK] = self.clock_time_black
+                self.internal_time[chess.WHITE] = self.clock_time_white
+                self.internal_time[chess.BLACK] = self.clock_time_black
 
             # Only start thread if not already started for same color, and the player has not already lost on time
-            if self.clock_time[color] > 0 and self.active_color is not None and self.run_color != self.active_color:
-                self.timer = threading.Timer(copy.copy(self.clock_time[color]), self._out_of_time,
-                                             [copy.copy(self.clock_time[color])])
+            if self.internal_time[color] > 0 and self.active_color is not None and self.run_color != self.active_color:
+                self.timer = threading.Timer(copy.copy(self.internal_time[color]), self._out_of_time,
+                                             [copy.copy(self.internal_time[color])])
                 self.timer.start()
                 self.run_color = self.active_color
 
@@ -174,9 +178,9 @@ class TimeControl(object):
             used_time = floor((time.time() - self.start_time) * 10) / 10
             if log:
                 logging.info('used time: %s secs', used_time)
-            self.clock_time[self.active_color] -= used_time
-            if self.clock_time[self.active_color] < 0:
-                self.clock_time[self.active_color] = 0
+            self.internal_time[self.active_color] -= used_time
+            if self.internal_time[self.active_color] < 0:
+                self.internal_time[self.active_color] = 0
 
             if log:
                 w_hms, b_hms = self._log_time()
@@ -191,8 +195,8 @@ class TimeControl(object):
         """Return remaining time for both players in an UCI dict."""
         uci_dict = {}
         if self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
-            uci_dict['wtime'] = str(int(self.clock_time[chess.WHITE] * 1000))
-            uci_dict['btime'] = str(int(self.clock_time[chess.BLACK] * 1000))
+            uci_dict['wtime'] = str(int(self.internal_time[chess.WHITE] * 1000))
+            uci_dict['btime'] = str(int(self.internal_time[chess.BLACK] * 1000))
 
             if self.mode == TimeMode.FISCHER:
                 uci_dict['winc'] = str(self.fischer_increment * 1000)

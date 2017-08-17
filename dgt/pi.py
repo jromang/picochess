@@ -104,7 +104,7 @@ class DgtPi(DgtIface):
                 self.lib.dgtpicom_get_time(clktime)
 
             times = list(clktime.raw)
-            counter = (counter + 1) % 10
+            counter = (counter + 1) % 5
             if counter == 0:
                 l_hms = times[:3]
                 r_hms = times[3:]
