@@ -954,8 +954,10 @@ def main():
 
             elif isinstance(event, Event.CLOCK_TIME):
                 if dgtdispatcher.get_prio_device() == event.dev:  # transfer only the most prio clock's time
-                    logging.debug('setting clock time from [%s]', event.dev)
+                    logging.debug('setting clock time - prio: %s w: %s b: %s', event.dev, event.time_white, event.time_black)
                     time_control.set_clock_times(white_time=event.time_white, black_time=event.time_black)
+                else:
+                    logging.debug('ignore clock time - too low prio: %s', event.dev)
 
             elif isinstance(event, Event.OUT_OF_TIME):
                 stop_search_and_clock()
