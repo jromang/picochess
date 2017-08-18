@@ -156,7 +156,7 @@ class TimeControl(object):
                 logging.info('start internal time w:%s - b:%s', w_hms, b_hms)
                 logging.info('received prio clock time w:%s - b:%s',
                              hms_time(self.clock_time_white), hms_time(self.clock_time_black))
-            if False and self.mode != TimeMode.FISCHER:  # @todo make this also work for fischer
+            if True:
                 self.internal_time[chess.WHITE] = self.clock_time_white
                 self.internal_time[chess.BLACK] = self.clock_time_black
 
