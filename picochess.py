@@ -191,7 +191,7 @@ def main():
     def stop_clock():
         """Stop the clock."""
         if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
-            time_control.stop()
+            time_control.stop_internal()
             DisplayMsg.show(Message.CLOCK_STOP(devs={'ser', 'i2c', 'web'}))
             time.sleep(0.4)  # @todo give some time to clock to really do it. Find a better solution!
         else:
@@ -200,7 +200,7 @@ def main():
     def start_clock():
         """Start the clock."""
         if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
-            time_control.start(game.turn)
+            time_control.start_internal(game.turn)
             tc_init = time_control.get_parameters()
             DisplayMsg.show(Message.CLOCK_START(turn=game.turn, tc_init=tc_init, devs={'ser', 'i2c', 'web'}))
             time.sleep(0.4)  # @todo give some time to clock to really do it. Find a better solution!
@@ -233,7 +233,7 @@ def main():
             DisplayMsg.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=game.copy()))
             return False
 
-    def user_move(move: chess.Move):
+    def user_move(move: chess.Move, sliding: bool):
         """Handle an user move."""
         nonlocal game
         nonlocal done_move
@@ -244,6 +244,8 @@ def main():
             logging.warning('illegal move [%s]', move)
         else:
             stop_search_and_clock()
+            if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE) and not sliding:
+                time_control.add_inc(game.turn)  # add fischer inc if not in pondering modes (tc is now stoped!)
 
             done_computer_fen = None
             done_move = chess.Move.null()
@@ -329,7 +331,7 @@ def main():
                 logging.debug('wrong color move -> sliding, reverting to: %s', game.board_fen())
             legal_moves = list(game.legal_moves)
             move = legal_moves[last_legal_fens.index(fen)]  # type: chess.Move
-            user_move(move)
+            user_move(move, sliding=True)
             if interaction_mode in (Mode.NORMAL, Mode.REMOTE):
                 legal_fens = []
             else:
@@ -337,10 +339,10 @@ def main():
 
         # legal move
         elif fen in legal_fens:
-            time_control.add_inc(game.turn)
+            # time_control.add_inc(game.turn)  # deactivated and moved to user_move() cause tc still running :-(
             legal_moves = list(game.legal_moves)
             move = legal_moves[legal_fens.index(fen)]  # type: chess.Move
-            user_move(move)
+            user_move(move, sliding=False)
             last_legal_fens = legal_fens
             if interaction_mode in (Mode.NORMAL, Mode.REMOTE):
                 legal_fens = []
@@ -805,7 +807,7 @@ def main():
                     stop_clock()
                     engine.stop(show_best=True)
                 else:
-                    if time_control.is_ticking():
+                    if time_control.internal_running():
                         stop_clock()
                     else:
                         start_clock()
@@ -939,7 +941,7 @@ def main():
                 stop_fen_timer()
 
             elif isinstance(event, Event.SET_TIME_CONTROL):
-                time_control.stop(log=False)
+                time_control.stop_internal(log=False)
                 time_control = TimeControl(**event.tc_init)
                 tc_init = time_control.get_parameters()
                 if time_control.mode == TimeMode.BLITZ:

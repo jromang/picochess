@@ -31,13 +31,13 @@ class TimeControl(object):
 
     """Control the picochess internal clock."""
 
-    def __init__(self, mode=TimeMode.FIXED, fixed=0, blitz=0, fischer=0, clock_time=None):
+    def __init__(self, mode=TimeMode.FIXED, fixed=0, blitz=0, fischer=0, internal_time=None):
         super(TimeControl, self).__init__()
         self.mode = mode
         self.seconds_per_move = fixed
         self.minutes_per_game = blitz
         self.fischer_increment = fischer
-        self.internal_time = clock_time
+        self.internal_time = internal_time
 
         self.clock_time_white = 0  # saves the sended clock time for white
         self.clock_time_black = 0  # saves the sended clock time for black
@@ -47,9 +47,9 @@ class TimeControl(object):
         self.active_color = None
         self.start_time = None
 
-        if clock_time:  # preset the clock (received) time already
-            self.clock_time_white = int(clock_time[chess.WHITE])
-            self.clock_time_black = int(clock_time[chess.BLACK])
+        if internal_time:  # preset the clock (received) time already
+            self.clock_time_white = int(internal_time[chess.WHITE])
+            self.clock_time_black = int(internal_time[chess.BLACK])
         else:
             self.reset()
 
@@ -67,7 +67,7 @@ class TimeControl(object):
     def get_parameters(self):
         """Return the state of this class for generating a new instance."""
         return {'mode': self.mode, 'fixed': self.seconds_per_move, 'blitz': self.minutes_per_game,
-                'fischer': self.fischer_increment, 'clock_time': self.internal_time}
+                'fischer': self.fischer_increment, 'internal_time': self.internal_time}
 
     def get_list_text(self):
         """Get the clock list text for the current time setting."""
@@ -95,15 +95,15 @@ class TimeControl(object):
         self.active_color = None
 
     def _log_time(self):
-        time_w, time_b = self.current_clock_time(flip_board=False)
+        time_w, time_b = self.get_internal_time(flip_board=False)
         return hms_time(time_w), hms_time(time_b)
 
-    def current_clock_time(self, flip_board=False):
+    def get_internal_time(self, flip_board=False):
         """Return the startup time for setting the clock at beginning."""
-        c_time = copy.copy(self.internal_time)
+        i_time = copy.copy(self.internal_time)
         if flip_board:
-            c_time[chess.WHITE], c_time[chess.BLACK] = c_time[chess.BLACK], c_time[chess.WHITE]
-        return int(c_time[chess.WHITE]), int(c_time[chess.BLACK])
+            i_time[chess.WHITE], i_time[chess.BLACK] = i_time[chess.BLACK], i_time[chess.WHITE]
+        return int(i_time[chess.WHITE]), int(i_time[chess.BLACK])
 
     def set_clock_times(self, white_time: int, black_time: int):
         """Set the times send from the clock."""
@@ -128,6 +128,7 @@ class TimeControl(object):
 
     def add_inc(self, color):
         """Add the increment value to the color given."""
+        assert self.internal_running() is False, 'internal clock still running for: %s' % self.run_color
         if self.mode == TimeMode.FISCHER:
             # log times - issue #184
             w_hms, b_hms = self._log_time()
@@ -143,12 +144,12 @@ class TimeControl(object):
             w_hms, b_hms = self._log_time()
             logging.info('after internal time w:%s - b:%s', w_hms, b_hms)
 
-    def start(self, color, log=True):
+    def start_internal(self, color, log=True):
         """Start the internal clock."""
-        if not self.is_ticking():
+        if not self.internal_running():
             if self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
                 self.active_color = color
-                self.start_time = time.time()
+                self.reset_start_time()
 
             if log:
                 w_hms, b_hms = self._log_time()
@@ -166,9 +167,9 @@ class TimeControl(object):
                 self.timer.start()
                 self.run_color = self.active_color
 
-    def stop(self, log=True):
+    def stop_internal(self, log=True):
         """Stop the internal clock."""
-        if self.is_ticking() and self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
+        if self.internal_running() and self.mode in (TimeMode.BLITZ, TimeMode.FISCHER):
             if log:
                 w_hms, b_hms = self._log_time()
                 logging.info('old internal time w:%s b:%s', w_hms, b_hms)
@@ -187,7 +188,7 @@ class TimeControl(object):
                 logging.info('new internal time w:%s b:%s', w_hms, b_hms)
             self.run_color = self.active_color = None
 
-    def is_ticking(self):
+    def internal_running(self):
         """Return if the internal clock is running."""
         return self.active_color is not None
 

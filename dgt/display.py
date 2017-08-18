@@ -459,7 +459,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             game_text = 'C10_ucigame' if self.uci960 else 'C10_newgame'
             DispatchDgt.fire(self.dgttranslate.text(game_text, str(pos960)))
         if self.dgtmenu.get_mode() in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
-            time_left, time_right = self.time_control.current_clock_time(flip_board=self.dgtmenu.get_flip_board())
+            time_left, time_right = self.time_control.get_internal_time(flip_board=self.dgtmenu.get_flip_board())
             DispatchDgt.fire(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE,
                                              wait=True, devs={'ser', 'i2c', 'web'}))
 
@@ -528,7 +528,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         if not self.dgtmenu.get_confirm() or not message.show_ok:
             DispatchDgt.fire(message.time_text)
         timectrl = self.time_control = TimeControl(**message.tc_init)
-        time_left, time_right = timectrl.current_clock_time(flip_board=self.dgtmenu.get_flip_board())
+        time_left, time_right = timectrl.get_internal_time(flip_board=self.dgtmenu.get_flip_board())
         DispatchDgt.fire(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE, wait=True,
                                          devs={'ser', 'i2c', 'web'}))
 
@@ -604,7 +604,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         if timectrl.mode == TimeMode.FIXED:
             time_left = time_right = timectrl.seconds_per_move
         else:
-            time_left, time_right = timectrl.current_clock_time(flip_board=self.dgtmenu.get_flip_board())
+            time_left, time_right = timectrl.get_internal_time(flip_board=self.dgtmenu.get_flip_board())
         side = ClockSide.LEFT if (message.turn == chess.WHITE) != self.dgtmenu.get_flip_board() else ClockSide.RIGHT
         text = Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side, wait=False, devs=message.devs)
         DispatchDgt.fire(text)
@@ -756,7 +756,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             DispatchDgt.fire(Dgt.CLOCK_VERSION(main=message.main, sub=message.sub, devs={message.dev}))
             if message.dev == 'ser':  # send the "board connected message" to serial clock
                 DispatchDgt.fire(message.text)
-            time_left, time_right = self.time_control.current_clock_time(flip_board=self.dgtmenu.get_flip_board())
+            time_left, time_right = self.time_control.get_internal_time(flip_board=self.dgtmenu.get_flip_board())
             DispatchDgt.fire(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE,
                                              wait=True, devs={message.dev}))
 
