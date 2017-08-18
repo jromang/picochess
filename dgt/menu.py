@@ -307,6 +307,10 @@ class DgtMenu(object):
         """Set the flag."""
         self.res_time_mode = self.menu_time_mode = mode
 
+    def get_time_mode(self):
+        """Get the flag."""
+        return self.res_time_mode
+
     def set_time_fixed(self, index: int):
         """Set the flag."""
         self.res_time_fixed = self.menu_time_fixed = index

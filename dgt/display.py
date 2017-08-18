@@ -475,7 +475,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self._exit_menu()
         if not self.dgtmenu.get_confirm():
             DispatchDgt.fire(self.dgttranslate.text('K05_okpico'))
-        if self.time_control.mode == TimeMode.FIXED:  # go back to a stoped time display
+        if self.dgtmenu.get_time_mode() == TimeMode.FIXED:  # go back to a stoped time display
             DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs={'ser', 'i2c', 'web'}))
 
     def _process_computer_move(self, message):
@@ -527,8 +527,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
     def _process_time_control(self, message):
         if not self.dgtmenu.get_confirm() or not message.show_ok:
             DispatchDgt.fire(message.time_text)
-        timectrl = self.time_control = TimeControl(**message.tc_init)
-        time_left, time_right = timectrl.get_internal_time(flip_board=self.dgtmenu.get_flip_board())
+        self.time_control = TimeControl(**message.tc_init)
+        time_left, time_right = self.time_control.get_internal_time(flip_board=self.dgtmenu.get_flip_board())
         DispatchDgt.fire(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE, wait=True,
                                          devs={'ser', 'i2c', 'web'}))
 
@@ -559,7 +559,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.dgtmenu.set_mode(message.info['interaction_mode'])
         self.dgtmenu.set_book(message.info['book_index'])
         self.dgtmenu.all_books = message.info['books']
-        timectrl = self.time_control = message.info['time_control']  # type: TimeControl
+        tc_init = message.info['tc_init']
+        timectrl = self.time_control = TimeControl(**tc_init)
         self.dgtmenu.set_time_mode(timectrl.mode)
         # try to find the index from the given time_control (timectrl)
         # if user gave a non-existent timectrl value update map & list
@@ -600,11 +601,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 self.dgtmenu.set_time_fisch(index)
 
     def _process_clock_start(self, message):
-        timectrl = self.time_control = TimeControl(**message.tc_init)
-        if timectrl.mode == TimeMode.FIXED:
-            time_left = time_right = timectrl.seconds_per_move
-        else:
-            time_left, time_right = timectrl.get_internal_time(flip_board=self.dgtmenu.get_flip_board())
+        self.time_control = TimeControl(**message.tc_init)
+        time_left, time_right = self.time_control.get_internal_time(flip_board=self.dgtmenu.get_flip_board())
         side = ClockSide.LEFT if (message.turn == chess.WHITE) != self.dgtmenu.get_flip_board() else ClockSide.RIGHT
         text = Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side, wait=False, devs=message.devs)
         DispatchDgt.fire(text)

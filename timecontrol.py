@@ -107,7 +107,7 @@ class TimeControl(object):
 
     def set_clock_times(self, white_time: int, black_time: int):
         """Set the times send from the clock."""
-        logging.info('sended clock values are not used anywhere => wip! w: %s b: %s', white_time, black_time)
+        logging.info('sended clock times are not used => wip! w: %s b: %s', hms_time(white_time), hms_time(black_time))
         self.clock_time_white = white_time
         self.clock_time_black = black_time
 

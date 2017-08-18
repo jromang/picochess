@@ -657,7 +657,7 @@ def main():
     DisplayMsg.show(Message.STARTUP_INFO(info={'interaction_mode': interaction_mode, 'play_mode': play_mode,
                                                'books': all_books, 'book_index': book_index,
                                                'level_text': level_text, 'level_name': level_name,
-                                               'time_control': time_control, 'time_text': time_text}))
+                                               'tc_init': time_control.get_parameters(), 'time_text': time_text}))
     DisplayMsg.show(Message.ENGINE_STARTUP(shell=engine.get_shell(), file=engine.get_file(), level_index=level_index,
                                            has_levels=engine.has_levels(), has_960=engine.has_chess960()))
     DisplayMsg.show(Message.SYSTEM_INFO(info=sys_info))
@@ -942,8 +942,8 @@ def main():
 
             elif isinstance(event, Event.SET_TIME_CONTROL):
                 time_control.stop_internal(log=False)
-                time_control = TimeControl(**event.tc_init)
-                tc_init = time_control.get_parameters()
+                tc_init = event.tc_init
+                time_control = TimeControl(**tc_init)
                 if time_control.mode == TimeMode.BLITZ:
                     write_picochess_ini('time', '{:d} 0'.format(tc_init['blitz']))
                 elif time_control.mode == TimeMode.FISCHER:

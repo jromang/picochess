@@ -525,6 +525,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
         elif isinstance(message, Message.TIME_CONTROL):
             self._create_game_info()
             self.shared['game_info']['time_text'] = message.time_text
+            self.shared['game_info']['tc_init'] = message.tc_init
 
         elif isinstance(message, Message.LEVEL):
             self._create_game_info()
