@@ -1,29 +1,23 @@
 #makefile to compile Rodent III on Linux
 # PREFIX=/usr/local
-PREFIX=/opt/picochess/engines
+PREFIX=/opt/picochess/engines/rodent3
 
 #define the directory for the executable file
-# BINDIR = $(PREFIX)/bin
-BINDIR = $(PREFIX)/armv7l
+BINDIR = $(PREFIX)/bin
 
 #define the directory for the data files
-# DATADIR = $(PREFIX)/share/rodentIII
-DATADIR = $(PREFIX)/rodent3
-
-#define the directory for the books files
-BOOKSDIR = $(DATADIR)/books
-
-#define the directory for the personality files
-PERSONALITIESDIR = $(DATADIR)/personalities
-
+# DATADIRBOOKS = $(PREFIX)/share/rodentIII-books
+DATADIRBOOKS = $(PREFIX)/books
+# DATADIRPERSONALITIES = $(PREFIX)/share/rodentIII-persons
+DATADIRPERSONALITIES = $(PREFIX)/personalities
 
 # Define the CPP compiler
 CXX = g++
 
 # Define features
 # Other options are -DBOOKGEN -DNO_THREADS
-CFG = -DNDEBUG -DUSEGEN -DUSE_THREADS -DNEW_THREADS -DBOOKSPATH=$(BOOKSDIR) -DPERSONALITIESPATH=$(PERSONALITIESDIR)
-CFG1 = -DUSEGEN -DUSE_THREADS -DNEW_THREADS -DBOOKSPATH=$(BOOKSDIR) -DPERSONALITIESPATH=$(PERSONALITIESDIR)
+CFG = -DNDEBUG -DUSEGEN -DUSE_THREADS -DNEW_THREADS -DBOOKSPATH=$(DATADIRBOOKS) -DPERSONALITIESPATH=$(DATADIRPERSONALITIES)
+CFG1 = -DUSEGEN -DUSE_THREADS -DNEW_THREADS -DBOOKSPATH=$(DATADIRBOOKS) -DPERSONALITIESPATH=$(DATADIRPERSONALITIES)
 
 # Define compiler flags
 CXXFLAGS = -g -std=c++14 -Wall -O3 -fno-rtti -pthread $(CFG)
@@ -110,7 +104,7 @@ build-debug:
 	@echo "Type make help for additional options"
 	$(CXX) $(CXX1FLAGS) $(LD1FLAGS) -o $(EXENAME) src/*.cpp
 	@echo "SHOW_OPTIONS" > $(CONFIGFILE)
-	
+
 gcc-lcov:
 	@echo "Type make help for additional options"
 	$(CXX) $(CXXFLAGS) -fprofile-generate -ftest-coverage $(LDFLAGS) -o $(EXENAME) src/*.cpp
@@ -118,35 +112,42 @@ gcc-lcov:
 	@lcov --capture --directory . --no-external --gcov-tool gcov --output-file coverage.info > /dev/null
 	@genhtml coverage.info --output-directory coveragedir > /dev/null
 	@rm -f rodentIII *.gcda *.gcno coverage.info
-	
+
 bookgen:
 	@echo "Type make help for additional options"
 	$(CXX) $(CXXFLAGS) -DBOOKGEN $(LDFLAGS) -o $(EXENAME)-bookgen src/*.cpp
 	@echo "SHOW_OPTIONS" > $(CONFIGFILE)
 	@./$(EXENAME)-bookgen
-	@rm -f $(EXENAME)-bookgen 
+	@rm -f $(EXENAME)-bookgen
 
 clean:
 	rm -rf $(EXENAME) $(EXENAME).exe book_gen.h basic.ini *.profdata *.profraw *.gcda *.gcno coverage.info coveragedir
 
 install:
 	mkdir -p $(BINDIR)
-	mkdir -p $(DATADIR)
+	mkdir -p $(DATADIRBOOKS)
+	mkdir -p $(DATADIRPERSONALITIES)
 	cp $(EXENAME) $(BINDIR)
-	cp $(CONFIGFILE) $(DATADIR)
-	find ../books/ -name '*.bin' -type f -exec cp '{}' $(DATADIR) \;
-	find ../personalities/ -name '*.ini' -type f -exec cp '{}' $(DATADIR) \;
+	cp $(CONFIGFILE) $(DATADIRPERSONALITIES)
+	#find ../books/ -name '*.bin' -type f -exec cp '{}' $(DATADIRBOOKS) \;
+	#find ../personalities/ -name '*.ini' -type f -exec cp '{}' $(DATADIRPERSONALITIES) \;
+	cp -r ../books/* $(DATADIRBOOKS)
+	cp -r ../personalities/* $(DATADIRPERSONALITIES)
 	chmod 755 $(BINDIR)/$(EXENAME)
-	chmod 644 $(DATADIR)/*
+	chmod -R 644 $(DATADIRBOOKS)/*
+	find $(DATADIRBOOKS) -type d -exec chmod 755 {} \;
+	chmod -R 644 $(DATADIRPERSONALITIES)/*
+	find $(DATADIRPERSONALITIES) -type d -exec chmod 755 {} \;
 
 # This just performs a copy of rodentIII engine
 update:
 	cp $(EXENAME) $(BINDIR)
-	
+
 remove:
 	rm -f $(BINDIR)/$(EXENAME)
-	rm -rf $(DATADIR)
-	
+	rm -rf $(DATADIRBOOKS)
+	rm -rf $(DATADIRPERSONALITIES)
+
 help:
 	@echo ""
 	@echo "To compile RodentIII type:"

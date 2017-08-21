@@ -246,6 +246,7 @@ class DgtBoard(object):
                     if status & 0x20:
                         logging.info('(ser) clock not connected')
                         if not self.is_pi:
+                            errtim = True
                             DisplayMsg.show(Message.DGT_NO_CLOCK_ERROR(text='dont_use'))
                         self.lever_pos = None
                     else:
