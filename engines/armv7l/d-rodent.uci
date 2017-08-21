@@ -1,8 +1,9 @@
 [Anand]
-; Anand personality for Rodent II chess engine
+; Anand personality for Rodent III chess engine
 ; hommage to Viswanathan Anand
 ; author: Pawel Koziol
 ; fast player, slight preference for attack, cares for pawn structure
+
 Strength = 2805
 PawnValue = 100
 KnightValue = 325
@@ -31,6 +32,9 @@ PassedPawns = 105
 PawnStructure = 115
 Lines = 100
 Outposts = 100
+Fianchetto = 0
+PawnMass = 110
+PawnChains = 100
 PawnShield = 120
 PawnStorm = 80
 Forwardness = 0
@@ -47,13 +51,18 @@ MobilityStyle = 0
 NpsLimit = 0
 EvalBlur = 0
 Contempt = 0
+SearchSkill = 10
+RiskyDepth = 0
 SlowMover = 90
 Selectivity = 175
 BookFilter = 20
-GuideBookFile = books/players/ph-anand2.bin
-MainBookFile = books/hist/_post06.bin
+GuideBookFile = players/ph-anand2.bin
+MainBookFile = hist/_post06.bin
 
 [Anderssen]
+; Anderssen presonality for Rodent III chess engine
+; author: Pawel Koziol
+;
 PawnValue = 100
 KnightValue = 325
 BishopValue = 335
@@ -81,6 +90,9 @@ PassedPawns = 85
 PawnStructure = 75
 Lines = 100
 Outposts = 50
+Fianchetto = 0
+PawnMass = 80
+PawnChains = 100
 PawnShield = 120
 PawnStorm = 100
 Forwardness = 25
@@ -97,17 +109,20 @@ MobilityStyle = 0
 NpsLimit = 0
 EvalBlur = 0
 Contempt = 0
+SearchSkill = 10
+RiskyDepth = 0
 SlowMover = 100
 Selectivity = 175
 BookFilter = 1
-GuideBookFile = books/players/ph-anderssen2.bin
-MainBookFile = books/hist/_pre30.bin
+GuideBookFile = players/ph-anderssen2.bin
+MainBookFile = hist/_pre30.bin
 
 [Botvinnik]
-; Botvinnik personality for Rodent II
+; Botvinnik personality for Rodent III chess engine
 ; author: Pawel Koziol
 ; balanced, cares for pawn structure, somewhat willing to accept doubled pawns
 ; changed piece/square table type
+
 PawnValue = 105
 KnightValue = 325
 BishopValue = 325
@@ -135,6 +150,9 @@ PassedPawns = 120
 PawnStructure = 120
 Lines = 100
 Outposts = 100
+Fianchetto = 0
+PawnMass = 110
+PawnChains = 100
 PawnShield = 120
 PawnStorm = 90
 Forwardness = 0
@@ -151,16 +169,19 @@ MobilityStyle = 0
 NpsLimit = 0
 EvalBlur = 0
 Contempt = 0
+SearchSkill = 10
+RiskyDepth = 0
 SlowMover = 100
 Selectivity = 175
 BookFilter = 20
-GuideBookFile = books/players/ph-botvinnik2.bin
-MainBookFile = books/hist/_31to80.bin
+GuideBookFile = players/ph-botvinnik2.bin
+MainBookFile = hist/_31to80.bin
 
 [Fischer]
-; Fischer personality for Rodent II chess engine
+; Fischer personality for Rodent III chess engine
 ; author: Pawel Koziol
 ; attacking, contemptous, mobility raised for both sides
+
 PawnValue = 100
 KnightValue = 325
 BishopValue = 335
@@ -188,6 +209,9 @@ PassedPawns = 100
 PawnStructure = 100
 Lines = 100
 Outposts = 100
+Fianchetto = 20
+PawnMass = 100
+PawnChains = 100
 PawnShield = 115
 PawnStorm = 100
 Forwardness = 0
@@ -204,18 +228,21 @@ MobilityStyle = 0
 NpsLimit = 0
 EvalBlur = 0
 Contempt = 25
+SearchSkill = 10
+RiskyDepth = 0
 SlowMover = 100
 Selectivity = 175
 BookFilter = 20
-GuideBookFile = books/players/ph-fischer2.bin
-MainBookFile = books/hist/_31to80.bin
+GuideBookFile = players/ph-fischer2.bin
+MainBookFile = hist/_31to80.bin
 
 [Larsen]
-; Larsen personality for Rodent II
+; Larsen personality for Rodent III chess engine
 ; author: Pawel Koziol
 ; tricky player following precepts of Nimzowitsch,
 ; plays varied and unusual openings, may want to sacrifice,
 ; even though king attacks aren't his chief interest
+;
 PawnValue = 100
 KnightValue = 330
 BishopValue = 335
@@ -243,6 +270,9 @@ PassedPawns = 100
 PawnStructure = 100
 Lines = 105
 Outposts = 120
+Fianchetto = 0
+PawnMass = 100
+PawnChains = 100
 PawnShield = 120
 PawnStorm = 100
 Forwardness = 20
@@ -259,17 +289,20 @@ MobilityStyle = 0
 NpsLimit = 0
 EvalBlur = 0
 Contempt = 0
+SearchSkill = 10
+RiskyDepth = 0
 SlowMover = 100
 Selectivity = 175
 BookFilter = 0
-GuideBookFile = books/players/ph-larsen2.bin
-MainBookFile = books/hist/_31to80.bin
+GuideBookFile = players/ph-larsen2.bin
+MainBookFile = hist/_31to80.bin
 
 [Marshall]
-; Marshall personality for Rodent II chess engine
+; Marshall personality for Rodent III chess engine
 ; by Pawel Koziol
 ; hommage to Frank Marshall (1877-1944)
 ; very high attack, very high mobility, sacrificial, likes knights
+
 Strength = 2737
 PawnValue = 100
 KnightValue = 335
@@ -298,6 +331,9 @@ PassedPawns = 100
 PawnStructure = 90
 Lines = 100
 Outposts = 100
+Fianchetto = 0
+PawnMass = 100
+PawnChains = 100
 PawnShield = 100
 PawnStorm = 100
 Forwardness = 100
@@ -314,15 +350,18 @@ MobilityStyle = 0
 NpsLimit = 0
 EvalBlur = 0
 Contempt = 0
+SearchSkill = 10
+RiskyDepth = 0
 SlowMover = 100
 Selectivity = 175
 BookFilter = 20
-GuideBookFile = books/players/marshall.bin
-MainBookFile = books/hist/_pre30.bin
+GuideBookFile = players/marshall.bin
+MainBookFile = hist/_pre30.bin
 
 [Nimzowitsch]
-; Nimzowitsch personality for Rodent II chess engine
+; Nimzowitsch personality for Rodent III chess engine
 ; author: Pawel Koziol
+
 PawnValue = 100
 KnightValue = 335
 BishopValue = 325
@@ -350,6 +389,9 @@ PassedPawns = 110
 PawnStructure = 110
 Lines = 100
 Outposts = 120
+Fianchetto = 10
+PawnMass = 120
+PawnChains = 100
 PawnShield = 120
 PawnStorm = 100
 Forwardness = 0
@@ -366,17 +408,19 @@ MobilityStyle = 0
 NpsLimit = 0
 EvalBlur = 0
 Contempt = 0
+SearchSkill = 10
+RiskyDepth = 0
 SlowMover = 100
 Selectivity = 175
 BookFilter = 20
-GuideBookFile = books/players/nimzowitsch.bin
-MainBookFile = books/hist/_pre30.bin
+GuideBookFile = players/nimzowitsch.bin
+MainBookFile = hist/_pre30.bin
 
 [Petrosian]
-; Petrosian personality for Rodent chess engine
+; Petrosian personality for Rodent III chess engine
 ; author: Pawel Koziol
 ; defense, restraint, likes closed positions, likes sacrificing exchange
-Strength = 2766
+
 PawnValue = 100
 KnightValue = 325
 BishopValue = 335
@@ -404,6 +448,9 @@ PassedPawns = 100
 PawnStructure = 110
 Lines = 100
 Outposts = 120
+Fianchetto = 10
+PawnMass = 120
+PawnChains = 100
 PawnShield = 120
 PawnStorm = 100
 Forwardness = 0
@@ -420,16 +467,19 @@ MobilityStyle = 0
 NpsLimit = 0
 EvalBlur = 0
 Contempt = -5
+SearchSkill = 10
+RiskyDepth = 0
 SlowMover = 100
 Selectivity = 175
 BookFilter = 20
-GuideBookFile = books/players/petrosian.bin
-MainBookFile = books/hist/_31to80.bin
+GuideBookFile = players/petrosian.bin
+MainBookFile = hist/_31to80.bin
 
 [Reti]
-; Reti personality for Rodent II chess engine
+; Reti personality for Rodent III chess engine
 ; author: Pawel Koziol
 ; disregards classical piece placement, solid pawn structure
+
 PawnValue = 100
 KnightValue = 325
 BishopValue = 335
@@ -457,6 +507,9 @@ PassedPawns = 150
 PawnStructure = 180
 Lines = 100
 Outposts = 110
+Fianchetto = 50
+PawnMass = 100
+PawnChains = 100
 PawnShield = 120
 PawnStorm = 80
 Forwardness = 0
@@ -473,17 +526,20 @@ MobilityStyle = 0
 NpsLimit = 0
 EvalBlur = 0
 Contempt = 0
+SearchSkill = 10
+RiskyDepth = 0
 SlowMover = 100
 Selectivity = 175
 BookFilter = 20
-GuideBookFile = books/players/reti.bin
-MainBookFile = books/players/ph-reti2.bin
+GuideBookFile = players/reti.bin
+MainBookFile = players/ph-reti2.bin
 
 [Rubinstein]
-; Rubinstein personality for Rodent II chess engine
+; Rubinstein personality for Rodent III chess engine
 ; author: Pawel Koziol
 ; classical player, marginally prefers defence, decreased mobility,
 ; likes rook play, steers towards endgame
+
 PawnValue = 107
 KnightValue = 325
 BishopValue = 335
@@ -511,6 +567,9 @@ PassedPawns = 120
 PawnStructure = 120
 Lines = 120
 Outposts = 90
+Fianchetto = 0
+PawnMass = 108
+PawnChains = 100
 PawnShield = 120
 PawnStorm = 90
 Forwardness = 0
@@ -527,16 +586,19 @@ MobilityStyle = 1
 NpsLimit = 0
 EvalBlur = 0
 Contempt = 0
+SearchSkill = 10
+RiskyDepth = 0
 SlowMover = 100
 Selectivity = 175
 BookFilter = 20
-GuideBookFile = books/players/ph-rubinstein2.bin
-MainBookFile = books/hist/_pre30.bin
+GuideBookFile = players/ph-rubinstein2.bin
+MainBookFile = hist/_pre30.bin
 
 [Spassky]
-; Spassky personality for Rodent II
+; Spassky personality for Rodent III chess engine
 ; author: Pawel Koziol
 ; defensive player who likes grabbing space and cares for pawn structure
+;
 PawnValue = 108
 KnightValue = 335
 BishopValue = 335
@@ -564,8 +626,11 @@ PassedPawns = 110
 PawnStructure = 130
 Lines = 100
 Outposts = 100
+Fianchetto = 0
+PawnMass = 100
+PawnChains = 100
 PawnShield = 120
-PawnStorm = 100
+PawnStorm = 105
 Forwardness = 150
 DoubledPawnMg = -12
 DoubledPawnEg = -24
@@ -580,17 +645,19 @@ MobilityStyle = 0
 NpsLimit = 0
 EvalBlur = 0
 Contempt = 0
+SearchSkill = 10
+RiskyDepth = 0
 SlowMover = 100
 Selectivity = 175
 BookFilter = 20
-GuideBookFile = books/players/ph_spassky2.bin
-MainBookFile = books/hist/_31to80.bin
+GuideBookFile = players/ph_spassky2.bin
+MainBookFile = hist/_31to80.bin
 
 [Steinitz]
-; Steinitz personality for Rodent II chess engine
+; Steinitz personality for Rodent III chess engine
 ; author: Pawel Koziol
 ; defensive, accepts cramped positions, accepts sacrifices, solid with pawns
-Strength = 2763
+
 PawnValue = 105
 KnightValue = 325
 BishopValue = 335
@@ -618,6 +685,9 @@ PassedPawns = 100
 PawnStructure = 125
 Lines = 100
 Outposts = 100
+Fianchetto = 0
+PawnMass = 125
+PawnChains = 100
 PawnShield = 100
 PawnStorm = 100
 Forwardness = 0
@@ -634,17 +704,19 @@ MobilityStyle = 1
 NpsLimit = 0
 EvalBlur = 0
 Contempt = 20
+SearchSkill = 10
+RiskyDepth = 0
 SlowMover = 100
 Selectivity = 125
 BookFilter = 20
-; GuideBookFile = books/guide/steinitz.bin JP! doesnt exist
-MainBookFile = books/hist/_pre30.bin
+GuideBookFile = guide/steinitz.bin
+MainBookFile = hist/_pre30.bin
 
 [Tarrasch]
-; Tarrasch personality for Rodent II
+; Tarrasch personality for Rodent III chess engine
 ; author: Pawel Koziol
 ; mobility, emphasis on bishops, likes open game
-Strength = 2766
+
 PawnValue = 100
 KnightValue = 325
 BishopValue = 345
@@ -672,6 +744,9 @@ PassedPawns = 100
 PawnStructure = 80
 Lines = 100
 Outposts = 80
+Fianchetto = 0
+PawnMass = 100
+PawnChains = 100
 PawnShield = 120
 PawnStorm = 80
 Forwardness = 50
@@ -688,8 +763,10 @@ MobilityStyle = 0
 NpsLimit = 0
 EvalBlur = 0
 Contempt = 0
+SearchSkill = 10
+RiskyDepth = 0
 SlowMover = 100
 Selectivity = 175
 BookFilter = 20
-GuideBookFile = books/players/ph-tarrasch2.bin
-MainBookFile = books/hist/_pre30.bin
+GuideBookFile = players/ph-tarrasch2.bin
+MainBookFile = hist/_pre30.bin
