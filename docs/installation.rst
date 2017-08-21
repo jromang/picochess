@@ -160,9 +160,9 @@ Manual installation
 
   Initialize the config files:
 
-  ``sudo python3 ./build_engines.py``
-  ``sudo python3 ./build_books.py``
-  ``sudo python3 ./build_voices.py``
+  ``sudo python3 ./build/engines.py``
+  ``sudo python3 ./build/books.py``
+  ``sudo python3 ./build/voices.py``
 
 6. **Copy the dgtpi services into the correct place (ONLY needed if you have a DGTPi chess computer)**
 

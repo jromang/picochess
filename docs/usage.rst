@@ -20,8 +20,8 @@ When using these modes, please be patient and don't rush moves. Allow a few seco
 * Analysis mode (enabled by **white** queen on **B5**): the computer is watching the game, it does not play itself. The clock continually displays the best move for the side to play.
 * Kibitz mode (enabled by **white** queen on **C5**): the computer is watching the game, it does not play itself. The clock continually displays the position score (right aligned) with the search depth (left aligned).
 * Observe mode (enabled by **white** queen on **D5**): the computer is watching the game, it does not play itself. The clock displays the remaining thinking time for both sides. Press the second button once to show the position evaluation, twice to show a hint.
-* Remote mode (enabled by **white** queen on **E5**): this mode will allow you to play against someone over internet. The remote player using the webserver whereas the other player using the pieces as normal to enter moves. A detailed documentation will be provided lateron.
-* Ponder mode (enabled by **white** queen on **F5**): the computer is watching the game, it does not play itself. The clock displays the best move for the side to play in a 2 secs rotation with the position score together with the depth. So, this mode is a combination of "Analysis" & "Kibitz"
+* Ponder mode (enabled by **white** queen on **E5**): the computer is watching the game, it does not play itself. The clock displays the best move for the side to play in a 2 secs rotation with the position score together with the depth. So, this mode is a combination of "Analysis" & "Kibitz"
+* Remote mode (enabled by **white** queen on **H5**): this mode will allow you to play against someone over internet. The remote player using the webserver whereas the other player using the pieces as normal to enter moves. A detailed documentation will be provided lateron.
 
 Game mode is the regular mode. If you used one of the other modes, you can return back to game mode by putting the extra **white** queen on **A5**.
 You can also press the fourth button to enter the menu (afterwards choose the Mode submenu) to toggle over the modes (Qa5-Qf5 only working in the starting position) see below.
@@ -75,12 +75,12 @@ engines are set with the extra **black** queen.
 
 * **A6** - Stockfish 7
 * **B6** - Texel 1.06
-* **C6** - Arasan 20.0
-* **D6** - Rodent II
-* **E6** - Zurichess skills
-* **F6** - Floyd 0.8 dev
+* **C6** - Arasan 20.2
+* **D6** - Rodent III
+* **E6** - Zurichess luzern
+* **F6** - Floyd 0.9
 * **G6** - Cinnamon 2.0
-* **H6** - Claudia 0.5
+* **H6** - Galjoen 0.36
 
 Setting up time controls
 ------------------------
