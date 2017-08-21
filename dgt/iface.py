@@ -39,8 +39,6 @@ class DgtIface(DisplayDgt, Thread):
 
         self.clock_running = False
         self.enable_dgt_3000 = False
-        # self.time_left = None
-        # self.time_right = None
         self.case_res = True
 
     def display_text_on_clock(self, message):
