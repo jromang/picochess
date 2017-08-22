@@ -352,7 +352,7 @@ def main():
         # Player had done the computer or remote move on the board
         elif fen == done_computer_fen:
             assert interaction_mode in (Mode.NORMAL, Mode.REMOTE), 'wrong mode: %s' % interaction_mode
-            DisplayMsg.show(Message.COMPUTER_MOVE_DONE())
+            # DisplayMsg.show(Message.COMPUTER_MOVE_DONE())  # this leads to problems with "ok_pico"
             game.push(done_move)
             done_computer_fen = None
             done_move = chess.Move.null()
@@ -365,6 +365,7 @@ def main():
             else:
                 legal_fens = []
             last_legal_fens = []
+            DisplayMsg.show(Message.COMPUTER_MOVE_DONE())  # must be after the clock is started => "ok_pico"
 
         # Check if this is a previous legal position and allow user to restart from this position
         else:
