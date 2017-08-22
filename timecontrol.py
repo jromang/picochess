@@ -107,7 +107,7 @@ class TimeControl(object):
 
     def set_clock_times(self, white_time: int, black_time: int):
         """Set the times send from the clock."""
-        logging.info('sended clock times are not used => wip! w: %s b: %s', hms_time(white_time), hms_time(black_time))
+        logging.info('set clock times w: %s b: %s', hms_time(white_time), hms_time(black_time))
         self.clock_time_white = white_time
         self.clock_time_black = black_time
 
@@ -156,9 +156,9 @@ class TimeControl(object):
                 logging.info('start internal time w:%s - b:%s', w_hms, b_hms)
                 logging.info('received prio clock time w:%s - b:%s',
                              hms_time(self.clock_time_white), hms_time(self.clock_time_black))
-            if True:
-                self.internal_time[chess.WHITE] = self.clock_time_white
-                self.internal_time[chess.BLACK] = self.clock_time_black
+
+            self.internal_time[chess.WHITE] = self.clock_time_white
+            self.internal_time[chess.BLACK] = self.clock_time_black
 
             # Only start thread if not already started for same color, and the player has not already lost on time
             if self.internal_time[color] > 0 and self.active_color is not None and self.run_color != self.active_color:
