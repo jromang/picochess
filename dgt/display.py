@@ -604,7 +604,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.time_control = TimeControl(**message.tc_init)
         time_left, time_right = self.time_control.get_internal_time(flip_board=self.dgtmenu.get_flip_board())
         side = ClockSide.LEFT if (message.turn == chess.WHITE) != self.dgtmenu.get_flip_board() else ClockSide.RIGHT
-        text = Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side, wait=False, devs=message.devs)
+        text = Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side, wait=True, devs=message.devs)
         DispatchDgt.fire(text)
 
     def _process_dgt_serial_nr(self):
