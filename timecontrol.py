@@ -126,7 +126,7 @@ class TimeControl(object):
             logging.debug(txt, self.internal_time[self.active_color], display_color, time_start)
             Observable.fire(Event.OUT_OF_TIME(color=self.active_color))
 
-    def add_inc(self, color):
+    def add_time(self, color):
         """Add the increment value to the color given."""
         assert self.internal_running() is False, 'internal clock still running for: %s' % self.run_color
         if self.mode == TimeMode.FISCHER:
@@ -143,6 +143,9 @@ class TimeControl(object):
             # log times - issue #184
             w_hms, b_hms = self._log_time()
             logging.info('after internal time w:%s - b:%s', w_hms, b_hms)
+
+        if self.mode == TimeMode.FIXED:
+            self.reset()
 
     def start_internal(self, color, log=True):
         """Start the internal clock."""

@@ -147,7 +147,13 @@ def main():
 
         If a move is found in the opening book, fire an event in a few seconds.
         """
-        # start_clock()
+
+        def reset_fixed_time():
+            nonlocal time_control
+            if time_control.mode == TimeMode.FIXED:
+                time_control.reset()
+
+        # reset_fixed_time()
         DisplayMsg.show(msg)
         start_clock()
         book_res = searchmoves.book(bookreader, game.copy())
@@ -240,6 +246,7 @@ def main():
         nonlocal game
         nonlocal done_move
         nonlocal done_computer_fen
+        nonlocal time_control
 
         logging.debug('user move [%s]', move)
         if move not in game.legal_moves:
@@ -247,7 +254,7 @@ def main():
         else:
             stop_search_and_clock()
             if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE) and not sliding:
-                time_control.add_inc(game.turn)  # add fischer inc if not in pondering modes (tc is now stopped!)
+                time_control.add_time(game.turn)
 
             done_computer_fen = None
             done_move = chess.Move.null()
@@ -360,7 +367,7 @@ def main():
             done_move = chess.Move.null()
             if check_game_state(game, play_mode):
                 searchmoves.reset()
-                time_control.add_inc(not game.turn)
+                time_control.add_time(not game.turn)
                 if time_control.mode != TimeMode.FIXED:
                     start_clock()
                 legal_fens = compute_legal_fens(game.copy())

@@ -502,7 +502,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self._exit_menu()
         if not self.dgtmenu.get_confirm():
             DispatchDgt.fire(self.dgttranslate.text('K05_okpico'))
-        if self.dgtmenu.get_time_mode() == TimeMode.FIXED:  # go back to a stopped time display
+        if self.dgtmenu.get_time_mode() == TimeMode.FIXED:  # go back to a stopped time display and reset times
+            self.time_control.reset()
             DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs={'ser', 'i2c', 'web'}))
 
     def _process_user_move_done(self, message):
