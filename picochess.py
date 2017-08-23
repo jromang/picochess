@@ -245,7 +245,7 @@ def main():
         else:
             stop_search_and_clock()
             if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE) and not sliding:
-                time_control.add_inc(game.turn)  # add fischer inc if not in pondering modes (tc is now stoped!)
+                time_control.add_inc(game.turn)  # add fischer inc if not in pondering modes (tc is now stopped!)
 
             done_computer_fen = None
             done_move = chess.Move.null()

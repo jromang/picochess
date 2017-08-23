@@ -70,10 +70,11 @@ class Dispatcher(DispatchDgt, Thread):
             logging.debug('delete not registered (%s) tasks', dev)
             self.tasks[dev] = []
             return
-        logging.debug('(%s) max timer finished - returning to time display', dev)
-        DisplayDgt.show(Dgt.DISPLAY_TIME(force=False, wait=True, devs={dev}))
         if self.tasks[dev]:
             logging.debug('processing delayed (%s) tasks: %s', dev, self.tasks[dev])
+        else:
+            logging.debug('(%s) max timer finished - returning to time display', dev)
+            DisplayDgt.show(Dgt.DISPLAY_TIME(force=False, wait=True, devs={dev}))
         while self.tasks[dev]:
             logging.debug('(%s) tasks has %i members', dev, len(self.tasks[dev]))
             try:
@@ -83,7 +84,7 @@ class Dispatcher(DispatchDgt, Thread):
             with self.process_lock[dev]:
                 self._process_message(message, dev)
             if self.maxtimer_running[dev]:  # run over the task list until a maxtime command was processed
-                logging.debug('(%s) tasks stoped on %i members', dev, len(self.tasks[dev]))
+                logging.debug('(%s) tasks stopped on %i members', dev, len(self.tasks[dev]))
                 break
 
     def _process_message(self, message, dev: str):

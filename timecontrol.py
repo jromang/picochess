@@ -165,6 +165,7 @@ class TimeControl(object):
                 self.timer = threading.Timer(copy.copy(self.internal_time[color]), self._out_of_time,
                                              [copy.copy(self.internal_time[color])])
                 self.timer.start()
+                logging.debug('internal timer started - color: %s run: %s active: %s', color, self.run_color, self.active_color)
                 self.run_color = self.active_color
 
     def stop_internal(self, log=True):

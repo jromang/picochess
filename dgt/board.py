@@ -120,9 +120,9 @@ class DgtBoard(object):
         if message[0] == DgtCmd.DGT_CLOCK_MESSAGE:
             self.last_clock_command = message
             if self.clock_lock:
-                logging.warning('(ser) clock already locked. Maybe a "resend"?')
+                logging.warning('(ser) clock is already locked. Maybe a "resend"?')
             else:
-                logging.debug('(ser) clock now locked')
+                logging.debug('(ser) clock is locked now')
             self.clock_lock = time.time()
         else:
             time.sleep(0.1)  # give the board some time to process the command
