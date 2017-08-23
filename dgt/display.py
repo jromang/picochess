@@ -463,21 +463,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             DispatchDgt.fire(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE,
                                              wait=True, devs={'ser', 'i2c', 'web'}))
 
-    def _process_computer_move_done(self):
-        self.force_leds_off()
-        self.last_move = self.play_move
-        self.last_fen = self.play_fen
-        self.last_turn = self.play_turn
-        self.play_move = chess.Move.null()
-        self.play_fen = None
-        self.play_turn = None
-        self.engine_finished = False
-        self._exit_menu()
-        if not self.dgtmenu.get_confirm():
-            DispatchDgt.fire(self.dgttranslate.text('K05_okpico'))
-        if self.dgtmenu.get_time_mode() == TimeMode.FIXED:  # go back to a stopped time display
-            DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs={'ser', 'i2c', 'web'}))
-
     def _process_computer_move(self, message):
         self.force_leds_off(log=True)  # can happen in case of a book move
         move = message.move
@@ -505,6 +490,21 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         DispatchDgt.fire(Dgt.LIGHT_SQUARES(uci_move=move.uci(), devs={'ser', 'web'}))
         self.leds_are_on = True
 
+    def _process_computer_move_done(self):
+        self.force_leds_off()
+        self.last_move = self.play_move
+        self.last_fen = self.play_fen
+        self.last_turn = self.play_turn
+        self.play_move = chess.Move.null()
+        self.play_fen = None
+        self.play_turn = None
+        self.engine_finished = False
+        self._exit_menu()
+        if not self.dgtmenu.get_confirm():
+            DispatchDgt.fire(self.dgttranslate.text('K05_okpico'))
+        # if self.dgtmenu.get_time_mode() == TimeMode.FIXED:  # go back to a stopped time display
+        #     DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs={'ser', 'i2c', 'web'}))
+
     def _process_user_move_done(self, message):
         self.force_leds_off(log=True)  # can happen in case of a sliding move
         self.last_move = message.move
@@ -525,11 +525,12 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             DispatchDgt.fire(self.dgttranslate.text('K05_okmove'))
 
     def _process_time_control(self, message):
-        if not self.dgtmenu.get_confirm() or not message.show_ok:
+        wait = not self.dgtmenu.get_confirm() or not message.show_ok
+        if wait:
             DispatchDgt.fire(message.time_text)
         self.time_control = TimeControl(**message.tc_init)
         time_left, time_right = self.time_control.get_internal_time(flip_board=self.dgtmenu.get_flip_board())
-        DispatchDgt.fire(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE, wait=True,
+        DispatchDgt.fire(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE, wait=wait,
                                          devs={'ser', 'i2c', 'web'}))
 
     def _process_new_score(self, message):

@@ -147,8 +147,9 @@ def main():
 
         If a move is found in the opening book, fire an event in a few seconds.
         """
-        start_clock()
+        # start_clock()
         DisplayMsg.show(msg)
+        start_clock()
         book_res = searchmoves.book(bookreader, game.copy())
         if book_res:
             Observable.fire(Event.BEST_MOVE(move=book_res.bestmove, ponder=book_res.ponder, inbook=True))
@@ -169,8 +170,9 @@ def main():
 
     def observe(game: chess.Board, msg: Message):
         """Start a new ponder search on the current game."""
-        start_clock()
+        # start_clock()
         analyse(game, msg)
+        start_clock()
 
     def stop_search_and_clock():
         """Depending on the interaction mode stop search and clock."""
