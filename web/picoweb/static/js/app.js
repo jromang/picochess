@@ -51,8 +51,8 @@ const BACKEND_SERVER_PREFIX = 'http://drshivaji.com:3334';
 //const BACKEND_SERVER_PREFIX = "http://localhost:7777";
 
 // remote begin
-var remote_server_prefix = "drshivaji.com:9876";
-//var remote_server_prefix = "localhost:5432";
+//var remote_server_prefix = "drshivaji.com:9876";
+var remote_server_prefix = "localhost:5432";
 var remote_ws = null;
 // remote end
 
@@ -1134,6 +1134,16 @@ function sendRemoteMsg() {
     }
 }
 
+function sendRemoteFen() {
+    if(remote_ws) {
+        var text_msg_obj = {"event": "Fen", "move": 'aMove', "fen": 'aFen', "play": 'aPlay'};
+        var jmsg = JSON.stringify(text_msg_obj);
+        remote_ws.send(jmsg);
+    } else {
+        console.log('cant send message cause of closed connection!');
+    }
+}
+
 function setInsideRoom() {
     $('#leaveRoomBtn').removeAttr('disabled').show();
     $('#SendTextRemoteBtn').removeAttr('disabled');
@@ -1744,6 +1754,7 @@ $(function() {
                     if(data.play === 'review') {
                         highlightBoard(data.move, 'review');
                     }
+                    sendRemoteFen();
                     break;
                 case 'Game':
                     newBoard(data.fen);
