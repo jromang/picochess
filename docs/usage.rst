@@ -127,12 +127,12 @@ These are set with the extra **white** queen.
 
 * **A3** - 1 minute game with 1 second Fischer increment
 * **B3** - 3 minute game with 2 second Fischer increment
-* **C3** - 4 minute game with 2 second Fischer increment
-* **D3** - 5 minute game with 3 second Fischer increment
-* **E3** - 10 minute game with 5 second Fischer increment
-* **F3** - 15 minute game with 10 second Fischer increment
-* **G3** - 30 minute game with 15 second Fischer increment
-* **H3** - 60 minute game with 30 second Fischer increment
+* **C3** - 5 minute game with 3 second Fischer increment
+* **D3** - 10 minute game with 5 second Fischer increment
+* **E3** - 15 minute game with 10 second Fischer increment
+* **F3** - 30 minute game with 15 second Fischer increment
+* **G3** - 60 minute game with 20 second Fischer increment
+* **H3** - 90 minute game with 30 second Fischer increment
 
 Clock button support (general)
 ------------------------------
