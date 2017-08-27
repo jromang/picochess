@@ -1237,13 +1237,13 @@ function receive_message(wsevent) {
     var msg_obj = $.parseJSON(wsevent.data);
     switch (msg_obj.event) {
         case "join":
-            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + msg_obj.payload + '</li>');
+            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + "Joined room " + msg_obj.payload + '</li>');
             break;
         case "leave":
-            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + msg_obj.payload + '</li>');
+            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + "Left room " + msg_obj.payload + '</li>');
             break;
         case "nick_list":
-            $('#consoleLogArea').append('<li>' + 'current users: ' + msg_obj.payload.toString() + '</li>');
+            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + 'Current users: ' + msg_obj.payload.toString() + '</li>');
             break;
         case "text":
             $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' +  msg_obj.payload + '</li>');
