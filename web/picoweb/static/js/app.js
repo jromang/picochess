@@ -1134,9 +1134,19 @@ function sendRemoteMsg() {
     }
 }
 
-function sendRemoteFen() {
+function sendRemoteFen(data) {
     if(remote_ws) {
-        var text_msg_obj = {"event": "Fen", "move": 'aMove', "fen": 'aFen', "play": 'aPlay'};
+        var text_msg_obj = {"event": "Fen", "move": data.move, "fen": data.fen, "play": data.play};
+        var jmsg = JSON.stringify(text_msg_obj);
+        remote_ws.send(jmsg);
+    } else {
+        console.log('cant send message cause of closed connection!');
+    }
+}
+
+function sendRemoteGame(fen) {
+    if(remote_ws) {
+        var text_msg_obj = {"event": "Game", "fen": fen};
         var jmsg = JSON.stringify(text_msg_obj);
         remote_ws.send(jmsg);
     } else {
@@ -1214,52 +1224,60 @@ function enterRoom() {
     });
 }
 
+function format_username(username) {
+    if(username === $('#RemoteNick').val()) {
+        return '<span style="color: green;">' + username + '</span>';
+    } else {
+        return '<span style="color: red;">' + username + '</span>';
+    }
+}
+
 function receive_message(wsevent) {
     console.log("received message: " + wsevent.data);
     var msg_obj = $.parseJSON(wsevent.data);
     switch (msg_obj.event) {
         case "join":
-            $('#consoleLogArea').append('<li>' + msg_obj.username + msg_obj.payload + '</li>');
+            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + msg_obj.payload + '</li>');
             break;
         case "leave":
-            $('#consoleLogArea').append('<li>' + msg_obj.username + msg_obj.payload + '</li>');
+            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + msg_obj.payload + '</li>');
             break;
         case "nick_list":
             $('#consoleLogArea').append('<li>' + 'current users: ' + msg_obj.payload.toString() + '</li>');
             break;
         case "text":
-            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' +  msg_obj.payload + '</li>');
+            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' +  msg_obj.payload + '</li>');
             break;
         // picochess events!
         case 'Clock':
-            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'Clock: ' + msg_obj.msg + '</li>');
+            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + 'Clock: ' + msg_obj.msg + '</li>');
             break;
         case 'Light':
-            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'Light: ' + msg_obj.move + '</li>');
+            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + 'Light: ' + msg_obj.move + '</li>');
             break;
         case 'Clear':
-            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'Clear' + '</li>');
+            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + 'Clear' + '</li>');
             break;
         case 'Fen':
-            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'Fen: ' + msg_obj.fen + ' move: ' + msg_obj.move + ' play: ' + msg_obj.play + '</li>');
+            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + 'Fen: ' + msg_obj.fen + ' move: ' + msg_obj.move + ' play: ' + msg_obj.play + '</li>');
             break;
         case 'Game':
-            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'NewGame' + '</li>');
+            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + 'NewGame:' + msg_obj.fen + '</li>');
             break;
         case 'Message':
-            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'Message: ' + msg_obj.msg + '</li>');
+            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + 'Message: ' + msg_obj.msg + '</li>');
             break;
         case 'Status':
-            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'ClockStatus: ' + msg_obj.msg + '</li>');
+            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + 'ClockStatus: ' + msg_obj.msg + '</li>');
             break;
         case 'Header':
-            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'Header: ' + msg_obj.headers.toString() + '</li>');
+            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + 'Header: ' + msg_obj.headers.toString() + '</li>');
             break;
         case 'Title':
-            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'Title: ' + msg_obj.ip_info.toString() + '</li>');
+            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + 'Title: ' + msg_obj.ip_info.toString() + '</li>');
             break;
         case 'Broadcast':
-            $('#consoleLogArea').append('<li>' + msg_obj.username + ':' + 'Broadcast: ' + msg_obj.msg + 'fen: ' + msg_obj.fen + '</li>');
+            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + 'Broadcast: ' + msg_obj.msg + 'fen: ' + msg_obj.fen + '</li>');
             break;
         default:
             console.log(msg_obj.event);
@@ -1267,34 +1285,6 @@ function receive_message(wsevent) {
             console.log(' ');
     }
 }
-
-/*
-function getCookie(name) {
-    console.log('getCookie');
-    console.log(document.cookie);
-    console.log(' ');
-    var pattern = new RegExp(name + "=.[^;]*");
-    var matched = document.cookie.match(pattern);
-    if (matched) {
-        var cookie = matched[0].split('=');
-        return cookie[1]
-    }
-    return false
-}
-
-function deleteCookie( name, path, domain ) {
-    if ( getCookie( name ) ) {
-        var pico_cookie = name + "=" +
-            ( ( path ) ? ";path=" + path : "") +
-            ( ( domain ) ? ";domain=" + domain : "" ) +
-            ";expires=Thu, 01-Jan-1970 00:00:01 GMT";
-        console.log('deleteCookie');
-        console.log(pico_cookie);
-        console.log(' ');
-        document.cookie = pico_cookie;
-    }
-}
-*/
 // remote end
 
 function formatEngineOutput(line) {
@@ -1754,10 +1744,11 @@ $(function() {
                     if(data.play === 'review') {
                         highlightBoard(data.move, 'review');
                     }
-                    sendRemoteFen();
+                    sendRemoteFen(data);
                     break;
                 case 'Game':
                     newBoard(data.fen);
+                    sendRemoteGame(data.fen);
                     break;
                 case 'Message':
                     boardStatusEl.html(data.msg);
