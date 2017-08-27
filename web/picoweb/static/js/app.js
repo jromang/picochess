@@ -51,8 +51,8 @@ const BACKEND_SERVER_PREFIX = 'http://drshivaji.com:3334';
 //const BACKEND_SERVER_PREFIX = "http://localhost:7777";
 
 // remote begin
-//var remote_server_prefix = "drshivaji.com:9876";
-var remote_server_prefix = "localhost:5432";
+var remote_server_prefix = "drshivaji.com:9876";
+//var remote_server_prefix = "localhost:7766";
 var remote_ws = null;
 // remote end
 
