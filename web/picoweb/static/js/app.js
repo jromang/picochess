@@ -1235,49 +1235,50 @@ function format_username(username) {
 function receive_message(wsevent) {
     console.log("received message: " + wsevent.data);
     var msg_obj = $.parseJSON(wsevent.data);
+    var logging = $('#consoleLogArea');
     switch (msg_obj.event) {
         case "join":
-            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + "Joined room " + msg_obj.payload + '</li>');
+            logging.append('<li>' + format_username(msg_obj.username) + ' => Joined room ' + msg_obj.payload + '</li>');
             break;
         case "leave":
-            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + "Left room " + msg_obj.payload + '</li>');
+            logging.append('<li>' + format_username(msg_obj.username) + ' => Left room ' + msg_obj.payload + '</li>');
             break;
         case "nick_list":
-            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + 'Current users: ' + msg_obj.payload.toString() + '</li>');
+            logging.append('<li>' + format_username(msg_obj.username) + ' => Current users: ' + msg_obj.payload.toString() + '</li>');
             break;
         case "text":
-            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' +  msg_obj.payload + '</li>');
+            logging.append('<li>' + format_username(msg_obj.username) + ' => ' +  msg_obj.payload + '</li>');
             break;
         // picochess events!
         case 'Clock':
-            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + 'Clock: ' + msg_obj.msg + '</li>');
+            logging.append('<li>' + format_username(msg_obj.username) + ' => Clock: ' + msg_obj.msg + '</li>');
             break;
         case 'Light':
-            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + 'Light: ' + msg_obj.move + '</li>');
+            logging.append('<li>' + format_username(msg_obj.username) + ' => Light: ' + msg_obj.move + '</li>');
             break;
         case 'Clear':
-            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + 'Clear' + '</li>');
+            logging.append('<li>' + format_username(msg_obj.username) + ' => Clear' + '</li>');
             break;
         case 'Fen':
-            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + 'Fen: ' + msg_obj.fen + ' move: ' + msg_obj.move + ' play: ' + msg_obj.play + '</li>');
+            logging.append('<li>' + format_username(msg_obj.username) + ' => Fen: ' + msg_obj.fen + ' move: ' + msg_obj.move + ' play: ' + msg_obj.play + '</li>');
             break;
         case 'Game':
-            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + 'NewGame:' + msg_obj.fen + '</li>');
+            logging.append('<li>' + format_username(msg_obj.username) + ' => NewGame: ' + msg_obj.fen + '</li>');
             break;
         case 'Message':
-            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + 'Message: ' + msg_obj.msg + '</li>');
+            logging.append('<li>' + format_username(msg_obj.username) + ' => Message: ' + msg_obj.msg + '</li>');
             break;
         case 'Status':
-            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + 'ClockStatus: ' + msg_obj.msg + '</li>');
+            logging.append('<li>' + format_username(msg_obj.username) + ' => ClockStatus: ' + msg_obj.msg + '</li>');
             break;
         case 'Header':
-            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + 'Header: ' + msg_obj.headers.toString() + '</li>');
+            logging.append('<li>' + format_username(msg_obj.username) + ' => Header: ' + msg_obj.headers.toString() + '</li>');
             break;
         case 'Title':
-            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + 'Title: ' + msg_obj.ip_info.toString() + '</li>');
+            logging.append('<li>' + format_username(msg_obj.username) + ' => Title: ' + msg_obj.ip_info.toString() + '</li>');
             break;
         case 'Broadcast':
-            $('#consoleLogArea').append('<li>' + format_username(msg_obj.username) + ':' + 'Broadcast: ' + msg_obj.msg + 'fen: ' + msg_obj.fen + '</li>');
+            logging.append('<li>' + format_username(msg_obj.username) + ' => Broadcast: ' + msg_obj.msg + 'fen: ' + msg_obj.fen + '</li>');
             break;
         default:
             console.log(msg_obj.event);
