@@ -221,7 +221,7 @@ def main():
 
         :param game:
         :param play_mode:
-        :return: True is the game continues, False if it has ended
+        :return: False is the game continues, Game_Ends() Message if it has ended
         """
         result = None
         if game.is_stalemate():
@@ -236,10 +236,9 @@ def main():
             result = GameResult.MATE
 
         if result is None:
-            return True
-        else:
-            DisplayMsg.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=game.copy()))
             return False
+        else:
+            return Message.GAME_ENDS(result=result, play_mode=play_mode, game=game.copy())
 
     def user_move(move: chess.Move, sliding: bool):
         """Handle an user move."""
@@ -264,28 +263,36 @@ def main():
             searchmoves.reset()
             if interaction_mode == Mode.NORMAL:
                 msg = Message.USER_MOVE_DONE(move=move, fen=fen, turn=turn, game=game.copy())
-                if check_game_state(game, play_mode):
-                    think(game, time_control, msg)
-                else:
+                game_end = check_game_state(game, play_mode)
+                if game_end:
                     DisplayMsg.show(msg)
+                    DisplayMsg.show(game_end)
+                else:
+                    think(game, time_control, msg)
             elif interaction_mode == Mode.REMOTE:
                 msg = Message.USER_MOVE_DONE(move=move, fen=fen, turn=turn, game=game.copy())
-                if check_game_state(game, play_mode):
-                    observe(game, msg)
-                else:
+                game_end = check_game_state(game, play_mode)
+                if game_end:
                     DisplayMsg.show(msg)
+                    DisplayMsg.show(game_end)
+                else:
+                    observe(game, msg)
             elif interaction_mode == Mode.OBSERVE:
                 msg = Message.REVIEW_MOVE_DONE(move=move, fen=fen, turn=turn, game=game.copy())
-                if check_game_state(game, play_mode):
-                    observe(game, msg)
-                else:
+                game_end = check_game_state(game, play_mode)
+                if game_end:
                     DisplayMsg.show(msg)
+                    DisplayMsg.show(game_end)
+                else:
+                    observe(game, msg)
             else:  # interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ):
                 msg = Message.REVIEW_MOVE_DONE(move=move, fen=fen, turn=turn, game=game.copy())
-                if check_game_state(game, play_mode):
-                    analyse(game, msg)
-                else:
+                game_end = check_game_state(game, play_mode)
+                if game_end:
                     DisplayMsg.show(msg)
+                    DisplayMsg.show(game_end)
+                else:
+                    analyse(game, msg)
 
     def is_not_user_turn(turn):
         """Return if it is users turn (only valid in normal or remote mode)."""
@@ -365,14 +372,16 @@ def main():
             game.push(done_move)
             done_computer_fen = None
             done_move = chess.Move.null()
-            if check_game_state(game, play_mode):
+            game_end = check_game_state(game, play_mode)
+            if game_end:
+                legal_fens = []
+                DisplayMsg.show(game_end)
+            else:
                 searchmoves.reset()
                 time_control.add_time(not game.turn)
                 if time_control.mode != TimeMode.FIXED:
                     start_clock()
                 legal_fens = compute_legal_fens(game.copy())
-            else:
-                legal_fens = []
             last_legal_fens = []
 
         # Check if this is a previous legal position and allow user to restart from this position
@@ -397,7 +406,10 @@ def main():
                         legal_fens = []
                         if interaction_mode == Mode.NORMAL:
                             searchmoves.reset()
-                            if check_game_state(game, play_mode):
+                            game_end = check_game_state(game, play_mode)
+                            if game_end:
+                                DisplayMsg.show(game_end)
+                            else:
                                 msg_send = True
                                 think(game, time_control, msg)
                     else:
@@ -857,13 +869,13 @@ def main():
                     text = play_mode.value  # type: str
                     msg = Message.PLAY_MODE(play_mode=play_mode, play_mode_text=dgttranslate.text(text))
 
-                    if not user_to_move and check_game_state(game, play_mode):
+                    if not user_to_move and not check_game_state(game, play_mode):
                         time_control.reset_start_time()
                         think(game, time_control, msg)
                         legal_fens = []
                     else:
                         start_clock()
-                        DisplayMsg.show(msg)
+                        DisplayMsg.show(msg)  # @todo: perhaps also display a game_end?!
                         legal_fens = compute_legal_fens(game.copy())
 
                     if event.engine_finished:
