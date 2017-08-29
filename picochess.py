@@ -147,13 +147,6 @@ def main():
 
         If a move is found in the opening book, fire an event in a few seconds.
         """
-
-        def reset_fixed_time():
-            nonlocal time_control
-            if time_control.mode == TimeMode.FIXED:
-                time_control.reset()
-
-        # reset_fixed_time()
         DisplayMsg.show(msg)
         start_clock()
         book_res = searchmoves.book(bookreader, game.copy())
@@ -379,8 +372,7 @@ def main():
             else:
                 searchmoves.reset()
                 time_control.add_time(not game.turn)
-                if time_control.mode != TimeMode.FIXED:
-                    start_clock()
+                start_clock()
                 legal_fens = compute_legal_fens(game.copy())
             last_legal_fens = []
 

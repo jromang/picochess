@@ -162,7 +162,7 @@ class PgnDisplay(DisplayMsg, threading.Thread):
         self.user_elo = '-'
 
     def _save_and_email_pgn(self, message):
-        logging.debug('Saving game to [' + self.file_name + ']')
+        logging.debug('Saving game to [%s]', self.file_name)
         pgn_game = chess.pgn.Game().from_board(message.game)
 
         # Headers
