@@ -66,7 +66,7 @@ class PicoTalker():
                         command = ['ogg123', voice_file]
                     else:
                         command = ['play', voice_file, 'tempo', str(self.speed_factor)]
-                    try:
+                    try:  # use blocking call
                         subprocess.call(command, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     except OSError as os_exc:
                         logging.warning('OSError: %s => turn voice OFF', os_exc)
@@ -108,8 +108,8 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
         """Set the user talker."""
         self.user_picotalker = picotalker
 
-    def set_speech(self, speed_factor):
-        """Set speech."""
+    def set_factor(self, speed_factor):
+        """Set speech factor."""
         if self.computer_picotalker:
             self.computer_picotalker.set_speed_factor(speed_factor)
         if self.user_picotalker:
@@ -117,15 +117,13 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
 
     def run(self):
         """Start listening for Messages on our queue and generate speech as appropriate."""
-        previous_move = chess.Move.null()  # Ignore repeated broadcasts of a move.
+        previous_move = chess.Move.null()  # Ignore repeated broadcasts of a move
         system_picotalker = self.system_voice()
         logging.info('msg_queue ready')
         while True:
             try:
-                # Check if we have something to say.
+                # Check if we have something to say
                 message = self.msg_queue.get()
-                # if repr(message) != MessageApi.DGT_SERIAL_NR:
-                #     logging.debug("received message from msg_queue: %s", message)
 
                 if False:  # switch-case
                     pass
@@ -243,7 +241,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                     if message.type == Voice.COMP:
                         self.set_computer(picotalker)
                     if message.type == Voice.SPEED:
-                        self.set_speech(self.speed_factor)
+                        self.set_factor(self.speed_factor)
                     system_picotalker = self.system_voice()
 
                 else:  # Default
@@ -264,7 +262,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
 
     @staticmethod
     def say_last_move(game: chess.Board):
-        """Take a chess.Move instance and a chess.BitBoard instance and speaks the move."""
+        """Take a chess.BitBoard instance and speaks the last move from it."""
         move_parts = {
             'K': 'king.ogg',
             'B': 'bishop.ogg',

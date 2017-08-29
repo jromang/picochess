@@ -262,8 +262,6 @@ class PgnDisplay(DisplayMsg, threading.Thread):
             # Check if we have something to display
             try:
                 message = self.msg_queue.get()
-                # if repr(message) != MessageApi.DGT_SERIAL_NR:
-                #     logging.debug("received message from msg_queue: %s", message)
                 self._process_message(message)
             except queue.Empty:
                 pass
