@@ -838,6 +838,8 @@ def main():
                     done_computer_fen = None
                     done_move = chess.Move.null()
                     if interaction_mode == Mode.NORMAL:  # @todo handle Remote too
+                        if time_control.mode == TimeMode.FIXED:
+                            time_control.reset()
                         # set computer to move - in case the user just changed the engine
                         play_mode = PlayMode.USER_WHITE if game.turn == chess.BLACK else PlayMode.USER_BLACK
                         think(game, time_control, Message.ALTERNATIVE_MOVE(game=game.copy()))
@@ -869,6 +871,8 @@ def main():
                     text = play_mode.value  # type: str
                     msg = Message.PLAY_MODE(play_mode=play_mode, play_mode_text=dgttranslate.text(text))
 
+                    if time_control.mode == TimeMode.FIXED:
+                        time_control.reset()
                     if not user_to_move and not check_game_state(game, play_mode):
                         time_control.reset_start_time()
                         think(game, time_control, msg)
