@@ -268,7 +268,7 @@ def get_location():
         country_code = j['country_code'] + ' ' if 'country_code' in j else ''
         ext_ip = j['ip'] if 'ip' in j else None
         city = j['city'] + ', ' if 'city' in j else ''
-        return city + country_name + country_code, ext_ip, int_ip
+        return (city + country_name + country_code).strip(), ext_ip, int_ip
     except:
         return '?', None, None
 
