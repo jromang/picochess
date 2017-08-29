@@ -160,6 +160,12 @@ def write_engine_ini(engine_path=None):
                     name_large = name_build(name_parts, 11, name_medium)
 
                     config[engine_file_name] = {}
+
+                    # config[engine_file_name][';available options'] = 'itsDefaultValue'
+                    engine_options = engine.get().options
+                    for option in engine_options:
+                        config[engine_file_name][str(';' + option)] = str(engine_options[option].default)
+
                     config[engine_file_name]['name'] = engine_name
                     config[engine_file_name]['small'] = name_small
                     config[engine_file_name]['medium'] = name_medium
