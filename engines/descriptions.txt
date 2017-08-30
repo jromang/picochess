@@ -1,5 +1,5 @@
 PicoChess Engines
-August 12, 2017
+August 30, 2017
 
 
 1. STOCKFISH
@@ -52,19 +52,19 @@ the years and is now a very attractive GM level engine. Arasan has a lot of feat
 including skill levels to make it an attractive opponent for players of every strength.
 
 
-4. RODENT II
+4. RODENT III
 =========================
 Author: Paweł Kozioł
-Version: 0.9.66
-Date: December 2016
+Version: 0.210
+Date: August 2017
 Elo: 2920
 Levels: 'Personalities'
 Chess960: no
 License: GPLv3
-Source: https://github.com/nescitus/Rodent_II/
-Description: RodentII is one of the few chess engines in the world that can adopt
+Source: https://github.com/nescitus/Rodent_III/
+Description: RodentIII is one of the few chess engines in the world that can adopt
 'personalities': it offers different playing styles rather than strength levels.
-RodentII can just as easily be turned into a strong GM as into a beginning kid.
+RodentIII can just as easily be turned into a strong GM as into a beginning kid.
 It has both serious and funny personalities, like the positional defender and the
 crazy attacker.
 
