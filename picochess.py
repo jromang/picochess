@@ -251,6 +251,9 @@ def main():
         if move not in game.legal_moves:
             logging.warning('illegal move [%s]', move)
         else:
+            if interaction_mode == Mode.BRAIN:
+                print('UserMove: %s PbMove: %s > Ponder%s' % (move, pb_move, 'Hit' if move == pb_move else 'Miss'))
+                logging.debug('UserMove: %s PbMove: %s > Ponder%s', move, pb_move, 'Hit' if move == pb_move else 'Miss')
             stop_search_and_clock()
             if interaction_mode in (Mode.NORMAL, Mode.BRAIN, Mode.OBSERVE, Mode.REMOTE) and not sliding:
                 time_control.add_time(game.turn)
@@ -696,6 +699,8 @@ def main():
     fen_timer_running = False
     error_fen = None
 
+    pb_move = chess.Move.null()  # safes the best ponder move so far (for permanent brain use)
+
     # Event loop
     logging.info('evt_queue ready')
     while True:
@@ -929,6 +934,7 @@ def main():
             elif isinstance(event, Event.NEW_PV):
                 # illegal moves can occur if a pv from the engine arrives at the same time as a user move.
                 if game.is_legal(event.pv[0]):
+                    pb_move = event.pv[0]
                     DisplayMsg.show(Message.NEW_PV(pv=event.pv, mode=interaction_mode, game=game.copy()))
                 else:
                     logging.info('illegal move can not be displayed. move: %s fen: %s', event.pv[0], game.fen())
