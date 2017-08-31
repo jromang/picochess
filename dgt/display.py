@@ -274,10 +274,11 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                       '3qq3/8/8/8/8/8/8/8')
 
         mode_map = {'rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR': Mode.NORMAL,
-                    'rnbqkbnr/pppppppp/8/1Q6/8/8/PPPPPPPP/RNBQKBNR': Mode.ANALYSIS,
-                    'rnbqkbnr/pppppppp/8/2Q5/8/8/PPPPPPPP/RNBQKBNR': Mode.KIBITZ,
-                    'rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR': Mode.OBSERVE,
-                    'rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR': Mode.PONDER,
+                    'rnbqkbnr/pppppppp/8/1Q6/8/8/PPPPPPPP/RNBQKBNR': Mode.BRAIN,
+                    'rnbqkbnr/pppppppp/8/2Q5/8/8/PPPPPPPP/RNBQKBNR': Mode.ANALYSIS,
+                    'rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR': Mode.KIBITZ,
+                    'rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR': Mode.OBSERVE,
+                    'rnbqkbnr/pppppppp/8/5Q2/8/8/PPPPPPPP/RNBQKBNR': Mode.PONDER,
                     'rnbqkbnr/pppppppp/8/7Q/8/8/PPPPPPPP/RNBQKBNR': Mode.REMOTE}
 
         drawresign_map = {'8/8/8/3k4/4K3/8/8/8': GameResult.WIN_WHITE,
@@ -458,7 +459,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self.uci960 = pos960 is not None and pos960 != 518
             game_text = 'C10_ucigame' if self.uci960 else 'C10_newgame'
             DispatchDgt.fire(self.dgttranslate.text(game_text, str(pos960)))
-        if self.dgtmenu.get_mode() in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
+        if self.dgtmenu.get_mode() in (Mode.NORMAL, Mode.BRAIN, Mode.OBSERVE, Mode.REMOTE):
             time_left, time_right = self.time_control.get_internal_time(flip_board=self.dgtmenu.get_flip_board())
             DispatchDgt.fire(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE,
                                              wait=True, devs={'ser', 'i2c', 'web'}))
@@ -633,7 +634,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         return '8/8/8/' + rnk_5 + '/' + rnk_4 + '/8/8/8'
 
     def _exit_display(self):
-        if self.play_move and self.dgtmenu.get_mode() in (Mode.NORMAL, Mode.REMOTE):
+        if self.play_move and self.dgtmenu.get_mode() in (Mode.NORMAL, Mode.BRAIN, Mode.REMOTE):
             side = self._get_clock_side(self.play_turn)
             beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side, wait=True, maxtime=1,

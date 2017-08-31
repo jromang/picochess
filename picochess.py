@@ -175,7 +175,7 @@ def main():
 
     def stop_search_and_clock():
         """Depending on the interaction mode stop search and clock."""
-        if interaction_mode == Mode.NORMAL:
+        if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
             stop_clock()
             if not engine.is_waiting():
                 stop_search()
@@ -191,7 +191,7 @@ def main():
 
     def stop_clock():
         """Stop the clock."""
-        if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
+        if interaction_mode in (Mode.NORMAL, Mode.BRAIN, Mode.OBSERVE, Mode.REMOTE):
             time_control.stop_internal()
             DisplayMsg.show(Message.CLOCK_STOP(devs={'ser', 'i2c', 'web'}))
             time.sleep(0.4)  # @todo give some time to clock to really do it. Find a better solution!
@@ -200,7 +200,7 @@ def main():
 
     def start_clock():
         """Start the clock."""
-        if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
+        if interaction_mode in (Mode.NORMAL, Mode.BRAIN, Mode.OBSERVE, Mode.REMOTE):
             time_control.start_internal(game.turn)
             tc_init = time_control.get_parameters()
             DisplayMsg.show(Message.CLOCK_START(turn=game.turn, tc_init=tc_init, devs={'ser', 'i2c', 'web'}))
@@ -245,7 +245,7 @@ def main():
             logging.warning('illegal move [%s]', move)
         else:
             stop_search_and_clock()
-            if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE) and not sliding:
+            if interaction_mode in (Mode.NORMAL, Mode.BRAIN, Mode.OBSERVE, Mode.REMOTE) and not sliding:
                 time_control.add_time(game.turn)
 
             done_computer_fen = None
@@ -254,7 +254,7 @@ def main():
             turn = game.turn
             game.push(move)
             searchmoves.reset()
-            if interaction_mode == Mode.NORMAL:
+            if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
                 msg = Message.USER_MOVE_DONE(move=move, fen=fen, turn=turn, game=game.copy())
                 game_end = check_game_state(game, play_mode)
                 if game_end:
@@ -310,7 +310,7 @@ def main():
 
         # Check if we have to undo a previous move (sliding)
         elif fen in last_legal_fens:
-            if interaction_mode == Mode.NORMAL:
+            if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
                 if is_not_user_turn(game.turn):
                     stop_search()
                     game.pop()
@@ -341,7 +341,7 @@ def main():
             legal_moves = list(game.legal_moves)
             move = legal_moves[last_legal_fens.index(fen)]  # type: chess.Move
             user_move(move, sliding=True)
-            if interaction_mode in (Mode.NORMAL, Mode.REMOTE):
+            if interaction_mode in (Mode.NORMAL, Mode.BRAIN, Mode.REMOTE):
                 legal_fens = []
             else:
                 legal_fens = compute_legal_fens(game.copy())
@@ -353,14 +353,14 @@ def main():
             move = legal_moves[legal_fens.index(fen)]  # type: chess.Move
             user_move(move, sliding=False)
             last_legal_fens = legal_fens
-            if interaction_mode in (Mode.NORMAL, Mode.REMOTE):
+            if interaction_mode in (Mode.NORMAL, Mode.BRAIN, Mode.REMOTE):
                 legal_fens = []
             else:
                 legal_fens = compute_legal_fens(game.copy())
 
         # Player had done the computer or remote move on the board
         elif fen == done_computer_fen:
-            assert interaction_mode in (Mode.NORMAL, Mode.REMOTE), 'wrong mode: %s' % interaction_mode
+            assert interaction_mode in (Mode.NORMAL, Mode.BRAIN, Mode.REMOTE), 'wrong mode: %s' % interaction_mode
             DisplayMsg.show(Message.COMPUTER_MOVE_DONE())
             game.push(done_move)
             done_computer_fen = None
@@ -394,9 +394,9 @@ def main():
                     last_legal_fens = []
                     msg = Message.TAKE_BACK(game=game.copy())
                     msg_send = False
-                    if interaction_mode in (Mode.NORMAL, Mode.REMOTE) and is_not_user_turn(game_history.turn):
+                    if interaction_mode in (Mode.NORMAL, Mode.BRAIN, Mode.REMOTE) and is_not_user_turn(game_history.turn):
                         legal_fens = []
-                        if interaction_mode == Mode.NORMAL:
+                        if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
                             searchmoves.reset()
                             game_end = check_game_state(game, play_mode)
                             if game_end:
@@ -407,7 +407,7 @@ def main():
                     else:
                         legal_fens = compute_legal_fens(game.copy())
 
-                    if interaction_mode == Mode.NORMAL:
+                    if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
                         pass
                     elif interaction_mode in (Mode.OBSERVE, Mode.REMOTE):
                         msg_send = True
@@ -429,7 +429,7 @@ def main():
 
     def set_wait_state(msg: Message, start_search=True):
         """Enter engine waiting (normal mode) and maybe (by parameter) start pondering."""
-        if interaction_mode == Mode.NORMAL:
+        if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
             nonlocal play_mode
             play_mode = PlayMode.USER_WHITE if game.turn == chess.WHITE else PlayMode.USER_BLACK
         if start_search:
@@ -829,7 +829,7 @@ def main():
                 if done_computer_fen:
                     done_computer_fen = None
                     done_move = chess.Move.null()
-                    if interaction_mode == Mode.NORMAL:  # @todo handle Remote too
+                    if interaction_mode in (Mode.NORMAL, Mode.BRAIN):  # @todo handle Remote too
                         if time_control.mode == TimeMode.FIXED:
                             time_control.reset()
                         # set computer to move - in case the user just changed the engine
@@ -839,7 +839,7 @@ def main():
                         logging.warning('wrong function call [alternative]! mode: %s', interaction_mode)
 
             elif isinstance(event, Event.SWITCH_SIDES):
-                if interaction_mode == Mode.NORMAL:
+                if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
                     user_to_move = False
                     last_legal_fens = []
 
@@ -897,7 +897,7 @@ def main():
                     logging.warning('wrong function call [remote]! mode: %s turn: %s', interaction_mode, game.turn)
 
             elif isinstance(event, Event.BEST_MOVE):
-                if interaction_mode == Mode.NORMAL and is_not_user_turn(game.turn):
+                if interaction_mode in (Mode.NORMAL, Mode.BRAIN) and is_not_user_turn(game.turn):
                     # clock must be stopped BEFORE the "book_move" event cause SetNRun resets the clock display
                     stop_clock()
                     if event.inbook:
@@ -933,14 +933,14 @@ def main():
                 DisplayMsg.show(Message.SEARCH_STOPPED(engine_status=event.engine_status))
 
             elif isinstance(event, Event.SET_INTERACTION_MODE):
-                if event.mode not in (Mode.NORMAL, Mode.REMOTE) and done_computer_fen:
+                if event.mode not in (Mode.NORMAL, Mode.BRAIN, Mode.REMOTE) and done_computer_fen:
                     dgtmenu.set_mode(interaction_mode)  # undo the button4 stuff
                     logging.warning('mode cant be changed to a pondering mode as long as a move is displayed')
                     mode_text = dgttranslate.text('Y00_default', 'errmode')
                     msg = Message.INTERACTION_MODE(mode=interaction_mode, mode_text=mode_text, show_ok=False)
                     DisplayMsg.show(msg)
                 else:
-                    if interaction_mode in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
+                    if interaction_mode in (Mode.NORMAL, Mode.BRAIN, Mode.OBSERVE, Mode.REMOTE):
                         stop_clock()
                     interaction_mode = event.mode
                     if engine.is_thinking():

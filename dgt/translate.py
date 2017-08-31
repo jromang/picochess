@@ -453,6 +453,13 @@ class DgtTranslate(object):
             frtxt = Dgt.DISPLAY_TEXT(l='Normal     ', m='Normal  ', s='normal')
             estxt = Dgt.DISPLAY_TEXT(l='Normal     ', m='Normal  ', s='normal')
             ittxt = Dgt.DISPLAY_TEXT(l='Normale    ', m='Normale ', s='normal')
+        if text_id == 'mode_brain_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='Perm Brain ', m='PerBrain', s='pbrain')
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
         if text_id == 'mode_analysis_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Analysis   ', m='Analysis', s='analys')
             detxt = Dgt.DISPLAY_TEXT(l='Analyse    ', m='Analyse ', s='analys')

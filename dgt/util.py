@@ -93,6 +93,7 @@ class Mode(enum.Enum):
     """Mode Class."""
 
     NORMAL = 'B00_mode_normal_menu'
+    BRAIN = 'B00_mode_brain_menu'
     ANALYSIS = 'B00_mode_analysis_menu'
     KIBITZ = 'B00_mode_kibitz_menu'
     OBSERVE = 'B00_mode_observe_menu'
@@ -111,6 +112,8 @@ class ModeLoop(object):
     def next(item: Mode):
         """Get next item."""
         if item == Mode.NORMAL:
+            return Mode.BRAIN
+        if item == Mode.BRAIN:
             return Mode.ANALYSIS
         elif item == Mode.ANALYSIS:
             return Mode.KIBITZ
@@ -129,8 +132,10 @@ class ModeLoop(object):
         """Get previous item."""
         if item == Mode.NORMAL:
             return Mode.REMOTE
-        elif item == Mode.ANALYSIS:
+        if item == Mode.BRAIN:
             return Mode.NORMAL
+        elif item == Mode.ANALYSIS:
+            return Mode.BRAIN
         elif item == Mode.KIBITZ:
             return Mode.ANALYSIS
         elif item == Mode.OBSERVE:
