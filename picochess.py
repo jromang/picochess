@@ -173,6 +173,13 @@ def main():
         analyse(game, msg)
         start_clock()
 
+    def brain(game: chess.Board):
+        """Start a new permanent brain search on the current game."""
+        print('START permanent brain')
+        logging.debug('start permanent brain')
+        engine.position(copy.deepcopy(game))
+        engine.ponder()
+
     def stop_search_and_clock():
         """Depending on the interaction mode stop search and clock."""
         if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
@@ -373,6 +380,9 @@ def main():
                 searchmoves.reset()
                 time_control.add_time(not game.turn)
                 start_clock()
+                if interaction_mode == Mode.BRAIN:
+                    brain(game)
+
                 legal_fens = compute_legal_fens(game.copy())
             last_legal_fens = []
 
@@ -406,6 +416,8 @@ def main():
                                 think(game, time_control, msg)
                     else:
                         legal_fens = compute_legal_fens(game.copy())
+                        if interaction_mode == Mode.BRAIN:
+                            brain(game)
 
                     if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
                         pass
@@ -434,6 +446,8 @@ def main():
             play_mode = PlayMode.USER_WHITE if game.turn == chess.WHITE else PlayMode.USER_BLACK
         if start_search:
             # Go back to analysing or observing
+            if interaction_mode == Mode.BRAIN:
+                brain(game)
             if interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
                 analyse(game, msg)
                 return
