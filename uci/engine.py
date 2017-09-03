@@ -174,6 +174,15 @@ class UciEngine(object):
         self.future = self.engine.go(ponder=True, infinite=True, async_callback=self.callback)
         return self.future
 
+    def hit(self):
+        """Send a ponder hit."""
+        if not self.is_pondering():
+            logging.warning('engine (still) not pondering - strange!')
+        self.engine.stop()  # @todo for the moment!
+        # self.status = EngineStatus.THINK
+        # self.show_best = True
+        # self.engine.ponderhit(self.callback)
+
     def callback(self, command):
         """Callback function."""
         try:

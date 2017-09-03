@@ -175,17 +175,24 @@ def main():
 
     def brain(game: chess.Board):
         """Start a new permanent brain search on the current game."""
-        print('START permanent brain')
-        logging.debug('start permanent brain')
-        engine.position(copy.deepcopy(game))
-        engine.ponder()
+        if pb_move:
+            logging.info('start permanent brain with PbMove %s', pb_move)
+            game_copy = copy.deepcopy(game)
+            game_copy.push(pb_move)
+            engine.position(game_copy)
+            engine.ponder()
+        else:
+            logging.info('ignore permanent brain with PbMove %s', pb_move)
 
-    def stop_search_and_clock():
+    def stop_search_and_clock(ponder_hit=False):
         """Depending on the interaction mode stop search and clock."""
         if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
             stop_clock()
             if not engine.is_waiting():
-                stop_search()
+                if ponder_hit:
+                    engine.hit()
+                else:
+                    stop_search()
         elif interaction_mode in (Mode.REMOTE, Mode.OBSERVE):
             stop_clock()
             stop_search()
@@ -252,9 +259,11 @@ def main():
             logging.warning('illegal move [%s]', move)
         else:
             if interaction_mode == Mode.BRAIN:
-                print('UserMove: %s PbMove: %s > Ponder%s' % (move, pb_move, 'Hit' if move == pb_move else 'Miss'))
-                logging.debug('UserMove: %s PbMove: %s > Ponder%s', move, pb_move, 'Hit' if move == pb_move else 'Miss')
-            stop_search_and_clock()
+                ponder_hit = (move == pb_move)
+                logging.info('UserMove: %s PbMove: %s > Ponder%s', move, pb_move, 'Hit' if ponder_hit else 'Miss')
+            else:
+                ponder_hit = False
+            stop_search_and_clock(ponder_hit=ponder_hit)
             if interaction_mode in (Mode.NORMAL, Mode.BRAIN, Mode.OBSERVE, Mode.REMOTE) and not sliding:
                 time_control.add_time(game.turn)
 
@@ -928,23 +937,32 @@ def main():
                     game_copy.push(event.move)
                     done_computer_fen = game_copy.board_fen()
                     done_move = event.move
+                    pb_move = event.ponder if event.ponder else chess.Move.null()
                 else:
                     logging.warning('wrong function call [best]! mode: %s turn: %s', interaction_mode, game.turn)
 
             elif isinstance(event, Event.NEW_PV):
-                # illegal moves can occur if a pv from the engine arrives at the same time as a user move.
-                if game.is_legal(event.pv[0]):
-                    pb_move = event.pv[0]
-                    DisplayMsg.show(Message.NEW_PV(pv=event.pv, mode=interaction_mode, game=game.copy()))
+                if interaction_mode == Mode.BRAIN and engine.is_pondering():
+                    logging.debug('in brain mode and pondering ignore pv %s', event.pv)
                 else:
-                    logging.info('illegal move can not be displayed. move: %s fen: %s', event.pv[0], game.fen())
+                    # illegal moves can occur if a pv from the engine arrives at the same time as a user move
+                    if game.is_legal(event.pv[0]):
+                        DisplayMsg.show(Message.NEW_PV(pv=event.pv, mode=interaction_mode, game=game.copy()))
+                    else:
+                        logging.info('illegal move can not be displayed. move: %s fen: %s', event.pv[0], game.fen())
 
             elif isinstance(event, Event.NEW_SCORE):
-                DisplayMsg.show(Message.NEW_SCORE(score=event.score, mate=event.mate, mode=interaction_mode,
-                                                  turn=game.turn))
+                if interaction_mode == Mode.BRAIN and engine.is_pondering():
+                    logging.debug('in brain mode and pondering ignore score %s', event.score)
+                else:
+                    DisplayMsg.show(Message.NEW_SCORE(score=event.score, mate=event.mate, mode=interaction_mode,
+                                                      turn=game.turn))
 
             elif isinstance(event, Event.NEW_DEPTH):
-                DisplayMsg.show(Message.NEW_DEPTH(depth=event.depth))
+                if interaction_mode == Mode.BRAIN and engine.is_pondering():
+                    logging.debug('in brain mode and pondering ignore depth %s', event.depth)
+                else:
+                    DisplayMsg.show(Message.NEW_DEPTH(depth=event.depth))
 
             elif isinstance(event, Event.START_SEARCH):
                 DisplayMsg.show(Message.SEARCH_STARTED(engine_status=event.engine_status))
