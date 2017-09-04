@@ -180,7 +180,7 @@ def main():
             game_copy = copy.deepcopy(game)
             game_copy.push(pb_move)
             engine.position(game_copy)
-            engine.ponder()
+            engine.brain()
         else:
             logging.info('ignore permanent brain with PbMove %s', pb_move)
 

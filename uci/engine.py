@@ -174,29 +174,66 @@ class UciEngine(object):
         self.future = self.engine.go(ponder=True, infinite=True, async_callback=self.callback)
         return self.future
 
+    def brain(self):
+        """Permanent brain."""
+        if not self.is_waiting():
+            logging.warning('engine (still) not waiting - strange!')
+        self.status = EngineStatus.PONDER
+        self.show_best = True
+
+        Observable.fire(Event.START_SEARCH(engine_status=self.status))
+        logging.info('engine in perm brain for 3secs')
+        self.future = self.engine.go(ponder=True, movetime=3000, async_callback=self.callback3)
+        return self.future
+
     def hit(self):
         """Send a ponder hit."""
         if not self.is_pondering():
             logging.warning('engine (still) not pondering - strange!')
-        self.engine.stop()  # @todo for the moment!
-        # self.status = EngineStatus.THINK
-        # self.show_best = True
-        # self.engine.ponderhit(self.callback)
+        # self.engine.stop()  # @todo for the moment!
+        logging.info('idle: %s', self.engine.idle)
+        self.future = self.engine.ponderhit(self.callback2)
+        self.status = EngineStatus.THINK
+        self.show_best = True
+        r = self.future.result()
+        logging.info('pRes: %s idle: %s', r, self.engine.idle)
+        return r
 
     def callback(self, command):
         """Callback function."""
+        logging.info('idle: %s', self.engine.idle)
         try:
             self.res = command.result()
         except chess.uci.EngineTerminatedException:
             logging.error('Engine terminated')  # @todo find out, why this can happen!
             self.show_best = False
-
+        logging.info('cRes1: %s idle: %s', self.res, self.engine.idle)
         Observable.fire(Event.STOP_SEARCH(engine_status=self.status))
-        if self.show_best:
+        if self.show_best and self.res:
             Observable.fire(Event.BEST_MOVE(move=self.res.bestmove, ponder=self.res.ponder, inbook=False))
         else:
-            logging.debug('event best_move not fired')
+            logging.debug('event best_move not fired - res: %s', self.res)
         self.status = EngineStatus.WAIT
+
+    def callback2(self, command):
+        """Callback function."""
+        logging.info('idle: %s', self.engine.idle)
+        try:
+            self.res = command.result()
+        except chess.uci.EngineTerminatedException:
+            logging.error('Engine terminated')  # @todo find out, why this can happen!
+            self.show_best = False
+        logging.info('cRes2: %s idle: %s', self.res, self.engine.idle)
+        Observable.fire(Event.STOP_SEARCH(engine_status=self.status))
+        if self.show_best and self.res:
+            Observable.fire(Event.BEST_MOVE(move=self.res.bestmove, ponder=self.res.ponder, inbook=False))
+        else:
+            logging.debug('event best_move not fired - res: %s', self.res)
+        self.status = EngineStatus.WAIT
+
+    def callback3(self, command):
+        logging.info('callback3 called - command: %s', command)
+        return self.callback2(command)
 
     def is_thinking(self):
         """Engine thinking."""
