@@ -280,7 +280,11 @@ def main():
                     DisplayMsg.show(msg)
                     DisplayMsg.show(game_end)
                 else:
-                    think(game, time_control, msg)
+                    if interaction_mode == Mode.NORMAL or not ponder_hit:
+                        think(game, time_control, msg)
+                    else:
+                        logging.info('think() not started cause ponderhit')
+                        DisplayMsg.show(msg)
             elif interaction_mode == Mode.REMOTE:
                 msg = Message.USER_MOVE_DONE(move=move, fen=fen, turn=turn, game=game.copy())
                 game_end = check_game_state(game, play_mode)

@@ -141,6 +141,7 @@ class UciEngine(object):
 
     def stop(self, show_best=False):
         """Stop engine."""
+        logging.info('show_best: %s', show_best)
         if self.is_waiting():
             logging.info('engine already stopped')
             return self.res
@@ -190,7 +191,7 @@ class UciEngine(object):
         """Send a ponder hit."""
         if not self.is_pondering():
             logging.warning('engine (still) not pondering - strange!')
-        # self.engine.ponderhit(self.callback2)
+        logging.info('idle: %s', self.engine.idle)
         self.engine.ponderhit()
         self.status = EngineStatus.THINK
         self.show_best = True
@@ -208,10 +209,10 @@ class UciEngine(object):
         if self.show_best and self.res:
             Observable.fire(Event.BEST_MOVE(move=self.res.bestmove, ponder=self.res.ponder, inbook=False))
         else:
-            logging.info('event best_move not fired - res: %s', self.res)
+            logging.info('event best_move not fired')
         self.status = EngineStatus.WAIT
 
-    def callback2(self, command):
+    def callback3(self, command):
         """Callback function."""
         logging.info('idle: %s', self.engine.idle)
         try:
@@ -219,17 +220,13 @@ class UciEngine(object):
         except chess.uci.EngineTerminatedException:
             logging.error('Engine terminated')  # @todo find out, why this can happen!
             self.show_best = False
-        logging.info('cRes2: %s idle: %s', self.res, self.engine.idle)
+        logging.info('cRes3: %s idle: %s', self.res, self.engine.idle)
         Observable.fire(Event.STOP_SEARCH(engine_status=self.status))
         if self.show_best and self.res:
             Observable.fire(Event.BEST_MOVE(move=self.res.bestmove, ponder=self.res.ponder, inbook=False))
         else:
-            logging.info('event best_move not fired - res: %s', self.res)
+            logging.info('event best_move not fired')
         self.status = EngineStatus.WAIT
-
-    def callback3(self, command):
-        logging.info('callback3 called - command: %s', command)
-        return self.callback2(command)
 
     def is_thinking(self):
         """Engine thinking."""
