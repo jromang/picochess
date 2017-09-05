@@ -190,14 +190,10 @@ class UciEngine(object):
         """Send a ponder hit."""
         if not self.is_pondering():
             logging.warning('engine (still) not pondering - strange!')
-        # self.engine.stop()  # @todo for the moment!
-        logging.info('idle: %s', self.engine.idle)
-        self.future = self.engine.ponderhit(self.callback2)
+        # self.engine.ponderhit(self.callback2)
+        self.engine.ponderhit()
         self.status = EngineStatus.THINK
         self.show_best = True
-        r = self.future.result()
-        logging.info('pRes: %s idle: %s', r, self.engine.idle)
-        return r
 
     def callback(self, command):
         """Callback function."""
@@ -212,7 +208,7 @@ class UciEngine(object):
         if self.show_best and self.res:
             Observable.fire(Event.BEST_MOVE(move=self.res.bestmove, ponder=self.res.ponder, inbook=False))
         else:
-            logging.debug('event best_move not fired - res: %s', self.res)
+            logging.info('event best_move not fired - res: %s', self.res)
         self.status = EngineStatus.WAIT
 
     def callback2(self, command):
@@ -228,7 +224,7 @@ class UciEngine(object):
         if self.show_best and self.res:
             Observable.fire(Event.BEST_MOVE(move=self.res.bestmove, ponder=self.res.ponder, inbook=False))
         else:
-            logging.debug('event best_move not fired - res: %s', self.res)
+            logging.info('event best_move not fired - res: %s', self.res)
         self.status = EngineStatus.WAIT
 
     def callback3(self, command):
