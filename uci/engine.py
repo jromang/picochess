@@ -175,16 +175,17 @@ class UciEngine(object):
         self.future = self.engine.go(ponder=True, infinite=True, async_callback=self.callback)
         return self.future
 
-    def brain(self):
+    def brain(self, time_dict: dict):
         """Permanent brain."""
         if not self.is_waiting():
             logging.warning('engine (still) not waiting - strange!')
         self.status = EngineStatus.PONDER
         self.show_best = True
+        time_dict['ponder'] = True
+        time_dict['async_callback'] = self.callback3
 
         Observable.fire(Event.START_SEARCH(engine_status=self.status))
-        logging.info('engine in perm brain for 3secs')
-        self.future = self.engine.go(ponder=True, movetime=3000, async_callback=self.callback3)
+        self.future = self.engine.go(**time_dict)
         return self.future
 
     def hit(self):
