@@ -875,9 +875,8 @@ def main():
                     user_to_move = False
                     last_legal_fens = []
 
-                    if engine.is_thinking():
-                        stop_clock()
-                        engine.stop(show_best=False)
+                    if not engine.is_waiting():
+                        stop_search_and_clock()
                         user_to_move = True
                     if event.engine_finished:
                         move = done_move if done_computer_fen else game.pop()
