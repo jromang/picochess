@@ -243,7 +243,7 @@ class PgnDisplay(DisplayMsg, threading.Thread):
                 self.engine_name = self.old_engine
 
         elif isinstance(message, Message.ENGINE_READY):
-            self.engine_name = message.engine_name
+            self.old_engine = self.engine_name = message.engine_name
             if not message.has_levels:
                 self.level_text = None
                 self.level_name = ''
