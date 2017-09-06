@@ -946,7 +946,7 @@ def main():
 
             elif isinstance(event, Event.NEW_PV):
                 if interaction_mode == Mode.BRAIN and engine.is_pondering():
-                    logging.debug('in brain mode and pondering ignore pv %s', event.pv)
+                    logging.debug('in brain mode and pondering ignore pv %s', event.pv[:3])
                 else:
                     # illegal moves can occur if a pv from the engine arrives at the same time as a user move
                     if game.is_legal(event.pv[0]):

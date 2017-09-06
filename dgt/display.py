@@ -797,6 +797,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self.hint_move = chess.Move.null()
             self.hint_fen = None
             self.hint_turn = None
+            self.force_leds_off()
             logging.debug('user ignored move %s', message.move)
 
         elif isinstance(message, Message.EXIT_MENU):
