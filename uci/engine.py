@@ -21,6 +21,7 @@ import configparser
 import spur
 import paramiko
 
+from subprocess import DEVNULL
 from dgt.api import Event
 from dgt.util import EngineStatus
 from utilities import Observable
@@ -48,7 +49,7 @@ class UciEngine(object):
                 self.shell = shell
                 self.engine = chess.uci.spur_spawn_engine(shell, [home + os.sep + file])
             else:
-                self.engine = chess.uci.popen_engine(file)
+                self.engine = chess.uci.popen_engine(file, stderr=DEVNULL)
 
             self.file = file
             if self.engine:
