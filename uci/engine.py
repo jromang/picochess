@@ -111,6 +111,10 @@ class UciEngine(object):
         """Return chess960 support."""
         return 'UCI_Chess960' in self.engine.options
 
+    def has_ponder(self):
+        """Return ponder support."""
+        return 'Ponder' in self.engine.options
+
     def get_file(self):
         """Get File."""
         return self.file

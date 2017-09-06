@@ -369,13 +369,15 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             logging.debug('map: Interaction mode [%s]', mode_map[fen])
             if mode_map[fen] == Mode.REMOTE and not self.dgtmenu.inside_room:
                 DispatchDgt.fire(self.dgttranslate.text('Y10_errorroom'))
-            else:
+            elif mode_map[fen] == Mode.NORMAL or self.dgtmenu.get_engine_has_ponder():
                 self.dgtmenu.set_mode(mode_map[fen])
                 text = self.dgttranslate.text(mode_map[fen].value)
                 text.beep = self.dgttranslate.bl(BeepLevel.MAP)
                 text.maxtime = 1  # wait 1sec not forever
                 text.wait = self._exit_menu()
                 Observable.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], mode_text=text, show_ok=False))
+            else:  # only allow a pondering mode if engine supports that
+                DispatchDgt.fire(self.dgttranslate.text('Y10_erroreng'))
         elif fen in self.dgtmenu.tc_fixed_map:
             logging.debug('map: Time control fixed')
             self.dgtmenu.set_time_mode(TimeMode.FIXED)
@@ -428,6 +430,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             if self.dgtmenu.installed_engines[index]['file'] == message.eng['file']:
                 self.dgtmenu.set_engine_index(index)
         self.dgtmenu.set_engine_has_960(message.has_960)
+        self.dgtmenu.set_engine_has_ponder(message.has_ponder)
         if not self.dgtmenu.get_confirm() or not message.show_ok:
             DispatchDgt.fire(message.eng_text)
         self.dgtmenu.set_engine_restart(False)
@@ -439,6 +442,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             if eng['file'] == message.file:
                 self.dgtmenu.set_engine_index(index)
                 self.dgtmenu.set_engine_has_960(message.has_960)
+                self.dgtmenu.set_engine_has_ponder(message.has_ponder)
                 self.dgtmenu.set_engine_level(message.level_index)
 
     def force_leds_off(self, log=False):

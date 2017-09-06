@@ -285,6 +285,7 @@ def main():
                     else:
                         logging.info('think() not started cause ponderhit')
                         DisplayMsg.show(msg)
+                        start_clock()
             elif interaction_mode == Mode.REMOTE:
                 msg = Message.USER_MOVE_DONE(move=move, fen=fen, turn=turn, game=game.copy())
                 game_end = check_game_state(game, play_mode)
@@ -301,7 +302,7 @@ def main():
                     DisplayMsg.show(game_end)
                 else:
                     observe(game, msg)
-            else:  # interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ):
+            else:  # interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
                 msg = Message.REVIEW_MOVE_DONE(move=move, fen=fen, turn=turn, game=game.copy())
                 game_end = check_game_state(game, play_mode)
                 if game_end:
@@ -702,7 +703,8 @@ def main():
                                                'level_text': level_text, 'level_name': level_name,
                                                'tc_init': time_control.get_parameters(), 'time_text': time_text}))
     DisplayMsg.show(Message.ENGINE_STARTUP(shell=engine.get_shell(), file=engine.get_file(), level_index=level_index,
-                                           has_levels=engine.has_levels(), has_960=engine.has_chess960()))
+                                           has_levels=engine.has_levels(), has_960=engine.has_chess960(),
+                                           has_ponder=engine.has_ponder()))
     DisplayMsg.show(Message.SYSTEM_INFO(info=sys_info))
 
     ip_info_thread = threading.Timer(10, display_ip_info)  # give RaspberyPi 10sec time to startup its network devices
@@ -785,14 +787,16 @@ def main():
                     gc.collect()
                     engine.startup(event.options)
                     # All done - rock'n'roll
-                    if not engine_fallback:
+                    engine_fail = engine_fallback or not (interaction_mode == Mode.NORMAL or engine.has_ponder())
+                    if not engine_fail:
                         searchmoves.reset()
                         msg = Message.ENGINE_READY(eng=event.eng, engine_name=engine_name,
                                                    eng_text=event.eng_text, has_levels=engine.has_levels(),
-                                                   has_960=engine.has_chess960(), show_ok=event.show_ok)
+                                                   has_960=engine.has_chess960(), has_ponder=engine.has_ponder(),
+                                                   show_ok=event.show_ok)
                     else:
                         msg = Message.ENGINE_FAIL()
-                    set_wait_state(msg, not engine_fallback)
+                    set_wait_state(msg, not engine_fail)
 
             elif isinstance(event, Event.SETUP_POSITION):
                 logging.debug('setting up custom fen: %s', event.fen)
