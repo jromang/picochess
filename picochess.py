@@ -202,6 +202,9 @@ def main():
     def stop_search():
         """Stop current search."""
         engine.stop()
+        while not engine.is_waiting():
+            time.sleep(0.1)
+            logging.warning('engine is still not waiting')
 
     def stop_clock():
         """Stop the clock."""
@@ -658,7 +661,7 @@ def main():
     engine = UciEngine(file=engine_file, hostname=args.engine_remote_server, username=args.engine_remote_user,
                        key_file=args.engine_remote_key, password=args.engine_remote_pass, home=args.engine_remote_home)
     try:
-        engine_name = engine.get().name
+        engine_name = engine.get_name()
     except AttributeError:
         logging.error('no engines started')
         time.sleep(3)
@@ -749,11 +752,12 @@ def main():
                 stop_fen_timer()
 
             elif isinstance(event, Event.NEW_ENGINE):
-                write_picochess_ini('engine', event.eng['file'])
                 old_file = engine.get_file()
+                old_options = engine.get_options()
                 engine_shutdown = True
+                engine_fallback = False
                 # Stop the old engine cleanly
-                engine.stop()
+                stop_search()
                 # Closeout the engine process and threads
                 # The all return non-zero error codes, 0=success
                 if engine.quit():  # Ask nicely
@@ -765,18 +769,17 @@ def main():
                 if engine_shutdown:
                     # Load the new one and send args.
                     # Local engines only
-                    engine_fallback = False
                     engine = UciEngine(event.eng['file'])
                     try:
-                        engine_name = engine.get().name
+                        engine_name = engine.get_name()
                     except AttributeError:
                         # New engine failed to start, restart old engine
                         logging.error('new engine failed to start, reverting to %s', old_file)
                         engine_fallback = True
-                        event.options = {}  # Reset options. This will load the last(=strongest?) level
+                        event.options = old_options
                         engine = UciEngine(old_file)
                         try:
-                            engine_name = engine.get().name
+                            engine_name = engine.get_name()
                         except AttributeError:
                             # Help - old engine failed to restart. There is no engine
                             logging.error('no engines started')
@@ -797,6 +800,11 @@ def main():
                     else:
                         msg = Message.ENGINE_FAIL()
                     set_wait_state(msg, not engine_fail)
+                    if interaction_mode == Mode.NORMAL:  # engine isnt started/searching, so also stop the clock
+                        stop_clock()
+                        legal_fens = compute_legal_fens(game.copy())
+                if not engine_fallback:  # here dont care if engine supports pondering, cause Mode.NORMAL from startup
+                    write_picochess_ini('engine', event.eng['file'])
 
             elif isinstance(event, Event.SETUP_POSITION):
                 logging.debug('setting up custom fen: %s', event.fen)
@@ -985,13 +993,8 @@ def main():
                     msg = Message.INTERACTION_MODE(mode=interaction_mode, mode_text=mode_text, show_ok=False)
                     DisplayMsg.show(msg)
                 else:
-                    if interaction_mode in (Mode.NORMAL, Mode.BRAIN, Mode.OBSERVE, Mode.REMOTE):
-                        stop_clock()
+                    stop_search_and_clock()
                     interaction_mode = event.mode
-                    if engine.is_thinking():
-                        stop_search()
-                    if engine.is_pondering():
-                        stop_search()
                     msg = Message.INTERACTION_MODE(mode=event.mode, mode_text=event.mode_text, show_ok=event.show_ok)
                     set_wait_state(msg)
 

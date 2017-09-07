@@ -71,9 +71,13 @@ class UciEngine(object):
         except TypeError:
             logging.exception('engine executable not found')
 
-    def get(self):
-        """Get Engine."""
-        return self.engine
+    def get_name(self):
+        """Get engine name."""
+        return self.engine.name
+
+    def get_options(self):
+        """Get engine options."""
+        return self.engine.options
 
     def option(self, name, value):
         """Set OptionName with value."""
@@ -262,5 +266,5 @@ class UciEngine(object):
         self.level(options)
         self.send()
         if show:
-            logging.debug('Loaded engine [%s]', self.get().name)
-            logging.debug('Supported options [%s]', self.get().options)
+            logging.debug('Loaded engine [%s]', self.get_name())
+            logging.debug('Supported options [%s]', self.get_options())
