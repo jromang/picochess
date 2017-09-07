@@ -283,6 +283,9 @@ def main():
                     DisplayMsg.show(msg)
                     DisplayMsg.show(game_end)
                 else:
+                    if engine.is_waiting() and ponder_hit:
+                        logging.warning('ponderhit but engine is waiting => turn ponderhit off')
+                        ponder_hit = False
                     if interaction_mode == Mode.NORMAL or not ponder_hit:
                         think(game, time_control, msg)
                     else:
