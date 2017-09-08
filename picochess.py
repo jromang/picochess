@@ -176,9 +176,9 @@ def main():
     def brain(game: chess.Board, timec: TimeControl):
         """Start a new permanent brain search on the game with pondering move made."""
         if pb_move:
-            logging.info('start permanent brain with pondering move [%s]', pb_move)
             game_copy = copy.deepcopy(game)
             game_copy.push(pb_move)
+            logging.info('start permanent brain with pondering move [%s] fen: %s', pb_move, game_copy.fen())
             engine.position(game_copy)
             engine.brain(timec.uci())
         else:
@@ -205,7 +205,7 @@ def main():
         """Stop current search."""
         engine.stop()
         while not engine.is_waiting():
-            time.sleep(0.1)
+            time.sleep(0.05)
             logging.warning('engine is still not waiting')
 
     def stop_clock():
@@ -268,6 +268,9 @@ def main():
                 logging.info('pondering move: [%s] res: Ponder%s', pb_move, 'Hit' if ponder_hit else 'Miss')
             else:
                 ponder_hit = False
+            if sliding and ponder_hit:
+                logging.warning('sliding detected, turn ponderhit off - status: %s', engine.status)
+                ponder_hit = False
             stop_search_and_clock(ponder_hit=ponder_hit)
             if interaction_mode in (Mode.NORMAL, Mode.BRAIN, Mode.OBSERVE, Mode.REMOTE) and not sliding:
                 time_control.add_time(game.turn)
@@ -286,9 +289,8 @@ def main():
                     DisplayMsg.show(game_end)
                 else:
                     if engine.is_waiting() and ponder_hit:
-                        logging.warning('ponderhit but engine is waiting, why this still happening?!?')
-                        print('ARGH')
-                        # ponder_hit = False
+                        logging.error('ponderhit but engine is waiting, why this still happening?!?')
+                        ponder_hit = False
                     if interaction_mode == Mode.NORMAL or not ponder_hit:
                         logging.info('starting think()')
                         think(game, time_control, msg)
