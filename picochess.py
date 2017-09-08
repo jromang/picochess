@@ -259,7 +259,7 @@ def main():
         nonlocal done_computer_fen
         nonlocal time_control
 
-        logging.debug('user move [%s]', move)
+        logging.debug('user move [%s] sliding: %s', move, sliding)
         if move not in game.legal_moves:
             logging.warning('illegal move [%s]', move)
         else:
@@ -351,30 +351,30 @@ def main():
                 if is_not_user_turn(game.turn):
                     stop_search()
                     game.pop()
-                    logging.debug('user move in computer turn, reverting to: %s', game.board_fen())
+                    logging.debug('user move in computer turn, reverting to: %s', game.fen())
                 elif done_computer_fen:
                     done_computer_fen = None
                     done_move = chess.Move.null()
                     game.pop()
-                    logging.debug('user move while computer move is displayed, reverting to: %s', game.board_fen())
+                    logging.debug('user move while computer move is displayed, reverting to: %s', game.fen())
                 else:
                     handled_fen = False
-                    logging.error('last_legal_fens not cleared: ' + game.board_fen())
+                    logging.error('last_legal_fens not cleared: %s', game.fen())
             elif interaction_mode == Mode.REMOTE:
                 if is_not_user_turn(game.turn):
                     game.pop()
-                    logging.debug('user move in remote turn, reverting to: %s', game.board_fen())
+                    logging.debug('user move in remote turn, reverting to: %s', game.fen())
                 elif done_computer_fen:
                     done_computer_fen = None
                     done_move = chess.Move.null()
                     game.pop()
-                    logging.debug('user move while remote move is displayed, reverting to: %s', game.board_fen())
+                    logging.debug('user move while remote move is displayed, reverting to: %s', game.fen())
                 else:
                     handled_fen = False
-                    logging.error('last_legal_fens not cleared: ' + game.board_fen())
+                    logging.error('last_legal_fens not cleared: %s', game.fen())
             else:
                 game.pop()
-                logging.debug('wrong color move -> sliding, reverting to: %s', game.board_fen())
+                logging.debug('wrong color move -> sliding, reverting to: %s', game.fen())
             legal_moves = list(game.legal_moves)
             move = legal_moves[last_legal_fens.index(fen)]  # type: chess.Move
             user_move(move, sliding=True)
@@ -419,22 +419,22 @@ def main():
         # Check if this is a previous legal position and allow user to restart from this position
         else:
             handled_fen = False
-            game_history = copy.deepcopy(game)
-            while game_history.move_stack:
-                game_history.pop()
-                if game_history.board_fen() == fen:
+            game_copy = copy.deepcopy(game)
+            while game_copy.move_stack:
+                game_copy.pop()
+                if game_copy.board_fen() == fen:
                     handled_fen = True
                     logging.debug('current game fen      : %s', game.fen())
                     logging.debug('undoing game until fen: %s', fen)
                     stop_search_and_clock()
-                    while len(game_history.move_stack) < len(game.move_stack):
+                    while len(game_copy.move_stack) < len(game.move_stack):
                         game.pop()
                     done_computer_fen = None
                     done_move = chess.Move.null()
                     last_legal_fens = []
                     msg = Message.TAKE_BACK(game=game.copy())
                     msg_send = False
-                    if interaction_mode in (Mode.NORMAL, Mode.BRAIN, Mode.REMOTE) and is_not_user_turn(game_history.turn):
+                    if interaction_mode in (Mode.NORMAL, Mode.BRAIN, Mode.REMOTE) and is_not_user_turn(game_copy.turn):
                         legal_fens = []
                         if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
                             searchmoves.reset()

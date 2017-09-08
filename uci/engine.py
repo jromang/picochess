@@ -164,7 +164,7 @@ class UciEngine(object):
     def go(self, time_dict: dict):
         """Go engine."""
         if not self.is_waiting():
-            logging.warning('engine (still) not waiting - strange!')
+            logging.error('engine not waiting - status: %s', self.status)
         self.status = EngineStatus.THINK
         self.show_best = True
         time_dict['async_callback'] = self.callback
@@ -176,7 +176,7 @@ class UciEngine(object):
     def ponder(self):
         """Ponder engine."""
         if not self.is_waiting():
-            logging.warning('engine (still) not waiting - strange!')
+            logging.error('engine not waiting - status: %s', self.status)
         self.status = EngineStatus.PONDER
         self.show_best = False
 
@@ -187,7 +187,7 @@ class UciEngine(object):
     def brain(self, time_dict: dict):
         """Permanent brain."""
         if not self.is_waiting():
-            logging.warning('engine (still) not waiting - strange!')
+            logging.error('engine not waiting - status: %s', self.status)
         self.status = EngineStatus.PONDER
         self.show_best = True
         time_dict['ponder'] = True
@@ -200,21 +200,19 @@ class UciEngine(object):
     def hit(self):
         """Send a ponder hit."""
         if not self.is_pondering():
-            logging.warning('engine (still) not pondering - strange!')
-        logging.info('idle: %s', self.engine.idle)
+            logging.error('engine not pondering - status: %s', self.status)
         self.engine.ponderhit()
         self.status = EngineStatus.THINK
         self.show_best = True
 
     def callback(self, command):
         """Callback function."""
-        logging.info('idle: %s', self.engine.idle)
         try:
             self.res = command.result()
         except chess.uci.EngineTerminatedException:
             logging.error('Engine terminated')  # @todo find out, why this can happen!
             self.show_best = False
-        logging.info('cRes1: %s idle: %s', self.res, self.engine.idle)
+        logging.info('res: %s', self.res)
         Observable.fire(Event.STOP_SEARCH(engine_status=self.status))
         if self.show_best and self.res:
             Observable.fire(Event.BEST_MOVE(move=self.res.bestmove, ponder=self.res.ponder, inbook=False))
@@ -224,13 +222,12 @@ class UciEngine(object):
 
     def callback3(self, command):
         """Callback function."""
-        logging.info('idle: %s', self.engine.idle)
         try:
             self.res = command.result()
         except chess.uci.EngineTerminatedException:
             logging.error('Engine terminated')  # @todo find out, why this can happen!
             self.show_best = False
-        logging.info('cRes3: %s idle: %s', self.res, self.engine.idle)
+        logging.info('res: %s', self.res)
         Observable.fire(Event.STOP_SEARCH(engine_status=self.status))
         if self.show_best and self.res:
             Observable.fire(Event.BEST_MOVE(move=self.res.bestmove, ponder=self.res.ponder, inbook=False))
