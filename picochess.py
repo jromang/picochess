@@ -292,8 +292,9 @@ def main():
                         logging.error('ponderhit but engine is waiting, why this still happening?!?')
                         ponder_hit = False
                     if interaction_mode == Mode.NORMAL or not ponder_hit:
-                        logging.info('starting think()')
-                        think(game, time_control, msg)
+                        if not check_game_state(game, play_mode):
+                            logging.info('starting think()')
+                            think(game, time_control, msg)
                     else:
                         logging.info('think() not started cause ponderhit')
                         DisplayMsg.show(msg)
@@ -888,7 +889,8 @@ def main():
                             time_control.reset()
                         # set computer to move - in case the user just changed the engine
                         play_mode = PlayMode.USER_WHITE if game.turn == chess.BLACK else PlayMode.USER_BLACK
-                        think(game, time_control, Message.ALTERNATIVE_MOVE(game=game.copy()))
+                        if not check_game_state(game, play_mode):
+                            think(game, time_control, Message.ALTERNATIVE_MOVE(game=game.copy()))
                     else:
                         logging.warning('wrong function call [alternative]! mode: %s', interaction_mode)
 
