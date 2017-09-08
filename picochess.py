@@ -174,23 +174,25 @@ def main():
         start_clock()
 
     def brain(game: chess.Board, timec: TimeControl):
-        """Start a new permanent brain search on the current game."""
+        """Start a new permanent brain search on the game with pondering move made."""
         if pb_move:
-            logging.info('start permanent brain with PbMove %s', pb_move)
+            logging.info('start permanent brain with pondering move [%s]', pb_move)
             game_copy = copy.deepcopy(game)
             game_copy.push(pb_move)
             engine.position(game_copy)
             engine.brain(timec.uci())
         else:
-            logging.info('ignore permanent brain with PbMove %s', pb_move)
+            logging.info('ignore permanent brain with pondering move [%s]', pb_move)
 
     def stop_search_and_clock(ponder_hit=False):
         """Depending on the interaction mode stop search and clock."""
         if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
             stop_clock()
-            if not engine.is_waiting():
+            if engine.is_waiting():
+                logging.info('engine already waiting')
+            else:
                 if ponder_hit:
-                    engine.hit()
+                    pass  # we send the engine.hit() lateron!
                 else:
                     stop_search()
         elif interaction_mode in (Mode.REMOTE, Mode.OBSERVE):
@@ -263,7 +265,7 @@ def main():
         else:
             if interaction_mode == Mode.BRAIN:
                 ponder_hit = (move == pb_move)
-                logging.info('UserMove: %s PbMove: %s > Ponder%s', move, pb_move, 'Hit' if ponder_hit else 'Miss')
+                logging.info('pondering move: [%s] res: Ponder%s', pb_move, 'Hit' if ponder_hit else 'Miss')
             else:
                 ponder_hit = False
             stop_search_and_clock(ponder_hit=ponder_hit)
@@ -284,14 +286,17 @@ def main():
                     DisplayMsg.show(game_end)
                 else:
                     if engine.is_waiting() and ponder_hit:
-                        logging.warning('ponderhit but engine is waiting => turn ponderhit off')
-                        ponder_hit = False
+                        logging.warning('ponderhit but engine is waiting, why this still happening?!?')
+                        print('ARGH')
+                        # ponder_hit = False
                     if interaction_mode == Mode.NORMAL or not ponder_hit:
+                        logging.info('starting think()')
                         think(game, time_control, msg)
                     else:
                         logging.info('think() not started cause ponderhit')
                         DisplayMsg.show(msg)
                         start_clock()
+                        engine.hit()  # finally tell the engine
             elif interaction_mode == Mode.REMOTE:
                 msg = Message.USER_MOVE_DONE(move=move, fen=fen, turn=turn, game=game.copy())
                 game_end = check_game_state(game, play_mode)
