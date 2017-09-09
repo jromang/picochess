@@ -575,8 +575,8 @@ def main():
                         default='some')
     parser.add_argument('-bs', '--beep-some-level', type=int, default=0x03,
                         help='sets (some-)beep level from 0(=no beeps) to 15(=all beeps)')
-    parser.add_argument('-uv', '--user-voice', type=str, help='voice for user', default='en:mute')
-    parser.add_argument('-cv', '--computer-voice', type=str, help='voice for computer', default='en:mute')
+    parser.add_argument('-uv', '--user-voice', type=str, help='voice for user', default=None)
+    parser.add_argument('-cv', '--computer-voice', type=str, help='voice for computer', default=None)
     parser.add_argument('-sv', '--speed-voice', type=int, help='voice speech factor from 0(=90%%) to 9(=135%%)',
                         default=2, choices=range(0, 10))
     parser.add_argument('-u', '--enable-update', action='store_true', help='enable picochess updates')
@@ -1033,7 +1033,7 @@ def main():
 
             elif isinstance(event, Event.CLOCK_TIME):
                 if dgtdispatcher.get_prio_device() == event.dev:  # transfer only the most prio clock's time
-                    logging.debug('setting tc clock time - prio: %s w: %s b: %s', event.dev,
+                    logging.debug('setting tc clock time - prio: %s w:%s b:%s', event.dev,
                                   hms_time(event.time_white), hms_time(event.time_black))
                     time_control.set_clock_times(white_time=event.time_white, black_time=event.time_black)
                 else:

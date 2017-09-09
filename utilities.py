@@ -39,11 +39,9 @@ version = '09g'
 
 evt_queue = queue.Queue()
 dispatch_queue = queue.Queue()
-serial_queue = queue.Queue()
 
 msgdisplay_devices = []
 dgtdisplay_devices = []
-dgtdispatch_devices = []
 
 
 class Observable(object):
