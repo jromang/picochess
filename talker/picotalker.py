@@ -148,9 +148,6 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
             try:
                 # Check if we have something to say
                 message = self.msg_queue.get()
-                # if self.msg_queue.qsize():
-                #     logging.debug('picotalker queue still with %s members', self.msg_queue.qsize())
-                #     logging.debug('%s', self.msg_queue.queue)
 
                 if False:  # switch-case
                     pass

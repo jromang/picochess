@@ -288,9 +288,9 @@ def main():
                     DisplayMsg.show(msg)
                     DisplayMsg.show(game_end)
                 else:
-                    if engine.is_waiting() and ponder_hit:
-                        logging.error('ponderhit but engine is waiting, why this still happening?!?')
-                        ponder_hit = False
+                    # if engine.is_waiting() and ponder_hit:
+                    #     logging.error('ponderhit but engine is waiting, why this still happening?!?')
+                    #     ponder_hit = False
                     if interaction_mode == Mode.NORMAL or not ponder_hit:
                         if not check_game_state(game, play_mode):
                             logging.info('starting think()')

@@ -151,7 +151,6 @@ class UciEngine(object):
     def stop(self, show_best=False):
         """Stop engine."""
         logging.info('show_best: %s', show_best)
-        logging.debug('stop testX')
         if self.is_waiting():
             logging.info('engine already stopped')
             return self.res
@@ -164,9 +163,8 @@ class UciEngine(object):
 
     def go(self, time_dict: dict):
         """Go engine."""
-        logging.debug('go testX')
-        if not self.is_waiting():
-            logging.error('engine not waiting - status: %s', self.status)
+        # if not self.is_waiting():
+        #     logging.error('engine not waiting - status: %s', self.status)
         self.status = EngineStatus.THINK
         self.show_best = True
         time_dict['async_callback'] = self.callback
@@ -177,9 +175,8 @@ class UciEngine(object):
 
     def ponder(self):
         """Ponder engine."""
-        logging.debug('ponder testX')
-        if not self.is_waiting():
-            logging.error('engine not waiting - status: %s', self.status)
+        # if not self.is_waiting():
+        #     logging.error('engine not waiting - status: %s', self.status)
         self.status = EngineStatus.PONDER
         self.show_best = False
 
@@ -189,9 +186,8 @@ class UciEngine(object):
 
     def brain(self, time_dict: dict):
         """Permanent brain."""
-        logging.debug('brain testX')
-        if not self.is_waiting():
-            logging.error('engine not waiting - status: %s', self.status)
+        # if not self.is_waiting():
+        #     logging.error('engine not waiting - status: %s', self.status)
         self.status = EngineStatus.PONDER
         self.show_best = True
         time_dict['ponder'] = True
@@ -203,8 +199,8 @@ class UciEngine(object):
 
     def hit(self):
         """Send a ponder hit."""
-        if not self.is_pondering():
-            logging.error('engine not pondering - status: %s', self.status)
+        # if not self.is_pondering():
+        #     logging.error('engine not pondering - status: %s', self.status)
         self.engine.ponderhit()
         self.status = EngineStatus.THINK
         self.show_best = True
@@ -244,24 +240,24 @@ class UciEngine(object):
         is_thinking = not self.engine.idle and not self.engine.pondering
         if is_thinking != (self.status == EngineStatus.THINK):
             logging.warning('status %s mismatch %s', self.status, is_thinking)
-            return is_thinking
-        return self.status == EngineStatus.THINK
+        return is_thinking
+        # return self.status == EngineStatus.THINK
 
     def is_pondering(self):
         """Engine pondering."""
         is_pondering = not self.engine.idle and self.engine.pondering
         if is_pondering != (self.status == EngineStatus.PONDER):
             logging.warning('status %s mismatch %s', self.status, is_pondering)
-            return is_pondering
-        return self.status == EngineStatus.PONDER
+        return is_pondering
+        # return self.status == EngineStatus.PONDER
 
     def is_waiting(self):
         """Engine waiting."""
         is_waiting = self.engine.idle
         if is_waiting != (self.status == EngineStatus.WAIT):
             logging.warning('status %s mismatch %s', self.status, is_waiting)
-            return is_waiting
-        return self.status == EngineStatus.WAIT
+        return is_waiting
+        # return self.status == EngineStatus.WAIT
 
     def startup(self, options: dict, show=True):
         """Startup engine."""
