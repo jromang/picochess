@@ -67,28 +67,28 @@ class DgtBoard(object):
 
         self.bconn_text = None
         # keep track of changed board positions
-        self.fen_timer = None
-        self.fen_timer_running = False
+        self.field_timer = None
+        self.field_timer_running = False
 
-    def expired_fen_timer(self):
+    def expired_field_timer(self):
         """Board position hasnt changed for some time."""
         logging.debug('board position now stable => ask for complete board')
-        self.fen_timer_running = False
+        self.field_timer_running = False
         self.write_command([DgtCmd.DGT_SEND_BRD])  # Ask for the board when a piece moved
 
-    def stop_fen_timer(self):
-        """Stop the fen timer cause another fen string been send."""
+    def stop_field_timer(self):
+        """Stop the field timer cause another field change been send."""
         logging.debug('board position was unstable => ignore former field update')
-        self.fen_timer.cancel()
-        self.fen_timer.join()
-        self.fen_timer_running = False
+        self.field_timer.cancel()
+        self.field_timer.join()
+        self.field_timer_running = False
 
-    def start_fen_timer(self):
-        """Start the fen timer waiting for a stable board position."""
+    def start_field_timer(self):
+        """Start the field timer waiting for a stable board position."""
         logging.debug('board position changed => wait for stable result')
-        self.fen_timer = Timer(0.5, self.expired_fen_timer)
-        self.fen_timer.start()
-        self.fen_timer_running = True
+        self.field_timer = Timer(0.5, self.expired_field_timer)
+        self.field_timer.start()
+        self.field_timer_running = True
 
     def write_command(self, message: list):
         """Write the message list to the dgt board."""
@@ -100,11 +100,11 @@ class DgtBoard(object):
 
         array = []
         char_to_xl = {
-            '0': 0x3f, '1': 0x06, '2': 0x5b, '3': 0x4f, '4': 0x66, '5': 0x6d, '6': 0x7d, '7': 0x07, '8': 0x7f, '9': 0x6f,
-            'a': 0x5f, 'b': 0x7c, 'c': 0x58, 'd': 0x5e, 'e': 0x7b, 'f': 0x71, 'g': 0x3d, 'h': 0x74, 'i': 0x10, 'j': 0x1e,
-            'k': 0x75, 'l': 0x38, 'm': 0x55, 'n': 0x54, 'o': 0x5c, 'p': 0x73, 'q': 0x67, 'r': 0x50, 's': 0x6d, 't': 0x78,
-            'u': 0x3e, 'v': 0x2a, 'w': 0x7e, 'x': 0x64, 'y': 0x6e, 'z': 0x5b, ' ': 0x00, '-': 0x40, '/': 0x52, '|': 0x36,
-            '\\': 0x64, '?': 0x53, '@': 0x65, '=': 0x48, '_': 0x08
+            '0': 0x3f, '1': 0x06, '2': 0x5b, '3': 0x4f, '4': 0x66, '5': 0x6d, '6': 0x7d, '7': 0x07, '8': 0x7f,
+            '9': 0x6f, 'a': 0x5f, 'b': 0x7c, 'c': 0x58, 'd': 0x5e, 'e': 0x7b, 'f': 0x71, 'g': 0x3d, 'h': 0x74,
+            'i': 0x10, 'j': 0x1e, 'k': 0x75, 'l': 0x38, 'm': 0x55, 'n': 0x54, 'o': 0x5c, 'p': 0x73, 'q': 0x67,
+            'r': 0x50, 's': 0x6d, 't': 0x78, 'u': 0x3e, 'v': 0x2a, 'w': 0x7e, 'x': 0x64, 'y': 0x6e, 'z': 0x5b,
+            ' ': 0x00, '-': 0x40, '/': 0x52, '|': 0x36, '\\': 0x64, '?': 0x53, '@': 0x65, '=': 0x48, '_': 0x08
         }
         for item in message:
             if isinstance(item, int):
@@ -337,9 +337,9 @@ class DgtBoard(object):
         elif message_id == DgtMsg.DGT_MSG_FIELD_UPDATE:
             if message_length != 2:
                 logging.warning('illegal length in data')
-            if self.fen_timer_running:
-                self.stop_fen_timer()
-            self.start_fen_timer()
+            if self.field_timer_running:
+                self.stop_field_timer()
+            self.start_field_timer()
             # self.write_command([DgtCmd.DGT_SEND_BRD])  # Ask for the board when a piece moved
 
         elif message_id == DgtMsg.DGT_MSG_SERIALNR:
