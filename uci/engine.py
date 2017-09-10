@@ -237,14 +237,26 @@ class UciEngine(object):
 
     def is_thinking(self):
         """Engine thinking."""
+        is_thinking = not self.engine.idle and not self.engine.pondering
+        if is_thinking != (self.status == EngineStatus.THINK):
+            logging.warning('status %s mismatch %s', self.status, is_thinking)
+            return is_thinking
         return self.status == EngineStatus.THINK
 
     def is_pondering(self):
         """Engine pondering."""
+        is_pondering = not self.engine.idle and self.engine.pondering
+        if is_pondering != (self.status == EngineStatus.PONDER):
+            logging.warning('status %s mismatch %s', self.status, is_pondering)
+            return is_pondering
         return self.status == EngineStatus.PONDER
 
     def is_waiting(self):
         """Engine waiting."""
+        is_waiting = self.engine.idle
+        if is_waiting != (self.status == EngineStatus.WAIT):
+            logging.warning('status %s mismatch %s', self.status, is_waiting)
+            return is_waiting
         return self.status == EngineStatus.WAIT
 
     def startup(self, options: dict, show=True):

@@ -348,6 +348,7 @@ def main():
 
         # Check if we have to undo a previous move (sliding)
         elif fen in last_legal_fens:
+            logging.debug('sliding move detected')
             if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
                 if is_not_user_turn(game.turn):
                     stop_search()
@@ -386,6 +387,7 @@ def main():
 
         # legal move
         elif fen in legal_fens:
+            logging.debug('standard move detected')
             # time_control.add_inc(game.turn)  # deactivated and moved to user_move() cause tc still running :-(
             legal_moves = list(game.legal_moves)
             move = legal_moves[legal_fens.index(fen)]  # type: chess.Move
@@ -398,6 +400,7 @@ def main():
 
         # Player had done the computer or remote move on the board
         elif fen == done_computer_fen:
+            logging.debug('done move detected')
             assert interaction_mode in (Mode.NORMAL, Mode.BRAIN, Mode.REMOTE), 'wrong mode: %s' % interaction_mode
             DisplayMsg.show(Message.COMPUTER_MOVE_DONE())
             game.push(done_move)
