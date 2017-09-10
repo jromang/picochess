@@ -66,6 +66,29 @@ class DgtBoard(object):
         self.l_time = 3600 * 10  # max value cause 10h cant be reached by clock
 
         self.bconn_text = None
+        # keep track of changed board positions
+        self.fen_timer = None
+        self.fen_timer_running = False
+
+    def expired_fen_timer(self):
+        """Board position hasnt changed for some time."""
+        logging.debug('board position now stable => ask for complete board')
+        self.fen_timer_running = False
+        self.write_command([DgtCmd.DGT_SEND_BRD])  # Ask for the board when a piece moved
+
+    def stop_fen_timer(self):
+        """Stop the fen timer cause another fen string been send."""
+        logging.debug('board position was unstable => ignore former field update')
+        self.fen_timer.cancel()
+        self.fen_timer.join()
+        self.fen_timer_running = False
+
+    def start_fen_timer(self):
+        """Start the fen timer waiting for a stable board position."""
+        logging.debug('board position changed => wait for stable result')
+        self.fen_timer = Timer(0.5, self.expired_fen_timer)
+        self.fen_timer.start()
+        self.fen_timer_running = True
 
     def write_command(self, message: list):
         """Write the message list to the dgt board."""
@@ -314,7 +337,10 @@ class DgtBoard(object):
         elif message_id == DgtMsg.DGT_MSG_FIELD_UPDATE:
             if message_length != 2:
                 logging.warning('illegal length in data')
-            self.write_command([DgtCmd.DGT_SEND_BRD])  # Ask for the board when a piece moved
+            if self.fen_timer_running:
+                self.stop_fen_timer()
+            self.start_fen_timer()
+            # self.write_command([DgtCmd.DGT_SEND_BRD])  # Ask for the board when a piece moved
 
         elif message_id == DgtMsg.DGT_MSG_SERIALNR:
             if message_length != 5:
