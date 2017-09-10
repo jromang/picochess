@@ -153,9 +153,8 @@ def main():
         if book_res:
             Observable.fire(Event.BEST_MOVE(move=book_res.bestmove, ponder=book_res.ponder, inbook=True))
         else:
-            logging.debug('test')
             while not engine.is_waiting():
-                time.sleep(0.1)
+                time.sleep(0.05)
                 logging.warning('engine is still not waiting')
             engine.position(copy.deepcopy(game))
             uci_dict = timec.uci()
@@ -189,7 +188,6 @@ def main():
         """Depending on the interaction mode stop search and clock."""
         if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
             stop_clock()
-            logging.debug('test')
             if engine.is_waiting():
                 logging.info('engine already waiting')
             else:
@@ -206,7 +204,6 @@ def main():
     def stop_search():
         """Stop current search."""
         engine.stop()
-        logging.debug('test')
         while not engine.is_waiting():
             time.sleep(0.05)
             logging.warning('engine is still not waiting')
@@ -294,8 +291,6 @@ def main():
                     if engine.is_waiting() and ponder_hit:
                         logging.error('ponderhit but engine is waiting, why this still happening?!?')
                         ponder_hit = False
-                    else:
-                        logging.debug('no problem')
                     if interaction_mode == Mode.NORMAL or not ponder_hit:
                         if not check_game_state(game, play_mode):
                             logging.info('starting think()')
@@ -610,7 +605,7 @@ def main():
 
     # Enable logging
     if args.log_file:
-        handler = RotatingFileHandler('logs' + os.sep + args.log_file, maxBytes=1.4 * 1024 * 1024, backupCount=6)
+        handler = RotatingFileHandler('logs' + os.sep + args.log_file, maxBytes=1.4 * 1024 * 1024, backupCount=5)
         logging.basicConfig(level=getattr(logging, args.log_level.upper()),
                             format='%(asctime)s.%(msecs)03d %(levelname)7s %(module)10s - %(funcName)s: %(message)s',
                             datefmt="%Y-%m-%d %H:%M:%S", handlers=[handler])

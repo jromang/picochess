@@ -151,6 +151,7 @@ class UciEngine(object):
     def stop(self, show_best=False):
         """Stop engine."""
         logging.info('show_best: %s', show_best)
+        logging.debug('stop testX')
         if self.is_waiting():
             logging.info('engine already stopped')
             return self.res
@@ -163,6 +164,7 @@ class UciEngine(object):
 
     def go(self, time_dict: dict):
         """Go engine."""
+        logging.debug('go testX')
         if not self.is_waiting():
             logging.error('engine not waiting - status: %s', self.status)
         self.status = EngineStatus.THINK
@@ -175,6 +177,7 @@ class UciEngine(object):
 
     def ponder(self):
         """Ponder engine."""
+        logging.debug('ponder testX')
         if not self.is_waiting():
             logging.error('engine not waiting - status: %s', self.status)
         self.status = EngineStatus.PONDER
@@ -186,6 +189,7 @@ class UciEngine(object):
 
     def brain(self, time_dict: dict):
         """Permanent brain."""
+        logging.debug('brain testX')
         if not self.is_waiting():
             logging.error('engine not waiting - status: %s', self.status)
         self.status = EngineStatus.PONDER
