@@ -34,11 +34,11 @@ Choosing skill level
 Put the extra **black** queen on the 5th rank of your DGT board to select skill level. The skill range of ​​the currently selected engine is devided by 8 meaning a5 (easiest level) towards h5 (strongest level). Some engines support ELO level or even personalities instead of skill levels. If no skill level is selected, PicoChess uses the highest level if nothing choosen before or your last selected level by default.
 (Remove the extra white queen if it is still on the board). Please notice that not all chess engines support levels.
 
-In case of "stockfish" engine:
+In case of "stockfish7" engine:
 
-* Level  0 estimates about 1100 Elo (Absolute beginner)
-* Level 10 estimates about 1750 Elo (Mediate club player )
-* Level 20 estimates about 2570 Elo (Advanced tournament player)
+* Level  3 estimates about 1000 Elo (Absolute beginner)
+* Level  9 estimates about 1750 Elo (Mediate club player )
+* Level 20 estimates about 3100 Elo (Advanced tournament player)
 
 Another way to choose the skill level is by entering the "engine" menu with the clock buttons. Detailed explanation is below.
 
