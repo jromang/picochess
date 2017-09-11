@@ -33,7 +33,7 @@ class DgtBoard(object):
 
     """Handle the DGT board communication."""
 
-    def __init__(self, device: str, disable_revelation_leds: bool, is_pi: bool, disable_end: bool):
+    def __init__(self, device: str, disable_revelation_leds: bool, is_pi: bool, disable_end: bool, field_factor=0):
         super(DgtBoard, self).__init__()
         self.given_device = device
         self.device = device
@@ -41,6 +41,7 @@ class DgtBoard(object):
         self.disable_revelation_leds = disable_revelation_leds
         self.is_pi = is_pi
         self.disable_end = disable_end  # @todo for test - XL needs a "end_text" maybe!
+        self.field_factor = field_factor % 10
 
         self.serial = None
         self.lock = Lock()  # inside setup_serial_port()
@@ -69,6 +70,7 @@ class DgtBoard(object):
         # keep track of changed board positions
         self.field_timer = None
         self.field_timer_running = False
+        self.channel = None
 
     def expired_field_timer(self):
         """Board position hasnt changed for some time."""
@@ -85,8 +87,9 @@ class DgtBoard(object):
 
     def start_field_timer(self):
         """Start the field timer waiting for a stable board position."""
-        logging.debug('board position changed => wait for stable result')
-        self.field_timer = Timer(0.5, self.expired_field_timer)
+        wait = (0.5 if self.channel == 'BT' else 0.25) + 0.03 * self.field_factor  # BT boards scanning in half speed
+        logging.debug('board position changed => wait %.2fsecs for a stable result', wait)
+        self.field_timer = Timer(wait, self.expired_field_timer)
         self.field_timer.start()
         self.field_timer_running = True
 
@@ -162,7 +165,7 @@ class DgtBoard(object):
             self.write_command([DgtCmd.DGT_SEND_BRD])  # Update the board => get first FEN
             if self.device.find('rfc') == -1:
                 text_l, text_m, text_s = 'USB e-Board', 'USBboard', 'ok usb'
-                channel = 'USB'
+                self.channel = 'USB'
             else:
                 btname5 = self.bt_name[-5:]
                 if 'REVII' in self.bt_name:
@@ -174,11 +177,11 @@ class DgtBoard(object):
                     self.use_revelation_leds = False
                 else:
                     text_l, text_m, text_s = 'BT e-Board', 'BT board', 'ok bt'
-                channel = 'BT'
+                self.channel = 'BT'
                 self.ask_battery_status()
             self.bconn_text = Dgt.DISPLAY_TEXT(l=text_l, m=text_m, s=text_s, wait=True, beep=False, maxtime=1.1,
                                                devs={'i2c', 'web'})  # serial clock lateron
-            DisplayMsg.show(Message.DGT_EBOARD_VERSION(text=self.bconn_text, channel=channel))
+            DisplayMsg.show(Message.DGT_EBOARD_VERSION(text=self.bconn_text, channel=self.channel))
             self.startup_serial_clock()  # now ask the serial clock to answer
             if self.watchdog_timer.is_running():
                 logging.warning('watchdog timer is already running')
