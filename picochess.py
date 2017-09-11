@@ -269,7 +269,7 @@ def main():
             else:
                 ponder_hit = False
             if sliding and ponder_hit:
-                logging.warning('sliding detected, turn ponderhit off - status: %s', engine.status)
+                logging.warning('sliding detected, turn ponderhit off')
                 ponder_hit = False
             stop_search_and_clock(ponder_hit=ponder_hit)
             if interaction_mode in (Mode.NORMAL, Mode.BRAIN, Mode.OBSERVE, Mode.REMOTE) and not sliding:
@@ -288,9 +288,6 @@ def main():
                     DisplayMsg.show(msg)
                     DisplayMsg.show(game_end)
                 else:
-                    # if engine.is_waiting() and ponder_hit:
-                    #     logging.error('ponderhit but engine is waiting, why this still happening?!?')
-                    #     ponder_hit = False
                     if interaction_mode == Mode.NORMAL or not ponder_hit:
                         if not check_game_state(game, play_mode):
                             logging.info('starting think()')
@@ -595,7 +592,7 @@ def main():
     parser.add_argument('-c', '--console', action='store_true', help='use console interface')
     parser.add_argument('-cl', '--capital-letters', action='store_true', help='clock messages in capital letters')
     parser.add_argument('-noet', '--disable-et', action='store_true', help='some clocks need this to work - deprecated')
-    parser.add_argument('-ss', '--slow-slide', type=int, help='how long to wait for a stable position (sliding detection)',
+    parser.add_argument('-ss', '--slow-slide', type=int, help='how long to wait for a stable position (sliding detect)',
                         default=0, choices=range(0, 10))
 
     args, unknown = parser.parse_known_args()
@@ -997,10 +994,10 @@ def main():
                     DisplayMsg.show(Message.NEW_DEPTH(depth=event.depth))
 
             elif isinstance(event, Event.START_SEARCH):
-                DisplayMsg.show(Message.SEARCH_STARTED(engine_status=event.engine_status))
+                DisplayMsg.show(Message.SEARCH_STARTED())
 
             elif isinstance(event, Event.STOP_SEARCH):
-                DisplayMsg.show(Message.SEARCH_STOPPED(engine_status=event.engine_status))
+                DisplayMsg.show(Message.SEARCH_STOPPED())
 
             elif isinstance(event, Event.SET_INTERACTION_MODE):
                 if event.mode not in (Mode.NORMAL, Mode.BRAIN, Mode.REMOTE) and done_computer_fen:

@@ -21,19 +21,16 @@ except ImportError:
     import enum34 as enum
 
 
-class AutoNumber(enum.Enum):
+class MyEnum(enum.Enum):
 
-    """AutoNumber Class."""
+    """Prevent __init__ problem Class."""
 
-    def __new__(cls):  # Autonumber
-        value = len(cls.__members__) + 1
-        obj = object.__new__(cls)
-        obj._value_ = value
-        return obj
+    def __init__(self, *args):
+        pass
 
 
 @enum.unique
-class Top(enum.Enum):
+class Top(MyEnum):
 
     """Top Class."""
 
@@ -88,7 +85,7 @@ class TopLoop(object):
 
 
 @enum.unique
-class Mode(enum.Enum):
+class Mode(MyEnum):
 
     """Mode Class."""
 
@@ -148,7 +145,7 @@ class ModeLoop(object):
 
 
 @enum.unique
-class PlayMode(enum.Enum):
+class PlayMode(MyEnum):
 
     """PlayMode Class."""
 
@@ -156,7 +153,7 @@ class PlayMode(enum.Enum):
     USER_BLACK = 'B10_playmode_black_user'
 
 
-class TimeMode(enum.Enum):
+class TimeMode(MyEnum):
 
     """TimeMode Class."""
 
@@ -195,7 +192,7 @@ class TimeModeLoop(object):
         return 'errTiMoPrev'
 
 
-class System(enum.Enum):
+class System(MyEnum):
 
     """System Class."""
 
@@ -259,7 +256,7 @@ class SystemLoop(object):
         return 'errSystPrev'
 
 
-class Language(enum.Enum):
+class Language(MyEnum):
 
     """Language Class."""
 
@@ -313,7 +310,7 @@ class LanguageLoop(object):
         return 'errLangPrev'
 
 
-class Beep(enum.Enum):
+class Beep(MyEnum):
 
     """Beep Class."""
 
@@ -351,7 +348,7 @@ class BeepLoop(object):
         return 'errBeepPrev'
 
 
-class Voice(enum.Enum):
+class Voice(MyEnum):
 
     """Voice Class."""
 
@@ -391,7 +388,7 @@ class VoiceLoop(object):
 
 
 @enum.unique
-class Display(enum.Enum):
+class Display(MyEnum):
 
     """Display Class."""
 
@@ -431,7 +428,7 @@ class DisplayLoop(object):
 
 
 @enum.unique
-class GameResult(enum.Enum):
+class GameResult(MyEnum):
 
     """Game end result."""
 
@@ -447,17 +444,8 @@ class GameResult(enum.Enum):
     DRAW = 'B00_gameresult_draw'
 
 
-class EngineStatus(AutoNumber):
-
-    """Status of the engine."""
-
-    THINK = ()
-    PONDER = ()
-    WAIT = ()
-
-
 @enum.unique
-class BeepLevel(enum.Enum):
+class BeepLevel(MyEnum):
 
     """Define the beep level for each beep event."""
 
@@ -470,7 +458,7 @@ class BeepLevel(enum.Enum):
 
 
 @enum.unique
-class ClockSide(enum.Enum):
+class ClockSide(MyEnum):
 
     """Side to display the message."""
 
@@ -480,7 +468,7 @@ class ClockSide(enum.Enum):
 
 
 @enum.unique
-class ClockIcons(enum.Enum):
+class ClockIcons(MyEnum):
 
     """DGT clock icons."""
 
@@ -490,7 +478,7 @@ class ClockIcons(enum.Enum):
 
 
 @enum.unique
-class DgtCmd(enum.Enum):
+class DgtCmd(MyEnum):
 
     """COMMAND CODES FROM PC TO BOARD."""
 
@@ -523,7 +511,7 @@ class DgtCmd(enum.Enum):
     DGT_CLOCK_MESSAGE = 0x2b  # This message contains a command for the clock.
 
 
-class DgtClk(enum.Enum):
+class DgtClk(MyEnum):
 
     """DESCRIPTION OF THE COMMANDS FROM BOARD TO PC."""
 
@@ -544,7 +532,7 @@ class DgtClk(enum.Enum):
     DGT_CMD_CLOCK_END_MESSAGE = 0x00
 
 
-class DgtAck(enum.Enum):
+class DgtAck(MyEnum):
 
     """DESCRIPTION OF THE ACKNOWLEDGMENTS FROM BOARD TO PC."""
 

@@ -23,7 +23,6 @@ import paramiko
 
 from subprocess import DEVNULL
 from dgt.api import Event
-from dgt.util import EngineStatus
 from utilities import Observable
 import chess.uci
 from chess import Board
@@ -63,7 +62,6 @@ class UciEngine(object):
             self.show_best = True
 
             self.res = None
-            self.status = EngineStatus.WAIT
             self.level_support = False
 
         except OSError:
@@ -163,46 +161,35 @@ class UciEngine(object):
 
     def go(self, time_dict: dict):
         """Go engine."""
-        # if not self.is_waiting():
-        #     logging.error('engine not waiting - status: %s', self.status)
-        self.status = EngineStatus.THINK
         self.show_best = True
         time_dict['async_callback'] = self.callback
 
-        Observable.fire(Event.START_SEARCH(engine_status=self.status))
+        Observable.fire(Event.START_SEARCH())
         self.future = self.engine.go(**time_dict)
         return self.future
 
     def ponder(self):
         """Ponder engine."""
-        # if not self.is_waiting():
-        #     logging.error('engine not waiting - status: %s', self.status)
-        self.status = EngineStatus.PONDER
         self.show_best = False
 
-        Observable.fire(Event.START_SEARCH(engine_status=self.status))
+        Observable.fire(Event.START_SEARCH())
         self.future = self.engine.go(ponder=True, infinite=True, async_callback=self.callback)
         return self.future
 
     def brain(self, time_dict: dict):
         """Permanent brain."""
-        # if not self.is_waiting():
-        #     logging.error('engine not waiting - status: %s', self.status)
-        self.status = EngineStatus.PONDER
         self.show_best = True
         time_dict['ponder'] = True
         time_dict['async_callback'] = self.callback3
 
-        Observable.fire(Event.START_SEARCH(engine_status=self.status))
+        Observable.fire(Event.START_SEARCH())
         self.future = self.engine.go(**time_dict)
         return self.future
 
     def hit(self):
         """Send a ponder hit."""
-        # if not self.is_pondering():
-        #     logging.error('engine not pondering - status: %s', self.status)
+        logging.info('show_best: %s', self.show_best)
         self.engine.ponderhit()
-        self.status = EngineStatus.THINK
         self.show_best = True
 
     def callback(self, command):
@@ -213,12 +200,11 @@ class UciEngine(object):
             logging.error('Engine terminated')  # @todo find out, why this can happen!
             self.show_best = False
         logging.info('res: %s', self.res)
-        Observable.fire(Event.STOP_SEARCH(engine_status=self.status))
+        Observable.fire(Event.STOP_SEARCH())
         if self.show_best and self.res:
             Observable.fire(Event.BEST_MOVE(move=self.res.bestmove, ponder=self.res.ponder, inbook=False))
         else:
             logging.info('event best_move not fired')
-        self.status = EngineStatus.WAIT
 
     def callback3(self, command):
         """Callback function."""
@@ -228,36 +214,23 @@ class UciEngine(object):
             logging.error('Engine terminated')  # @todo find out, why this can happen!
             self.show_best = False
         logging.info('res: %s', self.res)
-        Observable.fire(Event.STOP_SEARCH(engine_status=self.status))
+        Observable.fire(Event.STOP_SEARCH())
         if self.show_best and self.res:
             Observable.fire(Event.BEST_MOVE(move=self.res.bestmove, ponder=self.res.ponder, inbook=False))
         else:
             logging.info('event best_move not fired')
-        self.status = EngineStatus.WAIT
 
     def is_thinking(self):
         """Engine thinking."""
-        is_thinking = not self.engine.idle and not self.engine.pondering
-        if is_thinking != (self.status == EngineStatus.THINK):
-            logging.warning('status %s mismatch %s', self.status, is_thinking)
-        return is_thinking
-        # return self.status == EngineStatus.THINK
+        return not self.engine.idle and not self.engine.pondering
 
     def is_pondering(self):
         """Engine pondering."""
-        is_pondering = not self.engine.idle and self.engine.pondering
-        if is_pondering != (self.status == EngineStatus.PONDER):
-            logging.warning('status %s mismatch %s', self.status, is_pondering)
-        return is_pondering
-        # return self.status == EngineStatus.PONDER
+        return not self.engine.idle and self.engine.pondering
 
     def is_waiting(self):
         """Engine waiting."""
-        is_waiting = self.engine.idle
-        if is_waiting != (self.status == EngineStatus.WAIT):
-            logging.warning('status %s mismatch %s', self.status, is_waiting)
-        return is_waiting
-        # return self.status == EngineStatus.WAIT
+        return self.engine.idle
 
     def startup(self, options: dict, show=True):
         """Startup engine."""
