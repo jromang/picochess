@@ -343,7 +343,6 @@ class DgtBoard(object):
             if self.field_timer_running:
                 self.stop_field_timer()
             self.start_field_timer()
-            # self.write_command([DgtCmd.DGT_SEND_BRD])  # Ask for the board when a piece moved
 
         elif message_id == DgtMsg.DGT_MSG_SERIALNR:
             if message_length != 5:
