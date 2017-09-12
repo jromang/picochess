@@ -156,20 +156,19 @@ def main():
             while not engine.is_waiting():
                 time.sleep(0.05)
                 logging.warning('engine is still not waiting')
-            engine.position(copy.deepcopy(game))
             uci_dict = timec.uci()
             uci_dict['searchmoves'] = searchmoves.all(game)
+            engine.position(copy.deepcopy(game))
             engine.go(uci_dict)
 
     def analyse(game: chess.Board, msg: Message):
         """Start a new ponder search on the current game."""
+        DisplayMsg.show(msg)
         engine.position(copy.deepcopy(game))
         engine.ponder()
-        DisplayMsg.show(msg)
 
     def observe(game: chess.Board, msg: Message):
         """Start a new ponder search on the current game."""
-        # start_clock()
         analyse(game, msg)
         start_clock()
 
@@ -259,7 +258,7 @@ def main():
         nonlocal done_computer_fen
         nonlocal time_control
 
-        logging.debug('user move [%s] sliding: %s', move, sliding)
+        logging.info('user move [%s] sliding: %s', move, sliding)
         if move not in game.legal_moves:
             logging.warning('illegal move [%s]', move)
         else:
@@ -345,35 +344,35 @@ def main():
 
         # Check if we have to undo a previous move (sliding)
         elif fen in last_legal_fens:
-            logging.debug('sliding move detected')
+            logging.info('sliding move detected')
             if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
                 if is_not_user_turn(game.turn):
                     stop_search()
                     game.pop()
-                    logging.debug('user move in computer turn, reverting to: %s', game.fen())
+                    logging.info('user move in computer turn, reverting to: %s', game.fen())
                 elif done_computer_fen:
                     done_computer_fen = None
                     done_move = chess.Move.null()
                     game.pop()
-                    logging.debug('user move while computer move is displayed, reverting to: %s', game.fen())
+                    logging.info('user move while computer move is displayed, reverting to: %s', game.fen())
                 else:
                     handled_fen = False
                     logging.error('last_legal_fens not cleared: %s', game.fen())
             elif interaction_mode == Mode.REMOTE:
                 if is_not_user_turn(game.turn):
                     game.pop()
-                    logging.debug('user move in remote turn, reverting to: %s', game.fen())
+                    logging.info('user move in remote turn, reverting to: %s', game.fen())
                 elif done_computer_fen:
                     done_computer_fen = None
                     done_move = chess.Move.null()
                     game.pop()
-                    logging.debug('user move while remote move is displayed, reverting to: %s', game.fen())
+                    logging.info('user move while remote move is displayed, reverting to: %s', game.fen())
                 else:
                     handled_fen = False
                     logging.error('last_legal_fens not cleared: %s', game.fen())
             else:
                 game.pop()
-                logging.debug('wrong color move -> sliding, reverting to: %s', game.fen())
+                logging.info('wrong color move -> sliding, reverting to: %s', game.fen())
             legal_moves = list(game.legal_moves)
             move = legal_moves[last_legal_fens.index(fen)]  # type: chess.Move
             user_move(move, sliding=True)
@@ -384,7 +383,7 @@ def main():
 
         # legal move
         elif fen in legal_fens:
-            logging.debug('standard move detected')
+            logging.info('standard move detected')
             # time_control.add_inc(game.turn)  # deactivated and moved to user_move() cause tc still running :-(
             legal_moves = list(game.legal_moves)
             move = legal_moves[legal_fens.index(fen)]  # type: chess.Move
@@ -397,7 +396,7 @@ def main():
 
         # Player had done the computer or remote move on the board
         elif fen == done_computer_fen:
-            logging.debug('done move detected')
+            logging.info('done move detected')
             assert interaction_mode in (Mode.NORMAL, Mode.BRAIN, Mode.REMOTE), 'wrong mode: %s' % interaction_mode
             DisplayMsg.show(Message.COMPUTER_MOVE_DONE())
             game.push(done_move)
@@ -425,8 +424,8 @@ def main():
                 game_copy.pop()
                 if game_copy.board_fen() == fen:
                     handled_fen = True
-                    logging.debug('current game fen      : %s', game.fen())
-                    logging.debug('undoing game until fen: %s', fen)
+                    logging.info('current game fen      : %s', game.fen())
+                    logging.info('undoing game until fen: %s', fen)
                     stop_search_and_clock()
                     while len(game_copy.move_stack) < len(game.move_stack):
                         game.pop()
@@ -595,8 +594,8 @@ def main():
     parser.add_argument('-c', '--console', action='store_true', help='use console interface')
     parser.add_argument('-cl', '--capital-letters', action='store_true', help='clock messages in capital letters')
     parser.add_argument('-noet', '--disable-et', action='store_true', help='some clocks need this to work - deprecated')
-    parser.add_argument('-ss', '--slow-slide', type=int, help='how long to wait for a stable position (sliding detect)',
-                        default=0, choices=range(0, 10))
+    parser.add_argument('-ss', '--slow-slide', type=int, default=0, choices=range(0, 10),
+                        help='extra wait time factor for a stable board position (sliding detect)')
 
     args, unknown = parser.parse_known_args()
 
@@ -961,16 +960,20 @@ def main():
                 if interaction_mode in (Mode.NORMAL, Mode.BRAIN) and is_not_user_turn(game.turn):
                     # clock must be stopped BEFORE the "book_move" event cause SetNRun resets the clock display
                     stop_clock()
-                    if event.inbook:
-                        DisplayMsg.show(Message.BOOK_MOVE())
-                    searchmoves.add(event.move)
-                    DisplayMsg.show(Message.COMPUTER_MOVE(move=event.move, ponder=event.ponder, game=game.copy(),
-                                                          wait=event.inbook))
-                    game_copy = game.copy()
-                    game_copy.push(event.move)
-                    done_computer_fen = game_copy.board_fen()
-                    done_move = event.move
-                    pb_move = event.ponder if event.ponder else chess.Move.null()
+                    # @todo 8/8/R6P/1R6/7k/2B2K1p/8/8 and sliding Ra6 over a5 to a4 - handle this in correct way!!
+                    if game.is_game_over():
+                        logging.warning('illegal move on game_end - sliding? move: %s fen: %s', event.move, game.fen())
+                    else:
+                        if event.inbook:
+                            DisplayMsg.show(Message.BOOK_MOVE())
+                        searchmoves.add(event.move)
+                        DisplayMsg.show(Message.COMPUTER_MOVE(move=event.move, ponder=event.ponder, game=game.copy(),
+                                                              wait=event.inbook))
+                        game_copy = game.copy()
+                        game_copy.push(event.move)
+                        done_computer_fen = game_copy.board_fen()
+                        done_move = event.move
+                        pb_move = event.ponder if event.ponder else chess.Move.null()
                 else:
                     logging.warning('wrong function call [best]! mode: %s turn: %s', interaction_mode, game.turn)
 
@@ -978,11 +981,12 @@ def main():
                 if interaction_mode == Mode.BRAIN and engine.is_pondering():
                     logging.debug('in brain mode and pondering ignore pv %s', event.pv[:3])
                 else:
-                    # illegal moves can occur if a pv from the engine arrives at the same time as a user move
+                    # illegal moves can occur if a pv from the engine arrives at the same time as an user move
                     if game.is_legal(event.pv[0]):
                         DisplayMsg.show(Message.NEW_PV(pv=event.pv, mode=interaction_mode, game=game.copy()))
                     else:
                         logging.info('illegal move can not be displayed. move: %s fen: %s', event.pv[0], game.fen())
+                        logging.info('engine status: t:%s p:%s', engine.is_thinking(), engine.is_pondering())
 
             elif isinstance(event, Event.NEW_SCORE):
                 if interaction_mode == Mode.BRAIN and engine.is_pondering():

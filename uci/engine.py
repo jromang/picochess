@@ -148,11 +148,11 @@ class UciEngine(object):
 
     def stop(self, show_best=False):
         """Stop engine."""
-        logging.info('show_best: %s', show_best)
+        logging.info('show_best old: %s new: %s', self.show_best, show_best)
+        self.show_best = show_best
         if self.is_waiting():
             logging.info('engine already stopped')
             return self.res
-        self.show_best = show_best
         try:
             self.engine.stop()
         except chess.uci.EngineTerminatedException:

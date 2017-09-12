@@ -249,10 +249,6 @@ class DgtBoard(object):
                     else:
                         dev = 'err'
                     DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=main, sub=sub, dev=dev, text=self.bconn_text))
-                # @todo is that really needed? SetNRun also sets the r_time, l_time correctly (=> always override, no?)
-                if ack1 == DgtAck.DGT_ACK_CLOCK_SETNRUN.value:  # set time values to max => sure! override lateron
-                    self.r_time = 3600 * 10
-                    self.l_time = 3600 * 10
             elif any(message[:7]):
                 r_hours = message[0] & 0x0f
                 r_mins = (message[1] >> 4) * 10 + (message[1] & 0x0f)
