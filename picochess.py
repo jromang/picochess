@@ -905,7 +905,7 @@ def main():
                     last_legal_fens = []
 
                     if not engine.is_waiting():
-                        user_move = engine.is_thinking()
+                        user_to_move = engine.is_thinking()
                         stop_search_and_clock()
                         # user_to_move = True
                     if event.engine_finished:
