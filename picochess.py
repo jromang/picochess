@@ -905,8 +905,9 @@ def main():
                     last_legal_fens = []
 
                     if not engine.is_waiting():
+                        user_move = engine.is_thinking()
                         stop_search_and_clock()
-                        user_to_move = True
+                        # user_to_move = True
                     if event.engine_finished:
                         move = done_move if done_computer_fen else game.pop()
                         done_computer_fen = None
@@ -1008,7 +1009,7 @@ def main():
                 DisplayMsg.show(Message.SEARCH_STOPPED())
 
             elif isinstance(event, Event.SET_INTERACTION_MODE):
-                if event.mode not in (Mode.NORMAL, Mode.BRAIN, Mode.REMOTE) and done_computer_fen:
+                if event.mode not in (Mode.NORMAL, Mode.REMOTE) and done_computer_fen:
                     dgtmenu.set_mode(interaction_mode)  # undo the button4 stuff
                     logging.warning('mode cant be changed to a pondering mode as long as a move is displayed')
                     mode_text = dgttranslate.text('Y00_default', 'errmode')
