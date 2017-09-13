@@ -248,7 +248,7 @@ class Event():
     SET_INTERACTION_MODE = ClassFactory(EventApi.SET_INTERACTION_MODE, ['mode', 'mode_text', 'show_ok'])
     SETUP_POSITION = ClassFactory(EventApi.SETUP_POSITION, ['fen', 'uci960'])
     PAUSE_RESUME = ClassFactory(EventApi.PAUSE_RESUME, [])
-    SWITCH_SIDES = ClassFactory(EventApi.SWITCH_SIDES, ['engine_finished'])
+    SWITCH_SIDES = ClassFactory(EventApi.SWITCH_SIDES, [])
     SET_TIME_CONTROL = ClassFactory(EventApi.SET_TIME_CONTROL, ['tc_init', 'time_text', 'show_ok'])
     SHUTDOWN = ClassFactory(EventApi.SHUTDOWN, ['dev'])
     REBOOT = ClassFactory(EventApi.REBOOT, ['dev'])

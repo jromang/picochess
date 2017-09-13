@@ -901,41 +901,42 @@ def main():
 
             elif isinstance(event, Event.SWITCH_SIDES):
                 if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
-                    user_to_move = False
-                    last_legal_fens = []
-
                     if not engine.is_waiting():
-                        user_to_move = engine.is_thinking()
                         stop_search_and_clock()
-                        # user_to_move = True
-                    if event.engine_finished:
-                        move = done_move if done_computer_fen else game.pop()
+
+                    last_legal_fens = []
+                    best_move_displayed = done_computer_fen
+                    if best_move_displayed:
+                        move = done_move
                         done_computer_fen = None
                         done_move = chess.Move.null()
-                        user_to_move = True
                     else:
-                        move = chess.Move.null()
-                    if user_to_move:
-                        last_legal_fens = []
-                        play_mode = PlayMode.USER_WHITE if game.turn == chess.WHITE else PlayMode.USER_BLACK
-                    else:
-                        play_mode = PlayMode.USER_WHITE if game.turn == chess.BLACK else PlayMode.USER_BLACK
+                        move = chess.Move.null()  # not really needed
+
+                    play_mode = PlayMode.USER_WHITE if play_mode == PlayMode.USER_BLACK else PlayMode.USER_BLACK
 
                     text = play_mode.value  # type: str
                     msg = Message.PLAY_MODE(play_mode=play_mode, play_mode_text=dgttranslate.text(text))
 
                     if time_control.mode == TimeMode.FIXED:
                         time_control.reset()
-                    if not user_to_move and not check_game_state(game, play_mode):
-                        time_control.reset_start_time()
-                        think(game, time_control, msg)
-                        legal_fens = []
-                    else:
-                        start_clock()
-                        DisplayMsg.show(msg)  # @todo: perhaps also display a game_end?!
-                        legal_fens = compute_legal_fens(game.copy())
 
-                    if event.engine_finished:
+                    legal_fens = []
+                    game_end = check_game_state(game, play_mode)
+                    if game_end:
+                        DisplayMsg.show(msg)
+                    else:
+                        cond1 = game.turn == chess.WHITE and play_mode == PlayMode.USER_BLACK
+                        cond2 = game.turn == chess.BLACK and play_mode == PlayMode.USER_WHITE
+                        if cond1 or cond2:
+                            time_control.reset_start_time()
+                            think(game, time_control, msg)
+                        else:
+                            DisplayMsg.show(msg)
+                            start_clock()
+                            legal_fens = compute_legal_fens(game.copy())
+
+                    if best_move_displayed:
                         DisplayMsg.show(Message.SWITCH_SIDES(game=game.copy(), move=move))
 
             elif isinstance(event, Event.DRAWRESIGN):
@@ -954,6 +955,7 @@ def main():
                     game_copy.push(event.move)
                     done_computer_fen = game_copy.board_fen()
                     done_move = event.move
+                    pb_move = chess.Move.null()
                 else:
                     logging.warning('wrong function call [remote]! mode: %s turn: %s', interaction_mode, game.turn)
 
