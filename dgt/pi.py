@@ -117,7 +117,7 @@ class DgtPi(DgtIface):
     def _display_on_dgt_pi(self, text: str, beep=False, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
         if len(text) > 11:
             logging.warning('(i2c) clock message too long [%s]', text)
-        logging.debug(text)
+        logging.debug('[%s]', text)
         text = bytes(text, 'utf-8')
         with self.lib_lock:
             res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, left_icons.value, right_icons.value)

@@ -84,7 +84,11 @@ class Dispatcher(DispatchDgt, Thread):
             with self.process_lock[dev]:
                 self._process_message(message, dev)
             if self.maxtimer_running[dev]:  # run over the task list until a maxtime command was processed
-                logging.debug('(%s) tasks stopped on %i members', dev, len(self.tasks[dev]))
+                remaining = len(self.tasks[dev])
+                if remaining:
+                    logging.debug('(%s) tasks stopped on %i remaining members', dev, remaining)
+                else:
+                    logging.debug('(%s) tasks completed', dev)
                 break
 
     def _process_message(self, message, dev: str):

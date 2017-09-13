@@ -41,7 +41,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.dgtmenu = dgtmenu
         self.time_control = time_control
 
-        self.engine_finished = False
+        self.allow_alternative = False
         self.drawresign_fen = None
         self.show_move_or_value = 0
         self.leds_are_on = False
@@ -163,9 +163,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             if self.dgtmenu.get_mode() in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
                 DispatchDgt.fire(self.dgttranslate.text('B00_nofunction'))
             else:
-                if self.engine_finished:
-                    # @todo Protect against multi entrance of Alt-move
-                    self.engine_finished = False  # This is not 100% ok, but for the moment better as nothing
+                if self.allow_alternative:
+                    self.allow_alternative = False  # Protect against multi entrance of "alternative move"
                     Observable.fire(Event.ALTERNATIVE_MOVE())
                 else:
                     Observable.fire(Event.PAUSE_RESUME())
@@ -205,7 +204,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self.play_move = chess.Move.null()
             self.play_fen = None
             self.play_turn = None
-            Observable.fire(Event.SWITCH_SIDES(engine_finished=self.engine_finished))
+            Observable.fire(Event.SWITCH_SIDES())
 
     def _process_button(self, message):
         button = int(message.button)
@@ -274,10 +273,11 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                       '3qq3/8/8/8/8/8/8/8')
 
         mode_map = {'rnbqkbnr/pppppppp/8/Q7/8/8/PPPPPPPP/RNBQKBNR': Mode.NORMAL,
-                    'rnbqkbnr/pppppppp/8/1Q6/8/8/PPPPPPPP/RNBQKBNR': Mode.ANALYSIS,
-                    'rnbqkbnr/pppppppp/8/2Q5/8/8/PPPPPPPP/RNBQKBNR': Mode.KIBITZ,
-                    'rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR': Mode.OBSERVE,
-                    'rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR': Mode.PONDER,
+                    'rnbqkbnr/pppppppp/8/1Q6/8/8/PPPPPPPP/RNBQKBNR': Mode.BRAIN,
+                    'rnbqkbnr/pppppppp/8/2Q5/8/8/PPPPPPPP/RNBQKBNR': Mode.ANALYSIS,
+                    'rnbqkbnr/pppppppp/8/3Q4/8/8/PPPPPPPP/RNBQKBNR': Mode.KIBITZ,
+                    'rnbqkbnr/pppppppp/8/4Q3/8/8/PPPPPPPP/RNBQKBNR': Mode.OBSERVE,
+                    'rnbqkbnr/pppppppp/8/5Q2/8/8/PPPPPPPP/RNBQKBNR': Mode.PONDER,
                     'rnbqkbnr/pppppppp/8/7Q/8/8/PPPPPPPP/RNBQKBNR': Mode.REMOTE}
 
         drawresign_map = {'8/8/8/3k4/4K3/8/8/8': GameResult.WIN_WHITE,
@@ -368,13 +368,15 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             logging.debug('map: Interaction mode [%s]', mode_map[fen])
             if mode_map[fen] == Mode.REMOTE and not self.dgtmenu.inside_room:
                 DispatchDgt.fire(self.dgttranslate.text('Y10_errorroom'))
-            else:
+            elif mode_map[fen] == Mode.NORMAL or self.dgtmenu.get_engine_has_ponder():
                 self.dgtmenu.set_mode(mode_map[fen])
                 text = self.dgttranslate.text(mode_map[fen].value)
                 text.beep = self.dgttranslate.bl(BeepLevel.MAP)
                 text.maxtime = 1  # wait 1sec not forever
                 text.wait = self._exit_menu()
                 Observable.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], mode_text=text, show_ok=False))
+            else:  # only allow a pondering mode if engine supports that
+                DispatchDgt.fire(self.dgttranslate.text('Y10_erroreng'))
         elif fen in self.dgtmenu.tc_fixed_map:
             logging.debug('map: Time control fixed')
             self.dgtmenu.set_time_mode(TimeMode.FIXED)
@@ -427,6 +429,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             if self.dgtmenu.installed_engines[index]['file'] == message.eng['file']:
                 self.dgtmenu.set_engine_index(index)
         self.dgtmenu.set_engine_has_960(message.has_960)
+        self.dgtmenu.set_engine_has_ponder(message.has_ponder)
         if not self.dgtmenu.get_confirm() or not message.show_ok:
             DispatchDgt.fire(message.eng_text)
         self.dgtmenu.set_engine_restart(False)
@@ -438,6 +441,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             if eng['file'] == message.file:
                 self.dgtmenu.set_engine_index(index)
                 self.dgtmenu.set_engine_has_960(message.has_960)
+                self.dgtmenu.set_engine_has_ponder(message.has_ponder)
                 self.dgtmenu.set_engine_level(message.level_index)
 
     def force_leds_off(self, log=False):
@@ -451,14 +455,14 @@ class DgtDisplay(DisplayMsg, threading.Thread):
     def _process_start_new_game(self, message):
         self.force_leds_off()
         self._reset_moves_and_score()
-        self.engine_finished = False
+        self.allow_alternative = False
         self.time_control.reset()
         if message.newgame:
             pos960 = message.game.chess960_pos()
             self.uci960 = pos960 is not None and pos960 != 518
             game_text = 'C10_ucigame' if self.uci960 else 'C10_newgame'
             DispatchDgt.fire(self.dgttranslate.text(game_text, str(pos960)))
-        if self.dgtmenu.get_mode() in (Mode.NORMAL, Mode.OBSERVE, Mode.REMOTE):
+        if self.dgtmenu.get_mode() in (Mode.NORMAL, Mode.BRAIN, Mode.OBSERVE, Mode.REMOTE):
             time_left, time_right = self.time_control.get_internal_time(flip_board=self.dgtmenu.get_flip_board())
             DispatchDgt.fire(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE,
                                              wait=True, devs={'ser', 'i2c', 'web'}))
@@ -467,7 +471,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.force_leds_off(log=True)  # can happen in case of a book move
         move = message.move
         ponder = message.ponder
-        self.engine_finished = True
+        self.allow_alternative = True
         self.play_move = move
         self.play_fen = message.game.fen()
         self.play_turn = message.game.turn
@@ -498,7 +502,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.play_move = chess.Move.null()
         self.play_fen = None
         self.play_turn = None
-        self.engine_finished = False
+        self.allow_alternative = False
         self._exit_menu()
         if not self.dgtmenu.get_confirm():
             DispatchDgt.fire(self.dgttranslate.text('K05_okpico'))
@@ -513,7 +517,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.last_move = message.move
         self.last_fen = message.fen
         self.last_turn = message.turn
-        self.engine_finished = False
+        self.allow_alternative = False
         self._exit_menu()
         if not self.dgtmenu.get_confirm():
             DispatchDgt.fire(self.dgttranslate.text('K05_okuser'))
@@ -633,7 +637,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         return '8/8/8/' + rnk_5 + '/' + rnk_4 + '/8/8/8'
 
     def _exit_display(self):
-        if self.play_move and self.dgtmenu.get_mode() in (Mode.NORMAL, Mode.REMOTE):
+        if self.play_move and self.dgtmenu.get_mode() in (Mode.NORMAL, Mode.BRAIN, Mode.REMOTE):
             side = self._get_clock_side(self.play_turn)
             beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side, wait=True, maxtime=1,
@@ -694,7 +698,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         elif isinstance(message, Message.TAKE_BACK):
             self.force_leds_off()
             self._reset_moves_and_score()
-            self.engine_finished = False
+            self.allow_alternative = False
             DispatchDgt.fire(self.dgttranslate.text('C10_takeback'))
 
         elif isinstance(message, Message.GAME_ENDS):
@@ -706,7 +710,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
 
         elif isinstance(message, Message.INTERACTION_MODE):
             # self.dgtmenu.set_mode(message.mode)
-            self.engine_finished = False
+            self.allow_alternative = False
             if not self.dgtmenu.get_confirm() or not message.show_ok:
                 DispatchDgt.fire(message.mode_text)
 
@@ -792,10 +796,11 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             pass
 
         elif isinstance(message, Message.SWITCH_SIDES):
-            self.engine_finished = False
+            self.allow_alternative = False
             self.hint_move = chess.Move.null()
             self.hint_fen = None
             self.hint_turn = None
+            self.force_leds_off()
             logging.debug('user ignored move %s', message.move)
 
         elif isinstance(message, Message.EXIT_MENU):

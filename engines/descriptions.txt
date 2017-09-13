@@ -1,5 +1,5 @@
 PicoChess Engines
-August 26, 2016
+August 30, 2017
 
 
 1. STOCKFISH
@@ -7,17 +7,17 @@ August 26, 2016
 Authors: T. Romstad, M. Costalba, J. Kiiski, G. Linscott
 Version: 7
 Date: January 2016
-Elo: 3100
+Elo (CCRL 40/4): 3360
 Levels: yes
 Chess960: yes
 License: GPLv3
 Source: https://stockfishchess.org/
 Description: Stockfish is universally recognized as the strongest open source engine
-in the world. Even on the modest hardware of a Raspberry Pi 3 it easily
-beats every super grandmaster. The vast amount of chess knowledge
-programmed into Stockfish makes it an ideal engine to analyze your
-games. You can set the engine at a lower skill level to have a chance of
-winning. Stockfish also supports Chess960 (‘Fischer Random Chess’).
+in the world. Even on the modest hardware of a Raspberry Pi 3 it easily beats every
+super grandmaster. The vast amount of chess knowledge programmed into Stockfish makes
+it an ideal engine to analyze your games. You can set the engine at a lower skill
+level to have a chance of winning. Stockfish also supports Chess960 ('Fischer Random
+Chess').
 
 
 2. TEXEL
@@ -25,66 +25,66 @@ winning. Stockfish also supports Chess960 (‘Fischer Random Chess’).
 Author: Peter Österlund
 Version: 1.06
 Date: July 2016
-Elo: 2900
+Elo: 3050
 Levels: yes
 Chess960: no
 License: GPLv3
 Source: http://web.comhem.se/petero2home/javachess/index.html#texel
 Description: Texel is the successor to CuckooChess. It is a very strong engine that
-will beat every human GM. But thanks to its different skill levels, Texel
-will appeal to chess players of every strength. For absolute beginners
-there is even a level 0, which lets the engine play random legal moves.
+will beat every human GM. But thanks to its different skill levels, Texel will
+appeal to chess players of every strength. For absolute beginners there is even
+a level 0, which lets the engine play random legal moves.
 
 
 3. ARASAN
 =========================
 Author: Jon Dart
-Version: 18.3
-Date: March 2016
-Elo: 2750
+Version: 20.2
+Date: July 2017
+Elo: 2950
 Levels: yes
 Chess960: no
 License: MIT
 Source: http://arasanchess.org/
-Description: Arasan, or ‘king’ in the Tamil language, is a chess engine that has been
-around since 1994 – much longer than most other engines. It has evolved
-a lot over the years and is now a very attractive GM level engine. Arasan
-has a lot of features, including skill levels to make it an attractive opponent
-for players of every strength.
+Description: Arasan, or 'king' in the Tamil language, is a chess engine that has been
+around since 1994 – much longer than most other engines. It has evolved a lot over
+the years and is now a very attractive GM level engine. Arasan has a lot of features,
+including skill levels to make it an attractive opponent for players of every strength.
 
 
-4. RODENT II
+4. RODENT III
 =========================
 Author: Paweł Kozioł
-Version: 0.9.52
-Date: July 2016
-Elo: 2650
-Levels: Personalities
+Version: 0.210
+Date: August 2017
+Elo: 2920
+Levels: 'Personalities'
 Chess960: no
 License: GPLv3
-Source: https://github.com/nescitus/Rodent_II/
-Description: RodentII is one of the few chess engines in the world that can adopt ‘personalities’: it offers different playing styles rather than strength levels.
-RodentII can just as easily be turned into a strong GM as into a beginning
-kid. It has both serious and funny personalities, like the positional
-defender and the crazy attacker.
+Source: https://github.com/nescitus/Rodent_III/
+Description: RodentIII is one of the few chess engines in the world that can adopt
+'personalities': it offers different playing styles rather than strength levels.
+RodentIII can just as easily be turned into a strong GM as into a beginning kid.
+It has both serious and funny personalities, like the positional defender and the
+crazy attacker.
 
 
 5. ZURICHESS
 =========================
 Author: Alexandru Moșoi
-Version: graubuenden
-Date: July 2016
-Elo: 2450
-Levels: yes
+Version: luzern
+Date: July 2017
+Elo: 2790
+Levels: yes ('Handicaps')
 Chess960: no
 License: BSD
-Source: https://bitbucket.org/zurichess/
-Description: Zurichess is a relatively young engine. Unlike most other engines it is
-not written in C++ but in the Go computer language. And unlike other
+Source: http://www.zurichess.xyz/
+Description: Zurichess is a relatively young engine. Unlike most other engines
+it is not written in C++ but in the Go computer language. And unlike other
 engines, its versions are not numbered but named after the cantons of
-Switzerland. New versions of Zurichess are rapidly following up each
-other. The current version plays at gm level. Weaker opponents may
-like to set its skill level a little lower.
+Switzerland. New versions of Zurichess are rapidly following up each other.
+The current version plays at GM level. Weaker opponents may like to set its
+handicap level a little higher.
 
 
 6. FLOYD
@@ -92,14 +92,14 @@ like to set its skill level a little lower.
 Author: Marcel van Kervinck
 Version: 0.9
 Date: July 2016
-Elo: 2300
+Elo: 2660
 Levels: no
 Chess960: no
 License: BSD
 Source: https://github.com/kervinck/floyd/
-Description: Originally written as a study in chess engine writing, Floyd has quickly
-become one of the best master (FM/IM) strength engines. It was not
-written for speed or strength, but rather for ‘clarity and ease of change’.
+Description: Originally written as a study in chess engine writing, Floyd has
+quickly become one of the best master (FM/IM) strength engines. It was not
+written for speed or strength, but rather for 'clarity and ease of change'.
 Nevertheless, the engine has an attractive style of play. Unfortunately
 for weaker human players, Floyd cannot be forced to play weaker.
 
@@ -109,31 +109,30 @@ for weaker human players, Floyd cannot be forced to play weaker.
 Author: Giuseppe Cannella
 Version: 2.0
 Date: May 2016
-Elo: 2100
+Elo: 2060
 Levels: no
 Chess960: no
 License: GPLv3
 Source: https://github.com/gekomad/Cinnamon/
-Description: Cinnamon is the successor to Butterfly. It is an attractive opponent for
-experienced club players. This engine does not play too strong but is not
+Description: Cinnamon is the successor to Butterfly. It is an attractive opponent
+for experienced club players. This engine does not play too strong but is not
 very easy to beat either. If you have no FM or IM title and are looking for
-a beatable engine that can teach you a thing or two about chess, then
-Cinnamon is a good choice.
+a beatable engine that can teach you a thing or two about chess, then Cinnamon is
+a good choice.
 
 
-8. CLAUDIA
+8. GALJOEN
 =========================
-Author: Antonio Garro
-Version: 0.5
-Date: August 2016
-Elo: 1650
-Levels: no
-Chess960: no
-License: BSD
-Source: https://github.com/antoniogarro/Claudia
-Description: Claudia, named after the ‘father of information theory’ Claude E. Shannon,
-is one of the weaker engines around. When playing on the modest
-hardware of the Raspberry Pi it is an attractive opponent for intermediate
-club players. Claudia has a remarkably human playing style.
-
-
+Author: Werner Taelemans
+Version: 0.36
+Date: July 2017
+Elo: 2150
+Levels: yes
+Chess960: yes
+License: GPLv3
+Source: http://www.goudengaljoen.be/
+Description: Galjoen is a chess engine that plays at (stronger) club level. It has
+an active playing style. Together with its support for strength levels and Chess960
+('Fischer Random Chess') this makes Galjoen an ideal opponent for club players
+to practice their tactical and strategical skills. The program has its own graphical
+user interface, which is, of course, not used by PicoChess.

@@ -21,8 +21,8 @@ import configparser
 import spur
 import paramiko
 
+from subprocess import DEVNULL
 from dgt.api import Event
-from dgt.util import EngineStatus
 from utilities import Observable
 import chess.uci
 from chess import Board
@@ -48,7 +48,7 @@ class UciEngine(object):
                 self.shell = shell
                 self.engine = chess.uci.spur_spawn_engine(shell, [home + os.sep + file])
             else:
-                self.engine = chess.uci.popen_engine(file)
+                self.engine = chess.uci.popen_engine(file, stderr=DEVNULL)
 
             self.file = file
             if self.engine:
@@ -62,7 +62,6 @@ class UciEngine(object):
             self.show_best = True
 
             self.res = None
-            self.status = EngineStatus.WAIT
             self.level_support = False
 
         except OSError:
@@ -70,9 +69,13 @@ class UciEngine(object):
         except TypeError:
             logging.exception('engine executable not found')
 
-    def get(self):
-        """Get Engine."""
-        return self.engine
+    def get_name(self):
+        """Get engine name."""
+        return self.engine.name
+
+    def get_options(self):
+        """Get engine options."""
+        return self.engine.options
 
     def option(self, name, value):
         """Set OptionName with value."""
@@ -111,6 +114,10 @@ class UciEngine(object):
         """Return chess960 support."""
         return 'UCI_Chess960' in self.engine.options
 
+    def has_ponder(self):
+        """Return ponder support."""
+        return 'Ponder' in self.engine.options
+
     def get_file(self):
         """Get File."""
         return self.file
@@ -141,10 +148,11 @@ class UciEngine(object):
 
     def stop(self, show_best=False):
         """Stop engine."""
+        logging.info('show_best old: %s new: %s', self.show_best, show_best)
+        self.show_best = show_best
         if self.is_waiting():
             logging.info('engine already stopped')
             return self.res
-        self.show_best = show_best
         try:
             self.engine.stop()
         except chess.uci.EngineTerminatedException:
@@ -153,26 +161,36 @@ class UciEngine(object):
 
     def go(self, time_dict: dict):
         """Go engine."""
-        if not self.is_waiting():
-            logging.warning('engine (still) not waiting - strange!')
-        self.status = EngineStatus.THINK
         self.show_best = True
         time_dict['async_callback'] = self.callback
 
-        Observable.fire(Event.START_SEARCH(engine_status=self.status))
+        Observable.fire(Event.START_SEARCH())
         self.future = self.engine.go(**time_dict)
         return self.future
 
     def ponder(self):
         """Ponder engine."""
-        if not self.is_waiting():
-            logging.warning('engine (still) not waiting - strange!')
-        self.status = EngineStatus.PONDER
         self.show_best = False
 
-        Observable.fire(Event.START_SEARCH(engine_status=self.status))
+        Observable.fire(Event.START_SEARCH())
         self.future = self.engine.go(ponder=True, infinite=True, async_callback=self.callback)
         return self.future
+
+    def brain(self, time_dict: dict):
+        """Permanent brain."""
+        self.show_best = True
+        time_dict['ponder'] = True
+        time_dict['async_callback'] = self.callback3
+
+        Observable.fire(Event.START_SEARCH())
+        self.future = self.engine.go(**time_dict)
+        return self.future
+
+    def hit(self):
+        """Send a ponder hit."""
+        logging.info('show_best: %s', self.show_best)
+        self.engine.ponderhit()
+        self.show_best = True
 
     def callback(self, command):
         """Callback function."""
@@ -181,25 +199,38 @@ class UciEngine(object):
         except chess.uci.EngineTerminatedException:
             logging.error('Engine terminated')  # @todo find out, why this can happen!
             self.show_best = False
-
-        Observable.fire(Event.STOP_SEARCH(engine_status=self.status))
-        if self.show_best:
+        logging.info('res: %s', self.res)
+        Observable.fire(Event.STOP_SEARCH())
+        if self.show_best and self.res:
             Observable.fire(Event.BEST_MOVE(move=self.res.bestmove, ponder=self.res.ponder, inbook=False))
         else:
-            logging.debug('event best_move not fired')
-        self.status = EngineStatus.WAIT
+            logging.info('event best_move not fired')
+
+    def callback3(self, command):
+        """Callback function."""
+        try:
+            self.res = command.result()
+        except chess.uci.EngineTerminatedException:
+            logging.error('Engine terminated')  # @todo find out, why this can happen!
+            self.show_best = False
+        logging.info('res: %s', self.res)
+        Observable.fire(Event.STOP_SEARCH())
+        if self.show_best and self.res:
+            Observable.fire(Event.BEST_MOVE(move=self.res.bestmove, ponder=self.res.ponder, inbook=False))
+        else:
+            logging.info('event best_move not fired')
 
     def is_thinking(self):
         """Engine thinking."""
-        return self.status == EngineStatus.THINK
+        return not self.engine.idle and not self.engine.pondering
 
     def is_pondering(self):
         """Engine pondering."""
-        return self.status == EngineStatus.PONDER
+        return not self.engine.idle and self.engine.pondering
 
     def is_waiting(self):
         """Engine waiting."""
-        return self.status == EngineStatus.WAIT
+        return self.engine.idle
 
     def startup(self, options: dict, show=True):
         """Startup engine."""
@@ -217,5 +248,5 @@ class UciEngine(object):
         self.level(options)
         self.send()
         if show:
-            logging.debug('Loaded engine [%s]', self.get().name)
-            logging.debug('Supported options [%s]', self.get().options)
+            logging.debug('Loaded engine [%s]', self.get_name())
+            logging.debug('Supported options [%s]', self.get_options())

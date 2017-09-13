@@ -35,15 +35,13 @@ from dgt.api import Dgt
 from configobj import ConfigObj, ConfigObjError, DuplicateError
 
 # picochess version
-version = '09f'
+version = '09g'
 
 evt_queue = queue.Queue()
 dispatch_queue = queue.Queue()
-serial_queue = queue.Queue()
 
 msgdisplay_devices = []
 dgtdisplay_devices = []
-dgtdispatch_devices = []
 
 
 class Observable(object):
@@ -268,7 +266,7 @@ def get_location():
         country_code = j['country_code'] + ' ' if 'country_code' in j else ''
         ext_ip = j['ip'] if 'ip' in j else None
         city = j['city'] + ', ' if 'city' in j else ''
-        return city + country_name + country_code, ext_ip, int_ip
+        return (city + country_name + country_code).strip(), ext_ip, int_ip
     except:
         return '?', None, None
 

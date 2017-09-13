@@ -84,8 +84,9 @@ def write_engine_ini(engine_path=None):
         parser = configparser.ConfigParser()
         parser.optionxform = str
         if not parser.read(engine_path + os.sep + engine_filename + '.uci'):
+            options = engine.get_options()
             if engine.has_limit_strength():
-                uelevel = engine.get().options['UCI_Elo']
+                uelevel = options['UCI_Elo']
                 minelo = uelevel.min
                 maxelo = uelevel.max
                 minlevel, maxlevel = min(minelo, maxelo), max(minelo, maxelo)
@@ -96,21 +97,21 @@ def write_engine_ini(engine_path=None):
                     level += lvl_inc
                 parser['Elo@{:04d}'.format(maxlevel)] = {'UCI_LimitStrength': 'false', 'UCI_Elo': str(maxlevel)}
             if engine.has_skill_level():
-                sklevel = engine.get().options['Skill Level']
+                sklevel = options['Skill Level']
                 minlevel = sklevel.min
                 maxlevel = sklevel.max
                 minlevel, maxlevel = min(minlevel, maxlevel), max(minlevel, maxlevel)
                 for level in range(minlevel, maxlevel + 1):
                     parser['Level@{:02d}'.format(level)] = {'Skill Level': str(level)}
             if engine.has_handicap_level():
-                sklevel = engine.get().options['Handicap Level']
+                sklevel = options['Handicap Level']
                 minlevel = sklevel.min
                 maxlevel = sklevel.max
                 minlevel, maxlevel = min(minlevel, maxlevel), max(minlevel, maxlevel)
                 for level in range(minlevel, maxlevel + 1):
                     parser['Level@{:02d}'.format(level)] = {'Handicap Level': str(level)}
             if engine.has_strength():
-                sklevel = engine.get().options['Strength']
+                sklevel = options['Strength']
                 minlevel = sklevel.min
                 maxlevel = sklevel.max
                 minlevel, maxlevel = min(minlevel, maxlevel), max(minlevel, maxlevel)
@@ -152,7 +153,7 @@ def write_engine_ini(engine_path=None):
                 try:
                     if engine.has_levels():
                         write_level_ini(engine_file_name)
-                    engine_name = engine.get().name
+                    engine_name = engine.get_name()
 
                     name_parts = engine_name.replace('.', '').split(' ')
                     name_small = name_build(name_parts, 6, engine_file_name[2:])
@@ -160,6 +161,12 @@ def write_engine_ini(engine_path=None):
                     name_large = name_build(name_parts, 11, name_medium)
 
                     config[engine_file_name] = {}
+
+                    # config[engine_file_name][';available options'] = 'itsDefaultValue'
+                    engine_options = engine.get_options()
+                    for option in engine_options:
+                        config[engine_file_name][str(';' + option)] = str(engine_options[option].default)
+
                     config[engine_file_name]['name'] = engine_name
                     config[engine_file_name]['small'] = name_small
                     config[engine_file_name]['medium'] = name_medium

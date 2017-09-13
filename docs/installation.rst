@@ -203,6 +203,15 @@ Manual installation
 
   PicoChess has a lot of options. Type ``sudo python3 /opt/picochess/picochess.py -h`` for a list.
 
+Make picochess sound better
+---------------------------
+If your output from the RPi audio jack socket is quite low and buzzes a lot add the following line to /boot/config.txt
+``audio_pwm_mode=2``
+Afterwards type ``sudo reboot``.
+
+To make the volume instantly louder (it will also be kept after the reboot) type ``amixer sset PCM,0 90%``
+Obviously the percentage can be set to any number, but 100% is too loud.
+
 Bluetooth Connection
 --------------------
 

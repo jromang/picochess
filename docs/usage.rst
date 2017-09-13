@@ -17,14 +17,15 @@ Playing/Training Modes
 When using these modes, please be patient and don't rush moves. Allow a few seconds for the scores and moves to appear. If you see any bug when rushing moves, let us know on the mailing list.
 
 * Game mode (enabled by **white** queen on **A5**). This is the default mode. You can play against the computer. The clock displays the remaining thinking time for both sides. Press the second button to show the position evaluation, expressed in centipawns. Press again to show a hint ("ponder move").
-* Analysis mode (enabled by **white** queen on **B5**): the computer is watching the game, it does not play itself. The clock continually displays the best move for the side to play.
-* Kibitz mode (enabled by **white** queen on **C5**): the computer is watching the game, it does not play itself. The clock continually displays the position score (right aligned) with the search depth (left aligned).
-* Observe mode (enabled by **white** queen on **D5**): the computer is watching the game, it does not play itself. The clock displays the remaining thinking time for both sides. Press the second button once to show the position evaluation, twice to show a hint.
-* Ponder mode (enabled by **white** queen on **E5**): the computer is watching the game, it does not play itself. The clock displays the best move for the side to play in a 2 secs rotation with the position score together with the depth. So, this mode is a combination of "Analysis" & "Kibitz"
+* Brain mode (enabled by **white** queen on **B5**). This is same as Game mode but the computer is using the permanent brain to think ahead on your thinking time.
+* Analysis mode (enabled by **white** queen on **C5**): the computer is watching the game, it does not play itself. The clock continually displays the best move for the side to play.
+* Kibitz mode (enabled by **white** queen on **D5**): the computer is watching the game, it does not play itself. The clock continually displays the position score (right aligned) with the search depth (left aligned).
+* Observe mode (enabled by **white** queen on **E5**): the computer is watching the game, it does not play itself. The clock displays the remaining thinking time for both sides. Press the second button once to show the position evaluation, twice to show a hint.
+* Ponder mode (enabled by **white** queen on **F5**): the computer is watching the game, it does not play itself. The clock displays the best move for the side to play in a 2 secs rotation with the position score together with the depth. So, this mode is a combination of "Analysis" & "Kibitz"
 * Remote mode (enabled by **white** queen on **H5**): this mode will allow you to play against someone over internet. The remote player using the webserver whereas the other player using the pieces as normal to enter moves. A detailed documentation will be provided lateron.
 
 Game mode is the regular mode. If you used one of the other modes, you can return back to game mode by putting the extra **white** queen on **A5**.
-You can also press the fourth button to enter the menu (afterwards choose the Mode submenu) to toggle over the modes (Qa5-Qf5 only working in the starting position) see below.
+You can also press the fourth button to enter the menu (afterwards choose the Mode submenu) to toggle over the modes (Qa5-Qf5,Qh5 only working in the starting position) see below.
 
 The position score will always be displayed in centipawns from White's perspective. A negative score means black is ahead. If you have a DGT XL clock (or a Revelation II) the maximum score displayed it +/- 9.99
 
@@ -34,11 +35,11 @@ Choosing skill level
 Put the extra **black** queen on the 5th rank of your DGT board to select skill level. The skill range of ​​the currently selected engine is devided by 8 meaning a5 (easiest level) towards h5 (strongest level). Some engines support ELO level or even personalities instead of skill levels. If no skill level is selected, PicoChess uses the highest level if nothing choosen before or your last selected level by default.
 (Remove the extra white queen if it is still on the board). Please notice that not all chess engines support levels.
 
-In case of "stockfish" engine:
+In case of "stockfish7" engine:
 
-* Level  0 estimates about 1100 Elo (Absolute beginner)
-* Level 10 estimates about 1750 Elo (Mediate club player )
-* Level 20 estimates about 2570 Elo (Advanced tournament player)
+* Level  3 estimates about 1000 Elo (Absolute beginner)
+* Level  9 estimates about 1750 Elo (Mediate club player )
+* Level 20 estimates about 3100 Elo (Advanced tournament player)
 
 Another way to choose the skill level is by entering the "engine" menu with the clock buttons. Detailed explanation is below.
 
@@ -192,7 +193,7 @@ Engine Menu
 
 Similarly to above you can cyle with "-" & "+" accept with ">" or go back to the time variants with "<". You can choose alot more engines as with the queen.
 If the engine supports levels after accepting the engine you can select its level. Some engines have standard levels (for example from 0-20), and some engines support ELO rankings.
-The provided "rodent II" engine even support personalities. But the system is always the same. Cyle thrue the options and select with ">" or go back to former step with "<".
+The provided "rodent III" engine even support personalities. But the system is always the same. Cyle thrue the options and select with ">" or go back to former step with "<".
 
 System Menu
 -----------

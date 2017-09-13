@@ -122,6 +122,7 @@ class DgtMenu(object):
 
         self.menu_engine_level = None
         self.engine_has_960 = False
+        self.engine_has_ponder = False
         self.engine_restart = False
         self.menu_engine_name = 0
         self.installed_engines = []
@@ -262,6 +263,14 @@ class DgtMenu(object):
     def set_engine_has_960(self, flag: bool):
         """Set the flag."""
         self.engine_has_960 = flag
+
+    def get_engine_has_ponder(self):
+        """Get the flag."""
+        return self.engine_has_ponder
+
+    def set_engine_has_ponder(self, flag: bool):
+        """Set the flag."""
+        self.engine_has_ponder = flag
 
     def get_dgt_fen(self):
         """Get the flag."""
@@ -835,10 +844,12 @@ class DgtMenu(object):
             # maybe do action!
             if self.menu_mode == Mode.REMOTE and not self.inside_room:
                 text = self.dgttranslate.text('Y00_errorroom')
-            else:
+            elif self.menu_mode == Mode.NORMAL or self.get_engine_has_ponder():
                 mode_text = self.dgttranslate.text('B10_okmode')
                 event = Event.SET_INTERACTION_MODE(mode=self.menu_mode, mode_text=mode_text, show_ok=True)
                 text = self._fire_event(event)
+            else:  # only allow a pondering mode if engine supports that
+                text = self.dgttranslate.text('Y00_erroreng')
 
         elif self.state == MenuState.POS:
             text = self.enter_pos_color_menu()

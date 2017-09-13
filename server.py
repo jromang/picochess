@@ -480,7 +480,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
 
         elif isinstance(message, Message.ENGINE_READY):
             self._create_system_info()
-            self.shared['system_info']['engine_name'] = message.engine_name
+            self.shared['system_info']['old_engine'] = self.shared['system_info']['engine_name'] = message.engine_name
             if not message.has_levels:
                 if 'level_text' in self.shared['game_info']:
                     del self.shared['game_info']['level_text']
