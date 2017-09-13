@@ -471,8 +471,10 @@ def main():
 
     def set_wait_state(msg: Message, start_search=True):
         """Enter engine waiting (normal mode) and maybe (by parameter) start pondering."""
+        nonlocal play_mode, legal_fens, last_legal_fens
+        legal_fens = compute_legal_fens(game.copy())
+        last_legal_fens = []
         if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
-            nonlocal play_mode
             play_mode = PlayMode.USER_WHITE if game.turn == chess.WHITE else PlayMode.USER_BLACK
         if start_search:
             # Go back to analysing or observing
@@ -816,9 +818,8 @@ def main():
                     else:
                         msg = Message.ENGINE_FAIL()
                     set_wait_state(msg, not engine_fail)
-                    if interaction_mode == Mode.NORMAL:  # engine isnt started/searching, so also stop the clock
+                    if interaction_mode in (Mode.NORMAL, Mode.BRAIN):  # engine isnt started/searching => stop the clock
                         stop_clock()
-                        legal_fens = compute_legal_fens(game.copy())
                 if not engine_fallback:  # here dont care if engine supports pondering, cause Mode.NORMAL from startup
                     write_picochess_ini('engine', event.eng['file'])
 
@@ -836,8 +837,6 @@ def main():
                 if engine.has_chess960():
                     engine.option('UCI_Chess960', uci960)
                     engine.send()
-                legal_fens = compute_legal_fens(game.copy())
-                last_legal_fens = []
                 done_computer_fen = None
                 done_move = chess.Move.null()
                 time_control.reset()
@@ -863,8 +862,6 @@ def main():
                     if engine.has_chess960():
                         engine.option('UCI_Chess960', uci960)
                         engine.send()
-                    legal_fens = compute_legal_fens(game.copy())
-                    last_legal_fens = []
                     done_computer_fen = None
                     done_move = chess.Move.null()
                     time_control.reset()
