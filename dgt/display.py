@@ -700,6 +700,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self._reset_moves_and_score()
             self.allow_alternative = False
             DispatchDgt.fire(self.dgttranslate.text('C10_takeback'))
+            DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs={'ser', 'i2c', 'web'}))
 
         elif isinstance(message, Message.GAME_ENDS):
             if not self.dgtmenu.get_engine_restart():  # filter out the shutdown/reboot process

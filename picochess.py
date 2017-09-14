@@ -876,11 +876,13 @@ def main():
                 if engine.is_thinking():
                     stop_clock()
                     engine.stop(show_best=True)
-                else:
+                elif not done_computer_fen:
                     if time_control.internal_running():
                         stop_clock()
                     else:
                         start_clock()
+                else:
+                    logging.debug('best move displayed, dont start/stop clock')
 
             elif isinstance(event, Event.ALTERNATIVE_MOVE):
                 if done_computer_fen:
