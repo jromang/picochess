@@ -181,7 +181,7 @@ def main():
             engine.position(game_copy)
             engine.brain(timec.uci())
         else:
-            logging.info('ignore permanent brain with pondering move [%s]', pb_move)
+            logging.info('ignore permanent brain')
 
     def stop_search_and_clock(ponder_hit=False):
         """Depending on the interaction mode stop search and clock."""
@@ -335,6 +335,7 @@ def main():
         nonlocal game
         nonlocal done_move
         nonlocal done_computer_fen
+        nonlocal pb_move
         nonlocal error_fen
 
         handled_fen = True
@@ -429,37 +430,43 @@ def main():
                     stop_search_and_clock()
                     while len(game_copy.move_stack) < len(game.move_stack):
                         game.pop()
-                    done_computer_fen = None
-                    done_move = chess.Move.null()
-                    last_legal_fens = []
-                    msg = Message.TAKE_BACK(game=game.copy())
-                    msg_send = False
-                    if interaction_mode in (Mode.NORMAL, Mode.BRAIN, Mode.REMOTE) and is_not_user_turn(game_copy.turn):
-                        legal_fens = []
-                        if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
-                            searchmoves.reset()
-                            game_end = check_game_state(game, play_mode)
-                            if game_end:
-                                DisplayMsg.show(game_end)
-                            else:
-                                msg_send = True
-                                think(game, time_control, msg)
-                    else:
-                        legal_fens = compute_legal_fens(game.copy())
-                        if interaction_mode == Mode.BRAIN:
-                            brain(game, time_control)
 
-                    if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
-                        pass
-                    elif interaction_mode in (Mode.OBSERVE, Mode.REMOTE):
-                        msg_send = True
-                        analyse(game, msg)
-                    elif interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
-                        msg_send = True
-                        analyse(game, msg)
-                    if not msg_send:
-                        DisplayMsg.show(msg)
+                    # its a complete new pos, delete safed values
+                    done_computer_fen = None
+                    done_move = pb_move = chess.Move.null()
+                    searchmoves.reset()
+
+                    set_wait_state(Message.TAKE_BACK(game=game.copy()))  # new: force stop no matter if picochess turn
                     break
+                    # last_legal_fens = []
+                    # msg = Message.TAKE_BACK(game=game.copy())
+                    # msg_show = True
+                    # if interaction_mode in (Mode.NORMAL, Mode.BRAIN, Mode.REMOTE) and is_not_user_turn(game_copy.turn):
+                    #     legal_fens = []
+                    #     if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
+                    #         searchmoves.reset()
+                    #         game_end = check_game_state(game, play_mode)
+                    #         if game_end:
+                    #             DisplayMsg.show(game_end)
+                    #         else:
+                    #             msg_show = False
+                    #             think(game, time_control, msg)
+                    # else:
+                    #     legal_fens = compute_legal_fens(game.copy())
+                    #     if interaction_mode == Mode.BRAIN:
+                    #         brain(game, time_control)
+                    #
+                    # if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
+                    #     pass
+                    # elif interaction_mode in (Mode.OBSERVE, Mode.REMOTE):
+                    #     msg_show = False
+                    #     analyse(game, msg)
+                    # elif interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
+                    #     msg_show = False
+                    #     analyse(game, msg)
+                    # if msg_show:
+                    #     DisplayMsg.show(msg)
+                    # break
         # doing issue #152
         logging.debug('fen: %s result: %s', fen, handled_fen)
         stop_fen_timer()
@@ -475,8 +482,12 @@ def main():
         legal_fens = compute_legal_fens(game.copy())
         last_legal_fens = []
         if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
+            old_mode = play_mode
             play_mode = PlayMode.USER_WHITE if game.turn == chess.WHITE else PlayMode.USER_BLACK
+            if old_mode != play_mode:
+                logging.debug('play mode changed new: %s', play_mode)
         if start_search:
+            assert engine.is_waiting(), 'engine not waiting! thinking status: %s' % engine.is_thinking()
             # Go back to analysing or observing
             if interaction_mode == Mode.BRAIN:
                 brain(game, time_control)
@@ -1020,7 +1031,7 @@ def main():
                     stop_search_and_clock()
                     interaction_mode = event.mode
                     msg = Message.INTERACTION_MODE(mode=event.mode, mode_text=event.mode_text, show_ok=event.show_ok)
-                    set_wait_state(msg)
+                    set_wait_state(msg)  # dont clear searchmoves here
 
             elif isinstance(event, Event.SET_OPENING_BOOK):
                 write_picochess_ini('book', event.book['file'])
