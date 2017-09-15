@@ -322,7 +322,8 @@ def main():
                     analyse(game, msg)
 
     def is_not_user_turn(turn):
-        """Return if it is users turn (only valid in normal or remote mode)."""
+        """Return if it is users turn (only valid in normal, brain or remote mode)."""
+        assert interaction_mode in (Mode.NORMAL, Mode.BRAIN, Mode.REMOTE), 'wrong mode: %s' % interaction_mode
         condition1 = (play_mode == PlayMode.USER_WHITE and turn == chess.BLACK)
         condition2 = (play_mode == PlayMode.USER_BLACK and turn == chess.WHITE)
         return condition1 or condition2
@@ -979,14 +980,14 @@ def main():
 
             elif isinstance(event, Event.NEW_SCORE):
                 if interaction_mode == Mode.BRAIN and engine.is_pondering():
-                    logging.debug('in brain mode and pondering ignore score %s', event.score)
+                    logging.debug('in brain mode and pondering, ignore score %s', event.score)
                 else:
                     DisplayMsg.show(Message.NEW_SCORE(score=event.score, mate=event.mate, mode=interaction_mode,
                                                       turn=game.turn))
 
             elif isinstance(event, Event.NEW_DEPTH):
                 if interaction_mode == Mode.BRAIN and engine.is_pondering():
-                    logging.debug('in brain mode and pondering ignore depth %s', event.depth)
+                    logging.debug('in brain mode and pondering, ignore depth %s', event.depth)
                 else:
                     DisplayMsg.show(Message.NEW_DEPTH(depth=event.depth))
 
@@ -997,7 +998,7 @@ def main():
                 DisplayMsg.show(Message.SEARCH_STOPPED())
 
             elif isinstance(event, Event.SET_INTERACTION_MODE):
-                if event.mode not in (Mode.NORMAL, Mode.REMOTE) and done_computer_fen:
+                if event.mode not in (Mode.NORMAL, Mode.REMOTE) and done_computer_fen:  # @todo check why still needed
                     dgtmenu.set_mode(interaction_mode)  # undo the button4 stuff
                     logging.warning('mode cant be changed to a pondering mode as long as a move is displayed')
                     mode_text = dgttranslate.text('Y00_default', 'errmode')
