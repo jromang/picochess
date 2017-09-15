@@ -438,35 +438,6 @@ def main():
 
                     set_wait_state(Message.TAKE_BACK(game=game.copy()))  # new: force stop no matter if picochess turn
                     break
-                    # last_legal_fens = []
-                    # msg = Message.TAKE_BACK(game=game.copy())
-                    # msg_show = True
-                    # if interaction_mode in (Mode.NORMAL, Mode.BRAIN, Mode.REMOTE) and is_not_user_turn(game_copy.turn):
-                    #     legal_fens = []
-                    #     if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
-                    #         searchmoves.reset()
-                    #         game_end = check_game_state(game, play_mode)
-                    #         if game_end:
-                    #             DisplayMsg.show(game_end)
-                    #         else:
-                    #             msg_show = False
-                    #             think(game, time_control, msg)
-                    # else:
-                    #     legal_fens = compute_legal_fens(game.copy())
-                    #     if interaction_mode == Mode.BRAIN:
-                    #         brain(game, time_control)
-                    #
-                    # if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
-                    #     pass
-                    # elif interaction_mode in (Mode.OBSERVE, Mode.REMOTE):
-                    #     msg_show = False
-                    #     analyse(game, msg)
-                    # elif interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
-                    #     msg_show = False
-                    #     analyse(game, msg)
-                    # if msg_show:
-                    #     DisplayMsg.show(msg)
-                    # break
         # doing issue #152
         logging.debug('fen: %s result: %s', fen, handled_fen)
         stop_fen_timer()
@@ -852,6 +823,7 @@ def main():
                 done_move = chess.Move.null()
                 time_control.reset()
                 searchmoves.reset()
+                pb_move = chess.Move.null()
                 game_declared = False
                 set_wait_state(Message.START_NEW_GAME(game=game.copy(), newgame=True))
 
@@ -877,6 +849,7 @@ def main():
                     done_move = chess.Move.null()
                     time_control.reset()
                     searchmoves.reset()
+                    pb_move = chess.Move.null()
                     game_declared = False
                     set_wait_state(Message.START_NEW_GAME(game=game.copy(), newgame=newgame))
                 else:
