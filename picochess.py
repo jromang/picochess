@@ -449,14 +449,19 @@ def main():
 
     def set_wait_state(msg: Message, start_search=True):
         """Enter engine waiting (normal mode) and maybe (by parameter) start pondering."""
-        nonlocal play_mode, legal_fens, last_legal_fens
-        legal_fens = compute_legal_fens(game.copy())
-        last_legal_fens = []
-        if interaction_mode in (Mode.NORMAL, Mode.BRAIN):
-            old_mode = play_mode
-            play_mode = PlayMode.USER_WHITE if game.turn == chess.WHITE else PlayMode.USER_BLACK
-            if old_mode != play_mode:
-                logging.debug('play mode changed new: %s', play_mode)
+        if not done_computer_fen:
+            nonlocal play_mode, legal_fens, last_legal_fens
+            legal_fens = compute_legal_fens(game.copy())
+            last_legal_fens = []
+        if interaction_mode in (Mode.NORMAL, Mode.BRAIN):  # @todo handle Mode.REMOTE too
+            if done_computer_fen:
+                logging.debug('best move displayed, dont search and keep play mode: %s', play_mode)
+                start_search = False
+            else:
+                old_mode = play_mode
+                play_mode = PlayMode.USER_WHITE if game.turn == chess.WHITE else PlayMode.USER_BLACK
+                if old_mode != play_mode:
+                    logging.debug('new play mode: %s', play_mode)
         if start_search:
             assert engine.is_waiting(), 'engine not waiting! thinking status: %s' % engine.is_thinking()
             # Go back to analysing or observing
@@ -681,7 +686,7 @@ def main():
     bookreader = chess.polyglot.open_reader(all_books[book_index]['file'])
     searchmoves = AlternativeMover()
     interaction_mode = Mode.NORMAL
-    play_mode = PlayMode.USER_WHITE  # @todo make it valid in Mode.REMOTE too!
+    play_mode = PlayMode.USER_WHITE  # @todo make it valid in Mode.REMOTE too
 
     last_legal_fens = []
     done_computer_fen = None
@@ -820,10 +825,9 @@ def main():
                     engine.option('UCI_Chess960', uci960)
                     engine.send()
                 done_computer_fen = None
-                done_move = chess.Move.null()
+                done_move = pb_move = chess.Move.null()
                 time_control.reset()
                 searchmoves.reset()
-                pb_move = chess.Move.null()
                 game_declared = False
                 set_wait_state(Message.START_NEW_GAME(game=game.copy(), newgame=True))
 
@@ -846,10 +850,9 @@ def main():
                         engine.option('UCI_Chess960', uci960)
                         engine.send()
                     done_computer_fen = None
-                    done_move = chess.Move.null()
+                    done_move = pb_move = chess.Move.null()
                     time_control.reset()
                     searchmoves.reset()
-                    pb_move = chess.Move.null()
                     game_declared = False
                     set_wait_state(Message.START_NEW_GAME(game=game.copy(), newgame=newgame))
                 else:
@@ -872,7 +875,7 @@ def main():
                 if done_computer_fen:
                     done_computer_fen = None
                     done_move = chess.Move.null()
-                    if interaction_mode in (Mode.NORMAL, Mode.BRAIN):  # @todo handle Remote too
+                    if interaction_mode in (Mode.NORMAL, Mode.BRAIN):  # @todo handle Mode.REMOTE too
                         if time_control.mode == TimeMode.FIXED:
                             time_control.reset()
                         # set computer to move - in case the user just changed the engine
