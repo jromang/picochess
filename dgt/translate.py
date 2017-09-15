@@ -516,20 +516,27 @@ class DgtTranslate(object):
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
-        if text_id == 'system_version_menu':
+        if text_id == 'info_version_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Version    ', m='Version ', s='vers  ')
             detxt = Dgt.DISPLAY_TEXT(l='Version    ', m='Version ', s='vers  ')
             nltxt = Dgt.DISPLAY_TEXT(l='Versie     ', m='Versie  ', s='versie')
             frtxt = Dgt.DISPLAY_TEXT(l='Version    ', m='Version ', s='vers  ')
             estxt = Dgt.DISPLAY_TEXT(l='Version    ', m='Version ', s='vers  ')
             ittxt = Dgt.DISPLAY_TEXT(l='Versione   ', m='Versione', s='versio')
-        if text_id == 'system_ipadr_menu':
+        if text_id == 'info_ipadr_menu':
             entxt = Dgt.DISPLAY_TEXT(l='IP adr     ', m='IP adr  ', s='ip adr')
             detxt = Dgt.DISPLAY_TEXT(l='IP adr     ', m='IP adr  ', s='ip adr')
             nltxt = Dgt.DISPLAY_TEXT(l='IP address ', m='IP adr  ', s='ip adr')
             frtxt = Dgt.DISPLAY_TEXT(l='Adr IP     ', m='Adr IP  ', s='adr ip')
             estxt = Dgt.DISPLAY_TEXT(l='IP dir     ', m='IP dir  ', s='ip dir')
             ittxt = Dgt.DISPLAY_TEXT(l='ind IP     ', m='ind IP  ', s='ind ip')
+        if text_id == 'info_battery_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='BT battery ', m='Battery ', s='bt bat')
+            detxt = Dgt.DISPLAY_TEXT(l='BT Batterie', m='Batterie', s='bt bat')
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
         if text_id == 'system_sound_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Sound      ', m='Sound   ', s='sound ')
             detxt = Dgt.DISPLAY_TEXT(l='Toene      ', m='Toene   ', s='toene ')
@@ -551,6 +558,13 @@ class DgtTranslate(object):
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
+        if text_id == 'system_info_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='Information', m='Informat', s='inform')
+            detxt = Dgt.DISPLAY_TEXT(l='Information', m='Informat', s='inform')
+            nltxt = Dgt.DISPLAY_TEXT(l='Informatie ', m='Informat', s='inform')
+            frtxt = Dgt.DISPLAY_TEXT(l='Information', m='Informat', s='inform')
+            estxt = Dgt.DISPLAY_TEXT(l='Informacion', m='Informac', s='inform')
+            ittxt = Dgt.DISPLAY_TEXT(l='Informazion', m='Informaz', s='inform')
         if text_id == 'system_voice_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Voice      ', m='Voice   ', s='voice ')
             detxt = Dgt.DISPLAY_TEXT(l='Stimme     ', m='Stimme  ', s='stimme')
@@ -561,13 +575,6 @@ class DgtTranslate(object):
         if text_id == 'system_display_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Display    ', m='Display ', s='dsplay')
             detxt = entxt
-            nltxt = entxt
-            frtxt = entxt
-            estxt = entxt
-            ittxt = entxt
-        if text_id == 'system_battery_menu':
-            entxt = Dgt.DISPLAY_TEXT(l='BT battery ', m='Battery ', s='bt bat')
-            detxt = Dgt.DISPLAY_TEXT(l='BT Batterie', m='Batterie', s='bt bat')
             nltxt = entxt
             frtxt = entxt
             estxt = entxt

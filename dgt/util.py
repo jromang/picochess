@@ -196,14 +196,12 @@ class System(MyEnum):
 
     """System Class."""
 
-    VERSION = 'B00_system_version_menu'
-    IPADR = 'B00_system_ipadr_menu'
+    INFO = 'B00_system_info_menu'
     SOUND = 'B00_system_sound_menu'
     LANGUAGE = 'B00_system_language_menu'
     LOGFILE = 'B00_system_logfile_menu'
     VOICE = 'B00_system_voice_menu'
     DISPLAY = 'B00_system_display_menu'
-    BATTERY = 'B00_system_battery_menu'
 
 
 class SystemLoop(object):
@@ -216,9 +214,7 @@ class SystemLoop(object):
     @staticmethod
     def next(item: System):
         """Get next item."""
-        if item == System.VERSION:
-            return System.IPADR
-        elif item == System.IPADR:
+        if item == System.INFO:
             return System.SOUND
         elif item == System.SOUND:
             return System.LANGUAGE
@@ -229,17 +225,13 @@ class SystemLoop(object):
         elif item == System.VOICE:
             return System.DISPLAY
         elif item == System.DISPLAY:
-            return System.BATTERY
-        elif item == System.BATTERY:
-            return System.VERSION
+            return System.INFO
         return 'errSystNext'
 
     @staticmethod
     def prev(item: System):
         """Get previous item."""
-        if item == System.VERSION:
-            return System.BATTERY
-        if item == System.BATTERY:
+        if item == System.INFO:
             return System.DISPLAY
         if item == System.DISPLAY:
             return System.VOICE
@@ -250,10 +242,47 @@ class SystemLoop(object):
         if item == System.LANGUAGE:
             return System.SOUND
         elif item == System.SOUND:
-            return System.IPADR
-        elif item == System.IPADR:
-            return System.VERSION
+            return System.INFO
         return 'errSystPrev'
+
+
+class Info(MyEnum):
+
+    """Info Class."""
+
+    VERSION = 'B00_info_version_menu'
+    IPADR = 'B00_info_ipadr_menu'
+    BATTERY = 'B00_info_battery_menu'
+
+
+class InfoLoop(object):
+
+        """InfoLoop Class."""
+
+        def __init__(self):
+            super(InfoLoop, self).__init__()
+
+        @staticmethod
+        def next(item: Info):
+            """Get next item."""
+            if item == Info.VERSION:
+                return Info.IPADR
+            elif item == Info.IPADR:
+                return Info.BATTERY
+            elif item == Info.BATTERY:
+                return Info.VERSION
+            return 'errInfoNext'
+
+        @staticmethod
+        def prev(item: Info):
+            """Get previous item."""
+            if item == Info.VERSION:
+                return Info.BATTERY
+            if item == Info.BATTERY:
+                return Info.IPADR
+            if item == Info.IPADR:
+                return Info.VERSION
+            return 'errInfoPrev'
 
 
 class Language(MyEnum):
