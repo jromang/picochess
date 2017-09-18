@@ -139,7 +139,7 @@ class DgtPi(DgtIface):
         text = message.l
         if text is None:
             text = message.m
-        if self.getName() not in message.devs:
+        if self.get_name() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)
             return
         left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE
@@ -150,7 +150,7 @@ class DgtPi(DgtIface):
         """Display a move on the dgtpi."""
         bit_board, text = self.get_san(message)
         text = '{:3d}{:s}'.format(bit_board.fullmove_number, text)
-        if self.getName() not in message.devs:
+        if self.get_name() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)
             return True
         left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.DOT
@@ -159,7 +159,7 @@ class DgtPi(DgtIface):
 
     def display_time_on_clock(self, message):
         """Display the time on the dgtpi."""
-        if self.getName() not in message.devs:
+        if self.get_name() not in message.devs:
             logging.debug('ignored endText - devs: %s', message.devs)
             return True
         if self.clock_running or message.force:
@@ -189,7 +189,7 @@ class DgtPi(DgtIface):
 
     def stop_clock(self, devs: set):
         """Stop the dgtpi."""
-        if self.getName() not in devs:
+        if self.get_name() not in devs:
             logging.debug('ignored stopClock - devs: %s', devs)
             return True
         logging.debug('(%s) clock sending stop time to clock l:%s r:%s', ','.join(devs),
@@ -223,7 +223,7 @@ class DgtPi(DgtIface):
 
     def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
         """Start the dgtpi."""
-        if self.getName() not in devs:
+        if self.get_name() not in devs:
             logging.debug('ignored startClock - devs: %s', devs)
             return True
         l_hms = hms_time(time_left)
@@ -254,6 +254,6 @@ class DgtPi(DgtIface):
             self.clock_running = (side != ClockSide.NONE)
             return True
 
-    def getName(self):
+    def get_name(self):
         """Get name."""
         return 'i2c'

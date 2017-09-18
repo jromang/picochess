@@ -38,7 +38,7 @@ class DgtIface(DisplayDgt, Thread):
         self.dgttranslate = dgttranslate
 
         self.clock_running = False
-        self.enable_dgt_3000 = False
+        self.enable_dgt3000 = False
         self.case_res = True
 
     def display_text_on_clock(self, message):
@@ -73,7 +73,7 @@ class DgtIface(DisplayDgt, Thread):
         """Override this function."""
         raise NotImplementedError()
 
-    def getName(self):
+    def get_name(self):
         """Override this function."""
         raise NotImplementedError()
 
@@ -83,7 +83,7 @@ class DgtIface(DisplayDgt, Thread):
         if bit_board.is_legal(message.move):
             move_text = bit_board.san(message.move)
         else:
-            logging.warning('[%s] illegal move %s found - uci960: %s fen: %s', self.getName(), message.move,
+            logging.warning('[%s] illegal move %s found - uci960: %s fen: %s', self.get_name(), message.move,
                             message.uci960, message.fen)
             move_text = 'er{}' if is_xl else 'err {}'
             move_text = move_text.format(message.move.uci()[:4])
@@ -94,7 +94,7 @@ class DgtIface(DisplayDgt, Thread):
         return bit_board, text
 
     def _process_message(self, message):
-        if self.getName() not in message.devs:
+        if self.get_name() not in message.devs:
             return True
 
         logging.debug('(%s) handle DgtApi: %s started', ','.join(message.devs), message)
@@ -120,16 +120,12 @@ class DgtIface(DisplayDgt, Thread):
         elif isinstance(message, Dgt.CLOCK_START):
             self.case_res = self.start_clock(message.time_left, message.time_right, message.side, message.devs)
         elif isinstance(message, Dgt.CLOCK_VERSION):
-            text = self.dgttranslate.text('Y21_picochess', devs=message.devs)
-            text.rd = ClockIcons.DOT
-            DispatchDgt.fire(text)
-            DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs=message.devs))
             if 'i2c' in message.devs:
                 logging.debug('(i2c) clock found => starting the board connection')
                 self.dgtboard.run()  # finally start the serial board connection - see picochess.py
             else:
                 if message.main == 2:
-                    self.enable_dgt_3000 = True
+                    self.enable_dgt3000 = True
         else:  # switch-default
             pass
         logging.debug('(%s) handle DgtApi: %s ended', ','.join(message.devs), message)
@@ -142,7 +138,7 @@ class DgtIface(DisplayDgt, Thread):
 
     def run(self):
         """Call by threading.Thread start() function."""
-        logging.info('[%s] dgt_queue ready', self.getName())
+        logging.info('[%s] dgt_queue ready', self.get_name())
         while True:
             # Check if we have something to display
             try:

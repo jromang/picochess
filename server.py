@@ -192,7 +192,7 @@ class WebVr(DgtIface):
         self.shared = shared
         self.virtual_timer = None
         self.time_side = ClockSide.NONE
-        self.enable_dgt_pi = dgtboard.is_pi
+        self.enable_dgtpi = dgtboard.is_pi
         sub = 2 if dgtboard.is_pi else 0
         DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=2, sub=sub, dev='web', text=None))
         self.clock_show_time = True
@@ -243,10 +243,10 @@ class WebVr(DgtIface):
 
     def display_move_on_clock(self, message):
         """Display a move on the web clock."""
-        if self.enable_dgt_3000 or self.enable_dgt_pi:
-            bit_board, text = self.get_san(message, not self.enable_dgt_pi)
+        if self.enable_dgt3000 or self.enable_dgtpi:
+            bit_board, text = self.get_san(message, not self.enable_dgtpi)
             points = '...' if message.side == ClockSide.RIGHT else '.'
-            if self.enable_dgt_pi:
+            if self.enable_dgtpi:
                 text = '{:3d}{:s}{:s}'.format(bit_board.fullmove_number, points, text)
             else:
                 text = '{:2d}{:s}{:s}'.format(bit_board.fullmove_number % 100, points, text)
@@ -256,7 +256,7 @@ class WebVr(DgtIface):
                 text = text[:2].rjust(3) + text[2:].rjust(3)
             else:
                 text = text[:2].ljust(3) + text[2:].ljust(3)
-        if self.getName() not in message.devs:
+        if self.get_name() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)
             return True
         self.clock_show_time = False
@@ -268,13 +268,13 @@ class WebVr(DgtIface):
 
     def display_text_on_clock(self, message):
         """Display a text on the web clock."""
-        if self.enable_dgt_pi:
+        if self.enable_dgtpi:
             text = message.l
         else:
-            text = message.m if self.enable_dgt_3000 else message.s
+            text = message.m if self.enable_dgt3000 else message.s
         if text is None:
             text = message.m
-        if self.getName() not in message.devs:
+        if self.get_name() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)
             return True
         self.clock_show_time = False
@@ -286,7 +286,7 @@ class WebVr(DgtIface):
 
     def display_time_on_clock(self, message):
         """Display the time on the web clock."""
-        if self.getName() not in message.devs:
+        if self.get_name() not in message.devs:
             logging.debug('ignored endText - devs: %s', message.devs)
             return True
         if self.clock_running or message.force:
@@ -298,7 +298,7 @@ class WebVr(DgtIface):
 
     def stop_clock(self, devs: set):
         """Stop the time on the web clock."""
-        if self.getName() not in devs:
+        if self.get_name() not in devs:
             logging.debug('ignored stopClock - devs: %s', devs)
             return True
         if self.virtual_timer:
@@ -312,7 +312,7 @@ class WebVr(DgtIface):
 
     def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
         """Start the time on the web clock."""
-        if self.getName() not in devs:
+        if self.get_name() not in devs:
             logging.debug('ignored startClock - devs: %s', devs)
             return True
         if self.virtual_timer and self.virtual_timer.is_running():
@@ -340,7 +340,7 @@ class WebVr(DgtIface):
         EventHandler.write_to_clients(result)
         return True
 
-    def getName(self):
+    def get_name(self):
         """Return name."""
         return 'web'
 

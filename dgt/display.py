@@ -761,6 +761,11 @@ class DgtDisplay(DisplayMsg, threading.Thread):
 
         elif isinstance(message, Message.DGT_CLOCK_VERSION):
             DispatchDgt.fire(Dgt.CLOCK_VERSION(main=message.main, sub=message.sub, devs={message.dev}))
+            text = self.dgttranslate.text('Y21_picochess', devs={message.dev})
+            text.rd = ClockIcons.DOT
+            DispatchDgt.fire(text)
+            # DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs=message.devs))
+
             if message.dev == 'ser':  # send the "board connected message" to serial clock
                 DispatchDgt.fire(message.text)
             time_left, time_right = self.time_control.get_internal_time(flip_board=self.dgtmenu.get_flip_board())

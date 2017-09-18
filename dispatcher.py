@@ -117,7 +117,7 @@ class Dispatcher(DispatchDgt, Thread):
                     if message.maxtime == 2.1:  # 2.1=picochess message
                         self.dgtmenu.enable_picochess_displayed(dev)
                     if self.dgtmenu.inside_updt_menu():
-                        if message.maxtime == 0.1:  # 0.1=eboard error
+                        if message.maxtime == 0.1:  # 0.1=eBoard error
                             logging.debug('(%s) inside update menu => board errors not displayed', dev)
                             return
                         if message.maxtime == 1.1:  # 1.1=eBoard connect
