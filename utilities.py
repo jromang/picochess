@@ -35,7 +35,7 @@ from dgt.api import Dgt
 from configobj import ConfigObj, ConfigObjError, DuplicateError
 
 # picochess version
-version = '09g'
+version = '09h'
 
 evt_queue = queue.Queue()
 dispatch_queue = queue.Queue()
