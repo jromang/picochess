@@ -1,5 +1,5 @@
 ### ===================================
-### = picochess.ini.example v0.9[a-z] =
+### = picochess.ini.example v0.9[h-z] =
 ### ===================================
 ### Example and description how to configure PicoChess
 ### To use this file, simply copy this file to picochess.ini and edit the appropriate settings
@@ -39,6 +39,9 @@
 ### Also if you activate it but have non-DGT hardware connected (@raspberryPi) you might harm your hardware.
 ## If you have a new DGT Pi clock please uncomment the next line.
 # dgtpi = True
+### You can reduce the dgtboard piece recognition by a factor from 0 to 9. Please only use this, if you suffer from
+### sliding problems (like multi voices during you slide your pieces for example moving Bf1-b5 hear Be2,d3,c4 then b5).
+# slow-slide = 0
 
 ### ========================
 ### = Chess engine options =

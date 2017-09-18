@@ -254,8 +254,8 @@ class DgtTranslate(object):
             detxt = Dgt.DISPLAY_TEXT(l='illegalePos', m='illegal ', s='errpos')
             nltxt = Dgt.DISPLAY_TEXT(l='ongeldig   ', m='ongeldig', s='ongeld')
             frtxt = Dgt.DISPLAY_TEXT(l='illegale   ', m='illegale', s='pos il')
-            estxt = Dgt.DISPLAY_TEXT(l='illegal pos', m='ileg pos', s='ilegpo')
-            ittxt = Dgt.DISPLAY_TEXT(l='pos illegal', m='illegale', s='pos il')
+            estxt = Dgt.DISPLAY_TEXT(l='illegal pos', m='ileg pos', s='errpos')
+            ittxt = Dgt.DISPLAY_TEXT(l='pos illegal', m='illegale', s='errpos')
         if text_id == 'error960':
             entxt = Dgt.DISPLAY_TEXT(l='err uci960 ', m='err 960 ', s='err960')
             detxt = Dgt.DISPLAY_TEXT(l='err uci960 ', m='err 960 ', s='err960')
@@ -314,8 +314,8 @@ class DgtTranslate(object):
             detxt = Dgt.DISPLAY_TEXT(l='neues Spiel', m='neuesSpl', s='neuspl')
             nltxt = Dgt.DISPLAY_TEXT(l='nieuw party', m='nw party', s='nwpart')
             frtxt = Dgt.DISPLAY_TEXT(l='nvl partie ', m='nvl part', s='newgam')
-            estxt = Dgt.DISPLAY_TEXT(l='nuev partid', m='nuevpart', s='n part')
-            ittxt = Dgt.DISPLAY_TEXT(l='nuova parti', m='nuo part', s='nupart')
+            estxt = Dgt.DISPLAY_TEXT(l='nuev partid', m='nuevpart', s='nuepar')
+            ittxt = Dgt.DISPLAY_TEXT(l='nuova parti', m='nuo part', s='nuopar')
         if text_id == 'ucigame':
             wait = True
             msg = msg.rjust(3)
@@ -324,7 +324,7 @@ class DgtTranslate(object):
             nltxt = Dgt.DISPLAY_TEXT(l='nw party' + msg, m='party' + msg, s='par' + msg)
             frtxt = Dgt.DISPLAY_TEXT(l='nvl part' + msg, m='part ' + msg, s='gam' + msg)
             estxt = Dgt.DISPLAY_TEXT(l='partid  ' + msg, m='part ' + msg, s='par' + msg)
-            ittxt = Dgt.DISPLAY_TEXT(l='nuo part' + msg, m='nupar' + msg, s='par' + msg)
+            ittxt = Dgt.DISPLAY_TEXT(l='nuo part' + msg, m='part ' + msg, s='par' + msg)
         if text_id == 'takeback':
             wait = True
             entxt = Dgt.DISPLAY_TEXT(l='takeback   ', m='takeback', s='takbak')
@@ -454,7 +454,7 @@ class DgtTranslate(object):
             estxt = Dgt.DISPLAY_TEXT(l='Normal     ', m='Normal  ', s='normal')
             ittxt = Dgt.DISPLAY_TEXT(l='Normale    ', m='Normale ', s='normal')
         if text_id == 'mode_brain_menu':
-            entxt = Dgt.DISPLAY_TEXT(l='Perm Brain ', m='PerBrain', s='pbrain')
+            entxt = Dgt.DISPLAY_TEXT(l='Brain      ', m='Brain   ', s='brain ')
             detxt = entxt
             nltxt = entxt
             frtxt = entxt
@@ -516,20 +516,27 @@ class DgtTranslate(object):
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
-        if text_id == 'system_version_menu':
+        if text_id == 'info_version_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Version    ', m='Version ', s='vers  ')
             detxt = Dgt.DISPLAY_TEXT(l='Version    ', m='Version ', s='vers  ')
             nltxt = Dgt.DISPLAY_TEXT(l='Versie     ', m='Versie  ', s='versie')
             frtxt = Dgt.DISPLAY_TEXT(l='Version    ', m='Version ', s='vers  ')
             estxt = Dgt.DISPLAY_TEXT(l='Version    ', m='Version ', s='vers  ')
             ittxt = Dgt.DISPLAY_TEXT(l='Versione   ', m='Versione', s='versio')
-        if text_id == 'system_ipadr_menu':
+        if text_id == 'info_ipadr_menu':
             entxt = Dgt.DISPLAY_TEXT(l='IP adr     ', m='IP adr  ', s='ip adr')
             detxt = Dgt.DISPLAY_TEXT(l='IP adr     ', m='IP adr  ', s='ip adr')
             nltxt = Dgt.DISPLAY_TEXT(l='IP address ', m='IP adr  ', s='ip adr')
             frtxt = Dgt.DISPLAY_TEXT(l='Adr IP     ', m='Adr IP  ', s='adr ip')
             estxt = Dgt.DISPLAY_TEXT(l='IP dir     ', m='IP dir  ', s='ip dir')
             ittxt = Dgt.DISPLAY_TEXT(l='ind IP     ', m='ind IP  ', s='ind ip')
+        if text_id == 'info_battery_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='BT battery ', m='Battery ', s='bt bat')
+            detxt = Dgt.DISPLAY_TEXT(l='BT Batterie', m='Batterie', s='bt bat')
+            nltxt = Dgt.DISPLAY_TEXT(l='BT batterij', m='batterij', s='bt bat')
+            frtxt = Dgt.DISPLAY_TEXT(l='BT batterie', m='batterie', s='bt bat')
+            estxt = Dgt.DISPLAY_TEXT(l='BT bateria ', m='bateria ', s='bt bat')
+            ittxt = Dgt.DISPLAY_TEXT(l='BT batteria', m='batteria', s='bt bat')
         if text_id == 'system_sound_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Sound      ', m='Sound   ', s='sound ')
             detxt = Dgt.DISPLAY_TEXT(l='Toene      ', m='Toene   ', s='toene ')
@@ -551,6 +558,13 @@ class DgtTranslate(object):
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
+        if text_id == 'system_info_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='Information', m='Informat', s='inform')
+            detxt = Dgt.DISPLAY_TEXT(l='Information', m='Informat', s='inform')
+            nltxt = Dgt.DISPLAY_TEXT(l='Informatie ', m='Informat', s='inform')
+            frtxt = Dgt.DISPLAY_TEXT(l='Information', m='Informat', s='inform')
+            estxt = Dgt.DISPLAY_TEXT(l='Informacion', m='Informac', s='inform')
+            ittxt = Dgt.DISPLAY_TEXT(l='Informazion', m='Informaz', s='inform')
         if text_id == 'system_voice_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Voice      ', m='Voice   ', s='voice ')
             detxt = Dgt.DISPLAY_TEXT(l='Stimme     ', m='Stimme  ', s='stimme')
@@ -561,13 +575,6 @@ class DgtTranslate(object):
         if text_id == 'system_display_menu':
             entxt = Dgt.DISPLAY_TEXT(l='Display    ', m='Display ', s='dsplay')
             detxt = entxt
-            nltxt = entxt
-            frtxt = entxt
-            estxt = entxt
-            ittxt = entxt
-        if text_id == 'system_battery_menu':
-            entxt = Dgt.DISPLAY_TEXT(l='BT battery ', m='Battery ', s='bt bat')
-            detxt = Dgt.DISPLAY_TEXT(l='BT Batterie', m='Batterie', s='bt bat')
             nltxt = entxt
             frtxt = entxt
             estxt = entxt
@@ -925,11 +932,11 @@ class DgtTranslate(object):
             ittxt = Dgt.DISPLAY_TEXT(l='Versione' + msg, m='Vers ' + msg, s='ver' + msg)
         if text_id == 'bat_percent':
             entxt = Dgt.DISPLAY_TEXT(l='battery ' + msg, m='battr' + msg, s='bat' + msg)
-            detxt = entxt
-            nltxt = entxt
-            frtxt = entxt
-            estxt = entxt
-            ittxt = entxt
+            detxt = Dgt.DISPLAY_TEXT(l='Batterie' + msg, m='Battr' + msg, s='bat' + msg)
+            nltxt = Dgt.DISPLAY_TEXT(l='batterij' + msg, m='battr' + msg, s='bat' + msg)
+            frtxt = Dgt.DISPLAY_TEXT(l='batterie' + msg, m='battr' + msg, s='bat' + msg)
+            estxt = Dgt.DISPLAY_TEXT(l='bateria ' + msg, m='battr' + msg, s='bat' + msg)
+            ittxt = Dgt.DISPLAY_TEXT(l='batteria' + msg, m='battr' + msg, s='bat' + msg)
 
         for txt in [entxt, detxt, nltxt, frtxt, estxt, ittxt]:
             if txt:

@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from math import ceil
+from math import floor
 import logging
 import copy
 import queue
@@ -311,8 +311,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             eng = self.dgtmenu.get_engine()
             level_dict = eng['level_dict']
             if level_dict:
-                inc = ceil(len(level_dict) / 8)
-                level = min(inc * level_map.index(fen), len(level_dict) - 1)  # type: int
+                inc = len(level_dict) / 7
+                level = min(floor(inc * level_map.index(fen)), len(level_dict) - 1)  # type: int
                 self.dgtmenu.set_engine_level(level)
                 msg = sorted(level_dict)[level]
                 text = self.dgttranslate.text('M10_level', msg)
@@ -700,6 +700,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self._reset_moves_and_score()
             self.allow_alternative = False
             DispatchDgt.fire(self.dgttranslate.text('C10_takeback'))
+            DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs={'ser', 'i2c', 'web'}))
 
         elif isinstance(message, Message.GAME_ENDS):
             if not self.dgtmenu.get_engine_restart():  # filter out the shutdown/reboot process
