@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from math import ceil
+from math import floor
 import logging
 import copy
 import queue
@@ -311,8 +311,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             eng = self.dgtmenu.get_engine()
             level_dict = eng['level_dict']
             if level_dict:
-                inc = ceil(len(level_dict) / 8)
-                level = min(inc * level_map.index(fen), len(level_dict) - 1)  # type: int
+                inc = len(level_dict) / 7
+                level = min(floor(inc * level_map.index(fen)), len(level_dict) - 1)  # type: int
                 self.dgtmenu.set_engine_level(level)
                 msg = sorted(level_dict)[level]
                 text = self.dgttranslate.text('M10_level', msg)
