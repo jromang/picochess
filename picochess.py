@@ -626,7 +626,7 @@ def main():
 
     # Launch web server
     if args.web_server_port:
-        WebServer(args.web_server_port, dgttranslate, dgtboard).start()
+        WebServer(args.web_server_port, dgtboard).start()
         dgtdispatcher.register('web')
 
     if args.console:
@@ -636,12 +636,12 @@ def main():
         # Connect to DGT board
         logging.debug('starting PicoChess in board mode')
         if args.dgtpi:
-            DgtPi(dgttranslate, dgtboard).start()
+            DgtPi(dgtboard).start()
             dgtdispatcher.register('i2c')
         else:
             logging.debug('(ser) starting the board connection')
             dgtboard.run()  # a clock can only be online together with the board, so we must start it infront
-        DgtHw(dgttranslate, dgtboard).start()
+        DgtHw(dgtboard).start()
         dgtdispatcher.register('ser')
     # The class Dispatcher sends DgtApi messages at the correct (delayed) time out
     dgtdispatcher.start()

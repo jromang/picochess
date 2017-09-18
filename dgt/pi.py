@@ -33,8 +33,8 @@ class DgtPi(DgtIface):
 
     """Handle the DgtPi communication."""
 
-    def __init__(self, dgttranslate: DgtTranslate, dgtboard: DgtBoard):
-        super(DgtPi, self).__init__(dgttranslate, dgtboard)
+    def __init__(self, dgtboard: DgtBoard):
+        super(DgtPi, self).__init__(dgtboard)
 
         self.lib_lock = Lock()
         self.lib = cdll.LoadLibrary('etc/dgtpicom.x86.so' if machine() == 'x86_64' else 'etc/dgtpicom.so')

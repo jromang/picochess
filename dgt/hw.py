@@ -29,8 +29,8 @@ class DgtHw(DgtIface):
 
     """Handle the DgtXL/3000 communication."""
 
-    def __init__(self, dgttranslate: DgtTranslate, dgtboard: DgtBoard):
-        super(DgtHw, self).__init__(dgttranslate, dgtboard)
+    def __init__(self, dgtboard: DgtBoard):
+        super(DgtHw, self).__init__(dgtboard)
 
         self.lib_lock = Lock()
 

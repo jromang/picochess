@@ -158,11 +158,11 @@ class ChessBoardHandler(ServerRequestHandler):
 
 
 class WebServer(threading.Thread):
-    def __init__(self, port: int, dgttranslate: DgtTranslate, dgtboard: DgtBoard):
+    def __init__(self, port: int, dgtboard: DgtBoard):
         shared = {}
 
         WebDisplay(shared).start()
-        WebVr(shared, dgttranslate, dgtboard).start()
+        WebVr(shared, dgtboard).start()
         super(WebServer, self).__init__()
         wsgi_app = tornado.wsgi.WSGIContainer(pw)
 
@@ -187,8 +187,8 @@ class WebVr(DgtIface):
 
     """Handle the web (clock) communication."""
 
-    def __init__(self, shared, dgttranslate: DgtTranslate, dgtboard: DgtBoard):
-        super(WebVr, self).__init__(dgttranslate, dgtboard)
+    def __init__(self, shared, dgtboard: DgtBoard):
+        super(WebVr, self).__init__(dgtboard)
         self.shared = shared
         self.virtual_timer = None
         self.time_side = ClockSide.NONE

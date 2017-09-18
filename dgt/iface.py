@@ -31,11 +31,10 @@ class DgtIface(DisplayDgt, Thread):
 
     """An Interface class for DgtHw, DgtPi, DgtVr."""
 
-    def __init__(self, dgttranslate: DgtTranslate, dgtboard: DgtBoard):
+    def __init__(self, dgtboard: DgtBoard):
         super(DgtIface, self).__init__()
 
         self.dgtboard = dgtboard
-        self.dgttranslate = dgttranslate
 
         self.clock_running = False
         self.enable_dgt3000 = False
@@ -79,6 +78,28 @@ class DgtIface(DisplayDgt, Thread):
 
     def get_san(self, message, is_xl=False):
         """Create a chess.board plus a text ready to display on clock."""
+
+        def move(text: str, language: str, capital: bool):
+            """Return move text for clock display."""
+            directory = {}
+            if language == 'de':
+                directory = {'R': 'T', 'N': 'S', 'B': 'L', 'Q': 'D'}
+            if language == 'nl':
+                directory = {'R': 'T', 'N': 'P', 'B': 'L', 'Q': 'D'}
+            if language == 'fr':
+                directory = {'R': 'T', 'N': 'C', 'B': 'F', 'Q': 'D', 'K': '@'}
+            if language == 'es':
+                directory = {'R': 'T', 'N': 'C', 'B': 'A', 'Q': 'D', 'K': '@'}
+            if language == 'it':
+                directory = {'R': 'T', 'N': 'C', 'B': 'A', 'Q': 'D', 'K': '@'}
+            for i, j in directory.items():
+                text = text.replace(i, j)
+            text = text.replace('@', 'R')  # replace the King "@" from fr, es, it languages
+            if capital:
+                return text.upper()
+            else:
+                return text
+
         bit_board = Board(message.fen, message.uci960)
         if bit_board.is_legal(message.move):
             move_text = bit_board.san(message.move)
@@ -90,8 +111,9 @@ class DgtIface(DisplayDgt, Thread):
 
         if message.side == ClockSide.RIGHT:
             move_text = move_text.rjust(6 if is_xl else 8)
-        text = self.dgttranslate.move(move_text)
-        return bit_board, text
+        # text = self.dgttranslate.move(move_text)
+        # return bit_board, text
+        return bit_board, move(move_text, message.lang, message.capital and not is_xl)
 
     def _process_message(self, message):
         if self.get_name() not in message.devs:
