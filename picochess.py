@@ -589,11 +589,6 @@ def main():
 
     args, unknown = parser.parse_known_args()
 
-    engine_file = args.engine
-    if engine_file is None:
-        eng_ini = read_engine_ini()
-        engine_file = eng_ini[0]['file']  # read the first engine filename and use it as standard
-
     # Enable logging
     if args.log_file:
         handler = RotatingFileHandler('logs' + os.sep + args.log_file, maxBytes=1.4 * 1024 * 1024, backupCount=5)
@@ -663,13 +658,28 @@ def main():
     if args.enable_update:
         update_picochess(args.dgtpi, args.enable_update_reboot, dgttranslate)
 
-    # Gentlemen, start your engines...
-    engine = UciEngine(file=engine_file, hostname=args.engine_remote_server, username=args.engine_remote_user,
-                       key_file=args.engine_remote_key, password=args.engine_remote_pass, home=args.engine_remote_home)
-    try:
-        engine_name = engine.get_name()
-    except AttributeError:
-        logging.error('no engines started')
+    # try the given engine first and if that fails the first from engines.ini then crush
+    engine_file = args.engine
+    engine_tries = 0
+    engine = engine_name = None
+    while engine_tries < 2:
+        if engine_file is None:
+            eng_ini = read_engine_ini()
+            engine_file = eng_ini[0]['file']
+            engine_tries += 1
+
+        # Gentlemen, start your engines...
+        engine = UciEngine(file=engine_file, hostname=args.engine_remote_server, username=args.engine_remote_user,
+                           key_file=args.engine_remote_key, password=args.engine_remote_pass,
+                           home=args.engine_remote_home)
+        try:
+            engine_name = engine.get_name()
+            break
+        except AttributeError:
+            logging.error('engine %s not started', engine_file)
+            engine_file = None
+
+    if engine_tries == 2:
         time.sleep(3)
         DisplayMsg.show(Message.ENGINE_FAIL())
         time.sleep(2)
