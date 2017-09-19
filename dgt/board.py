@@ -632,7 +632,8 @@ class DgtBoard(object):
             self.wait_counter = (self.wait_counter + 1) % len(waitchars)
         return False
 
-    def _wait_for_clock(self, func):
+    # dgtHw functions start
+    def _wait_for_clock(self, func: str):
         has_to_wait = False
         counter = 0
         while self.clock_lock:
@@ -698,6 +699,21 @@ class DgtBoard(object):
                                   DgtClk.DGT_CMD_CLOCK_END,
                                   DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         return res
+
+    def light_squares_on_revelation(self, uci_move: str):
+        """Light the Rev2 leds."""
+        if self.use_revelation_leds:
+            logging.debug('(rev) leds turned on - move: %s', uci_move)
+            fr_s = (8 - int(uci_move[1])) * 8 + ord(uci_move[0]) - ord('a')
+            to_s = (8 - int(uci_move[3])) * 8 + ord(uci_move[2]) - ord('a')
+            self.write_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x01, fr_s, to_s, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+
+    def clear_light_on_revelation(self):
+        """Clear the Rev2 leds."""
+        if self.use_revelation_leds:
+            logging.debug('(rev) leds turned off')
+            self.write_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0x40, 0x40, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+    # dgtHw functions end
 
     def run(self):
         """NOT called from threading.Thread instead inside the __init__ function from hw.py."""
