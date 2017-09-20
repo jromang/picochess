@@ -807,14 +807,24 @@ def main():
                     engine.startup(event.options)
                     # All done - rock'n'roll
                     engine_fail = engine_fallback or not (interaction_mode == Mode.NORMAL or engine.has_ponder())
-                    if not engine_fail:
-                        searchmoves.reset()
+                    if engine_fail:
+                        if not engine_fallback:
+                            logging.debug('new engine doesnt support pondering mode, reverting to %s', old_file)
+                            # engine = UciEngine(old_file)
+                            # engine.startup(old_options)
+                        # msg = Message.ENGINE_FAIL()
+
+                        # @todo for the moment ignore this error, and just start the engine
                         msg = Message.ENGINE_READY(eng=event.eng, engine_name=engine_name,
                                                    eng_text=event.eng_text, has_levels=engine.has_levels(),
                                                    has_960=engine.has_chess960(), has_ponder=engine.has_ponder(),
                                                    show_ok=event.show_ok)
                     else:
-                        msg = Message.ENGINE_FAIL()
+                        searchmoves.reset()
+                        msg = Message.ENGINE_READY(eng=event.eng, engine_name=engine_name,
+                                                   eng_text=event.eng_text, has_levels=engine.has_levels(),
+                                                   has_960=engine.has_chess960(), has_ponder=engine.has_ponder(),
+                                                   show_ok=event.show_ok)
                     set_wait_state(msg, not engine_fail)
                     if interaction_mode in (Mode.NORMAL, Mode.BRAIN):  # engine isnt started/searching => stop the clock
                         stop_clock()
