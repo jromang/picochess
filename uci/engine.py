@@ -132,15 +132,11 @@ class UciEngine(object):
 
     def quit(self):
         """Quit engine."""
-        return self.engine.quit()
-
-    def terminate(self):
-        """Terminate engine."""
-        return self.engine.terminate()
-
-    def kill(self):
-        """Kill engine."""
-        return self.engine.kill()
+        if self.engine.quit():  # Ask nicely
+            if self.engine.terminate():  # If you won't go nicely....
+                if self.engine.kill():  # Right that does it!
+                    return False
+        return True
 
     def uci(self):
         """Send start uci command."""

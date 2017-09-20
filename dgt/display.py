@@ -670,6 +670,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
 
         elif isinstance(message, Message.ENGINE_FAIL):
             DispatchDgt.fire(self.dgttranslate.text('Y10_erroreng'))
+            self.dgtmenu.set_engine_restart(False)
 
         elif isinstance(message, Message.COMPUTER_MOVE):
             self._process_computer_move(message)

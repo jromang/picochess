@@ -769,20 +769,15 @@ def main():
 
             elif isinstance(event, Event.NEW_ENGINE):
                 old_file = engine.get_file()
-                old_options = engine.get_options()
-                engine_shutdown = True
+                old_options = {}
+                raw_options = engine.get_options()
+                for name, value in raw_options.items():  # transfer Option to string by using the "default" value
+                    old_options[name] = str(value.default)
                 engine_fallback = False
                 # Stop the old engine cleanly
                 stop_search()
                 # Closeout the engine process and threads
-                # The all return non-zero error codes, 0=success
-                if engine.quit():  # Ask nicely
-                    if engine.terminate():  # If you won't go nicely....
-                        if engine.kill():  # Right that does it!
-                            logging.error('engine shutdown failure')
-                            DisplayMsg.show(Message.ENGINE_FAIL())
-                            engine_shutdown = False
-                if engine_shutdown:
+                if engine.quit():
                     # Load the new one and send args.
                     # Local engines only
                     engine = UciEngine(event.eng['file'])
@@ -802,32 +797,32 @@ def main():
                             DisplayMsg.show(Message.ENGINE_FAIL())
                             time.sleep(3)
                             sys.exit(-1)
-                    # Schedule cleanup of old objects
-                    gc.collect()
                     engine.startup(event.options)
                     # All done - rock'n'roll
-                    engine_fail = engine_fallback or not (interaction_mode == Mode.NORMAL or engine.has_ponder())
-                    if engine_fail:
-                        if not engine_fallback:
-                            logging.debug('new engine doesnt support pondering mode, reverting to %s', old_file)
-                            # engine = UciEngine(old_file)
-                            # engine.startup(old_options)
-                        # msg = Message.ENGINE_FAIL()
-
-                        # @todo for the moment ignore this error, and just start the engine
-                        msg = Message.ENGINE_READY(eng=event.eng, engine_name=engine_name,
-                                                   eng_text=event.eng_text, has_levels=engine.has_levels(),
-                                                   has_960=engine.has_chess960(), has_ponder=engine.has_ponder(),
-                                                   show_ok=event.show_ok)
+                    if not (interaction_mode == Mode.NORMAL or engine.has_ponder()):
+                        logging.debug('new engine doesnt support pondering mode, reverting to %s', old_file)
+                        engine_fallback = True
+                        if engine.quit():
+                            engine = UciEngine(old_file)
+                            engine.startup(old_options)
+                        else:
+                            logging.error('engine shutdown failure')
+                    if engine_fallback:
+                        msg = Message.ENGINE_FAIL()
                     else:
                         searchmoves.reset()
                         msg = Message.ENGINE_READY(eng=event.eng, engine_name=engine_name,
                                                    eng_text=event.eng_text, has_levels=engine.has_levels(),
                                                    has_960=engine.has_chess960(), has_ponder=engine.has_ponder(),
                                                    show_ok=event.show_ok)
-                    set_wait_state(msg, not engine_fail)
+                    # Schedule cleanup of old objects
+                    gc.collect()
+                    set_wait_state(msg, not engine_fallback)
                     if interaction_mode in (Mode.NORMAL, Mode.BRAIN):  # engine isnt started/searching => stop the clock
                         stop_clock()
+                else:
+                    logging.error('engine shutdown failure')
+                    DisplayMsg.show(Message.ENGINE_FAIL())
                 if not engine_fallback:  # here dont care if engine supports pondering, cause Mode.NORMAL from startup
                     write_picochess_ini('engine', event.eng['file'])
 
