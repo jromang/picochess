@@ -422,7 +422,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                     Observable.fire(Event.NEW_GAME(pos960=pos960))
                 else:
                     # self._reset_moves_and_score()
-                    DispatchDgt.fire(self.dgttranslate.text('Y00_error960'))
+                    DispatchDgt.fire(self.dgttranslate.text('Y10_error960'))
             else:
                 Observable.fire(Event.FEN(fen=fen))
 

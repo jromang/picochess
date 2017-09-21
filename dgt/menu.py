@@ -850,13 +850,14 @@ class DgtMenu(object):
         elif self.state == MenuState.MODE_TYPE:
             # maybe do action!
             if self.menu_mode == Mode.REMOTE and not self.inside_room:
-                text = self.dgttranslate.text('Y00_errorroom')
+                text = self.dgttranslate.text('Y10_errorroom')
             elif self.menu_mode == Mode.NORMAL or self.get_engine_has_ponder():
                 mode_text = self.dgttranslate.text('B10_okmode')
                 event = Event.SET_INTERACTION_MODE(mode=self.menu_mode, mode_text=mode_text, show_ok=True)
                 text = self._fire_event(event)
             else:  # only allow a pondering mode if engine supports that
-                text = self.dgttranslate.text('Y00_erroreng')
+                DispatchDgt.fire(self.dgttranslate.text('Y10_erroreng'))
+                text = Dgt.DISPLAY_TIME(force=True, wait=True, devs={'ser', 'i2c', 'web'})
 
         elif self.state == MenuState.POS:
             text = self.enter_pos_color_menu()
@@ -888,7 +889,7 @@ class DgtMenu(object):
                 text = self.save_choices()
             else:
                 logging.debug('illegal fen %s', fen)
-                DispatchDgt.fire(self.dgttranslate.text('Y05_illegalpos'))
+                DispatchDgt.fire(self.dgttranslate.text('Y10_illegalpos'))
                 text = self.dgttranslate.text('B00_scanboard')
                 text.wait = True
 
@@ -1181,7 +1182,7 @@ class DgtMenu(object):
                 self.menu_position_uci960 = not self.menu_position_uci960
                 text = self.dgttranslate.text('B00_960yes' if self.menu_position_uci960 else 'B00_960no')
             else:
-                text = self.dgttranslate.text('Y00_error960')
+                text = self.dgttranslate.text('Y10_error960')
 
         elif self.state == MenuState.POS_READ:
             text = self.dgttranslate.text('B00_nofunction')
@@ -1406,10 +1407,10 @@ class DgtMenu(object):
                 self.menu_position_uci960 = not self.menu_position_uci960
                 text = self.dgttranslate.text('B00_960yes' if self.menu_position_uci960 else 'B00_960no')
             else:
-                text = self.dgttranslate.text('Y00_error960')
+                text = self.dgttranslate.text('Y10_error960')
 
         elif self.state == MenuState.POS_READ:
-            text = self.dgttranslate.text('B00_nofunction')
+            text = self.dgttranslate.text('B10_nofunction')
 
         elif self.state == MenuState.TIME:
             self.state = MenuState.BOOK
