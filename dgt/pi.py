@@ -221,15 +221,13 @@ class DgtPi(DgtIface):
             self.clock_running = (side != ClockSide.NONE)
             return True
 
-    def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
+    def start_clock(self, side: ClockSide, devs: set):
         """Start the dgtpi."""
         if self.get_name() not in devs:
             logging.debug('ignored startClock - devs: %s', devs)
             return True
-        l_hms = hms_time(time_left)
-        r_hms = hms_time(time_right)
-        logging.debug('(%s) clock received last time from clock l:%s r:%s', ','.join(devs),
-                      hms_time(self.l_time), hms_time(self.r_time))
+        l_hms = hms_time(self.l_time)
+        r_hms = hms_time(self.r_time)
         logging.debug('(%s) clock sending start time to clock l:%s r:%s', ','.join(devs), l_hms, r_hms)
 
         l_run = r_run = 0
@@ -253,6 +251,22 @@ class DgtPi(DgtIface):
         else:
             self.clock_running = (side != ClockSide.NONE)
             return True
+
+    def set_clock(self, time_left: int, time_right: int, devs: set):
+        """Set the dgtpi."""
+        if self.get_name() not in devs:
+            logging.debug('ignored setClock - devs: %s', devs)
+            return True
+
+        l_hms = hms_time(time_left)
+        r_hms = hms_time(time_right)
+        logging.debug('(%s) clock received last time from clock l:%s r:%s', ','.join(devs),
+                      hms_time(self.l_time), hms_time(self.r_time))
+        logging.debug('(%s) clock sending set time to clock l:%s r:%s', ','.join(devs), l_hms, r_hms)
+
+        self.l_time = time_left
+        self.r_time = time_right
+        return True
 
     def get_name(self):
         """Get name."""

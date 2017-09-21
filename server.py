@@ -310,7 +310,7 @@ class WebVr(DgtIface):
         self.time_side = side
         return True
 
-    def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
+    def start_clock(self, side: ClockSide, devs: set):
         """Start the time on the web clock."""
         if self.get_name() not in devs:
             logging.debug('ignored startClock - devs: %s', devs)
@@ -322,10 +322,16 @@ class WebVr(DgtIface):
             self.virtual_timer.start()
         self._resume_clock(side)
         self.clock_show_time = True
-        # simulate the "start_clock" function from dgthw/pi
+        self._display_time(self.l_time, self.r_time)
+        return True
+
+    def set_clock(self, time_left: int, time_right: int, devs: set):
+        """Start the time on the web clock."""
+        if self.get_name() not in devs:
+            logging.debug('ignored setClock - devs: %s', devs)
+            return True
         self.l_time = time_left
         self.r_time = time_right
-        self._display_time(self.l_time, self.r_time)
         return True
 
     def light_squares_on_revelation(self, uci_move):
