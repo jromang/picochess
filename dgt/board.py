@@ -269,6 +269,9 @@ class DgtBoard(object):
                 elif r_time > self.r_time or l_time > self.l_time:  # the new time is higher as the old => ignore
                     logging.warning('(ser) clock strange old time received %s l:%s r:%s',
                                     message, hms_time(self.l_time), hms_time(self.r_time))
+                    if self.in_settime:
+                        logging.debug('(ser) clock still not finished set time, ignore received time')
+                        errtim = True
                 else:
                     status = message[6] & 0x3f
                     if status & 0x20:
