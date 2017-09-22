@@ -119,6 +119,7 @@ class MessageApi():
     SEARCH_STARTED = 'MSG_SEARCH_STARTED'  # Engine has started to search
     SEARCH_STOPPED = 'MSG_SEARCH_STOPPED'  # Engine has stopped the search
     TAKE_BACK = 'MSG_TACK_BACK'  # User takes back move(s)
+    # CLOCK_SET = 'MSG_CLOCK_SET'  # Say to run autonomous clock, contains time_control
     CLOCK_START = 'MSG_CLOCK_START'  # Say to run autonomous clock, contains time_control
     CLOCK_STOP = 'MSG_CLOCK_STOP'  # Stops the clock
     USER_MOVE_DONE = 'MSG_USER_MOVE_DONE'  # Player has done a move on board
@@ -152,10 +153,10 @@ class DgtApi():
     DISPLAY_TIME = 'DGT_DISPLAY_TIME'
     LIGHT_CLEAR = 'DGT_LIGHT_CLEAR'
     LIGHT_SQUARES = 'DGT_LIGHT_SQUARES'
-    CLOCK_STOP = 'DGT_CLOCK_STOP'
+    CLOCK_SET = 'DGT_CLOCK_SET'
     CLOCK_START = 'DGT_CLOCK_START'
+    CLOCK_STOP = 'DGT_CLOCK_STOP'
     CLOCK_VERSION = 'DGT_CLOCK_VERSION'
-    # CLOCK_TIME = 'DGT_CLOCK_TIME'
     SERIALNR = 'DGT_SERIALNR'
 
 
@@ -170,8 +171,9 @@ class Dgt():
     DISPLAY_TIME = ClassFactory(DgtApi.DISPLAY_TIME, ['wait', 'force', 'devs'])
     LIGHT_CLEAR = ClassFactory(DgtApi.LIGHT_CLEAR, ['devs'])
     LIGHT_SQUARES = ClassFactory(DgtApi.LIGHT_SQUARES, ['uci_move', 'devs'])
+    CLOCK_SET = ClassFactory(DgtApi.CLOCK_SET, ['time_left', 'time_right', 'devs'])
+    CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['side', 'devs', 'wait'])
     CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, ['devs'])
-    CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side', 'devs', 'wait'])
     CLOCK_VERSION = ClassFactory(DgtApi.CLOCK_VERSION, ['main', 'sub', 'devs'])
 
 
@@ -210,6 +212,7 @@ class Message():
     SEARCH_STARTED = ClassFactory(MessageApi.SEARCH_STARTED, [])
     SEARCH_STOPPED = ClassFactory(MessageApi.SEARCH_STOPPED, [])
     TAKE_BACK = ClassFactory(MessageApi.TAKE_BACK, ['game'])
+    # CLOCK_SET = ClassFactory(MessageApi.CLOCK_SET, ['turn', 'tc_init', 'devs'])
     CLOCK_START = ClassFactory(MessageApi.CLOCK_START, ['turn', 'tc_init', 'devs'])
     CLOCK_STOP = ClassFactory(MessageApi.CLOCK_STOP, ['devs'])
     USER_MOVE_DONE = ClassFactory(MessageApi.USER_MOVE_DONE, ['move', 'fen', 'turn', 'game'])

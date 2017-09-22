@@ -39,17 +39,15 @@ class TimeControl(object):
         self.fischer_increment = fischer
         self.internal_time = internal_time
 
-        self.clock_time_white = 0  # saves the sended clock time for white
-        self.clock_time_black = 0  # saves the sended clock time for black
-
+        self.clock_time = {chess.WHITE: 0, chess.BLACK: 0}  # saves the sended clock time for white/black
         self.timer = None
         self.run_color = None
         self.active_color = None
         self.start_time = None
 
         if internal_time:  # preset the clock (received) time already
-            self.clock_time_white = int(internal_time[chess.WHITE])
-            self.clock_time_black = int(internal_time[chess.BLACK])
+            self.clock_time[chess.WHITE] = int(internal_time[chess.WHITE])
+            self.clock_time[chess.BLACK] = int(internal_time[chess.BLACK])
         else:
             self.reset()
 
@@ -82,16 +80,16 @@ class TimeControl(object):
     def reset(self):
         """Reset the clock's times for both players."""
         if self.mode == TimeMode.BLITZ:
-            self.clock_time_white = self.clock_time_black = self.minutes_per_game * 60
+            self.clock_time[chess.WHITE] = self.clock_time[chess.BLACK] = self.minutes_per_game * 60
 
         elif self.mode == TimeMode.FISCHER:
-            self.clock_time_white = self.clock_time_black = self.minutes_per_game * 60 + self.fischer_increment
+            self.clock_time[chess.WHITE] = self.clock_time[chess.BLACK] = self.minutes_per_game * 60 + self.fischer_increment
 
         elif self.mode == TimeMode.FIXED:
-            self.clock_time_white = self.clock_time_black = self.seconds_per_move
+            self.clock_time[chess.WHITE] = self.clock_time[chess.BLACK] = self.seconds_per_move
 
-        self.internal_time = {chess.WHITE: float(self.clock_time_white),
-                              chess.BLACK: float(self.clock_time_black)}
+        self.internal_time = {chess.WHITE: float(self.clock_time[chess.WHITE]),
+                              chess.BLACK: float(self.clock_time[chess.BLACK])}
         self.active_color = None
 
     def _log_time(self):
@@ -108,8 +106,8 @@ class TimeControl(object):
     def set_clock_times(self, white_time: int, black_time: int):
         """Set the times send from the clock."""
         logging.info('set clock times w:%s b:%s', hms_time(white_time), hms_time(black_time))
-        self.clock_time_white = white_time
-        self.clock_time_black = black_time
+        self.clock_time[chess.WHITE] = white_time
+        self.clock_time[chess.BLACK] = black_time
 
     def reset_start_time(self):
         """Set the start time to the current time."""
@@ -135,10 +133,7 @@ class TimeControl(object):
             logging.info('before internal time w:%s - b:%s', w_hms, b_hms)
 
             self.internal_time[color] += self.fischer_increment
-            if color == chess.WHITE:
-                self.clock_time_white += self.fischer_increment
-            else:
-                self.clock_time_black += self.fischer_increment
+            self.clock_time[color] += self.fischer_increment
 
             # log times - issue #184
             w_hms, b_hms = self._log_time()
@@ -158,10 +153,10 @@ class TimeControl(object):
                 w_hms, b_hms = self._log_time()
                 logging.info('start internal time w:%s - b:%s', w_hms, b_hms)
                 logging.info('received prio clock time w:%s - b:%s',
-                             hms_time(self.clock_time_white), hms_time(self.clock_time_black))
+                             hms_time(self.clock_time[chess.WHITE]), hms_time(self.clock_time[chess.BLACK]))
 
-            self.internal_time[chess.WHITE] = self.clock_time_white
-            self.internal_time[chess.BLACK] = self.clock_time_black
+            self.internal_time[chess.WHITE] = self.clock_time[chess.WHITE]
+            self.internal_time[chess.BLACK] = self.clock_time[chess.BLACK]
 
             # Only start thread if not already started for same color, and the player has not already lost on time
             if self.internal_time[color] > 0 and self.active_color is not None and self.run_color != self.active_color:

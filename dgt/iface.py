@@ -60,15 +60,19 @@ class DgtIface(DisplayDgt, Thread):
         """Override this function."""
         raise NotImplementedError()
 
-    def stop_clock(self, devs):
-        """Override this function."""
-        raise NotImplementedError()
-
     def _resume_clock(self, side):
         """Override this function."""
         raise NotImplementedError()
 
-    def start_clock(self, time_left, time_right, side, devs):
+    def start_clock(self, side, devs):
+        """Override this function."""
+        raise NotImplementedError()
+
+    def set_clock(self, time_left, time_right, devs):
+        """Override this function."""
+        raise NotImplementedError()
+
+    def stop_clock(self, devs):
         """Override this function."""
         raise NotImplementedError()
 
@@ -134,13 +138,15 @@ class DgtIface(DisplayDgt, Thread):
             self.case_res = self.clear_light_on_revelation()
         elif isinstance(message, Dgt.LIGHT_SQUARES):
             self.case_res = self.light_squares_on_revelation(message.uci_move)
+        elif isinstance(message, Dgt.CLOCK_SET):
+            self.case_res = self.set_clock(message.time_left, message.time_right, message.devs)
+        elif isinstance(message, Dgt.CLOCK_START):
+            self.case_res = self.start_clock(message.side, message.devs)
         elif isinstance(message, Dgt.CLOCK_STOP):
             if self.clock_running:
                 self.case_res = self.stop_clock(message.devs)
             else:
                 logging.debug('(%s) clock is already stopped', ','.join(message.devs))
-        elif isinstance(message, Dgt.CLOCK_START):
-            self.case_res = self.start_clock(message.time_left, message.time_right, message.side, message.devs)
         elif isinstance(message, Dgt.CLOCK_VERSION):
             if 'i2c' in message.devs:
                 logging.debug('(i2c) clock found => starting the board connection')

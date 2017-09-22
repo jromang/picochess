@@ -153,18 +153,28 @@ class DgtHw(DgtIface):
                 return res
             return self.dgtboard.end_text()  # this is needed for some(!) clocks
 
-    def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
+    def start_clock(self, side: ClockSide, devs: set):
         """Start the dgtxl/3k."""
         if self.get_name() not in devs:
             logging.debug('ignored startClock - devs: %s', devs)
             return True
+        logging.debug('(%s) clock sending start time to clock l:%s r:%s', ','.join(devs),
+                      hms_time(self.dgtboard.l_time), hms_time(self.dgtboard.r_time))
+        return self._resume_clock(side)
+
+    def set_clock(self, time_left: int, time_right: int, devs: set):
+        """Start the dgtxl/3k."""
+        if self.get_name() not in devs:
+            logging.debug('ignored setClock - devs: %s', devs)
+            return True
         logging.debug('(%s) clock received last time from clock l:%s r:%s', ','.join(devs),
                       hms_time(self.dgtboard.l_time), hms_time(self.dgtboard.r_time))
+        logging.debug('(%s) clock sending set time to clock l:%s r:%s', ','.join(devs),
+                      hms_time(time_left), hms_time(time_right))
+        self.dgtboard.in_settime = True  # it will return to false as soon SetAndRun ack received
         self.dgtboard.l_time = time_left
         self.dgtboard.r_time = time_right
-        logging.debug('(%s) clock sending start time to clock l:%s r:%s', ','.join(devs),
-                      hms_time(time_left), hms_time(time_right))
-        return self._resume_clock(side)
+        return True
 
     def get_name(self):
         """Get name."""

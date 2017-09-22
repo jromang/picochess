@@ -93,7 +93,7 @@ class Dispatcher(DispatchDgt, Thread):
 
     def _process_message(self, message, dev: str):
         do_handle = True
-        if repr(message) in (DgtApi.CLOCK_START, DgtApi.CLOCK_STOP):
+        if repr(message) in (DgtApi.CLOCK_START, DgtApi.CLOCK_STOP, DgtApi.DISPLAY_TIME):
             self.display_hash[dev] = None  # Cant know the clock display if command changing the running status
         else:
             if repr(message) in (DgtApi.DISPLAY_MOVE, DgtApi.DISPLAY_TEXT):
@@ -108,7 +108,8 @@ class Dispatcher(DispatchDgt, Thread):
                 logging.debug('(%s) clock registered', dev)
                 self.clock_connected[dev] = True
 
-            clk = (DgtApi.DISPLAY_MOVE, DgtApi.DISPLAY_TEXT, DgtApi.DISPLAY_TIME, DgtApi.CLOCK_START, DgtApi.CLOCK_STOP)
+            clk = (DgtApi.DISPLAY_MOVE, DgtApi.DISPLAY_TEXT, DgtApi.DISPLAY_TIME,
+                   DgtApi.CLOCK_SET, DgtApi.CLOCK_START, DgtApi.CLOCK_STOP)
             if repr(message) in clk and not self.clock_connected[dev]:
                 logging.debug('(%s) clock still not registered => ignore %s', dev, message)
                 return
