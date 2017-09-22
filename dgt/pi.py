@@ -43,6 +43,8 @@ class DgtPi(DgtIface):
         self.r_time = 3600 * 10  # max value cause 10h cant be reached by clock
         self.l_time = 3600 * 10  # max value cause 10h cant be reached by clock
 
+        self.in_settime = False  # this is true between set_clock and clock_start => use set values instead of clock
+
         self._startup_i2c_clock()
         incoming_clock_thread = Timer(0, self._process_incoming_clock_forever)
         incoming_clock_thread.start()
@@ -108,9 +110,12 @@ class DgtPi(DgtIface):
             if counter == 0:
                 l_hms = times[:3]
                 r_hms = times[3:]
-                self.l_time = l_hms[0] * 3600 + l_hms[1] * 60 + l_hms[2]
-                self.r_time = r_hms[0] * 3600 + r_hms[1] * 60 + r_hms[2]
                 logging.info('(i2c) clock new time received l:%s r:%s', l_hms, r_hms)
+                if self.in_settime:
+                    logging.info('(i2c) clock still not finished set time, sending old time')
+                else:
+                    self.l_time = l_hms[0] * 3600 + l_hms[1] * 60 + l_hms[2]
+                    self.r_time = r_hms[0] * 3600 + r_hms[1] * 60 + r_hms[2]
                 DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=self.l_time, time_right=self.r_time, dev='i2c'))
             time.sleep(0.1)
 
@@ -221,15 +226,13 @@ class DgtPi(DgtIface):
             self.clock_running = (side != ClockSide.NONE)
             return True
 
-    def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
+    def start_clock(self, side: ClockSide, devs: set):
         """Start the dgtpi."""
         if self.get_name() not in devs:
             logging.debug('ignored startClock - devs: %s', devs)
             return True
-        l_hms = hms_time(time_left)
-        r_hms = hms_time(time_right)
-        logging.debug('(%s) clock received last time from clock l:%s r:%s', ','.join(devs),
-                      hms_time(self.l_time), hms_time(self.r_time))
+        l_hms = hms_time(self.l_time)
+        r_hms = hms_time(self.r_time)
         logging.debug('(%s) clock sending start time to clock l:%s r:%s', ','.join(devs), l_hms, r_hms)
 
         l_run = r_run = 0
@@ -252,7 +255,25 @@ class DgtPi(DgtIface):
             return False
         else:
             self.clock_running = (side != ClockSide.NONE)
+            self.in_settime = False
             return True
+
+    def set_clock(self, time_left: int, time_right: int, devs: set):
+        """Set the dgtpi."""
+        if self.get_name() not in devs:
+            logging.debug('ignored setClock - devs: %s', devs)
+            return True
+
+        l_hms = hms_time(time_left)
+        r_hms = hms_time(time_right)
+        logging.debug('(%s) clock received last time from clock l:%s r:%s', ','.join(devs),
+                      hms_time(self.l_time), hms_time(self.r_time))
+        logging.debug('(%s) clock sending set time to clock l:%s r:%s', ','.join(devs), l_hms, r_hms)
+
+        self.in_settime = True
+        self.l_time = time_left
+        self.r_time = time_right
+        return True
 
     def get_name(self):
         """Get name."""

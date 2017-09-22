@@ -465,9 +465,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             game_text = 'C10_ucigame' if self.uci960 else 'C10_newgame'
             DispatchDgt.fire(self.dgttranslate.text(game_text, str(pos960)))
         if self.dgtmenu.get_mode() in (Mode.NORMAL, Mode.BRAIN, Mode.OBSERVE, Mode.REMOTE):
-            time_left, time_right = self.time_control.get_internal_time(flip_board=self.dgtmenu.get_flip_board())
-            DispatchDgt.fire(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE,
-                                             wait=True, devs={'ser', 'i2c', 'web'}))
+            self._set_clock()
 
     def _process_computer_move(self, message):
         self.force_leds_off(log=True)  # can happen in case of a book move
@@ -497,6 +495,11 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         DispatchDgt.fire(Dgt.LIGHT_SQUARES(uci_move=move.uci(), devs={'ser', 'web'}))
         self.leds_are_on = True
 
+    def _set_clock(self):
+        time_left, time_right = self.time_control.get_internal_time(flip_board=self.dgtmenu.get_flip_board())
+        DispatchDgt.fire(Dgt.CLOCK_SET(time_left=time_left, time_right=time_right, devs={'ser', 'i2c', 'web'}))
+        DispatchDgt.fire(Dgt.CLOCK_START(side=ClockSide.NONE, wait=True, devs={'ser', 'i2c', 'web'}))
+
     def _process_computer_move_done(self):
         self.force_leds_off()
         self.last_move = self.play_move
@@ -510,10 +513,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         if not self.dgtmenu.get_confirm():
             DispatchDgt.fire(self.dgttranslate.text('K05_okpico'))
         if self.dgtmenu.get_time_mode() == TimeMode.FIXED:  # go back to a stopped time display and reset times
-            self.time_control.reset()  # need to use CLOCK_START not DISPLAY_TIME cause the clock time=0
-            time_l, time_r = self.time_control.get_internal_time(flip_board=self.dgtmenu.get_flip_board())
-            DispatchDgt.fire(Dgt.CLOCK_START(time_left=time_l, time_right=time_r, side=ClockSide.NONE, wait=True,
-                                             devs={'ser', 'i2c', 'web'}))
+            self.time_control.reset()
+            self._set_clock()
 
     def _process_user_move_done(self, message):
         self.force_leds_off(log=True)  # can happen in case of a sliding move
@@ -539,9 +540,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         if wait:
             DispatchDgt.fire(message.time_text)
         self.time_control = TimeControl(**message.tc_init)
-        time_left, time_right = self.time_control.get_internal_time(flip_board=self.dgtmenu.get_flip_board())
-        DispatchDgt.fire(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE, wait=wait,
-                                         devs={'ser', 'i2c', 'web'}))
+        self._set_clock()
 
     def _process_new_score(self, message):
         if message.mate is None:
@@ -616,8 +615,9 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.time_control = TimeControl(**message.tc_init)
         time_left, time_right = self.time_control.get_internal_time(flip_board=self.dgtmenu.get_flip_board())
         side = ClockSide.LEFT if (message.turn == chess.WHITE) != self.dgtmenu.get_flip_board() else ClockSide.RIGHT
-        text = Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side, wait=True, devs=message.devs)
-        DispatchDgt.fire(text)
+        # text = Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=side, wait=True, devs=message.devs)
+        DispatchDgt.fire(Dgt.CLOCK_SET(time_left=time_left, time_right=time_right, devs=message.devs))
+        DispatchDgt.fire(Dgt.CLOCK_START(side=side, wait=True, devs=message.devs))
 
     def _process_dgt_serial_nr(self):
         # logging.debug('Serial number {}'.format(message.number))  # actually used for watchdog (once a second)
@@ -771,13 +771,12 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             text = self.dgttranslate.text('Y21_picochess', devs={message.dev})
             text.rd = ClockIcons.DOT
             DispatchDgt.fire(text)
-            # DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs=message.devs))
 
             if message.dev == 'ser':  # send the "board connected message" to serial clock
                 DispatchDgt.fire(message.text)
             time_left, time_right = self.time_control.get_internal_time(flip_board=self.dgtmenu.get_flip_board())
-            DispatchDgt.fire(Dgt.CLOCK_START(time_left=time_left, time_right=time_right, side=ClockSide.NONE,
-                                             wait=True, devs={message.dev}))
+            DispatchDgt.fire(Dgt.CLOCK_SET(time_left=time_left, time_right=time_right, devs={message.dev}))
+            DispatchDgt.fire(Dgt.CLOCK_START(side=ClockSide.NONE, wait=True, devs={message.dev}))
 
         elif isinstance(message, Message.DGT_CLOCK_TIME):
             time_white = message.time_left
