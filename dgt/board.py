@@ -72,6 +72,8 @@ class DgtBoard(object):
         self.field_timer_running = False
         self.channel = None
 
+        self.in_settime = False  # this is true between set_clock and clock_start => use set values instead of clock
+
     def expired_field_timer(self):
         """Board position hasnt changed for some time."""
         logging.debug('board position now stable => ask for complete board')
@@ -212,6 +214,9 @@ class DgtBoard(object):
                         if cmd.value != ack1 and ack1 < 0x80:
                             logging.warning('(ser) clock ACK [%s] out of sync - last: [%s]', DgtAck(ack1), cmd)
 
+                if ack1 == DgtAck.DGT_ACK_CLOCK_SETNRUN.value:
+                    logging.info('(ser) clock out of set time now')  # @todo remove this line
+                    self.in_settime = False
                 if ack1 == DgtAck.DGT_ACK_CLOCK_BUTTON.value:
                     # this are the other (ack2-ack3) codes
                     # 05-49 33-52 17-51 09-50 65-53 | button 0-4 (single)
@@ -274,6 +279,10 @@ class DgtBoard(object):
                         self.lever_pos = None
                     else:
                         logging.info('(ser) clock new time received l:%s r:%s', hms_time(l_time), hms_time(r_time))
+                        if self.in_settime:
+                            logging.info('(ser) clock still not finished set time, sending old time')
+                            l_time = self.l_time
+                            r_time = self.r_time
                         DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=l_time, time_right=r_time, dev='ser'))
 
                         if not self.enable_ser_clock:
