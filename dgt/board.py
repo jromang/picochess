@@ -270,7 +270,7 @@ class DgtBoard(object):
                     logging.warning('(ser) clock strange old time received %s l:%s r:%s',
                                     message, hms_time(self.l_time), hms_time(self.r_time))
                     if self.in_settime:
-                        logging.debug('(ser) clock still not finished set time, ignore received time')
+                        logging.info('(ser) clock still not finished set time, ignore received time')
                         errtim = True
                 else:
                     status = message[6] & 0x3f

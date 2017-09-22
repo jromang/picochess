@@ -93,7 +93,7 @@ Another way to choose the time control is by entering the "Time" menu with the c
 Move Time
 ---------
 
-Fixed time controls are set with the extra **white** queen.
+Fixed time controls are set with the extra **white** queen. Especially in brain mode the engine might move quicker.
 (Remove the extra black queen if it is still on the board)
 
 * **A6** - 1 second per move
@@ -117,13 +117,13 @@ Blitz time controls are set with the extra **white** queen.
 * **D4** - 10 minute game
 * **E4** - 15 minute game
 * **F4** - 30 minute game
-* **G4** - 60 minute game (1 hour)
-* **H4** - 90 minute game (1 hour and 30 minutes)
+* **G4** - 60 minute game
+* **H4** - 90 minute game
 
 Fischer Time
 ------------
 
-These are set with the extra **white** queen.
+Fischer time controls are set with the extra **white** queen.
 (Remove the extra black queen if it is still on the board)
 
 * **A3** - 1 minute game with 1 second Fischer increment
@@ -138,7 +138,7 @@ These are set with the extra **white** queen.
 Clock button support (general)
 ------------------------------
 
-There are now 2 states (one is the "game-playing" state, where y see the clock time or a move) and the other is the "menu" state.
+There are now 2 states (one is the "game-playing" state, where you see the clock time or a move) and the other is the "menu" state.
 Entering the menu state can be done by pressing ">". Leaving it with "<". Entering the menu offers the last choosen top-level in menu (for example "Mode")
 
 If you are not inside the menu (clock showing moves, times), the function is as follows:
@@ -169,12 +169,12 @@ Choose the mode setting by pressing ">" or exit menu again with "<" (without cho
 Postition Menu
 --------------
 
-Here you can setup a position. To enter this, picochess will answer you some questions. You can setup the position before y enter this menu or before you press >" at last step (=scan).
+Here you can setup a position. To enter this, picochess will answer you some questions. You can setup the position before you enter this menu or before you press >" at last step (=scan).
 With the "=" button you can shortcut the 4 levels (useful for similar positions). Here are the list of questions to be answered:
 
 * **side** - decides with side to move first
 * **origin** - is the board flipped (which side of board is white which is black)
-* **chess960** - is this a fischer random position (used for castling) Please make sure your choose engine support 960 mode (right now only stockfish)
+* **chess960** - is this a fischer random position (used for castling) Please make sure your choose engine support 960 mode (right now only stockfish, galjoe)
 * **scan** - after accepting with ">" picochess will scan in the position (last chance to setup your pieces) and a new game will start
 
 Time Menu
@@ -200,8 +200,7 @@ System Menu
 
 Here you choose between the following:
 
-* **version** - showing you the current picochess version
-* **ip adr** - showing you the ip-adr. This is needed for example to use the picochess webserver (see below)
+* **information** - This is a submenu you see various informations like the current picochess version, your internal ip-adr (useful for the webserver) and your battery status (only useful if you have a BT board).
 * **sound** - controls the beeps of your dgt clock. You can change between "never", "sometimes", or "always"
 * **language** - sets the language of clock messages. You can choose between english, german, french, dutch and spanish
 * **logfile** - sends a debug log file to your eMail box. Thats for us developers to have a clue what is going on at picochess. Please use this only if you asked for it.
