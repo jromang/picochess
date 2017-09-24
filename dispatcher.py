@@ -54,13 +54,14 @@ class Dispatcher(DispatchDgt, Thread):
         self.tasks[device] = []
         self.display_hash[device] = None
 
-    def get_prio_device(self):
+    def is_prio_device(self, dev, connect):
         """Return the most prio registered device."""
+        logging.debug('(%s) clock connected: %s', dev, connect)
         if 'i2c' in self.devices:
-            return 'i2c'
+            return 'i2c' == dev
         if 'ser' in self.devices:
-            return 'ser'
-        return 'web'
+            return 'ser' == dev
+        return 'web' == dev
 
     def _stopped_maxtimer(self, dev: str):
         self.maxtimer_running[dev] = False

@@ -116,7 +116,8 @@ class DgtPi(DgtIface):
                 else:
                     self.l_time = l_hms[0] * 3600 + l_hms[1] * 60 + l_hms[2]
                     self.r_time = r_hms[0] * 3600 + r_hms[1] * 60 + r_hms[2]
-                DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=self.l_time, time_right=self.r_time, dev='i2c'))
+                text = Message.DGT_CLOCK_TIME(time_left=self.l_time, time_right=self.r_time, connect=True, dev='i2c')
+                DisplayMsg.show(text)
             time.sleep(0.1)
 
     def _display_on_dgt_pi(self, text: str, beep=False, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
