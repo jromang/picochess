@@ -1047,7 +1047,7 @@ def main():
                 stop_fen_timer()
 
             elif isinstance(event, Event.CLOCK_TIME):
-                if dgtdispatcher.get_prio_device() == event.dev:  # transfer only the most prio clock's time
+                if dgtdispatcher.is_prio_device(event.dev, event.connect):  # transfer only the most prio clock's time
                     logging.debug('setting tc clock time - prio: %s w:%s b:%s', event.dev,
                                   hms_time(event.time_white), hms_time(event.time_black))
                     time_control.set_clock_times(white_time=event.time_white, black_time=event.time_black)
