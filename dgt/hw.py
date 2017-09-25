@@ -149,9 +149,10 @@ class DgtHw(DgtIface):
                 return False
             else:
                 self.clock_running = (side != ClockSide.NONE)
-            if self.dgtboard.disable_end:
-                return res
-            return self.dgtboard.end_text()  # this is needed for some(!) clocks
+            if not self.dgtboard.disable_end:
+                res = self.dgtboard.end_text()  # this is needed for some(!) clocks
+            self.dgtboard.in_settime = False  # @todo should be set on ACK (see: DgtBoard) not here
+            return res
 
     def start_clock(self, side: ClockSide, devs: set):
         """Start the dgtxl/3k."""
