@@ -173,8 +173,11 @@ class TimeControl(object):
                 w_hms, b_hms = self._log_time()
                 logging.info('old internal time w:%s b:%s', w_hms, b_hms)
 
-            self.timer.cancel()
-            self.timer.join()
+            if self.timer:
+                self.timer.cancel()
+                self.timer.join()
+            else:
+                print('time=%s', self.internal_time)
             used_time = floor((time.time() - self.start_time) * 10) / 10
             if log:
                 logging.info('used time: %s secs', used_time)
