@@ -213,10 +213,10 @@ class DgtBoard(object):
                         cmd = self.last_clock_command[3]  # type: DgtClk
                         if cmd.value != ack1 and ack1 < 0x80:
                             logging.warning('(ser) clock ACK [%s] out of sync - last: [%s]', DgtAck(ack1), cmd)
-
-                if ack1 == DgtAck.DGT_ACK_CLOCK_SETNRUN.value:
-                    logging.info('(ser) clock out of set time now')  # @todo remove this line
-                    self.in_settime = False
+                # @todo these lines are better as what is done on DgtHw but it doesnt work
+                # if ack1 == DgtAck.DGT_ACK_CLOCK_SETNRUN.value:
+                #     logging.info('(ser) clock out of set time now')
+                #     self.in_settime = False
                 if ack1 == DgtAck.DGT_ACK_CLOCK_BUTTON.value:
                     # this are the other (ack2-ack3) codes
                     # 05-49 33-52 17-51 09-50 65-53 | button 0-4 (single)
