@@ -270,25 +270,28 @@ class DgtBoard(object):
                     logging.warning('(ser) clock strange old time received %s l:%s r:%s',
                                     message, hms_time(self.l_time), hms_time(self.r_time))
                     if self.in_settime:
-                        logging.info('(ser) clock still not finished set time, ignore received time')
+                        logging.info('(ser) clock still in set mode, ignore received time')
                         errtim = True
                 else:
+                    logging.info('(ser) clock new time received l:%s r:%s', hms_time(l_time), hms_time(r_time))
                     status = message[6] & 0x3f
                     connect = not status & 0x20
                     if not connect:
-                        logging.info('(ser) clock not connected')
+                        logging.info('(ser) clock not connected, sending old time l:%s r:%s',
+                                     hms_time(self.l_time), hms_time(self.r_time))
+                        l_time = self.l_time
+                        r_time = self.r_time
                         # if not self.is_pi:  # try: ignore "clock not connected"
                         #     errtim = True
                         #     DisplayMsg.show(Message.DGT_NO_CLOCK_ERROR(text='dont_use'))
                         # self.lever_pos = None
-                    logging.info('(ser) clock new time received l:%s r:%s', hms_time(l_time), hms_time(r_time))
                     if self.in_settime:
-                        logging.info('(ser) clock still not finished set time, sending old time')
+                        logging.info('(ser) clock still in set mode, sending old time l:%s r:%s',
+                                     hms_time(self.l_time), hms_time(self.r_time))
                         l_time = self.l_time
                         r_time = self.r_time
-                    text = Message.DGT_CLOCK_TIME(time_left=l_time, time_right=r_time, connect=connect, dev='ser')
-                    DisplayMsg.show(text)
-
+                    DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=l_time, time_right=r_time, connect=connect,
+                                                           dev='ser'))
                     if not self.enable_ser_clock:
                         if self.watchdog_timer.is_running():  # a running watchdog means: board already found
                             logging.info('restarting clock setup - enable_ser_clock: %s', self.enable_ser_clock)

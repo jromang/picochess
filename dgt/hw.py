@@ -106,6 +106,9 @@ class DgtHw(DgtIface):
                     logging.debug('time values not set - abort function')
                     return False
                 else:
+                    if self.dgtboard.in_settime:
+                        logging.debug('(ser) clock still in set mode - abort function')
+                        return False
                     return self.dgtboard.end_text()
         else:
             logging.debug('(ser) clock isnt running - no need for endText')
