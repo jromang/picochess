@@ -169,6 +169,13 @@ class Dispatcher(DispatchDgt, Thread):
                                 self.stop_maxtimer(dev)
                                 if self.tasks[dev]:
                                     logging.debug('delete following (%s) tasks: %s', dev, self.tasks[dev])
+                                    while self.tasks[dev]:  # but do the last CLOCK_START()
+                                        command = self.tasks[dev].pop()
+                                        if repr(command) == DgtApi.CLOCK_START:  # clock might be in set mode
+                                            logging.debug('processing (last) delayed clock start command')
+                                            with self.process_lock[dev]:
+                                                self._process_message(command, dev)
+                                            break
                                     self.tasks[dev] = []
                         else:
                             logging.debug('command doesnt change the clock display => (%s) max timer ignored', dev)
