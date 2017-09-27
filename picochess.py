@@ -176,6 +176,7 @@ def main():
         """Start a new permanent brain search on the game with pondering move made."""
         if pb_move:
             game_copy = copy.deepcopy(game)
+            logging.debug(game_copy)
             game_copy.push(pb_move)
             logging.info('start permanent brain with pondering move [%s] fen: %s', pb_move, game_copy.fen())
             engine.position(game_copy)
@@ -456,7 +457,7 @@ def main():
             last_legal_fens = []
         if interaction_mode in (Mode.NORMAL, Mode.BRAIN):  # @todo handle Mode.REMOTE too
             if done_computer_fen:
-                logging.debug('best move displayed, dont search and keep play mode: %s', play_mode)
+                logging.debug('best move displayed, dont search and also keep play mode: %s', play_mode)
                 start_search = False
             else:
                 old_mode = play_mode
@@ -908,10 +909,14 @@ def main():
 
                     last_legal_fens = []
                     best_move_displayed = done_computer_fen
+                    logging.debug('done_computer_fen: %s - remove this line!', done_computer_fen)  # @todo remove line
                     if best_move_displayed:
                         move = done_move
                         done_computer_fen = None
-                        done_move = chess.Move.null()
+                        # @todo check if the problem from 20170927 still exists (new game and e7e5 move)
+                        # brain: start permanent brain with pondering move [e7e5]
+                        # fen: rnbqkbnr/pppp1ppp/8/4P3/8/8/PPPPPPPP/RNBQKBNR b KQkq e6 0 1
+                        done_move = pb_move = chess.Move.null()
                     else:
                         move = chess.Move.null()  # not really needed
 
