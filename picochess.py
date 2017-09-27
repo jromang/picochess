@@ -174,9 +174,9 @@ def main():
 
     def brain(game: chess.Board, timec: TimeControl):
         """Start a new permanent brain search on the game with pondering move made."""
+        assert pb_move and not done_computer_fen, 'brain() called with displayed move - fen: %s' % done_computer_fen
         if pb_move:
             game_copy = copy.deepcopy(game)
-            logging.debug(game_copy)
             game_copy.push(pb_move)
             logging.info('start permanent brain with pondering move [%s] fen: %s', pb_move, game_copy.fen())
             engine.position(game_copy)
@@ -467,7 +467,7 @@ def main():
         if start_search:
             assert engine.is_waiting(), 'engine not waiting! thinking status: %s' % engine.is_thinking()
             # Go back to analysing or observing
-            if interaction_mode == Mode.BRAIN:
+            if interaction_mode == Mode.BRAIN and not done_computer_fen:
                 brain(game, time_control)
             if interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
                 analyse(game, msg)
