@@ -174,7 +174,7 @@ def main():
 
     def brain(game: chess.Board, timec: TimeControl):
         """Start a new permanent brain search on the game with pondering move made."""
-        assert pb_move and not done_computer_fen, 'brain() called with displayed move - fen: %s' % done_computer_fen
+        assert not done_computer_fen, 'brain() called with displayed move - fen: %s' % done_computer_fen
         if pb_move:
             game_copy = copy.deepcopy(game)
             game_copy.push(pb_move)
