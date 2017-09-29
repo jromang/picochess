@@ -41,7 +41,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.dgtmenu = dgtmenu
         self.time_control = time_control
 
-        self.allow_alternative = False
         self.drawresign_fen = None
         self.show_move_or_value = 0
         self.leds_are_on = False
@@ -164,8 +163,10 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             if self.dgtmenu.get_mode() in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
                 DispatchDgt.fire(self.dgttranslate.text('B00_nofunction'))
             else:
-                if self.allow_alternative:
-                    self.allow_alternative = False  # Protect against multi entrance of "alternative move"
+                if self.play_move:
+                    self.play_move = chess.Move.null()
+                    self.play_fen = None
+                    self.play_turn = None
                     Observable.fire(Event.ALTERNATIVE_MOVE())
                 else:
                     Observable.fire(Event.PAUSE_RESUME())
@@ -457,7 +458,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
     def _process_start_new_game(self, message):
         self.force_leds_off()
         self._reset_moves_and_score()
-        self.allow_alternative = False
         self.time_control.reset()
         if message.newgame:
             pos960 = message.game.chess960_pos()
@@ -470,7 +470,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.force_leds_off(log=True)  # can happen in case of a book move
         move = message.move
         ponder = message.ponder
-        self.allow_alternative = True
         self.play_move = move
         self.play_fen = message.game.fen()
         self.play_turn = message.game.turn
@@ -509,7 +508,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.play_move = chess.Move.null()
         self.play_fen = None
         self.play_turn = None
-        self.allow_alternative = False
         self._exit_menu()
         if not self.dgtmenu.get_confirm():
             DispatchDgt.fire(self.dgttranslate.text('K05_okpico'))
@@ -522,7 +520,9 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.last_move = message.move
         self.last_fen = message.fen
         self.last_turn = message.turn
-        self.allow_alternative = False
+        self.play_move = chess.Move.null()
+        self.play_fen = None
+        self.play_turn = None
         self._exit_menu()
         if not self.dgtmenu.get_confirm():
             DispatchDgt.fire(self.dgttranslate.text('K05_okuser'))
@@ -703,7 +703,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         elif isinstance(message, Message.TAKE_BACK):
             self.force_leds_off()
             self._reset_moves_and_score()
-            self.allow_alternative = False
             DispatchDgt.fire(self.dgttranslate.text('C10_takeback'))
             DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs={'ser', 'i2c', 'web'}))
 
@@ -715,8 +714,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 DispatchDgt.fire(text)
 
         elif isinstance(message, Message.INTERACTION_MODE):
-            # self.dgtmenu.set_mode(message.mode)
-            self.allow_alternative = False
             if not self.dgtmenu.get_confirm() or not message.show_ok:
                 DispatchDgt.fire(message.mode_text)
 
@@ -805,7 +802,10 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             pass
 
         elif isinstance(message, Message.SWITCH_SIDES):
-            self.allow_alternative = False
+            self.play_move = chess.Move.null()
+            self.play_fen = None
+            self.play_turn = None
+
             self.hint_move = chess.Move.null()
             self.hint_fen = None
             self.hint_turn = None

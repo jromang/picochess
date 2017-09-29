@@ -909,19 +909,14 @@ def main():
 
                     last_legal_fens = []
                     best_move_displayed = done_computer_fen
-                    logging.debug('done_computer_fen: %s - remove this line!', done_computer_fen)  # @todo remove line
                     if best_move_displayed:
                         move = done_move
                         done_computer_fen = None
-                        # @todo check if the problem from 20170927 still exists (new game and e7e5 move)
-                        # brain: start permanent brain with pondering move [e7e5]
-                        # fen: rnbqkbnr/pppp1ppp/8/4P3/8/8/PPPPPPPP/RNBQKBNR b KQkq e6 0 1
                         done_move = pb_move = chess.Move.null()
                     else:
                         move = chess.Move.null()  # not really needed
 
                     play_mode = PlayMode.USER_WHITE if play_mode == PlayMode.USER_BLACK else PlayMode.USER_BLACK
-
                     text = play_mode.value  # type: str
                     msg = Message.PLAY_MODE(play_mode=play_mode, play_mode_text=dgttranslate.text(text))
 
