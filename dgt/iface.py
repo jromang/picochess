@@ -115,8 +115,6 @@ class DgtIface(DisplayDgt, Thread):
 
         if message.side == ClockSide.RIGHT:
             move_text = move_text.rjust(6 if is_xl else 8)
-        # text = self.dgttranslate.move(move_text)
-        # return bit_board, text
         return bit_board, move(move_text, message.lang, message.capital and not is_xl)
 
     def _process_message(self, message):

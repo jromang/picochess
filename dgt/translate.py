@@ -66,23 +66,6 @@ class DgtTranslate(object):
                 return text.upper()
         return text
 
-    # def move(self, text: str):
-    #     """Return move text for clock display."""
-    #     directory = {}
-    #     if self.language == 'de':
-    #         directory = {'R': 'T', 'N': 'S', 'B': 'L', 'Q': 'D'}
-    #     if self.language == 'nl':
-    #         directory = {'R': 'T', 'N': 'P', 'B': 'L', 'Q': 'D'}
-    #     if self.language == 'fr':
-    #         directory = {'R': 'T', 'N': 'C', 'B': 'F', 'Q': 'D', 'K': '@'}
-    #     if self.language == 'es':
-    #         directory = {'R': 'T', 'N': 'C', 'B': 'A', 'Q': 'D', 'K': '@'}
-    #     if self.language == 'it':
-    #         directory = {'R': 'T', 'N': 'C', 'B': 'A', 'Q': 'D', 'K': '@'}
-    #     for i, j in directory.items():
-    #         text = text.replace(i, j)
-    #     return self.capital_text(text.replace('@', 'R'), False)  # replace the King "@" from fr, es, it languages
-
     def text(self, str_code: str, msg='', devs=None):
         """Return standard text for clock display."""
         if devs is None:  # prevent W0102 error
