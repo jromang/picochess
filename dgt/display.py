@@ -25,7 +25,7 @@ import chess
 from utilities import DisplayMsg, Observable, DispatchDgt, write_picochess_ini
 from dgt.translate import DgtTranslate
 from dgt.menu import DgtMenu
-from dgt.util import ClockSide, ClockIcons, BeepLevel, Mode, GameResult, TimeMode
+from dgt.util import ClockSide, ClockIcons, BeepLevel, Mode, GameResult, TimeMode, PlayMode
 from dgt.api import Dgt, Event, Message
 from timecontrol import TimeControl
 from uci.util import get_installed_engines
@@ -51,6 +51,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.score = self.dgttranslate.text('N10_score', None)
         self.depth = None
         self.uci960 = False
+        self.play_mode = PlayMode.USER_WHITE
 
     def _exit_menu(self):
         if self.dgtmenu.exit_menu():
@@ -500,6 +501,11 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         DispatchDgt.fire(Dgt.CLOCK_SET(time_left=time_left, time_right=time_right, devs=devs))
         DispatchDgt.fire(Dgt.CLOCK_START(side=side, wait=True, devs=devs))
 
+    def _display_confirm(self, text_key):
+        time_u, time_c = self.time_control.get_internal_time(flip_board=self.play_mode == PlayMode.USER_BLACK)
+        if time_u > 60 and not self.dgtmenu.get_confirm():  # only display if the user has >60sec on his clock
+            DispatchDgt.fire(self.dgttranslate.text(text_key))
+
     def _process_computer_move_done(self):
         self.force_leds_off()
         self.last_move = self.play_move
@@ -509,8 +515,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.play_fen = None
         self.play_turn = None
         self._exit_menu()
-        if not self.dgtmenu.get_confirm():
-            DispatchDgt.fire(self.dgttranslate.text('K05_okpico'))
+        self._display_confirm('K05_okpico')
         if self.dgtmenu.get_time_mode() == TimeMode.FIXED:  # go back to a stopped time display and reset times
             self.time_control.reset()
             self._set_clock()
@@ -524,8 +529,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.play_fen = None
         self.play_turn = None
         self._exit_menu()
-        if not self.dgtmenu.get_confirm():
-            DispatchDgt.fire(self.dgttranslate.text('K05_okuser'))
+        self._display_confirm('K05_okuser')
 
     def _process_review_move_done(self, message):
         self.force_leds_off(log=True)  # can happen in case of a sliding move
@@ -533,8 +537,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.last_fen = message.fen
         self.last_turn = message.turn
         self._exit_menu()
-        if not self.dgtmenu.get_confirm():
-            DispatchDgt.fire(self.dgttranslate.text('K05_okmove'))
+        self._display_confirm('K05_okmove')
 
     def _process_time_control(self, message):
         wait = not self.dgtmenu.get_confirm() or not message.show_ok
@@ -568,6 +571,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             DispatchDgt.fire(disp)
 
     def _process_startup_info(self, message):
+        self.play_mode = message.info['play_mode']
         self.dgtmenu.set_mode(message.info['interaction_mode'])
         self.dgtmenu.set_book(message.info['book_index'])
         self.dgtmenu.all_books = message.info['books']
@@ -687,6 +691,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
 
         elif isinstance(message, Message.ALTERNATIVE_MOVE):
             self.force_leds_off()
+            self.play_mode = message.play_mode
             DispatchDgt.fire(self.dgttranslate.text('B05_altmove'))
 
         elif isinstance(message, Message.LEVEL):
@@ -718,6 +723,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 DispatchDgt.fire(message.mode_text)
 
         elif isinstance(message, Message.PLAY_MODE):
+            self.play_mode = message.play_mode
             DispatchDgt.fire(message.play_mode_text)
 
         elif isinstance(message, Message.NEW_SCORE):

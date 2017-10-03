@@ -463,7 +463,9 @@ def main():
                 old_mode = play_mode
                 play_mode = PlayMode.USER_WHITE if game.turn == chess.WHITE else PlayMode.USER_BLACK
                 if old_mode != play_mode:
-                    logging.debug('new play mode: %s', play_mode)
+                    logging.debug('new play mode: %s', play_mode)  # @todo below: for the moment send it to display too
+                    text = play_mode.value  # type: str
+                    DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode, play_mode_text=dgttranslate.text(text)))
         if start_search:
             assert engine.is_waiting(), 'engine not waiting! thinking status: %s' % engine.is_thinking()
             # Go back to analysing or observing
@@ -900,7 +902,7 @@ def main():
                         # set computer to move - in case the user just changed the engine
                         play_mode = PlayMode.USER_WHITE if game.turn == chess.BLACK else PlayMode.USER_BLACK
                         if not check_game_state(game, play_mode):
-                            think(game, time_control, Message.ALTERNATIVE_MOVE(game=game.copy()))
+                            think(game, time_control, Message.ALTERNATIVE_MOVE(game=game.copy(), play_mode=play_mode))
                     else:
                         logging.warning('wrong function call [alternative]! mode: %s', interaction_mode)
 
