@@ -620,7 +620,7 @@ def main():
     DgtDisplay(dgttranslate, dgtmenu, time_control).start()
 
     # Create PicoTalker for speech output
-    PicoTalkerDisplay(args.user_voice, args.computer_voice, args.speed_voice).start()
+    PicoTalkerDisplay(args.user_voice, args.computer_voice, args.speed_voice, time_control).start()
 
     # Launch web server
     if args.web_server_port:
