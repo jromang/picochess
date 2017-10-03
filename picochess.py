@@ -620,7 +620,7 @@ def main():
     DgtDisplay(dgttranslate, dgtmenu, time_control).start()
 
     # Create PicoTalker for speech output
-    PicoTalkerDisplay(args.user_voice, args.computer_voice, args.speed_voice, time_control).start()
+    PicoTalkerDisplay(args.user_voice, args.computer_voice, args.speed_voice).start()
 
     # Launch web server
     if args.web_server_port:
@@ -1055,6 +1055,7 @@ def main():
                     logging.debug('setting tc clock time - prio: %s w:%s b:%s', event.dev,
                                   hms_time(event.time_white), hms_time(event.time_black))
                     time_control.set_clock_times(white_time=event.time_white, black_time=event.time_black)
+                    DisplayMsg.show(Message.CLOCK_TIME(time_white=event.time_white, time_black=event.time_black))
                 else:
                     logging.debug('ignore clock time - too low prio: %s', event.dev)
 

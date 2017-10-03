@@ -52,6 +52,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         self.depth = None
         self.uci960 = False
         self.play_mode = PlayMode.USER_WHITE
+        self.low_time = False
 
     def _exit_menu(self):
         if self.dgtmenu.exit_menu():
@@ -502,8 +503,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         DispatchDgt.fire(Dgt.CLOCK_START(side=side, wait=True, devs=devs))
 
     def _display_confirm(self, text_key):
-        time_u, time_c = self.time_control.get_internal_time(flip_board=self.play_mode == PlayMode.USER_BLACK)
-        if time_u > 60 and not self.dgtmenu.get_confirm():  # only display if the user has >60sec on his clock
+        if not self.low_time and not self.dgtmenu.get_confirm():  # only display if the user has >60sec on his clock
             DispatchDgt.fire(self.dgttranslate.text(text_key))
 
     def _process_computer_move_done(self):
@@ -784,6 +784,15 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 time_white, time_black = time_black, time_white
             Observable.fire(Event.CLOCK_TIME(time_white=time_white, time_black=time_black, connect=message.connect,
                                              dev=message.dev))
+
+        elif isinstance(message, Message.CLOCK_TIME):
+            time_u = message.time_white
+            time_c = message.time_black
+            if self.play_mode == PlayMode.USER_BLACK:
+                time_u, time_c = time_c, time_u
+            self.low_time = time_u < 60
+            if self.low_time:
+                logging.debug('time too low, disable confirm - u: %i, c: %i', time_u, time_c)
 
         elif isinstance(message, Message.DGT_SERIAL_NR):
             self._process_dgt_serial_nr()

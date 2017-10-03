@@ -91,7 +91,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
     COMPUTER = 'computer'
     SYSTEM = 'system'
 
-    def __init__(self, user_voice: str, computer_voice: str, speed_factor: int, time_control: TimeControl):
+    def __init__(self, user_voice: str, computer_voice: str, speed_factor: int):
         """
         Initialize a PicoTalkerDisplay with voices for the user and/or computer players.
 
@@ -103,7 +103,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
         self.computer_picotalker = None  # type: PicoTalker
         self.speed_factor = (90 + (speed_factor % 10) * 5) / 100
         self.play_mode = PlayMode.USER_WHITE
-        self.time_control = time_control
+        self.low_time = False
 
         if user_voice:
             logging.debug('creating user voice: [%s]', str(user_voice))
@@ -128,9 +128,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
             self.user_picotalker.set_speed_factor(speed_factor)
 
     def talk(self, sounds, dev=SYSTEM):
-        time_u, time_c = self.time_control.get_internal_time(flip_board=self.play_mode == PlayMode.USER_BLACK)
-        if time_u < 60:
-            logging.debug('time too low, dont speak - u: %i, c: %i', time_u, time_c)
+        if self.low_time:
             return
         if False:  # switch-case
             pass
@@ -222,7 +220,6 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                     self.talk(['takeback.ogg'])
 
                 elif isinstance(message, Message.TIME_CONTROL):
-                    self.time_control = TimeControl(**message.tc_init)
                     logging.debug('announcing TIME_CONTROL')
                     self.talk(['oktime.ogg'])
 
@@ -253,13 +250,17 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
 
                 elif isinstance(message, Message.STARTUP_INFO):
                     self.play_mode = message.info['play_mode']
-                    tc_init = message.info['tc_init']
-                    self.time_control = TimeControl(**tc_init)
                     logging.debug('announcing PICOCHESS')
                     self.talk(['picoChess.ogg'])
 
-                elif isinstance(message, Message.CLOCK_START):
-                    self.time_control = TimeControl(**message.tc_init)
+                elif isinstance(message, Message.CLOCK_TIME):
+                    time_u = message.time_white
+                    time_c = message.time_black
+                    if self.play_mode == PlayMode.USER_BLACK:
+                        time_u, time_c = time_c, time_u
+                    self.low_time = time_u < 60
+                    if self.low_time:
+                        logging.debug('time too low, disable voice - u: %i, c: %i', time_u, time_c)
 
                 elif isinstance(message, Message.ALTERNATIVE_MOVE):
                     self.play_mode = message.play_mode

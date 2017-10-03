@@ -119,9 +119,9 @@ class MessageApi():
     SEARCH_STARTED = 'MSG_SEARCH_STARTED'  # Engine has started to search
     SEARCH_STOPPED = 'MSG_SEARCH_STOPPED'  # Engine has stopped the search
     TAKE_BACK = 'MSG_TACK_BACK'  # User takes back move(s)
-    # CLOCK_SET = 'MSG_CLOCK_SET'  # Say to run autonomous clock, contains time_control
     CLOCK_START = 'MSG_CLOCK_START'  # Say to run autonomous clock, contains time_control
     CLOCK_STOP = 'MSG_CLOCK_STOP'  # Stops the clock
+    CLOCK_TIME = 'MSG_CLOCK_TIME'  # Send the prio clock time
     USER_MOVE_DONE = 'MSG_USER_MOVE_DONE'  # Player has done a move on board
     GAME_ENDS = 'MSG_GAME_ENDS'  # The current game has ended, contains a 'result' (GameResult) and list of 'moves'
 
@@ -214,6 +214,7 @@ class Message():
     TAKE_BACK = ClassFactory(MessageApi.TAKE_BACK, ['game'])
     CLOCK_START = ClassFactory(MessageApi.CLOCK_START, ['turn', 'tc_init', 'devs'])
     CLOCK_STOP = ClassFactory(MessageApi.CLOCK_STOP, ['devs'])
+    CLOCK_TIME = ClassFactory(MessageApi.CLOCK_TIME, ['time_white', 'time_black'])
     USER_MOVE_DONE = ClassFactory(MessageApi.USER_MOVE_DONE, ['move', 'fen', 'turn', 'game'])
     GAME_ENDS = ClassFactory(MessageApi.GAME_ENDS, ['result', 'play_mode', 'game'])
 
