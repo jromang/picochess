@@ -73,6 +73,7 @@ class DgtBoard(object):
         self.channel = None
 
         self.in_settime = False  # this is true between set_clock and clock_start => use set values instead of clock
+        self.low_time = False  # This is set from picochess.py and used to limit the field timer
 
     def expired_field_timer(self):
         """Board position hasnt changed for some time."""
@@ -90,7 +91,9 @@ class DgtBoard(object):
     def start_field_timer(self):
         """Start the field timer waiting for a stable board position."""
         wait = (0.5 if self.channel == 'BT' else 0.25) + 0.03 * self.field_factor  # BT boards scanning in half speed
-        logging.debug('board position changed => wait %.2fsecs for a stable result', wait)
+        if self.low_time:
+            wait -= 0.1  # @todo for TEST, we trying 0.1 now
+        logging.debug('board position changed => wait %.2fsecs for a stable result low_time: %s', wait, self.low_time)
         self.field_timer = Timer(wait, self.expired_field_timer)
         self.field_timer.start()
         self.field_timer_running = True
