@@ -228,6 +228,11 @@ class UciEngine(object):
         """Engine waiting."""
         return self.engine.idle
 
+    def newgame(self, game: Board):
+        """Engine sometimes need this to setup internal values."""
+        self.engine.ucinewgame()
+        self.engine.position(game)
+
     def startup(self, options: dict, show=True):
         """Startup engine."""
         parser = configparser.ConfigParser()
@@ -243,6 +248,7 @@ class UciEngine(object):
         logging.debug('setting engine with options %s', options)
         self.level(options)
         self.send()
+        self.newgame(Board())
         if show:
             logging.debug('Loaded engine [%s]', self.get_name())
             logging.debug('Supported options [%s]', self.get_options())

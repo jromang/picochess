@@ -841,6 +841,7 @@ def main():
                 if engine.has_chess960():
                     engine.option('UCI_Chess960', uci960)
                     engine.send()
+                engine.newgame(game.copy())
                 done_computer_fen = None
                 done_move = pb_move = chess.Move.null()
                 time_control.reset()
@@ -866,6 +867,7 @@ def main():
                     if engine.has_chess960():
                         engine.option('UCI_Chess960', uci960)
                         engine.send()
+                    engine.newgame(game.copy())
                     done_computer_fen = None
                     done_move = pb_move = chess.Move.null()
                     time_control.reset()
