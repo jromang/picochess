@@ -80,7 +80,7 @@ engines are set with the extra **black** queen.
 * **D6** - Rodent III
 * **E6** - Zurichess luzern
 * **F6** - Floyd 0.9
-* **G6** - Cinnamon 2.0
+* **G6** - Sayuri 2017.09.29
 * **H6** - Galjoen 0.36
 
 Setting up time controls
