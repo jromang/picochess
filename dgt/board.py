@@ -90,9 +90,10 @@ class DgtBoard(object):
 
     def start_field_timer(self):
         """Start the field timer waiting for a stable board position."""
-        wait = (0.5 if self.channel == 'BT' else 0.25) + 0.03 * self.field_factor  # BT boards scanning in half speed
         if self.low_time:
-            wait -= 0.1  # @todo for TEST, we trying 0.1 now
+            wait = (0.2 if self.channel == 'BT' else 0.10) + 0.06 * self.field_factor  # bullet => allow more sliding
+        else:
+            wait = (0.5 if self.channel == 'BT' else 0.25) + 0.03 * self.field_factor  # BT's scanning in half speed
         logging.debug('board position changed => wait %.2fsecs for a stable result low_time: %s', wait, self.low_time)
         self.field_timer = Timer(wait, self.expired_field_timer)
         self.field_timer.start()
