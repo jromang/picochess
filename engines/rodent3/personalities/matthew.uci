@@ -1,7 +1,7 @@
 [Matthew]
 ; Matthew
 ; Personality for Rodent III chess engine, version 0.210 or later
-; Materialist, slightly below 2000 mark
+; Materialist, slightly below 1000 mark
 ;
 PawnValueMg = 95
 KnightValueMg = 310
@@ -59,7 +59,7 @@ PawnMass = 100
 PawnChains = 100
 PstStyle = 2
 MobilityStyle = 0
-NpsLimit = 3600
+NpsLimit = 3500
 EvalBlur = 0
 Contempt = 0
 SlowMover = 100

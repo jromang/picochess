@@ -1,9 +1,7 @@
-[Garbiel]
-; Gabriel
+[Amy]
+; Amy
+; weak, aggressive, slow
 ; Personality for Rodent III chess engine, version 0.210 or later
-; author: Pawel Koziol
-; Gabriel is for gambits!
-; Estimated strength: 2000 Elo
 ;
 PawnValueMg = 95
 KnightValueMg = 310
@@ -19,7 +17,7 @@ KeepPawn = 0
 KeepKnight = 0
 KeepBishop = 0
 KeepRook = 0
-KeepQueen = 0
+KeepQueen = 25
 BishopPair = 51
 KnightPair = -9
 RookPair = -9
@@ -31,10 +29,10 @@ BothUp = 80
 ExchangeImbalance = 30
 MinorVsQueen = 4
 TwoMinors = 44
-Material = 80
-OwnAttack = 150
+Material = 100
+OwnAttack = 200
 OppAttack = 100
-OwnMobility = 150
+OwnMobility = 200
 OppMobility = 100
 KingTropism = 20
 PiecePlacement = 75
@@ -59,15 +57,15 @@ Fianchetto = 6
 ReturningB = 10
 PawnMass = 100
 PawnChains = 100
-PstStyle = 0
+PstStyle = 2
 MobilityStyle = 0
-NpsLimit = 7000
-EvalBlur = 0
+NpsLimit = 600
+EvalBlur = 20
 Contempt = 0
-SlowMover = 100
+SlowMover = 150
 Selectivity = 175
 SearchSkill = 10
-BookFilter = 20
 RiskyDepth = 0
-GuideBookFile = ph-gambitbook.bin
+BookFilter = 20
+GuideBookFile = micro.bin
 MainBookFile = micro.bin

@@ -1,20 +1,19 @@
-[Garbiel]
-; Gabriel
+[Ben]
+; Ben
 ; Personality for Rodent III chess engine, version 0.210 or later
-; author: Pawel Koziol
-; Gabriel is for gambits!
-; Estimated strength: 2000 Elo
+; created by Pawel Koziol
+; Ben is still weak, but has balanced outlook on the game. Let's hope he improves!
 ;
 PawnValueMg = 95
-KnightValueMg = 310
-BishopValueMg = 322
-RookValueMg = 514
-QueenValueMg = 1000
-PawnValueEg = 110
-KnightValueEg = 305
-BishopValueEg = 320
-RookValueEg = 529
-QueenValueEg = 1013
+KnightValueMg = 325
+BishopValueMg = 325
+RookValueMg = 500
+QueenValueMg = 975
+PawnValueEg = 100
+KnightValueEg = 325
+BishopValueEg = 325
+RookValueEg = 500
+QueenValueEg = 975
 KeepPawn = 0
 KeepKnight = 0
 KeepBishop = 0
@@ -31,13 +30,13 @@ BothUp = 80
 ExchangeImbalance = 30
 MinorVsQueen = 4
 TwoMinors = 44
-Material = 80
-OwnAttack = 150
-OppAttack = 100
-OwnMobility = 150
-OppMobility = 100
+Material = 100
+OwnAttack = 80
+OppAttack = 80
+OwnMobility = 80
+OppMobility = 80
 KingTropism = 20
-PiecePlacement = 75
+PiecePlacement = 100
 PiecePressure = 109
 PassedPawns = 100
 PawnStructure = 100
@@ -59,15 +58,15 @@ Fianchetto = 6
 ReturningB = 10
 PawnMass = 100
 PawnChains = 100
-PstStyle = 0
+PstStyle = 1
 MobilityStyle = 0
-NpsLimit = 7000
-EvalBlur = 0
+NpsLimit = 120
+EvalBlur = 25
 Contempt = 0
 SlowMover = 100
 Selectivity = 175
 SearchSkill = 10
-BookFilter = 20
 RiskyDepth = 0
-GuideBookFile = ph-gambitbook.bin
+BookFilter = 20
+GuideBookFile = micro.bin
 MainBookFile = micro.bin

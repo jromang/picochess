@@ -1,9 +1,7 @@
-[Garbiel]
-; Gabriel
+[Sid]
+; Sid
 ; Personality for Rodent III chess engine, version 0.210 or later
-; author: Pawel Koziol
-; Gabriel is for gambits!
-; Estimated strength: 2000 Elo
+; Sid likes to simplify and win in the endgame
 ;
 PawnValueMg = 95
 KnightValueMg = 310
@@ -16,10 +14,10 @@ BishopValueEg = 320
 RookValueEg = 529
 QueenValueEg = 1013
 KeepPawn = 0
-KeepKnight = 0
-KeepBishop = 0
-KeepRook = 0
-KeepQueen = 0
+KeepKnight = -5
+KeepBishop = -5
+KeepRook = -10
+KeepQueen = -20
 BishopPair = 51
 KnightPair = -9
 RookPair = -9
@@ -31,10 +29,10 @@ BothUp = 80
 ExchangeImbalance = 30
 MinorVsQueen = 4
 TwoMinors = 44
-Material = 80
-OwnAttack = 150
+Material = 100
+OwnAttack = 100
 OppAttack = 100
-OwnMobility = 150
+OwnMobility = 100
 OppMobility = 100
 KingTropism = 20
 PiecePlacement = 75
@@ -59,15 +57,15 @@ Fianchetto = 6
 ReturningB = 10
 PawnMass = 100
 PawnChains = 100
-PstStyle = 0
+PstStyle = 1
 MobilityStyle = 0
-NpsLimit = 7000
+NpsLimit = 900
 EvalBlur = 0
-Contempt = 0
+Contempt = 50
 SlowMover = 100
 Selectivity = 175
 SearchSkill = 10
-BookFilter = 20
 RiskyDepth = 0
-GuideBookFile = ph-gambitbook.bin
+BookFilter = 20
+GuideBookFile = guide/exchange.bin
 MainBookFile = micro.bin

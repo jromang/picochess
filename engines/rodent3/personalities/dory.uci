@@ -1,9 +1,7 @@
-[Garbiel]
-; Gabriel
+[Dory]
+; Dory
 ; Personality for Rodent III chess engine, version 0.210 or later
-; author: Pawel Koziol
-; Gabriel is for gambits!
-; Estimated strength: 2000 Elo
+; weak, defense oriented
 ;
 PawnValueMg = 95
 KnightValueMg = 310
@@ -15,7 +13,7 @@ KnightValueEg = 305
 BishopValueEg = 320
 RookValueEg = 529
 QueenValueEg = 1013
-KeepPawn = 0
+KeepPawn = 2
 KeepKnight = 0
 KeepBishop = 0
 KeepRook = 0
@@ -31,11 +29,11 @@ BothUp = 80
 ExchangeImbalance = 30
 MinorVsQueen = 4
 TwoMinors = 44
-Material = 80
-OwnAttack = 150
-OppAttack = 100
-OwnMobility = 150
-OppMobility = 100
+Material = 100
+OwnAttack = 100
+OppAttack = 150
+OwnMobility = 200
+OppMobility = 150
 KingTropism = 20
 PiecePlacement = 75
 PiecePressure = 109
@@ -43,8 +41,8 @@ PassedPawns = 100
 PawnStructure = 100
 Lines = 100
 Outposts = 78
-PawnShield = 119
-PawnStorm = 99
+PawnShield = 150
+PawnStorm = 50
 Forwardness = 0
 Center = 50
 DoubledPawnMg = -23
@@ -55,19 +53,19 @@ IsolatedOnOpenMg = -10
 BackwardPawnMg = -8
 BackwardPawnEg = -10
 BackwardOnOpenMg = -8
-Fianchetto = 6
-ReturningB = 10
+Fianchetto = 35
+ReturningB = 50
 PawnMass = 100
 PawnChains = 100
-PstStyle = 0
+PstStyle = 2
 MobilityStyle = 0
-NpsLimit = 7000
-EvalBlur = 0
+NpsLimit = 1000
+EvalBlur = 18
 Contempt = 0
 SlowMover = 100
 Selectivity = 175
 SearchSkill = 10
-BookFilter = 20
 RiskyDepth = 0
-GuideBookFile = ph-gambitbook.bin
+BookFilter = 20
+GuideBookFile = micro.bin
 MainBookFile = micro.bin

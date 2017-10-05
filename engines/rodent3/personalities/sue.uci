@@ -1,9 +1,8 @@
-[Garbiel]
-; Gabriel
+[Sue]
+; Sue
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; author: Pawel Koziol
-; Gabriel is for gambits!
-; Estimated strength: 2000 Elo
+; Sue likes to sacrifice, even though at her current tactical level she is yet unable to calculate all the consequences
 ;
 PawnValueMg = 95
 KnightValueMg = 310
@@ -32,9 +31,9 @@ ExchangeImbalance = 30
 MinorVsQueen = 4
 TwoMinors = 44
 Material = 80
-OwnAttack = 150
+OwnAttack = 100
 OppAttack = 100
-OwnMobility = 150
+OwnMobility = 100
 OppMobility = 100
 KingTropism = 20
 PiecePlacement = 75
@@ -46,7 +45,7 @@ Outposts = 78
 PawnShield = 119
 PawnStorm = 99
 Forwardness = 0
-Center = 50
+Center = 100
 DoubledPawnMg = -23
 DoubledPawnEg = -12
 IsolatedPawnMg = -10
@@ -59,9 +58,9 @@ Fianchetto = 6
 ReturningB = 10
 PawnMass = 100
 PawnChains = 100
-PstStyle = 0
+PstStyle = 2
 MobilityStyle = 0
-NpsLimit = 7000
+NpsLimit = 550
 EvalBlur = 0
 Contempt = 0
 SlowMover = 100
@@ -69,5 +68,6 @@ Selectivity = 175
 SearchSkill = 10
 BookFilter = 20
 RiskyDepth = 0
-GuideBookFile = ph-gambitbook.bin
+BookFilter = 20
+GuideBookFile = micro.bin
 MainBookFile = micro.bin
