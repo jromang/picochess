@@ -1,5 +1,5 @@
 PicoChess Engines
-August 30, 2017
+October 06, 2017
 
 
 1. STOCKFISH
@@ -104,21 +104,20 @@ Nevertheless, the engine has an attractive style of play. Unfortunately
 for weaker human players, Floyd cannot be forced to play weaker.
 
 
-7. CINNAMON   
+7. SAYURI
 =========================
-Author: Giuseppe Cannella
-Version: 2.0
-Date: May 2016
-Elo: 2060
+Author: Hironori Ishibashi
+Version: 2017.09.29
+Date: September 2017
+Elo: 1840
 Levels: no
 Chess960: no
-License: GPLv3
-Source: https://github.com/gekomad/Cinnamon/
-Description: Cinnamon is the successor to Butterfly. It is an attractive opponent
-for experienced club players. This engine does not play too strong but is not
-very easy to beat either. If you have no FM or IM title and are looking for
-a beatable engine that can teach you a thing or two about chess, then Cinnamon is
-a good choice.
+License: MIT
+Source: https://github.com/MetalPhaeton/sayuri
+Description: Sayuri is a weaker chess engine than the other famous engines.
+Sayuri is a customizable UCI chess engine with Sayulisp (=Scheme-like Lisp interpreter) which allows you to customize
+the search algorithm or adjust the evaluation weights. For details please take a look at the sayuri webpage.
+If you are looking for a beatable engine that can teach you a thing or two about chess, then Sayuri is a good choice.
 
 
 8. GALJOEN
