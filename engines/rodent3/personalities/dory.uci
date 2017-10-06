@@ -2,7 +2,6 @@
 ; Dory
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; weak, defense oriented
-;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -45,8 +44,8 @@ PawnShield = 150
 PawnStorm = 50
 Forwardness = 0
 Center = 50
-DoubledPawnMg = -23
-DoubledPawnEg = -12
+DoubledPawnMg = -12
+DoubledPawnEg = -23
 IsolatedPawnMg = -10
 IsolatedPawnEg = -8
 IsolatedOnOpenMg = -10

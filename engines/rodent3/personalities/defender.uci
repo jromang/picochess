@@ -4,7 +4,6 @@
 ; by Pawel Koziol
 ; personality that weights enemy attack and mobility marginally higher
 ; this is one of the strongest settings
-
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -43,8 +42,8 @@ PawnShield = 119
 PawnStorm = 99
 Forwardness = 0
 Center = 50
-DoubledPawnMg = -23
-DoubledPawnEg = -12
+DoubledPawnMg = -12
+DoubledPawnEg = -23
 IsolatedPawnMg = -10
 IsolatedPawnEg = -8
 IsolatedOnOpenMg = -10

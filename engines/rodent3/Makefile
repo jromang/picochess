@@ -13,9 +13,9 @@ DATADIRPERSONALITIES = $(PREFIX)/personalities
 
 # Define the CPP compiler
 CXX = g++
-# LocutusOfPenguin: use this instead for cross compile with ubuntu 16.04
-# sudo apt install gcc-4.9-arm-linux-gnueabihf g++-4.9-arm-linux-gnueabihf pkg-config-arm-linux-gnueabihf  <<< c++11
-# sudo apt install gcc-arm-linux-gnueabihf  g++-arm-linux-gnueabihf pkg-config-arm-linux-gnueabihf   <<< c++14 needs this!
+# LocutusOfPenguin: use this instead => cross compile with ubuntu 16.04 - rodent3 needs the c++14 (so use last line!)
+# sudo apt install gcc-4.9-arm-linux-gnueabihf g++-4.9-arm-linux-gnueabihf pkg-config-arm-linux-gnueabihf   <<< c++11
+# sudo apt install gcc-arm-linux-gnueabihf  g++-arm-linux-gnueabihf pkg-config-arm-linux-gnueabihf   <<< c++14
 # CXX = arm-linux-gnueabihf-g++
 
 # Define features
@@ -29,7 +29,7 @@ CXX1FLAGS = -g -std=c++14 -Wall -pthread $(CFG1)
 
 # Define linker options
 LDFLAGS = -s -Wl,--no-as-needed,--gc-sections
-# LocutusOfPenguin: use this instead for Jessie system (c++14 not installed cause of gcc4.9) but needs cross compile!
+# LocutusOfPenguin: use this instead => Jessie system (c++14 not installed cause of gcc4.9) needs cross compile to work!
 # LDFLAGS = -s -static -Wl,--no-as-needed,--gc-sections
 LD1FLAGS = -lm
 
