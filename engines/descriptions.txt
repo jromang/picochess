@@ -3,7 +3,7 @@ October 06, 2017
 
 
 1. STOCKFISH
-=========================
+===========================
 Authors: T. Romstad, M. Costalba, J. Kiiski, G. Linscott
 Version: 7
 Date: January 2016
@@ -21,10 +21,10 @@ Chess').
 
 
 2. TEXEL
-=========================
+===========================
 Author: Peter Österlund
-Version: 1.06
-Date: July 2016
+Version: 1.07
+Date: September 2017
 Elo: 3050
 Levels: yes
 Chess960: no
@@ -37,7 +37,7 @@ a level 0, which lets the engine play random legal moves.
 
 
 3. ARASAN
-=========================
+===========================
 Author: Jon Dart
 Version: 20.2
 Date: July 2017
@@ -53,10 +53,10 @@ including skill levels to make it an attractive opponent for players of every st
 
 
 4. RODENT III
-=========================
+===========================
 Author: Paweł Kozioł
-Version: 0.210
-Date: August 2017
+Version: 0.220
+Date: October 2017
 Elo: 2920
 Levels: 'Personalities'
 Chess960: no
@@ -88,7 +88,7 @@ handicap level a little higher.
 
 
 6. FLOYD
-=========================
+===========================
 Author: Marcel van Kervinck
 Version: 0.9
 Date: July 2016
@@ -105,7 +105,7 @@ for weaker human players, Floyd cannot be forced to play weaker.
 
 
 7. SAYURI
-=========================
+===========================
 Author: Hironori Ishibashi
 Version: 2017.09.29
 Date: September 2017
@@ -115,13 +115,15 @@ Chess960: no
 License: MIT
 Source: https://github.com/MetalPhaeton/sayuri
 Description: Sayuri is a weaker chess engine than the other famous engines.
-Sayuri is a customizable UCI chess engine with Sayulisp (=Scheme-like Lisp interpreter) which allows you to customize
-the search algorithm or adjust the evaluation weights. For details please take a look at the sayuri webpage.
-If you are looking for a beatable engine that can teach you a thing or two about chess, then Sayuri is a good choice.
+Sayuri is a customizable UCI chess engine with Sayulisp (=Scheme-like Lisp interpreter)
+which allows you to customize the search algorithm or adjust the evaluation weights.
+For details please take a look at the sayuri webpage.
+If you are looking for a beatable engine that can teach you a thing or two about chess,
+then Sayuri is a good choice.
 
 
 8. GALJOEN
-=========================
+===========================
 Author: Werner Taelemans
 Version: 0.36
 Date: July 2017
