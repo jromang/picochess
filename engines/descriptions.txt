@@ -5,8 +5,8 @@ October 06, 2017
 1. STOCKFISH
 ===========================
 Authors: T. Romstad, M. Costalba, J. Kiiski, G. Linscott
-Version: 7
-Date: January 2016
+Version: 8
+Date: October 2017
 Elo (CCRL 40/4): 3360
 Levels: yes
 Chess960: yes
@@ -40,7 +40,7 @@ a level 0, which lets the engine play random legal moves.
 ===========================
 Author: Jon Dart
 Version: 20.2
-Date: July 2017
+Date: September 2017
 Elo: 2950
 Levels: yes
 Chess960: no
@@ -72,8 +72,8 @@ crazy attacker.
 5. ZURICHESS
 =========================
 Author: Alexandru Moșoi
-Version: luzern
-Date: July 2017
+Version: neuchatel
+Date: October 2017
 Elo: 2790
 Levels: yes ('Handicaps')
 Chess960: no
