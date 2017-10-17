@@ -28,9 +28,9 @@ CXXFLAGS = -g -std=c++14 -Wall -Wno-unknown-pragmas -O3 -fno-rtti -pthread $(CFG
 CXX1FLAGS = -g -std=c++14 -Wall -Wno-unknown-pragmas -pthread $(CFG1)
 
 # Define linker options
-LDFLAGS = -s -Wl,--no-as-needed,--gc-sections
+# LDFLAGS = -s -Wl,--no-as-needed,--gc-sections
 # LocutusOfPenguin: use this instead => Jessie system (c++14 not installed cause of gcc4.9) needs cross compile to work!
-# LDFLAGS = -s -static -Wl,--no-as-needed,--gc-sections
+LDFLAGS = -s -static -Wl,--no-as-needed,--gc-sections
 LD1FLAGS = -lm
 
 # Command line switches
