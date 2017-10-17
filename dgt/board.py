@@ -276,6 +276,9 @@ class DgtBoard(object):
                     if self.in_settime:
                         logging.info('(ser) clock still in set mode, ignore received time')
                         errtim = True
+                    elif r_time - self.r_time > 3600 or l_time - self.l_time > 3600:  # todo ignore it completely?
+                        logging.info('(ser) clock new time over 1h difference, ignore received time')
+                        errtim = True
                 else:
                     logging.info('(ser) clock new time received l:%s r:%s', hms_time(l_time), hms_time(r_time))
                     status = message[6] & 0x3f
