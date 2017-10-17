@@ -3,6 +3,7 @@
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; author: Pawel Koziol
 ; defence, restraint, classical style
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -53,6 +54,7 @@ IsolatedOnOpenMg = -10
 BackwardPawnMg = -8
 BackwardPawnEg = -10
 BackwardOnOpenMg = -8
+FianchBase = 4
 Fianchetto = 6
 ReturningB = 10
 MinorBehindPawn = 5

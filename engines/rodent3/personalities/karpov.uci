@@ -53,6 +53,7 @@ IsolatedOnOpenMg = -10
 BackwardPawnMg = -8
 BackwardPawnEg = -10
 BackwardOnOpenMg = -8
+FianchBase = 4
 Fianchetto = 6
 ReturningB = 20
 MinorBehindPawn = 5
