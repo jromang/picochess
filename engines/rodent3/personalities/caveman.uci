@@ -2,7 +2,7 @@
 ; Caveman
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; stripped of most of knowledge, relies mostly on raw calculating power.
-
+;
 PawnValueMg = 100
 KnightValueMg = 334
 BishopValueMg = 335

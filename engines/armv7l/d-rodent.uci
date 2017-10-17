@@ -2,6 +2,7 @@
 ; Amy
 ; weak, aggressive, slow
 ; Personality for Rodent III chess engine, version 0.210 or later
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -54,6 +55,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 2
@@ -74,6 +77,7 @@ MainBookFile = micro.bin
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; created by Pawel Koziol
 ; weak, attacker
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -126,6 +130,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 0
@@ -199,6 +205,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 12
 ReturningB = 20
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 2
@@ -214,11 +222,87 @@ BookFilter = 20
 GuideBookFile = guide/grandpa.bin
 MainBookFile = small.bin
 
+[Barbarian]
+; Barbarian
+; Personality for Rodent III chess engine, version 0.210 or later
+; attacker with lower interest for positional factors
+;
+PawnValueMg = 95
+KnightValueMg = 310
+BishopValueMg = 322
+RookValueMg = 514
+QueenValueMg = 1000
+PawnValueEg = 110
+KnightValueEg = 305
+BishopValueEg = 320
+RookValueEg = 529
+QueenValueEg = 1013
+KeepPawn = 0
+KeepKnight = 0
+KeepBishop = 0
+KeepRook = 0
+KeepQueen = 20
+BishopPair = 51
+KnightPair = -9
+RookPair = -9
+KnightLikesClosed = 6
+RookLikesOpen = 3
+MajorUp = 60
+MinorUp = 53
+BothUp = 80
+ExchangeImbalance = 30
+MinorVsQueen = 4
+TwoMinors = 44
+Material = 100
+OwnAttack = 180
+OppAttack = 100
+OwnMobility = 75
+OppMobility = 75
+KingTropism = 100
+PiecePlacement = 100
+PiecePressure = 125
+PassedPawns = 100
+PawnStructure = 75
+Lines = 100
+Outposts = 78
+PawnShield = 119
+PawnStorm = 99
+Forwardness = 0
+Center = 50
+DoubledPawnMg = -12
+DoubledPawnEg = -23
+IsolatedPawnMg = -10
+IsolatedPawnEg = -8
+IsolatedOnOpenMg = -10
+BackwardPawnMg = -8
+BackwardPawnEg = -10
+BackwardOnOpenMg = -8
+FianchBase = 4
+Fianchetto = 6
+ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
+PawnMass = 100
+PawnChains = 100
+PstStyle = 1
+MobilityStyle = 0
+NpsLimit = 0
+EvalBlur = 0
+Contempt = 0
+SlowMover = 100
+Selectivity = 175
+SearchSkill = 10
+RiskyDepth = 0
+BookFilter = 20
+GuideBookFile = guide/guide.bin
+MainBookFile = rodent.bin
+
 [Ben]
 ; Ben
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; created by Pawel Koziol
 ; Ben is still weak, but has balanced outlook on the game. Let's hope he improves!
+;
 PawnValueMg = 95
 KnightValueMg = 325
 BishopValueMg = 325
@@ -271,6 +355,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 1
@@ -286,10 +372,87 @@ BookFilter = 20
 GuideBookFile = micro.bin
 MainBookFile = micro.bin
 
+[Bibi]
+; Bibi
+; Personality for Rodent III chess engine, version 0.210 or later
+; Bibi likes bishop pair. But it is not the end of the story.
+; Playing against two bishops, he will strongly prefer closed positions.
+;
+PawnValueMg = 95
+KnightValueMg = 310
+BishopValueMg = 332
+RookValueMg = 520
+QueenValueMg = 1000
+PawnValueEg = 110
+KnightValueEg = 305
+BishopValueEg = 330
+RookValueEg = 535
+QueenValueEg = 1013
+KeepPawn = 0
+KeepKnight = 0
+KeepBishop = 0
+KeepRook = 0
+KeepQueen = 0
+BishopPair = 75
+KnightPair = -9
+RookPair = -9
+KnightLikesClosed = 9
+RookLikesOpen = 3
+MajorUp = 60
+MinorUp = 53
+BothUp = 80
+ExchangeImbalance = 30
+MinorVsQueen = 4
+TwoMinors = 44
+Material = 100
+OwnAttack = 100
+OppAttack = 100
+OwnMobility = 100
+OppMobility = 100
+KingTropism = 20
+PiecePlacement = 75
+PiecePressure = 109
+PassedPawns = 100
+PawnStructure = 100
+Lines = 100
+Outposts = 78
+PawnShield = 119
+PawnStorm = 99
+Forwardness = 0
+Center = 50
+DoubledPawnMg = -12
+DoubledPawnEg = -23
+IsolatedPawnMg = -10
+IsolatedPawnEg = -8
+IsolatedOnOpenMg = -10
+BackwardPawnMg = -8
+BackwardPawnEg = -10
+BackwardOnOpenMg = -8
+FianchBase = 9
+Fianchetto = 6
+ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
+PawnMass = 100
+PawnChains = 140
+PstStyle = 0
+MobilityStyle = 0
+NpsLimit = 0
+EvalBlur = 0
+Contempt = 0
+SlowMover = 100
+Selectivity = 175
+SearchSkill = 10
+RiskyDepth = 0
+BookFilter = 20
+GuideBookFile = mini.bin
+MainBookFile = mini.bin
+
 [Blais]
 ; Blais
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; Blais has a blurred vision of the board
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -342,6 +505,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 0
@@ -363,6 +528,7 @@ MainBookFile = micro.bin
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; Created by Pawel Koziol
 ; materialist, stripped of some fancy eval staff and material tuning results, high king tropism
+;
 PawnValueMg = 100
 KnightValueMg = 325
 BishopValueMg = 325
@@ -411,6 +577,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 0
 ReturningB = 0
+MinorBehindPawn = 0
+PawnThreat = 0
 PawnMass = 0
 PawnChains = 100
 PstStyle = 2
@@ -431,6 +599,7 @@ MainBookFile = rodent.bin
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; created by Pawel Koziol
 ; ignores pawn structure, low interest in king attack
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -479,6 +648,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 0
+PawnThreat = 0
 PawnMass = 0
 PawnChains = 100
 PstStyle = 0
@@ -498,6 +669,7 @@ MainBookFile = rodent.bin
 ; Caveman
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; stripped of most of knowledge, relies mostly on raw calculating power.
+;
 PawnValueMg = 100
 KnightValueMg = 334
 BishopValueMg = 335
@@ -550,6 +722,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 0
 ReturningB = 0
+MinorBehindPawn = 0
+PawnThreat = 0
 PawnMass = 0
 PawnChains = 0
 PstStyle = 2
@@ -569,6 +743,7 @@ MainBookFile = small.bin
 ; Chloe
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; Chloe is chaotic, but a bit more tactically aware than the oter kids
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -621,6 +796,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 0
@@ -640,6 +817,7 @@ MainBookFile = micro.bin
 ; Chris
 ; Chris is a constrictor
 ; Personality for Rodent III chess engine, version 0.210 or later
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -692,6 +870,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 1
@@ -707,11 +887,87 @@ BookFilter = 20
 GuideBookFile = micro.bin
 MainBookFile = micro.bin
 
+[Constrictor]
+; Constrictor
+; Personality for Rodent III chess engine, version 0.210 or later
+; It wants to restrict your mobility and to attack
+;
+PawnValueMg = 95
+KnightValueMg = 310
+BishopValueMg = 322
+RookValueMg = 514
+QueenValueMg = 1000
+PawnValueEg = 110
+KnightValueEg = 305
+BishopValueEg = 320
+RookValueEg = 529
+QueenValueEg = 1013
+KeepPawn = 0
+KeepKnight = 0
+KeepBishop = 0
+KeepRook = 0
+KeepQueen = 0
+BishopPair = 51
+KnightPair = -9
+RookPair = -9
+KnightLikesClosed = 7
+RookLikesOpen = 3
+MajorUp = 60
+MinorUp = 53
+BothUp = 80
+ExchangeImbalance = 30
+MinorVsQueen = 4
+TwoMinors = 44
+Material = 100
+OwnAttack = 150
+OppAttack = 100
+OwnMobility = 100
+OppMobility = 150
+KingTropism = 20
+PiecePlacement = 75
+PiecePressure = 109
+PassedPawns = 100
+PawnStructure = 100
+Lines = 100
+Outposts = 78
+PawnShield = 119
+PawnStorm = 99
+Forwardness = 0
+Center = 50
+DoubledPawnMg = -12
+DoubledPawnEg = -23
+IsolatedPawnMg = -10
+IsolatedPawnEg = -8
+IsolatedOnOpenMg = -10
+BackwardPawnMg = -8
+BackwardPawnEg = -10
+BackwardOnOpenMg = -8
+FianchBase = 4
+Fianchetto = 6
+ReturningB = 10
+MinorBehindPawn = 6
+PawnThreat = 4
+PawnMass = 100
+PawnChains = 100
+PstStyle = 1
+MobilityStyle = 0
+NpsLimit = 0
+EvalBlur = 0
+Contempt = 0
+SlowMover = 100
+Selectivity = 175
+SearchSkill = 10
+RiskyDepth = 0
+BookFilter = 20
+GuideBookFile = guide/guide.bin
+MainBookFile = rodent.bin
+
 [Deborah]
 ; Deborah
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; created by Pawel Koziol
 ; defensive player that likes bishops
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 332
@@ -760,6 +1016,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 8
+PawnThreat = 8
 PawnMass = 100
 PawnChains = 100
 PstStyle = 0
@@ -829,6 +1087,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 6
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 0
@@ -901,6 +1161,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 6
 PawnMass = 105
 PawnChains = 100
 PstStyle = 1
@@ -972,6 +1234,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 35
 ReturningB = 50
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 2
@@ -991,6 +1255,7 @@ MainBookFile = micro.bin
 ; Drunk
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; huge random factor in eval and messy openings
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -1043,6 +1308,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 0
@@ -1061,6 +1328,7 @@ MainBookFile = rodent.bin
 [Expert]
 ; Expert
 ; Personality for Rodent III chess engine, version 0.210 or later
+;
 PawnValueMg = 100
 KnightValueMg = 325
 BishopValueMg = 325
@@ -1113,6 +1381,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 1
@@ -1133,6 +1403,7 @@ MainBookFile = small.bin
 ; Personality for Rodent III chess engine, version 0.210 or later 
 ; Created by Pawel Koziol
 ; Likes sacrificing pawns and restricting opponent's mobility.
+;
 PawnValueMg = 85
 KnightValueMg = 310
 BishopValueMg = 322
@@ -1181,6 +1452,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 0
@@ -1201,6 +1474,7 @@ MainBookFile = rodent.bin
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; Created by Pawel Koziol
 ; Fiona likes fianchetto and uses non-default piece/square table
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -1249,6 +1523,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 30
 ReturningB = 15
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 200
 PstStyle = 2
@@ -1269,6 +1545,7 @@ MainBookFile = rodent.bin
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; created by Pawel Koziol
 ; weak, rushes forward
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -1321,6 +1598,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 0
 PawnMass = 100
 PawnChains = 100
 PstStyle = 0
@@ -1341,6 +1620,7 @@ MainBookFile = micro.bin
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; 1900-ish player that likes thrusting his pieces forward
 ; the funny thing is that he likes flank openings as well
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -1393,6 +1673,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 0
@@ -1414,6 +1696,7 @@ MainBookFile = small.bin
 ; author: Pawel Koziol
 ; Gabriel is for gambits!
 ; Estimated strength: 2000 Elo
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -1466,6 +1749,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 0
@@ -1535,6 +1820,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 0
@@ -1557,6 +1844,7 @@ MainBookFile = rodent.bin
 ; created by Pawel Koziol
 ; based on attack and restraint, likes closed positions, slight contempt
 ; meant to simulate strong elderly player
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -1605,6 +1893,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 0
@@ -1620,10 +1910,237 @@ BookFilter = 20
 GuideBookFile = guide/solid.bin
 MainBookFile = rodent.bin
 
+[Hedgehog]
+; Hedgehog
+; Personality for Rodent III chess engine, version 0.210 or later
+; solid with pawns, slightly pessimistic
+;
+PawnValueMg = 95
+KnightValueMg = 310
+BishopValueMg = 322
+RookValueMg = 514
+QueenValueMg = 1000
+PawnValueEg = 110
+KnightValueEg = 305
+BishopValueEg = 320
+RookValueEg = 529
+QueenValueEg = 1013
+KeepPawn = 0
+KeepKnight = 0
+KeepBishop = 0
+KeepRook = 0
+KeepQueen = 0
+BishopPair = 51
+KnightPair = -9
+RookPair = -9
+KnightLikesClosed = 7
+RookLikesOpen = 3
+MajorUp = 60
+MinorUp = 53
+BothUp = 80
+ExchangeImbalance = 30
+MinorVsQueen = 4
+TwoMinors = 44
+Material = 100
+OwnAttack = 100
+OppAttack = 115
+OwnMobility = 100
+OppMobility = 100
+KingTropism = 0
+PiecePlacement = 75
+PiecePressure = 109
+PassedPawns = 100
+PawnStructure = 140
+Lines = 100
+Outposts = 78
+PawnShield = 119
+PawnStorm = 99
+Forwardness = 0
+Center = 50
+DoubledPawnMg = -12
+DoubledPawnEg = -23
+IsolatedPawnMg = -10
+IsolatedPawnEg = -8
+IsolatedOnOpenMg = -10
+BackwardPawnMg = -8
+BackwardPawnEg = -10
+BackwardOnOpenMg = -8
+FianchBase = 10
+Fianchetto = 6
+ReturningB = 12
+MinorBehindPawn = 10
+PawnThreat = 4
+PawnMass = 110
+PawnChains = 100
+PstStyle = 0
+MobilityStyle = 0
+NpsLimit = 0
+EvalBlur = 0
+Contempt = 0
+SlowMover = 105
+Selectivity = 175
+SearchSkill = 10
+RiskyDepth = 0
+BookFilter = 20
+GuideBookFile = guide/flank.bin
+MainBookFile = rodent.bin
+
+[Helpless]
+; Helpless
+; Personality for Rodent III chess engine, version 0.210 or later
+; Severely restricted speed, no regard for material values
+;
+PawnValueMg = 95
+KnightValueMg = 310
+BishopValueMg = 322
+RookValueMg = 514
+QueenValueMg = 1000
+PawnValueEg = 110
+KnightValueEg = 305
+BishopValueEg = 320
+RookValueEg = 529
+QueenValueEg = 1013
+KeepPawn = 0
+KeepKnight = 0
+KeepBishop = 0
+KeepRook = 0
+KeepQueen = 0
+BishopPair = 51
+KnightPair = -9
+RookPair = -9
+KnightLikesClosed = 6
+RookLikesOpen = 3
+MajorUp = 60
+MinorUp = 53
+BothUp = 80
+ExchangeImbalance = 30
+MinorVsQueen = 4
+TwoMinors = 44
+Material = 0
+OwnAttack = 100
+OppAttack = 100
+OwnMobility = 100
+OppMobility = 100
+KingTropism = 20
+PiecePlacement = 75
+PiecePressure = 109
+PassedPawns = 100
+PawnStructure = 100
+Lines = 100
+Outposts = 78
+PawnShield = 119
+PawnStorm = 99
+Forwardness = 0
+Center = 50
+DoubledPawnMg = -12
+DoubledPawnEg = -23
+IsolatedPawnMg = -10
+IsolatedPawnEg = -8
+IsolatedOnOpenMg = -10
+BackwardPawnMg = -8
+BackwardPawnEg = -10
+BackwardOnOpenMg = -8
+FianchBase = 4
+Fianchetto = 6
+ReturningB = 0
+MinorBehindPawn = 5
+PawnThreat = 4
+PawnMass = 100
+PawnChains = 100
+PstStyle = 0
+MobilityStyle = 0
+NpsLimit = 50
+EvalBlur = 1000
+Contempt = 0
+SlowMover = 100
+Selectivity = 175
+SearchSkill = 10
+BookFilter = 20
+RiskyDepth = 0
+BookFilter = 20
+GuideBookFile = empty.bin
+MainBookFile = empty.bin
+
+[John]
+; John
+; Personality for Rodent III chess engine, version 0.210 or later
+; weak, neglects protecting own king
+;
+PawnValueMg = 95
+KnightValueMg = 310
+BishopValueMg = 322
+RookValueMg = 514
+QueenValueMg = 1000
+PawnValueEg = 110
+KnightValueEg = 305
+BishopValueEg = 320
+RookValueEg = 529
+QueenValueEg = 1013
+KeepPawn = 0
+KeepKnight = 0
+KeepBishop = 0
+KeepRook = 0
+KeepQueen = 0
+BishopPair = 51
+KnightPair = -9
+RookPair = -9
+KnightLikesClosed = 6
+RookLikesOpen = 3
+MajorUp = 60
+MinorUp = 53
+BothUp = 80
+ExchangeImbalance = 30
+MinorVsQueen = 4
+TwoMinors = 44
+Material = 100
+OwnAttack = 100
+OppAttack = 0
+OwnMobility = 100
+OppMobility = 100
+KingTropism = 0
+PiecePlacement = 75
+PiecePressure = 109
+PassedPawns = 100
+PawnStructure = 100
+Lines = 100
+Outposts = 78
+PawnShield = 119
+PawnStorm = 99
+Forwardness = 0
+Center = 50
+DoubledPawnMg = -12
+DoubledPawnEg = -23
+IsolatedPawnMg = -10
+IsolatedPawnEg = -8
+IsolatedOnOpenMg = -10
+BackwardPawnMg = -8
+BackwardPawnEg = -10
+BackwardOnOpenMg = -8
+FianchBase = 10
+Fianchetto = 0
+ReturningB = 0
+MinorBehindPawn = 5
+PawnThreat = 4
+PawnMass = 100
+PawnChains = 100
+PstStyle = 2
+MobilityStyle = 0
+NpsLimit = 180
+EvalBlur = 0
+Contempt = 0
+SlowMover = 100
+Selectivity = 175
+SearchSkill = 10
+RiskyDepth = 0
+BookFilter = 20
+GuideBookFile = micro.bin
+MainBookFile = micro.bin
+
 [Karpov]
 ; Karpov
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; based on Brendan J. Norman's personality for Rodent II
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -1676,6 +2193,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 20
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 1
@@ -1696,6 +2215,7 @@ MainBookFile = rodent.bin
 ; Lasker
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; created by Pawel Koziol
+;
 PawnValueMg = 95
 KnightValueMg = 341
 BishopValueMg = 322
@@ -1744,6 +2264,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 0
@@ -1763,6 +2285,7 @@ MainBookFile = rodent.bin
 ; Lea
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; Lea just learns how the pieces move
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -1814,7 +2337,9 @@ BackwardPawnMg = -8
 BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
-ReturningB = 10
+ReturningB = 0
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 0
@@ -1831,12 +2356,88 @@ BookFilter = 20
 GuideBookFile = micro.bin
 MainBookFile = micro.bin
 
+[Mark]
+; Mark
+; Personality for Rodent III chess engine, version 0.210 or later
+; defensive playr who likes own mobility
+;
+PawnValueMg = 95
+KnightValueMg = 310
+BishopValueMg = 322
+RookValueMg = 514
+QueenValueMg = 1000
+PawnValueEg = 110
+KnightValueEg = 305
+BishopValueEg = 320
+RookValueEg = 529
+QueenValueEg = 1013
+KeepPawn = 0
+KeepKnight = 0
+KeepBishop = 0
+KeepRook = 0
+KeepQueen = 0
+BishopPair = 51
+KnightPair = -9
+RookPair = -9
+KnightLikesClosed = 6
+RookLikesOpen = 3
+MajorUp = 60
+MinorUp = 53
+BothUp = 80
+ExchangeImbalance = 30
+MinorVsQueen = 4
+TwoMinors = 44
+Material = 105
+OwnAttack = 100
+OppAttack = 120
+OwnMobility = 130
+OppMobility = 100
+KingTropism = 20
+PiecePlacement = 75
+PiecePressure = 109
+PassedPawns = 100
+PawnStructure = 100
+Lines = 100
+Outposts = 78
+PawnShield = 119
+PawnStorm = 99
+Forwardness = 0
+Center = 50
+DoubledPawnMg = -12
+DoubledPawnEg = -23
+IsolatedPawnMg = -10
+IsolatedPawnEg = -8
+IsolatedOnOpenMg = -10
+BackwardPawnMg = -8
+BackwardPawnEg = -10
+BackwardOnOpenMg = -8
+FianchBase = 4
+Fianchetto = 6
+ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
+PawnMass = 100
+PawnChains = 100
+PstStyle = 1
+MobilityStyle = 0
+NpsLimit = 400
+EvalBlur = 0
+Contempt = 0
+SlowMover = 100
+Selectivity = 175
+SearchSkill = 10
+RiskyDepth = 0
+BookFilter = 20
+GuideBookFile = micro.bin
+MainBookFile = micro.bin
+
 [Marshall]
 ; Marshall
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; by Pawel Koziol
 ; hommage to Frank Marshall (1877-1944)
 ; very high attack, very high mobility, sacrificial, likes knights
+;
 PawnValueMg = 95
 KnightValueMg = 320
 BishopValueMg = 322
@@ -1889,6 +2490,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 0
 ReturningB = 0
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 1
@@ -1908,6 +2511,7 @@ MainBookFile = rodent.bin
 ; Matthew
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; Materialist, slightly below 1000 mark
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -1960,6 +2564,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 2
@@ -1980,6 +2586,7 @@ MainBookFile = small.bin
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; created by Pawel Koziol
 ; materialist who likes mobility, limited opening knowledge
+;
 PawnValueMg = 98
 KnightValueMg = 310
 BishopValueMg = 322
@@ -2032,6 +2639,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 1
@@ -2052,6 +2661,7 @@ MainBookFile = small.bin
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; created by Pawel Koziol
 ; symmetric violent attacker, piece values spaced further apart than usual
+;
 PawnValueMg = 95
 KnightValueMg = 335
 BishopValueMg = 322
@@ -2100,6 +2710,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 107
 PawnChains = 100
 PstStyle = 1
@@ -2120,6 +2732,7 @@ MainBookFile = rodent.bin
 ; author: Pawel Koziol
 ; attacking player who likes closed positions, approx. elo 2300
 ; Personality for Rodent III chess engine, version 0.210 or later
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -2172,6 +2785,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 16
 ReturningB = 12
+MinorBehindPawn = 8
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 1
@@ -2186,11 +2801,162 @@ BookFilter = 20
 GuideBookFile = guide/solid.bin
 MainBookFile = rodent.bin
 
+[Nerd]
+; Nerd
+; Personality for Rodent III chess engine, version 0.210 or later
+; carea a bit too much about positional play
+;
+PawnValueMg = 95
+KnightValueMg = 310
+BishopValueMg = 322
+RookValueMg = 514
+QueenValueMg = 1000
+PawnValueEg = 110
+KnightValueEg = 305
+BishopValueEg = 320
+RookValueEg = 529
+QueenValueEg = 1013
+KeepPawn = 1
+KeepKnight = 0
+KeepBishop = -5
+KeepRook = 0
+KeepQueen = 0
+BishopPair = 60
+KnightPair = -9
+RookPair = -9
+KnightLikesClosed = 8
+RookLikesOpen = 3
+MajorUp = 60
+MinorUp = 53
+BothUp = 80
+ExchangeImbalance = 0
+MinorVsQueen = 4
+TwoMinors = 44
+Material = 100
+OwnAttack = 108
+OppAttack = 100
+OwnMobility = 100
+OppMobility = 100
+KingTropism = 20
+PiecePlacement = 75
+PiecePressure = 109
+PassedPawns = 100
+PawnStructure = 120
+Lines = 120
+Outposts = 110
+PawnShield = 119
+PawnStorm = 99
+Forwardness = 0
+Center = 50
+DoubledPawnMg = -16
+DoubledPawnEg = -32
+IsolatedPawnMg = -10
+IsolatedPawnEg = -8
+IsolatedOnOpenMg = -10
+BackwardPawnMg = -8
+BackwardPawnEg = -10
+BackwardOnOpenMg = -8
+FianchBase = 16
+Fianchetto = 6
+ReturningB = 13
+MinorBehindPawn = 8
+PawnThreat = 8
+PawnMass = 120
+PawnChains = 150
+PstStyle = 2
+MobilityStyle = 0
+NpsLimit = 10000
+EvalBlur = 0
+Contempt = 0
+SlowMover = 115
+Selectivity = 175
+SearchSkill = 10
+RiskyDepth = 0
+BookFilter = 20
+GuideBookFile = guide/solid.bin
+MainBookFile = rodent.bin
+
+[Nimzowitsch]
+; Nimzowitsch
+; Personality for Rodent III chess engine, version 0.210 or later
+; likes knights and restricting opponent's mobility
+;
+PawnValueMg = 95
+KnightValueMg = 322
+BishopValueMg = 310
+RookValueMg = 514
+QueenValueMg = 1000
+PawnValueEg = 110
+KnightValueEg = 305
+BishopValueEg = 320
+RookValueEg = 529
+QueenValueEg = 1013
+KeepPawn = 0
+KeepKnight = 0
+KeepBishop = 0
+KeepRook = 0
+KeepQueen = 0
+BishopPair = 40
+KnightPair = -9
+RookPair = -9
+KnightLikesClosed = 8
+RookLikesOpen = 3
+MajorUp = 60
+MinorUp = 53
+BothUp = 80
+ExchangeImbalance = 30
+MinorVsQueen = 4
+TwoMinors = 44
+Material = 100
+OwnAttack = 100
+OppAttack = 90
+OwnMobility = 100
+OppMobility = 120
+KingTropism = 20
+PiecePlacement = 75
+PiecePressure = 109
+PassedPawns = 100
+PawnStructure = 110
+Lines = 100
+Outposts = 100
+PawnShield = 119
+PawnStorm = 99
+Forwardness = 0
+Center = 75
+DoubledPawnMg = -14
+DoubledPawnEg = -28
+IsolatedPawnMg = -10
+IsolatedPawnEg = -8
+IsolatedOnOpenMg = -10
+BackwardPawnMg = -8
+BackwardPawnEg = -10
+BackwardOnOpenMg = -8
+FianchBase = 8
+Fianchetto = 6
+ReturningB = 20
+MinorBehindPawn = 5
+PawnThreat = 4
+PawnMass = 110
+PawnChains = 150
+PstStyle = 0
+MobilityStyle = 0
+NpsLimit = 0
+EvalBlur = 0
+Contempt = 0
+SlowMover = 100
+Selectivity = 125
+SearchSkill = 10
+RiskyDepth = 0
+BookFilter = 20
+GuideBookFile = players/nimzowitsch.bin
+MainBookFile = hist/_pre30.bin
+
 [Nina]
 ; Nina
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; created by Pawel Koziol
 ; Nina likes knights and passed pawns, and heads towards endgame
+;
 PawnValueMg = 95
 KnightValueMg = 330
 BishopValueMg = 322
@@ -2243,6 +3009,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 110
 PawnChains = 100
 PstStyle = 0
@@ -2262,6 +3030,7 @@ MainBookFile = small.bin
 ; Nora
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; weak, overvalues knights
+;
 PawnValueMg = 95
 KnightValueMg = 360
 BishopValueMg = 322
@@ -2314,6 +3083,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 0
@@ -2329,11 +3100,86 @@ BookFilter = 20
 GuideBookFile = micro.bin
 MainBookFile = micro.bin
 
+[Novice]
+; Novice
+; Personality for Rodent III chess engine, version 0.210 or later
+;
+PawnValueMg = 95
+KnightValueMg = 310
+BishopValueMg = 322
+RookValueMg = 514
+QueenValueMg = 1000
+PawnValueEg = 110
+KnightValueEg = 305
+BishopValueEg = 320
+RookValueEg = 529
+QueenValueEg = 1013
+KeepPawn = 0
+KeepKnight = 0
+KeepBishop = 0
+KeepRook = 0
+KeepQueen = 0
+BishopPair = 51
+KnightPair = -9
+RookPair = -9
+KnightLikesClosed = 6
+RookLikesOpen = 3
+MajorUp = 0
+MinorUp = 0
+BothUp = 0
+ExchangeImbalance = 50
+MinorVsQueen = 0
+TwoMinors = 0
+Material = 100
+OwnAttack = 100
+OppAttack = 100
+OwnMobility = 100
+OppMobility = 100
+KingTropism = 20
+PiecePlacement = 75
+PiecePressure = 0
+PassedPawns = 100
+PawnStructure = 100
+Lines = 100
+Outposts = 0
+PawnShield = 100
+PawnStorm = 0
+Forwardness = 0
+Center = 0
+DoubledPawnMg = -12
+DoubledPawnEg = -23
+IsolatedPawnMg = -10
+IsolatedPawnEg = -8
+IsolatedOnOpenMg = -10
+BackwardPawnMg = -8
+BackwardPawnEg = -10
+BackwardOnOpenMg = -8
+FianchBase = 0
+Fianchetto = 0
+ReturningB = 0
+MinorBehindPawn = 0
+PawnThreat = 0
+PawnMass = 0
+PawnChains = 0
+PstStyle = 0
+MobilityStyle = 0
+NpsLimit = 60
+EvalBlur = 48
+Contempt = 0
+SlowMover = 100
+Selectivity = 175
+SearchSkill = 10
+RiskyDepth = 0
+BookFilter = 20
+GuideBookFile = empty.bin
+MainBookFile = empty.bin
+
 [Open]
 ; Open
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; Created by Pawel Koziol
 ; likes mobility, bishops and open positions
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -2382,6 +3228,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 3
+PawnThreat = 4
 PawnMass = 110
 PawnChains = 100
 PstStyle = 1
@@ -2402,6 +3250,7 @@ MainBookFile = rodent.bin
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; created by Pawel Koziol
 ; Weak, overvalues pawns, cares for pawn structure
+;
 PawnValueMg = 115
 KnightValueMg = 310
 BishopValueMg = 322
@@ -2454,6 +3303,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 120
 PawnChains = 100
 PstStyle = 0
@@ -2468,6 +3319,81 @@ RiskyDepth = 0
 BookFilter = 20
 GuideBookFile = micro.bin
 MainBookFile = micro.bin
+
+[Partisan]
+; Partisan
+; Personality for Rodent III chess engine, version 0.210 or later
+; emphasizes attack but plays stealthy openings
+;
+PawnValueMg = 95
+KnightValueMg = 310
+BishopValueMg = 322
+RookValueMg = 514
+QueenValueMg = 1000
+PawnValueEg = 110
+KnightValueEg = 305
+BishopValueEg = 320
+RookValueEg = 529
+QueenValueEg = 1013
+KeepPawn = 0
+KeepKnight = 0
+KeepBishop = 0
+KeepRook = 0
+KeepQueen = 0
+BishopPair = 51
+KnightPair = -9
+RookPair = -9
+KnightLikesClosed = 6
+RookLikesOpen = 3
+MajorUp = 60
+MinorUp = 53
+BothUp = 80
+ExchangeImbalance = 30
+MinorVsQueen = 4
+TwoMinors = 44
+Material = 100
+OwnAttack = 200
+OppAttack = 100
+OwnMobility = 100
+OppMobility = 100
+KingTropism = 50
+PiecePlacement = 100
+PiecePressure = 109
+PassedPawns = 100
+PawnStructure = 100
+Lines = 100
+Outposts = 78
+PawnShield = 119
+PawnStorm = 99
+Forwardness = 0
+Center = 50
+DoubledPawnMg = -12
+DoubledPawnEg = -23
+IsolatedPawnMg = -10
+IsolatedPawnEg = -8
+IsolatedOnOpenMg = -10
+BackwardPawnMg = -8
+BackwardPawnEg = -10
+BackwardOnOpenMg = -8
+FianchBase = 4
+Fianchetto = 6
+ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
+PawnMass = 100
+PawnChains = 100
+PstStyle = 2
+MobilityStyle = 0
+NpsLimit = 0
+EvalBlur = 0
+Contempt = 0
+SlowMover = 100
+Selectivity = 175
+SearchSkill = 10
+RiskyDepth = 0
+BookFilter = 20
+GuideBookFile = guide/low.bin
+MainBookFile = rodent.bin
 
 [Patrick]
 ; Patrick
@@ -2525,6 +3451,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 0
 ReturningB = 0
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 2
@@ -2545,6 +3473,7 @@ MainBookFile = rodent.bin
 ;Personality for Rodent III chess engine, version 0.210 or later
 ;Created by Pawel Koziol
 ;Balanced personality, slightly less materialistic than default.
+;
 PawnValueMg = 90
 KnightValueMg = 310
 BishopValueMg = 322
@@ -2593,6 +3522,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 0
@@ -2608,10 +3539,84 @@ BookFilter = 20
 GuideBookFile = guide.bin
 MainBookFile = rodent.bin
 
+[Pessimist]
+; Pessimist
+; Personality for Rodent III chess engine, version 0.210 or later
+PawnValueMg = 95
+KnightValueMg = 310
+BishopValueMg = 322
+RookValueMg = 514
+QueenValueMg = 1000
+PawnValueEg = 110
+KnightValueEg = 305
+BishopValueEg = 320
+RookValueEg = 529
+QueenValueEg = 1013
+KeepPawn = 0
+KeepKnight = 0
+KeepBishop = 0
+KeepRook = 0
+KeepQueen = 0
+BishopPair = 51
+KnightPair = -9
+RookPair = -9
+KnightLikesClosed = 6
+RookLikesOpen = 3
+MajorUp = 60
+MinorUp = 53
+BothUp = 80
+ExchangeImbalance = 30
+MinorVsQueen = 4
+TwoMinors = 44
+Material = 100
+OwnAttack = 100
+OppAttack = 150
+OwnMobility = 150
+OppMobility = 100
+KingTropism = 20
+PiecePlacement = 75
+PiecePressure = 109
+PassedPawns = 100
+PawnStructure = 100
+Lines = 100
+Outposts = 78
+PawnShield = 119
+PawnStorm = 99
+Forwardness = 0
+Center = 50
+DoubledPawnMg = -12
+DoubledPawnEg = -23
+IsolatedPawnMg = -10
+IsolatedPawnEg = -8
+IsolatedOnOpenMg = -10
+BackwardPawnMg = -8
+BackwardPawnEg = -10
+BackwardOnOpenMg = -8
+FianchBase = 4
+Fianchetto = 6
+ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
+PawnMass = 100
+PawnChains = 100
+PstStyle = 1
+MobilityStyle = 0
+NpsLimit = 0
+EvalBlur = 0
+Contempt = 0
+SlowMover = 100
+Selectivity = 175
+SearchSkill = 10
+RiskyDepth = 0
+BookFilter = 20
+GuideBookFile = guide/solid.bin
+MainBookFile = rodent.bin
+
 [Preston]
 ; Preston
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; Slightly materialistic, likes to pressurize the opponent in various ways
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -2660,6 +3665,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 0
@@ -2672,13 +3679,14 @@ Selectivity = 175
 SearchSkill = 10
 RiskyDepth = 0
 BookFilter = 20
-GuideBookFile = guide.bin
+GuideBookFile = guide/cs.bin
 MainBookFile = rodent.bin
 
 [Rita]
 ; Rita
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; Rita is weak, and overvalues rooks
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -2731,6 +3739,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 0
@@ -2750,6 +3760,7 @@ MainBookFile = micro.bin
 ; Sid
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; Sid likes to simplify and win in the endgame
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -2802,6 +3813,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 1
@@ -2822,6 +3835,7 @@ MainBookFile = micro.bin
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; created by Pawel Koziol
 ; likes bishops and closed positions
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 332
@@ -2870,6 +3884,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 24
 ReturningB = 12
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 120
 PawnChains = 200
 PstStyle = 2
@@ -2892,6 +3908,7 @@ MainBookFile = rodent.bin
 ; Created by Pawel Koziol
 ; Overemphasizes positional factors
 ; likely to sacrifice exchange or to play with minor pieces against queen
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -2940,6 +3957,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 24
 ReturningB = 12
+MinorBehindPawn = 5
+PawnThreat = 5
 PawnMass = 100
 PawnChains = 100
 PstStyle = 2
@@ -2959,6 +3978,7 @@ MainBookFile = rodent.bin
 ;Solid
 ;Personality for Rodent III chess engine, version 0.210 or later
 ;created by Pawel Koziol
+;
 PawnValueMg = 100
 KnightValueMg = 310
 BishopValueMg = 322
@@ -3007,6 +4027,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 6
+PawnThreat = 4
 PawnMass = 110
 PawnChains = 100
 PstStyle = 1
@@ -3027,6 +4049,7 @@ MainBookFile = rodent.bin
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; created by Pawel Koziol
 ; likes active positions, detests being under attack
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 332
@@ -3075,6 +4098,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 0
@@ -3095,6 +4120,7 @@ MainBookFile = rodent.bin
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; created by Pawel Koziol
 ; likes following enemy king with own pieces
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -3147,6 +4173,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 1
@@ -3214,6 +4242,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 20
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 200
 PawnChains = 100
 PstStyle = 0
@@ -3234,6 +4264,7 @@ MainBookFile = rodent.bin
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; author: Pawel Koziol
 ; Sue likes to sacrifice, even though at her current tactical level she is yet unable to calculate all the consequences
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -3286,6 +4317,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 2
@@ -3307,6 +4340,7 @@ MainBookFile = micro.bin
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; created by Pawel Koziol
 ; likes to exchange pieces; high draw rate
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -3355,6 +4389,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 0
@@ -3374,6 +4410,7 @@ MainBookFile = rodent.bin
 ; Theresa
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; Tricky player with a tendency to sacrifice, lowered attack and raised positional factors
+;
 PawnValueMg = 93
 KnightValueMg = 312
 BishopValueMg = 322
@@ -3426,6 +4463,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 120
 PstStyle = 0
@@ -3445,6 +4484,7 @@ MainBookFile = small.bin
 ; Tortoise
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; slow and plays backwards
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -3497,6 +4537,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 30
 ReturningB = 20
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 2
@@ -3516,6 +4558,7 @@ MainBookFile = rodent.bin
 ; Victor
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; Victor is violent and plays gambits.
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -3568,6 +4611,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 0
 ReturningB = 0
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 80
 PstStyle = 2
@@ -3583,11 +4628,87 @@ RiskyDepth = 0
 GuideBookFile = ph-gambitbook.bin
 MainBookFile = rodent.bin
 
+[Vincent]
+; Vincent
+; Personality for Rodent III chess engine, version 0.210 or later
+; violent attacker (+ piece pressure)
+;
+PawnValueMg = 95
+KnightValueMg = 310
+BishopValueMg = 322
+RookValueMg = 514
+QueenValueMg = 1000
+PawnValueEg = 110
+KnightValueEg = 305
+BishopValueEg = 320
+RookValueEg = 529
+QueenValueEg = 1013
+KeepPawn = 0
+KeepKnight = 0
+KeepBishop = 0
+KeepRook = 0
+KeepQueen = 0
+BishopPair = 51
+KnightPair = -9
+RookPair = -9
+KnightLikesClosed = 6
+RookLikesOpen = 3
+MajorUp = 60
+MinorUp = 53
+BothUp = 80
+ExchangeImbalance = 30
+MinorVsQueen = 4
+TwoMinors = 44
+Material = 100
+OwnAttack = 200
+OppAttack = 100
+OwnMobility = 100
+OppMobility = 100
+KingTropism = 20
+PiecePlacement = 75
+PiecePressure = 200
+PassedPawns = 100
+PawnStructure = 100
+Lines = 100
+Outposts = 78
+PawnShield = 119
+PawnStorm = 99
+Forwardness = 0
+Center = 50
+DoubledPawnMg = -12
+DoubledPawnEg = -23
+IsolatedPawnMg = -10
+IsolatedPawnEg = -8
+IsolatedOnOpenMg = -10
+BackwardPawnMg = -8
+BackwardPawnEg = -10
+BackwardOnOpenMg = -8
+FianchBase = 4
+Fianchetto = 6
+ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
+PawnMass = 100
+PawnChains = 100
+PstStyle = 0
+MobilityStyle = 0
+NpsLimit = 1200
+EvalBlur = 0
+Contempt = 0
+SlowMover = 100
+Selectivity = 175
+SearchSkill = 10
+RiskyDepth = 0
+BookFilter = 20
+GuideBookFile = mini.bin
+MainBookFile = small.bin
+
 [Wild]
 ; Wild
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; created by Pawel Koziol
 ; sacrificial attacker, emphasis on mobility
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322
@@ -3636,6 +4757,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 6
 ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
 PawnMass = 100
 PawnChains = 100
 PstStyle = 0
@@ -3650,3 +4773,79 @@ RiskyDepth = 0
 BookFilter = 20
 GuideBookFile = ph-gambitbook.bin
 MainBookFile = rodent.bin
+
+[Zero]
+; Zero
+; Personality for Rodent III chess engine, version 0.210 or later
+; Purely random eval with restricted speed
+;
+PawnValueMg = 0
+KnightValueMg = 0
+BishopValueMg = 0
+RookValueMg = 0
+QueenValueMg = 0
+PawnValueEg = 0
+KnightValueEg = 0
+BishopValueEg = 0
+RookValueEg = 0
+QueenValueEg = 0
+KeepPawn = 0
+KeepKnight = 0
+KeepBishop = 0
+KeepRook = 0
+KeepQueen = 0
+BishopPair = 0
+KnightPair = 0
+RookPair = 0
+KnightLikesClosed = 0
+RookLikesOpen = 0
+MajorUp = 0
+MinorUp = 0
+BothUp = 0
+ExchangeImbalance = 0
+MinorVsQueen = 0
+TwoMinors = 0
+Material = 0
+OwnAttack = 0
+OppAttack = 0
+OwnMobility = 0
+OppMobility = 0
+KingTropism = 0
+PiecePlacement = 0
+PiecePressure = 0
+PassedPawns = 0
+PawnStructure = 0
+Lines = 0
+Outposts = 0
+PawnShield = 0
+PawnStorm = 0
+Forwardness = 0
+Center = 0
+DoubledPawnMg = 0
+DoubledPawnEg = 0
+IsolatedPawnMg = 0
+IsolatedPawnEg = 0
+IsolatedOnOpenMg = 0
+BackwardPawnMg = 0
+BackwardPawnEg = 0
+BackwardOnOpenMg = 0
+FianchBase = 0
+Fianchetto = 0
+ReturningB = 0
+MinorBehindPawn = 0
+PawnThreat = 0
+PawnMass = 0
+PawnChains = 0
+PstStyle = 0
+MobilityStyle = 0
+NpsLimit = 50
+EvalBlur = 1000
+Contempt = 0
+SlowMover = 100
+Selectivity = 175
+SearchSkill = 10
+BookFilter = 20
+RiskyDepth = 0
+BookFilter = 20
+GuideBookFile = empty.bin
+MainBookFile = empty.bin

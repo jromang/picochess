@@ -4,7 +4,7 @@
 ; created by Pawel Koziol
 ; based on attack and restraint, likes closed positions, slight contempt
 ; meant to simulate strong elderly player
-
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322

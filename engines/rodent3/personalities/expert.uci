@@ -1,7 +1,7 @@
 [Expert]
 ; Expert
 ; Personality for Rodent III chess engine, version 0.210 or later
-
+;
 PawnValueMg = 100
 KnightValueMg = 325
 BishopValueMg = 325

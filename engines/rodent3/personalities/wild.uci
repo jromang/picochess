@@ -3,7 +3,7 @@
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; created by Pawel Koziol
 ; sacrificial attacker, emphasis on mobility
-
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322

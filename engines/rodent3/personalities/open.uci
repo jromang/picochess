@@ -3,7 +3,7 @@
 ; Personality for Rodent III chess engine, version 0.210 or later
 ; Created by Pawel Koziol
 ; likes mobility, bishops and open positions
-
+;
 PawnValueMg = 95
 KnightValueMg = 310
 BishopValueMg = 322

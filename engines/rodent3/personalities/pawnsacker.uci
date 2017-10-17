@@ -3,7 +3,7 @@
 ;Personality for Rodent III chess engine, version 0.210 or later
 ;Created by Pawel Koziol
 ;Balanced personality, slightly less materialistic than default.
-
+;
 PawnValueMg = 90
 KnightValueMg = 310
 BishopValueMg = 322

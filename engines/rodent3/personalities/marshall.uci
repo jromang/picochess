@@ -4,7 +4,7 @@
 ; by Pawel Koziol
 ; hommage to Frank Marshall (1877-1944)
 ; very high attack, very high mobility, sacrificial, likes knights
-
+;
 PawnValueMg = 95
 KnightValueMg = 320
 BishopValueMg = 322
