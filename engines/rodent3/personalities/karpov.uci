@@ -69,6 +69,5 @@ Selectivity = 175
 SearchSkill = 10
 BookFilter = 20
 RiskyDepth = 0
-BookFilter = 20
 GuideBookFile = players/ph-karpov2.bin
 MainBookFile = rodent.bin
