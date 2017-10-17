@@ -52,6 +52,8 @@ BackwardPawnEg = -10
 BackwardOnOpenMg = -8
 Fianchetto = 0
 ReturningB = 0
+MinorBehindPawn = 0
+PawnThreat = 0
 PawnMass = 0
 PawnChains = 100
 PstStyle = 2
@@ -66,4 +68,3 @@ RiskyDepth = 0
 BookFilter = 20
 GuideBookFile = guide.bin
 MainBookFile = rodent.bin
-
