@@ -756,7 +756,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             self._process_clock_start(message)
 
         elif isinstance(message, Message.CLOCK_STOP):
-            DispatchDgt.fire(Dgt.CLOCK_STOP(devs=message.devs))
+            DispatchDgt.fire(Dgt.CLOCK_STOP(devs=message.devs, wait=True))
 
         elif isinstance(message, Message.DGT_BUTTON):
             self._process_button(message)
