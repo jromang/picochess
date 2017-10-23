@@ -100,7 +100,7 @@ class DgtHw(DgtIface):
         if self.get_name() not in message.devs:
             logging.debug('ignored endText - devs: %s', message.devs)
             return True
-        if self.clock_running or message.force:
+        if self.side_running != ClockSide.NONE or message.force:
             with self.lib_lock:
                 if self.dgtboard.l_time >= 3600 * 10 or self.dgtboard.r_time >= 3600 * 10:
                     logging.debug('time values not set - abort function')
@@ -151,7 +151,7 @@ class DgtHw(DgtIface):
                 logging.warning('finally failed %i', res)
                 return False
             else:
-                self.clock_running = (side != ClockSide.NONE)
+                self.side_running = side
             if not self.dgtboard.disable_end:
                 res = self.dgtboard.end_text()  # this is needed for some(!) clocks
             self.dgtboard.in_settime = False  # @todo should be set on ACK (see: DgtBoard) not here

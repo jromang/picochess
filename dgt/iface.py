@@ -36,7 +36,7 @@ class DgtIface(DisplayDgt, Thread):
 
         self.dgtboard = dgtboard
 
-        self.clock_running = False
+        self.side_running = ClockSide.NONE
         self.enable_dgt3000 = False
         self.case_res = True
 
@@ -141,7 +141,7 @@ class DgtIface(DisplayDgt, Thread):
         elif isinstance(message, Dgt.CLOCK_START):
             self.case_res = self.start_clock(message.side, message.devs)
         elif isinstance(message, Dgt.CLOCK_STOP):
-            if self.clock_running:
+            if self.side_running != ClockSide.NONE:
                 self.case_res = self.stop_clock(message.devs)
             else:
                 logging.debug('(%s) clock is already stopped', ','.join(message.devs))

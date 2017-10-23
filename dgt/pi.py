@@ -114,10 +114,12 @@ class DgtPi(DgtIface):
                 if self.in_settime:
                     logging.info('(i2c) clock still not finished set time, sending old time')
                 else:
-                    if self.clock_running:  # DgtPi needs 2secs for a stopped clock to return the correct(!) time
+                    # DgtPi needs 2secs for a stopped clock to return the correct(!) time
+                    if self.side_running == ClockSide.LEFT:
                         self.l_time = l_hms[0] * 3600 + l_hms[1] * 60 + l_hms[2]
+                    if self.side_running == ClockSide.RIGHT:
                         self.r_time = r_hms[0] * 3600 + r_hms[1] * 60 + r_hms[2]
-                    else:
+                    if self.side_running == ClockSide.NONE:
                         logging.info('clock is stopped, returning old time')
                 text = Message.DGT_CLOCK_TIME(time_left=self.l_time, time_right=self.r_time, connect=True, dev='i2c')
                 DisplayMsg.show(text)
@@ -171,7 +173,7 @@ class DgtPi(DgtIface):
         if self.get_name() not in message.devs:
             logging.debug('ignored endText - devs: %s', message.devs)
             return True
-        if self.clock_running or message.force:
+        if self.side_running != ClockSide.NONE or message.force:
             with self.lib_lock:
                 res = self.lib.dgtpicom_end_text()
                 if res < 0:
@@ -227,7 +229,7 @@ class DgtPi(DgtIface):
         if res < 0:
             return False
         else:
-            self.clock_running = (side != ClockSide.NONE)
+            self.side_running = side
             return True
 
     def start_clock(self, side: ClockSide, devs: set):
@@ -258,7 +260,7 @@ class DgtPi(DgtIface):
         if res < 0:
             return False
         else:
-            self.clock_running = (side != ClockSide.NONE)
+            self.side_running = side
             self.in_settime = False
             return True
 
