@@ -114,8 +114,11 @@ class DgtPi(DgtIface):
                 if self.in_settime:
                     logging.info('(i2c) clock still not finished set time, sending old time')
                 else:
-                    self.l_time = l_hms[0] * 3600 + l_hms[1] * 60 + l_hms[2]
-                    self.r_time = r_hms[0] * 3600 + r_hms[1] * 60 + r_hms[2]
+                    if self.clock_running:  # DgtPi needs 2secs for a stopped clock to return the correct(!) time
+                        self.l_time = l_hms[0] * 3600 + l_hms[1] * 60 + l_hms[2]
+                        self.r_time = r_hms[0] * 3600 + r_hms[1] * 60 + r_hms[2]
+                    else:
+                        logging.info('clock is stopped, returning old time')
                 text = Message.DGT_CLOCK_TIME(time_left=self.l_time, time_right=self.r_time, connect=True, dev='i2c')
                 DisplayMsg.show(text)
             time.sleep(0.1)
