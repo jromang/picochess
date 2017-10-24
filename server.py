@@ -191,7 +191,6 @@ class WebVr(DgtIface):
         super(WebVr, self).__init__(dgtboard)
         self.shared = shared
         self.virtual_timer = None
-        self.time_side = ClockSide.NONE
         self.enable_dgtpi = dgtboard.is_pi
         sub = 2 if dgtboard.is_pi else 0
         DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=2, sub=sub, dev='web', text=None))
@@ -206,14 +205,14 @@ class WebVr(DgtIface):
             self.shared['clock_text'] = {}
 
     def _runclock(self):
-        if self.time_side == ClockSide.LEFT:
+        if self.side_running == ClockSide.LEFT:
             time_left = self.l_time - 1
             if time_left <= 0:
                 logging.info('negative/zero time left: %s', time_left)
                 self.virtual_timer.stop()
                 time_left = 0
             self.l_time = time_left
-        if self.time_side == ClockSide.RIGHT:
+        if self.side_running == ClockSide.RIGHT:
             time_right = self.r_time - 1
             if time_right <= 0:
                 logging.info('negative/zero time right: %s', time_right)
@@ -232,8 +231,8 @@ class WebVr(DgtIface):
             r_hms = hms_time(time_right)
             text_l = '{}:{:02d}.{:02d}'.format(l_hms[0], l_hms[1], l_hms[2])
             text_r = '{}:{:02d}.{:02d}'.format(r_hms[0], r_hms[1], r_hms[2])
-            icon_d = 'fa-caret-right' if self.time_side == ClockSide.RIGHT else 'fa-caret-left'
-            if self.time_side == ClockSide.NONE:
+            icon_d = 'fa-caret-right' if self.side_running == ClockSide.RIGHT else 'fa-caret-left'
+            if self.side_running == ClockSide.NONE:
                 icon_d = 'fa-sort'
             text = text_l + '&nbsp;<i class="fa ' + icon_d + '"></i>&nbsp;' + text_r
             self._create_clock_text()
@@ -289,7 +288,7 @@ class WebVr(DgtIface):
         if self.get_name() not in message.devs:
             logging.debug('ignored endText - devs: %s', message.devs)
             return True
-        if self.clock_running or message.force:
+        if self.side_running != ClockSide.NONE or message.force:
             self.clock_show_time = True
             self._display_time(self.l_time, self.r_time)
         else:
@@ -306,8 +305,7 @@ class WebVr(DgtIface):
         return self._resume_clock(ClockSide.NONE)
 
     def _resume_clock(self, side: ClockSide):
-        self.clock_running = (side != ClockSide.NONE)
-        self.time_side = side
+        self.side_running = side
         return True
 
     def start_clock(self, side: ClockSide, devs: set):

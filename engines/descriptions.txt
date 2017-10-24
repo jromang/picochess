@@ -1,5 +1,5 @@
 PicoChess Engines
-October 17, 2017
+October 24, 2017
 
 
 1. STOCKFISH
@@ -87,21 +87,19 @@ The current version plays at GM level. Weaker opponents may like to set its
 handicap level a little higher.
 
 
-6. FLOYD
+6. WyldChess
 ===========================
-Author: Marcel van Kervinck
-Version: 0.9
-Date: July 2016
-Elo: 2660
-Levels: no
-Chess960: no
-License: BSD
-Source: https://github.com/kervinck/floyd/
-Description: Originally written as a study in chess engine writing, Floyd has
-quickly become one of the best master (FM/IM) strength engines. It was not
-written for speed or strength, but rather for 'clarity and ease of change'.
-Nevertheless, the engine has an attractive style of play. Unfortunately
-for weaker human players, Floyd cannot be forced to play weaker.
+Author: Manik Charan
+Version: 1.5
+Date: September 2017
+Elo: 2630
+Levels: 'Personalities'
+Chess960: yes
+License: GPLv3
+Source: https://github.com/Mk-Chan/WyldChess
+Description: WyldChess offers something similar to RodentIII with personalities (needs to create more Personae)
+and also supports Chess960 ('Fischer Random Chess'). The evaluation is compared to the other top chess
+engines not as detailed, but its tactics is very strong.
 
 
 7. SAYURI

@@ -127,7 +127,7 @@ class DgtPi(DgtIface):
     def _run_configure(self):
         res = self.lib.dgtpicom_configure()
         if res < 0:
-            logging.warning('Configure() also failed %i, reseting the dgtpi clock', res)
+            logging.warning('Configure() also failed %i, resetting the dgtpi clock', res)
             self.lib.dgtpicom_stop()
             self.lib.dgtpicom_init()
 
