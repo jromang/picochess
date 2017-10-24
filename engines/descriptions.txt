@@ -7,7 +7,7 @@ October 24, 2017
 Authors: T. Romstad, M. Costalba, J. Kiiski, G. Linscott
 Version: 8
 Date: October 2017
-Elo (CCRL 40/4): 3360
+Elo: 3360
 Levels: yes
 Chess960: yes
 License: GPLv3
