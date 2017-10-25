@@ -102,7 +102,24 @@ and also supports Chess960 ('Fischer Random Chess'). The evaluation is compared 
 engines not as detailed, but its tactics is very strong.
 
 
-7. SAYURI
+7. GALJOEN
+===========================
+Author: Werner Taelemans
+Version: 0.36
+Date: July 2017
+Elo: 2150
+Levels: yes
+Chess960: yes
+License: GPLv3
+Source: http://www.goudengaljoen.be/
+Description: Galjoen is a chess engine that plays at (stronger) club level. It has
+an active playing style. Together with its support for strength levels and Chess960
+('Fischer Random Chess') this makes Galjoen an ideal opponent for club players
+to practice their tactical and strategical skills. The program has its own graphical
+user interface, which is, of course, not used by PicoChess.
+
+
+8. SAYURI
 ===========================
 Author: Hironori Ishibashi
 Version: 2017.09.29
@@ -118,20 +135,3 @@ which allows you to customize the search algorithm or adjust the evaluation weig
 For details please take a look at the sayuri webpage.
 If you are looking for a beatable engine that can teach you a thing or two about chess,
 then Sayuri is a good choice.
-
-
-8. GALJOEN
-===========================
-Author: Werner Taelemans
-Version: 0.36
-Date: July 2017
-Elo: 2150
-Levels: yes
-Chess960: yes
-License: GPLv3
-Source: http://www.goudengaljoen.be/
-Description: Galjoen is a chess engine that plays at (stronger) club level. It has
-an active playing style. Together with its support for strength levels and Chess960
-('Fischer Random Chess') this makes Galjoen an ideal opponent for club players
-to practice their tactical and strategical skills. The program has its own graphical
-user interface, which is, of course, not used by PicoChess.
