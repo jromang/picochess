@@ -34,9 +34,9 @@ class TimeControl(object):
     def __init__(self, mode=TimeMode.FIXED, fixed=0, blitz=0, fischer=0, internal_time=None):
         super(TimeControl, self).__init__()
         self.mode = mode
-        self.seconds_per_move = fixed
-        self.minutes_per_game = blitz
-        self.fischer_increment = fischer
+        self.move_time = fixed
+        self.game_time = blitz
+        self.fisch_inc = fischer
         self.internal_time = internal_time
 
         self.clock_time = {chess.WHITE: 0, chess.BLACK: 0}  # saves the sended clock time for white/black
@@ -53,40 +53,40 @@ class TimeControl(object):
 
     def __eq__(self, other):
         chk_mode = self.mode == other.mode
-        chk_secs = self.seconds_per_move == other.seconds_per_move
-        chk_mins = self.minutes_per_game == other.minutes_per_game
-        chk_finc = self.fischer_increment == other.fischer_increment
+        chk_secs = self.move_time == other.move_time
+        chk_mins = self.game_time == other.game_time
+        chk_finc = self.fisch_inc == other.fisch_inc
         return chk_mode and chk_secs and chk_mins and chk_finc
 
     def __hash__(self):
-        value = str(self.mode) + str(self.seconds_per_move) + str(self.minutes_per_game) + str(self.fischer_increment)
+        value = str(self.mode) + str(self.move_time) + str(self.game_time) + str(self.fisch_inc)
         return hash(value)
 
     def get_parameters(self):
         """Return the state of this class for generating a new instance."""
-        return {'mode': self.mode, 'fixed': self.seconds_per_move, 'blitz': self.minutes_per_game,
-                'fischer': self.fischer_increment, 'internal_time': self.internal_time}
+        return {'mode': self.mode, 'fixed': self.move_time, 'blitz': self.game_time,
+                'fischer': self.fisch_inc, 'internal_time': self.internal_time}
 
     def get_list_text(self):
         """Get the clock list text for the current time setting."""
         if self.mode == TimeMode.FIXED:
-            return '{:2d}'.format(self.seconds_per_move)
+            return '{:2d}'.format(self.move_time)
         if self.mode == TimeMode.BLITZ:
-            return '{:2d}'.format(self.minutes_per_game)
+            return '{:2d}'.format(self.game_time)
         if self.mode == TimeMode.FISCHER:
-            return '{:2d} {:2d}'.format(self.minutes_per_game, self.fischer_increment)
+            return '{:2d} {:2d}'.format(self.game_time, self.fisch_inc)
         return 'errtm'
 
     def reset(self):
         """Reset the clock's times for both players."""
         if self.mode == TimeMode.BLITZ:
-            self.clock_time[chess.WHITE] = self.clock_time[chess.BLACK] = self.minutes_per_game * 60
+            self.clock_time[chess.WHITE] = self.clock_time[chess.BLACK] = self.game_time * 60
 
         elif self.mode == TimeMode.FISCHER:
-            self.clock_time[chess.WHITE] = self.clock_time[chess.BLACK] = self.minutes_per_game * 60 + self.fischer_increment
+            self.clock_time[chess.WHITE] = self.clock_time[chess.BLACK] = self.game_time * 60 + self.fisch_inc
 
         elif self.mode == TimeMode.FIXED:
-            self.clock_time[chess.WHITE] = self.clock_time[chess.BLACK] = self.seconds_per_move
+            self.clock_time[chess.WHITE] = self.clock_time[chess.BLACK] = self.move_time
 
         self.internal_time = {chess.WHITE: float(self.clock_time[chess.WHITE]),
                               chess.BLACK: float(self.clock_time[chess.BLACK])}
@@ -132,8 +132,8 @@ class TimeControl(object):
             w_hms, b_hms = self._log_time()
             logging.info('before internal time w:%s - b:%s', w_hms, b_hms)
 
-            self.internal_time[color] += self.fischer_increment
-            self.clock_time[color] += self.fischer_increment
+            self.internal_time[color] += self.fisch_inc
+            self.clock_time[color] += self.fisch_inc
 
             # log times - issue #184
             w_hms, b_hms = self._log_time()
@@ -163,7 +163,8 @@ class TimeControl(object):
                 self.timer = threading.Timer(copy.copy(self.internal_time[color]), self._out_of_time,
                                              [copy.copy(self.internal_time[color])])
                 self.timer.start()
-                logging.debug('internal timer started - color: %s run: %s active: %s', color, self.run_color, self.active_color)
+                logging.debug('internal timer started - color: %s run: %s active: %s',
+                              color, self.run_color, self.active_color)
                 self.run_color = self.active_color
 
     def stop_internal(self, log=True):
@@ -202,9 +203,9 @@ class TimeControl(object):
             uci_dict['btime'] = str(int(self.internal_time[chess.BLACK] * 1000))
 
             if self.mode == TimeMode.FISCHER:
-                uci_dict['winc'] = str(self.fischer_increment * 1000)
-                uci_dict['binc'] = str(self.fischer_increment * 1000)
+                uci_dict['winc'] = str(self.fisch_inc * 1000)
+                uci_dict['binc'] = str(self.fisch_inc * 1000)
         elif self.mode == TimeMode.FIXED:
-            uci_dict['movetime'] = str(self.seconds_per_move * 1000)
+            uci_dict['movetime'] = str(self.move_time * 1000)
 
         return uci_dict

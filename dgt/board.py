@@ -333,7 +333,7 @@ class DgtBoard(object):
             }
             board = ''
             for character in message:
-                board += piece_to_char[character]
+                board += piece_to_char[character & 0x0f]
             logging.debug('\n' + '\n'.join(board[0 + i:8 + i] for i in range(0, len(board), 8)))  # Show debug board
             # Create fen from board
             fen = ''
@@ -343,7 +343,7 @@ class DgtBoard(object):
                     if empty > 0:
                         fen += str(empty)
                         empty = 0
-                    fen += piece_to_char[message[square]]
+                    fen += piece_to_char[message[square] & 0x0f]
                 else:
                     empty += 1
                 if (square + 1) % 8 == 0:

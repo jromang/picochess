@@ -982,7 +982,8 @@ def main():
                         game_copy.push(event.move)
                         done_computer_fen = game_copy.board_fen()
                         done_move = event.move
-                        pb_move = event.ponder if event.ponder else chess.Move.null()
+                        brain_book = interaction_mode == Mode.BRAIN and event.inbook
+                        pb_move = event.ponder if event.ponder and not brain_book else chess.Move.null()
                 else:
                     logging.warning('wrong function call [best]! mode: %s turn: %s', interaction_mode, game.turn)
 
