@@ -329,7 +329,7 @@ class DgtBoard(object):
             piece_to_char = {
                 0x01: 'P', 0x02: 'R', 0x03: 'N', 0x04: 'B', 0x05: 'K', 0x06: 'Q',
                 0x07: 'p', 0x08: 'r', 0x09: 'n', 0x0a: 'b', 0x0b: 'k', 0x0c: 'q',
-                0x0d: '1', 0x0e: '2', 0x0f: '3', 0x00: '.'
+                0x0d: '$', 0x0e: '%', 0x0f: '&', 0x00: '.'
             }
             board = ''
             for character in message:
@@ -339,7 +339,7 @@ class DgtBoard(object):
             fen = ''
             empty = 0
             for square in range(0, 64):
-                if message[square] != 0:
+                if message[square] != 0 and message[square] < 0x0d:  # @todo for the moment ignore the special pieces
                     if empty > 0:
                         fen += str(empty)
                         empty = 0
