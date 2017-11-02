@@ -668,7 +668,7 @@ def main():
     while engine_tries < 2:
         if engine_file is None:
             eng_ini = read_engine_ini()
-            engine_file = eng_ini[0]['file']
+            engine_file = eng_ini[engine_tries]['file']
             engine_tries += 1
 
         # Gentlemen, start your engines...

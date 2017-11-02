@@ -27,6 +27,7 @@ from utilities import Observable
 import chess.uci
 from chess import Board
 from uci.informer import Informer
+from uci.util import get_installed_engines
 
 
 class UciEngine(object):
@@ -46,7 +47,9 @@ class UciEngine(object):
                     shell = spur.SshShell(hostname=hostname, username=username, password=password,
                                           missing_host_key=paramiko.AutoAddPolicy())
                 self.shell = shell
-                self.engine = chess.uci.spur_spawn_engine(shell, [home + os.sep + file])
+                if home:
+                    file = home + os.sep + file
+                self.engine = chess.uci.spur_spawn_engine(shell, [file])
             else:
                 self.engine = chess.uci.popen_engine(file, stderr=DEVNULL)
 
@@ -63,6 +66,8 @@ class UciEngine(object):
 
             self.res = None
             self.level_support = False
+            self.lib = get_installed_engines(self.shell, file)
+            # print(self.lib)
 
         except OSError:
             logging.exception('OS error in starting engine')
@@ -240,10 +245,10 @@ class UciEngine(object):
         if not options and parser.read(self.get_file() + '.uci'):
             options = dict(parser[parser.sections().pop()])
         self.level_support = bool(options)
-        if parser.read(os.path.dirname(self.get_file()) + os.sep + 'engines.uci'):
-            pc_opts = dict(parser[parser.sections().pop()])
-            pc_opts.update(options)
-            options = pc_opts
+        # if parser.read(os.path.dirname(self.get_file()) + os.sep + 'engines.uci'):
+        #     pc_opts = dict(parser[parser.sections().pop()])
+        #     pc_opts.update(options)
+        #     options = pc_opts
 
         logging.debug('setting engine with options %s', options)
         self.level(options)

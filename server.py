@@ -389,14 +389,16 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 engine_name = self.shared['system_info']['engine_name']
             if 'user_elo' in self.shared['system_info']:
                 user_elo = self.shared['system_info']['user_elo']
+            if 'engine_elo' in self.shared['system_info']:
+                comp_elo = self.shared['system_info']['engine_elo']
 
-        # @todo find a better way to setup engine elo
-        engine_elo = {'stockfish': 3360, 'texel': 3050, 'rodent': 2920,
-                      'zurichess': 2790, 'wyld': 2630, 'sayuri': 1850}
-        for name, elo in engine_elo.items():
-            if engine_name.lower().startswith(name):
-                comp_elo = elo
-                break
+        # # @todo find a better way to setup engine elo
+        # engine_elo = {'stockfish': 3360, 'texel': 3050, 'rodent': 2920,
+        #               'zurichess': 2790, 'wyld': 2630, 'sayuri': 1850}
+        # for name, elo in engine_elo.items():
+        #     if engine_name.lower().startswith(name):
+        #         comp_elo = elo
+        #         break
 
         if 'game_info' in self.shared:
             if 'level_text' in self.shared['game_info']:
@@ -485,6 +487,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
         elif isinstance(message, Message.ENGINE_READY):
             self._create_system_info()
             self.shared['system_info']['old_engine'] = self.shared['system_info']['engine_name'] = message.engine_name
+            self.shared['system_info']['engine_elo'] = message.eng['elo']
             if not message.has_levels:
                 if 'level_text' in self.shared['game_info']:
                     del self.shared['game_info']['level_text']
