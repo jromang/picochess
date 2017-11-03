@@ -29,7 +29,7 @@ import queue
 import configargparse
 
 from uci.engine import UciEngine
-from uci.util import read_engine_ini, get_installed_engines
+from uci.read import read_engine_ini
 import chess
 import chess.polyglot
 import chess.uci
@@ -512,7 +512,7 @@ def main():
 
     def get_engine_level_dict(engine_level):
         """Transfer an engine level to its level_dict plus an index."""
-        installed_engines = get_installed_engines(engine.get_shell(), engine.get_file())
+        installed_engines = engine.get_installed_engines()
         for index in range(0, len(installed_engines)):
             eng = installed_engines[index]
             if eng['file'] == engine.get_file():
@@ -661,7 +661,7 @@ def main():
     if args.enable_update:
         update_picochess(args.dgtpi, args.enable_update_reboot, dgttranslate)
 
-    # try the given engine first and if that fails the first from engines.ini then crush
+    # try the given engine first and if that fails the first/second from "engines.ini" then crush
     engine_file = args.engine
     engine_tries = 0
     engine = engine_name = None
@@ -724,9 +724,9 @@ def main():
                                                'books': all_books, 'book_index': book_index,
                                                'level_text': level_text, 'level_name': level_name,
                                                'tc_init': time_control.get_parameters(), 'time_text': time_text}))
-    DisplayMsg.show(Message.ENGINE_STARTUP(shell=engine.get_shell(), file=engine.get_file(), level_index=level_index,
-                                           has_levels=engine.has_levels(), has_960=engine.has_chess960(),
-                                           has_ponder=engine.has_ponder()))
+    DisplayMsg.show(Message.ENGINE_STARTUP(installed_engines=engine.get_installed_engines(), file=engine.get_file(),
+                                           level_index=level_index, has_levels=engine.has_levels(),
+                                           has_960=engine.has_chess960(), has_ponder=engine.has_ponder()))
     DisplayMsg.show(Message.SYSTEM_INFO(info=sys_info))
 
     ip_info_thread = threading.Timer(10, display_ip_info)  # give RaspberyPi 10sec time to startup its network devices

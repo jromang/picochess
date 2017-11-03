@@ -188,8 +188,8 @@ class Message():
     REVIEW_MOVE_DONE = ClassFactory(MessageApi.REVIEW_MOVE_DONE, ['move', 'fen', 'turn', 'game'])
     ENGINE_READY = ClassFactory(MessageApi.ENGINE_READY, ['eng', 'eng_text', 'engine_name', 'has_levels', 'has_960',
                                                           'has_ponder', 'show_ok'])
-    ENGINE_STARTUP = ClassFactory(MessageApi.ENGINE_STARTUP, ['shell', 'file', 'level_index', 'has_levels', 'has_960',
-                                                              'has_ponder'])
+    ENGINE_STARTUP = ClassFactory(MessageApi.ENGINE_STARTUP, ['installed_engines', 'file', 'level_index', 'has_levels',
+                                                              'has_960', 'has_ponder'])
     ENGINE_FAIL = ClassFactory(MessageApi.ENGINE_FAIL, [])
     LEVEL = ClassFactory(MessageApi.LEVEL, ['level_text', 'level_name', 'do_speak'])
     TIME_CONTROL = ClassFactory(MessageApi.TIME_CONTROL, ['time_text', 'show_ok', 'tc_init'])

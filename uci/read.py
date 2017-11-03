@@ -21,11 +21,6 @@ import os
 from dgt.api import Dgt
 
 
-def get_installed_engines(engine_shell, engine_file: str):
-    """Create a library list."""
-    return read_engine_ini(engine_shell, (engine_file.rsplit(os.sep, 1))[0])
-
-
 def read_engine_ini(engine_shell=None, engine_path=None):
     """Read engine.ini and creates a library list out of it."""
     config = configparser.ConfigParser()

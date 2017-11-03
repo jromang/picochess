@@ -27,7 +27,7 @@ from utilities import Observable
 import chess.uci
 from chess import Board
 from uci.informer import Informer
-from uci.util import get_installed_engines
+from uci.read import read_engine_ini
 
 
 class UciEngine(object):
@@ -66,8 +66,7 @@ class UciEngine(object):
 
             self.res = None
             self.level_support = False
-            self.lib = get_installed_engines(self.shell, file)
-            # print(self.lib)
+            self.installed_engines = read_engine_ini(self.shell, (file.rsplit(os.sep, 1))[0])
 
         except OSError:
             logging.exception('OS error in starting engine')
@@ -127,9 +126,9 @@ class UciEngine(object):
         """Get File."""
         return self.file
 
-    def get_shell(self):
-        """Get Shell."""
-        return self.shell  # shell is only "not none" if its a local engine - see __init__
+    def get_installed_engines(self):
+        """Get installed engines."""
+        return self.installed_engines
 
     def position(self, game: Board):
         """Set position."""
@@ -245,10 +244,6 @@ class UciEngine(object):
         if not options and parser.read(self.get_file() + '.uci'):
             options = dict(parser[parser.sections().pop()])
         self.level_support = bool(options)
-        # if parser.read(os.path.dirname(self.get_file()) + os.sep + 'engines.uci'):
-        #     pc_opts = dict(parser[parser.sections().pop()])
-        #     pc_opts.update(options)
-        #     options = pc_opts
 
         logging.debug('setting engine with options %s', options)
         self.level(options)
