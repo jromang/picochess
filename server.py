@@ -392,14 +392,6 @@ class WebDisplay(DisplayMsg, threading.Thread):
             if 'engine_elo' in self.shared['system_info']:
                 comp_elo = self.shared['system_info']['engine_elo']
 
-        # # @todo find a better way to setup engine elo
-        # engine_elo = {'stockfish': 3360, 'texel': 3050, 'rodent': 2920,
-        #               'zurichess': 2790, 'wyld': 2630, 'sayuri': 1850}
-        # for name, elo in engine_elo.items():
-        #     if engine_name.lower().startswith(name):
-        #         comp_elo = elo
-        #         break
-
         if 'game_info' in self.shared:
             if 'level_text' in self.shared['game_info']:
                 engine_level = ' ({0})'.format(self.shared['game_info']['level_text'].m)
@@ -481,6 +473,15 @@ class WebDisplay(DisplayMsg, threading.Thread):
         elif isinstance(message, Message.SYSTEM_INFO):
             self.shared['system_info'] = message.info
             self.shared['system_info']['old_engine'] = self.shared['system_info']['engine_name']
+            _build_headers()
+            _send_headers()
+
+        elif isinstance(message, Message.ENGINE_STARTUP):
+            for index in range(0, len(message.installed_engines)):
+                eng = message.installed_engines[index]
+                if eng['file'] == message.file:
+                    self.shared['system_info']['engine_elo'] = eng['elo']
+                    break
             _build_headers()
             _send_headers()
 

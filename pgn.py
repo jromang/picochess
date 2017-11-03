@@ -186,14 +186,6 @@ class PgnDisplay(DisplayMsg, threading.Thread):
             comp_elo = int(self.level_name[4:])
             engine_level = ''
         else:
-            # comp_elo = 2900
-            # # @todo find a better way to setup engine elo
-            # engine_elo = {'stockfish': 3360, 'texel': 3050, 'rodent': 2920,
-            #               'zurichess': 2790, 'wyld': 2630, 'sayuri': 1850}
-            # for name, elo in engine_elo.items():
-            #     if self.engine_name.lower().startswith(name):
-            #         comp_elo = elo
-            #         break
             comp_elo = self.engine_elo
 
         if message.play_mode == PlayMode.USER_WHITE:
@@ -242,6 +234,13 @@ class PgnDisplay(DisplayMsg, threading.Thread):
                 self.engine_name = 'Remote Player'
             else:
                 self.engine_name = self.old_engine
+
+        elif isinstance(message, Message.ENGINE_STARTUP):
+            for index in range(0, len(message.installed_engines)):
+                eng = message.installed_engines[index]
+                if eng['file'] == message.file:
+                    self.engine_elo = eng['elo']
+                    break
 
         elif isinstance(message, Message.ENGINE_READY):
             self.old_engine = self.engine_name = message.engine_name

@@ -724,10 +724,10 @@ def main():
                                                'books': all_books, 'book_index': book_index,
                                                'level_text': level_text, 'level_name': level_name,
                                                'tc_init': time_control.get_parameters(), 'time_text': time_text}))
+    DisplayMsg.show(Message.SYSTEM_INFO(info=sys_info))
     DisplayMsg.show(Message.ENGINE_STARTUP(installed_engines=engine.get_installed_engines(), file=engine.get_file(),
                                            level_index=level_index, has_levels=engine.has_levels(),
                                            has_960=engine.has_chess960(), has_ponder=engine.has_ponder()))
-    DisplayMsg.show(Message.SYSTEM_INFO(info=sys_info))
 
     ip_info_thread = threading.Timer(10, display_ip_info)  # give RaspberyPi 10sec time to startup its network devices
     ip_info_thread.start()
