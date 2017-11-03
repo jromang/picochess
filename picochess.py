@@ -611,7 +611,7 @@ def main():
     dgtboard = DgtBoard(args.dgt_port, args.disable_revelation_leds, args.dgtpi, args.disable_et, args.slow_slide)
     dgttranslate = DgtTranslate(args.beep_config, args.beep_some_level, args.language, version)
     dgtmenu = DgtMenu(args.disable_confirm_message, args.ponder_interval, args.speed_voice, args.capital_letters,
-                      dgttranslate)
+                      args.log_file, dgttranslate)
     dgtdispatcher = Dispatcher(dgtmenu)
 
     time_control, time_text = transfer_time(args.time.split())
@@ -700,7 +700,7 @@ def main():
     bookreader = chess.polyglot.open_reader(all_books[book_index]['file'])
     searchmoves = AlternativeMover()
     interaction_mode = Mode.NORMAL
-    play_mode = PlayMode.USER_WHITE  # @todo make it valid in Mode.REMOTE too
+    play_mode = PlayMode.USER_WHITE  # @todo handle Mode.REMOTE too
 
     last_legal_fens = []
     done_computer_fen = None
@@ -726,7 +726,7 @@ def main():
                                                'tc_init': time_control.get_parameters(), 'time_text': time_text}))
     DisplayMsg.show(Message.SYSTEM_INFO(info=sys_info))
     DisplayMsg.show(Message.ENGINE_STARTUP(installed_engines=engine.get_installed_engines(), file=engine.get_file(),
-                                           level_index=level_index, has_levels=engine.has_levels(),
+                                           level_index=level_index,
                                            has_960=engine.has_chess960(), has_ponder=engine.has_ponder()))
 
     ip_info_thread = threading.Timer(10, display_ip_info)  # give RaspberyPi 10sec time to startup its network devices
@@ -1084,12 +1084,11 @@ def main():
                 reboot(args.dgtpi, dev=event.dev)
 
             elif isinstance(event, Event.EMAIL_LOG):
-                if args.log_file:
-                    email_logger = Emailer(email=args.email, mailgun_key=args.mailgun_key)
-                    email_logger.set_smtp(sserver=args.smtp_server, suser=args.smtp_user, spass=args.smtp_pass,
-                                          sencryption=args.smtp_encryption, sfrom=args.smtp_from)
-                    body = 'You probably want to forward this file to a picochess developer ;-)'
-                    email_logger.send('Picochess LOG', body, '/opt/picochess/logs/{}'.format(args.log_file))
+                email_logger = Emailer(email=args.email, mailgun_key=args.mailgun_key)
+                email_logger.set_smtp(sserver=args.smtp_server, suser=args.smtp_user, spass=args.smtp_pass,
+                                      sencryption=args.smtp_encryption, sfrom=args.smtp_from)
+                body = 'You probably want to forward this file to a picochess developer ;-)'
+                email_logger.send('Picochess LOG', body, '/opt/picochess/logs/{}'.format(args.log_file))
 
             elif isinstance(event, Event.SET_VOICE):
                 DisplayMsg.show(Message.SET_VOICE(type=event.type, lang=event.lang, speaker=event.speaker,

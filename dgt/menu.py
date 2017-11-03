@@ -88,22 +88,20 @@ class MenuState(object):
     SYS_DISP_CAPITAL = 763000
     SYS_DISP_CAPTIAL_YESNO = 763100  # yes, no
 
-    # @todo implement transitions from one state to the other like "up, down, left, right"
-    # @todo take for example the numbers given to build source code instead of one by one
-
 
 class DgtMenu(object):
 
     """Handle the Dgt Menu."""
 
     def __init__(self, disable_confirm: bool, ponder_interval: int, speed_voice: int, capital_letters: bool,
-                 dgttranslate: DgtTranslate):
+                 log_file, dgttranslate: DgtTranslate):
         super(DgtMenu, self).__init__()
 
         self.current_text = None  # save the current text
         self.menu_system_display_confirm = disable_confirm
         self.menu_system_display_ponderinterval = ponder_interval
         self.menu_system_display_capital = capital_letters
+        self.log_file = log_file
         self.dgttranslate = dgttranslate
         self.state = MenuState.TOP
 
@@ -1058,8 +1056,11 @@ class DgtMenu(object):
 
         elif self.state == MenuState.SYS_LOG:
             # do action!
-            Observable.fire(Event.EMAIL_LOG())
-            text = self._fire_dispatchdgt(self.dgttranslate.text('B10_oklogfile'))  # @todo give pos/neg feedback
+            if self.log_file:
+                Observable.fire(Event.EMAIL_LOG())
+                text = self._fire_dispatchdgt(self.dgttranslate.text('B10_oklogfile'))
+            else:
+                text = self._fire_dispatchdgt(self.dgttranslate.text('B10_nofunction'))
 
         elif self.state == MenuState.SYS_VOICE:
             if self.menu_system_voice == Voice.USER:

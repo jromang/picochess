@@ -122,7 +122,6 @@ def write_engine_ini(engine_path=None):
                         config[engine_file_name][str(';' + option)] = str(engine_options[option].default)
 
                     comp_elo = 2900
-                    # @todo find a better way to setup engine elo
                     engine_elo = {'stockfish': 3360, 'texel': 3050, 'rodent': 2920,
                                   'zurichess': 2790, 'wyld': 2630, 'sayuri': 1850}
                     for name, elo in engine_elo.items():

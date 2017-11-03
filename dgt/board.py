@@ -470,19 +470,19 @@ class DgtBoard(object):
     def _open_bluetooth(self):
         if self.bt_state == -1:
             # only for jessie
-            if path.exists("/usr/bin/bluetoothctl"):
+            if path.exists('/usr/bin/bluetoothctl'):
                 self.bt_state = 0
 
                 # get rid of old rfcomm
-                if path.exists("/dev/rfcomm123"):
+                if path.exists('/dev/rfcomm123'):
                     logging.debug('BT releasing /dev/rfcomm123')
-                    subprocess.call(["rfcomm", "release", "123"])
+                    subprocess.call(['rfcomm', 'release', '123'])
                 self.bt_current_device = -1
                 self.bt_mac_list = []
                 self.bt_name_list = []
 
-                logging.debug("BT starting bluetoothctl")
-                self.btctl = subprocess.Popen("/usr/bin/bluetoothctl",
+                logging.debug('BT starting bluetoothctl')
+                self.btctl = subprocess.Popen('/usr/bin/bluetoothctl',
                                               stdin=subprocess.PIPE,
                                               stdout=subprocess.PIPE,
                                               stderr=subprocess.STDOUT,
@@ -510,38 +510,38 @@ class DgtBoard(object):
 
             # complete line
             if '\n' in self.bt_line:
-                if "Changing power on succeeded" in self.bt_line:
+                if 'Changing power on succeeded' in self.bt_line:
                     self.bt_state = 1
                     self.btctl.stdin.write("agent on\n")
                     self.btctl.stdin.flush()
-                if "Agent registered" in self.bt_line:
+                if 'Agent registered' in self.bt_line:
                     self.bt_state = 2
                     self.btctl.stdin.write("default-agent\n")
                     self.btctl.stdin.flush()
-                if "Default agent request successful" in self.bt_line:
+                if 'Default agent request successful' in self.bt_line:
                     self.bt_state = 3
                     self.btctl.stdin.write("scan on\n")
                     self.btctl.stdin.flush()
-                if "Discovering: yes" in self.bt_line:
+                if 'Discovering: yes' in self.bt_line:
                     self.bt_state = 4
-                if "Pairing successful" in self.bt_line:
+                if 'Pairing successful' in self.bt_line:
                     self.bt_state = 6
-                    logging.debug("BT pairing successful")
-                if "Failed to pair: org.bluez.Error.AlreadyExists" in self.bt_line:
+                    logging.debug('BT pairing successful')
+                if 'Failed to pair: org.bluez.Error.AlreadyExists' in self.bt_line:
                     self.bt_state = 6
                     logging.debug("BT already paired")
-                elif "Failed to pair" in self.bt_line:
+                elif 'Failed to pair' in self.bt_line:
                     # try the next
                     self.bt_state = 4
-                    logging.debug("BT pairing failed")
-                if "not available" in self.bt_line:
+                    logging.debug('BT pairing failed')
+                if 'not available' in self.bt_line:
                     # remove and try the next
                     self.bt_state = 4
                     self.bt_mac_list.remove(self.bt_mac_list[self.bt_current_device])
                     self.bt_name_list.remove(self.bt_name_list[self.bt_current_device])
                     self.bt_current_device -= 1
-                    logging.debug("BT pairing failed, unknown device")
-                if ("DGT_BT_" in self.bt_line or "PCS-REVII" in self.bt_line) and "DEL" not in self.bt_line:
+                    logging.debug('BT pairing failed, unknown device')
+                if ('DGT_BT_' in self.bt_line or 'PCS-REVII' in self.bt_line) and 'DEL' not in self.bt_line:
                     # New e-Board found add to list
                     try:
                         if not self.bt_line.split()[3] in self.bt_mac_list:
@@ -550,20 +550,19 @@ class DgtBoard(object):
                             logging.debug('BT found device: %s %s', self.bt_line.split()[3], self.bt_line.split()[4])
                     except IndexError:
                         logging.error('wrong bt_line [%s]', self.bt_line)
-
                 # clear the line
                 self.bt_line = ''
 
-            if "Enter PIN code:" in self.bt_line:
-                if "DGT_BT_" in self.bt_name_list[self.bt_current_device]:
+            if 'Enter PIN code:' in self.bt_line:
+                if 'DGT_BT_' in self.bt_name_list[self.bt_current_device]:
                     self.btctl.stdin.write("0000\n")
                     self.btctl.stdin.flush()
-                if "PCS-REVII" in self.bt_name_list[self.bt_current_device]:
+                if 'PCS-REVII' in self.bt_name_list[self.bt_current_device]:
                     self.btctl.stdin.write("1234\n")
                     self.btctl.stdin.flush()
                 self.bt_line = ''
 
-            if "Confirm passkey" in self.bt_line:
+            if 'Confirm passkey' in self.bt_line:
                 self.btctl.stdin.write("yes\n")
                 self.btctl.stdin.flush()
                 self.bt_line = ''
@@ -575,29 +574,29 @@ class DgtBoard(object):
                     self.bt_current_device += 1
                     if self.bt_current_device >= len(self.bt_mac_list):
                         self.bt_current_device = 0
-                    logging.debug("BT pairing to: %s %s",
+                    logging.debug('BT pairing to: %s %s',
                                   self.bt_mac_list[self.bt_current_device],
                                   self.bt_name_list[self.bt_current_device])
-                    self.btctl.stdin.write("pair " + self.bt_mac_list[self.bt_current_device] + "\n")
+                    self.btctl.stdin.write('pair ' + self.bt_mac_list[self.bt_current_device] + "\n")
                     self.btctl.stdin.flush()
 
             # pair succesful, try rfcomm
             if self.bt_state == 6:
                 # now try rfcomm
                 self.bt_state = 7
-                self.bt_rfcomm = subprocess.Popen("rfcomm connect 123 " + self.bt_mac_list[self.bt_current_device],
+                self.bt_rfcomm = subprocess.Popen('rfcomm connect 123 ' + self.bt_mac_list[self.bt_current_device],
                                                   stdin=subprocess.PIPE,
                                                   stdout=subprocess.PIPE,
                                                   stderr=subprocess.PIPE,
                                                   universal_newlines=True,
                                                   shell=True)
 
-            # wait for rfcomm to fail or suceed
+            # wait for rfcomm to fail or succeed
             if self.bt_state == 7:
                 # rfcomm succeeded
-                if path.exists("/dev/rfcomm123"):
-                    logging.debug("BT connected to: %s", self.bt_name_list[self.bt_current_device])
-                    if self._open_serial("/dev/rfcomm123"):
+                if path.exists('/dev/rfcomm123'):
+                    logging.debug('BT connected to: %s', self.bt_name_list[self.bt_current_device])
+                    if self._open_serial('/dev/rfcomm123'):
                         self.btctl.stdin.write("quit\n")
                         self.btctl.stdin.flush()
                         self.bt_name = self.bt_name_list[self.bt_current_device]
@@ -606,8 +605,8 @@ class DgtBoard(object):
                         return True
                 # rfcomm failed
                 if self.bt_rfcomm.poll() is not None:
-                    logging.debug("BT rfcomm failed")
-                    self.btctl.stdin.write("remove " + self.bt_mac_list[self.bt_current_device] + "\n")
+                    logging.debug('BT rfcomm failed')
+                    self.btctl.stdin.write('remove ' + self.bt_mac_list[self.bt_current_device] + "\n")
                     self.bt_mac_list.remove(self.bt_mac_list[self.bt_current_device])
                     self.bt_name_list.remove(self.bt_name_list[self.bt_current_device])
                     self.bt_current_device -= 1

@@ -438,7 +438,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             DispatchDgt.fire(message.eng_text)
         self.dgtmenu.set_engine_restart(False)
 
-    def _process_engine_startup(self, message):  # @todo "has_levels" not used
+    def _process_engine_startup(self, message):
         self.dgtmenu.installed_engines = message.installed_engines
         for index in range(0, len(self.dgtmenu.installed_engines)):
             eng = self.dgtmenu.installed_engines[index]
