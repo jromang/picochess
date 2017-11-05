@@ -347,6 +347,13 @@ class DgtTranslate(object):
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
+        if text_id == 'errormode':
+            entxt = Dgt.DISPLAY_TEXT(l='error mode ', m='err mode', s='errmod')
+            detxt = Dgt.DISPLAY_TEXT(l='error Modus', m='errModus', s='errmod')
+            nltxt = Dgt.DISPLAY_TEXT(l='fout modus ', m='fout mod', s='errmod')
+            frtxt = Dgt.DISPLAY_TEXT(l='error mode ', m='err mode', s='errmod')
+            estxt = Dgt.DISPLAY_TEXT(l='error modo ', m='err modo', s='errmod')
+            ittxt = Dgt.DISPLAY_TEXT(l='errore modo', m='err modo', s='errmod')
         if text_id == 'level':
             if msg.startswith('Elo@'):
                 msg = str(int(msg[4:])).rjust(4)

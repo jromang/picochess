@@ -276,22 +276,25 @@ class DgtBoard(object):
                     if self.in_settime:
                         logging.info('(ser) clock still in set mode, ignore received time')
                         errtim = True
-                    elif r_time - self.r_time > 3600 or l_time - self.l_time > 3600:  # todo ignore it completely?
+                    elif r_time - self.r_time > 3600 or l_time - self.l_time > 3600:
                         logging.info('(ser) clock new time over 1h difference, ignore received time')
                         errtim = True
                 else:
                     logging.info('(ser) clock new time received l:%s r:%s', hms_time(l_time), hms_time(r_time))
                     status = message[6] & 0x3f
                     connect = not status & 0x20
-                    if not connect:
+                    if connect:
+                        right_side_down = -0x40 if status & 0x02 else 0x40
+                        if self.lever_pos != right_side_down:
+                            logging.debug('(ser) clock button status: %x old lever: %s', status, self.lever_pos)
+                            if self.lever_pos is not None:
+                                DisplayMsg.show(Message.DGT_BUTTON(button=right_side_down, dev='ser'))
+                            self.lever_pos = right_side_down
+                    else:
                         logging.info('(ser) clock not connected, sending old time l:%s r:%s',
                                      hms_time(self.l_time), hms_time(self.r_time))
                         l_time = self.l_time
                         r_time = self.r_time
-                        # if not self.is_pi:  # try: ignore "clock not connected"
-                        #     errtim = True
-                        #     DisplayMsg.show(Message.DGT_NO_CLOCK_ERROR(text='dont_use'))
-                        # self.lever_pos = None
                     if self.in_settime:
                         logging.info('(ser) clock still in set mode, sending old time l:%s r:%s',
                                      hms_time(self.l_time), hms_time(self.r_time))
@@ -300,20 +303,12 @@ class DgtBoard(object):
                     DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=l_time, time_right=r_time, connect=connect,
                                                            dev='ser'))
                     if not self.enable_ser_clock:
+                        dev = 'rev' if 'REVII' in self.bt_name else 'ser'
                         if self.watchdog_timer.is_running():  # a running watchdog means: board already found
-                            logging.info('restarting clock setup - enable_ser_clock: %s', self.enable_ser_clock)
+                            logging.info('(%s) clock restarting setup', dev)
                             self.startup_serial_clock()
                         else:
-                            dev = 'rev' if 'REVII' in self.bt_name else 'ser'
-                            logging.info('(%s) clock sends messages already but the board still not found', dev)
-
-                    if connect:  # @todo maybe move up?
-                        right_side_down = -0x40 if status & 0x02 else 0x40
-                        if self.lever_pos != right_side_down:
-                            logging.debug('(ser) clock button status: %x old lever: %s', status, self.lever_pos)
-                            if self.lever_pos is not None:
-                                DisplayMsg.show(Message.DGT_BUTTON(button=right_side_down, dev='ser'))
-                            self.lever_pos = right_side_down
+                            logging.info('(%s) clock sends messages already but (ser) board still not found', dev)
                 if not errtim:
                     self.r_time = r_time
                     self.l_time = l_time

@@ -1021,7 +1021,7 @@ def main():
                 if event.mode not in (Mode.NORMAL, Mode.REMOTE) and done_computer_fen:  # @todo check why still needed
                     dgtmenu.set_mode(interaction_mode)  # undo the button4 stuff
                     logging.warning('mode cant be changed to a pondering mode as long as a move is displayed')
-                    mode_text = dgttranslate.text('Y10_default', 'errmode')
+                    mode_text = dgttranslate.text('Y10_errormode')
                     msg = Message.INTERACTION_MODE(mode=interaction_mode, mode_text=mode_text, show_ok=False)
                     DisplayMsg.show(msg)
                 else:
@@ -1056,12 +1056,16 @@ def main():
                     logging.debug('setting tc clock time - prio: %s w:%s b:%s', event.dev,
                                   hms_time(event.time_white), hms_time(event.time_black))
                     time_control.set_clock_times(white_time=event.time_white, black_time=event.time_black)
-                    # find out, if we are in bullet time (<60secs on users clock)
+                    # find out, if we are in bullet time (<=60secs on users clock or lowest time if user side unknown)
                     time_u = event.time_white
                     time_c = event.time_black
-                    if play_mode == PlayMode.USER_BLACK:
-                        time_u, time_c = time_c, time_u
-                    dgtboard.low_time = time_u < 60  # this is used for "piece sliding" factor
+                    if interaction_mode in (Mode.NORMAL, Mode.BRAIN):  # @todo handle Mode.REMOTE too
+                        if play_mode == PlayMode.USER_BLACK:
+                            time_u, time_c = time_c, time_u
+                    else:  # here, we use the lowest time
+                        if time_c < time_u:
+                            time_u, time_c = time_c, time_u
+                    dgtboard.low_time = time_u <= 60  # this is used for "piece sliding" factor
                     DisplayMsg.show(Message.CLOCK_TIME(time_white=event.time_white, time_black=event.time_black))
                 else:
                     logging.debug('ignore clock time - too low prio: %s', event.dev)
