@@ -1,5 +1,5 @@
 PicoChess Engines
-October 24, 2017
+November 05, 2017
 
 
 1. STOCKFISH
@@ -39,8 +39,8 @@ a level 0, which lets the engine play random legal moves.
 3. ARASAN
 ===========================
 Author: Jon Dart
-Version: 20.2
-Date: September 2017
+Version: 20.3
+Date: November 2017
 Elo: 2950
 Levels: yes
 Chess960: no
@@ -55,7 +55,7 @@ including skill levels to make it an attractive opponent for players of every st
 4. RODENT III
 ===========================
 Author: Paweł Kozioł
-Version: 0.225
+Version: 0.228
 Date: October 2017
 Elo: 2920
 Levels: 'Personalities'
