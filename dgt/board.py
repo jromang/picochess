@@ -464,7 +464,7 @@ class DgtBoard(object):
 
     def _open_bluetooth(self):
         if self.bt_state == -1:
-            # only for jessie
+            # only for jessie upwards
             if path.exists('/usr/bin/bluetoothctl'):
                 self.bt_state = 0
 
@@ -490,13 +490,13 @@ class DgtBoard(object):
 
                 self.btctl.stdin.write("power on\n")
                 self.btctl.stdin.flush()
-        else:
-            # state >= 0 so bluetoothctl is running
-
-            # check for new data from bluetoothctl
-            try:
+        else:  # state >= 0 so bluetoothctl is running
+            try:  # check for new data from bluetoothctl
                 while True:
                     bt_byte = read(self.btctl.stdout.fileno(), 1).decode(encoding='UTF-8', errors='ignore')
+                    if bt_byte == '\r':
+                        logging.warning('changing CR to LF')
+                        bt_byte = '\n'
                     self.bt_line += bt_byte
                     if bt_byte == '' or bt_byte == '\n':
                         break
@@ -548,7 +548,8 @@ class DgtBoard(object):
                 # clear the line
                 self.bt_line = ''
 
-            if 'Enter PIN code:' in self.bt_line:
+            # if 'Enter PIN code:' in self.bt_line:
+            if 'PIN code' in self.bt_line:
                 if 'DGT_BT_' in self.bt_name_list[self.bt_current_device]:
                     self.btctl.stdin.write("0000\n")
                     self.btctl.stdin.flush()
@@ -575,7 +576,7 @@ class DgtBoard(object):
                     self.btctl.stdin.write('pair ' + self.bt_mac_list[self.bt_current_device] + "\n")
                     self.btctl.stdin.flush()
 
-            # pair succesful, try rfcomm
+            # pair successful, try rfcomm
             if self.bt_state == 6:
                 # now try rfcomm
                 self.bt_state = 7
