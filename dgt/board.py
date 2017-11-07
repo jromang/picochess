@@ -308,7 +308,7 @@ class DgtBoard(object):
                             logging.info('(%s) clock restarting setup', dev)
                             self.startup_serial_clock()
                         else:
-                            logging.info('(%s) clock sends messages already but (ser) board still not found', dev)
+                            logging.info('(%s) clock sends messages already but (%s) board still not found', dev, dev)
                 if not errtim:
                     self.r_time = r_time
                     self.l_time = l_time
@@ -421,8 +421,9 @@ class DgtBoard(object):
                 else:
                     self._setup_serial_port()
                     if self.serial:
-                        logging.debug('sleeping for 1.5 secs. Afterwards startup the (ser) hardware')
-                        time.sleep(1.5)
+                        logging.debug('sleeping for 0.5 secs. Afterwards startup the (ser) board')
+                        time.sleep(0.5)
+                        counter = 0
                         self._startup_serial_board()
                 if byte and byte[0] & 0x80:
                     self._read_board_message(head=byte)
