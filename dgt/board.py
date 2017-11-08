@@ -503,38 +503,40 @@ class DgtBoard(object):
 
             # complete line
             if '\n' in self.bt_line:
-                if 'Changing power on succeeded' in self.bt_line:
+                if False:  # switch-case
+                    pass
+                elif 'Changing power on succeeded' in self.bt_line:
                     self.bt_state = 1
                     self.btctl.stdin.write("agent on\n")
                     self.btctl.stdin.flush()
-                if 'Agent registered' in self.bt_line:
+                elif 'Agent registered' in self.bt_line:
                     self.bt_state = 2
                     self.btctl.stdin.write("default-agent\n")
                     self.btctl.stdin.flush()
-                if 'Default agent request successful' in self.bt_line:
+                elif 'Default agent request successful' in self.bt_line:
                     self.bt_state = 3
                     self.btctl.stdin.write("scan on\n")
                     self.btctl.stdin.flush()
-                if 'Discovering: yes' in self.bt_line:
+                elif 'Discovering: yes' in self.bt_line:
                     self.bt_state = 4
-                if 'Pairing successful' in self.bt_line:
+                elif 'Pairing successful' in self.bt_line:
                     self.bt_state = 6
                     logging.debug('BT pairing successful')
-                if 'Failed to pair: org.bluez.Error.AlreadyExists' in self.bt_line:
+                elif 'Failed to pair: org.bluez.Error.AlreadyExists' in self.bt_line:
                     self.bt_state = 6
                     logging.debug("BT already paired")
                 elif 'Failed to pair' in self.bt_line:
                     # try the next
                     self.bt_state = 4
                     logging.debug('BT pairing failed')
-                if 'not available' in self.bt_line:
+                elif 'not available' in self.bt_line:
                     # remove and try the next
                     self.bt_state = 4
                     self.bt_mac_list.remove(self.bt_mac_list[self.bt_current_device])
                     self.bt_name_list.remove(self.bt_name_list[self.bt_current_device])
                     self.bt_current_device -= 1
                     logging.debug('BT pairing failed, unknown device')
-                if ('DGT_BT_' in self.bt_line or 'PCS-REVII' in self.bt_line) and \
+                elif ('DGT_BT_' in self.bt_line or 'PCS-REVII' in self.bt_line) and \
                         ('NEW' in self.bt_line or 'CHG' in self.bt_line) and 'DEL' not in self.bt_line:
                     # New e-Board found add to list
                     try:
