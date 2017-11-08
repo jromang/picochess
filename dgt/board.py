@@ -495,9 +495,6 @@ class DgtBoard(object):
             try:  # check for new data from bluetoothctl
                 while True:
                     bt_byte = read(self.btctl.stdout.fileno(), 1).decode(encoding='UTF-8', errors='ignore')
-                    if bt_byte == '\r':
-                        logging.warning('changing CR to LF')
-                        bt_byte = '\n'
                     self.bt_line += bt_byte
                     if bt_byte == '' or bt_byte == '\n':
                         break
@@ -537,7 +534,8 @@ class DgtBoard(object):
                     self.bt_name_list.remove(self.bt_name_list[self.bt_current_device])
                     self.bt_current_device -= 1
                     logging.debug('BT pairing failed, unknown device')
-                if ('DGT_BT_' in self.bt_line or 'PCS-REVII' in self.bt_line) and 'DEL' not in self.bt_line:
+                if ('DGT_BT_' in self.bt_line or 'PCS-REVII' in self.bt_line) and \
+                        ('NEW' in self.bt_line or 'CHG' in self.bt_line) and 'DEL' not in self.bt_line:
                     # New e-Board found add to list
                     try:
                         if not self.bt_line.split()[3] in self.bt_mac_list:
