@@ -524,7 +524,7 @@ class DgtBoard(object):
                     logging.debug('BT pairing successful')
                 elif 'Failed to pair: org.bluez.Error.AlreadyExists' in self.bt_line:
                     self.bt_state = 6
-                    logging.debug("BT already paired")
+                    logging.debug('BT already paired')
                 elif 'Failed to pair' in self.bt_line:
                     # try the next
                     self.bt_state = 4
@@ -545,7 +545,7 @@ class DgtBoard(object):
                             self.bt_name_list.append(self.bt_line.split()[4])
                             logging.debug('BT found device: %s %s', self.bt_line.split()[3], self.bt_line.split()[4])
                     except IndexError:
-                        logging.error('wrong bt_line [%s]', self.bt_line)
+                        logging.error('BT wrong line [%s]', self.bt_line)
                 # clear the line
                 self.bt_line = ''
 
@@ -612,6 +612,7 @@ class DgtBoard(object):
         return False
 
     def _open_serial(self, device: str):
+        assert not self.serial, 'serial connection still active: %s' % self.serial
         try:
             self.serial = Serial(device, stopbits=STOPBITS_ONE, parity=PARITY_NONE, bytesize=EIGHTBITS, timeout=2)
         except SerialException:
