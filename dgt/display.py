@@ -642,13 +642,15 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         _, _, _, rnk_5, rnk_4, _, _, _ = self.dgtmenu.get_dgt_fen().split('/')
         return '8/8/8/' + rnk_5 + '/' + rnk_4 + '/8/8/8'
 
-    def _exit_display(self):
+    def _exit_display(self, devs=None):
+        if devs is None:  # prevent W0102 error
+            devs = {'ser', 'i2c', 'web'}
         if self.play_move and self.dgtmenu.get_mode() in (Mode.NORMAL, Mode.BRAIN, Mode.REMOTE):
             side = self._get_clock_side(self.play_turn)
             beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side, wait=True, maxtime=1,
-                                    beep=beep, devs={'ser', 'i2c', 'web'}, uci960=self.uci960,
-                                    lang=self.dgttranslate.language, capital=self.dgttranslate.capital)
+                                    beep=beep, devs=devs, uci960=self.uci960, lang=self.dgttranslate.language,
+                                    capital=self.dgttranslate.capital)
         else:
             text = None
             if self._inside_main_menu():
@@ -656,7 +658,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             if text:
                 text.wait = True  # in case of "bad pos" message send before
             else:
-                text = Dgt.DISPLAY_TIME(force=True, wait=True, devs={'ser', 'i2c', 'web'})
+                text = Dgt.DISPLAY_TIME(force=True, wait=True, devs=devs)
         DispatchDgt.fire(text)
 
     def _process_message(self, message):

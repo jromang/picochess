@@ -381,7 +381,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
         user_name = 'User'
         engine_name = 'Picochess'
         user_elo = '-'
-        comp_elo = 2900
+        comp_elo = 2500
         if 'system_info' in self.shared:
             if 'user_name' in self.shared['system_info']:
                 user_name = self.shared['system_info']['user_name']
