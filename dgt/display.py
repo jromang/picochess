@@ -807,7 +807,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 logging.debug('inside update menu => board channel not displayed')
             else:
                 DispatchDgt.fire(message.text)
-                DispatchDgt.fire(Dgt.DISPLAY_TIME(force=True, wait=True, devs={'i2c'}))
+                self._exit_display(devs={'i2c', 'web'})  # ser is done, when clock found
 
         elif isinstance(message, Message.DGT_NO_EBOARD_ERROR):
             if self.dgtmenu.inside_updt_menu() or self.dgtmenu.inside_main_menu():
