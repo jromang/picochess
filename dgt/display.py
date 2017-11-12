@@ -777,6 +777,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             if message.dev == 'ser':  # send the "board connected message" to serial clock
                 DispatchDgt.fire(message.text)
             self._set_clock(devs={message.dev})
+            self._exit_display(devs={message.dev})
 
         elif isinstance(message, Message.DGT_CLOCK_TIME):
             time_white = message.time_left

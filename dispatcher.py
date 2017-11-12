@@ -116,7 +116,7 @@ class Dispatcher(DispatchDgt, Thread):
             if repr(message) in clk and not self.clock_connected[dev]:
                 logging.debug('(%s) clock still not registered => ignore %s', dev, message)
                 return
-            if hasattr(message, 'maxtime') and message.maxtime > 0:
+            if hasattr(message, 'maxtime'):
                 if repr(message) == DgtApi.DISPLAY_TEXT:
                     if message.maxtime == 2.1:  # 2.1=picochess message
                         self.dgtmenu.enable_picochess_displayed(dev)
@@ -127,10 +127,11 @@ class Dispatcher(DispatchDgt, Thread):
                         if message.maxtime == 1.1:  # 1.1=eBoard connect
                             logging.debug('(%s) inside update menu => board connect not displayed', dev)
                             return
-                self.maxtimer[dev] = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer, [dev])
-                self.maxtimer[dev].start()
-                logging.debug('(%s) showing %s for %.1f secs', dev, message, message.maxtime * self.time_factor)
-                self.maxtimer_running[dev] = True
+                if message.maxtime > 0.1:  # filter out "all the time" show and "eBoard error" messages
+                    self.maxtimer[dev] = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer, [dev])
+                    self.maxtimer[dev].start()
+                    logging.debug('(%s) showing %s for %.1f secs', dev, message, message.maxtime * self.time_factor)
+                    self.maxtimer_running[dev] = True
             if repr(message) == DgtApi.CLOCK_START and self.dgtmenu.inside_updt_menu():
                 logging.debug('(%s) inside update menu => clock not started', dev)
                 return
