@@ -1236,49 +1236,50 @@ function receive_message(wsevent) {
     console.log("received message: " + wsevent.data);
     var msg_obj = $.parseJSON(wsevent.data);
     var logging = $('#consoleLogArea');
+    var username = format_username(msg_obj.username);
     switch (msg_obj.event) {
         case "join":
-            logging.append('<li>' + format_username(msg_obj.username) + ' => Joined room ' + msg_obj.payload + '</li>');
+            logging.append('<li>' + username + ' => Joined room ' + msg_obj.payload + '</li>');
             break;
         case "leave":
-            logging.append('<li>' + format_username(msg_obj.username) + ' => Left room ' + msg_obj.payload + '</li>');
+            logging.append('<li>' + username + ' => Left room ' + msg_obj.payload + '</li>');
             break;
         case "nick_list":
-            logging.append('<li>' + format_username(msg_obj.username) + ' => Current users: ' + msg_obj.payload.toString() + '</li>');
+            logging.append('<li>' + username + ' => Current users: ' + msg_obj.payload.toString() + '</li>');
             break;
         case "text":
-            logging.append('<li>' + format_username(msg_obj.username) + ' => ' +  msg_obj.payload + '</li>');
+            logging.append('<li>' + username + ' => ' +  msg_obj.payload + '</li>');
             break;
         // picochess events!
         case 'Clock':
-            logging.append('<li>' + format_username(msg_obj.username) + ' => Clock: ' + msg_obj.msg + '</li>');
+            logging.append('<li>' + username + ' => Clock: ' + msg_obj.msg + '</li>');
             break;
         case 'Light':
-            logging.append('<li>' + format_username(msg_obj.username) + ' => Light: ' + msg_obj.move + '</li>');
+            logging.append('<li>' + username + ' => Light: ' + msg_obj.move + '</li>');
             break;
         case 'Clear':
-            logging.append('<li>' + format_username(msg_obj.username) + ' => Clear' + '</li>');
+            logging.append('<li>' + username + ' => Clear' + '</li>');
             break;
         case 'Fen':
-            logging.append('<li>' + format_username(msg_obj.username) + ' => Fen: ' + msg_obj.fen + ' move: ' + msg_obj.move + ' play: ' + msg_obj.play + '</li>');
+            logging.append('<li>' + username + ' => Fen: ' + msg_obj.fen + ' move: ' + msg_obj.move + ' play: ' + msg_obj.play + '</li>');
             break;
         case 'Game':
-            logging.append('<li>' + format_username(msg_obj.username) + ' => NewGame: ' + msg_obj.fen + '</li>');
+            logging.append('<li>' + username + ' => NewGame: ' + msg_obj.fen + '</li>');
             break;
         case 'Message':
-            logging.append('<li>' + format_username(msg_obj.username) + ' => Message: ' + msg_obj.msg + '</li>');
+            logging.append('<li>' + username + ' => Message: ' + msg_obj.msg + '</li>');
             break;
         case 'Status':
-            logging.append('<li>' + format_username(msg_obj.username) + ' => ClockStatus: ' + msg_obj.msg + '</li>');
+            logging.append('<li>' + username + ' => ClockStatus: ' + msg_obj.msg + '</li>');
             break;
         case 'Header':
-            logging.append('<li>' + format_username(msg_obj.username) + ' => Header: ' + msg_obj.headers.toString() + '</li>');
+            logging.append('<li>' + username + ' => Header: ' + msg_obj.headers.toString() + '</li>');
             break;
         case 'Title':
-            logging.append('<li>' + format_username(msg_obj.username) + ' => Title: ' + msg_obj.ip_info.toString() + '</li>');
+            logging.append('<li>' + username + ' => Title: ' + msg_obj.ip_info.toString() + '</li>');
             break;
         case 'Broadcast':
-            logging.append('<li>' + format_username(msg_obj.username) + ' => Broadcast: ' + msg_obj.msg + 'fen: ' + msg_obj.fen + '</li>');
+            logging.append('<li>' + username + ' => Broadcast: ' + msg_obj.msg + 'fen: ' + msg_obj.fen + '</li>');
             break;
         default:
             console.log(msg_obj.event);
