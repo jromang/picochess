@@ -1,0 +1,72 @@
+[Smart]
+; Smart
+; Personality for Rodent III chess engine, version 0.210 or later
+; Created by Pawel Koziol
+; Overemphasizes positional factors
+; likely to sacrifice exchange or to play with minor pieces against queen
+;
+PawnValueMg = 95
+KnightValueMg = 310
+BishopValueMg = 322
+RookValueMg = 514
+QueenValueMg = 1013
+PawnValueEg = 110
+KnightValueEg = 305
+BishopValueEg = 320
+RookValueEg = 529
+QueenValueEg = 1013
+KeepPawn = 0
+KeepKnight = 0
+KeepBishop = 0
+KeepRook = 0
+KeepQueen = 0
+BishopPair = 51
+KnightPair = -9
+RookPair = -9
+KnightLikesClosed = 8
+RookLikesOpen = 3
+ExchangeImbalance = 0
+MinorVsQueen = 16
+Material = 100
+OwnAttack = 110
+OppAttack = 100
+OwnMobility = 110
+OppMobility = 100
+KingTropism = 20
+PiecePlacement = 100
+PiecePressure = 109
+PassedPawns = 100
+PawnStructure = 100
+Lines = 200
+Outposts = 200
+PawnShield = 119
+PawnStorm = 99
+Forwardness = 0
+Center = 75
+DoubledPawnMg = -12
+DoubledPawnEg = -23
+IsolatedPawnMg = -10
+IsolatedPawnEg = -8
+IsolatedOnOpenMg = -10
+BackwardPawnMg = -8
+BackwardPawnEg = -10
+BackwardOnOpenMg = -8
+FianchBase = 4
+Fianchetto = 24
+ReturningB = 12
+MinorBehindPawn = 5
+PawnThreat = 5
+PawnMass = 100
+PawnChains = 100
+PstStyle = 2
+MobilityStyle = 0
+NpsLimit = 0
+EvalBlur = 0
+Contempt = 0
+SlowMover = 100
+Selectivity = 175
+SearchSkill = 10
+RiskyDepth = 0
+BookFilter = 20
+GuideBookFile = guide/tricky.bin
+MainBookFile = rodent.bin

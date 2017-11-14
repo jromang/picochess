@@ -54,13 +54,16 @@ class Dispatcher(DispatchDgt, Thread):
         self.tasks[device] = []
         self.display_hash[device] = None
 
-    def get_prio_device(self):
+    def is_prio_device(self, dev, connect):
         """Return the most prio registered device."""
+        logging.debug('(%s) clock connected: %s', dev, connect)
+        if not connect:
+            return False
         if 'i2c' in self.devices:
-            return 'i2c'
+            return 'i2c' == dev
         if 'ser' in self.devices:
-            return 'ser'
-        return 'web'
+            return 'ser' == dev
+        return 'web' == dev
 
     def _stopped_maxtimer(self, dev: str):
         self.maxtimer_running[dev] = False
@@ -93,7 +96,7 @@ class Dispatcher(DispatchDgt, Thread):
 
     def _process_message(self, message, dev: str):
         do_handle = True
-        if repr(message) in (DgtApi.CLOCK_START, DgtApi.CLOCK_STOP):
+        if repr(message) in (DgtApi.CLOCK_START, DgtApi.CLOCK_STOP, DgtApi.DISPLAY_TIME):
             self.display_hash[dev] = None  # Cant know the clock display if command changing the running status
         else:
             if repr(message) in (DgtApi.DISPLAY_MOVE, DgtApi.DISPLAY_TEXT):
@@ -108,25 +111,27 @@ class Dispatcher(DispatchDgt, Thread):
                 logging.debug('(%s) clock registered', dev)
                 self.clock_connected[dev] = True
 
-            clk = (DgtApi.DISPLAY_MOVE, DgtApi.DISPLAY_TEXT, DgtApi.DISPLAY_TIME, DgtApi.CLOCK_START, DgtApi.CLOCK_STOP)
+            clk = (DgtApi.DISPLAY_MOVE, DgtApi.DISPLAY_TEXT, DgtApi.DISPLAY_TIME,
+                   DgtApi.CLOCK_SET, DgtApi.CLOCK_START, DgtApi.CLOCK_STOP)
             if repr(message) in clk and not self.clock_connected[dev]:
                 logging.debug('(%s) clock still not registered => ignore %s', dev, message)
                 return
-            if hasattr(message, 'maxtime') and message.maxtime > 0:
+            if hasattr(message, 'maxtime'):
                 if repr(message) == DgtApi.DISPLAY_TEXT:
                     if message.maxtime == 2.1:  # 2.1=picochess message
                         self.dgtmenu.enable_picochess_displayed(dev)
                     if self.dgtmenu.inside_updt_menu():
-                        if message.maxtime == 0.1:  # 0.1=eboard error
+                        if message.maxtime == 0.1:  # 0.1=eBoard error
                             logging.debug('(%s) inside update menu => board errors not displayed', dev)
                             return
                         if message.maxtime == 1.1:  # 1.1=eBoard connect
                             logging.debug('(%s) inside update menu => board connect not displayed', dev)
                             return
-                self.maxtimer[dev] = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer, [dev])
-                self.maxtimer[dev].start()
-                logging.debug('(%s) showing %s for %.1f secs', dev, message, message.maxtime * self.time_factor)
-                self.maxtimer_running[dev] = True
+                if message.maxtime > 0.1:  # filter out "all the time" show and "eBoard error" messages
+                    self.maxtimer[dev] = Timer(message.maxtime * self.time_factor, self._stopped_maxtimer, [dev])
+                    self.maxtimer[dev].start()
+                    logging.debug('(%s) showing %s for %.1f secs', dev, message, message.maxtime * self.time_factor)
+                    self.maxtimer_running[dev] = True
             if repr(message) == DgtApi.CLOCK_START and self.dgtmenu.inside_updt_menu():
                 logging.debug('(%s) inside update menu => clock not started', dev)
                 return
@@ -165,6 +170,13 @@ class Dispatcher(DispatchDgt, Thread):
                                 self.stop_maxtimer(dev)
                                 if self.tasks[dev]:
                                     logging.debug('delete following (%s) tasks: %s', dev, self.tasks[dev])
+                                    while self.tasks[dev]:  # but do the last CLOCK_START()
+                                        command = self.tasks[dev].pop()
+                                        if repr(command) == DgtApi.CLOCK_START:  # clock might be in set mode
+                                            logging.debug('processing (last) delayed clock start command')
+                                            with self.process_lock[dev]:
+                                                self._process_message(command, dev)
+                                            break
                                     self.tasks[dev] = []
                         else:
                             logging.debug('command doesnt change the clock display => (%s) max timer ignored', dev)

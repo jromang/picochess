@@ -121,6 +121,7 @@ class MessageApi():
     TAKE_BACK = 'MSG_TACK_BACK'  # User takes back move(s)
     CLOCK_START = 'MSG_CLOCK_START'  # Say to run autonomous clock, contains time_control
     CLOCK_STOP = 'MSG_CLOCK_STOP'  # Stops the clock
+    CLOCK_TIME = 'MSG_CLOCK_TIME'  # Send the prio clock time
     USER_MOVE_DONE = 'MSG_USER_MOVE_DONE'  # Player has done a move on board
     GAME_ENDS = 'MSG_GAME_ENDS'  # The current game has ended, contains a 'result' (GameResult) and list of 'moves'
 
@@ -152,10 +153,10 @@ class DgtApi():
     DISPLAY_TIME = 'DGT_DISPLAY_TIME'
     LIGHT_CLEAR = 'DGT_LIGHT_CLEAR'
     LIGHT_SQUARES = 'DGT_LIGHT_SQUARES'
-    CLOCK_STOP = 'DGT_CLOCK_STOP'
+    CLOCK_SET = 'DGT_CLOCK_SET'
     CLOCK_START = 'DGT_CLOCK_START'
+    CLOCK_STOP = 'DGT_CLOCK_STOP'
     CLOCK_VERSION = 'DGT_CLOCK_VERSION'
-    # CLOCK_TIME = 'DGT_CLOCK_TIME'
     SERIALNR = 'DGT_SERIALNR'
 
 
@@ -163,14 +164,16 @@ class Dgt():
 
     """Used to define tasks for the communication towards the dgt hardware."""
 
-    DISPLAY_MOVE = ClassFactory(DgtApi.DISPLAY_MOVE, ['move', 'fen', 'uci960', 'side', 'beep', 'maxtime', 'devs',
-                                                      'wait', 'ld', 'rd'])
-    DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['l', 'm', 's', 'beep', 'maxtime', 'devs', 'wait', 'ld', 'rd'])
+    DISPLAY_MOVE = ClassFactory(DgtApi.DISPLAY_MOVE, ['move', 'fen', 'uci960', 'side', 'lang', 'capital',
+                                                      'beep', 'maxtime', 'devs', 'wait', 'ld', 'rd'])
+    DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['l', 'm', 's',
+                                                      'beep', 'maxtime', 'devs', 'wait', 'ld', 'rd'])
     DISPLAY_TIME = ClassFactory(DgtApi.DISPLAY_TIME, ['wait', 'force', 'devs'])
     LIGHT_CLEAR = ClassFactory(DgtApi.LIGHT_CLEAR, ['devs'])
     LIGHT_SQUARES = ClassFactory(DgtApi.LIGHT_SQUARES, ['uci_move', 'devs'])
-    CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, ['devs'])
-    CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['time_left', 'time_right', 'side', 'devs', 'wait'])
+    CLOCK_SET = ClassFactory(DgtApi.CLOCK_SET, ['time_left', 'time_right', 'devs'])
+    CLOCK_START = ClassFactory(DgtApi.CLOCK_START, ['side', 'devs', 'wait'])
+    CLOCK_STOP = ClassFactory(DgtApi.CLOCK_STOP, ['devs', 'wait'])
     CLOCK_VERSION = ClassFactory(DgtApi.CLOCK_VERSION, ['main', 'sub', 'devs'])
 
 
@@ -185,7 +188,7 @@ class Message():
     REVIEW_MOVE_DONE = ClassFactory(MessageApi.REVIEW_MOVE_DONE, ['move', 'fen', 'turn', 'game'])
     ENGINE_READY = ClassFactory(MessageApi.ENGINE_READY, ['eng', 'eng_text', 'engine_name', 'has_levels', 'has_960',
                                                           'has_ponder', 'show_ok'])
-    ENGINE_STARTUP = ClassFactory(MessageApi.ENGINE_STARTUP, ['shell', 'file', 'level_index', 'has_levels', 'has_960',
+    ENGINE_STARTUP = ClassFactory(MessageApi.ENGINE_STARTUP, ['installed_engines', 'file', 'level_index', 'has_960',
                                                               'has_ponder'])
     ENGINE_FAIL = ClassFactory(MessageApi.ENGINE_FAIL, [])
     LEVEL = ClassFactory(MessageApi.LEVEL, ['level_text', 'level_name', 'do_speak'])
@@ -195,7 +198,7 @@ class Message():
     DGT_BUTTON = ClassFactory(MessageApi.DGT_BUTTON, ['button', 'dev'])
     DGT_FEN = ClassFactory(MessageApi.DGT_FEN, ['fen', 'raw'])
     DGT_CLOCK_VERSION = ClassFactory(MessageApi.DGT_CLOCK_VERSION, ['main', 'sub', 'dev', 'text'])
-    DGT_CLOCK_TIME = ClassFactory(MessageApi.DGT_CLOCK_TIME, ['time_left', 'time_right', 'dev'])
+    DGT_CLOCK_TIME = ClassFactory(MessageApi.DGT_CLOCK_TIME, ['time_left', 'time_right' , 'connect', 'dev'])
     DGT_SERIAL_NR = ClassFactory(MessageApi.DGT_SERIAL_NR, ['number'])
     DGT_JACK_CONNECTED_ERROR = ClassFactory(MessageApi.DGT_JACK_CONNECTED_ERROR, [])
     DGT_NO_CLOCK_ERROR = ClassFactory(MessageApi.DGT_NO_CLOCK_ERROR, ['text'])
@@ -211,6 +214,7 @@ class Message():
     TAKE_BACK = ClassFactory(MessageApi.TAKE_BACK, ['game'])
     CLOCK_START = ClassFactory(MessageApi.CLOCK_START, ['turn', 'tc_init', 'devs'])
     CLOCK_STOP = ClassFactory(MessageApi.CLOCK_STOP, ['devs'])
+    CLOCK_TIME = ClassFactory(MessageApi.CLOCK_TIME, ['time_white', 'time_black'])
     USER_MOVE_DONE = ClassFactory(MessageApi.USER_MOVE_DONE, ['move', 'fen', 'turn', 'game'])
     GAME_ENDS = ClassFactory(MessageApi.GAME_ENDS, ['result', 'play_mode', 'game'])
 
@@ -219,7 +223,7 @@ class Message():
     IP_INFO = ClassFactory(MessageApi.IP_INFO, ['info'])
     NEW_SCORE = ClassFactory(MessageApi.NEW_SCORE, ['score', 'mate', 'mode', 'turn'])
     NEW_DEPTH = ClassFactory(MessageApi.NEW_DEPTH, ['depth'])
-    ALTERNATIVE_MOVE = ClassFactory(MessageApi.ALTERNATIVE_MOVE, ['game'])
+    ALTERNATIVE_MOVE = ClassFactory(MessageApi.ALTERNATIVE_MOVE, ['game', 'play_mode'])
     SWITCH_SIDES = ClassFactory(MessageApi.SWITCH_SIDES, ['game', 'move'])
     SYSTEM_SHUTDOWN = ClassFactory(MessageApi.SYSTEM_SHUTDOWN, [])
     SYSTEM_REBOOT = ClassFactory(MessageApi.SYSTEM_REBOOT, [])
@@ -267,7 +271,7 @@ class Event():
     STOP_SEARCH = ClassFactory(EventApi.STOP_SEARCH, [])
     # Timecontrol events
     OUT_OF_TIME = ClassFactory(EventApi.OUT_OF_TIME, ['color'])
-    CLOCK_TIME = ClassFactory(EventApi.CLOCK_TIME, ['time_white', 'time_black', 'dev'])
+    CLOCK_TIME = ClassFactory(EventApi.CLOCK_TIME, ['time_white', 'time_black', 'connect', 'dev'])
     # special events
     EXIT_MENU = ClassFactory(EventApi.EXIT_MENU, [])
     UPDATE_PICO = ClassFactory(EventApi.UPDATE_PICO, ['tag'])

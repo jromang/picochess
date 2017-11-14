@@ -1,13 +1,13 @@
 PicoChess Engines
-August 30, 2017
+November 05, 2017
 
 
 1. STOCKFISH
-=========================
+===========================
 Authors: T. Romstad, M. Costalba, J. Kiiski, G. Linscott
-Version: 7
-Date: January 2016
-Elo (CCRL 40/4): 3360
+Version: 8
+Date: October 2017
+Elo: 3360
 Levels: yes
 Chess960: yes
 License: GPLv3
@@ -21,10 +21,10 @@ Chess').
 
 
 2. TEXEL
-=========================
+===========================
 Author: Peter Österlund
-Version: 1.06
-Date: July 2016
+Version: 1.07
+Date: September 2017
 Elo: 3050
 Levels: yes
 Chess960: no
@@ -37,10 +37,10 @@ a level 0, which lets the engine play random legal moves.
 
 
 3. ARASAN
-=========================
+===========================
 Author: Jon Dart
-Version: 20.2
-Date: July 2017
+Version: 20.3
+Date: November 2017
 Elo: 2950
 Levels: yes
 Chess960: no
@@ -53,10 +53,10 @@ including skill levels to make it an attractive opponent for players of every st
 
 
 4. RODENT III
-=========================
+===========================
 Author: Paweł Kozioł
-Version: 0.210
-Date: August 2017
+Version: 0.228
+Date: October 2017
 Elo: 2920
 Levels: 'Personalities'
 Chess960: no
@@ -72,8 +72,8 @@ crazy attacker.
 5. ZURICHESS
 =========================
 Author: Alexandru Moșoi
-Version: luzern
-Date: July 2017
+Version: neuchatel
+Date: October 2017
 Elo: 2790
 Levels: yes ('Handicaps')
 Chess960: no
@@ -87,42 +87,23 @@ The current version plays at GM level. Weaker opponents may like to set its
 handicap level a little higher.
 
 
-6. FLOYD
-=========================
-Author: Marcel van Kervinck
-Version: 0.9
-Date: July 2016
-Elo: 2660
-Levels: no
-Chess960: no
-License: BSD
-Source: https://github.com/kervinck/floyd/
-Description: Originally written as a study in chess engine writing, Floyd has
-quickly become one of the best master (FM/IM) strength engines. It was not
-written for speed or strength, but rather for 'clarity and ease of change'.
-Nevertheless, the engine has an attractive style of play. Unfortunately
-for weaker human players, Floyd cannot be forced to play weaker.
-
-
-7. CINNAMON   
-=========================
-Author: Giuseppe Cannella
-Version: 2.0
-Date: May 2016
-Elo: 2060
-Levels: no
-Chess960: no
+6. WyldChess
+===========================
+Author: Manik Charan
+Version: 1.5
+Date: September 2017
+Elo: 2630
+Levels: 'Personalities'
+Chess960: yes
 License: GPLv3
-Source: https://github.com/gekomad/Cinnamon/
-Description: Cinnamon is the successor to Butterfly. It is an attractive opponent
-for experienced club players. This engine does not play too strong but is not
-very easy to beat either. If you have no FM or IM title and are looking for
-a beatable engine that can teach you a thing or two about chess, then Cinnamon is
-a good choice.
+Source: https://github.com/Mk-Chan/WyldChess
+Description: WyldChess offers something similar to RodentIII with personalities (needs to create more Personae)
+and also supports Chess960 ('Fischer Random Chess'). The evaluation is compared to the other top chess
+engines not as detailed, but its tactics is very strong.
 
 
-8. GALJOEN
-=========================
+7. GALJOEN
+===========================
 Author: Werner Taelemans
 Version: 0.36
 Date: July 2017
@@ -136,3 +117,21 @@ an active playing style. Together with its support for strength levels and Chess
 ('Fischer Random Chess') this makes Galjoen an ideal opponent for club players
 to practice their tactical and strategical skills. The program has its own graphical
 user interface, which is, of course, not used by PicoChess.
+
+
+8. SAYURI
+===========================
+Author: Hironori Ishibashi
+Version: 2017.09.29
+Date: September 2017
+Elo: 1840
+Levels: no
+Chess960: no
+License: MIT
+Source: https://github.com/MetalPhaeton/sayuri
+Description: Sayuri is a weaker chess engine than the other famous engines.
+Sayuri is a customizable UCI chess engine with Sayulisp (=Scheme-like Lisp interpreter)
+which allows you to customize the search algorithm or adjust the evaluation weights.
+For details please take a look at the sayuri webpage.
+If you are looking for a beatable engine that can teach you a thing or two about chess,
+then Sayuri is a good choice.

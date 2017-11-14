@@ -72,6 +72,9 @@ class DgtBoard(object):
         self.field_timer_running = False
         self.channel = None
 
+        self.in_settime = False  # this is true between set_clock and clock_start => use set values instead of clock
+        self.low_time = False  # This is set from picochess.py and used to limit the field timer
+
     def expired_field_timer(self):
         """Board position hasnt changed for some time."""
         logging.debug('board position now stable => ask for complete board')
@@ -87,8 +90,11 @@ class DgtBoard(object):
 
     def start_field_timer(self):
         """Start the field timer waiting for a stable board position."""
-        wait = (0.5 if self.channel == 'BT' else 0.25) + 0.03 * self.field_factor  # BT boards scanning in half speed
-        logging.debug('board position changed => wait %.2fsecs for a stable result', wait)
+        if self.low_time:
+            wait = (0.2 if self.channel == 'BT' else 0.10) + 0.06 * self.field_factor  # bullet => allow more sliding
+        else:
+            wait = (0.5 if self.channel == 'BT' else 0.25) + 0.03 * self.field_factor  # BT's scanning in half speed
+        logging.debug('board position changed => wait %.2fsecs for a stable result low_time: %s', wait, self.low_time)
         self.field_timer = Timer(wait, self.expired_field_timer)
         self.field_timer.start()
         self.field_timer_running = True
@@ -211,7 +217,10 @@ class DgtBoard(object):
                         cmd = self.last_clock_command[3]  # type: DgtClk
                         if cmd.value != ack1 and ack1 < 0x80:
                             logging.warning('(ser) clock ACK [%s] out of sync - last: [%s]', DgtAck(ack1), cmd)
-
+                # @todo these lines are better as what is done on DgtHw but it doesnt work
+                # if ack1 == DgtAck.DGT_ACK_CLOCK_SETNRUN.value:
+                #     logging.info('(ser) clock out of set time now')
+                #     self.in_settime = False
                 if ack1 == DgtAck.DGT_ACK_CLOCK_BUTTON.value:
                     # this are the other (ack2-ack3) codes
                     # 05-49 33-52 17-51 09-50 65-53 | button 0-4 (single)
@@ -264,32 +273,42 @@ class DgtBoard(object):
                 elif r_time > self.r_time or l_time > self.l_time:  # the new time is higher as the old => ignore
                     logging.warning('(ser) clock strange old time received %s l:%s r:%s',
                                     message, hms_time(self.l_time), hms_time(self.r_time))
+                    if self.in_settime:
+                        logging.info('(ser) clock still in set mode, ignore received time')
+                        errtim = True
+                    elif r_time - self.r_time > 3600 or l_time - self.l_time > 3600:
+                        logging.info('(ser) clock new time over 1h difference, ignore received time')
+                        errtim = True
                 else:
+                    logging.info('(ser) clock new time received l:%s r:%s', hms_time(l_time), hms_time(r_time))
                     status = message[6] & 0x3f
-                    if status & 0x20:
-                        logging.info('(ser) clock not connected')
-                        if not self.is_pi:
-                            errtim = True
-                            DisplayMsg.show(Message.DGT_NO_CLOCK_ERROR(text='dont_use'))
-                        self.lever_pos = None
-                    else:
-                        logging.info('(ser) clock new time received l:%s r:%s', hms_time(l_time), hms_time(r_time))
-                        DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=l_time, time_right=r_time, dev='ser'))
-
-                        if not self.enable_ser_clock:
-                            if self.watchdog_timer.is_running():  # a running watchdog means: board already found
-                                logging.info('restarting clock setup - enable_ser_clock: %s', self.enable_ser_clock)
-                                self.startup_serial_clock()
-                            else:
-                                dev = 'rev' if 'REVII' in self.bt_name else 'ser'
-                                logging.info('(%s) clock sends messages already but the board still not found', dev)
-
+                    connect = not status & 0x20
+                    if connect:
                         right_side_down = -0x40 if status & 0x02 else 0x40
                         if self.lever_pos != right_side_down:
                             logging.debug('(ser) clock button status: %x old lever: %s', status, self.lever_pos)
                             if self.lever_pos is not None:
                                 DisplayMsg.show(Message.DGT_BUTTON(button=right_side_down, dev='ser'))
                             self.lever_pos = right_side_down
+                    else:
+                        logging.info('(ser) clock not connected, sending old time l:%s r:%s',
+                                     hms_time(self.l_time), hms_time(self.r_time))
+                        l_time = self.l_time
+                        r_time = self.r_time
+                    if self.in_settime:
+                        logging.info('(ser) clock still in set mode, sending old time l:%s r:%s',
+                                     hms_time(self.l_time), hms_time(self.r_time))
+                        l_time = self.l_time
+                        r_time = self.r_time
+                    DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=l_time, time_right=r_time, connect=connect,
+                                                           dev='ser'))
+                    if not self.enable_ser_clock:
+                        dev = 'rev' if 'REVII' in self.bt_name else 'ser'
+                        if self.watchdog_timer.is_running():  # a running watchdog means: board already found
+                            logging.info('(%s) clock restarting setup', dev)
+                            self.startup_serial_clock()
+                        else:
+                            logging.info('(%s) clock sends messages already but (%s) board still not found', dev, dev)
                 if not errtim:
                     self.r_time = r_time
                     self.l_time = l_time
@@ -305,21 +324,21 @@ class DgtBoard(object):
             piece_to_char = {
                 0x01: 'P', 0x02: 'R', 0x03: 'N', 0x04: 'B', 0x05: 'K', 0x06: 'Q',
                 0x07: 'p', 0x08: 'r', 0x09: 'n', 0x0a: 'b', 0x0b: 'k', 0x0c: 'q',
-                0x0d: '1', 0x0e: '2', 0x0f: '3', 0x00: '.'
+                0x0d: '$', 0x0e: '%', 0x0f: '&', 0x00: '.'
             }
             board = ''
             for character in message:
-                board += piece_to_char[character]
+                board += piece_to_char[character & 0x0f]
             logging.debug('\n' + '\n'.join(board[0 + i:8 + i] for i in range(0, len(board), 8)))  # Show debug board
             # Create fen from board
             fen = ''
             empty = 0
             for square in range(0, 64):
-                if message[square] != 0:
+                if message[square] != 0 and message[square] < 0x0d:  # @todo for the moment ignore the special pieces
                     if empty > 0:
                         fen += str(empty)
                         empty = 0
-                    fen += piece_to_char[message[square]]
+                    fen += piece_to_char[message[square] & 0x0f]
                 else:
                     empty += 1
                 if (square + 1) % 8 == 0:
@@ -402,8 +421,9 @@ class DgtBoard(object):
                 else:
                     self._setup_serial_port()
                     if self.serial:
-                        logging.debug('sleeping for 1.5 secs. Afterwards startup the (ser) hardware')
-                        time.sleep(1.5)
+                        logging.debug('sleeping for 0.5 secs. Afterwards startup the (ser) board')
+                        time.sleep(0.5)
+                        counter = 0
                         self._startup_serial_board()
                 if byte and byte[0] & 0x80:
                     self._read_board_message(head=byte)
@@ -445,20 +465,20 @@ class DgtBoard(object):
 
     def _open_bluetooth(self):
         if self.bt_state == -1:
-            # only for jessie
-            if path.exists("/usr/bin/bluetoothctl"):
+            # only for jessie upwards
+            if path.exists('/usr/bin/bluetoothctl'):
                 self.bt_state = 0
 
                 # get rid of old rfcomm
-                if path.exists("/dev/rfcomm123"):
+                if path.exists('/dev/rfcomm123'):
                     logging.debug('BT releasing /dev/rfcomm123')
-                    subprocess.call(["rfcomm", "release", "123"])
+                    subprocess.call(['rfcomm', 'release', '123'])
                 self.bt_current_device = -1
                 self.bt_mac_list = []
                 self.bt_name_list = []
 
-                logging.debug("BT starting bluetoothctl")
-                self.btctl = subprocess.Popen("/usr/bin/bluetoothctl",
+                logging.debug('BT starting bluetoothctl')
+                self.btctl = subprocess.Popen('/usr/bin/bluetoothctl',
                                               stdin=subprocess.PIPE,
                                               stdout=subprocess.PIPE,
                                               stderr=subprocess.STDOUT,
@@ -471,11 +491,8 @@ class DgtBoard(object):
 
                 self.btctl.stdin.write("power on\n")
                 self.btctl.stdin.flush()
-        else:
-            # state >= 0 so bluetoothctl is running
-
-            # check for new data from bluetoothctl
-            try:
+        else:  # state >= 0 so bluetoothctl is running
+            try:  # check for new data from bluetoothctl
                 while True:
                     bt_byte = read(self.btctl.stdout.fileno(), 1).decode(encoding='UTF-8', errors='ignore')
                     self.bt_line += bt_byte
@@ -486,38 +503,41 @@ class DgtBoard(object):
 
             # complete line
             if '\n' in self.bt_line:
-                if "Changing power on succeeded" in self.bt_line:
+                if False:  # switch-case
+                    pass
+                elif 'Changing power on succeeded' in self.bt_line:
                     self.bt_state = 1
                     self.btctl.stdin.write("agent on\n")
                     self.btctl.stdin.flush()
-                if "Agent registered" in self.bt_line:
+                elif 'Agent registered' in self.bt_line:
                     self.bt_state = 2
                     self.btctl.stdin.write("default-agent\n")
                     self.btctl.stdin.flush()
-                if "Default agent request successful" in self.bt_line:
+                elif 'Default agent request successful' in self.bt_line:
                     self.bt_state = 3
                     self.btctl.stdin.write("scan on\n")
                     self.btctl.stdin.flush()
-                if "Discovering: yes" in self.bt_line:
+                elif 'Discovering: yes' in self.bt_line:
                     self.bt_state = 4
-                if "Pairing successful" in self.bt_line:
+                elif 'Pairing successful' in self.bt_line:
                     self.bt_state = 6
-                    logging.debug("BT pairing successful")
-                if "Failed to pair: org.bluez.Error.AlreadyExists" in self.bt_line:
+                    logging.debug('BT pairing successful')
+                elif 'Failed to pair: org.bluez.Error.AlreadyExists' in self.bt_line:
                     self.bt_state = 6
-                    logging.debug("BT already paired")
-                elif "Failed to pair" in self.bt_line:
+                    logging.debug('BT already paired')
+                elif 'Failed to pair' in self.bt_line:
                     # try the next
                     self.bt_state = 4
-                    logging.debug("BT pairing failed")
-                if "not available" in self.bt_line:
+                    logging.debug('BT pairing failed')
+                elif 'not available' in self.bt_line:
                     # remove and try the next
                     self.bt_state = 4
                     self.bt_mac_list.remove(self.bt_mac_list[self.bt_current_device])
                     self.bt_name_list.remove(self.bt_name_list[self.bt_current_device])
                     self.bt_current_device -= 1
-                    logging.debug("BT pairing failed, unknown device")
-                if ("DGT_BT_" in self.bt_line or "PCS-REVII" in self.bt_line) and "DEL" not in self.bt_line:
+                    logging.debug('BT pairing failed, unknown device')
+                elif ('DGT_BT_' in self.bt_line or 'PCS-REVII' in self.bt_line) and \
+                        ('NEW' in self.bt_line or 'CHG' in self.bt_line) and 'DEL' not in self.bt_line:
                     # New e-Board found add to list
                     try:
                         if not self.bt_line.split()[3] in self.bt_mac_list:
@@ -525,21 +545,21 @@ class DgtBoard(object):
                             self.bt_name_list.append(self.bt_line.split()[4])
                             logging.debug('BT found device: %s %s', self.bt_line.split()[3], self.bt_line.split()[4])
                     except IndexError:
-                        logging.error('wrong bt_line [%s]', self.bt_line)
-
+                        logging.error('BT wrong line [%s]', self.bt_line)
                 # clear the line
                 self.bt_line = ''
 
-            if "Enter PIN code:" in self.bt_line:
-                if "DGT_BT_" in self.bt_name_list[self.bt_current_device]:
+            # if 'Enter PIN code:' in self.bt_line:
+            if 'PIN code' in self.bt_line:
+                if 'DGT_BT_' in self.bt_name_list[self.bt_current_device]:
                     self.btctl.stdin.write("0000\n")
                     self.btctl.stdin.flush()
-                if "PCS-REVII" in self.bt_name_list[self.bt_current_device]:
+                if 'PCS-REVII' in self.bt_name_list[self.bt_current_device]:
                     self.btctl.stdin.write("1234\n")
                     self.btctl.stdin.flush()
                 self.bt_line = ''
 
-            if "Confirm passkey" in self.bt_line:
+            if 'Confirm passkey' in self.bt_line:
                 self.btctl.stdin.write("yes\n")
                 self.btctl.stdin.flush()
                 self.bt_line = ''
@@ -551,29 +571,29 @@ class DgtBoard(object):
                     self.bt_current_device += 1
                     if self.bt_current_device >= len(self.bt_mac_list):
                         self.bt_current_device = 0
-                    logging.debug("BT pairing to: %s %s",
+                    logging.debug('BT pairing to: %s %s',
                                   self.bt_mac_list[self.bt_current_device],
                                   self.bt_name_list[self.bt_current_device])
-                    self.btctl.stdin.write("pair " + self.bt_mac_list[self.bt_current_device] + "\n")
+                    self.btctl.stdin.write('pair ' + self.bt_mac_list[self.bt_current_device] + "\n")
                     self.btctl.stdin.flush()
 
-            # pair succesful, try rfcomm
+            # pair successful, try rfcomm
             if self.bt_state == 6:
                 # now try rfcomm
                 self.bt_state = 7
-                self.bt_rfcomm = subprocess.Popen("rfcomm connect 123 " + self.bt_mac_list[self.bt_current_device],
+                self.bt_rfcomm = subprocess.Popen('rfcomm connect 123 ' + self.bt_mac_list[self.bt_current_device],
                                                   stdin=subprocess.PIPE,
                                                   stdout=subprocess.PIPE,
                                                   stderr=subprocess.PIPE,
                                                   universal_newlines=True,
                                                   shell=True)
 
-            # wait for rfcomm to fail or suceed
+            # wait for rfcomm to fail or succeed
             if self.bt_state == 7:
                 # rfcomm succeeded
-                if path.exists("/dev/rfcomm123"):
-                    logging.debug("BT connected to: %s", self.bt_name_list[self.bt_current_device])
-                    if self._open_serial("/dev/rfcomm123"):
+                if path.exists('/dev/rfcomm123'):
+                    logging.debug('BT connected to: %s', self.bt_name_list[self.bt_current_device])
+                    if self._open_serial('/dev/rfcomm123'):
                         self.btctl.stdin.write("quit\n")
                         self.btctl.stdin.flush()
                         self.bt_name = self.bt_name_list[self.bt_current_device]
@@ -582,8 +602,8 @@ class DgtBoard(object):
                         return True
                 # rfcomm failed
                 if self.bt_rfcomm.poll() is not None:
-                    logging.debug("BT rfcomm failed")
-                    self.btctl.stdin.write("remove " + self.bt_mac_list[self.bt_current_device] + "\n")
+                    logging.debug('BT rfcomm failed')
+                    self.btctl.stdin.write('remove ' + self.bt_mac_list[self.bt_current_device] + "\n")
                     self.bt_mac_list.remove(self.bt_mac_list[self.bt_current_device])
                     self.bt_name_list.remove(self.bt_name_list[self.bt_current_device])
                     self.bt_current_device -= 1
@@ -592,6 +612,7 @@ class DgtBoard(object):
         return False
 
     def _open_serial(self, device: str):
+        assert not self.serial, 'serial connection still active: %s' % self.serial
         try:
             self.serial = Serial(device, stopbits=STOPBITS_ONE, parity=PARITY_NONE, bytesize=EIGHTBITS, timeout=2)
         except SerialException:
@@ -632,7 +653,8 @@ class DgtBoard(object):
             self.wait_counter = (self.wait_counter + 1) % len(waitchars)
         return False
 
-    def _wait_for_clock(self, func):
+    # dgtHw functions start
+    def _wait_for_clock(self, func: str):
         has_to_wait = False
         counter = 0
         while self.clock_lock:
@@ -698,6 +720,21 @@ class DgtBoard(object):
                                   DgtClk.DGT_CMD_CLOCK_END,
                                   DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         return res
+
+    def light_squares_on_revelation(self, uci_move: str):
+        """Light the Rev2 leds."""
+        if self.use_revelation_leds:
+            logging.debug('(rev) leds turned on - move: %s', uci_move)
+            fr_s = (8 - int(uci_move[1])) * 8 + ord(uci_move[0]) - ord('a')
+            to_s = (8 - int(uci_move[3])) * 8 + ord(uci_move[2]) - ord('a')
+            self.write_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x01, fr_s, to_s, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+
+    def clear_light_on_revelation(self):
+        """Clear the Rev2 leds."""
+        if self.use_revelation_leds:
+            logging.debug('(rev) leds turned off')
+            self.write_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0x40, 0x40, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+    # dgtHw functions end
 
     def run(self):
         """NOT called from threading.Thread instead inside the __init__ function from hw.py."""

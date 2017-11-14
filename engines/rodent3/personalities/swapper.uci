@@ -1,0 +1,71 @@
+[Swapper]
+; Swapper
+; Personality for Rodent III chess engine, version 0.210 or later
+; created by Pawel Koziol
+; likes to exchange pieces; high draw rate
+;
+PawnValueMg = 95
+KnightValueMg = 310
+BishopValueMg = 322
+RookValueMg = 514
+QueenValueMg = 1013
+PawnValueEg = 110
+KnightValueEg = 305
+BishopValueEg = 320
+RookValueEg = 529
+QueenValueEg = 1013
+KeepPawn = -2
+KeepKnight = -6
+KeepBishop = -6
+KeepRook = -10
+KeepQueen = -18
+BishopPair = 51
+KnightPair = -9
+RookPair = -9
+KnightLikesClosed = 6
+RookLikesOpen = 3
+ExchangeImbalance = 30
+MinorVsQueen = 4
+Material = 100
+OwnAttack = 100
+OppAttack = 100
+OwnMobility = 100
+OppMobility = 100
+KingTropism = 20
+PiecePlacement = 75
+PiecePressure = 109
+PassedPawns = 100
+PawnStructure = 100
+Lines = 100
+Outposts = 95
+PawnShield = 119
+PawnStorm = 99
+Forwardness = 0
+Center = 50
+DoubledPawnMg = -12
+DoubledPawnEg = -23
+IsolatedPawnMg = -10
+IsolatedPawnEg = -8
+IsolatedOnOpenMg = -10
+BackwardPawnMg = -8
+BackwardPawnEg = -10
+BackwardOnOpenMg = -8
+FianchBase = 4
+Fianchetto = 6
+ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
+PawnMass = 100
+PawnChains = 100
+PstStyle = 0
+MobilityStyle = 0
+NpsLimit = 0
+EvalBlur = 0
+Contempt = -25
+SlowMover = 100
+Selectivity = 175
+SearchSkill = 10
+RiskyDepth = 0
+BookFilter = 20
+GuideBookFile = guide.bin
+MainBookFile = rodent.bin

@@ -1,0 +1,44 @@
+[Elo@1500]
+UCI_LimitStrength = true
+UCI_Elo = 1500
+
+[Elo@1570]
+UCI_LimitStrength = true
+UCI_Elo = 1570
+
+[Elo@1640]
+UCI_LimitStrength = true
+UCI_Elo = 1640
+
+[Elo@1710]
+UCI_LimitStrength = true
+UCI_Elo = 1710
+
+[Elo@1780]
+UCI_LimitStrength = true
+UCI_Elo = 1780
+
+[Elo@1850]
+UCI_LimitStrength = true
+UCI_Elo = 1850
+
+[Elo@1920]
+UCI_LimitStrength = true
+UCI_Elo = 1920
+
+[Elo@1990]
+UCI_LimitStrength = true
+UCI_Elo = 1990
+
+[Elo@2060]
+UCI_LimitStrength = true
+UCI_Elo = 2060
+
+[Elo@2130]
+UCI_LimitStrength = true
+UCI_Elo = 2130
+
+[Elo@2200]
+UCI_LimitStrength = false
+UCI_Elo = 2200
+

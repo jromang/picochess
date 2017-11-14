@@ -28,6 +28,7 @@ from shutil import which
 
 import chess
 from utilities import DisplayMsg
+from timecontrol import TimeControl
 from dgt.api import Message
 from dgt.util import GameResult, PlayMode, Voice
 
@@ -101,6 +102,8 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
         self.user_picotalker = None  # type: PicoTalker
         self.computer_picotalker = None  # type: PicoTalker
         self.speed_factor = (90 + (speed_factor % 10) * 5) / 100
+        self.play_mode = PlayMode.USER_WHITE
+        self.low_time = False
 
         if user_voice:
             logging.debug('creating user voice: [%s]', str(user_voice))
@@ -125,6 +128,8 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
             self.user_picotalker.set_speed_factor(speed_factor)
 
     def talk(self, sounds, dev=SYSTEM):
+        if self.low_time:
+            return
         if False:  # switch-case
             pass
         elif dev == self.USER:
@@ -239,12 +244,26 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
 
                 elif isinstance(message, Message.PLAY_MODE):
                     logging.debug('announcing PLAY_MODE')
+                    self.play_mode = message.play_mode
                     userplay = 'userblack.ogg' if message.play_mode == PlayMode.USER_BLACK else 'userwhite.ogg'
                     self.talk([userplay])
 
                 elif isinstance(message, Message.STARTUP_INFO):
+                    self.play_mode = message.info['play_mode']
                     logging.debug('announcing PICOCHESS')
                     self.talk(['picoChess.ogg'])
+
+                elif isinstance(message, Message.CLOCK_TIME):
+                    time_u = message.time_white
+                    time_c = message.time_black
+                    if self.play_mode == PlayMode.USER_BLACK:
+                        time_u, time_c = time_c, time_u
+                    self.low_time = time_u < 60
+                    if self.low_time:
+                        logging.debug('time too low, disable voice - u: %i, c: %i', time_u, time_c)
+
+                elif isinstance(message, Message.ALTERNATIVE_MOVE):
+                    self.play_mode = message.play_mode
 
                 elif isinstance(message, Message.SYSTEM_SHUTDOWN):
                     logging.debug('announcing SHUTDOWN')

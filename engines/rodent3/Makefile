@@ -12,19 +12,25 @@ DATADIRBOOKS = $(PREFIX)/books
 DATADIRPERSONALITIES = $(PREFIX)/personalities
 
 # Define the CPP compiler
-CXX = g++
+# CXX = g++
+# LocutusOfPenguin: use this instead => cross compile with ubuntu 16.04 - rodent3 needs the c++14 (so use last line!)
+# sudo apt install gcc-4.9-arm-linux-gnueabihf g++-4.9-arm-linux-gnueabihf pkg-config-arm-linux-gnueabihf   <<< c++11
+# sudo apt install gcc-arm-linux-gnueabihf  g++-arm-linux-gnueabihf pkg-config-arm-linux-gnueabihf   <<< c++14
+CXX = arm-linux-gnueabihf-g++
 
 # Define features
 # Other options are -DBOOKGEN -DNO_THREADS
-CFG = -DNDEBUG -DUSEGEN -DUSE_THREADS -DNEW_THREADS -DBOOKSPATH=$(DATADIRBOOKS) -DPERSONALITIESPATH=$(DATADIRPERSONALITIES)
-CFG1 = -DUSEGEN -DUSE_THREADS -DNEW_THREADS -DBOOKSPATH=$(DATADIRBOOKS) -DPERSONALITIESPATH=$(DATADIRPERSONALITIES)
+CFG = -DNDEBUG -DUSEGEN -DUSE_THREADS -DBOOKSPATH=$(DATADIRBOOKS) -DPERSONALITIESPATH=$(DATADIRPERSONALITIES)
+CFG1 = -DUSEGEN -DUSE_THREADS -DBOOKSPATH=$(DATADIRBOOKS) -DPERSONALITIESPATH=$(DATADIRPERSONALITIES)
 
 # Define compiler flags
-CXXFLAGS = -g -std=c++14 -Wall -O3 -fno-rtti -pthread $(CFG)
-CXX1FLAGS = -g -std=c++14 -Wall -pthread $(CFG1)
+CXXFLAGS = -g -std=c++14 -Wall -Wno-unknown-pragmas -O3 -fno-rtti -pthread $(CFG)
+CXX1FLAGS = -g -std=c++14 -Wall -Wno-unknown-pragmas -pthread $(CFG1)
 
 # Define linker options
-LDFLAGS = -s -Wl,--no-as-needed,--gc-sections
+# LDFLAGS = -s -Wl,--no-as-needed,--gc-sections
+# LocutusOfPenguin: use this instead => Jessie system (c++14 not installed cause of gcc4.9) needs cross compile to work!
+LDFLAGS = -s -static -static-libgcc -static-libstdc++ -Wl,--no-as-needed,--gc-sections
 LD1FLAGS = -lm
 
 # Command line switches

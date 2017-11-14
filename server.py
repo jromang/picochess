@@ -158,11 +158,11 @@ class ChessBoardHandler(ServerRequestHandler):
 
 
 class WebServer(threading.Thread):
-    def __init__(self, port: int, dgttranslate: DgtTranslate, dgtboard: DgtBoard):
+    def __init__(self, port: int, dgtboard: DgtBoard):
         shared = {}
 
         WebDisplay(shared).start()
-        WebVr(shared, dgttranslate, dgtboard).start()
+        WebVr(shared, dgtboard).start()
         super(WebServer, self).__init__()
         wsgi_app = tornado.wsgi.WSGIContainer(pw)
 
@@ -187,12 +187,11 @@ class WebVr(DgtIface):
 
     """Handle the web (clock) communication."""
 
-    def __init__(self, shared, dgttranslate: DgtTranslate, dgtboard: DgtBoard):
-        super(WebVr, self).__init__(dgttranslate, dgtboard)
+    def __init__(self, shared, dgtboard: DgtBoard):
+        super(WebVr, self).__init__(dgtboard)
         self.shared = shared
         self.virtual_timer = None
-        self.time_side = ClockSide.NONE
-        self.enable_dgt_pi = dgtboard.is_pi
+        self.enable_dgtpi = dgtboard.is_pi
         sub = 2 if dgtboard.is_pi else 0
         DisplayMsg.show(Message.DGT_CLOCK_VERSION(main=2, sub=sub, dev='web', text=None))
         self.clock_show_time = True
@@ -206,14 +205,14 @@ class WebVr(DgtIface):
             self.shared['clock_text'] = {}
 
     def _runclock(self):
-        if self.time_side == ClockSide.LEFT:
+        if self.side_running == ClockSide.LEFT:
             time_left = self.l_time - 1
             if time_left <= 0:
                 logging.info('negative/zero time left: %s', time_left)
                 self.virtual_timer.stop()
                 time_left = 0
             self.l_time = time_left
-        if self.time_side == ClockSide.RIGHT:
+        if self.side_running == ClockSide.RIGHT:
             time_right = self.r_time - 1
             if time_right <= 0:
                 logging.info('negative/zero time right: %s', time_right)
@@ -221,7 +220,7 @@ class WebVr(DgtIface):
                 time_right = 0
             self.r_time = time_right
         logging.info('(web) clock new time received l:%s r:%s', hms_time(self.l_time), hms_time(self.r_time))
-        DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=self.l_time, time_right=self.r_time, dev='web'))
+        DisplayMsg.show(Message.DGT_CLOCK_TIME(time_left=self.l_time, time_right=self.r_time, connect=True, dev='web'))
         self._display_time(self.l_time, self.r_time)
 
     def _display_time(self, time_left: int, time_right: int):
@@ -232,8 +231,8 @@ class WebVr(DgtIface):
             r_hms = hms_time(time_right)
             text_l = '{}:{:02d}.{:02d}'.format(l_hms[0], l_hms[1], l_hms[2])
             text_r = '{}:{:02d}.{:02d}'.format(r_hms[0], r_hms[1], r_hms[2])
-            icon_d = 'fa-caret-right' if self.time_side == ClockSide.RIGHT else 'fa-caret-left'
-            if self.time_side == ClockSide.NONE:
+            icon_d = 'fa-caret-right' if self.side_running == ClockSide.RIGHT else 'fa-caret-left'
+            if self.side_running == ClockSide.NONE:
                 icon_d = 'fa-sort'
             text = text_l + '&nbsp;<i class="fa ' + icon_d + '"></i>&nbsp;' + text_r
             self._create_clock_text()
@@ -243,10 +242,10 @@ class WebVr(DgtIface):
 
     def display_move_on_clock(self, message):
         """Display a move on the web clock."""
-        if self.enable_dgt_3000 or self.enable_dgt_pi:
-            bit_board, text = self.get_san(message, not self.enable_dgt_pi)
+        if self.enable_dgt3000 or self.enable_dgtpi:
+            bit_board, text = self.get_san(message, not self.enable_dgtpi)
             points = '...' if message.side == ClockSide.RIGHT else '.'
-            if self.enable_dgt_pi:
+            if self.enable_dgtpi:
                 text = '{:3d}{:s}{:s}'.format(bit_board.fullmove_number, points, text)
             else:
                 text = '{:2d}{:s}{:s}'.format(bit_board.fullmove_number % 100, points, text)
@@ -256,7 +255,7 @@ class WebVr(DgtIface):
                 text = text[:2].rjust(3) + text[2:].rjust(3)
             else:
                 text = text[:2].ljust(3) + text[2:].ljust(3)
-        if self.getName() not in message.devs:
+        if self.get_name() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)
             return True
         self.clock_show_time = False
@@ -268,13 +267,13 @@ class WebVr(DgtIface):
 
     def display_text_on_clock(self, message):
         """Display a text on the web clock."""
-        if self.enable_dgt_pi:
+        if self.enable_dgtpi:
             text = message.l
         else:
-            text = message.m if self.enable_dgt_3000 else message.s
+            text = message.m if self.enable_dgt3000 else message.s
         if text is None:
             text = message.m
-        if self.getName() not in message.devs:
+        if self.get_name() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)
             return True
         self.clock_show_time = False
@@ -286,10 +285,10 @@ class WebVr(DgtIface):
 
     def display_time_on_clock(self, message):
         """Display the time on the web clock."""
-        if self.getName() not in message.devs:
+        if self.get_name() not in message.devs:
             logging.debug('ignored endText - devs: %s', message.devs)
             return True
-        if self.clock_running or message.force:
+        if self.side_running != ClockSide.NONE or message.force:
             self.clock_show_time = True
             self._display_time(self.l_time, self.r_time)
         else:
@@ -298,7 +297,7 @@ class WebVr(DgtIface):
 
     def stop_clock(self, devs: set):
         """Stop the time on the web clock."""
-        if self.getName() not in devs:
+        if self.get_name() not in devs:
             logging.debug('ignored stopClock - devs: %s', devs)
             return True
         if self.virtual_timer:
@@ -306,13 +305,12 @@ class WebVr(DgtIface):
         return self._resume_clock(ClockSide.NONE)
 
     def _resume_clock(self, side: ClockSide):
-        self.clock_running = (side != ClockSide.NONE)
-        self.time_side = side
+        self.side_running = side
         return True
 
-    def start_clock(self, time_left: int, time_right: int, side: ClockSide, devs: set):
+    def start_clock(self, side: ClockSide, devs: set):
         """Start the time on the web clock."""
-        if self.getName() not in devs:
+        if self.get_name() not in devs:
             logging.debug('ignored startClock - devs: %s', devs)
             return True
         if self.virtual_timer and self.virtual_timer.is_running():
@@ -322,10 +320,16 @@ class WebVr(DgtIface):
             self.virtual_timer.start()
         self._resume_clock(side)
         self.clock_show_time = True
-        # simulate the "start_clock" function from dgthw/pi
+        self._display_time(self.l_time, self.r_time)
+        return True
+
+    def set_clock(self, time_left: int, time_right: int, devs: set):
+        """Start the time on the web clock."""
+        if self.get_name() not in devs:
+            logging.debug('ignored setClock - devs: %s', devs)
+            return True
         self.l_time = time_left
         self.r_time = time_right
-        self._display_time(self.l_time, self.r_time)
         return True
 
     def light_squares_on_revelation(self, uci_move):
@@ -340,7 +344,7 @@ class WebVr(DgtIface):
         EventHandler.write_to_clients(result)
         return True
 
-    def getName(self):
+    def get_name(self):
         """Return name."""
         return 'web'
 
@@ -377,7 +381,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
         user_name = 'User'
         engine_name = 'Picochess'
         user_elo = '-'
-        comp_elo = 2900
+        comp_elo = 2500
         if 'system_info' in self.shared:
             if 'user_name' in self.shared['system_info']:
                 user_name = self.shared['system_info']['user_name']
@@ -385,14 +389,8 @@ class WebDisplay(DisplayMsg, threading.Thread):
                 engine_name = self.shared['system_info']['engine_name']
             if 'user_elo' in self.shared['system_info']:
                 user_elo = self.shared['system_info']['user_elo']
-
-        # @todo find a better way to setup engine elo
-        engine_elo = {'stockfish': 3360, 'texel': 3050, 'rodent': 2920,
-                      'zurichess': 2790, 'floyd': 2620, 'cinnamon': 2060}
-        for name, elo in engine_elo.items():
-            if engine_name.lower().startswith(name):
-                comp_elo = elo
-                break
+            if 'engine_elo' in self.shared['system_info']:
+                comp_elo = self.shared['system_info']['engine_elo']
 
         if 'game_info' in self.shared:
             if 'level_text' in self.shared['game_info']:
@@ -478,9 +476,19 @@ class WebDisplay(DisplayMsg, threading.Thread):
             _build_headers()
             _send_headers()
 
+        elif isinstance(message, Message.ENGINE_STARTUP):
+            for index in range(0, len(message.installed_engines)):
+                eng = message.installed_engines[index]
+                if eng['file'] == message.file:
+                    self.shared['system_info']['engine_elo'] = eng['elo']
+                    break
+            _build_headers()
+            _send_headers()
+
         elif isinstance(message, Message.ENGINE_READY):
             self._create_system_info()
             self.shared['system_info']['old_engine'] = self.shared['system_info']['engine_name'] = message.engine_name
+            self.shared['system_info']['engine_elo'] = message.eng['elo']
             if not message.has_levels:
                 if 'level_text' in self.shared['game_info']:
                     del self.shared['game_info']['level_text']

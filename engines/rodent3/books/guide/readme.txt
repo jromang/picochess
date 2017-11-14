@@ -11,7 +11,10 @@ if we want limited opening knowledge.
 flank.bin - plays flank openings, likes fianchettoing bishops;
 based on games by Tomasz Markowski with some lines added by hand.
 
-kasparov.bin - Kasparov's games from PgnMentor as the firrst layer
+grandpa.bin - small book, Caro + Tarrasch as main Black options, Ruy + Nimzo as a backup,
+prefers d4 to e4 as White
+
+kasparov.bin - Kasparov's games from PgnMentor as the first layer
 + 1980 to 2006 games as the second layer 
  
 low.bin - minimal book which tries to start with a couple of moves that

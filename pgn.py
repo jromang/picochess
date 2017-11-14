@@ -108,7 +108,6 @@ class Emailer(object):
 
             logging.debug('SMTP Mail delivery: trying to send email')
             conn.sendmail(self.smtp_from, self.email, outer.as_string())
-            # @todo should check the result from sendmail
             logging.debug('SMTP Mail delivery: successfuly delivered message to SMTP server')
         except Exception as smtp_exc:
             logging.error('SMTP Mail delivery: Failed')
@@ -160,6 +159,7 @@ class PgnDisplay(DisplayMsg, threading.Thread):
         self.level_text = None
         self.level_name = ''
         self.user_elo = '-'
+        self.engine_elo = '-'
 
     def _save_and_email_pgn(self, message):
         logging.debug('Saving game to [%s]', self.file_name)
@@ -186,14 +186,7 @@ class PgnDisplay(DisplayMsg, threading.Thread):
             comp_elo = int(self.level_name[4:])
             engine_level = ''
         else:
-            comp_elo = 2900
-            # @todo find a better way to setup engine elo
-            engine_elo = {'stockfish': 3360, 'texel': 3050, 'rodent': 2920,
-                          'zurichess': 2790, 'floyd': 2620, 'cinnamon': 2060}
-            for name, elo in engine_elo.items():
-                if self.engine_name.lower().startswith(name):
-                    comp_elo = elo
-                    break
+            comp_elo = self.engine_elo
 
         if message.play_mode == PlayMode.USER_WHITE:
             pgn_game.headers['White'] = self.user_name
@@ -242,8 +235,16 @@ class PgnDisplay(DisplayMsg, threading.Thread):
             else:
                 self.engine_name = self.old_engine
 
+        elif isinstance(message, Message.ENGINE_STARTUP):
+            for index in range(0, len(message.installed_engines)):
+                eng = message.installed_engines[index]
+                if eng['file'] == message.file:
+                    self.engine_elo = eng['elo']
+                    break
+
         elif isinstance(message, Message.ENGINE_READY):
             self.old_engine = self.engine_name = message.engine_name
+            self.engine_elo = message.eng['elo']
             if not message.has_levels:
                 self.level_text = None
                 self.level_name = ''

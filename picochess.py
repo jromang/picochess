@@ -29,7 +29,7 @@ import queue
 import configargparse
 
 from uci.engine import UciEngine
-from uci.util import read_engine_ini, get_installed_engines
+from uci.read import read_engine_ini
 import chess
 import chess.polyglot
 import chess.uci
@@ -174,6 +174,7 @@ def main():
 
     def brain(game: chess.Board, timec: TimeControl):
         """Start a new permanent brain search on the game with pondering move made."""
+        assert not done_computer_fen, 'brain() called with displayed move - fen: %s' % done_computer_fen
         if pb_move:
             game_copy = copy.deepcopy(game)
             game_copy.push(pb_move)
@@ -456,17 +457,19 @@ def main():
             last_legal_fens = []
         if interaction_mode in (Mode.NORMAL, Mode.BRAIN):  # @todo handle Mode.REMOTE too
             if done_computer_fen:
-                logging.debug('best move displayed, dont search and keep play mode: %s', play_mode)
+                logging.debug('best move displayed, dont search and also keep play mode: %s', play_mode)
                 start_search = False
             else:
                 old_mode = play_mode
                 play_mode = PlayMode.USER_WHITE if game.turn == chess.WHITE else PlayMode.USER_BLACK
                 if old_mode != play_mode:
-                    logging.debug('new play mode: %s', play_mode)
+                    logging.debug('new play mode: %s', play_mode)  # @todo below: for the moment send it to display too
+                    text = play_mode.value  # type: str
+                    DisplayMsg.show(Message.PLAY_MODE(play_mode=play_mode, play_mode_text=dgttranslate.text(text)))
         if start_search:
             assert engine.is_waiting(), 'engine not waiting! thinking status: %s' % engine.is_thinking()
             # Go back to analysing or observing
-            if interaction_mode == Mode.BRAIN:
+            if interaction_mode == Mode.BRAIN and not done_computer_fen:
                 brain(game, time_control)
             if interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.PONDER):
                 analyse(game, msg)
@@ -509,7 +512,7 @@ def main():
 
     def get_engine_level_dict(engine_level):
         """Transfer an engine level to its level_dict plus an index."""
-        installed_engines = get_installed_engines(engine.get_shell(), engine.get_file())
+        installed_engines = engine.get_installed_engines()
         for index in range(0, len(installed_engines)):
             eng = installed_engines[index]
             if eng['file'] == engine.get_file():
@@ -589,11 +592,6 @@ def main():
 
     args, unknown = parser.parse_known_args()
 
-    engine_file = args.engine
-    if engine_file is None:
-        eng_ini = read_engine_ini()
-        engine_file = eng_ini[0]['file']  # read the first engine filename and use it as standard
-
     # Enable logging
     if args.log_file:
         handler = RotatingFileHandler('logs' + os.sep + args.log_file, maxBytes=1.4 * 1024 * 1024, backupCount=5)
@@ -613,7 +611,7 @@ def main():
     dgtboard = DgtBoard(args.dgt_port, args.disable_revelation_leds, args.dgtpi, args.disable_et, args.slow_slide)
     dgttranslate = DgtTranslate(args.beep_config, args.beep_some_level, args.language, version)
     dgtmenu = DgtMenu(args.disable_confirm_message, args.ponder_interval, args.speed_voice, args.capital_letters,
-                      dgttranslate)
+                      args.log_file, dgttranslate)
     dgtdispatcher = Dispatcher(dgtmenu)
 
     time_control, time_text = transfer_time(args.time.split())
@@ -626,7 +624,7 @@ def main():
 
     # Launch web server
     if args.web_server_port:
-        WebServer(args.web_server_port, dgttranslate, dgtboard).start()
+        WebServer(args.web_server_port, dgtboard).start()
         dgtdispatcher.register('web')
 
     if args.console:
@@ -636,12 +634,12 @@ def main():
         # Connect to DGT board
         logging.debug('starting PicoChess in board mode')
         if args.dgtpi:
-            DgtPi(dgttranslate, dgtboard).start()
+            DgtPi(dgtboard).start()
             dgtdispatcher.register('i2c')
         else:
             logging.debug('(ser) starting the board connection')
             dgtboard.run()  # a clock can only be online together with the board, so we must start it infront
-        DgtHw(dgttranslate, dgtboard).start()
+        DgtHw(dgtboard).start()
         dgtdispatcher.register('ser')
     # The class Dispatcher sends DgtApi messages at the correct (delayed) time out
     dgtdispatcher.start()
@@ -663,13 +661,28 @@ def main():
     if args.enable_update:
         update_picochess(args.dgtpi, args.enable_update_reboot, dgttranslate)
 
-    # Gentlemen, start your engines...
-    engine = UciEngine(file=engine_file, hostname=args.engine_remote_server, username=args.engine_remote_user,
-                       key_file=args.engine_remote_key, password=args.engine_remote_pass, home=args.engine_remote_home)
-    try:
-        engine_name = engine.get_name()
-    except AttributeError:
-        logging.error('no engines started')
+    # try the given engine first and if that fails the first/second from "engines.ini" then crush
+    engine_file = args.engine
+    engine_tries = 0
+    engine = engine_name = None
+    while engine_tries < 2:
+        if engine_file is None:
+            eng_ini = read_engine_ini()
+            engine_file = eng_ini[engine_tries]['file']
+            engine_tries += 1
+
+        # Gentlemen, start your engines...
+        engine = UciEngine(file=engine_file, hostname=args.engine_remote_server, username=args.engine_remote_user,
+                           key_file=args.engine_remote_key, password=args.engine_remote_pass,
+                           home=args.engine_remote_home)
+        try:
+            engine_name = engine.get_name()
+            break
+        except AttributeError:
+            logging.error('engine %s not started', engine_file)
+            engine_file = None
+
+    if engine_tries == 2:
         time.sleep(3)
         DisplayMsg.show(Message.ENGINE_FAIL())
         time.sleep(2)
@@ -687,7 +700,7 @@ def main():
     bookreader = chess.polyglot.open_reader(all_books[book_index]['file'])
     searchmoves = AlternativeMover()
     interaction_mode = Mode.NORMAL
-    play_mode = PlayMode.USER_WHITE  # @todo make it valid in Mode.REMOTE too
+    play_mode = PlayMode.USER_WHITE  # @todo handle Mode.REMOTE too
 
     last_legal_fens = []
     done_computer_fen = None
@@ -711,10 +724,10 @@ def main():
                                                'books': all_books, 'book_index': book_index,
                                                'level_text': level_text, 'level_name': level_name,
                                                'tc_init': time_control.get_parameters(), 'time_text': time_text}))
-    DisplayMsg.show(Message.ENGINE_STARTUP(shell=engine.get_shell(), file=engine.get_file(), level_index=level_index,
-                                           has_levels=engine.has_levels(), has_960=engine.has_chess960(),
-                                           has_ponder=engine.has_ponder()))
     DisplayMsg.show(Message.SYSTEM_INFO(info=sys_info))
+    DisplayMsg.show(Message.ENGINE_STARTUP(installed_engines=engine.get_installed_engines(), file=engine.get_file(),
+                                           level_index=level_index,
+                                           has_960=engine.has_chess960(), has_ponder=engine.has_ponder()))
 
     ip_info_thread = threading.Timer(10, display_ip_info)  # give RaspberyPi 10sec time to startup its network devices
     ip_info_thread.start()
@@ -759,20 +772,15 @@ def main():
 
             elif isinstance(event, Event.NEW_ENGINE):
                 old_file = engine.get_file()
-                old_options = engine.get_options()
-                engine_shutdown = True
+                old_options = {}
+                raw_options = engine.get_options()
+                for name, value in raw_options.items():  # transfer Option to string by using the "default" value
+                    old_options[name] = str(value.default)
                 engine_fallback = False
                 # Stop the old engine cleanly
                 stop_search()
                 # Closeout the engine process and threads
-                # The all return non-zero error codes, 0=success
-                if engine.quit():  # Ask nicely
-                    if engine.terminate():  # If you won't go nicely....
-                        if engine.kill():  # Right that does it!
-                            logging.error('engine shutdown failure')
-                            DisplayMsg.show(Message.ENGINE_FAIL())
-                            engine_shutdown = False
-                if engine_shutdown:
+                if engine.quit():
                     # Load the new one and send args.
                     # Local engines only
                     engine = UciEngine(event.eng['file'])
@@ -792,22 +800,32 @@ def main():
                             DisplayMsg.show(Message.ENGINE_FAIL())
                             time.sleep(3)
                             sys.exit(-1)
-                    # Schedule cleanup of old objects
-                    gc.collect()
                     engine.startup(event.options)
                     # All done - rock'n'roll
-                    engine_fail = engine_fallback or not (interaction_mode == Mode.NORMAL or engine.has_ponder())
-                    if not engine_fail:
+                    if not (interaction_mode == Mode.NORMAL or engine.has_ponder()):
+                        logging.debug('new engine doesnt support pondering mode, reverting to %s', old_file)
+                        engine_fallback = True
+                        if engine.quit():
+                            engine = UciEngine(old_file)
+                            engine.startup(old_options)
+                        else:
+                            logging.error('engine shutdown failure')
+                    if engine_fallback:
+                        msg = Message.ENGINE_FAIL()
+                    else:
                         searchmoves.reset()
                         msg = Message.ENGINE_READY(eng=event.eng, engine_name=engine_name,
                                                    eng_text=event.eng_text, has_levels=engine.has_levels(),
                                                    has_960=engine.has_chess960(), has_ponder=engine.has_ponder(),
                                                    show_ok=event.show_ok)
-                    else:
-                        msg = Message.ENGINE_FAIL()
-                    set_wait_state(msg, not engine_fail)
+                    # Schedule cleanup of old objects
+                    gc.collect()
+                    set_wait_state(msg, not engine_fallback)
                     if interaction_mode in (Mode.NORMAL, Mode.BRAIN):  # engine isnt started/searching => stop the clock
                         stop_clock()
+                else:
+                    logging.error('engine shutdown failure')
+                    DisplayMsg.show(Message.ENGINE_FAIL())
                 if not engine_fallback:  # here dont care if engine supports pondering, cause Mode.NORMAL from startup
                     write_picochess_ini('engine', event.eng['file'])
 
@@ -825,6 +843,7 @@ def main():
                 if engine.has_chess960():
                     engine.option('UCI_Chess960', uci960)
                     engine.send()
+                engine.newgame(game.copy())
                 done_computer_fen = None
                 done_move = pb_move = chess.Move.null()
                 time_control.reset()
@@ -850,6 +869,7 @@ def main():
                     if engine.has_chess960():
                         engine.option('UCI_Chess960', uci960)
                         engine.send()
+                    engine.newgame(game.copy())
                     done_computer_fen = None
                     done_move = pb_move = chess.Move.null()
                     time_control.reset()
@@ -882,7 +902,7 @@ def main():
                         # set computer to move - in case the user just changed the engine
                         play_mode = PlayMode.USER_WHITE if game.turn == chess.BLACK else PlayMode.USER_BLACK
                         if not check_game_state(game, play_mode):
-                            think(game, time_control, Message.ALTERNATIVE_MOVE(game=game.copy()))
+                            think(game, time_control, Message.ALTERNATIVE_MOVE(game=game.copy(), play_mode=play_mode))
                     else:
                         logging.warning('wrong function call [alternative]! mode: %s', interaction_mode)
 
@@ -896,12 +916,11 @@ def main():
                     if best_move_displayed:
                         move = done_move
                         done_computer_fen = None
-                        done_move = chess.Move.null()
+                        done_move = pb_move = chess.Move.null()
                     else:
                         move = chess.Move.null()  # not really needed
 
                     play_mode = PlayMode.USER_WHITE if play_mode == PlayMode.USER_BLACK else PlayMode.USER_BLACK
-
                     text = play_mode.value  # type: str
                     msg = Message.PLAY_MODE(play_mode=play_mode, play_mode_text=dgttranslate.text(text))
 
@@ -963,7 +982,8 @@ def main():
                         game_copy.push(event.move)
                         done_computer_fen = game_copy.board_fen()
                         done_move = event.move
-                        pb_move = event.ponder if event.ponder else chess.Move.null()
+                        brain_book = interaction_mode == Mode.BRAIN and event.inbook
+                        pb_move = event.ponder if event.ponder and not brain_book else chess.Move.null()
                 else:
                     logging.warning('wrong function call [best]! mode: %s turn: %s', interaction_mode, game.turn)
 
@@ -1001,7 +1021,7 @@ def main():
                 if event.mode not in (Mode.NORMAL, Mode.REMOTE) and done_computer_fen:  # @todo check why still needed
                     dgtmenu.set_mode(interaction_mode)  # undo the button4 stuff
                     logging.warning('mode cant be changed to a pondering mode as long as a move is displayed')
-                    mode_text = dgttranslate.text('Y00_default', 'errmode')
+                    mode_text = dgttranslate.text('Y10_errormode')
                     msg = Message.INTERACTION_MODE(mode=interaction_mode, mode_text=mode_text, show_ok=False)
                     DisplayMsg.show(msg)
                 else:
@@ -1032,10 +1052,21 @@ def main():
                 stop_fen_timer()
 
             elif isinstance(event, Event.CLOCK_TIME):
-                if dgtdispatcher.get_prio_device() == event.dev:  # transfer only the most prio clock's time
+                if dgtdispatcher.is_prio_device(event.dev, event.connect):  # transfer only the most prio clock's time
                     logging.debug('setting tc clock time - prio: %s w:%s b:%s', event.dev,
                                   hms_time(event.time_white), hms_time(event.time_black))
                     time_control.set_clock_times(white_time=event.time_white, black_time=event.time_black)
+                    # find out, if we are in bullet time (<=60secs on users clock or lowest time if user side unknown)
+                    time_u = event.time_white
+                    time_c = event.time_black
+                    if interaction_mode in (Mode.NORMAL, Mode.BRAIN):  # @todo handle Mode.REMOTE too
+                        if play_mode == PlayMode.USER_BLACK:
+                            time_u, time_c = time_c, time_u
+                    else:  # here, we use the lowest time
+                        if time_c < time_u:
+                            time_u, time_c = time_c, time_u
+                    dgtboard.low_time = time_u <= 60  # this is used for "piece sliding" factor
+                    DisplayMsg.show(Message.CLOCK_TIME(time_white=event.time_white, time_black=event.time_black))
                 else:
                     logging.debug('ignore clock time - too low prio: %s', event.dev)
 
@@ -1057,12 +1088,11 @@ def main():
                 reboot(args.dgtpi, dev=event.dev)
 
             elif isinstance(event, Event.EMAIL_LOG):
-                if args.log_file:
-                    email_logger = Emailer(email=args.email, mailgun_key=args.mailgun_key)
-                    email_logger.set_smtp(sserver=args.smtp_server, suser=args.smtp_user, spass=args.smtp_pass,
-                                          sencryption=args.smtp_encryption, sfrom=args.smtp_from)
-                    body = 'You probably want to forward this file to a picochess developer ;-)'
-                    email_logger.send('Picochess LOG', body, '/opt/picochess/logs/{}'.format(args.log_file))
+                email_logger = Emailer(email=args.email, mailgun_key=args.mailgun_key)
+                email_logger.set_smtp(sserver=args.smtp_server, suser=args.smtp_user, spass=args.smtp_pass,
+                                      sencryption=args.smtp_encryption, sfrom=args.smtp_from)
+                body = 'You probably want to forward this file to a picochess developer ;-)'
+                email_logger.send('Picochess LOG', body, '/opt/picochess/logs/{}'.format(args.log_file))
 
             elif isinstance(event, Event.SET_VOICE):
                 DisplayMsg.show(Message.SET_VOICE(type=event.type, lang=event.lang, speaker=event.speaker,

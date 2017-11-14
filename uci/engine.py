@@ -27,6 +27,7 @@ from utilities import Observable
 import chess.uci
 from chess import Board
 from uci.informer import Informer
+from uci.read import read_engine_ini
 
 
 class UciEngine(object):
@@ -46,7 +47,9 @@ class UciEngine(object):
                     shell = spur.SshShell(hostname=hostname, username=username, password=password,
                                           missing_host_key=paramiko.AutoAddPolicy())
                 self.shell = shell
-                self.engine = chess.uci.spur_spawn_engine(shell, [home + os.sep + file])
+                if home:
+                    file = home + os.sep + file
+                self.engine = chess.uci.spur_spawn_engine(shell, [file])
             else:
                 self.engine = chess.uci.popen_engine(file, stderr=DEVNULL)
 
@@ -63,6 +66,7 @@ class UciEngine(object):
 
             self.res = None
             self.level_support = False
+            self.installed_engines = read_engine_ini(self.shell, (file.rsplit(os.sep, 1))[0])
 
         except OSError:
             logging.exception('OS error in starting engine')
@@ -122,9 +126,9 @@ class UciEngine(object):
         """Get File."""
         return self.file
 
-    def get_shell(self):
-        """Get Shell."""
-        return self.shell  # shell is only "not none" if its a local engine - see __init__
+    def get_installed_engines(self):
+        """Get installed engines."""
+        return self.installed_engines
 
     def position(self, game: Board):
         """Set position."""
@@ -132,15 +136,11 @@ class UciEngine(object):
 
     def quit(self):
         """Quit engine."""
-        return self.engine.quit()
-
-    def terminate(self):
-        """Terminate engine."""
-        return self.engine.terminate()
-
-    def kill(self):
-        """Kill engine."""
-        return self.engine.kill()
+        if self.engine.quit():  # Ask nicely
+            if self.engine.terminate():  # If you won't go nicely....
+                if self.engine.kill():  # Right that does it!
+                    return False
+        return True
 
     def uci(self):
         """Send start uci command."""
@@ -232,6 +232,11 @@ class UciEngine(object):
         """Engine waiting."""
         return self.engine.idle
 
+    def newgame(self, game: Board):
+        """Engine sometimes need this to setup internal values."""
+        self.engine.ucinewgame()
+        self.engine.position(game)
+
     def startup(self, options: dict, show=True):
         """Startup engine."""
         parser = configparser.ConfigParser()
@@ -239,14 +244,11 @@ class UciEngine(object):
         if not options and parser.read(self.get_file() + '.uci'):
             options = dict(parser[parser.sections().pop()])
         self.level_support = bool(options)
-        if parser.read(os.path.dirname(self.get_file()) + os.sep + 'engines.uci'):
-            pc_opts = dict(parser[parser.sections().pop()])
-            pc_opts.update(options)
-            options = pc_opts
 
         logging.debug('setting engine with options %s', options)
         self.level(options)
         self.send()
+        self.newgame(Board())
         if show:
             logging.debug('Loaded engine [%s]', self.get_name())
             logging.debug('Supported options [%s]', self.get_options())

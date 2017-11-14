@@ -1,0 +1,75 @@
+[Dorothy]
+; Dorothy
+; Personality for Rodent III chess engine, version 0.210 or later
+; author: Pawel Koziol
+; defence, restraint, classical style
+;
+PawnValueMg = 95
+KnightValueMg = 310
+BishopValueMg = 322
+RookValueMg = 514
+QueenValueMg = 1000
+PawnValueEg = 110
+KnightValueEg = 305
+BishopValueEg = 320
+RookValueEg = 529
+QueenValueEg = 1013
+KeepPawn = 0
+KeepKnight = 0
+KeepBishop = 0
+KeepRook = 0
+KeepQueen = 0
+BishopPair = 51
+KnightPair = -9
+RookPair = -9
+KnightLikesClosed = 6
+RookLikesOpen = 3
+MajorUp = 60
+MinorUp = 53
+BothUp = 80
+ExchangeImbalance = 30
+MinorVsQueen = 4
+TwoMinors = 44
+Material = 100
+OwnAttack = 100
+OppAttack = 115
+OwnMobility = 100
+OppMobility = 125
+KingTropism = 20
+PiecePlacement = 100
+PiecePressure = 109
+PassedPawns = 100
+PawnStructure = 100
+Lines = 100
+Outposts = 78
+PawnShield = 119
+PawnStorm = 99
+Forwardness = 0
+Center = 50
+DoubledPawnMg = -15
+DoubledPawnEg = -30
+IsolatedPawnMg = -10
+IsolatedPawnEg = -8
+IsolatedOnOpenMg = -10
+BackwardPawnMg = -8
+BackwardPawnEg = -10
+BackwardOnOpenMg = -8
+FianchBase = 4
+Fianchetto = 6
+ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 6
+PawnMass = 105
+PawnChains = 100
+PstStyle = 1
+MobilityStyle = 0
+NpsLimit = 15000
+EvalBlur = 0
+Contempt = 0
+SlowMover = 100
+Selectivity = 175
+SearchSkill = 10
+RiskyDepth = 0
+BookFilter = 20
+GuideBookFile = guide/solid.bin
+MainBookFile = small.bin

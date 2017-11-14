@@ -1,0 +1,71 @@
+[Fiona]
+; Fiona
+; Personality for Rodent III chess engine, version 0.210 or later
+; Created by Pawel Koziol
+; Fiona likes fianchetto and uses non-default piece/square table
+;
+PawnValueMg = 95
+KnightValueMg = 310
+BishopValueMg = 322
+RookValueMg = 514
+QueenValueMg = 1013
+PawnValueEg = 110
+KnightValueEg = 305
+BishopValueEg = 320
+RookValueEg = 529
+QueenValueEg = 1013
+KeepPawn = 0
+KeepKnight = 0
+KeepBishop = 0
+KeepRook = 0
+KeepQueen = 0
+BishopPair = 51
+KnightPair = -9
+RookPair = -9
+KnightLikesClosed = 6
+RookLikesOpen = 3
+ExchangeImbalance = 30
+MinorVsQueen = 4
+Material = 100
+OwnAttack = 100
+OppAttack = 100
+OwnMobility = 105
+OppMobility = 100
+KingTropism = 20
+PiecePlacement = 100
+PiecePressure = 109
+PassedPawns = 100
+PawnStructure = 100
+Lines = 100
+Outposts = 95
+PawnShield = 119
+PawnStorm = 99
+Forwardness = 0
+Center = 100
+DoubledPawnMg = -12
+DoubledPawnEg = -23
+IsolatedPawnMg = -10
+IsolatedPawnEg = -8
+IsolatedOnOpenMg = -10
+BackwardPawnMg = -8
+BackwardPawnEg = -10
+BackwardOnOpenMg = -8
+FianchBase = 12
+Fianchetto = 24
+ReturningB = 15
+MinorBehindPawn = 5
+PawnThreat = 4
+PawnMass = 100
+PawnChains = 200
+PstStyle = 2
+MobilityStyle = 0
+NpsLimit = 0
+EvalBlur = 0
+Contempt = 0
+SlowMover = 100
+Selectivity = 175
+SearchSkill = 10
+BookFilter = 20
+RiskyDepth = 0
+GuideBookFile = guide.bin
+MainBookFile = rodent.bin
