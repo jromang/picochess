@@ -1745,11 +1745,11 @@ $(function() {
                     if(data.play === 'review') {
                         highlightBoard(data.move, 'review');
                     }
-                    sendRemoteFen(data);
+                    //sendRemoteFen(data);
                     break;
                 case 'Game':
                     newBoard(data.fen);
-                    sendRemoteGame(data.fen);
+                    //sendRemoteGame(data.fen);
                     break;
                 case 'Message':
                     boardStatusEl.html(data.msg);
