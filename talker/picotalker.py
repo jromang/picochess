@@ -91,7 +91,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
     COMPUTER = 'computer'
     SYSTEM = 'system'
 
-    def __init__(self, user_voice: str, computer_voice: str, speed_factor: int):
+    def __init__(self, user_voice: str, computer_voice: str, speed_factor: int, setpieces_voice: bool):
         """
         Initialize a PicoTalkerDisplay with voices for the user and/or computer players.
 
@@ -105,6 +105,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
         self.play_mode = PlayMode.USER_WHITE
         self.low_time = False
         self.play_game = None  # saves the game after a computer move - used for "setpieces" to speak the move again
+        self.setpieces_voice = setpieces_voice
 
         if user_voice:
             logging.debug('creating user voice: [%s]', str(user_voice))
@@ -294,7 +295,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                         self.set_factor(self.speed_factor)
 
                 elif isinstance(message, Message.WRONG_FEN):
-                    if self.play_game:
+                    if self.play_game and self.setpieces_voice:
                         self.talk(self.say_last_move(self.play_game), self.COMPUTER)
 
                 else:  # Default

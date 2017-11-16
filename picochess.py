@@ -574,6 +574,8 @@ def main():
     parser.add_argument('-cv', '--computer-voice', type=str, help='voice for computer', default=None)
     parser.add_argument('-sv', '--speed-voice', type=int, help='voice speech factor from 0(=90%%) to 9(=135%%)',
                         default=2, choices=range(0, 10))
+    parser.add_argument('-sp', '--enable-setpieces-voice', action='store_true',
+                        help="speak last computer move again when 'set pieces' displayed")
     parser.add_argument('-u', '--enable-update', action='store_true', help='enable picochess updates')
     parser.add_argument('-ur', '--enable-update-reboot', action='store_true', help='reboot system after update')
     parser.add_argument('-nocm', '--disable-confirm-message', action='store_true', help='disable confirmation messages')
@@ -620,7 +622,7 @@ def main():
     DgtDisplay(dgttranslate, dgtmenu, time_control).start()
 
     # Create PicoTalker for speech output
-    PicoTalkerDisplay(args.user_voice, args.computer_voice, args.speed_voice).start()
+    PicoTalkerDisplay(args.user_voice, args.computer_voice, args.speed_voice, args.enable_setpieces_voice).start()
 
     # Launch web server
     if args.web_server_port:
