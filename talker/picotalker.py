@@ -104,6 +104,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
         self.speed_factor = (90 + (speed_factor % 10) * 5) / 100
         self.play_mode = PlayMode.USER_WHITE
         self.low_time = False
+        self.play_game = None  # saves the game after a computer move - used for "setpieces" to speak the move again
 
         if user_voice:
             logging.debug('creating user voice: [%s]', str(user_voice))
@@ -164,6 +165,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                     if message.newgame:
                         logging.debug('announcing START_NEW_GAME')
                         self.talk(['newgame.ogg'])
+                        self.play_game = None
 
                 elif isinstance(message, Message.COMPUTER_MOVE):
                     if message.move and message.game and message.move != previous_move:
@@ -172,18 +174,24 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                         game_copy.push(message.move)
                         self.talk(self.say_last_move(game_copy), self.COMPUTER)
                         previous_move = message.move
+                        self.play_game = game_copy
+
+                elif isinstance(message, Message.COMPUTER_MOVE_DONE):
+                    self.play_game = None
 
                 elif isinstance(message, Message.USER_MOVE_DONE):
                     if message.move and message.game and message.move != previous_move:
                         logging.debug('announcing USER_MOVE_DONE [%s]', message.move)
                         self.talk(self.say_last_move(message.game), self.USER)
                         previous_move = message.move
+                        self.play_game = None
 
                 elif isinstance(message, Message.REVIEW_MOVE_DONE):
                     if message.move and message.game and message.move != previous_move:
                         logging.debug('announcing REVIEW_MOVE_DONE [%s]', message.move)
                         self.talk(self.say_last_move(message.game), self.USER)
                         previous_move = message.move
+                        self.play_game = None  # @todo why thats not set in dgtdisplay?
 
                 elif isinstance(message, Message.GAME_ENDS):
                     if message.result == GameResult.OUT_OF_TIME:
@@ -218,6 +226,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                 elif isinstance(message, Message.TAKE_BACK):
                     logging.debug('announcing TAKE_BACK')
                     self.talk(['takeback.ogg'])
+                    self.play_game = None
 
                 elif isinstance(message, Message.TIME_CONTROL):
                     logging.debug('announcing TIME_CONTROL')
@@ -264,6 +273,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
 
                 elif isinstance(message, Message.ALTERNATIVE_MOVE):
                     self.play_mode = message.play_mode
+                    self.play_game = None
 
                 elif isinstance(message, Message.SYSTEM_SHUTDOWN):
                     logging.debug('announcing SHUTDOWN')
@@ -282,6 +292,10 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                         self.set_computer(picotalker)
                     if message.type == Voice.SPEED:
                         self.set_factor(self.speed_factor)
+
+                elif isinstance(message, Message.WRONG_FEN):
+                    if self.play_game:
+                        self.talk(self.say_last_move(self.play_game), self.COMPUTER)
 
                 else:  # Default
                     pass

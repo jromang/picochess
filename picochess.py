@@ -542,7 +542,7 @@ def main():
     parser.add_argument('-erh', '--engine-remote-home', type=str, help='engine home path for the remote engine server',
                         default='/opt/picochess')
     parser.add_argument('-d', '--dgt-port', type=str,
-                        help='enable dgt board on the given serial port such as /dev/ttyUSB0')
+                        help="enable dgt board on the given serial port such as '/dev/ttyUSB0'")
     parser.add_argument('-b', '--book', type=str, help="path of book such as 'books/b-flank.bin'",
                         default='books/h-varied.bin')
     parser.add_argument('-t', '--time', type=str, default='5 0',
