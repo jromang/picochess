@@ -1,0 +1,77 @@
+; Tal personality for Rodent III chess engine, version 0.229 or later
+; created by Brendan J. Norman, modified by Pawel Koziol
+; Hommage to Mikhail Tal
+;
+; "My head is filled with sunshine. In the first game 
+; of my match with Botvinnik I will play 1.e4 
+; and I shall win."
+;
+PawnValueMg = 100
+KnightValueMg = 325
+BishopValueMg = 340
+RookValueMg = 500
+QueenValueMg = 950
+PawnValueEg = 101
+KnightValueEg = 320
+BishopValueEg = 340
+RookValueEg = 505
+QueenValueEg = 960
+KeepPawn = 8
+KeepKnight = 10
+KeepBishop = 10
+KeepRook = 0
+KeepQueen = 20
+BishopPair = 70
+KnightPair = -10
+RookPair = -9
+KnightLikesClosed = 6
+RookLikesOpen = 3
+MajorUp = 60
+MinorUp = 53
+BothUp = 80
+ExchangeImbalance = -10
+MinorVsQueen = 4
+TwoMinors = 44
+Material = 48
+OwnAttack = 450
+OppAttack = 100
+OwnMobility = 125
+OppMobility = 100
+KingTropism = 80
+PiecePlacement = 100
+PiecePressure = 190
+PassedPawns = 127
+PawnStructure = 90
+Lines = 100
+Outposts = 100
+PawnShield = 189
+PawnStorm = 181
+Forwardness = 0
+Center = 50
+DoubledPawnMg = -12
+DoubledPawnEg = -24
+IsolatedPawnMg = -10
+IsolatedPawnEg = -20
+IsolatedOnOpenMg = -10
+BackwardPawnMg = -8
+BackwardPawnEg = -10
+BackwardOnOpenMg = -8
+FianchBase = 4
+Fianchetto = 8
+ReturningB = 10
+MinorBehindPawn = 5
+PawnThreat = 4
+PawnMass = 100
+PawnChains = 100
+PstStyle = 0
+MobilityStyle = 0
+NpsLimit = 0
+EvalBlur = 0
+Contempt = 5
+SlowMover = 95
+Selectivity = 175
+SearchSkill = 10
+RiskyDepth = 0
+BookFilter = 20
+GuideBookFile = players/ph-tal2.bin
+MainBookFile = rodent.bin
