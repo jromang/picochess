@@ -74,14 +74,14 @@ Choosing the engine
 engines are set with the extra **black** queen.
 (Remove the extra white queen if it is still on the board)
 
-* **A6** - Stockfish 7
-* **B6** - Texel 1.06
+* **A6** - Stockfish 8
+* **B6** - Texel 1.07
 * **C6** - Arasan 20.3
 * **D6** - Rodent III
 * **E6** - Zurichess luzern
-* **F6** - Floyd 0.9
-* **G6** - Sayuri 2017.09.29
-* **H6** - Galjoen 0.36
+* **F6** - WyldChess 1.5
+* **G6** - Galjoen 0.36
+* **H6** - Sayuri 2017.09.29
 
 Setting up time controls
 ------------------------

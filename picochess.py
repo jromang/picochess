@@ -213,7 +213,7 @@ def main():
         if interaction_mode in (Mode.NORMAL, Mode.BRAIN, Mode.OBSERVE, Mode.REMOTE):
             time_control.stop_internal()
             DisplayMsg.show(Message.CLOCK_STOP(devs={'ser', 'i2c', 'web'}))
-            # time.sleep(0.4)  # @todo give some time to clock to really do it. Find a better solution!
+            time.sleep(0.4)  # @todo give some time to clock to really do it. Find a better solution!
         else:
             logging.warning('wrong function call [stop]! mode: %s', interaction_mode)
 
@@ -223,7 +223,7 @@ def main():
             time_control.start_internal(game.turn)
             tc_init = time_control.get_parameters()
             DisplayMsg.show(Message.CLOCK_START(turn=game.turn, tc_init=tc_init, devs={'ser', 'i2c', 'web'}))
-            # time.sleep(0.4)  # @todo give some time to clock to really do it. Find a better solution!
+            time.sleep(0.4)  # @todo give some time to clock to really do it. Find a better solution!
         else:
             logging.warning('wrong function call [start]! mode: %s', interaction_mode)
 
