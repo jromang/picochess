@@ -78,8 +78,8 @@ engines are set with the extra **black** queen.
 * **B6** - Texel 1.07
 * **C6** - Arasan 20.3
 * **D6** - Rodent III
-* **E6** - Zurichess luzern
-* **F6** - WyldChess 1.5
+* **E6** - Zurichess neuchatel
+* **F6** - WyldChess 10062017
 * **G6** - Galjoen 0.36
 * **H6** - Sayuri 2017.09.29
 
