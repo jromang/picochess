@@ -1,5 +1,5 @@
 ### ===================================
-### = picochess.ini.example v0.9[h-z] =
+### = picochess.ini.example v0.9[k-z] =
 ### ===================================
 ### Example and description how to configure PicoChess
 ### To use this file, simply copy this file to picochess.ini and edit the appropriate settings
@@ -139,6 +139,8 @@
 ## Increase, decrease the voice speed factor. Must be between 0 to 9. Default is 2 (100%)
 ## Each step is 5% starting from 90% towards 135%. Sets factor for both voices (user/computer)
 # speed-voice = 2
+## Speak last computer move again when 'set pieces' displayed
+# enable-setpieces-voice = False
 ## PicoChess writes pgn files at end of game. This file is created in the 'games' folder
 # pgn-file = games.pgn
 ## If you want to have your own name in the pgn file uncomment the next line and change accordingly
