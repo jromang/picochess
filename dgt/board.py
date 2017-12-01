@@ -52,7 +52,7 @@ class DgtBoard(object):
         self.last_clock_command = []  # Used for resend last (failed) clock command
         self.enable_ser_clock = None  # None = "unknown status" False="only board found" True="clock also found"
         self.watchdog_timer = RepeatedTimer(1, self._watchdog)
-        # bluetooth vars for Jessie & autoconnect
+        # bluetooth vars for Jessie upwards & autoconnect
         self.btctl = None
         self.bt_rfcomm = None
         self.bt_state = -1
@@ -429,7 +429,7 @@ class DgtBoard(object):
                     self._read_board_message(head=byte)
                 else:
                     counter = (counter + 1) % 10
-                    if counter == 0:  # issue 150 - check for alive connection
+                    if counter == 0 and not self.watchdog_timer.is_running():  # issue 150 - check for alive connection
                         self._watchdog()  # force to write something to the board
                     time.sleep(0.1)
             except SerialException:
@@ -662,13 +662,12 @@ class DgtBoard(object):
                 has_to_wait = True
                 logging.debug('(ser) clock is locked => waiting to serve: %s', func)
             time.sleep(0.1)
-            counter += 1
-            if counter > 20:
-                logging.warning('(ser) clock is locked over 2secs')
-                logging.debug('resending locked (ser) clock message [%s]', self.last_clock_command)
-                has_to_wait = False
-                counter = 0
-                self.write_command(self.last_clock_command)
+            counter = (counter + 1) % 30
+            if counter == 0:
+                logging.warning('(ser) clock is locked over 3secs')
+                # logging.debug('resending locked (ser) clock message [%s]', self.last_clock_command)
+                # has_to_wait = False
+                # self.write_command(self.last_clock_command)
         if has_to_wait:
             logging.debug('(ser) clock is released now')
 
