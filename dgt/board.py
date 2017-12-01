@@ -286,7 +286,7 @@ class DgtBoard(object):
                     if connect:
                         right_side_down = -0x40 if status & 0x02 else 0x40
                         if self.lever_pos != right_side_down:
-                            logging.debug('(ser) clock button status: %x old lever: %s', status, self.lever_pos)
+                            logging.debug('(ser) clock button status: 0x%x old lever: %s', status, self.lever_pos)
                             if self.lever_pos is not None:
                                 DisplayMsg.show(Message.DGT_BUTTON(button=right_side_down, dev='ser'))
                             self.lever_pos = right_side_down
@@ -384,14 +384,17 @@ class DgtBoard(object):
         message_id = header[0]
         message_length = counter = (header[1] << 7) + header[2] - header_len
         if message_length <= 0 or message_length > 64:
-            logging.warning('illegal length in message header %i length: %i', message_id, message_length)
+            if message_id == 0x8f and message_length == 0x1f00:
+                logging.warning('somehow DGT_SEND_EE_MOVES command send before => ignore EE_MOVES result')
+            else:
+                logging.warning('illegal length in message header 0x%x length: %i', message_id, message_length)
             return message
 
         try:
             if not message_id == DgtMsg.DGT_MSG_SERIALNR:
                 logging.debug('(ser) board get [%s] length: %i', DgtMsg(message_id), message_length)
         except ValueError:
-            logging.warning('illegal id in message header %i length: %i', message_id, message_length)
+            logging.warning('illegal id in message header 0x%x length: %i', message_id, message_length)
             return message
 
         while counter:
@@ -400,7 +403,7 @@ class DgtBoard(object):
                 data = struct.unpack('>B', byte)
                 counter -= 1
                 if data[0] & 0x80:
-                    logging.warning('illegal data in message %i found', message_id)
+                    logging.warning('illegal data in message 0x%x found', message_id)
                     logging.warning('ignore collected message data %s', message)
                     return self._read_board_message(byte)
                 message += data
