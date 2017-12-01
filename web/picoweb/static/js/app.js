@@ -942,7 +942,8 @@ function getFullGame() {
             'Round': '?',
             'Result': '*',
             'BlackElo' : '-',
-            'WhiteElo' : '-'
+            'WhiteElo' : '-',
+            'Time' : '00:00:00'
         };
         gameHeader = getPgnGameHeader(gameHistory.originalHeader);
     }

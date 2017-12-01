@@ -356,6 +356,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
     def __init__(self, shared):
         super(WebDisplay, self).__init__()
         self.shared = shared
+        self.starttime = datetime.datetime.now().strftime('%H:%M:%S')
 
     def _create_game_info(self):
         if 'game_info' not in self.shared:
@@ -418,6 +419,8 @@ class WebDisplay(DisplayMsg, threading.Thread):
             if 'location' in self.shared['ip_info']:
                 pgn_game.headers['Site'] = self.shared['ip_info']['location']
 
+        pgn_game.headers['Time'] = self.starttime
+
     def task(self, message):
         def _oldstyle_fen(game: chess.Board):
             builder = []
@@ -457,6 +460,7 @@ class WebDisplay(DisplayMsg, threading.Thread):
         if False:  # switch-case
             pass
         elif isinstance(message, Message.START_NEW_GAME):
+            self.starttime = datetime.datetime.now().strftime('%H:%M:%S')
             pgn_str = _transfer(message.game)
             fen = message.game.fen()
             result = {'pgn': pgn_str, 'fen': fen, 'event': 'Game', 'move': '0000', 'play': 'newgame'}
