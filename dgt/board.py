@@ -385,7 +385,8 @@ class DgtBoard(object):
         message_length = counter = (header[1] << 7) + header[2] - header_len
         if message_length <= 0 or message_length > 64:
             if message_id == 0x8f and message_length == 0x1f00:
-                logging.warning('somehow DGT_SEND_EE_MOVES command send before => ignore EE_MOVES result')
+                logging.warning('falsely DGT_SEND_EE_MOVES send => ignore EE_MOVES 0x%x bytes', self.serial.inWaiting())
+                self.serial.read(0x1f00)
             else:
                 logging.warning('illegal length in message header 0x%x length: %i', message_id, message_length)
             return message
@@ -462,7 +463,8 @@ class DgtBoard(object):
         if self.clock_lock and not self.is_pi:
             if time.time() - self.clock_lock > 2:
                 logging.warning('(ser) clock is locked over 2secs')
-                self.clock_lock = False  # display no warning
+                logging.debug('resending locked (ser) clock message [%s]', self.last_clock_command)
+                self.clock_lock = False
                 self.write_command(self.last_clock_command)
         self.write_command([DgtCmd.DGT_RETURN_SERIALNR])  # ask for this AFTER cause of - maybe - old board hardware
 
@@ -668,9 +670,6 @@ class DgtBoard(object):
             counter = (counter + 1) % 30
             if counter == 0:
                 logging.warning('(ser) clock is locked over 3secs')
-                # logging.debug('resending locked (ser) clock message [%s]', self.last_clock_command)
-                # has_to_wait = False
-                # self.write_command(self.last_clock_command)
         if has_to_wait:
             logging.debug('(ser) clock is released now')
 
