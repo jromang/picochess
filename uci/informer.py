@@ -37,7 +37,12 @@ class Informer(chess.uci.InfoHandler):
         self.allow_score = True
         self.allow_pv = True
         self.allow_depth = True
+        Observable.fire(Event.START_SEARCH())
         super().on_go()
+
+    def on_bestmove(self, bestmove, ponder):
+        Observable.fire(Event.STOP_SEARCH())
+        super().on_bestmove(bestmove, ponder)
 
     def _reset_allow_score(self):
         self.allow_score = True

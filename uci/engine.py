@@ -164,7 +164,7 @@ class UciEngine(object):
         self.show_best = True
         time_dict['async_callback'] = self.callback
 
-        Observable.fire(Event.START_SEARCH())
+        # Observable.fire(Event.START_SEARCH())
         self.future = self.engine.go(**time_dict)
         return self.future
 
@@ -172,7 +172,7 @@ class UciEngine(object):
         """Ponder engine."""
         self.show_best = False
 
-        Observable.fire(Event.START_SEARCH())
+        # Observable.fire(Event.START_SEARCH())
         self.future = self.engine.go(ponder=True, infinite=True, async_callback=self.callback)
         return self.future
 
@@ -182,7 +182,7 @@ class UciEngine(object):
         time_dict['ponder'] = True
         time_dict['async_callback'] = self.callback3
 
-        Observable.fire(Event.START_SEARCH())
+        # Observable.fire(Event.START_SEARCH())
         self.future = self.engine.go(**time_dict)
         return self.future
 
@@ -200,7 +200,7 @@ class UciEngine(object):
             logging.error('Engine terminated')  # @todo find out, why this can happen!
             self.show_best = False
         logging.info('res: %s', self.res)
-        Observable.fire(Event.STOP_SEARCH())
+        # Observable.fire(Event.STOP_SEARCH())
         if self.show_best and self.res:
             Observable.fire(Event.BEST_MOVE(move=self.res.bestmove, ponder=self.res.ponder, inbook=False))
         else:
@@ -214,7 +214,7 @@ class UciEngine(object):
             logging.error('Engine terminated')  # @todo find out, why this can happen!
             self.show_best = False
         logging.info('res: %s', self.res)
-        Observable.fire(Event.STOP_SEARCH())
+        # Observable.fire(Event.STOP_SEARCH())
         if self.show_best and self.res:
             Observable.fire(Event.BEST_MOVE(move=self.res.bestmove, ponder=self.res.ponder, inbook=False))
         else:
