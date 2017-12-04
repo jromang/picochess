@@ -160,6 +160,7 @@ class PgnDisplay(DisplayMsg, threading.Thread):
         self.level_name = ''
         self.user_elo = '-'
         self.engine_elo = '-'
+        self.startime = datetime.datetime.now().strftime('%H:%M:%S')
 
     def _save_and_email_pgn(self, message):
         logging.debug('Saving game to [%s]', self.file_name)
@@ -198,6 +199,8 @@ class PgnDisplay(DisplayMsg, threading.Thread):
             pgn_game.headers['Black'] = self.user_name
             pgn_game.headers['WhiteElo'] = comp_elo
             pgn_game.headers['BlackElo'] = self.user_elo
+
+        pgn_game.headers['Time'] = self.startime
 
         # Save to file
         file = open(self.file_name, 'a')
@@ -252,6 +255,9 @@ class PgnDisplay(DisplayMsg, threading.Thread):
         elif isinstance(message, Message.GAME_ENDS):
             if message.game.move_stack:
                 self._save_and_email_pgn(message)
+
+        elif isinstance(message, Message.START_NEW_GAME):
+            self.startime = datetime.datetime.now().strftime('%H:%M:%S')
 
         else:  # Default
             pass
