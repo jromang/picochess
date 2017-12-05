@@ -44,7 +44,7 @@ class DgtBoard(object):
         self.field_factor = field_factor % 10
 
         self.serial = None
-        self.lock = Lock()  # inside setup_serial_port()
+        self.lock = Lock()  # lock the serial write
         self.incoming_board_thread = None
         self.lever_pos = None
         # the next three are only used for "not dgtpi" mode
@@ -129,20 +129,21 @@ class DgtBoard(object):
 
         while True:
             if self.serial:
-                try:
-                    self.serial.write(bytearray(array))
-                    break
-                except ValueError:
-                    logging.error('invalid bytes sent %s', message)
-                    return False
-                except SerialException as write_expection:
-                    logging.error(write_expection)
-                    self.serial.close()
-                    self.serial = None
-                except IOError as write_expection:
-                    logging.error(write_expection)
-                    self.serial.close()
-                    self.serial = None
+                with self.lock:
+                    try:
+                        self.serial.write(bytearray(array))
+                        break
+                    except ValueError:
+                        logging.error('invalid bytes sent %s', message)
+                        return False
+                    except SerialException as write_expection:
+                        logging.error(write_expection)
+                        self.serial.close()
+                        self.serial = None
+                    except IOError as write_expection:
+                        logging.error(write_expection)
+                        self.serial.close()
+                        self.serial = None
             if mes == DgtCmd.DGT_RETURN_SERIALNR:
                 break
             time.sleep(0.1)
@@ -653,12 +654,12 @@ class DgtBoard(object):
                 if self._open_bluetooth():
                     return _success('/dev/rfcomm123')
 
-            # text = self.dgttranslate.text('N00_noboard', 'Board' + waitchars[self.wait_counter])
-            bwait = 'Board' + waitchars[self.wait_counter]
-            text = Dgt.DISPLAY_TEXT(l='no e-' + bwait, m='no' + bwait, s=bwait, wait=True, beep=False, maxtime=0.1,
-                                    devs={'i2c', 'web'})
-            DisplayMsg.show(Message.DGT_NO_EBOARD_ERROR(text=text))
-            self.wait_counter = (self.wait_counter + 1) % len(waitchars)
+        # text = self.dgttranslate.text('N00_noboard', 'Board' + waitchars[self.wait_counter])
+        bwait = 'Board' + waitchars[self.wait_counter]
+        text = Dgt.DISPLAY_TEXT(l='no e-' + bwait, m='no' + bwait, s=bwait, wait=True, beep=False, maxtime=0.1,
+                                devs={'i2c', 'web'})
+        DisplayMsg.show(Message.DGT_NO_EBOARD_ERROR(text=text))
+        self.wait_counter = (self.wait_counter + 1) % len(waitchars)
         return False
 
     # dgtHw functions start
