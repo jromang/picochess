@@ -386,7 +386,10 @@ class DgtBoard(object):
         if message_length <= 0 or message_length > 64:
             if message_id == 0x8f and message_length == 0x1f00:
                 logging.warning('falsely DGT_SEND_EE_MOVES send => ignore EE_MOVES 0x%x bytes', self.serial.inWaiting())
-                self.serial.read(0x1f00)
+                self.watchdog_timer.stop()  # this serial read gonna take around 8secs
+                ee_moves = self.serial.read(0x1f00)
+                logging.debug('EE_MOVES 0x%x bytes read', len(ee_moves))
+                self.watchdog_timer.start()
             else:
                 logging.warning('illegal length in message header 0x%x length: %i', message_id, message_length)
             return message
@@ -619,7 +622,7 @@ class DgtBoard(object):
     def _open_serial(self, device: str):
         assert not self.serial, 'serial connection still active: %s' % self.serial
         try:
-            self.serial = Serial(device, stopbits=STOPBITS_ONE, parity=PARITY_NONE, bytesize=EIGHTBITS, timeout=2)
+            self.serial = Serial(device, stopbits=STOPBITS_ONE, parity=PARITY_NONE, bytesize=EIGHTBITS, timeout=0.5)
         except SerialException:
             return False
         return True
