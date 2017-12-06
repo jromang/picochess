@@ -872,13 +872,13 @@ class DgtMenu(object):
             # maybe do action!
             if self.menu_mode == Mode.REMOTE and not self.inside_room:
                 text = self.dgttranslate.text('Y10_errorroom')
-            elif self.menu_mode == Mode.NORMAL or self.get_engine_has_ponder():
+            elif self.menu_mode == Mode.BRAIN or not self.get_engine_has_ponder():
+                DispatchDgt.fire(self.dgttranslate.text('Y10_erroreng'))
+                text = Dgt.DISPLAY_TIME(force=True, wait=True, devs={'ser', 'i2c', 'web'})
+            else:
                 mode_text = self.dgttranslate.text('B10_okmode')
                 event = Event.SET_INTERACTION_MODE(mode=self.menu_mode, mode_text=mode_text, show_ok=True)
                 text = self._fire_event(event)
-            else:  # only allow a pondering mode if engine supports that
-                DispatchDgt.fire(self.dgttranslate.text('Y10_erroreng'))
-                text = Dgt.DISPLAY_TIME(force=True, wait=True, devs={'ser', 'i2c', 'web'})
 
         elif self.state == MenuState.POS:
             text = self.enter_pos_color_menu()

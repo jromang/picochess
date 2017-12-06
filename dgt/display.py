@@ -372,15 +372,16 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             logging.debug('map: Interaction mode [%s]', mode_map[fen])
             if mode_map[fen] == Mode.REMOTE and not self.dgtmenu.inside_room:
                 DispatchDgt.fire(self.dgttranslate.text('Y10_errorroom'))
-            elif mode_map[fen] == Mode.NORMAL or self.dgtmenu.get_engine_has_ponder():
+            elif mode_map[fen] == Mode.BRAIN or not self.dgtmenu.get_engine_has_ponder():
+                DispatchDgt.fire(self.dgttranslate.text('Y10_erroreng'))
+            else:
                 self.dgtmenu.set_mode(mode_map[fen])
                 text = self.dgttranslate.text(mode_map[fen].value)
                 text.beep = self.dgttranslate.bl(BeepLevel.MAP)
                 text.maxtime = 1  # wait 1sec not forever
                 text.wait = self._exit_menu()
                 Observable.fire(Event.SET_INTERACTION_MODE(mode=mode_map[fen], mode_text=text, show_ok=False))
-            else:  # only allow a pondering mode if engine supports that
-                DispatchDgt.fire(self.dgttranslate.text('Y10_erroreng'))
+
         elif fen in self.dgtmenu.tc_fixed_map:
             logging.debug('map: Time control fixed')
             self.dgtmenu.set_time_mode(TimeMode.FIXED)

@@ -1029,6 +1029,20 @@ def main():
                 else:
                     stop_search_and_clock()
                     interaction_mode = event.mode
+                    if False:  # switch-case
+                        pass
+                    elif interaction_mode == Mode.NORMAL:
+                        engine.option('Ponder', False)
+                        engine.option('UCI_AnalyseMode', False)
+                    elif interaction_mode == Mode.BRAIN:
+                        engine.option('Ponder', True)
+                        engine.option('UCI_AnalyseMode', False)
+                    elif interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.OBSERVE, Mode.PONDER):
+                        engine.option('Ponder', False)
+                        engine.option('UCI_AnalyseMode', True)
+                    elif interaction_mode == Mode.REMOTE:
+                        pass
+                    # engine.send()  @todo activate this
                     msg = Message.INTERACTION_MODE(mode=event.mode, mode_text=event.mode_text, show_ok=event.show_ok)
                     set_wait_state(msg)  # dont clear searchmoves here
 

@@ -395,7 +395,8 @@ class DgtBoard(object):
                     logging.info('EE_MOVES 0x%x bytes read', len(ee_moves))
                     bytes_toread -= len(ee_moves)
                     if time.time() - now > 20:
-                        logging.warning('EE_MOVES needed over 20secs needed => stop it')
+                        logging.warning('EE_MOVES needed over 20secs => stop it')
+                        break
                 self.watchdog_timer.start()
             else:
                 logging.warning('illegal length in message header 0x%x length: %i', message_id, message_length)
