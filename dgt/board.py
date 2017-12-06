@@ -388,8 +388,14 @@ class DgtBoard(object):
             if message_id == 0x8f and message_length == 0x1f00:
                 logging.warning('falsely DGT_SEND_EE_MOVES send => ignore EE_MOVES 0x%x bytes', self.serial.inWaiting())
                 self.watchdog_timer.stop()  # this serial read gonna take around 8secs
-                ee_moves = self.serial.read(0x1f00)
-                logging.debug('EE_MOVES 0x%x bytes read', len(ee_moves))
+                bytes_toread = 0x1f00
+                now = time.time()
+                while bytes_toread > 0:
+                    ee_moves = self.serial.read(bytes_toread)
+                    logging.info('EE_MOVES 0x%x bytes read', len(ee_moves))
+                    bytes_toread -= len(ee_moves)
+                    if time.time() - now > 20:
+                        logging.warning('EE_MOVES needed over 20secs needed => stop it')
                 self.watchdog_timer.start()
             else:
                 logging.warning('illegal length in message header 0x%x length: %i', message_id, message_length)
