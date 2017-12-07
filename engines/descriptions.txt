@@ -41,7 +41,7 @@ a level 0, which lets the engine play random legal moves.
 Author: Jon Dart
 Version: 20.3
 Date: November 2017
-Elo: 2950
+Elo: 2980
 Levels: yes
 Chess960: no
 License: MIT

@@ -48,14 +48,14 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'PicoChess'
-copyright = u'2014-2017, Jean-Francois Romang, Shivkumar Shivaji, Jürgen Précour, Jonas Znidarsic'
+copyright = u'2014-2017, Jean-Francois Romang, Shivkumar Shivaji, Jürgen Précour'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = '0.88'
+version = '0.9'
 # The full version, including alpha/beta/rc tags.
 release = '0.9'
 
@@ -201,7 +201,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
   ('index', 'PicoChess.tex', 'PicoChess Documentation',
-   'Jean-Francois Romang, Shivkumar Shivaji', 'manual'),
+   'Jean-Francois Romang, Shivkumar Shivaji', 'Jürgen Précour', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -231,7 +231,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'picochess', 'PicoChess Documentation',
-     ['Jean-Francois Romang, Shivkumar Shivaji'], 1)
+     ['Jean-Francois Romang, Shivkumar Shivaji', 'Jürgen Précour'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -245,7 +245,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'PicoChess', 'PicoChess Documentation',
-   'Jean-Francois Romang, Shivkumar Shivaji', 'PicoChess',
+   'Jean-Francois Romang, Shivkumar Shivaji', 'Jürgen Précour', 'PicoChess',
    'Stand alone chess computer based on Raspberry Pi and DGT electronic chess board.', 'Miscellaneous'),
 ]
 
