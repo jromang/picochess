@@ -182,7 +182,7 @@ def main():
             engine.position(game_copy)
             engine.brain(timec.uci())
         else:
-            logging.info('ignore permanent brain')
+            logging.info('ignore permanent brain cause no pondering move available')
 
     def stop_search_and_clock(ponder_hit=False):
         """Depending on the interaction mode stop search and clock."""
@@ -524,6 +524,18 @@ def main():
                     break
         return {}, None
 
+    def engine_mode():
+        ponder_mode = analyse_mode = False
+        if False:  # switch-case
+            pass
+        elif interaction_mode in (Mode.NORMAL, Mode.REMOTE):
+            pass
+        elif interaction_mode == Mode.BRAIN:
+            ponder_mode = True
+        elif interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.OBSERVE, Mode.PONDER):
+            analyse_mode = True
+        engine.mode(ponder=ponder_mode, analyse=analyse_mode)
+
     def _dgt_serial_nr():
         DisplayMsg.show(Message.DGT_SERIAL_NR(number='dont_use'))
 
@@ -712,6 +724,7 @@ def main():
     args.engine_level = None if args.engine_level == 'None' else args.engine_level
     engine_opt, level_index = get_engine_level_dict(args.engine_level)
     engine.startup(engine_opt)
+    engine.newgame(game.copy())
 
     # Startup - external
     level_name = args.engine_level
@@ -803,15 +816,18 @@ def main():
                             time.sleep(3)
                             sys.exit(-1)
                     engine.startup(event.options)
+                    engine.newgame(game.copy())
                     # All done - rock'n'roll
-                    if not (interaction_mode == Mode.NORMAL or engine.has_ponder()):
-                        logging.debug('new engine doesnt support pondering mode, reverting to %s', old_file)
+                    if interaction_mode == Mode.BRAIN and not engine.has_ponder():
+                        logging.debug('new engine doesnt support brain mode, reverting to %s', old_file)
                         engine_fallback = True
                         if engine.quit():
                             engine = UciEngine(old_file)
                             engine.startup(old_options)
+                            engine.newgame(game.copy())
                         else:
                             logging.error('engine shutdown failure')
+                    engine_mode()
                     if engine_fallback:
                         msg = Message.ENGINE_FAIL()
                     else:
@@ -1029,20 +1045,7 @@ def main():
                 else:
                     stop_search_and_clock()
                     interaction_mode = event.mode
-                    if False:  # switch-case
-                        pass
-                    elif interaction_mode == Mode.NORMAL:
-                        engine.option('Ponder', False)
-                        engine.option('UCI_AnalyseMode', False)
-                    elif interaction_mode == Mode.BRAIN:
-                        engine.option('Ponder', True)
-                        engine.option('UCI_AnalyseMode', False)
-                    elif interaction_mode in (Mode.ANALYSIS, Mode.KIBITZ, Mode.OBSERVE, Mode.PONDER):
-                        engine.option('Ponder', False)
-                        engine.option('UCI_AnalyseMode', True)
-                    elif interaction_mode == Mode.REMOTE:
-                        pass
-                    # engine.send()  @todo activate this
+                    engine_mode()
                     msg = Message.INTERACTION_MODE(mode=event.mode, mode_text=event.mode_text, show_ok=event.show_ok)
                     set_wait_state(msg)  # dont clear searchmoves here
 

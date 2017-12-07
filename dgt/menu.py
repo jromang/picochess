@@ -872,7 +872,7 @@ class DgtMenu(object):
             # maybe do action!
             if self.menu_mode == Mode.REMOTE and not self.inside_room:
                 text = self.dgttranslate.text('Y10_errorroom')
-            elif self.menu_mode == Mode.BRAIN or not self.get_engine_has_ponder():
+            elif self.menu_mode == Mode.BRAIN and not self.get_engine_has_ponder():
                 DispatchDgt.fire(self.dgttranslate.text('Y10_erroreng'))
                 text = Dgt.DISPLAY_TIME(force=True, wait=True, devs={'ser', 'i2c', 'web'})
             else:

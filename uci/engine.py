@@ -89,10 +89,6 @@ class UciEngine(object):
         """Send options to engine."""
         self.engine.setoption(self.options)
 
-    def level(self, options: dict):
-        """Set options."""
-        self.options = options
-
     def has_levels(self):
         """Return engine level support."""
         has_lv = self.has_skill_level() or self.has_handicap_level() or self.has_limit_strength() or self.has_strength()
@@ -237,6 +233,10 @@ class UciEngine(object):
         self.engine.ucinewgame()
         self.engine.position(game)
 
+    def mode(self, ponder: bool, analyse: bool):
+        """Set engine mode."""
+        self.engine.setoption({'Ponder': ponder, 'UCI_AnalyseMode': analyse})
+
     def startup(self, options: dict, show=True):
         """Startup engine."""
         parser = configparser.ConfigParser()
@@ -246,9 +246,8 @@ class UciEngine(object):
         self.level_support = bool(options)
 
         logging.debug('setting engine with options %s', options)
-        self.level(options)
+        self.options = options
         self.send()
-        self.newgame(Board())
         if show:
             logging.debug('Loaded engine [%s]', self.get_name())
             logging.debug('Supported options [%s]', self.get_options())
