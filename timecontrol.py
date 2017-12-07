@@ -151,8 +151,8 @@ class TimeControl(object):
 
             if log:
                 w_hms, b_hms = self._log_time()
-                logging.info('start internal time w:%s - b:%s', w_hms, b_hms)
-                logging.info('received prio clock time w:%s - b:%s',
+                logging.info('start internal time w:%s - b:%s [ign]', w_hms, b_hms)
+                logging.info('received clock time w:%s - b:%s [use]',
                              hms_time(self.clock_time[chess.WHITE]), hms_time(self.clock_time[chess.BLACK]))
 
             self.internal_time[chess.WHITE] = self.clock_time[chess.WHITE]

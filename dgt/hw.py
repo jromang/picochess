@@ -171,9 +171,9 @@ class DgtHw(DgtIface):
         if self.get_name() not in devs:
             logging.debug('ignored setClock - devs: %s', devs)
             return True
-        logging.debug('(%s) clock received last time from clock l:%s r:%s', ','.join(devs),
+        logging.debug('(%s) clock received last time from clock l:%s r:%s [ign]', ','.join(devs),
                       hms_time(self.dgtboard.l_time), hms_time(self.dgtboard.r_time))
-        logging.debug('(%s) clock sending set time to clock l:%s r:%s', ','.join(devs),
+        logging.debug('(%s) clock sending set time to clock l:%s r:%s [use]', ','.join(devs),
                       hms_time(time_left), hms_time(time_right))
         self.dgtboard.in_settime = True  # it will return to false as soon SetAndRun ack received
         self.dgtboard.l_time = time_left

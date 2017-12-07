@@ -257,8 +257,11 @@ class DgtPi(DgtIface):
             return False
         else:
             self.side_running = side
-            self.in_settime = False
+            Timer(0.9, self.out_settime).start()  # delay abit cause the clock needs time to update its time result
             return True
+
+    def out_settime(self):
+        self.in_settime = False
 
     def set_clock(self, time_left: int, time_right: int, devs: set):
         """Set the dgtpi."""
@@ -268,9 +271,9 @@ class DgtPi(DgtIface):
 
         l_hms = hms_time(time_left)
         r_hms = hms_time(time_right)
-        logging.debug('(%s) clock received last time from clock l:%s r:%s', ','.join(devs),
+        logging.debug('(%s) clock received last time from clock l:%s r:%s [ign]', ','.join(devs),
                       hms_time(self.l_time), hms_time(self.r_time))
-        logging.debug('(%s) clock sending set time to clock l:%s r:%s', ','.join(devs), l_hms, r_hms)
+        logging.debug('(%s) clock sending set time to clock l:%s r:%s [use]', ','.join(devs), l_hms, r_hms)
 
         self.in_settime = True
         self.l_time = time_left
