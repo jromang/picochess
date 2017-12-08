@@ -191,11 +191,13 @@ Start of Definitions:
 
 #define DGT_SEND_UPDATE          0x43
 /* Results in DGT_MSG_FIELD_UPDATE messages and DGT_MSG_BWTIME messages
- * as long as the board is in UPDATE mode  */
+ * as long as the board is in UPDATE mode
+ */
 
 #define DGT_SEND_UPDATE_BRD      0x44
 /* results in DGT_MSG_FIELD_UPDATE messages
- * as long as the board is in UPDATE_BOARD mode  */
+ * as long as the board is in UPDATE_BOARD mode
+ */
 
 #define DGT_RETURN_SERIALNR      0x45
 /* Results in a DGT_MSG_SERIALNR message
@@ -216,7 +218,8 @@ Start of Definitions:
 #define DGT_SEND_UPDATE_NICE     0x4b
 /* results in DGT_MSG_FIELD_UPDATE messages and DGT_MSG_BWTIME messages,
  * the latter only at time changes,
- * as long as the board is in UPDATE_NICE mode*/
+ * as long as the board is in UPDATE_NICE mode
+ */
 
 #define DGT_SEND_BATTERY_STATUS	 0x4c
 /* New command for bluetooth board. Requests the

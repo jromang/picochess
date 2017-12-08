@@ -178,7 +178,7 @@ class TimeControl(object):
                 self.timer.cancel()
                 self.timer.join()
             else:
-                print('time=%s', self.internal_time)
+                logging.warning('time=%s', self.internal_time)
             used_time = floor((time.time() - self.start_time) * 10) / 10
             if log:
                 logging.info('used time: %s secs', used_time)
