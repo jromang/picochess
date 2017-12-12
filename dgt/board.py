@@ -373,10 +373,23 @@ class DgtBoard(object):
         else:  # Default
             logging.warning('message not handled [%s]', DgtMsg(message_id))
 
+    def _read_serial(self, bytes_toread=1):
+        try:
+            return self.serial.read(bytes_toread)
+        except SerialException:
+            pass
+        except TypeError:
+            pass
+        except struct.error:  # can happen, when plugin board-cable again
+            pass
+        except AttributeError:  # serial is None (race condition)
+            pass
+        return b''
+
     def _read_board_message(self, head: bytes):
         message = ()
         header_len = 3
-        header = head + self.serial.read(header_len - 1)
+        header = head + self._read_serial(header_len - 1)
         try:
             header = struct.unpack('>BBB', header)
         except struct.error:
@@ -391,7 +404,7 @@ class DgtBoard(object):
                 bytes_toread = 0x1f00
                 now = time.time()
                 while bytes_toread > 0:
-                    ee_moves = self.serial.read(bytes_toread)
+                    ee_moves = self._read_serial(bytes_toread)
                     logging.info('EE_MOVES 0x%x bytes read', len(ee_moves))
                     bytes_toread -= len(ee_moves)
                     if time.time() - now > 20:
@@ -410,7 +423,7 @@ class DgtBoard(object):
             return message
 
         while counter:
-            byte = self.serial.read(1)
+            byte = self._read_serial()
             if byte:
                 data = struct.unpack('>B', byte)
                 counter -= 1
@@ -432,7 +445,7 @@ class DgtBoard(object):
             try:
                 byte = None
                 if self.serial:
-                    byte = self.serial.read(1)
+                    byte = self._read_serial()
                 else:
                     self._setup_serial_port()
                     if self.serial:
@@ -452,6 +465,8 @@ class DgtBoard(object):
             except TypeError:
                 pass
             except struct.error:  # can happen, when plugin board-cable again
+                pass
+            except AttributeError:  # serial is None (race condition)
                 pass
 
     def ask_battery_status(self):
@@ -489,6 +504,7 @@ class DgtBoard(object):
                 if path.exists('/dev/rfcomm123'):
                     logging.debug('BT releasing /dev/rfcomm123')
                     subprocess.call(['rfcomm', 'release', '123'])
+                    subprocess.call(['cat', '/dev/rfcomm123'])  # Lucas
                 self.bt_current_device = -1
                 self.bt_mac_list = []
                 self.bt_name_list = []
@@ -553,7 +569,7 @@ class DgtBoard(object):
                     self.bt_current_device -= 1
                     logging.debug('BT pairing failed, unknown device')
                 elif ('DGT_BT_' in self.bt_line or 'PCS-REVII' in self.bt_line) and \
-                        ('NEW' in self.bt_line or 'CHG' in self.bt_line) and 'DEL' not in self.bt_line:
+                        ('NEW' in self.bt_line or 'CHG' in self.bt_line) and 'Device' in self.bt_line:
                     # New e-Board found add to list
                     try:
                         if not self.bt_line.split()[3] in self.bt_mac_list:
