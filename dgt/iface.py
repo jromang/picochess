@@ -38,7 +38,6 @@ class DgtIface(DisplayDgt, Thread):
 
         self.side_running = ClockSide.NONE
         self.enable_dgt3000 = False
-        self.long_move = True
         self.case_res = True
 
     def display_text_on_clock(self, message):
@@ -84,22 +83,23 @@ class DgtIface(DisplayDgt, Thread):
     def get_san(self, message, is_xl=False):
         """Create a chess.board plus a text ready to display on clock."""
 
-        def move(text: str, language: str, capital: bool):
+        def move(text: str, language: str, capital: bool, short: bool):
             """Return move text for clock display."""
-            directory = {}
-            if language == 'de':
-                directory = {'R': 'T', 'N': 'S', 'B': 'L', 'Q': 'D'}
-            if language == 'nl':
-                directory = {'R': 'T', 'N': 'P', 'B': 'L', 'Q': 'D'}
-            if language == 'fr':
-                directory = {'R': 'T', 'N': 'C', 'B': 'F', 'Q': 'D', 'K': '@'}
-            if language == 'es':
-                directory = {'R': 'T', 'N': 'C', 'B': 'A', 'Q': 'D', 'K': '@'}
-            if language == 'it':
-                directory = {'R': 'T', 'N': 'C', 'B': 'A', 'Q': 'D', 'K': '@'}
-            for i, j in directory.items():
-                text = text.replace(i, j)
-            text = text.replace('@', 'R')  # replace the King "@" from fr, es, it languages
+            if short:
+                directory = {}
+                if language == 'de':
+                    directory = {'R': 'T', 'N': 'S', 'B': 'L', 'Q': 'D'}
+                if language == 'nl':
+                    directory = {'R': 'T', 'N': 'P', 'B': 'L', 'Q': 'D'}
+                if language == 'fr':
+                    directory = {'R': 'T', 'N': 'C', 'B': 'F', 'Q': 'D', 'K': '@'}
+                if language == 'es':
+                    directory = {'R': 'T', 'N': 'C', 'B': 'A', 'Q': 'D', 'K': '@'}
+                if language == 'it':
+                    directory = {'R': 'T', 'N': 'C', 'B': 'A', 'Q': 'D', 'K': '@'}
+                for i, j in directory.items():
+                    text = text.replace(i, j)
+                text = text.replace('@', 'R')  # replace the King "@" from fr, es, it languages
             if capital:
                 return text.upper()
             else:
@@ -107,7 +107,10 @@ class DgtIface(DisplayDgt, Thread):
 
         bit_board = Board(message.fen, message.uci960)
         if bit_board.is_legal(message.move):
-            move_text = bit_board.san(message.move)
+            if message.short:
+                move_text = bit_board.san(message.move)
+            else:
+                move_text = message.move.uci()
         else:
             logging.warning('[%s] illegal move %s found - uci960: %s fen: %s', self.get_name(), message.move,
                             message.uci960, message.fen)
@@ -116,7 +119,7 @@ class DgtIface(DisplayDgt, Thread):
 
         if message.side == ClockSide.RIGHT:
             move_text = move_text.rjust(6 if is_xl else 8)
-        return bit_board, move(move_text, message.lang, message.capital and not is_xl)
+        return bit_board, move(move_text, message.lang, message.capital and not is_xl, message.short)
 
     def _process_message(self, message):
         if self.get_name() not in message.devs:

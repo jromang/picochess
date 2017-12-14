@@ -163,8 +163,6 @@ class DgtPi(DgtIface):
     def display_move_on_clock(self, message):
         """Display a move on the dgtpi."""
         bit_board, text = self.get_san(message)
-        if not self.long_move:
-            text = message.move.uci()
         text = '{:3d}{:s}'.format(bit_board.fullmove_number, text)
         if self.get_name() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)

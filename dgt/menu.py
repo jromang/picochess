@@ -87,20 +87,23 @@ class MenuState(object):
     SYS_DISP_PONDER_INTERVAL = 762100  # 1-8
     SYS_DISP_CAPITAL = 763000
     SYS_DISP_CAPTIAL_YESNO = 763100  # yes, no
+    SYS_DISP_NOTATION = 764000
+    SYS_DISP_NOTATION_MOVE = 764100  # short, long
 
 
 class DgtMenu(object):
 
     """Handle the Dgt Menu."""
 
-    def __init__(self, disable_confirm: bool, ponder_interval: int, speed_voice: int, capital_letters: bool,
-                 log_file, dgttranslate: DgtTranslate):
+    def __init__(self, disable_confirm: bool, ponder_interval: int, speed_voice: int, enable_capital_letters: bool,
+                 disable_short_move: bool, log_file, dgttranslate: DgtTranslate):
         super(DgtMenu, self).__init__()
 
         self.current_text = None  # save the current text
         self.menu_system_display_confirm = disable_confirm
         self.menu_system_display_ponderinterval = ponder_interval
-        self.menu_system_display_capital = capital_letters
+        self.menu_system_display_capital = enable_capital_letters
+        self.menu_system_display_notation = disable_short_move  # True = disable short move display
         self.log_file = log_file
         self.dgttranslate = dgttranslate
         self.state = MenuState.TOP
@@ -239,6 +242,7 @@ class DgtMenu(object):
         self.res_system_display_confirm = self.menu_system_display_confirm
         self.res_system_display_ponderinterval = self.menu_system_display_ponderinterval
         self.dgttranslate.set_capital(self.menu_system_display_capital)
+        self.dgttranslate.set_notation(self.menu_system_display_notation)
         return False
 
     def set_engine_restart(self, flag: bool):
@@ -672,6 +676,19 @@ class DgtMenu(object):
         text = self.dgttranslate.text('B00_capital_' + msg)
         return text
 
+    def enter_sys_disp_notation_menu(self):
+        """Set the menu state."""
+        self.state = MenuState.SYS_DISP_NOTATION
+        text = self.dgttranslate.text(Display.NOTATION.value)
+        return text
+
+    def enter_sys_disp_notation_move_menu(self):
+        """Set the menu state."""
+        self.state = MenuState.SYS_DISP_NOTATION_MOVE
+        msg = 'short' if self.menu_system_display_notation else 'long'
+        text = self.dgttranslate.text('B00_notation_' + msg)
+        return text
+
     def _fire_event(self, event: Event):
         Observable.fire(event)
         return self.save_choices()
@@ -840,6 +857,12 @@ class DgtMenu(object):
 
         elif self.state == MenuState.SYS_DISP_CAPTIAL_YESNO:
             text = self.enter_sys_disp_capital_menu()
+
+        elif self.state == MenuState.SYS_DISP_NOTATION:
+            text = self.enter_sys_disp_menu()
+
+        elif self.state == MenuState.SYS_DISP_NOTATION_MOVE:
+            text = self.enter_sys_disp_notation_menu()
 
         else:  # Default
             pass
@@ -1158,6 +1181,8 @@ class DgtMenu(object):
                 text = self.enter_sys_disp_confirm_menu()
             if self.menu_system_display == Display.CAPITAL:
                 text = self.enter_sys_disp_capital_menu()
+            if self.menu_system_display == Display.NOTATION:
+                text = self.enter_sys_disp_notation_menu()
 
         elif self.state == MenuState.SYS_DISP_CONFIRM:
             text = self.enter_sys_disp_confirm_yesno_menu()
@@ -1187,11 +1212,24 @@ class DgtMenu(object):
             # do action!
             config = ConfigObj('picochess.ini')
             if self.menu_system_display_capital:
-                config['capital-letters'] = self.menu_system_display_capital
+                config['enable-capital-letters'] = self.menu_system_display_capital
             elif 'capital-letters' in config:
-                del config['capital-letters']
+                del config['enable-capital-letters']
             config.write()
             text = self._fire_dispatchdgt(self.dgttranslate.text('B10_okcapital'))
+
+        elif self.state == MenuState.SYS_DISP_NOTATION:
+            text = self.enter_sys_disp_notation_move_menu()
+
+        elif self.state == MenuState.SYS_DISP_NOTATION_MOVE:
+            # do-action!
+            config = ConfigObj('picochess.ini')
+            if self.menu_system_display_notation:
+                config['disable-short-notation'] = self.menu_system_display_notation
+            elif 'disable-short-notation' in config:
+                del config['disable-short-notation']
+            config.write()
+            text = self._fire_dispatchdgt(self.dgttranslate.text('B10_oknotation'))
 
         else:  # Default
             pass
@@ -1403,6 +1441,17 @@ class DgtMenu(object):
             self.menu_system = SystemLoop.prev(self.menu_system)
             text = self.dgttranslate.text(self.menu_system.value)
 
+        elif self.state == MenuState.SYS_DISP_PONDER:
+            self.state = MenuState.SYS_DISP_NOTATION
+            self.menu_system_display = DisplayLoop.prev(self.menu_system_display)
+            text = self.dgttranslate.text(self.menu_system_display.value)
+
+        elif self.state == MenuState.SYS_DISP_PONDER_INTERVAL:
+            self.menu_system_display_ponderinterval -= 1
+            if self.menu_system_display_ponderinterval < 1:
+                self.menu_system_display_ponderinterval = 8
+            text = self.dgttranslate.text('B00_ponder_interval', str(self.menu_system_display_ponderinterval))
+
         elif self.state == MenuState.SYS_DISP_CONFIRM:
             self.state = MenuState.SYS_DISP_PONDER
             self.menu_system_display = DisplayLoop.prev(self.menu_system_display)
@@ -1413,17 +1462,6 @@ class DgtMenu(object):
             msg = 'off' if self.menu_system_display_confirm else 'on'
             text = self.dgttranslate.text('B00_confirm_' + msg)
 
-        elif self.state == MenuState.SYS_DISP_PONDER:
-            self.state = MenuState.SYS_DISP_CAPITAL
-            self.menu_system_display = DisplayLoop.prev(self.menu_system_display)
-            text = self.dgttranslate.text(self.menu_system_display.value)
-
-        elif self.state == MenuState.SYS_DISP_PONDER_INTERVAL:
-            self.menu_system_display_ponderinterval -= 1
-            if self.menu_system_display_ponderinterval < 1:
-                self.menu_system_display_ponderinterval = 8
-            text = self.dgttranslate.text('B00_ponder_interval', str(self.menu_system_display_ponderinterval))
-
         elif self.state == MenuState.SYS_DISP_CAPITAL:
             self.state = MenuState.SYS_DISP_CONFIRM
             self.menu_system_display = DisplayLoop.prev(self.menu_system_display)
@@ -1433,6 +1471,16 @@ class DgtMenu(object):
             self.menu_system_display_capital = not self.menu_system_display_capital
             msg = 'on' if self.menu_system_display_capital else 'off'
             text = self.dgttranslate.text('B00_capital_' + msg)
+
+        elif self.state == MenuState.SYS_DISP_NOTATION:
+            self.state = MenuState.SYS_DISP_CAPITAL
+            self.menu_system_display = DisplayLoop.prev(self.menu_system_display)
+            text = self.dgttranslate.text(self.menu_system_display.value)
+
+        elif self.state == MenuState.SYS_DISP_NOTATION_MOVE:
+            self.menu_system_display_notation = not self.menu_system_display_notation
+            msg = 'short' if self.menu_system_display_notation else 'long'
+            text = self.dgttranslate.text('B00_notation_' + msg)
 
         else:  # Default
             pass
@@ -1644,16 +1692,6 @@ class DgtMenu(object):
             self.menu_system = SystemLoop.next(self.menu_system)
             text = self.dgttranslate.text(self.menu_system.value)
 
-        elif self.state == MenuState.SYS_DISP_CONFIRM:
-            self.state = MenuState.SYS_DISP_CAPITAL
-            self.menu_system_display = DisplayLoop.next(self.menu_system_display)
-            text = self.dgttranslate.text(self.menu_system_display.value)
-
-        elif self.state == MenuState.SYS_DISP_CONFIRM_YESNO:
-            self.menu_system_display_confirm = not self.menu_system_display_confirm
-            msg = 'off' if self.menu_system_display_confirm else 'on'
-            text = self.dgttranslate.text('B00_confirm_' + msg)
-
         elif self.state == MenuState.SYS_DISP_PONDER:
             self.state = MenuState.SYS_DISP_CONFIRM
             self.menu_system_display = DisplayLoop.next(self.menu_system_display)
@@ -1665,8 +1703,18 @@ class DgtMenu(object):
                 self.menu_system_display_ponderinterval = 1
             text = self.dgttranslate.text('B00_ponder_interval', str(self.menu_system_display_ponderinterval))
 
+        elif self.state == MenuState.SYS_DISP_CONFIRM:
+            self.state = MenuState.SYS_DISP_CAPITAL
+            self.menu_system_display = DisplayLoop.next(self.menu_system_display)
+            text = self.dgttranslate.text(self.menu_system_display.value)
+
+        elif self.state == MenuState.SYS_DISP_CONFIRM_YESNO:
+            self.menu_system_display_confirm = not self.menu_system_display_confirm
+            msg = 'off' if self.menu_system_display_confirm else 'on'
+            text = self.dgttranslate.text('B00_confirm_' + msg)
+
         elif self.state == MenuState.SYS_DISP_CAPITAL:
-            self.state = MenuState.SYS_DISP_PONDER
+            self.state = MenuState.SYS_DISP_NOTATION
             self.menu_system_display = DisplayLoop.next(self.menu_system_display)
             text = self.dgttranslate.text(self.menu_system_display.value)
 
@@ -1674,6 +1722,16 @@ class DgtMenu(object):
             self.menu_system_display_capital = not self.menu_system_display_capital
             msg = 'on' if self.menu_system_display_capital else 'off'
             text = self.dgttranslate.text('B00_capital_' + msg)
+
+        elif self.state == MenuState.SYS_DISP_NOTATION:
+            self.state = MenuState.SYS_DISP_PONDER
+            self.menu_system_display = DisplayLoop.next(self.menu_system_display)
+            text = self.dgttranslate.text(self.menu_system_display.value)
+
+        elif self.state == MenuState.SYS_DISP_NOTATION_MOVE:
+            self.menu_system_display_notation = not self.menu_system_display_notation
+            msg = 'short' if self.menu_system_display_notation else 'long'
+            text = self.dgttranslate.text('B00_notation_' + msg)
 
         else:  # Default
             pass

@@ -31,6 +31,7 @@ class DgtTranslate(object):
         self.language = language
         self.version = picochess_version
         self.capital = False  # Set from dgt.menu lateron
+        self.notation = False  # Set from dgt.menu lateron
 
     def beep_to_config(self, beep: Beep):
         """Transfer beep to dict."""
@@ -65,6 +66,10 @@ class DgtTranslate(object):
             else:
                 return text.upper()
         return text
+
+    def set_notation(self, notation: bool):
+        """Set notation."""
+        self.notation = notation
 
     def text(self, str_code: str, msg='', devs=None):
         """Return standard text for clock display."""
@@ -834,6 +839,13 @@ class DgtTranslate(object):
             frtxt = entxt
             estxt = entxt
             ittxt = entxt
+        if text_id == 'display_notation_menu':
+            entxt = Dgt.DISPLAY_TEXT(l='Mv Notation', m='Notation', s='notati')
+            detxt = entxt
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
         if text_id == 'okconfirm':
             entxt = Dgt.DISPLAY_TEXT(l='ok confirm ', m='okConfrm', s='okconf')
             detxt = Dgt.DISPLAY_TEXT(l='ok Zugbest ', m='okZugbes', s='ok bes')
@@ -872,6 +884,27 @@ class DgtTranslate(object):
         if text_id == 'capital_off':
             entxt = Dgt.DISPLAY_TEXT(l='Capital off', m='Capt off', s='capoff')
             detxt = Dgt.DISPLAY_TEXT(l='Buchstb aus', m='Bstb aus', s='bstaus')
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
+        if text_id == 'oknotation':
+            entxt = Dgt.DISPLAY_TEXT(l='ok Notation', m='ok Notat', s='ok  nt')
+            detxt = Dgt.DISPLAY_TEXT(l='ok Notation', m='ok Notat', s='ok  nt')
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
+        if text_id == 'notation_short':
+            entxt = Dgt.DISPLAY_TEXT(l='Notat short', m='Nt short', s='short ')
+            detxt = Dgt.DISPLAY_TEXT(l='Notatn kurz', m='Ntn kurz', s='ntkurz')
+            nltxt = entxt
+            frtxt = entxt
+            estxt = entxt
+            ittxt = entxt
+        if text_id == 'notation_long':
+            entxt = Dgt.DISPLAY_TEXT(l='Notat  long', m='Nt  long', s='  long')
+            detxt = Dgt.DISPLAY_TEXT(l='Notatn lang', m='Ntn lang', s='ntlang')
             nltxt = entxt
             frtxt = entxt
             estxt = entxt

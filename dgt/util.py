@@ -424,6 +424,7 @@ class Display(MyEnum):
     PONDER = 'B00_display_ponder_menu'
     CONFIRM = 'B00_display_confirm_menu'
     CAPITAL = 'B00_display_capital_menu'
+    NOTATION = 'B00_display_notation_menu'
 
 
 class DisplayLoop(object):
@@ -441,18 +442,22 @@ class DisplayLoop(object):
         elif item == Display.CONFIRM:
             return Display.CAPITAL
         elif item == Display.CAPITAL:
+            return Display.NOTATION
+        elif item == Display.NOTATION:
             return Display.PONDER
         return 'errDispNext'
 
     @staticmethod
     def prev(item: Display):
         """Get previous item."""
-        if item == Display.PONDER:
+        if item == Display.NOTATION:
             return Display.CAPITAL
         elif item == Display.CAPITAL:
             return Display.CONFIRM
         elif item == Display.CONFIRM:
             return Display.PONDER
+        elif item == Display.PONDER:
+            return Display.NOTATION
         return 'errDispPrev'
 
 

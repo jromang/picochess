@@ -164,7 +164,7 @@ class Dgt():
 
     """Used to define tasks for the communication towards the dgt hardware."""
 
-    DISPLAY_MOVE = ClassFactory(DgtApi.DISPLAY_MOVE, ['move', 'fen', 'uci960', 'side', 'lang', 'capital',
+    DISPLAY_MOVE = ClassFactory(DgtApi.DISPLAY_MOVE, ['move', 'fen', 'uci960', 'side', 'lang', 'capital', 'short',
                                                       'beep', 'maxtime', 'devs', 'wait', 'ld', 'rd'])
     DISPLAY_TEXT = ClassFactory(DgtApi.DISPLAY_TEXT, ['l', 'm', 's',
                                                       'beep', 'maxtime', 'devs', 'wait', 'ld', 'rd'])

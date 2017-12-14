@@ -133,7 +133,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 beep = self.dgttranslate.bl(BeepLevel.BUTTON)
                 text = Dgt.DISPLAY_MOVE(move=self.last_move, fen=self.last_fen, side=side, wait=False, maxtime=1,
                                         beep=beep, devs={'ser', 'i2c', 'web'}, uci960=self.uci960,
-                                        lang=self.dgttranslate.language, capital=self.dgttranslate.capital)
+                                        lang=self.dgttranslate.language, capital=self.dgttranslate.capital,
+                                        short=self.dgttranslate.notation)
             else:
                 text = self.dgttranslate.text('B10_nomove')
             DispatchDgt.fire(text)
@@ -184,7 +185,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 beep = self.dgttranslate.bl(BeepLevel.BUTTON)
                 text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=False, maxtime=1,
                                         beep=beep, devs={'ser', 'i2c', 'web'}, uci960=self.uci960,
-                                        lang=self.dgttranslate.language, capital=self.dgttranslate.capital)
+                                        lang=self.dgttranslate.language, capital=self.dgttranslate.capital,
+                                        short=self.dgttranslate.notation)
             else:
                 text = self.dgttranslate.text('B10_nomove')
             DispatchDgt.fire(text)
@@ -490,7 +492,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
         beep = self.dgttranslate.bl(BeepLevel.CONFIG)
         disp = Dgt.DISPLAY_MOVE(move=move, fen=message.game.fen(), side=side, wait=message.wait, maxtime=0,
                                 beep=beep, devs={'ser', 'i2c', 'web'}, uci960=self.uci960,
-                                lang=self.dgttranslate.language, capital=self.dgttranslate.capital)
+                                lang=self.dgttranslate.language, capital=self.dgttranslate.capital,
+                                short=self.dgttranslate.notation)
         DispatchDgt.fire(disp)
         DispatchDgt.fire(Dgt.LIGHT_SQUARES(uci_move=move.uci(), devs={'ser', 'web'}))
         self.leds_are_on = True
@@ -567,7 +570,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             beep = self.dgttranslate.bl(BeepLevel.NO)
             disp = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=True, maxtime=0,
                                     beep=beep, devs={'ser', 'i2c', 'web'}, uci960=self.uci960,
-                                    lang=self.dgttranslate.language, capital=self.dgttranslate.capital)
+                                    lang=self.dgttranslate.language, capital=self.dgttranslate.capital,
+                                    short=self.dgttranslate.notation)
             DispatchDgt.fire(disp)
 
     def _process_startup_info(self, message):
@@ -630,7 +634,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                     beep = self.dgttranslate.bl(BeepLevel.NO)
                     text = Dgt.DISPLAY_MOVE(move=self.hint_move, fen=self.hint_fen, side=side, wait=True, maxtime=1,
                                             beep=beep, devs={'ser', 'i2c', 'web'}, uci960=self.uci960,
-                                            lang=self.dgttranslate.language, capital=self.dgttranslate.capital)
+                                            lang=self.dgttranslate.language, capital=self.dgttranslate.capital,
+                                            short=self.dgttranslate.notation)
                 else:
                     text = self.dgttranslate.text('N10_nomove')
             else:
@@ -651,7 +656,7 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             beep = self.dgttranslate.bl(BeepLevel.BUTTON)
             text = Dgt.DISPLAY_MOVE(move=self.play_move, fen=self.play_fen, side=side, wait=True, maxtime=1,
                                     beep=beep, devs=devs, uci960=self.uci960, lang=self.dgttranslate.language,
-                                    capital=self.dgttranslate.capital)
+                                    capital=self.dgttranslate.capital, short=self.dgttranslate.notation)
         else:
             text = None
             if self._inside_main_menu():

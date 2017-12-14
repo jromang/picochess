@@ -163,7 +163,7 @@
 # ponder-interval = 3
 ## Displays messages with only capital letters. Doesn't work on DGTXL/Revelation II due to hardware limits.
 ## If so, please uncomment the next line.
-# capital-letters = True
+# enable-capital-letters = True
 ## Should a confirmation message be displayed? If not, please active the next line
 # disable-confirm-message = True
 ## Should moves be displayed in short notation (only valid for non-XL clocks)? If not, please active the next line

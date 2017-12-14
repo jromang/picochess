@@ -599,7 +599,7 @@ def main():
     parser.add_argument('-lang', '--language', choices=['en', 'de', 'nl', 'fr', 'es', 'it'], default='en',
                         help='picochess language')
     parser.add_argument('-c', '--console', action='store_true', help='use console interface')
-    parser.add_argument('-cl', '--capital-letters', action='store_true', help='clock messages in capital letters')
+    parser.add_argument('-cl', '--enable-capital-letters', action='store_true', help='clock messages in capital letters')
     parser.add_argument('-noet', '--disable-et', action='store_true', help='some clocks need this to work - deprecated')
     parser.add_argument('-ss', '--slow-slide', type=int, default=0, choices=range(0, 10),
                         help='extra wait time factor for a stable board position (sliding detect)')
@@ -625,8 +625,8 @@ def main():
     # wire some dgt classes
     dgtboard = DgtBoard(args.dgt_port, args.disable_revelation_leds, args.dgtpi, args.disable_et, args.slow_slide)
     dgttranslate = DgtTranslate(args.beep_config, args.beep_some_level, args.language, version)
-    dgtmenu = DgtMenu(args.disable_confirm_message, args.ponder_interval, args.speed_voice, args.capital_letters,
-                      args.log_file, dgttranslate)
+    dgtmenu = DgtMenu(args.disable_confirm_message, args.ponder_interval, args.speed_voice, args.enable_capital_letters,
+                      args.disable_short_notation, args.log_file, dgttranslate)
     dgtdispatcher = Dispatcher(dgtmenu)
 
     time_control, time_text = transfer_time(args.time.split())
