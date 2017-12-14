@@ -77,7 +77,7 @@ class DgtHw(DgtIface):
     def display_move_on_clock(self, message):
         """Display a move on the dgtxl/3k."""
         display_m = self.enable_dgt3000 and not self.dgtboard.use_revelation_leds
-        if display_m:
+        if display_m and self.long_move:
             bit_board, text = self.get_san(message)
         else:
             text = message.move.uci()

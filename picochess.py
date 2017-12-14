@@ -603,6 +603,7 @@ def main():
     parser.add_argument('-noet', '--disable-et', action='store_true', help='some clocks need this to work - deprecated')
     parser.add_argument('-ss', '--slow-slide', type=int, default=0, choices=range(0, 10),
                         help='extra wait time factor for a stable board position (sliding detect)')
+    parser.add_argument('-nosn', '--disable-short-notation', action='store_true', help='disable short notation')
 
     args, unknown = parser.parse_known_args()
 

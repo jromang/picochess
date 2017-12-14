@@ -1,5 +1,5 @@
 ### ===================================
-### = picochess.ini.example v0.9[k-z] =
+### = picochess.ini.example v0.9[l-z] =
 ### ===================================
 ### Example and description how to configure PicoChess
 ### To use this file, simply copy this file to picochess.ini and edit the appropriate settings
@@ -166,3 +166,5 @@
 # capital-letters = True
 ## Should a confirmation message be displayed? If not, please active the next line
 # disable-confirm-message = True
+## Should moves be displayed in short notation (only valid for non-XL clocks)? If not, please active the next line
+# disable-short-notation = True

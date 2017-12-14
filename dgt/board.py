@@ -378,10 +378,6 @@ class DgtBoard(object):
             return self.serial.read(bytes_toread)
         except SerialException:
             pass
-        except TypeError:
-            pass
-        except struct.error:  # can happen, when plugin board-cable again
-            pass
         except AttributeError:  # serial is None (race condition)
             pass
         return b''
@@ -398,17 +394,16 @@ class DgtBoard(object):
         message_id = header[0]
         message_length = counter = (header[1] << 7) + header[2] - header_len
         if message_length <= 0 or message_length > 64:
-            if message_id == 0x8f and message_length == 0x1f00:
-                logging.warning('falsely DGT_SEND_EE_MOVES send => ignore EE_MOVES 0x%x bytes', self.serial.inWaiting())
+            if message_id == 0x8f and message_length == 0x1f00:  # @todo find out why this can happen
+                logging.warning('falsely DGT_SEND_EE_MOVES send before => receive and ignore EE_MOVES result')
                 self.watchdog_timer.stop()  # this serial read gonna take around 8secs
-                bytes_toread = 0x1f00
                 now = time.time()
-                while bytes_toread > 0:
-                    ee_moves = self._read_serial(bytes_toread)
-                    logging.info('EE_MOVES 0x%x bytes read', len(ee_moves))
-                    bytes_toread -= len(ee_moves)
-                    if time.time() - now > 20:
-                        logging.warning('EE_MOVES needed over 20secs => stop it')
+                while counter > 0:
+                    ee_moves = self._read_serial(counter)
+                    logging.info('EE_MOVES 0x%x bytes read - inWaiting: 0x%x', len(ee_moves), self.serial.inWaiting())
+                    counter -= len(ee_moves)
+                    if time.time() - now > 15:
+                        logging.warning('EE_MOVES needed over 15secs => ignore not readed 0x%x bytes now', counter)
                         break
                 self.watchdog_timer.start()
             else:
@@ -424,16 +419,19 @@ class DgtBoard(object):
 
         while counter:
             byte = self._read_serial()
-            if byte:
-                data = struct.unpack('>B', byte)
-                counter -= 1
-                if data[0] & 0x80:
-                    logging.warning('illegal data in message 0x%x found', message_id)
-                    logging.warning('ignore collected message data %s', message)
-                    return self._read_board_message(byte)
-                message += data
-            else:
-                logging.warning('timeout in data reading')
+            try:
+                if byte:
+                    data = struct.unpack('>B', byte)
+                    counter -= 1
+                    if data[0] & 0x80:
+                        logging.warning('illegal data in message 0x%x found', message_id)
+                        logging.warning('ignore collected message data %s', message)
+                        return self._read_board_message(byte)
+                    message += data
+                else:
+                    logging.warning('timeout in data reading')
+            except struct.error:
+                logging.warning('struct error => maybe a reconnected board?')
 
         self._process_board_message(message_id, message, message_length)
         return message
@@ -442,32 +440,23 @@ class DgtBoard(object):
         counter = 0
         logging.info('incoming_board ready')
         while True:
-            try:
-                byte = None
+            byte = b''
+            if self.serial:
+                byte = self._read_serial()
+            else:
+                self._setup_serial_port()
                 if self.serial:
-                    byte = self._read_serial()
-                else:
-                    self._setup_serial_port()
-                    if self.serial:
-                        logging.debug('sleeping for 0.5 secs. Afterwards startup the (ser) board')
-                        time.sleep(0.5)
-                        counter = 0
-                        self._startup_serial_board()
-                if byte and byte[0] & 0x80:
-                    self._read_board_message(head=byte)
-                else:
-                    counter = (counter + 1) % 10
-                    if counter == 0 and not self.watchdog_timer.is_running():  # issue 150 - check for alive connection
-                        self._watchdog()  # force to write something to the board
-                    time.sleep(0.1)
-            except SerialException:
-                pass
-            except TypeError:
-                pass
-            except struct.error:  # can happen, when plugin board-cable again
-                pass
-            except AttributeError:  # serial is None (race condition)
-                pass
+                    logging.debug('sleeping for 0.5 secs. Afterwards startup the (ser) board')
+                    time.sleep(0.5)
+                    counter = 0
+                    self._startup_serial_board()
+            if byte and byte[0] & 0x80:
+                self._read_board_message(head=byte)
+            else:
+                counter = (counter + 1) % 10
+                if counter == 0 and not self.watchdog_timer.is_running():
+                    self._watchdog()  # issue 150 - check for alive connection, so write something to the board
+                time.sleep(0.1)
 
     def ask_battery_status(self):
         """Ask the BT board for the battery status."""
