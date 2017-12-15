@@ -1213,7 +1213,7 @@ class DgtMenu(object):
             config = ConfigObj('picochess.ini')
             if self.menu_system_display_capital:
                 config['enable-capital-letters'] = self.menu_system_display_capital
-            elif 'capital-letters' in config:
+            elif 'enable-capital-letters' in config:
                 del config['enable-capital-letters']
             config.write()
             text = self._fire_dispatchdgt(self.dgttranslate.text('B10_okcapital'))
