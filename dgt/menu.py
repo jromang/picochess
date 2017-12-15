@@ -103,7 +103,7 @@ class DgtMenu(object):
         self.menu_system_display_confirm = disable_confirm
         self.menu_system_display_ponderinterval = ponder_interval
         self.menu_system_display_capital = enable_capital_letters
-        self.menu_system_display_notation = disable_short_move  # True = disable short move display
+        self.menu_system_display_notation = disable_short_move  # True = disable short move display => long display
         self.log_file = log_file
         self.dgttranslate = dgttranslate
         self.state = MenuState.TOP

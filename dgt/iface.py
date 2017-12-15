@@ -107,10 +107,10 @@ class DgtIface(DisplayDgt, Thread):
 
         bit_board = Board(message.fen, message.uci960)
         if bit_board.is_legal(message.move):
-            if message.short:
-                move_text = bit_board.san(message.move)
-            else:
+            if message.long:
                 move_text = message.move.uci()
+            else:
+                move_text = bit_board.san(message.move)
         else:
             logging.warning('[%s] illegal move %s found - uci960: %s fen: %s', self.get_name(), message.move,
                             message.uci960, message.fen)
