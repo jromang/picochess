@@ -119,7 +119,7 @@ class DgtIface(DisplayDgt, Thread):
 
         if message.side == ClockSide.RIGHT:
             move_text = move_text.rjust(6 if is_xl else 8)
-        return bit_board, move(move_text, message.lang, message.capital and not is_xl, message.short)
+        return bit_board, move(move_text, message.lang, message.capital and not is_xl, not message.long)
 
     def _process_message(self, message):
         if self.get_name() not in message.devs:
