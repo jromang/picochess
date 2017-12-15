@@ -685,7 +685,7 @@ class DgtMenu(object):
     def enter_sys_disp_notation_move_menu(self):
         """Set the menu state."""
         self.state = MenuState.SYS_DISP_NOTATION_MOVE
-        msg = 'short' if self.menu_system_display_notation else 'long'
+        msg = 'long' if self.menu_system_display_notation else 'short'
         text = self.dgttranslate.text('B00_notation_' + msg)
         return text
 
@@ -1479,7 +1479,7 @@ class DgtMenu(object):
 
         elif self.state == MenuState.SYS_DISP_NOTATION_MOVE:
             self.menu_system_display_notation = not self.menu_system_display_notation
-            msg = 'short' if self.menu_system_display_notation else 'long'
+            msg = 'long' if self.menu_system_display_notation else 'short'
             text = self.dgttranslate.text('B00_notation_' + msg)
 
         else:  # Default
@@ -1730,7 +1730,7 @@ class DgtMenu(object):
 
         elif self.state == MenuState.SYS_DISP_NOTATION_MOVE:
             self.menu_system_display_notation = not self.menu_system_display_notation
-            msg = 'short' if self.menu_system_display_notation else 'long'
+            msg = 'long' if self.menu_system_display_notation else 'short'
             text = self.dgttranslate.text('B00_notation_' + msg)
 
         else:  # Default
