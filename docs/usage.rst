@@ -35,13 +35,13 @@ Choosing skill level
 Put the extra **black** queen on the 5th rank of your DGT board to select skill level. The skill range of ​​the currently selected engine is devided by 8 meaning a5 (easiest level) towards h5 (strongest level). Some engines support ELO level or even personalities instead of skill levels. If no skill level is selected, PicoChess uses the highest level if nothing choosen before or your last selected level by default.
 (Remove the extra white queen if it is still on the board). Please notice that not all chess engines support levels.
 
-In case of "stockfish7" engine:
+In case of "Stockfish 8" engine:
 
 * Level  3 estimates about 1000 Elo (Absolute beginner)
 * Level  9 estimates about 1750 Elo (Mediate club player )
 * Level 20 estimates about 3100 Elo (Advanced tournament player)
 
-Another way to choose the skill level is by entering the "engine" menu with the clock buttons. Detailed explanation is below.
+Another way to choose the skill level is by entering the "Engine" menu with the clock buttons.
 
 Choosing opening books
 ----------------------
@@ -80,8 +80,10 @@ engines are set with the extra **black** queen.
 * **D6** - Rodent III
 * **E6** - Zurichess neuchatel
 * **F6** - WyldChess 10062017
-* **G6** - Galjoen 0.36
-* **H6** - Sayuri 2017.09.29
+* **G6** - Galjoen 0.37.1
+* **H6** - Sayuri 2017.12.16
+
+Another way to choose the engine is by entering the "Engine" menu with the clock buttons.
 
 Setting up time controls
 ------------------------
@@ -200,12 +202,12 @@ System Menu
 
 Here you choose between the following:
 
-* **information** - This is a submenu you see various informations like the current picochess version, your internal ip-adr (useful for the webserver) and your battery status (only useful if you have a BT board).
+* **information** - in this submenu you see various informations like the current picochess version, your internal ip-adr (useful for the webserver) and your battery status (only useful if you have a BT board).
 * **sound** - controls the beeps of your dgt clock. You can change between "never", "sometimes", or "always"
 * **language** - sets the language of clock messages. You can choose between english, german, french, dutch and spanish
 * **logfile** - sends a debug log file to your eMail box. Thats for us developers to have a clue what is going on at picochess. Please use this only if you asked for it.
 * **voice** - selects the voice for the computer and user. Also you can change the voice speed factor.
-* **display** - selects the ponder-time or if you see confirmation messages
+* **display** - selects various clock display options like ponder interval, confirmation messages, capital letters and short/long notation (useful if you have a DGT3000 or DGTPi)
 
 System shutdown
 ---------------

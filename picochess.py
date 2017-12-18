@@ -598,7 +598,7 @@ def main():
                         help='how long each part of ponder display should be visible (default=3secs)')
     parser.add_argument('-lang', '--language', choices=['en', 'de', 'nl', 'fr', 'es', 'it'], default='en',
                         help='picochess language')
-    parser.add_argument('-c', '--console', action='store_true', help='use console interface')
+    parser.add_argument('-c', '--enable-console', action='store_true', help='use console interface')
     parser.add_argument('-cl', '--enable-capital-letters', action='store_true', help='clock messages in capital letters')
     parser.add_argument('-noet', '--disable-et', action='store_true', help='some clocks need this to work - deprecated')
     parser.add_argument('-ss', '--slow-slide', type=int, default=0, choices=range(0, 10),
@@ -642,7 +642,7 @@ def main():
         WebServer(args.web_server_port, dgtboard).start()
         dgtdispatcher.register('web')
 
-    if args.console:
+    if args.enable_console:
         logging.debug('starting PicoChess in console mode')
         RepeatedTimer(1, _dgt_serial_nr).start()  # simulate the dgtboard watchdog
     else:
