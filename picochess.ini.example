@@ -34,7 +34,7 @@
 # dgt-port = /dev/ttyACM0
 ## Instead of connecting to a dgt board, you can also start picochess with a command line.
 ## If so, please uncomment the next line
-# console = True
+# enable-console = True
 ### Handle with care! Only activate this if you have a DGT Pi clock connected. So be careful!
 ### Also if you activate it but have non-DGT hardware connected (@raspberryPi) you might harm your hardware.
 ## If you have a new DGT Pi clock please uncomment the next line.
@@ -140,7 +140,7 @@
 ## Each step is 5% starting from 90% towards 135%. Sets factor for both voices (user/computer)
 # speed-voice = 2
 ## Speak last computer move again when 'set pieces' displayed
-# enable-setpieces-voice = False
+# enable-setpieces-voice = True
 ## PicoChess writes pgn files at end of game. This file is created in the 'games' folder
 # pgn-file = games.pgn
 ## If you want to have your own name in the pgn file uncomment the next line and change accordingly
