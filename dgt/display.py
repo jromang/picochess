@@ -324,7 +324,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                 text = self.dgttranslate.text('M10_level', msg)
                 text.wait = self._exit_menu()
                 logging.debug('map: New level %s', msg)
-                write_picochess_ini('engine-level', msg)
+                if not self.dgtmenu.remote_engine:
+                    write_picochess_ini('engine-level', msg)
                 Observable.fire(Event.LEVEL(options=level_dict[msg], level_text=text, level_name=msg))
             else:
                 logging.debug('engine doesnt support levels')
@@ -363,7 +364,8 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                     else:
                         msg = None
                         options = {}
-                    write_picochess_ini('engine-level', msg)
+                    if not self.dgtmenu.remote_engine:
+                        write_picochess_ini('engine-level', msg)
                     Observable.fire(Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options=options, show_ok=False))
                     self.dgtmenu.set_engine_restart(True)
                 except IndexError:

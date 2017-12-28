@@ -96,7 +96,7 @@ class DgtMenu(object):
     """Handle the Dgt Menu."""
 
     def __init__(self, disable_confirm: bool, ponder_interval: int, speed_voice: int, enable_capital_letters: bool,
-                 disable_short_move: bool, log_file, dgttranslate: DgtTranslate):
+                 disable_short_move: bool, log_file, engine_server, dgttranslate: DgtTranslate):
         super(DgtMenu, self).__init__()
 
         self.current_text = None  # save the current text
@@ -105,6 +105,7 @@ class DgtMenu(object):
         self.menu_system_display_capital = enable_capital_letters
         self.menu_system_display_notation = disable_short_move  # True = disable short move display => long display
         self.log_file = log_file
+        self.remote_engine = bool(engine_server)
         self.dgttranslate = dgttranslate
         self.state = MenuState.TOP
 
@@ -982,7 +983,8 @@ class DgtMenu(object):
             # maybe do action!
             text = self.enter_eng_name_level_menu()
             if not text:
-                write_picochess_ini('engine-level', None)
+                if not self.remote_engine:
+                    write_picochess_ini('engine-level', None)
                 eng = self.installed_engines[self.menu_engine_name]
                 eng_text = self.dgttranslate.text('B10_okengine')
                 event = Event.NEW_ENGINE(eng=eng, eng_text=eng_text, options={}, show_ok=True)
@@ -996,7 +998,8 @@ class DgtMenu(object):
             if level_dict:
                 msg = sorted(level_dict)[self.menu_engine_level]
                 options = level_dict[msg]
-                write_picochess_ini('engine-level', msg)
+                if not self.remote_engine:
+                    write_picochess_ini('engine-level', msg)
                 event = Event.LEVEL(options={}, level_text=self.dgttranslate.text('B10_level', msg), level_name=msg)
                 Observable.fire(event)
             else:

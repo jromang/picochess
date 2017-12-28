@@ -626,7 +626,7 @@ def main():
     dgtboard = DgtBoard(args.dgt_port, args.disable_revelation_leds, args.dgtpi, args.disable_et, args.slow_slide)
     dgttranslate = DgtTranslate(args.beep_config, args.beep_some_level, args.language, version)
     dgtmenu = DgtMenu(args.disable_confirm_message, args.ponder_interval, args.speed_voice, args.enable_capital_letters,
-                      args.disable_short_notation, args.log_file, dgttranslate)
+                      args.disable_short_notation, args.log_file, args.engine_remote_server, dgttranslate)
     dgtdispatcher = Dispatcher(dgtmenu)
 
     time_control, time_text = transfer_time(args.time.split())
@@ -845,7 +845,8 @@ def main():
                 else:
                     logging.error('engine shutdown failure')
                     DisplayMsg.show(Message.ENGINE_FAIL())
-                if not engine_fallback:  # here dont care if engine supports pondering, cause Mode.NORMAL from startup
+                # here dont care if engine supports pondering, cause Mode.NORMAL from startup
+                if not engine_fallback and not args.engine_remote_server:  # dont write engine(_level) if remote engine
                     write_picochess_ini('engine', event.eng['file'])
 
             elif isinstance(event, Event.SETUP_POSITION):
