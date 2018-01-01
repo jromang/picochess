@@ -27,8 +27,9 @@ from logging.handlers import RotatingFileHandler
 import time
 import queue
 import configargparse
+from platform import machine
 
-from uci.engine import UciEngine
+from uci.engine import UciShell, UciEngine
 from uci.read import read_engine_ini
 import chess
 import chess.polyglot
@@ -544,15 +545,18 @@ def main():
 
     # Command line argument parsing
     parser = configargparse.ArgParser(default_config_files=[os.path.join(os.path.dirname(__file__), 'picochess.ini')])
-    parser.add_argument('-e', '--engine', type=str, help="UCI engine executable path such as 'engines/armv7l/a-stockf'",
+    parser.add_argument('-e', '--engine', type=str, help="UCI engine filename/path such as 'engines/armv7l/a-stockf'",
                         default=None)
     parser.add_argument('-el', '--engine-level', type=str, help='UCI engine level', default=None)
-    parser.add_argument('-ers', '--engine-remote-server', type=str, help='adress of the remote engine server')
+    parser.add_argument('-er', '--engine-remote', type=str,
+                        help="UCI engine filename/path such as 'engines/armv7l/a-stockf'", default=None)
+    parser.add_argument('-ers', '--engine-remote-server', type=str, help='adress of the remote engine server',
+                        default=None)
     parser.add_argument('-eru', '--engine-remote-user', type=str, help='username for the remote engine server')
     parser.add_argument('-erp', '--engine-remote-pass', type=str, help='password for the remote engine server')
     parser.add_argument('-erk', '--engine-remote-key', type=str, help='key file for the remote engine server')
     parser.add_argument('-erh', '--engine-remote-home', type=str, help='engine home path for the remote engine server',
-                        default='/opt/picochess')
+                        default='')
     parser.add_argument('-d', '--dgt-port', type=str,
                         help="enable dgt board on the given serial port such as '/dev/ttyUSB0'")
     parser.add_argument('-b', '--book', type=str, help="path of book such as 'books/b-flank.bin'",
@@ -677,19 +681,20 @@ def main():
         update_picochess(args.dgtpi, args.enable_update_reboot, dgttranslate)
 
     # try the given engine first and if that fails the first/second from "engines.ini" then crush
-    engine_file = args.engine
+    engine_file = args.engine if args.engine_remote_server is None else args.engine_remote
+    engine_home = 'engines' + os.sep + machine() if args.engine_remote_server is None else args.engine_remote_home.rstrip(os.sep)
     engine_tries = 0
     engine = engine_name = None
+    uci_shell = UciShell(hostname=args.engine_remote_server, username=args.engine_remote_user,
+                         key_file=args.engine_remote_key, password=args.engine_remote_pass)
     while engine_tries < 2:
         if engine_file is None:
-            eng_ini = read_engine_ini()
+            eng_ini = read_engine_ini(uci_shell.get(), engine_home)
             engine_file = eng_ini[engine_tries]['file']
             engine_tries += 1
-
+        engine_file = os.path.basename(engine_file)
         # Gentlemen, start your engines...
-        engine = UciEngine(file=engine_file, hostname=args.engine_remote_server, username=args.engine_remote_user,
-                           key_file=args.engine_remote_key, password=args.engine_remote_pass,
-                           home=args.engine_remote_home)
+        engine = UciEngine(file=engine_file, uci_shell=uci_shell, home=engine_home)
         try:
             engine_name = engine.get_name()
             break
@@ -798,8 +803,7 @@ def main():
                 # Closeout the engine process and threads
                 if engine.quit():
                     # Load the new one and send args.
-                    # Local engines only
-                    engine = UciEngine(event.eng['file'])
+                    engine = UciEngine(file=event.eng['file'], uci_shell=uci_shell)
                     try:
                         engine_name = engine.get_name()
                     except AttributeError:
@@ -807,7 +811,7 @@ def main():
                         logging.error('new engine failed to start, reverting to %s', old_file)
                         engine_fallback = True
                         event.options = old_options
-                        engine = UciEngine(old_file)
+                        engine = UciEngine(file=old_file, uci_shell=uci_shell)
                         try:
                             engine_name = engine.get_name()
                         except AttributeError:
@@ -823,7 +827,7 @@ def main():
                         logging.debug('new engine doesnt support brain mode, reverting to %s', old_file)
                         engine_fallback = True
                         if engine.quit():
-                            engine = UciEngine(old_file)
+                            engine = UciEngine(file=old_file, uci_shell=uci_shell)
                             engine.startup(old_options)
                             engine.newgame(game.copy())
                         else:

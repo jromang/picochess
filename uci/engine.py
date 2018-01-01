@@ -30,26 +30,39 @@ from uci.informer import Informer
 from uci.read import read_engine_ini
 
 
+class UciShell(object):
+
+    """Handle the uci engine shell."""
+
+    def __init__(self, hostname=None, username=None, key_file=None, password=None):
+        super(UciShell, self).__init__()
+        if hostname:
+            logging.info('connecting to [%s]', hostname)
+            if key_file:
+                self.shell = spur.SshShell(hostname=hostname, username=username, private_key_file=key_file,
+                                           missing_host_key=paramiko.AutoAddPolicy())
+            else:
+                self.shell = spur.SshShell(hostname=hostname, username=username, password=password,
+                                           missing_host_key=paramiko.AutoAddPolicy())
+        else:
+            self.shell = None
+
+    def get(self):
+        return self.shell
+
+
 class UciEngine(object):
 
     """Handle the uci engine communication."""
 
-    def __init__(self, file: str, hostname=None, username=None, key_file=None, password=None, home=''):
+    def __init__(self, file: str, uci_shell: UciShell,  home=''):
         super(UciEngine, self).__init__()
         try:
-            self.shell = None
-            if hostname:
-                logging.info('connecting to [%s]', hostname)
-                if key_file:
-                    shell = spur.SshShell(hostname=hostname, username=username, private_key_file=key_file,
-                                          missing_host_key=paramiko.AutoAddPolicy())
-                else:
-                    shell = spur.SshShell(hostname=hostname, username=username, password=password,
-                                          missing_host_key=paramiko.AutoAddPolicy())
-                self.shell = shell
-                if home:
-                    file = home + os.sep + file
-                self.engine = chess.uci.spur_spawn_engine(shell, [file])
+            self.shell = uci_shell.get()
+            if home:
+                file = home + os.sep + file
+            if self.shell:
+                self.engine = chess.uci.spur_spawn_engine(self.shell, [file])
             else:
                 self.engine = chess.uci.popen_engine(file, stderr=DEVNULL)
 

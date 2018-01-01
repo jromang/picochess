@@ -194,7 +194,7 @@ def get_tags():
     """Get the last 3 tags from git."""
     git = git_name()
     tags = [(tags, tags[1] + tags[-2:]) for tags in do_popen([git, 'tag'], log=False).split('\n')[-4:-1]]
-    return tags  # returns something like [('v0.9a', 09a'), ('v0.9b', '09b'), ('v0.9c', '09c')]
+    return tags  # returns something like [('v0.9j', 09j'), ('v0.9k', '09k'), ('v0.9l', '09l')]
 
 
 def checkout_tag(tag):
@@ -209,7 +209,7 @@ def update_picochess(dgtpi: bool, auto_reboot: bool, dgttranslate: DgtTranslate)
     git = git_name()
 
     branch = do_popen([git, 'rev-parse', '--abbrev-ref', 'HEAD'], log=False).rstrip()
-    if branch == 'stable' or branch == 'master':
+    if branch == 'master':
         # Fetch remote repo
         do_popen([git, 'remote', 'update'])
         # Check if update is needed - need to make sure, we get english answers
@@ -226,6 +226,8 @@ def update_picochess(dgtpi: bool, auto_reboot: bool, dgttranslate: DgtTranslate)
                 time.sleep(2)  # give time to display the "update" message
         else:
             logging.debug('no update available')
+    else:
+        logging.debug('wrong branch %s', branch)
 
 
 def shutdown(dgtpi: bool, dev: str):

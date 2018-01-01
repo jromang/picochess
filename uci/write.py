@@ -18,7 +18,7 @@
 import platform
 import configparser
 import os
-from uci.engine import UciEngine
+from uci.engine import UciShell, UciEngine
 
 
 def write_engine_ini(engine_path=None):
@@ -99,9 +99,10 @@ def write_engine_ini(engine_path=None):
     engine_list = sorted(os.listdir(engine_path))
     config = configparser.ConfigParser()
     config.optionxform = str
+    uci_shell = UciShell()
     for engine_file_name in engine_list:
         if is_exe(engine_path + os.sep + engine_file_name):
-            engine = UciEngine(engine_path + os.sep + engine_file_name)
+            engine = UciEngine(file=engine_path + os.sep + engine_file_name, uci_shell=uci_shell)
             if engine:
                 print(engine_file_name)
                 try:
