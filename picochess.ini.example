@@ -1,5 +1,5 @@
 ### ===================================
-### = picochess.ini.example v0.9[l-z] =
+### = picochess.ini.example v0.9[m-z] =
 ### ===================================
 ### Example and description how to configure PicoChess
 ### To use this file, simply copy this file to picochess.ini and edit the appropriate settings
@@ -50,7 +50,6 @@
 ## Sets the UCI engine used at startup
 ## handle with care. If you setup this section wrong, picochess won't start.
 ## Path to the engine relative to the 'picochess' folder (local engine - standard case)
-## If you use a remote engine server, please make sure that you also set 'engine-remote-home' accordingly
 # engine = engines/armv7l/a-stockf
 ## What level the engine should have at startup?
 ## For a (correct) value please take a look at 'engines/<your_plattform>/<engine_name>.uci'
@@ -58,7 +57,10 @@
 ### =========================
 ### = Remote engine options =
 ### =========================
-### Parameters for a remote engine (server) - good chances you do not need them ;-)
+## Path to the remote engine - good chances you do not need them ;-)
+## Please make sure that you also set 'engine-remote-home' accordingly
+# engine-remote = engines/armv7l/a-stockf
+### Parameters for a remote engine (server)
 ## Where is the server with the engine
 # engine-remote-server = engine.remote-domain.com
 ## What user to use for connect to the remote-engine server

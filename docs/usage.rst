@@ -6,7 +6,7 @@ Setup the starting position
 Place the pieces in starting position. It doesn't matter if you have the white or black pieces in front of you. Both ways will work. Keep in mind that with black pieces in front of you the (printed) coordinates of your dgt-board also reversed.
 You can now start a game by moving a piece or press the lever to let picochess start as white.
 
-Its also possible to play a chess960 (Fischer Random Chess) game. Just set up your chess960 position. Please choose "Stockfish" as your engine, cause the other engines dont support chess960 mode.
+Its also possible to play a chess960 (Fischer Random Chess) game. Just set up your chess960 position. Please choose "Stockfish", "Galjoen" or "WyldChess" as your engine, cause the other engines dont support chess960 mode.
 Before or during your game you can also change your settings like book, time, engine, and many more (see details below). These settings are safed and reloaded, so you start with your old settings first.
 Settings can be changed by placing the white & black queen at the fields a4-h6 (you must be in the starting position) or by using the clock buttons (no matter the board position).
 With the queen placing you can change some default values, whereas the clock buttons offers the complete options.
@@ -16,11 +16,11 @@ Playing/Training Modes
 
 When using these modes, please be patient and don't rush moves. Allow a few seconds for the scores and moves to appear. If you see any bug when rushing moves, let us know on the mailing list.
 
-* Game mode (enabled by **white** queen on **A5**). This is the default mode. You can play against the computer. The clock displays the remaining thinking time for both sides. Press the second button to show the position evaluation, expressed in centipawns. Press again to show a hint ("ponder move").
+* Game mode (enabled by **white** queen on **A5**). This is the default mode. You can play against the computer. The clock displays the remaining thinking time for both sides.
 * Brain mode (enabled by **white** queen on **B5**). This is same as Game mode but the computer is using the permanent brain to think ahead on your thinking time.
 * Analysis mode (enabled by **white** queen on **C5**): the computer is watching the game, it does not play itself. The clock continually displays the best move for the side to play.
 * Kibitz mode (enabled by **white** queen on **D5**): the computer is watching the game, it does not play itself. The clock continually displays the position score (right aligned) with the search depth (left aligned).
-* Observe mode (enabled by **white** queen on **E5**): the computer is watching the game, it does not play itself. The clock displays the remaining thinking time for both sides. Press the second button once to show the position evaluation, twice to show a hint.
+* Observe mode (enabled by **white** queen on **E5**): the computer is watching the game, it does not play itself. The clock displays the remaining thinking time for both sides. The computer is thinking silently ahead. You can see the results by pressing the clock buttons (see below)
 * Ponder mode (enabled by **white** queen on **F5**): the computer is watching the game, it does not play itself. The clock displays the best move for the side to play in a 2 secs rotation with the position score together with the depth. So, this mode is a combination of "Analysis" & "Kibitz"
 * Remote mode (enabled by **white** queen on **H5**): this mode will allow you to play against someone over internet. The remote player using the webserver whereas the other player using the pieces as normal to enter moves. A detailed documentation will be provided lateron.
 
@@ -80,7 +80,7 @@ engines are set with the extra **black** queen.
 * **D6** - Rodent III
 * **E6** - Zurichess neuchatel
 * **F6** - WyldChess 10062017
-* **G6** - Galjoen 0.37.1
+* **G6** - Galjoen 0.37.2
 * **H6** - Sayuri 2017.12.16
 
 Another way to choose the engine is by entering the "Engine" menu with the clock buttons.
@@ -156,7 +156,7 @@ If you already inside the menu (clock showing you menu or value items) the funct
 
 * **(<) button** - moving up a level inside the menu tree. If you already at top exists the menu
 * **(-) button** - showing the previous value inside the menu tree
-* **(=) button** - no function
+* **(=) button** - no function (in position submenu: use last choosen values for the remaining questions)
 * **(+) button** - showing the next value inside the menu tree
 * **(>) button** - moving down a level inside the menu tree. If there is none, it accepts the choosen value and exists the menu
 
@@ -176,7 +176,7 @@ With the "=" button you can shortcut the 4 levels (useful for similar positions)
 
 * **side** - decides with side to move first
 * **origin** - is the board flipped (which side of board is white which is black)
-* **chess960** - is this a fischer random position (used for castling) Please make sure your choose engine support 960 mode (right now only stockfish, galjoe)
+* **chess960** - is this a fischer random position (used for castling) Please make sure your choose engine support 960 mode (right now only stockfish, galjoe, wyldchess)
 * **scan** - after accepting with ">" picochess will scan in the position (last chance to setup your pieces) and a new game will start
 
 Time Menu

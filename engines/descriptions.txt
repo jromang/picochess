@@ -1,5 +1,5 @@
 PicoChess Engines
-November 05, 2017
+January 01, 2018
 
 
 1. STOCKFISH
@@ -55,7 +55,7 @@ including skill levels to make it an attractive opponent for players of every st
 4. RODENT III
 ===========================
 Author: Paweł Kozioł
-Version: 0.229
+Version: 0.233
 Date: November 2017
 Elo: 2920
 Levels: 'Personalities'
@@ -105,8 +105,8 @@ engines not as detailed, but its tactics is very strong.
 7. GALJOEN
 ===========================
 Author: Werner Taelemans
-Version: 0.36
-Date: July 2017
+Version: 0.37.2
+Date: December 2017
 Elo: 2150
 Levels: yes
 Chess960: yes
@@ -122,8 +122,8 @@ user interface, which is, of course, not used by PicoChess.
 8. SAYURI
 ===========================
 Author: Hironori Ishibashi
-Version: 2017.09.29
-Date: September 2017
+Version: 2017.12.16
+Date: December 2017
 Elo: 1840
 Levels: no
 Chess960: no
