@@ -1101,12 +1101,18 @@ def main():
                 DisplayMsg.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=game.copy()))
 
             elif isinstance(event, Event.SHUTDOWN):
+                if uci_shell.get():
+                    with uci_shell.get():  # force to call __exit__ (close shell connection)
+                        pass
                 result = GameResult.ABORT
                 DisplayMsg.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=game.copy()))
                 DisplayMsg.show(Message.SYSTEM_SHUTDOWN())
                 shutdown(args.dgtpi, dev=event.dev)
 
             elif isinstance(event, Event.REBOOT):
+                if uci_shell.get():
+                    with uci_shell.get():  # force to call __exit__ (close shell connection)
+                        pass
                 result = GameResult.ABORT
                 DisplayMsg.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=game.copy()))
                 DisplayMsg.show(Message.SYSTEM_REBOOT())
