@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2013-2017 Jean-Francois Romang (jromang@posteo.de)
+# Copyright (C) 2013-2018 Jean-Francois Romang (jromang@posteo.de)
 #                         Shivkumar Shivaji ()
 #                         Jürgen Précour (LocutusOfPenguin@posteo.de)
 #
@@ -20,4 +20,4 @@
 __all__ = ['api', 'board', 'display', 'hw', 'iface', 'menu', 'pi', 'translate', 'util']
 __author__ = 'Jürgen Précour'
 __email__ = 'LocutusOfPenguin@posteo.de'
-__version__ = '0.87'
+__version__ = '0.9m'
