@@ -214,7 +214,7 @@ class Message():
     TAKE_BACK = ClassFactory(MessageApi.TAKE_BACK, ['game'])
     CLOCK_START = ClassFactory(MessageApi.CLOCK_START, ['turn', 'tc_init', 'devs'])
     CLOCK_STOP = ClassFactory(MessageApi.CLOCK_STOP, ['devs'])
-    CLOCK_TIME = ClassFactory(MessageApi.CLOCK_TIME, ['time_white', 'time_black'])
+    CLOCK_TIME = ClassFactory(MessageApi.CLOCK_TIME, ['time_white', 'time_black', 'low_time'])
     USER_MOVE_DONE = ClassFactory(MessageApi.USER_MOVE_DONE, ['move', 'fen', 'turn', 'game'])
     GAME_ENDS = ClassFactory(MessageApi.GAME_ENDS, ['result', 'play_mode', 'game'])
 

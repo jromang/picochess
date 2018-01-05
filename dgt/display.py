@@ -796,13 +796,9 @@ class DgtDisplay(DisplayMsg, threading.Thread):
                                              dev=message.dev))
 
         elif isinstance(message, Message.CLOCK_TIME):
-            time_u = message.time_white
-            time_c = message.time_black
-            if self.play_mode == PlayMode.USER_BLACK:
-                time_u, time_c = time_c, time_u
-            self.low_time = time_u < 60
+            self.low_time = message.low_time
             if self.low_time:
-                logging.debug('time too low, disable confirm - u: %i, c: %i', time_u, time_c)
+                logging.debug('time too low, disable confirm - w: %i, b: %i', message.time_white, message.time_black)
 
         elif isinstance(message, Message.DGT_SERIAL_NR):
             self._process_dgt_serial_nr()

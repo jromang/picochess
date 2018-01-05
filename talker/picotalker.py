@@ -264,13 +264,10 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                     self.talk(['picoChess.ogg'])
 
                 elif isinstance(message, Message.CLOCK_TIME):
-                    time_u = message.time_white
-                    time_c = message.time_black
-                    if self.play_mode == PlayMode.USER_BLACK:
-                        time_u, time_c = time_c, time_u
-                    self.low_time = time_u < 60
+                    self.low_time = message.low_time
                     if self.low_time:
-                        logging.debug('time too low, disable voice - u: %i, c: %i', time_u, time_c)
+                        logging.debug('time too low, disable voice - w: %i, b: %i', message.time_white,
+                                      message.time_black)
 
                 elif isinstance(message, Message.ALTERNATIVE_MOVE):
                     self.play_mode = message.play_mode
