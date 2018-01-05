@@ -1136,7 +1136,7 @@ class DgtMenu(object):
         elif self.state == MenuState.SYS_VOICE_COMP_MUTE:
             # maybe do action!
             if self.menu_system_voice_mute:
-                text = self.enter_sys_voice_user_mute_lang_menu()
+                text = self.enter_sys_voice_comp_mute_lang_menu()
             else:
                 config = ConfigObj('picochess.ini')
                 if 'computer-voice' in config:
