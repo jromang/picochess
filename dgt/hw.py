@@ -63,6 +63,8 @@ class DgtHw(DgtIface):
         text = message.m if display_m else message.s
         if text is None:
             text = message.l if display_m else message.m
+        # force 11 chars for H version
+        text = message.l
         if self.get_name() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)
             return True
@@ -89,6 +91,8 @@ class DgtHw(DgtIface):
             logging.debug('ignored %s - devs: %s', text, message.devs)
             return True
         if display_m:
+            # force 11 chars for H-version
+            text = message.l
             return self._display_on_dgt_3000(text, message.beep)
         else:
             left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE
