@@ -106,8 +106,10 @@ class DgtBoard(object):
         mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
         if not mes == DgtCmd.DGT_RETURN_SERIALNR:
             logging.debug('(ser) board put [%s] length: %i', mes, len(message))
-            # if mes.value == DgtClk.DGT_CMD_CLOCK_ASCII.value:
-            #     logging.debug('sending text [%s] to (ser) clock', ''.join([chr(elem) for elem in message[4:12]]))
+            if mes.value == DgtClk.DGT_CMD_CLOCK_ASCII.value:
+                logging.debug('sending text [%s] to (ser) clock', ''.join([chr(elem) for elem in message[4:12]]))
+            if mes.value == DgtClk.DGT_CMD_REV2_ASCII.value:
+                logging.debug('sending text [%s] to (rev) clock', ''.join([chr(elem) for elem in message[4:15]]))
 
         array = []
         char_to_xl = {
@@ -693,9 +695,9 @@ class DgtBoard(object):
 
     def set_text_3k(self, text: str, beep: int):
         """Display a text on a 3000 Clock."""
-        self._wait_for_clock('SetText3K()')
+        self._wait_for_clock('SetTextRev()')
         res = self.write_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x0f, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
-                                  0x0d,
+                                  DgtClk.DGT_CMD_REV2_ASCII,
                                   text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7],
                                   text[8], text[9], text[10], beep,
                                   DgtClk.DGT_CMD_CLOCK_END_MESSAGE])

@@ -560,8 +560,9 @@ class DgtClk(MyEnum):
     # the clock is in mode 23. A clock can be paused or counting down. But
     # counting up isn't supported on current DGT XL's (1.14 and lower) yet.
     DGT_CMD_CLOCK_BEEP = 0x0b  # This clock command turns the beep on, for a specified time (64ms * byte 5)
-    DGT_CMD_CLOCK_ASCII = 0x0c  # This clock commands sends a ASCII message to the clock that
-    # can be displayed only by the DGT3000.
+    DGT_CMD_CLOCK_ASCII = 0x0c  # This clock command sends a ASCII message to the clock that
+    DGT_CMD_REV2_ASCII = 0x0d  # This rev2 command sends a ASCII message to the clock that
+    # can be displayed only by the Revelation 2.
     DGT_CMD_CLOCK_START_MESSAGE = 0x03
     DGT_CMD_CLOCK_END_MESSAGE = 0x00
 
