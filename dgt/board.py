@@ -33,12 +33,14 @@ class DgtBoard(object):
 
     """Handle the DGT board communication."""
 
-    def __init__(self, device: str, disable_revelation_leds: bool, is_pi: bool, disable_end: bool, field_factor=0):
+    def __init__(self, device: str, disable_revelation_leds: bool, enable_revelation_3000: bool, is_pi: bool,
+                 disable_end: bool, field_factor=0):
         super(DgtBoard, self).__init__()
         self.given_device = device
         self.device = device
         self.use_revelation_leds = False
         self.disable_revelation_leds = disable_revelation_leds
+        self.enable_revelation_3000 = enable_revelation_3000
         self.is_pi = is_pi
         self.disable_end = disable_end  # @todo for test - XL needs a "end_text" maybe!
         self.field_factor = field_factor % 10

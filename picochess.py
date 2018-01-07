@@ -565,6 +565,8 @@ def main():
                         help="Time settings <FixSec> or <StMin IncSec> like '10'(move) or '5 0'(game) '3 2'(fischer). \
                         All values must be below 100")
     parser.add_argument('-norl', '--disable-revelation-leds', action='store_true', help='disable Revelation leds')
+    parser.add_argument('-r3', '--enable-revelation-3000', action='store_true',
+                        help='enable Revelation DGT3000 clock emulation - needs >=3.24H firmware!')
     parser.add_argument('-l', '--log-level', choices=['notset', 'debug', 'info', 'warning', 'error', 'critical'],
                         default='warning', help='logging level')
     parser.add_argument('-lf', '--log-file', type=str, help='log to the given file')
@@ -627,7 +629,8 @@ def main():
     if unknown:
         logging.warning('invalid parameter given %s', unknown)
     # wire some dgt classes
-    dgtboard = DgtBoard(args.dgt_port, args.disable_revelation_leds, args.dgtpi, args.disable_et, args.slow_slide)
+    dgtboard = DgtBoard(args.dgt_port, args.disable_revelation_leds, args.enable_revelation_3000, args.dgtpi,
+                        args.disable_et, args.slow_slide)
     dgttranslate = DgtTranslate(args.beep_config, args.beep_some_level, args.language, version)
     dgtmenu = DgtMenu(args.disable_confirm_message, args.ponder_interval, args.speed_voice, args.enable_capital_letters,
                       args.disable_short_notation, args.log_file, args.engine_remote_server, dgttranslate)
