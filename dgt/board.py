@@ -106,8 +106,8 @@ class DgtBoard(object):
         mes = message[3] if message[0].value == DgtCmd.DGT_CLOCK_MESSAGE.value else message[0]
         if not mes == DgtCmd.DGT_RETURN_SERIALNR:
             logging.debug('(ser) board put [%s] length: %i', mes, len(message))
-            if mes.value == DgtClk.DGT_CMD_CLOCK_ASCII.value:
-                logging.debug('sending text [%s] to (ser) clock', ''.join([chr(elem) for elem in message[4:12]]))
+            # if mes.value == DgtClk.DGT_CMD_CLOCK_ASCII.value:
+            #     logging.debug('sending text [%s] to (ser) clock', ''.join([chr(elem) for elem in message[4:12]]))
 
         array = []
         char_to_xl = {
