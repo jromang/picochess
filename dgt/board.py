@@ -694,10 +694,10 @@ class DgtBoard(object):
     def set_text_3k(self, text: str, beep: int):
         """Display a text on a 3000 Clock."""
         self._wait_for_clock('SetText3K()')
-        res = self.write_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x0d, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
-                                  DgtClk.DGT_CMD_CLOCK_ASCII,
+        res = self.write_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x0f, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                                  0x0d,
                                   text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7],
-                                     text[8], text[9], text[10], beep,
+                                  text[8], text[9], text[10], beep,
                                   DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         return res
 
