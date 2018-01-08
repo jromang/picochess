@@ -95,7 +95,8 @@ class DgtMenu(object):
 
     """Handle the Dgt Menu."""
 
-    def __init__(self, disable_confirm: bool, ponder_interval: int, speed_voice: int, enable_capital_letters: bool,
+    def __init__(self, disable_confirm: bool, ponder_interval: int,
+                 user_voice: str, comp_voice: str, speed_voice: int, enable_capital_letters: bool,
                  disable_short_move: bool, log_file, engine_server, dgttranslate: DgtTranslate):
         super(DgtMenu, self).__init__()
 
@@ -148,6 +149,9 @@ class DgtMenu(object):
 
         self.menu_system_voice_speak = 0
         self.menu_system_voice_speedfactor = speed_voice
+        # For test - pay the voice-software-credit (Karutz)
+        (user_language_name, user_speaker_name) = user_voice.split(':')
+        (comp_language_name, comp_speaker_name) = comp_voice.split(':')
 
         self.menu_system_display = Display.PONDER
         self.menu_system_info = Info.VERSION

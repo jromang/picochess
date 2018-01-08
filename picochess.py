@@ -629,7 +629,8 @@ def main():
     # wire some dgt classes
     dgtboard = DgtBoard(args.dgt_port, args.disable_revelation_leds, args.dgtpi, args.disable_et, args.slow_slide)
     dgttranslate = DgtTranslate(args.beep_config, args.beep_some_level, args.language, version)
-    dgtmenu = DgtMenu(args.disable_confirm_message, args.ponder_interval, args.speed_voice, args.enable_capital_letters,
+    dgtmenu = DgtMenu(args.disable_confirm_message, args.ponder_interval,
+                      args.user_voice, args.computer_voice, args.speed_voice, args.enable_capital_letters,
                       args.disable_short_notation, args.log_file, args.engine_remote_server, dgttranslate)
     dgtdispatcher = Dispatcher(dgtmenu)
 
