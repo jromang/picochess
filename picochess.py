@@ -1093,8 +1093,10 @@ def main():
                     else:  # here, we use the lowest time
                         if time_c < time_u:
                             time_u, time_c = time_c, time_u
-                    dgtboard.low_time = time_u <= 60  # this is used for "piece sliding" factor
-                    DisplayMsg.show(Message.CLOCK_TIME(time_white=event.time_white, time_black=event.time_black))
+                    low_time = time_u <= 60 and not (time_control.mode == TimeMode.FIXED and time_control.move_time > 2)
+                    dgtboard.low_time = low_time
+                    DisplayMsg.show(Message.CLOCK_TIME(time_white=event.time_white, time_black=event.time_black,
+                                                       low_time=low_time))
                 else:
                     logging.debug('ignore clock time - too low prio: %s', event.dev)
 

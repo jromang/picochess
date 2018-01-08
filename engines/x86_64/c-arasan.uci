@@ -1,0 +1,88 @@
+[DEFAULT]
+Threads = 1
+Hash = 32
+
+[Elo@1000]
+UCI_Elo = 1000
+UCI_LimitStrength = true
+
+[Elo@1080]
+UCI_Elo = 1080
+UCI_LimitStrength = true
+
+[Elo@1160]
+UCI_Elo = 1160
+UCI_LimitStrength = true
+
+[Elo@1240]
+UCI_Elo = 1240
+UCI_LimitStrength = true
+
+[Elo@1320]
+UCI_Elo = 1320
+UCI_LimitStrength = true
+
+[Elo@1400]
+UCI_Elo = 1400
+UCI_LimitStrength = true
+
+[Elo@1480]
+UCI_Elo = 1480
+UCI_LimitStrength = true
+
+[Elo@1560]
+UCI_Elo = 1560
+UCI_LimitStrength = true
+
+[Elo@1640]
+UCI_Elo = 1640
+UCI_LimitStrength = true
+
+[Elo@1720]
+UCI_Elo = 1720
+UCI_LimitStrength = true
+
+[Elo@1800]
+UCI_Elo = 1800
+UCI_LimitStrength = true
+
+[Elo@1880]
+UCI_Elo = 1880
+UCI_LimitStrength = true
+
+[Elo@1960]
+UCI_Elo = 1960
+UCI_LimitStrength = true
+
+[Elo@2040]
+UCI_Elo = 2040
+UCI_LimitStrength = true
+
+[Elo@2120]
+UCI_Elo = 2120
+UCI_LimitStrength = true
+
+[Elo@2200]
+UCI_Elo = 2200
+UCI_LimitStrength = true
+
+[Elo@2280]
+UCI_Elo = 2280
+UCI_LimitStrength = true
+
+[Elo@2360]
+UCI_Elo = 2360
+UCI_LimitStrength = true
+
+[Elo@2440]
+UCI_Elo = 2440
+UCI_LimitStrength = true
+
+[Elo@2520]
+UCI_Elo = 2520
+UCI_LimitStrength = true
+
+[Elo@2600]
+UCI_Elo = 2600
+UCI_LimitStrength = false
+
