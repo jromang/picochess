@@ -46,8 +46,8 @@ class DgtHw(DgtIface):
             return res
 
     def _display_on_dgt_3000(self, text: str, beep=False):
-        text = text.ljust(11)
-        if len(text) > 11:
+        text = text.ljust(8)
+        if len(text) > 8:
             logging.warning('(ser) clock message too long [%s]', text)
         logging.debug('[%s]', text)
         text = bytes(text, 'utf-8')
@@ -59,12 +59,11 @@ class DgtHw(DgtIface):
 
     def display_text_on_clock(self, message):
         """Display a text on the dgtxl/3k."""
-        display_m = self.enable_dgt3000 # and not self.dgtboard.use_revelation_leds
+        is_new_rev2 = self.dgtboard.is_revelation and self.dgtboard.enable_revelation_3000  # @todo check >=v3.24H
+        display_m = self.enable_dgt3000 or is_new_rev2
         text = message.m if display_m else message.s
         if text is None:
             text = message.l if display_m else message.m
-        # force 11 chars for H version
-        text = message.l
         if self.get_name() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)
             return True
@@ -78,7 +77,8 @@ class DgtHw(DgtIface):
 
     def display_move_on_clock(self, message):
         """Display a move on the dgtxl/3k."""
-        display_m = self.enable_dgt3000 # and not self.dgtboard.use_revelation_leds
+        is_new_rev2 = self.dgtboard.is_revelation and self.dgtboard.enable_revelation_3000  # @todo check >=v3.24H
+        display_m = self.enable_dgt3000 or is_new_rev2
         if display_m:
             bit_board, text = self.get_san(message)
         else:
@@ -91,8 +91,6 @@ class DgtHw(DgtIface):
             logging.debug('ignored %s - devs: %s', text, message.devs)
             return True
         if display_m:
-            # force 11 chars for H-version
-            text = message.l
             return self._display_on_dgt_3000(text, message.beep)
         else:
             left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE

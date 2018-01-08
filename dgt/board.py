@@ -38,9 +38,11 @@ class DgtBoard(object):
         super(DgtBoard, self).__init__()
         self.given_device = device
         self.device = device
-        self.use_revelation_leds = False
+        # rev2 flags
         self.disable_revelation_leds = disable_revelation_leds
         self.enable_revelation_3000 = enable_revelation_3000
+        self.is_revelation = False
+
         self.is_pi = is_pi
         self.disable_end = disable_end  # @todo for test - XL needs a "end_text" maybe!
         self.field_factor = field_factor % 10
@@ -181,11 +183,9 @@ class DgtBoard(object):
                 btname5 = self.bt_name[-5:]
                 if 'REVII' in self.bt_name:
                     text_l, text_m, text_s = 'RevII ' + btname5, 'Rev' + btname5, 'b' + btname5
-                    if not self.disable_revelation_leds:
-                        self.use_revelation_leds = True
+                    self.is_revelation = True
                 elif 'DGT_BT' in self.bt_name:
                     text_l, text_m, text_s = 'DGTBT ' + btname5, 'BT ' + btname5, 'b' + btname5
-                    self.use_revelation_leds = False
                 else:
                     text_l, text_m, text_s = 'BT e-Board', 'BT board', 'ok bt'
                 self.channel = 'BT'
@@ -696,11 +696,10 @@ class DgtBoard(object):
     def set_text_3k(self, text: str, beep: int):
         """Display a text on a 3000 Clock."""
         self._wait_for_clock('SetTextRev()')
-        res = self.write_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x0f, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
-                                  DgtClk.DGT_CMD_REV2_ASCII,
+        res = self.write_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x0c, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                                  DgtClk.DGT_CMD_CLOCK_ASCII,
                                   text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7],
-                                  text[8], text[9], text[10], beep,
-                                  DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+                                  beep, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
         return res
 
     def set_text_xl(self, text: str, beep: int, left_icons=ClockIcons.NONE, right_icons=ClockIcons.NONE):
@@ -745,7 +744,7 @@ class DgtBoard(object):
 
     def light_squares_on_revelation(self, uci_move: str):
         """Light the Rev2 leds."""
-        if self.use_revelation_leds:
+        if self.is_revelation and not self.disable_revelation_leds:
             logging.debug('(rev) leds turned on - move: %s', uci_move)
             fr_s = (8 - int(uci_move[1])) * 8 + ord(uci_move[0]) - ord('a')
             to_s = (8 - int(uci_move[3])) * 8 + ord(uci_move[2]) - ord('a')
@@ -753,7 +752,7 @@ class DgtBoard(object):
 
     def clear_light_on_revelation(self):
         """Clear the Rev2 leds."""
-        if self.use_revelation_leds:
+        if self.is_revelation and not self.disable_revelation_leds:
             logging.debug('(rev) leds turned off')
             self.write_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0x40, 0x40, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
     # dgtHw functions end

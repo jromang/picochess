@@ -154,8 +154,7 @@ class DgtIface(DisplayDgt, Thread):
                 logging.debug('(i2c) clock found => starting the board connection')
                 self.dgtboard.run()  # finally start the serial board connection - see picochess.py
             else:
-                if message.main == 2 or self.dgtboard.enable_revelation_3000:
-                    # or (message.main == 1 and message.sub == 14 and self.dgtboard.enable_revelation_3000):
+                if message.main == 2:
                     self.enable_dgt3000 = True
         else:  # switch-default
             pass

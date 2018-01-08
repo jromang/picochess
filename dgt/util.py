@@ -561,8 +561,9 @@ class DgtClk(MyEnum):
     # counting up isn't supported on current DGT XL's (1.14 and lower) yet.
     DGT_CMD_CLOCK_BEEP = 0x0b  # This clock command turns the beep on, for a specified time (64ms * byte 5)
     DGT_CMD_CLOCK_ASCII = 0x0c  # This clock command sends a ASCII message to the clock that
+    # can be displayed only by the DGT3000 clock.
     DGT_CMD_REV2_ASCII = 0x0d  # This rev2 command sends a ASCII message to the clock that
-    # can be displayed only by the Revelation 2.
+    # can be displayed only by the Revelation 2 with firmware >=3.24H.
     DGT_CMD_CLOCK_START_MESSAGE = 0x03
     DGT_CMD_CLOCK_END_MESSAGE = 0x00
 
