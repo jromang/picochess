@@ -745,6 +745,7 @@ class DgtBoard(object):
     def light_squares_on_revelation(self, uci_move: str):
         """Light the Rev2 leds."""
         if self.is_revelation and not self.disable_revelation_leds:
+            self._wait_for_clock('LIGHTon')
             logging.debug('(rev) leds turned on - move: %s', uci_move)
             fr_s = (8 - int(uci_move[1])) * 8 + ord(uci_move[0]) - ord('a')
             to_s = (8 - int(uci_move[3])) * 8 + ord(uci_move[2]) - ord('a')
@@ -753,6 +754,7 @@ class DgtBoard(object):
     def clear_light_on_revelation(self):
         """Clear the Rev2 leds."""
         if self.is_revelation and not self.disable_revelation_leds:
+            self._wait_for_clock('LIGHToff')
             logging.debug('(rev) leds turned off')
             self.write_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0x40, 0x40, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
     # dgtHw functions end
