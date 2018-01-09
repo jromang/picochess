@@ -33,14 +33,14 @@ class DgtBoard(object):
 
     """Handle the DGT board communication."""
 
-    def __init__(self, device: str, disable_revelation_leds: bool, enable_revelation_3000: bool, is_pi: bool,
+    def __init__(self, device: str, disable_revelation_leds: bool, enable_revelation_pi: bool, is_pi: bool,
                  disable_end: bool, field_factor=0):
         super(DgtBoard, self).__init__()
         self.given_device = device
         self.device = device
         # rev2 flags
         self.disable_revelation_leds = disable_revelation_leds
-        self.enable_revelation_3000 = enable_revelation_3000
+        self.enable_revelation_pi = enable_revelation_pi
         self.is_revelation = False
 
         self.is_pi = is_pi
@@ -745,7 +745,7 @@ class DgtBoard(object):
     def light_squares_on_revelation(self, uci_move: str):
         """Light the Rev2 leds."""
         if self.is_revelation and not self.disable_revelation_leds:
-            self._wait_for_clock('LIGHTon')
+            # self._wait_for_clock('LIGHTon')
             logging.debug('(rev) leds turned on - move: %s', uci_move)
             fr_s = (8 - int(uci_move[1])) * 8 + ord(uci_move[0]) - ord('a')
             to_s = (8 - int(uci_move[3])) * 8 + ord(uci_move[2]) - ord('a')
@@ -754,7 +754,7 @@ class DgtBoard(object):
     def clear_light_on_revelation(self):
         """Clear the Rev2 leds."""
         if self.is_revelation and not self.disable_revelation_leds:
-            self._wait_for_clock('LIGHToff')
+            # self._wait_for_clock('LIGHToff')
             logging.debug('(rev) leds turned off')
             self.write_command([DgtCmd.DGT_SET_LEDS, 0x04, 0x00, 0x40, 0x40, DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
     # dgtHw functions end
