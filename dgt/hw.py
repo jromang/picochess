@@ -60,9 +60,9 @@ class DgtHw(DgtIface):
     def display_text_on_clock(self, message):
         """Display a text on the dgtxl/3k."""
         is_new_rev2 = self.dgtboard.is_revelation and self.dgtboard.enable_revelation_pi  # @todo check >=v3.25A
-        display_m = self.enable_dgt3000 or is_new_rev2
+        display_m = self.enable_dgt3000
         text = message.m if display_m else message.s
-        if text is None:
+        if text is None or is_new_rev2:
             text = message.l if display_m else message.m
         if self.get_name() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)
@@ -78,9 +78,11 @@ class DgtHw(DgtIface):
     def display_move_on_clock(self, message):
         """Display a move on the dgtxl/3k."""
         is_new_rev2 = self.dgtboard.is_revelation and self.dgtboard.enable_revelation_pi  # @todo check >=v3.25A
-        display_m = self.enable_dgt3000 or is_new_rev2
-        if display_m:
+        display_m = self.enable_dgt3000
+        if display_m or is_new_rev2:
             bit_board, text = self.get_san(message)
+            if is_new_rev2:
+                text = '{:3d}{:s}'.format(bit_board.fullmove_number, text)
         else:
             text = message.move.uci()
             if message.side == ClockSide.RIGHT:
