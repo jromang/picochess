@@ -619,12 +619,14 @@ class DgtMenu(object):
         """Set the menu state."""
         self.state = MenuState.SYS_VOICE_USER_MUTE_LANG_SPEAK
         vkey = self.voices_conf.keys()[self.menu_system_voice_user_lang]
+        self.menu_system_voice_user_speak %= len(self.voices_conf[vkey])  # in case: change from higher=>lower speakerNo
         return self._get_current_speaker(self.voices_conf[vkey], self.menu_system_voice_user_speak)
 
     def enter_sys_voice_comp_mute_lang_speak_menu(self):
         """Set the menu state."""
         self.state = MenuState.SYS_VOICE_COMP_MUTE_LANG_SPEAK
         vkey = self.voices_conf.keys()[self.menu_system_voice_comp_lang]
+        self.menu_system_voice_comp_speak %= len(self.voices_conf[vkey])  # in case: change from higher=>lower speakerNo
         return self._get_current_speaker(self.voices_conf[vkey], self.menu_system_voice_comp_speak)
 
     def enter_sys_voice_speed_menu(self):
