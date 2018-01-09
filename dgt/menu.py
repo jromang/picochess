@@ -1176,11 +1176,9 @@ class DgtMenu(object):
 
         elif self.state == MenuState.SYS_VOICE_SPEED_FACTOR:
             # do action!
-            vkey = self.voices_conf.keys()[self.menu_system_voice_user_lang]  # @todo doesnt work!!
-            speakers = self.voices_conf[vkey].keys()
-            skey = speakers[self.menu_system_voice_user_speak]  # @todo doesnt work!!
+            assert self.menu_system_voice == Voice.SPEED, 'menu item is not Voice.SPEED: %s' % self.menu_system_voice
             write_picochess_ini('speed-voice', self.menu_system_voice_speedfactor)
-            event = Event.SET_VOICE(type=self.menu_system_voice, lang=vkey, speaker=skey,
+            event = Event.SET_VOICE(type=self.menu_system_voice, lang='en', speaker='mute',  # lang & speaker ignored
                                     speed=self.menu_system_voice_speedfactor)
             Observable.fire(event)
             text = self._fire_dispatchdgt(self.dgttranslate.text('B10_okspeed'))
