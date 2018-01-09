@@ -46,8 +46,8 @@ class DgtHw(DgtIface):
             return res
 
     def _display_on_dgt_3000(self, text: str, beep=False):
-        text = text.ljust(8)
-        if len(text) > 8:
+        text = text.ljust(11)
+        if len(text) > 11:
             logging.warning('(ser) clock message too long [%s]', text)
         logging.debug('[%s]', text)
         text = bytes(text, 'utf-8')
