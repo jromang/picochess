@@ -283,11 +283,11 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
 
                 elif isinstance(message, Message.SET_VOICE):
                     self.speed_factor = (90 + (message.speed % 10) * 5) / 100
-                    picotalker = PicoTalker(message.lang + ':' + message.speaker, self.speed_factor)
+                    localisation_id_voice = message.lang + ':' + message.speaker
                     if message.type == Voice.USER:
-                        self.set_user(picotalker)
+                        self.set_user(PicoTalker(localisation_id_voice, self.speed_factor))
                     if message.type == Voice.COMP:
-                        self.set_computer(picotalker)
+                        self.set_computer(PicoTalker(localisation_id_voice, self.speed_factor))
                     if message.type == Voice.SPEED:
                         self.set_factor(self.speed_factor)
 
