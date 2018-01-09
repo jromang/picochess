@@ -141,13 +141,15 @@ class DgtMenu(object):
 
         self.voices_conf = ConfigObj('talker' + os.sep + 'voices' + os.sep + 'voices.ini')
         self.menu_system_voice = Voice.COMP
-        self.menu_system_voice_mute = False
+        self.menu_system_voice_user_mute = self.menu_system_voice_comp_mute = False
         try:
-            self.menu_system_voice_lang = self.voices_conf.keys().index(self.dgttranslate.language)
+            self.menu_system_voice_user_lang = self.voices_conf.keys().index(self.dgttranslate.language)
+            self.menu_system_voice_comp_lang = self.voices_conf.keys().index(self.dgttranslate.language)
         except ValueError:
-            self.menu_system_voice_lang = 0
+            self.menu_system_voice_user_lang = 0
+            self.menu_system_voice_comp_lang = 0
 
-        self.menu_system_voice_speak = 0
+        self.menu_system_voice_user_speak = self.menu_system_voice_comp_speak = 0
         self.menu_system_voice_speedfactor = speed_voice
         # For test - pay the voice-software-credit (Karutz)
         (user_language_name, user_speaker_name) = user_voice.split(':')
@@ -573,14 +575,14 @@ class DgtMenu(object):
     def enter_sys_voice_user_mute_menu(self):
         """Set the menu state."""
         self.state = MenuState.SYS_VOICE_USER_MUTE
-        msg = 'on' if self.menu_system_voice_mute else 'off'
+        msg = 'on' if self.menu_system_voice_user_mute else 'off'
         text = self.dgttranslate.text('B00_voice_' + msg)
         return text
 
     def enter_sys_voice_user_mute_lang_menu(self):
         """Set the menu state."""
         self.state = MenuState.SYS_VOICE_USER_MUTE_LANG
-        vkey = self.voices_conf.keys()[self.menu_system_voice_lang]
+        vkey = self.voices_conf.keys()[self.menu_system_voice_user_lang]
         text = self.dgttranslate.text('B00_language_' + vkey + '_menu')
         return text
 
@@ -593,19 +595,19 @@ class DgtMenu(object):
     def enter_sys_voice_comp_mute_menu(self):
         """Set the menu state."""
         self.state = MenuState.SYS_VOICE_COMP_MUTE
-        msg = 'on' if self.menu_system_voice_mute else 'off'
+        msg = 'on' if self.menu_system_voice_comp_mute else 'off'
         text = self.dgttranslate.text('B00_voice_' + msg)
         return text
 
     def enter_sys_voice_comp_mute_lang_menu(self):
         """Set the menu state."""
         self.state = MenuState.SYS_VOICE_COMP_MUTE_LANG
-        vkey = self.voices_conf.keys()[self.menu_system_voice_lang]
+        vkey = self.voices_conf.keys()[self.menu_system_voice_comp_lang]
         text = self.dgttranslate.text('B00_language_' + vkey + '_menu')
         return text
 
-    def _get_current_speaker(self, speakers):
-        speaker = speakers[list(speakers)[self.menu_system_voice_speak]]
+    def _get_current_speaker(self, speakers, index:int):
+        speaker = speakers[list(speakers)[index]]
         text = Dgt.DISPLAY_TEXT(l=speaker['large'], m=speaker['medium'], s=speaker['small'])
         text.beep = self.dgttranslate.bl(BeepLevel.BUTTON)
         text.wait = False
@@ -616,14 +618,14 @@ class DgtMenu(object):
     def enter_sys_voice_user_mute_lang_speak_menu(self):
         """Set the menu state."""
         self.state = MenuState.SYS_VOICE_USER_MUTE_LANG_SPEAK
-        vkey = self.voices_conf.keys()[self.menu_system_voice_lang]
-        return self._get_current_speaker(self.voices_conf[vkey])
+        vkey = self.voices_conf.keys()[self.menu_system_voice_user_lang]
+        return self._get_current_speaker(self.voices_conf[vkey], self.menu_system_voice_user_speak)
 
     def enter_sys_voice_comp_mute_lang_speak_menu(self):
         """Set the menu state."""
         self.state = MenuState.SYS_VOICE_COMP_MUTE_LANG_SPEAK
-        vkey = self.voices_conf.keys()[self.menu_system_voice_lang]
-        return self._get_current_speaker(self.voices_conf[vkey])
+        vkey = self.voices_conf.keys()[self.menu_system_voice_comp_lang]
+        return self._get_current_speaker(self.voices_conf[vkey], self.menu_system_voice_comp_speak)
 
     def enter_sys_voice_speed_menu(self):
         """Set the menu state."""
@@ -1110,7 +1112,7 @@ class DgtMenu(object):
 
         elif self.state == MenuState.SYS_VOICE_USER_MUTE:
             # maybe do action!
-            if self.menu_system_voice_mute:
+            if self.menu_system_voice_user_mute:
                 text = self.enter_sys_voice_user_mute_lang_menu()
             else:
                 config = ConfigObj('picochess.ini')
@@ -1126,10 +1128,10 @@ class DgtMenu(object):
 
         elif self.state == MenuState.SYS_VOICE_USER_MUTE_LANG_SPEAK:
             # do action!
-            vkey = self.voices_conf.keys()[self.menu_system_voice_lang]
+            vkey = self.voices_conf.keys()[self.menu_system_voice_user_lang]
             speakers = self.voices_conf[vkey].keys()
             config = ConfigObj('picochess.ini')
-            skey = speakers[self.menu_system_voice_speak]
+            skey = speakers[self.menu_system_voice_user_speak]
             config['user-voice'] = vkey + ':' + skey
             config.write()
             event = Event.SET_VOICE(type=self.menu_system_voice, lang=vkey, speaker=skey,
@@ -1139,7 +1141,7 @@ class DgtMenu(object):
 
         elif self.state == MenuState.SYS_VOICE_COMP_MUTE:
             # maybe do action!
-            if self.menu_system_voice_mute:
+            if self.menu_system_voice_comp_mute:
                 text = self.enter_sys_voice_comp_mute_lang_menu()
             else:
                 config = ConfigObj('picochess.ini')
@@ -1155,10 +1157,10 @@ class DgtMenu(object):
 
         elif self.state == MenuState.SYS_VOICE_COMP_MUTE_LANG_SPEAK:
             # do action!
-            vkey = self.voices_conf.keys()[self.menu_system_voice_lang]
+            vkey = self.voices_conf.keys()[self.menu_system_voice_comp_lang]
             speakers = self.voices_conf[vkey].keys()
             config = ConfigObj('picochess.ini')
-            skey = speakers[self.menu_system_voice_speak]
+            skey = speakers[self.menu_system_voice_comp_speak]
             config['computer-voice'] = vkey + ':' + skey
             config.write()
             event = Event.SET_VOICE(type=self.menu_system_voice, lang=vkey, speaker=skey,
@@ -1172,9 +1174,9 @@ class DgtMenu(object):
 
         elif self.state == MenuState.SYS_VOICE_SPEED_FACTOR:
             # do action!
-            vkey = self.voices_conf.keys()[self.menu_system_voice_lang]
+            vkey = self.voices_conf.keys()[self.menu_system_voice_user_lang]  # @todo doesnt work!!
             speakers = self.voices_conf[vkey].keys()
-            skey = speakers[self.menu_system_voice_speak]
+            skey = speakers[self.menu_system_voice_user_speak]  # @todo doesnt work!!
             write_picochess_ini('speed-voice', self.menu_system_voice_speedfactor)
             event = Event.SET_VOICE(type=self.menu_system_voice, lang=vkey, speaker=skey,
                                     speed=self.menu_system_voice_speedfactor)
@@ -1398,20 +1400,20 @@ class DgtMenu(object):
             text = self.dgttranslate.text(self.menu_system_voice.value)
 
         elif self.state == MenuState.SYS_VOICE_USER_MUTE:
-            self.menu_system_voice_mute = not self.menu_system_voice_mute
-            msg = 'on' if self.menu_system_voice_mute else 'off'
+            self.menu_system_voice_user_mute = not self.menu_system_voice_user_mute
+            msg = 'on' if self.menu_system_voice_user_mute else 'off'
             text = self.dgttranslate.text('B00_voice_' + msg)
 
         elif self.state == MenuState.SYS_VOICE_USER_MUTE_LANG:
-            self.menu_system_voice_lang = (self.menu_system_voice_lang - 1) % len(self.voices_conf)
-            vkey = self.voices_conf.keys()[self.menu_system_voice_lang]
+            self.menu_system_voice_user_lang = (self.menu_system_voice_user_lang - 1) % len(self.voices_conf)
+            vkey = self.voices_conf.keys()[self.menu_system_voice_user_lang]
             text = self.dgttranslate.text('B00_language_' + vkey + '_menu')  # voice using same as language
 
         elif self.state == MenuState.SYS_VOICE_USER_MUTE_LANG_SPEAK:
-            vkey = self.voices_conf.keys()[self.menu_system_voice_lang]
+            vkey = self.voices_conf.keys()[self.menu_system_voice_user_lang]
             speakers = self.voices_conf[vkey]
-            self.menu_system_voice_speak = (self.menu_system_voice_speak - 1) % len(speakers)
-            text = self._get_current_speaker(speakers)
+            self.menu_system_voice_user_speak = (self.menu_system_voice_user_speak - 1) % len(speakers)
+            text = self._get_current_speaker(speakers, self.menu_system_voice_user_speak)
 
         elif self.state == MenuState.SYS_VOICE_COMP:
             self.state = MenuState.SYS_VOICE_SPEED
@@ -1419,20 +1421,20 @@ class DgtMenu(object):
             text = self.dgttranslate.text(self.menu_system_voice.value)
 
         elif self.state == MenuState.SYS_VOICE_COMP_MUTE:
-            self.menu_system_voice_mute = not self.menu_system_voice_mute
-            msg = 'on' if self.menu_system_voice_mute else 'off'
+            self.menu_system_voice_comp_mute = not self.menu_system_voice_comp_mute
+            msg = 'on' if self.menu_system_voice_comp_mute else 'off'
             text = self.dgttranslate.text('B00_voice_' + msg)
 
         elif self.state == MenuState.SYS_VOICE_COMP_MUTE_LANG:
-            self.menu_system_voice_lang = (self.menu_system_voice_lang - 1) % len(self.voices_conf)
-            vkey = self.voices_conf.keys()[self.menu_system_voice_lang]
+            self.menu_system_voice_comp_lang = (self.menu_system_voice_comp_lang - 1) % len(self.voices_conf)
+            vkey = self.voices_conf.keys()[self.menu_system_voice_comp_lang]
             text = self.dgttranslate.text('B00_language_' + vkey + '_menu')  # voice using same as language
 
         elif self.state == MenuState.SYS_VOICE_COMP_MUTE_LANG_SPEAK:
-            vkey = self.voices_conf.keys()[self.menu_system_voice_lang]
+            vkey = self.voices_conf.keys()[self.menu_system_voice_comp_lang]
             speakers = self.voices_conf[vkey]
-            self.menu_system_voice_speak = (self.menu_system_voice_speak - 1) % len(speakers)
-            text = self._get_current_speaker(speakers)
+            self.menu_system_voice_comp_speak = (self.menu_system_voice_comp_speak - 1) % len(speakers)
+            text = self._get_current_speaker(speakers, self.menu_system_voice_comp_speak)
 
         elif self.state == MenuState.SYS_VOICE_SPEED:
             self.state = MenuState.SYS_VOICE_USER
@@ -1649,20 +1651,20 @@ class DgtMenu(object):
             text = self.dgttranslate.text(self.menu_system_voice.value)
 
         elif self.state == MenuState.SYS_VOICE_USER_MUTE:
-            self.menu_system_voice_mute = not self.menu_system_voice_mute
-            msg = 'on' if self.menu_system_voice_mute else 'off'
+            self.menu_system_voice_user_mute = not self.menu_system_voice_user_mute
+            msg = 'on' if self.menu_system_voice_user_mute else 'off'
             text = self.dgttranslate.text('B00_voice_' + msg)
 
         elif self.state == MenuState.SYS_VOICE_USER_MUTE_LANG:
-            self.menu_system_voice_lang = (self.menu_system_voice_lang + 1) % len(self.voices_conf)
-            vkey = self.voices_conf.keys()[self.menu_system_voice_lang]
+            self.menu_system_voice_user_lang = (self.menu_system_voice_user_lang + 1) % len(self.voices_conf)
+            vkey = self.voices_conf.keys()[self.menu_system_voice_user_lang]
             text = self.dgttranslate.text('B00_language_' + vkey + '_menu')  # voice using same as language
 
         elif self.state == MenuState.SYS_VOICE_USER_MUTE_LANG_SPEAK:
-            vkey = self.voices_conf.keys()[self.menu_system_voice_lang]
+            vkey = self.voices_conf.keys()[self.menu_system_voice_user_lang]
             speakers = self.voices_conf[vkey]
-            self.menu_system_voice_speak = (self.menu_system_voice_speak + 1) % len(speakers)
-            text = self._get_current_speaker(speakers)
+            self.menu_system_voice_user_speak = (self.menu_system_voice_user_speak + 1) % len(speakers)
+            text = self._get_current_speaker(speakers, self.menu_system_voice_user_speak)
 
         elif self.state == MenuState.SYS_VOICE_COMP:
             self.state = MenuState.SYS_VOICE_USER
@@ -1670,20 +1672,20 @@ class DgtMenu(object):
             text = self.dgttranslate.text(self.menu_system_voice.value)
 
         elif self.state == MenuState.SYS_VOICE_COMP_MUTE:
-            self.menu_system_voice_mute = not self.menu_system_voice_mute
-            msg = 'on' if self.menu_system_voice_mute else 'off'
+            self.menu_system_voice_comp_mute = not self.menu_system_voice_comp_mute
+            msg = 'on' if self.menu_system_voice_comp_mute else 'off'
             text = self.dgttranslate.text('B00_voice_' + msg)
 
         elif self.state == MenuState.SYS_VOICE_COMP_MUTE_LANG:
-            self.menu_system_voice_lang = (self.menu_system_voice_lang + 1) % len(self.voices_conf)
-            vkey = self.voices_conf.keys()[self.menu_system_voice_lang]
+            self.menu_system_voice_comp_lang = (self.menu_system_voice_comp_lang + 1) % len(self.voices_conf)
+            vkey = self.voices_conf.keys()[self.menu_system_voice_comp_lang]
             text = self.dgttranslate.text('B00_language_' + vkey + '_menu')  # voice using same as language
 
         elif self.state == MenuState.SYS_VOICE_COMP_MUTE_LANG_SPEAK:
-            vkey = self.voices_conf.keys()[self.menu_system_voice_lang]
+            vkey = self.voices_conf.keys()[self.menu_system_voice_comp_lang]
             speakers = self.voices_conf[vkey]
-            self.menu_system_voice_speak = (self.menu_system_voice_speak + 1) % len(speakers)
-            text = self._get_current_speaker(speakers)
+            self.menu_system_voice_comp_speak = (self.menu_system_voice_comp_speak + 1) % len(speakers)
+            text = self._get_current_speaker(speakers, self.menu_system_voice_comp_speak)
 
         elif self.state == MenuState.SYS_VOICE_SPEED:
             self.state = MenuState.SYS_VOICE_COMP
