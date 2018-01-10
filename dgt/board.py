@@ -365,12 +365,12 @@ class DgtBoard(object):
                 self.stop_field_timer()
             self.start_field_timer()
 
-        elif message_id == DgtMsg.DGT_MSG_LONG_SERIALNR:
+        elif message_id == DgtMsg.DGT_MSG_SERIALNR:
             if message_length != 5:
                 logging.warning('illegal length in data')
             DisplayMsg.show(Message.DGT_SERIAL_NR(number=''.join([chr(elem) for elem in message])))
 
-        elif message_id == DgtMsg.DGT_LONG_SERIALNR:
+        elif message_id == DgtMsg.DGT_MSG_LONG_SERIALNR:
             if message_length != 10:
                 logging.warning('illegal length in data')
             DisplayMsg.show(Message.DGT_SERIAL_LONG_NR(number=''.join([chr(elem) for elem in message])))
