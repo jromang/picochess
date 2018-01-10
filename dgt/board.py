@@ -184,6 +184,7 @@ class DgtBoard(object):
                 if 'REVII' in self.bt_name:
                     text_l, text_m, text_s = 'RevII ' + btname5, 'Rev' + btname5, 'b' + btname5
                     self.is_revelation = True
+                    self.write_command([DgtCmd.DGT_RETURN_LONG_SERIALNR])
                 elif 'DGT_BT' in self.bt_name:
                     text_l, text_m, text_s = 'DGTBT ' + btname5, 'BT ' + btname5, 'b' + btname5
                 else:
@@ -368,6 +369,11 @@ class DgtBoard(object):
             if message_length != 5:
                 logging.warning('illegal length in data')
             DisplayMsg.show(Message.DGT_SERIAL_NR(number=''.join([chr(elem) for elem in message])))
+
+        elif message_id == DgtMsg.DGT_LONG_SERIALNR:
+            if message_length != 10:
+                logging.warning('illegal length in data')
+            DisplayMsg.show(Message.DGT_SERIAL_LONG_NR(number=''.join([chr(elem) for elem in message])))
 
         elif message_id == DgtMsg.DGT_MSG_BATTERY_STATUS:
             if message_length != 9:
