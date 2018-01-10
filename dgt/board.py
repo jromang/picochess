@@ -33,14 +33,13 @@ class DgtBoard(object):
 
     """Handle the DGT board communication."""
 
-    def __init__(self, device: str, disable_revelation_leds: bool, enable_revelation_pi: bool, is_pi: bool,
-                 disable_end: bool, field_factor=0):
+    def __init__(self, device: str, disable_revelation_leds: bool, is_pi: bool, disable_end: bool, field_factor=0):
         super(DgtBoard, self).__init__()
         self.given_device = device
         self.device = device
         # rev2 flags
         self.disable_revelation_leds = disable_revelation_leds
-        self.enable_revelation_pi = enable_revelation_pi
+        self.enable_revelation_pi = False
         self.is_revelation = False
 
         self.is_pi = is_pi
