@@ -373,7 +373,8 @@ class DgtBoard(object):
         elif message_id == DgtMsg.DGT_MSG_LONG_SERIALNR:
             if message_length != 10:
                 logging.warning('illegal length in data')
-            DisplayMsg.show(Message.DGT_SERIAL_LONG_NR(number=''.join([chr(elem) for elem in message])))
+            number = ''.join([chr(elem) for elem in message])
+            self.enable_revelation_pi = float(number[:4]) >= 3.25  # "3.250010001" "0000000001"
 
         elif message_id == DgtMsg.DGT_MSG_BATTERY_STATUS:
             if message_length != 9:

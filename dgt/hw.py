@@ -59,27 +59,25 @@ class DgtHw(DgtIface):
 
     def display_text_on_clock(self, message):
         """Display a text on the dgtxl/3k."""
-        is_new_rev2 = self.dgtboard.is_revelation and self.dgtboard.enable_revelation_pi  # @todo check >=v3.25A
-        display_m = self.enable_dgt3000
-        text = message.m if display_m else message.s
+        is_new_rev2 = self.dgtboard.is_revelation and self.dgtboard.enable_revelation_pi
+        text = message.m if self.enable_dgt3000 else message.s
         if text is None or is_new_rev2:
-            text = message.l if display_m else message.m
+            text = message.l if self.enable_dgt3000 else message.m
         if self.get_name() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)
             return True
         left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE
         right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
 
-        if display_m:
+        if self.enable_dgt3000:
             return self._display_on_dgt_3000(text, message.beep)
         else:
             return self._display_on_dgt_xl(text, message.beep, left_icons, right_icons)
 
     def display_move_on_clock(self, message):
         """Display a move on the dgtxl/3k."""
-        is_new_rev2 = self.dgtboard.is_revelation and self.dgtboard.enable_revelation_pi  # @todo check >=v3.25A
-        display_m = self.enable_dgt3000
-        if display_m or is_new_rev2:
+        is_new_rev2 = self.dgtboard.is_revelation and self.dgtboard.enable_revelation_pi
+        if self.enable_dgt3000 or is_new_rev2:
             bit_board, text = self.get_san(message)
             if is_new_rev2:
                 text = '{:3d}{:s}'.format(bit_board.fullmove_number, text)
@@ -92,7 +90,7 @@ class DgtHw(DgtIface):
         if self.get_name() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)
             return True
-        if display_m:
+        if self.enable_dgt3000:
             return self._display_on_dgt_3000(text, message.beep)
         else:
             left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE

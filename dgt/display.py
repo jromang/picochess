@@ -646,12 +646,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             DispatchDgt.fire(text)
             self.show_move_or_value = (self.show_move_or_value + 1) % (self.dgtmenu.get_ponderinterval() * 2)
 
-    def _process_dgt_serial_long_nr(self, message):
-        nr = message.number  # "3.250010001" "0000000001"
-        if float(nr[:4]) >= 3.25:
-            print('PI possible')
-        print(nr)
-
     def _drawresign(self):
         _, _, _, rnk_5, rnk_4, _, _, _ = self.dgtmenu.get_dgt_fen().split('/')
         return '8/8/8/' + rnk_5 + '/' + rnk_4 + '/8/8/8'
@@ -808,9 +802,6 @@ class DgtDisplay(DisplayMsg, threading.Thread):
 
         elif isinstance(message, Message.DGT_SERIAL_NR):
             self._process_dgt_serial_nr()
-
-        elif isinstance(message, Message.DGT_SERIAL_LONG_NR):
-            self._process_dgt_serial_long_nr(message)
 
         elif isinstance(message, Message.DGT_JACK_CONNECTED_ERROR):  # only working in case of 2 clocks connected!
             DispatchDgt.fire(self.dgttranslate.text('Y00_errorjack'))
