@@ -139,7 +139,7 @@ class DgtPi(DgtIface):
         with self.lib_lock:
             res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, left_icons.value, right_icons.value)
             if res < 0:
-                logging.warning('SetText() returned error %i', res)
+                logging.warning('SetText() returned error %i, running configure', res)
                 self._run_configure()
                 res = self.lib.dgtpicom_set_text(text, 0x03 if beep else 0x00, left_icons.value, right_icons.value)
         if res < 0:
@@ -180,12 +180,12 @@ class DgtPi(DgtIface):
             with self.lib_lock:
                 res = self.lib.dgtpicom_end_text()
                 if res < 0:
-                    logging.warning('EndText() returned error %i', res)
+                    logging.warning('EndText() returned error %i, running configure', res)
                     self._run_configure()
                     res = self.lib.dgtpicom_end_text()
-                if res < 0:
-                    logging.warning('finally failed %i', res)
-                    return False
+            if res < 0:
+                logging.warning('finally failed %i', res)
+                return False
         else:
             logging.debug('(i2c) clock isnt running - no need for endText')
         return True
@@ -220,7 +220,7 @@ class DgtPi(DgtIface):
         with self.lib_lock:
             res = self.lib.dgtpicom_run(l_run, r_run)
             if res < 0:
-                logging.warning('Run() returned error %i', res)
+                logging.warning('Run() returned error %i, running configure', res)
                 self._run_configure()
                 res = self.lib.dgtpicom_run(l_run, r_run)
         if res < 0:
@@ -248,7 +248,7 @@ class DgtPi(DgtIface):
             res = self.lib.dgtpicom_set_and_run(l_run, l_hms[0], l_hms[1], l_hms[2],
                                                 r_run, r_hms[0], r_hms[1], r_hms[2])
             if res < 0:
-                logging.warning('SetAndRun() returned error %i', res)
+                logging.warning('SetAndRun() returned error %i, running configure', res)
                 self._run_configure()
                 res = self.lib.dgtpicom_set_and_run(l_run, l_hms[0], l_hms[1], l_hms[2],
                                                     r_run, r_hms[0], r_hms[1], r_hms[2])
