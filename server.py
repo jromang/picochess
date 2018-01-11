@@ -242,7 +242,7 @@ class WebVr(DgtIface):
 
     def display_move_on_clock(self, message):
         """Display a move on the web clock."""
-        is_new_rev2 = self.dgtboard.is_revelation and self.dgtboard.enable_revelation_pi  # @todo check >=v3.25A
+        is_new_rev2 = self.dgtboard.is_revelation and self.dgtboard.enable_revelation_pi
         if self.enable_dgt3000 or is_new_rev2 or self.enable_dgtpi:
             bit_board, text = self.get_san(message, not self.enable_dgtpi)
             points = '...' if message.side == ClockSide.RIGHT else '.'
@@ -268,13 +268,11 @@ class WebVr(DgtIface):
 
     def display_text_on_clock(self, message):
         """Display a text on the web clock."""
-        if self.enable_dgtpi:
+        is_new_rev2 = self.dgtboard.is_revelation and self.dgtboard.enable_revelation_pi
+        if self.enable_dgtpi or is_new_rev2:
             text = message.l
         else:
-            is_new_rev2 = self.dgtboard.is_revelation and self.dgtboard.enable_revelation_pi  # @todo check >=v3.25A
-            text = message.m if self.enable_dgt3000 or is_new_rev2 else message.s
-        if text is None:
-            text = message.m
+            text = message.m if self.enable_dgt3000 else message.s
         if self.get_name() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)
             return True

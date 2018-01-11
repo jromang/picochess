@@ -57,30 +57,46 @@ class DgtHw(DgtIface):
                 logging.warning('SetText() returned error %i', res)
             return res
 
+    def _display_on_rev2_pi(self, text: str, beep=False):
+        text = text.ljust(11)
+        if len(text) > 11:
+            logging.warning('(rev) clock message too long [%s]', text)
+        logging.debug('[%s]', text)
+        text = bytes(text, 'utf-8')
+        with self.lib_lock:
+            res = self.dgtboard.set_text_rp(text, 0x03 if beep else 0x00)
+            if not res:
+                logging.warning('SetText() returned error %i', res)
+            return res
+
     def display_text_on_clock(self, message):
-        """Display a text on the dgtxl/3k."""
-        is_new_rev2 = self.dgtboard.is_revelation and self.dgtboard.enable_revelation_pi  # @todo check >=v3.25A
-        display_m = self.enable_dgt3000 or is_new_rev2
-        text = message.m if display_m else message.s
-        if text is None:
-            text = message.l if display_m else message.m
+        """Display a text on the dgtxl/3k/rev2."""
+        is_new_rev2 = self.dgtboard.is_revelation and self.dgtboard.enable_revelation_pi
+        if is_new_rev2:
+            text = message.l
+        else:
+            text = message.m if self.enable_dgt3000 else message.s
         if self.get_name() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)
             return True
-        left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE
-        right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
 
-        if display_m:
-            return self._display_on_dgt_3000(text, message.beep)
+        if is_new_rev2:
+            return self._display_on_rev2_pi(text, message.beep)
         else:
-            return self._display_on_dgt_xl(text, message.beep, left_icons, right_icons)
+            if self.enable_dgt3000:
+                return self._display_on_dgt_3000(text, message.beep)
+            else:
+                left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE
+                right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
+                return self._display_on_dgt_xl(text, message.beep, left_icons, right_icons)
 
     def display_move_on_clock(self, message):
-        """Display a move on the dgtxl/3k."""
-        is_new_rev2 = self.dgtboard.is_revelation and self.dgtboard.enable_revelation_pi  # @todo check >=v3.25A
-        display_m = self.enable_dgt3000 or is_new_rev2
-        if display_m:
+        """Display a move on the dgtxl/3k/rev2."""
+        is_new_rev2 = self.dgtboard.is_revelation and self.dgtboard.enable_revelation_pi
+        if self.enable_dgt3000 or is_new_rev2:
             bit_board, text = self.get_san(message)
+            if is_new_rev2:
+                text = '{:3d}{:s}'.format(bit_board.fullmove_number, text)
         else:
             text = message.move.uci()
             if message.side == ClockSide.RIGHT:
@@ -90,7 +106,7 @@ class DgtHw(DgtIface):
         if self.get_name() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)
             return True
-        if display_m:
+        if self.enable_dgt3000:
             return self._display_on_dgt_3000(text, message.beep)
         else:
             left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE
@@ -98,7 +114,7 @@ class DgtHw(DgtIface):
             return self._display_on_dgt_xl(text, message.beep, left_icons, right_icons)
 
     def display_time_on_clock(self, message):
-        """Display the time on the dgtxl/3k."""
+        """Display the time on the dgtxl/3k/rev2."""
         if self.get_name() not in message.devs:
             logging.debug('ignored endText - devs: %s', message.devs)
             return True

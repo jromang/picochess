@@ -33,14 +33,13 @@ class DgtBoard(object):
 
     """Handle the DGT board communication."""
 
-    def __init__(self, device: str, disable_revelation_leds: bool, enable_revelation_pi: bool, is_pi: bool,
-                 disable_end: bool, field_factor=0):
+    def __init__(self, device: str, disable_revelation_leds: bool, is_pi: bool, disable_end: bool, field_factor=0):
         super(DgtBoard, self).__init__()
         self.given_device = device
         self.device = device
         # rev2 flags
         self.disable_revelation_leds = disable_revelation_leds
-        self.enable_revelation_pi = enable_revelation_pi
+        self.enable_revelation_pi = False
         self.is_revelation = False
 
         self.is_pi = is_pi
@@ -184,6 +183,7 @@ class DgtBoard(object):
                 if 'REVII' in self.bt_name:
                     text_l, text_m, text_s = 'RevII ' + btname5, 'Rev' + btname5, 'b' + btname5
                     self.is_revelation = True
+                    self.write_command([DgtCmd.DGT_RETURN_LONG_SERIALNR])
                 elif 'DGT_BT' in self.bt_name:
                     text_l, text_m, text_s = 'DGTBT ' + btname5, 'BT ' + btname5, 'b' + btname5
                 else:
@@ -368,6 +368,12 @@ class DgtBoard(object):
             if message_length != 5:
                 logging.warning('illegal length in data')
             DisplayMsg.show(Message.DGT_SERIAL_NR(number=''.join([chr(elem) for elem in message])))
+
+        elif message_id == DgtMsg.DGT_MSG_LONG_SERIALNR:
+            if message_length != 10:
+                logging.warning('illegal length in data')
+            number = ''.join([chr(elem) for elem in message])
+            self.enable_revelation_pi = float(number[:4]) >= 3.25  # "3.250010001"=yes "0000000001"=no
 
         elif message_id == DgtMsg.DGT_MSG_BATTERY_STATUS:
             if message_length != 9:
@@ -692,6 +698,16 @@ class DgtBoard(object):
                 logging.warning('(ser) clock is locked over 3secs')
         if has_to_wait:
             logging.debug('(ser) clock is released now')
+
+    def set_text_rp(self, text: str, beep: int):
+        """Display a text on a Pi enabled Rev2."""
+        self._wait_for_clock('SetTextRp()')
+        res = self.write_command([DgtCmd.DGT_CLOCK_MESSAGE, 0x0f, DgtClk.DGT_CMD_CLOCK_START_MESSAGE,
+                                  DgtClk.DGT_CMD_REV2_ASCII,
+                                  text[0], text[1], text[2], text[3], text[4], text[5], text[6], text[7],
+                                  text[8], text[9], text[10], beep,
+                                  DgtClk.DGT_CMD_CLOCK_END_MESSAGE])
+        return res
 
     def set_text_3k(self, text: str, beep: int):
         """Display a text on a 3000 Clock."""
