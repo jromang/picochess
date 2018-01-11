@@ -106,12 +106,15 @@ class DgtHw(DgtIface):
         if self.get_name() not in message.devs:
             logging.debug('ignored %s - devs: %s', text, message.devs)
             return True
-        if self.enable_dgt3000:
-            return self._display_on_dgt_3000(text, message.beep)
+        if is_new_rev2:
+            return self._display_on_rev2_pi(text, message.beep)
         else:
-            left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE
-            right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
-            return self._display_on_dgt_xl(text, message.beep, left_icons, right_icons)
+            if self.enable_dgt3000:
+                return self._display_on_dgt_3000(text, message.beep)
+            else:
+                left_icons = message.ld if hasattr(message, 'ld') else ClockIcons.NONE
+                right_icons = message.rd if hasattr(message, 'rd') else ClockIcons.NONE
+                return self._display_on_dgt_xl(text, message.beep, left_icons, right_icons)
 
     def display_time_on_clock(self, message):
         """Display the time on the dgtxl/3k/rev2."""
