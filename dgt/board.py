@@ -374,6 +374,7 @@ class DgtBoard(object):
                 logging.warning('illegal length in data')
             number = ''.join([chr(elem) for elem in message])
             self.enable_revelation_pi = float(number[:4]) >= 3.25  # "3.250010001"=yes "0000000001"=no
+            logging.info('(rev) clock in PiMode: %s - serial: %s', 'yes' if self.enable_revelation_pi else 'no', number)
 
         elif message_id == DgtMsg.DGT_MSG_BATTERY_STATUS:
             if message_length != 9:
