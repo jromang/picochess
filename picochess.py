@@ -1105,21 +1105,17 @@ def main():
 
             elif isinstance(event, Event.SHUTDOWN):
                 if uci_shell.get():
-                    with uci_shell.get():  # force to call __exit__ (close shell connection)
-                        pass
+                    uci_shell.get().__exit__(None, None, None)  # force to call __exit__ (close shell connection)
                 result = GameResult.ABORT
                 DisplayMsg.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=game.copy()))
                 DisplayMsg.show(Message.SYSTEM_SHUTDOWN())
-                shutdown(args.dgtpi, dev=event.dev)
+                shutdown(args.dgtpi and uci_shell.get() is None, dev=event.dev)  # @todo make independant of remote eng
 
             elif isinstance(event, Event.REBOOT):
-                if uci_shell.get():
-                    with uci_shell.get():  # force to call __exit__ (close shell connection)
-                        pass
                 result = GameResult.ABORT
                 DisplayMsg.show(Message.GAME_ENDS(result=result, play_mode=play_mode, game=game.copy()))
                 DisplayMsg.show(Message.SYSTEM_REBOOT())
-                reboot(args.dgtpi, dev=event.dev)
+                reboot(args.dgtpi and uci_shell.get() is None, dev=event.dev)  # @todo make independant of remote eng
 
             elif isinstance(event, Event.EMAIL_LOG):
                 email_logger = Emailer(email=args.email, mailgun_key=args.mailgun_key)

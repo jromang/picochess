@@ -561,7 +561,9 @@ class DgtDisplay(DisplayMsg, threading.Thread):
             text = self.dgttranslate.text('N10_mate', str(message.mate))
         self.score = text
         if message.mode == Mode.KIBITZ and not self._inside_main_menu():
-            DispatchDgt.fire(self._combine_depth_and_score())
+            text = self._combine_depth_and_score()
+            text.wait = True
+            DispatchDgt.fire(text)
 
     def _process_new_pv(self, message):
         self.hint_move = message.pv[0]
