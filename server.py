@@ -261,6 +261,7 @@ class WebVr(DgtIface):
             return True
         self.clock_show_time = False
         self._create_clock_text()
+        logging.debug('[%s]', text)
         self.shared['clock_text'] = text
         result = {'event': 'Clock', 'msg': text}
         EventHandler.write_to_clients(result)
@@ -278,6 +279,7 @@ class WebVr(DgtIface):
             return True
         self.clock_show_time = False
         self._create_clock_text()
+        logging.debug('[%s]', text)
         self.shared['clock_text'] = text
         result = {'event': 'Clock', 'msg': text}
         EventHandler.write_to_clients(result)
