@@ -41,12 +41,23 @@ def read_engine_ini(engine_shell=None, engine_path=None):
     for section in config.sections():
         parser = configparser.ConfigParser()
         parser.optionxform = str
+
         level_dict = {}
-        if parser.read(engine_path + os.sep + section + '.uci'):
+        if engine_shell is None:
+            success = parser.read(engine_path + os.sep + section + '.uci')
+        else:
+            try:
+                with engine_shell.open(engine_path + os.sep + section + '.uci', 'r') as file:
+                    parser.read_file(file)
+                success = True
+            except FileNotFoundError:
+                success = False
+        if success:
             for p_section in parser.sections():
                 level_dict[p_section] = {}
                 for option in parser.options(p_section):
                     level_dict[p_section][option] = parser[p_section][option]
+
         confsect = config[section]
         text = Dgt.DISPLAY_TEXT(l=confsect['large'], m=confsect['medium'], s=confsect['small'], wait=True, beep=False,
                                 maxtime=0, devs={'ser', 'i2c', 'web'})
