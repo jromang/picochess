@@ -254,8 +254,20 @@ class UciEngine(object):
         """Startup engine."""
         parser = configparser.ConfigParser()
         parser.optionxform = str
-        if not options and parser.read(self.get_file() + '.uci'):
-            options = dict(parser[parser.sections().pop()])
+
+        if not options:
+            if self.shell is None:
+                success = parser.read(self.get_file() + '.uci')
+            else:
+                try:
+                    with self.shell.open(self.get_file() + '.uci', 'r') as file:
+                        parser.read_file(file)
+                    success = True
+                except FileNotFoundError:
+                    success = False
+            if success:
+                options = dict(parser[parser.sections().pop()])
+
         self.level_support = bool(options)
 
         logging.debug('setting engine with options %s', options)
