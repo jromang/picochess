@@ -228,6 +228,7 @@ class PicoTalkerDisplay(DisplayMsg, threading.Thread):
                     logging.debug('announcing TAKE_BACK')
                     self.talk(['takeback.ogg'])
                     self.play_game = None
+                    previous_move = chess.Move.null()
 
                 elif isinstance(message, Message.TIME_CONTROL):
                     logging.debug('announcing TIME_CONTROL')
