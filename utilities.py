@@ -262,7 +262,7 @@ def get_location():
         int_ip = sock.getsockname()[0]
         sock.close()
 
-        response = urllib.request.urlopen('http://will6.de/freegeoip')
+        response = urllib.request.urlopen('https://geolocation-db.com/json')
         j = json.loads(response.read().decode())
         country_name = j['country_name'] + ' ' if 'country_name' in j else ''
         country_code = j['country_code'] + ' ' if 'country_code' in j else ''
