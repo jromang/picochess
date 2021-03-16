@@ -8,3 +8,4 @@ requests==2.20.0
 spur==0.3.20
 tornado==4.5.1
 configobj==5.0.6
+nanpy==0.9.6

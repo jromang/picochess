@@ -41,6 +41,7 @@ from utilities import Observable, DisplayMsg, version, evt_queue, write_picoches
 from pgn import Emailer, PgnDisplay
 from server import WebServer
 from talker.picotalker import PicoTalkerDisplay
+from arduino.lcd import ArduinoDisplay
 from dispatcher import Dispatcher
 
 from dgt.api import Message, Event
@@ -641,6 +642,9 @@ def main():
 
     # Create PicoTalker for speech output
     PicoTalkerDisplay(args.user_voice, args.computer_voice, args.speed_voice, args.enable_setpieces_voice).start()
+
+    # Create LCD output to the arduino one, if no arduino one display exists, it will auto terminate the thread
+    ArduinoDisplay(version).start()
 
     # Launch web server
     if args.web_server_port:
