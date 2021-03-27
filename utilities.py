@@ -25,6 +25,7 @@ import json
 import time
 import copy
 import configparser
+import pyudev
 
 from threading import Timer
 from subprocess import Popen, PIPE
@@ -140,6 +141,18 @@ class RepeatedTimer(object):
         else:
             logging.info('repeated timer already stopped - strange!')
 
+
+def get_relevant_usb_devices():
+    context = pyudev.Context()
+    relevant_usb_devices = {}
+    for device in context.list_devices(subsystem='tty', ID_BUS='usb'):
+        if "DGT" in device.properties["ID_VENDOR"]:
+            relevant_usb_devices["DGT_BOARD"] = device.properties["DEVNAME"]
+            logging.info("DGT board found at {}".format(device.properties["DEVNAME"]))
+        elif "Arduino" in device.properties["ID_VENDOR"]:
+            logging.info("Arduino LCD found at {}".format(device.properties["DEVNAME"]))
+            relevant_usb_devices["ARDUINO_LCD"] = device.properties["DEVNAME"]
+    return relevant_usb_devices
 
 def get_opening_books():
     """Build an opening book lib."""

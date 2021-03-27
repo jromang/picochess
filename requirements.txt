@@ -9,3 +9,4 @@ spur==0.3.20
 tornado==4.5.1
 configobj==5.0.6
 nanpy==0.9.6
+pyudev==0.22.0

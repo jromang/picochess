@@ -29,6 +29,7 @@ import requests
 import chess
 import time
 from utilities import DisplayMsg
+from utilities import get_relevant_usb_devices
 from timecontrol import TimeControl
 from dgt.api import Message
 from dgt.util import GameResult, PlayMode, Voice
@@ -92,12 +93,17 @@ class ArduinoDisplay(DisplayMsg, threading.Thread):
         if not self.lcd:
             try:
                 with self.lcd_lock:
-                    connection = SerialManager()
-                    self.lcd = Lcd([8, 9, 4, 5, 6, 7], [16, 2], connection=connection)
-                    logging.error("Arduino Uno R3 LCD Found!!")
+                    relevant_usb_devices = get_relevant_usb_devices()
+                    if "ARDUINO_LCD" in relevant_usb_devices:
+                        arduino_lcd_device = relevant_usb_devices["ARDUINO_LCD"]
+                        connection = SerialManager(device=arduino_lcd_device)
+                        self.lcd = Lcd([8, 9, 4, 5, 6, 7], [16, 2], connection=connection)
+                        logging.error("Arduino Uno R3 LCD Found!!")
+                    else:
+                        raise Exception("Arduino Device Not Auto-detected via USB")
                 # time.sleep(1)
-            except:
-                logging.error("Arduino Uno R3 LCD not found")
+            except Exception as e:
+                logging.error(e)
                 return
 
         while True:

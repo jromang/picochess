@@ -27,7 +27,7 @@ import time
 from dgt.util import DgtAck, DgtClk, DgtCmd, DgtMsg, ClockIcons, ClockSide, enum
 from dgt.api import Message, Dgt
 from utilities import RepeatedTimer, DisplayMsg, hms_time
-
+from utilities import get_relevant_usb_devices
 
 class DgtBoard(object):
 
@@ -669,11 +669,17 @@ class DgtBoard(object):
                 if self._open_serial(self.given_device):
                     return _success(self.given_device)
             else:
-                for file in listdir('/dev'):
-                    if file.startswith('ttyACM') or file.startswith('ttyUSB') or file == 'rfcomm0':
-                        dev = path.join('/dev', file)
-                        if self._open_serial(dev):
-                            return _success(dev)
+                # KEYLINE
+                relevant_usb_devices = get_relevant_usb_devices()
+                if "DGT_BOARD" in relevant_usb_devices:
+                    dev = path.join('/dev', relevant_usb_devices["DGT_BOARD"])
+                    if self._open_serial(dev):
+                        return _success(dev)
+                # for file in listdir('/dev'):
+                #     if file.startswith('ttyACM') or file.startswith('ttyUSB') or file == 'rfcomm0':
+                #         dev = path.join('/dev', file)
+                #         if self._open_serial(dev):
+                #             return _success(dev)
                 if self._open_bluetooth():
                     return _success('/dev/rfcomm123')
 
