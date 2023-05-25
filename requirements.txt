@@ -6,5 +6,5 @@ python-chess==0.22.1
 pyOpenSSL==17.5.0
 requests==2.20.0
 spur==0.3.20
-tornado==4.5.1
+tornado==6.3.2
 configobj==5.0.6
